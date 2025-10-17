@@ -84,7 +84,3 @@ Backend Golang:
 
 ---
 
-Jika mau, aku bisa buatkan **ultra-short version** dalam bahasa Inggris: tinggal clone repo → `docker-compose up` → ready, cocok untuk **new developer onboarding**.  
-
-Apakah mau aku buatkan versi itu juga?
-```
