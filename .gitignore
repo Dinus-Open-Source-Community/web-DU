@@ -1,0 +1,7 @@
+# Node.js
+/frontend/node_modules
+/frontend/.next
+
+# Golang
+/backend/vendor/
+
