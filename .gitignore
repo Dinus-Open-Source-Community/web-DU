@@ -5,6 +5,5 @@
 # Golang
 /backend/vendor/
 
-
 # Environment variables
 .env
