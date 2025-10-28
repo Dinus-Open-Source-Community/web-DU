@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"net/http"
+	"backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,12 +9,6 @@ import (
 func StartLoginRoutes(r *gin.Engine) {
 	login := r.Group("/login")
 	{
-		login.POST("", postLoginFunc)
+		login.POST("", services.PostLoginFunc)
 	}
-}
-
-func postLoginFunc(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "User logged in successfully!",
-	})
 }

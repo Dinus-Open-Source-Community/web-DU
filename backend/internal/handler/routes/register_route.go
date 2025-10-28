@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"net/http"
+	"backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,12 +9,6 @@ import (
 func StartRegisterRoutes(r *gin.Engine) {
 	register := r.Group("/register")
 	{
-		register.POST("", postRegisterFunc)
+		register.POST("", services.PostRegisterFunc)
 	}
-}
-
-func postRegisterFunc(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "User registered successfully!",
-	})
 }

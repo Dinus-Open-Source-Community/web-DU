@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"net/http"
+	"backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,12 +9,7 @@ import (
 func StartHelloRoutes(r *gin.Engine) {
 	hello := r.Group("/hello")
 	{
-		hello.GET("", getServicefunc)
+		hello.GET("", services.GetServicefunc)
 	}
 }
 
-func getServicefunc(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello from Golang Backend!",
-	})
-}
