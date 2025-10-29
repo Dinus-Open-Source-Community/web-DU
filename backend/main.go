@@ -20,6 +20,9 @@ func init() {
 func main() {
 	r := gin.Default()
 
+	//
+	r.Use(gin.Recovery())
+
 	database.ConnectDB()
 
 	routes.StartRegisterRoutes(r)
