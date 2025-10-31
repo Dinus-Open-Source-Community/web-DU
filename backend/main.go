@@ -20,14 +20,13 @@ func init() {
 func main() {
 	r := gin.Default()
 
-	//
 	r.Use(gin.Recovery())
 
 	database.ConnectDB()
 
 	routes.StartRegisterRoutes(r)
 	routes.StartLoginRoutes(r)
-	routes.StartHelloRoutes(r)
+	routes.StartDataRoutes(r)
 
 	r.Run(":8080")
 }
