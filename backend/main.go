@@ -1,14 +1,27 @@
+// @title Web DU Backend
+// @version 1.0
+// @description Documentation for Web DU Backend API.
+
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (
 	"backend/internal/handler/routes"
-	"log"
-
 	"backend/internal/database"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	// Swagger import
+	_ "backend/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// Setiap ada perubahan pada dokumentasi swagger, jalankan perintah berikut di terminal:
+// go run github.com/swaggo/swag/cmd/swag@latest init -g main.go -o ./docs
 
 // Fungsi init() akan dijalankan pertama kali sebelum fungsi main()
 // Di sini digunakan untuk memuat file .env agar variabel lingkungan dapat digunakan di seluruh aplikasi
@@ -20,21 +33,18 @@ func init() {
 }
 
 func main() {
-	// Membuat instance default dari Gin
-	// Secara default sudah termasuk middleware Logger dan Recovery
 	r := gin.Default()
-
-	// Menambahkan middleware Recovery untuk menangani panic agar server tidak langsung berhenti
 	r.Use(gin.Recovery())
-
-	// Melakukan koneksi ke database menggunakan fungsi dari internal/database
 	database.ConnectDB()
 
-	// Inisialisasi route untuk registrasi, login, dan data
+	// Register all routes
 	routes.StartRegisterRoutes(r)
 	routes.StartLoginRoutes(r)
 	routes.StartDataRoutes(r)
 
-	// Menjalankan server Gin pada port 8080
+	// Swagger endpoint
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	log.Println("Server running on http://localhost:8080")
 	r.Run(":8080")
 }

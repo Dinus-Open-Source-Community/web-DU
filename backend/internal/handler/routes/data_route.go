@@ -1,5 +1,4 @@
 // Example penggunaan token jwt dengan middleware AuthMiddleware
-
 package routes
 
 import (
@@ -9,10 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CLI untuk nguji route ini:
-// curl -X GET http://localhost:8080/data \
-//   -H "Authorization: Bearer <TOKEN_KAMU>"
-
+// StartDataRoutes godoc
+// @Summary Protected data route
+// @Description Get user data using JWT authentication
+// @Tags Protected
+// @Security BearerAuth
+// @Router /data [get]
+// @Produce  json
+// @Success 200 {object} map[string]any "Success response"
+// @Failure 401 {object} map[string]any "Unauthorized - Invalid or missing token"
+// @Failure 500 {object} map[string]any "Internal server error"
+//
+// @Example curl -X GET "http://localhost:8080/data" \
+// -H "Authorization: Bearer <TOKEN_KAMU>"
 func StartDataRoutes(r *gin.Engine) {
 	data := r.Group("/data")
 	data.Use(middleware.AuthMiddleware())
@@ -20,4 +28,3 @@ func StartDataRoutes(r *gin.Engine) {
 		data.GET("", services.GetServicefunc)
 	}
 }
-

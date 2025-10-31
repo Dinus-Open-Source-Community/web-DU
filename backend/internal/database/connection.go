@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/driver/postgres"
-	"gorm.io/gorm/logger"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -32,7 +32,7 @@ func ConnectDB() {
 	// Fungsi pembantu untuk membuka koneksi ke database dengan error handling otomatis
 	openOrFatal := func(dsn string) *gorm.DB {
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk pengembangan
+			Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk Development
 			// Logger: logger.Default.LogMode(logger.Silent), // Gunakan untuk production agar log tidak bising
 		})
 		if err != nil {
