@@ -64,7 +64,8 @@ func ConnectDB() {
 //   - openOrFatal: fungsi pembuka koneksi yang akan menutup program jika terjadi error.
 func createDatabase(openOrFatal func(dsn string) *gorm.DB) {
 	// Koneksi ke database "postgres" untuk hak akses pembuatan database baru
-	adminDsn := fmt.Sprintf("postgres://%s:%s@%s:%s?sslmode=%s&search_path=public", user, password, host, port, sslmode)
+	// --- PERBAIKAN DI SINI: Menambahkan "/postgres" ke DSN ---
+	adminDsn := fmt.Sprintf("postgres://%s:%s@%s:%s/postgres?sslmode=%s&search_path=public", user, password, host, port, sslmode)
 	adminDB := openOrFatal(adminDsn)
 
 	// Jalankan query CREATE DATABASE jika belum ada
@@ -72,6 +73,7 @@ func createDatabase(openOrFatal func(dsn string) *gorm.DB) {
 		// Tangani jika database sudah ada (kode error PostgreSQL: 42P04)
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "42P04" {
 			// Database sudah ada — abaikan
+			log.Println("[Info] Database '" + dbname + "' sudah ada.")
 		} else {
 			log.Fatalf("[Error] Gagal membuat database: %v", err)
 		}

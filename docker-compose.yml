@@ -20,6 +20,8 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_NAME=${POSTGRES_DB}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DB_SSLMODE=${DB_SSLMODE}
     depends_on:
       - db
     volumes:
