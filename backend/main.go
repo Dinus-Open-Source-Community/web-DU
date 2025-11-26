@@ -7,8 +7,8 @@
 package main
 
 import (
-	"backend/internal/handler/routes"
 	"backend/internal/database"
+	"backend/internal/handler/routes"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -26,9 +26,9 @@ import (
 // Fungsi init() akan dijalankan pertama kali sebelum fungsi main()
 // Di sini digunakan untuk memuat file .env agar variabel lingkungan dapat digunakan di seluruh aplikasi
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("[Error] Gagal memuat file .env:", err)
+	// Load .env file (hanya untuk development lokal tanpa docker)
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
 	}
 }
 
