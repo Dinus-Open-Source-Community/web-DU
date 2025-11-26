@@ -115,7 +115,7 @@ const docTemplate = `{
             "post": {
                 "description": "Group of routes used for user registration",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -126,18 +126,36 @@ const docTemplate = `{
                 "summary": "Register route initialization",
                 "parameters": [
                     {
-                        "description": "User registration data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.RegisterRequest"
-                        }
+                        "type": "string",
+                        "description": "User's name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "User's avatar image (opsional)",
+                        "name": "avatar",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "User registered successfully",
+                        "description": "User registered successfully!",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
