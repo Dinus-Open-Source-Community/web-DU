@@ -18,7 +18,7 @@ import (
 func PostLoginFunc(c *gin.Context) {
 	var req model.LoginRequest
 
-	// 1️⃣ Parsing JSON body ke struct LoginRequest
+	// Parsing JSON body ke struct LoginRequest
 	// Jika format JSON tidak valid, kembalikan error 400 (Bad Request)
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

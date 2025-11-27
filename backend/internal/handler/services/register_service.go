@@ -5,7 +5,6 @@ import (
 	"backend/internal/model"
 	"backend/internal/utils"
 	"net/http"
-	"os"
 	"path/filepath" // Diperlukan untuk ekstensi file
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +41,26 @@ func PostRegisterFunc(c *gin.Context) {
 		return
 	}
 
-	// 2. Proses file avatar (opsional)
+	// 2. Hash password
+	// (Kita sekarang menggunakan data dari 'req' yang sudah divalidasi)
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false, "message": "Internal server error (hashing failed)", "data": nil, "error": err.Error(),
+		})
+		return
+	}
+
+	emailEncrypted, err := utils.Encrypt(req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false, "message": "Internal server error (encryption failed)", "data": nil, "error": err.Error(),
+		})
+		return
+	}
+	emailHash := utils.GenerateBlindIndex(req.Email)
+
+	// 3. Proses file avatar (opsional)
 	// (Logika ini tetap sama, sudah benar)
 	var avatarURL string
 	file, err := c.FormFile("avatar")
@@ -63,13 +81,6 @@ func PostRegisterFunc(c *gin.Context) {
 		uploadDir := "./public/uploads/avatars"
 		savePath := filepath.Join(uploadDir, uniqueFilename)
 
-		if err := os.MkdirAll(uploadDir, 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false, "message": "Failed to create upload directory", "data": nil, "error": err.Error(),
-			})
-			return
-		}
-
 		if err := c.SaveUploadedFile(file, savePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
@@ -79,20 +90,11 @@ func PostRegisterFunc(c *gin.Context) {
 		avatarURL = "/uploads/avatars/" + uniqueFilename
 	}
 
-	// 3. Hash password
-	// (Kita sekarang menggunakan data dari 'req' yang sudah divalidasi)
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false, "message": "Internal server error (hashing failed)", "data": nil, "error": err.Error(),
-		})
-		return
-	}
-
 	// 4. Buat instance user baru
 	newUser := model.User{
-		Name:      req.Name,  // <-- Gunakan req.Name
-		Email:     req.Email, // <-- Gunakan req.Email
+		Name:      req.Name,
+		Email:     emailEncrypted,
+		EmailHash: emailHash,
 		Password:  hashedPassword,
 		Role:      model.StudentRole,
 		AvatarURL: avatarURL,

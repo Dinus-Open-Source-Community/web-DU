@@ -23,6 +23,8 @@ services:
       - DB_NAME=${DB_NAME}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - DB_SSLMODE=${DB_SSLMODE}
+      - AES_KEY=${AES_KEY}
+      - HMAC_KEY=${HMAC_KEY}
     depends_on:
       - db
     volumes:

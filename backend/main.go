@@ -8,6 +8,7 @@ package main
 
 import (
 	"backend/internal/database"
+	// "backend/internal/handler/middleware"
 	"backend/internal/handler/routes"
 	"log"
 
@@ -16,6 +17,7 @@ import (
 
 	// Swagger import
 	_ "backend/docs"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -36,6 +38,12 @@ func main() {
 	r := gin.Default()
 	r.Use(gin.Recovery())
 	database.ConnectDB()
+
+	// Static file server untuk mengakses file upload (avatar, dll)
+	// uploads := r.Group("/uploads")
+	// uploads.Use(middleware.AuthMiddleware())
+	// uploads.Static("/", "./public/uploads")
+	r.Static("/uploads", "./public/uploads")
 
 	// Register all routes
 	routes.StartRegisterRoutes(r)

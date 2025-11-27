@@ -5,7 +5,7 @@
 # Golang
 /backend/vendor/
 /backend/*.exe
-/backend/public
+/backend/public/uploads/avatars/*.webp
 
 # Environment variables
 .env
