@@ -48,7 +48,8 @@ func main() {
 	// Register all routes
 	routes.StartRegisterRoutes(r)
 	routes.StartLoginRoutes(r)
-	routes.StartDataRoutes(r)
+	routes.StartUserRoutes(r)
+	routes.StartAvatarRoutes(r)
 
 	// Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

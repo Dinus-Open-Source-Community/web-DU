@@ -8,23 +8,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StartDataRoutes godoc
+// StartAvatarRoutes godoc
 // @Summary Protected data route
 // @Description Get user data using JWT authentication
 // @Tags Protected
 // @Security BearerAuth
-// @Router /data [get]
-// @Produce  json
+// @Router /avatar [post]
+// @Produce  multipart/form-data
 // @Success 200 {object} map[string]any "Success response"
 // @Failure 401 {object} map[string]any "Unauthorized - Invalid or missing token"
 // @Failure 500 {object} map[string]any "Internal server error"
 //
-// @Example curl -X GET "http://localhost:8080/data" \
-// -H "Authorization: Bearer <TOKEN_KAMU>"
-func StartDataRoutes(r *gin.Engine) {
-	data := r.Group("/data")
-	data.Use(middleware.AuthMiddleware())
+// @Example curl -X POST "http://localhost:8080/avatar" \
+// -H "Authorization: Bearer <TOKEN_KAMU>" \
+// -F "avatar=@/path/to/avatar.jpg"
+func StartAvatarRoutes(r *gin.Engine) {
+	avatar := r.Group("/avatar")
+	avatar.Use(middleware.AuthMiddleware())
 	{
-		data.GET("", services.GetServicefunc)
+		avatar.POST("", services.PostAvatarFunc)
 	}
 }

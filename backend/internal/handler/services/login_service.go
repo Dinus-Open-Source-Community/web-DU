@@ -32,7 +32,8 @@ func PostLoginFunc(c *gin.Context) {
 
 	// Ambil data user dari database berdasarkan email
 	var userData model.User
-	database.DB.Where("email = ?", req.Email).First(&userData)
+	emailHash := utils.GenerateBlindIndex(req.Email)
+	database.DB.Where("email_hash = ?", emailHash).First(&userData)
 
 	// Verifikasi password yang dimasukkan user
 	// utils.CheckPassword akan membandingkan antara password asli dan hash yang tersimpan
@@ -50,7 +51,7 @@ func PostLoginFunc(c *gin.Context) {
 	// Generate token JWT untuk user yang berhasil login
 	// Token akan berlaku selama 24 jam sejak waktu login
 	expiration := time.Now().Add(24 * time.Hour)
-	token, err := middleware.GenerateJWT(userData.Name, userData.Email, expiration)
+	token, err := middleware.GenerateJWT(userData.EmailHash, expiration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

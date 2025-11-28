@@ -32,13 +32,12 @@ func (e *errorMsg) Error() string {
 // - ExpiresAt (waktu kedaluwarsa)
 // - IssuedAt (waktu pembuatan)
 // - Subject ("user_auth")
-func GenerateJWT(name, email string, expiresAt time.Time) (string, error) {
+func GenerateJWT(key string, expiresAt time.Time) (string, error) {
 	// Membuat claims yang berisi data user dan informasi waktu.
 	claims := model.Claims{
-		Name:  name,
-		Email: email,
+		Key: key,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiresAt), // waktu token berakhir
+			ExpiresAt: jwt.NewNumericDate(expiresAt),  // waktu token berakhir
 			IssuedAt:  jwt.NewNumericDate(time.Now()), // waktu token dibuat
 			Subject:   "user_auth",                    // penanda jenis token
 		},

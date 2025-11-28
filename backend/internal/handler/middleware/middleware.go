@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"backend/internal/database"
+	"backend/internal/model"
 	"net/http"
 	"strings"
 
@@ -10,8 +12,7 @@ import (
 // Konstanta context key yang digunakan untuk menyimpan data user (Name dan Email)
 // di dalam context Gin agar bisa diakses pada handler selanjutnya.
 const (
-	NameCK  = "name"
-	EmailCK = "email"
+	IDCK    = "id"
 )
 
 // AuthMiddleware adalah middleware yang digunakan untuk memverifikasi token JWT
@@ -62,10 +63,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		var userData model.User
+		_ = database.DB.Model(&model.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
+
 		// Simpan data Name dan Email dari claims ke context.
 		// Data ini bisa diambil di handler menggunakan c.Get(NameCK) atau c.Get(EmailCK).
-		c.Set(NameCK, claims.Name)
-		c.Set(EmailCK, claims.Email)
+		c.Set(IDCK, userData.ID)
 
 		// Lanjutkan ke handler berikutnya jika token valid.
 		c.Next()
