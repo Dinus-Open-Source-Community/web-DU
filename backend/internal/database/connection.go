@@ -50,7 +50,17 @@ func ConnectDB() {
 
 	// Buat semua enum (jika ada) dan lakukan migrasi tabel model
 	CreateAllEnums(DB)
-	DB.AutoMigrate(&model.User{})
+	DB.AutoMigrate(
+		&model.User{},
+		&model.Event{},
+		&model.Course{},
+		&model.Module{},
+		&model.Lesson{},
+		&model.Enrollment{},
+		&model.Payment{},
+		&model.CourseReview{},
+		&model.CourseAnnouncement{},
+	)
 
 	log.Println("[Success] Berhasil terhubung ke database")
 }
