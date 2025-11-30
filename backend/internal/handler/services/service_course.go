@@ -5,8 +5,11 @@ import (
 	"backend/internal/handler/middleware"
 	"backend/internal/model"
 	"net/http"
+	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func PostAdminCourseFunc(c *gin.Context) {
@@ -33,30 +36,55 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	var body model.AdminCourseRequest
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid request data",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
+	priceStr := c.PostForm("price")
+	priceInt := 0
+	if priceStr != "" {
+		if p, err := strconv.Atoi(priceStr); err == nil {
+			priceInt = p
+		}
+	}
+
+	var thumbnailURL string
+	file, err := c.FormFile("thumbnail")
+	if err == nil && file != nil {
+		extension := filepath.Ext(file.Filename)
+		uniqueFilename := uuid.New().String() + extension
+		uploadDir := "./public/uploads/courses"
+		savePath := filepath.Join(uploadDir, uniqueFilename)
+
+		if err := c.SaveUploadedFile(file, savePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
+			})
+			return
+		}
+		thumbnailURL = "/uploads/courses/" + uniqueFilename
 	}
 
 	course := model.Course{
-		Title:       body.Title,
-		Slug:        body.Slug,
-		Description: body.Description,
-		Price:       float64(body.Price),
-		IsPremium:   body.IsPremium,
-		IsPublished: body.IsPublished,
+		Title:        c.PostForm("title"),
+		Slug:         c.PostForm("slug"),
+		Description:  c.PostForm("description"),
+		ThumbnailURL: thumbnailURL,
+		Price:        float64(priceInt),
+		IsPremium:    c.PostForm("is_premium") == "true",
+		IsPublished:  c.PostForm("is_published") == "true",
 	}
 
 	if err := database.DB.Create(&course).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to create course",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if err := database.DB.First(&course, course.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve created course",
 			"data":    nil,
 			"error":   err.Error(),
 		})

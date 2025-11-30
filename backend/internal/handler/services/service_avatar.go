@@ -37,6 +37,19 @@ func PostAvatarFunc(c *gin.Context) {
 	}
 
 	if file != nil {
+		const maxSize = 5 * 1024 * 1024 // 5MB
+		if file.Size > maxSize {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
+				"success": false,
+				"message": "Avatar file size exceeds 5MB limit",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+	}
+
+	if file != nil {
 		extension := filepath.Ext(file.Filename)
 		uniqueFilename := uuid.New().String() + extension
 		uploadDir := "./public/uploads/avatars"
