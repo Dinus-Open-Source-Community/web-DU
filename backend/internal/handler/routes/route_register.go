@@ -19,8 +19,8 @@ import (
 // @Failure 409 {object} map[string]any "Email already registered"
 // @Failure 500 {object} map[string]any "Internal server error"
 func StartRegisterRoutes(r *gin.Engine) {
-	register := r.Group("/register")
+	registerGroup := r.Group("/register")
 	{
-		register.POST("", services.PostRegisterFunc)
+		registerGroup.POST("/", services.PostRegisterFunc)
 	}
 }

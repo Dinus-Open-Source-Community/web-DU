@@ -19,8 +19,8 @@ import (
 // @Failure 401 {object} map[string]any "Invalid credentials"
 // @Failure 500 {object} map[string]any "Failed to generate token"
 func StartLoginRoutes(r *gin.Engine) {
-	login := r.Group("/login")
+	loginGroup := r.Group("/login")
 	{
-		login.POST("", services.PostLoginFunc)
+		loginGroup.POST("/", services.PostLoginFunc)
 	}
 }

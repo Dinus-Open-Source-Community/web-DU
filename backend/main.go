@@ -50,6 +50,7 @@ func main() {
 	routes.StartLoginRoutes(r)
 	routes.StartUserRoutes(r)
 	routes.StartAvatarRoutes(r)
+	routes.StartCourseRoutes(r)
 
 	// Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

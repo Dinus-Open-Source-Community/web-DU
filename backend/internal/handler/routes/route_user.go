@@ -8,9 +8,9 @@ import (
 )
 
 func StartUserRoutes(r *gin.Engine) {
-	user := r.Group("/user")
-	user.Use(middleware.AuthMiddleware())
+	userGroup := r.Group("/user")
+	userGroup.Use(middleware.AuthMiddleware())
 	{
-		user.GET("", services.GetUserService)
+		userGroup.GET("/", services.GetUserService)
 	}
 }

@@ -11,10 +11,10 @@ import (
 )
 
 func GetUserService(c *gin.Context) {
-	userId, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.IDCK)
 
 	var userData model.User
-	err := database.DB.First(&userData, userId).Error
+	err := database.DB.First(&userData, userID).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
