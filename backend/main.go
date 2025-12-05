@@ -12,6 +12,9 @@ import (
 	"backend/internal/handler/routes"
 	"log"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
@@ -37,6 +40,11 @@ func init() {
 func main() {
 	r := gin.Default()
 	r.Use(gin.Recovery())
+
+	// session
+	store := cookie.NewStore([]byte("iniperluditaruhenv?"))
+	r.Use(sessions.Sessions("inijuga", store))
+
 	database.ConnectDB()
 
 	// Static file server untuk mengakses file upload (avatar, dll)
@@ -50,6 +58,9 @@ func main() {
 	routes.StartLoginRoutes(r)
 	routes.StartUserRoutes(r)
 	routes.StartAvatarRoutes(r)
+
+	//OAuth2 routes
+	routes.StartOauth2Routes(r)
 
 	// Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
