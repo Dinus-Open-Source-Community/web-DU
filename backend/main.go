@@ -58,6 +58,7 @@ func main() {
 	routes.StartLoginRoutes(r)
 	routes.StartUserRoutes(r)
 	routes.StartAvatarRoutes(r)
+	routes.StartCourseRoutes(r)
 
 	//OAuth2 routes
 	routes.StartOauth2Routes(r)

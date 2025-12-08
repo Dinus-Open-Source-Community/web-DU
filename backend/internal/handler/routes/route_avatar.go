@@ -23,9 +23,9 @@ import (
 // -H "Authorization: Bearer <TOKEN_KAMU>" \
 // -F "avatar=@/path/to/avatar.jpg"
 func StartAvatarRoutes(r *gin.Engine) {
-	avatar := r.Group("/avatar")
-	avatar.Use(middleware.AuthMiddleware())
+	avatarGroup := r.Group("/avatar")
+	avatarGroup.Use(middleware.AuthMiddleware())
 	{
-		avatar.POST("", services.PostAvatarFunc)
+		avatarGroup.POST("/", services.PostAvatarFunc)
 	}
 }

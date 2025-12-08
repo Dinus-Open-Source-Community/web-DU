@@ -18,6 +18,9 @@ import (
 func CreateAllEnums(db *gorm.DB) {
 	// 1️⃣ Buat ENUM untuk role user (admin, mentor, student)
 	createUserRoleEnum(db)
+	createEnrollmentStatusEnum(db)
+	createPaymentMethodEnum(db)
+	createPaymentStatusEnum(db)
 
 	// 2️⃣ Log bahwa seluruh ENUM berhasil diinisialisasi
 	log.Println("[Success] All ENUMs have been created")
@@ -47,4 +50,82 @@ func createUserRoleEnum(db *gorm.DB) {
 	db.Exec(query)
 
 	log.Println("[Success] ENUM user_role is ready for use")
+}
+
+// createEnrollmentStatusEnum digunakan untuk membuat ENUM bernama `enrollment_status`
+// di database PostgreSQL jika belum ada sebelumnya.
+//
+// ENUM ini berisi tiga nilai tetap:
+// - 'active'    → untuk status pendaftaran yang sedang aktif
+// - 'completed' → untuk status pendaftaran yang telah selesai
+// - 'cancelled' → untuk status pendaftaran yang dibatalkan
+//
+// Fungsi ini menjalankan query SQL menggunakan blok DO $$ BEGIN ... END $$
+// untuk membuat ENUM hanya jika belum terdaftar di sistem PostgreSQL.
+//
+// Parameter:
+//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
+func createEnrollmentStatusEnum(db *gorm.DB) {
+	query := `
+	DO $$ BEGIN
+		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enrollment_status') THEN
+			CREATE TYPE enrollment_status AS ENUM ('active', 'completed', 'cancelled');
+		END IF;
+	END $$;
+	`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM enrollment_status is ready for use")
+}
+
+// createPaymentMethodEnum digunakan untuk membuat ENUM bernama `payment_method`
+// di database PostgreSQL jika belum ada sebelumnya.
+//
+// ENUM ini berisi tiga nilai tetap:
+// - 'credit_card'   → untuk metode pembayaran menggunakan kartu kredit
+// - 'bank_transfer' → untuk metode pembayaran melalui transfer bank
+// - 'ewallet'       → untuk metode pembayaran menggunakan dompet digital
+//
+// Fungsi ini menjalankan query SQL menggunakan blok DO $$ BEGIN ... END $$
+// untuk membuat ENUM hanya jika belum terdaftar di sistem PostgreSQL.
+//
+// Parameter:
+//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
+func createPaymentMethodEnum(db *gorm.DB) {
+	query := `
+	DO $$ BEGIN
+		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
+			CREATE TYPE payment_method AS ENUM ('credit_card', 'bank_transfer', 'ewallet');
+		END IF;
+	END $$;
+	`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM payment_method is ready for use")
+}
+
+// createPaymentStatusEnum digunakan untuk membuat ENUM bernama `payment_status`
+// di database PostgreSQL jika belum ada sebelumnya.
+//
+// ENUM ini berisi tiga nilai tetap:
+// - 'pending' → untuk status pembayaran yang sedang diproses
+// - 'success' → untuk status pembayaran yang berhasil
+// - 'failed'  → untuk status pembayaran yang gagal
+//
+// Fungsi ini menjalankan query SQL menggunakan blok DO $$ BEGIN ... END $$
+// untuk membuat ENUM hanya jika belum terdaftar di sistem PostgreSQL.
+//
+// Parameter:
+//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
+func createPaymentStatusEnum(db *gorm.DB) {
+	query := `
+	DO $$ BEGIN
+		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+			CREATE TYPE payment_status AS ENUM ('pending', 'success', 'failed');
+		END IF;
+	END $$;
+	`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM payment_status is ready for use")
 }

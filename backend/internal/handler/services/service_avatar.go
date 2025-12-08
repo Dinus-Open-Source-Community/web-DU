@@ -20,8 +20,8 @@ import (
 // Setelah token terverifikasi, data klaim seperti `Name` dan `Email` disimpan
 // ke dalam context (c.Set) dan dapat diambil kembali di handler ini.
 func PostAvatarFunc(c *gin.Context) {
-	// Ambil data userId dari context yang sudah diset oleh middleware
-	userId, _ := c.Get(middleware.IDCK)
+	// Ambil data userID dari context yang sudah diset oleh middleware
+	userID, _ := c.Get(middleware.IDCK)
 
 	var avatarURL string
 	file, err := c.FormFile("avatar")
@@ -34,6 +34,19 @@ func PostAvatarFunc(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	if file != nil {
+		const maxSize = 5 * 1024 * 1024 // 5MB
+		if file.Size > maxSize {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
+				"success": false,
+				"message": "Avatar file size exceeds 5MB limit",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
 	}
 
 	if file != nil {
@@ -55,7 +68,7 @@ func PostAvatarFunc(c *gin.Context) {
 		AvatarURL: avatarURL,
 	}
 
-	err = database.DB.Model(&model.User{}).Where("id = ?", userId).Updates(avatar).Error
+	err = database.DB.Model(&model.User{}).Where("id = ?", userID).Updates(avatar).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
