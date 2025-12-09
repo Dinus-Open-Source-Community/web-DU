@@ -6,6 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	RegisterRoute(StartLoginRoutes)
+}
+
 // StartLoginRoutes godoc
 // @Summary Login route initialization
 // @Description Group of routes used for user authentication (login)

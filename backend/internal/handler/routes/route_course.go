@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	RegisterRoute(StartCourseRoutes)
+}
+
 func StartCourseRoutes(r *gin.Engine) {
 	courseGroup := r.Group("/courses")
 	courseGroup.Use(middleware.AuthMiddleware())

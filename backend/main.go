@@ -8,7 +8,7 @@ package main
 
 import (
 	"backend/internal/database"
-	// "backend/internal/handler/middleware"
+	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes"
 	"log"
 
@@ -48,20 +48,11 @@ func main() {
 	database.ConnectDB()
 
 	// Static file server untuk mengakses file upload (avatar, dll)
-	// uploads := r.Group("/uploads")
-	// uploads.Use(middleware.AuthMiddleware())
-	// uploads.Static("/", "./public/uploads")
-	r.Static("/uploads", "./public/uploads")
+	uploads := r.Group("/uploads")
+	uploads.Use(middleware.AuthMiddleware())
+	uploads.Static("/", "./public/uploads")
 
-	// Register all routes
-	routes.StartRegisterRoutes(r)
-	routes.StartLoginRoutes(r)
-	routes.StartUserRoutes(r)
-	routes.StartAvatarRoutes(r)
-	routes.StartCourseRoutes(r)
-
-	//OAuth2 routes
-	routes.StartOauth2Routes(r)
+	routes.SetupAllRoutes(r)
 
 	// Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

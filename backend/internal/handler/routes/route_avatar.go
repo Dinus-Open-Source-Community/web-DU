@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	RegisterRoute(StartAvatarRoutes)
+}
+
 // StartAvatarRoutes godoc
 // @Summary Protected data route
 // @Description Get user data using JWT authentication

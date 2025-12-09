@@ -1,18 +1,20 @@
 package routes
 
 import (
-	"backend/internal/handler/middleware"
+	"backend/internal/handler/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-func StartOauth2Routes(oauth *gin.Engine) {
-	group := oauth.Group("/oauth")
-	{
-		group.GET("/", middleware.Home)
-		group.GET("/auth/:provider", middleware.SignInWithProvider)
-		group.GET("/auth/:provider/callback", middleware.CallbackHandler)
-		group.GET("/success", middleware.Success)
-	}
+func init() {
+	RegisterRoute(StartOauth2Routes)
 }
 
+func StartOauth2Routes(r *gin.Engine) {
+	oAuthGroup := r.Group("/oauth")
+	{
+		oAuthGroup.GET("/", services.Home)
+		oAuthGroup.GET("/google/login", services.LoginOAuth)
+		oAuthGroup.GET("/google/callback", services.CallbackHandler)
+	}
+}
