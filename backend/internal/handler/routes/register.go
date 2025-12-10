@@ -1,13 +1,14 @@
 package routes
 
 import (
-	"backend/internal/services"
+	"backend/internal/handler/routes/setup"
+	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	RegisterRoute(StartRegisterRoutes)
+	setup.RegisterRoute(StartRegisterRoutes)
 }
 
 // StartRegisterRoutes godoc
@@ -25,6 +26,6 @@ func init() {
 func StartRegisterRoutes(r *gin.Engine) {
 	registerGroup := r.Group("/register")
 	{
-		registerGroup.POST("/", services.PostRegisterFunc)
+		registerGroup.POST("/", service.PostRegisterFunc)
 	}
 }

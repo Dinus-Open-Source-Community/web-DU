@@ -3,13 +3,14 @@ package routes
 
 import (
 	"backend/internal/handler/middleware"
-	"backend/internal/services"
+	"backend/internal/handler/routes/setup"
+	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	RegisterRoute(StartAvatarRoutes)
+	setup.RegisterRoute(StartAvatarRoutes)
 }
 
 // StartAvatarRoutes godoc
@@ -30,6 +31,6 @@ func StartAvatarRoutes(r *gin.Engine) {
 	avatarGroup := r.Group("/avatar")
 	avatarGroup.Use(middleware.AuthMiddleware())
 	{
-		avatarGroup.POST("/", services.PostAvatarFunc)
+		avatarGroup.POST("/", service.PostAvatarFunc)
 	}
 }

@@ -9,7 +9,7 @@ package main
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/handler/routes"
+	"backend/internal/handler/routes/setup"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +45,7 @@ func main() {
 	uploads.Use(middleware.AuthMiddleware())
 	uploads.Static("/", "./public/uploads")
 
-	routes.SetupAllRoutes(r)
+	setup.SetupAllRoutes(r)
 
 	// Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

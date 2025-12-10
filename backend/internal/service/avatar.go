@@ -1,6 +1,6 @@
 // Example penggunaan token JWT dengan middleware AuthMiddleware
 
-package services
+package service
 
 import (
 	"backend/internal/database"
