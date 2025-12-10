@@ -15,6 +15,7 @@ func StartUserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	userGroup.Use(middleware.AuthMiddleware())
 	{
-		userGroup.GET("/", services.GetUserService)
+		userGroup.GET("/data", services.GetUserDataService)
+		userGroup.GET("/all", services.GetUserDataService)
 	}
 }

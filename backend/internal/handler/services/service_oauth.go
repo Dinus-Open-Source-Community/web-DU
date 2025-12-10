@@ -1,12 +1,18 @@
 package services
 
 import (
+	"backend/internal/database"
+	"backend/internal/model"
+	"backend/internal/utils"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -20,15 +26,6 @@ func generateRandomString(length int) (string, error) {
 		return "", err
 	}
 	return base64.RawURLEncoding.EncodeToString(bytes)[:length], nil
-}
-
-func Home(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Welcome to the OAuth2 Service",
-		"data":    nil,
-		"error":   nil,
-	})
 }
 
 func LoginOAuth(c *gin.Context) {
@@ -121,7 +118,6 @@ func CallbackHandler(c *gin.Context) {
 	}
 	defer response.Body.Close()
 
-	// Baca hasil response body
 	contents, err := io.ReadAll(response.Body)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -133,6 +129,80 @@ func CallbackHandler(c *gin.Context) {
 		return
 	}
 
-	// Tampilkan data user (JSON) ke browser
-	c.Data(http.StatusOK, "application/json", contents)
+	// Unmarshal only the fields we care about
+	var gu model.GoogleUserMinimal
+	if err := json.Unmarshal(contents, &gu); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to parse user info",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Normalize and prepare values
+	email := strings.ToLower(strings.TrimSpace(gu.Email))
+	emailHash := utils.GenerateBlindIndex(email)
+	encName, _ := utils.Encrypt(gu.Name)
+	encEmail, _ := utils.Encrypt(email)
+
+	var user model.User
+	database.DB.Where("email_hash = ?", emailHash).First(&user)
+	if user.ID == 0 {
+		user = model.User{
+			Name:       encName,
+			Email:      encEmail,
+			EmailHash:  emailHash,
+			AvatarURL:  gu.Picture,
+			IsVerified: gu.VerifiedEmail,
+			Role:       model.StudentRole, // default role
+			// CreatedAt and UpdatedAt handled by GORM if zero value
+		}
+
+		if err := database.DB.Create(&user).Error; err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to create user",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+	} else {
+		user.Name = encName
+		user.Email = encEmail
+		user.AvatarURL = gu.Picture
+		user.IsVerified = gu.VerifiedEmail
+		user.UpdatedAt = time.Now()
+
+		if err := database.DB.Save(&user).Error; err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to update user",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+	}
+
+	nameDecrypted, _ := utils.Decrypt(user.Name)
+	emailDecrypted, _ := utils.Decrypt(user.Email)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "User logged in via Google successfully",
+		"data": gin.H{
+			"id":          user.ID,
+			"name":        nameDecrypted,
+			"email":       emailDecrypted,
+			"avatar_url":  user.AvatarURL,
+			"role":        user.Role,
+			"is_verified": user.IsVerified,
+			"created_at":  user.CreatedAt,
+			"updated_at":  user.UpdatedAt,
+		},
+		"error": nil,
+	})
 }
