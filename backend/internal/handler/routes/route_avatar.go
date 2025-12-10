@@ -3,7 +3,7 @@ package routes
 
 import (
 	"backend/internal/handler/middleware"
-	"backend/internal/handler/services"
+	"backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )

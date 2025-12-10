@@ -3,7 +3,8 @@ package services
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model"
+	"backend/internal/model/dto"
+	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"net/http"
 	"time"
@@ -27,7 +28,7 @@ import (
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /register [post]
 func PostRegisterFunc(c *gin.Context) {
-	var req model.RegisterRequest // <-- KITA GUNAKAN MODEL YANG SUDAH DIPERBAIKI
+	var req dto.RegisterRequest // <-- KITA GUNAKAN MODEL YANG SUDAH DIPERBAIKI
 
 	// 1. Ambil dan validasi data form (name, email, password)
 	// Gin akan otomatis memvalidasi form data berdasarkan tag 'binding'
@@ -56,12 +57,12 @@ func PostRegisterFunc(c *gin.Context) {
 	emailHash := utils.GenerateBlindIndex(req.Email)
 
 	// 3. Buat instance user baru
-	newUser := model.User{
+	newUser := entity.User{
 		Name:      nameEncrypted,
 		Email:     emailEncrypted,
 		EmailHash: emailHash,
 		Password:  hashedPassword,
-		Role:      model.StudentRole,
+		Role:      entity.StudentRole,
 	}
 
 	// 4. Simpan user ke database

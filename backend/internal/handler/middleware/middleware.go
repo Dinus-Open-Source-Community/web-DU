@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"backend/internal/database"
-	"backend/internal/model"
+	"backend/internal/model/entity"
 	"net/http"
 	"strings"
 
@@ -63,8 +63,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		var userData model.User
-		_ = database.DB.Model(&model.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
+		var userData entity.User
+		_ = database.DB.Model(&entity.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
 
 		// Simpan data Name dan Email dari claims ke context.
 		// Data ini bisa diambil di handler menggunakan c.Get(NameCK) atau c.Get(EmailCK).

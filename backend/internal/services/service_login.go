@@ -3,7 +3,8 @@ package services
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model"
+	"backend/internal/model/entity"
+	"backend/internal/model/dto"
 	"backend/internal/utils"
 	"net/http"
 	"time"
@@ -16,7 +17,7 @@ import (
 // memverifikasi data tersebut dengan database, dan jika valid — akan
 // menghasilkan token JWT yang dikirim kembali ke client.
 func PostLoginFunc(c *gin.Context) {
-	var req model.LoginRequest
+	var req dto.LoginRequest
 
 	// Parsing JSON body ke struct LoginRequest
 	// Jika format JSON tidak valid, kembalikan error 400 (Bad Request)
@@ -31,7 +32,7 @@ func PostLoginFunc(c *gin.Context) {
 	}
 
 	// Ambil data user dari database berdasarkan email
-	var userData model.User
+	var userData entity.User
 	emailHash := utils.GenerateBlindIndex(req.Email)
 	database.DB.Where("email_hash = ?", emailHash).First(&userData)
 

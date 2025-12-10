@@ -8,7 +8,7 @@ import (
 
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model"
+	"backend/internal/model/entity"
 	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ import (
 func GetUserDataService(c *gin.Context) {
 	userID, _ := c.Get(middleware.IDCK)
 
-	var userData model.User
+	var userData entity.User
 	err := database.DB.First(&userData, userID).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -87,7 +87,7 @@ func GetAllUsersService(c *gin.Context) {
 
 	// If no search query provided, do DB-level pagination and filtering by role.
 	if search == "" {
-		db := database.DB.Model(&model.User{})
+		db := database.DB.Model(&entity.User{})
 		if roleFilter != "" {
 			db = db.Where("role = ?", roleFilter)
 		}
@@ -115,7 +115,7 @@ func GetAllUsersService(c *gin.Context) {
 		}
 
 		offset := (page - 1) * perPage
-		var users []model.User
+		var users []entity.User
 		if err := db.Order(sortField + " " + order).Limit(perPage).Offset(offset).Find(&users).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
@@ -163,12 +163,12 @@ func GetAllUsersService(c *gin.Context) {
 	}
 
 	// If search is provided -> need to decrypt and filter in-memory.
-	db := database.DB.Model(&model.User{})
+	db := database.DB.Model(&entity.User{})
 	if roleFilter != "" {
 		db = db.Where("role = ?", roleFilter)
 	}
 
-	var users []model.User
+	var users []entity.User
 	if err := db.Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -180,7 +180,7 @@ func GetAllUsersService(c *gin.Context) {
 	}
 
 	type userWithDecrypted struct {
-		User  model.User
+		User  entity.User
 		Name  string
 		Email string
 	}

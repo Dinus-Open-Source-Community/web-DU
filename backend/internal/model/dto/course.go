@@ -1,4 +1,4 @@
-package model
+package dto
 
 type AdminCourseRequest struct {
 	Title        string `form:"title" binding:"required" example:"Introduction to Go"`

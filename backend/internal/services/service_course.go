@@ -3,7 +3,7 @@ package services
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model"
+	"backend/internal/model/entity"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -15,7 +15,7 @@ import (
 func PostAdminCourseFunc(c *gin.Context) {
 	userID, _ := c.Get(middleware.IDCK)
 
-	var userData model.User
+	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -26,7 +26,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != model.AdminRole {
+	if userData.Role != entity.AdminRole {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Create Course Access denied: Admins only",
@@ -61,7 +61,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		thumbnailURL = "/uploads/courses/" + uniqueFilename
 	}
 
-	course := model.Course{
+	course := entity.Course{
 		Title:        c.PostForm("title"),
 		Slug:         c.PostForm("slug"),
 		Description:  c.PostForm("description"),
@@ -102,7 +102,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 func GetAllCoursesFunc(c *gin.Context) {
 	userID, _ := c.Get(middleware.IDCK)
 
-	var userData model.User
+	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -113,7 +113,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != model.AdminRole {
+	if userData.Role != entity.AdminRole {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Get All Courses Access denied: Admins only",
@@ -123,7 +123,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 		return
 	}
 
-	var courses []model.Course
+	var courses []entity.Course
 	if err := database.DB.Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -145,7 +145,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 func GetCourseByIDFunc(c *gin.Context) {
 	courseID := c.Param("id")
 
-	var course model.Course
+	var course entity.Course
 	if err := database.DB.First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,

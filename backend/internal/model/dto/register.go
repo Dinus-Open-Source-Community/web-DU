@@ -1,4 +1,4 @@
-package model
+package dto
 
 // RegisterRequest merepresentasikan struktur FORM untuk permintaan registrasi user
 type RegisterRequest struct {

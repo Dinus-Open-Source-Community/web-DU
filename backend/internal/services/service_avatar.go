@@ -5,7 +5,7 @@ package services
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model"
+	"backend/internal/model/entity"
 	"net/http"
 	"path/filepath"
 
@@ -64,11 +64,11 @@ func PostAvatarFunc(c *gin.Context) {
 		avatarURL = "/uploads/avatars/" + uniqueFilename
 	}
 
-	avatar := model.User{
+	avatar := entity.User{
 		AvatarURL: avatarURL,
 	}
 
-	err = database.DB.Model(&model.User{}).Where("id = ?", userID).Updates(avatar).Error
+	err = database.DB.Model(&entity.User{}).Where("id = ?", userID).Updates(avatar).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

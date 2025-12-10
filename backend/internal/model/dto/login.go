@@ -1,4 +1,4 @@
-package model
+package dto
 
 // LoginRequest merepresentasikan struktur JSON untuk permintaan login user
 type LoginRequest struct {

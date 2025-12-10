@@ -2,7 +2,8 @@ package services
 
 import (
 	"backend/internal/database"
-	"backend/internal/model"
+	"backend/internal/model/entity"
+	"backend/internal/model/dto"
 	"backend/internal/utils"
 	"context"
 	"crypto/rand"
@@ -130,7 +131,7 @@ func CallbackHandler(c *gin.Context) {
 	}
 
 	// Unmarshal only the fields we care about
-	var gu model.GoogleUserMinimal
+	var gu dto.GoogleUserMinimal
 	if err := json.Unmarshal(contents, &gu); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -147,16 +148,16 @@ func CallbackHandler(c *gin.Context) {
 	encName, _ := utils.Encrypt(gu.Name)
 	encEmail, _ := utils.Encrypt(email)
 
-	var user model.User
+	var user entity.User
 	database.DB.Where("email_hash = ?", emailHash).First(&user)
 	if user.ID == 0 {
-		user = model.User{
+		user = entity.User{
 			Name:       encName,
 			Email:      encEmail,
 			EmailHash:  emailHash,
 			AvatarURL:  gu.Picture,
 			IsVerified: gu.VerifiedEmail,
-			Role:       model.StudentRole, // default role
+			Role:       entity.StudentRole, // default role
 			// CreatedAt and UpdatedAt handled by GORM if zero value
 		}
 
