@@ -10,5 +10,5 @@ type CourseAnnouncement struct {
 	Message   string    `gorm:"type:text" json:"message"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
-	Course *Course
+	Course *Course `json:"course"`
 }

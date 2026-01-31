@@ -2,8 +2,8 @@ package service
 
 import (
 	"backend/internal/database"
-	"backend/internal/model/entity"
 	"backend/internal/model/dto"
+	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"context"
 	"crypto/rand"
@@ -29,6 +29,14 @@ func generateRandomString(length int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(bytes)[:length], nil
 }
 
+// @Summary      Initiate Google OAuth login
+// @Description  Initiates Google OAuth 2.0 authentication flow. Redirects user to Google consent screen.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Success      307  {string}  string  "Redirect to Google OAuth consent screen"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /oauth/google [get]
 func LoginOAuth(c *gin.Context) {
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
@@ -51,6 +59,17 @@ func LoginOAuth(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// @Summary      Google OAuth callback
+// @Description  Handles OAuth callback from Google. Exchanges authorization code for token and creates/updates user account.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        state  query  string  true  "OAuth state parameter for CSRF protection"
+// @Param        code   query  string  true  "OAuth authorization code from Google"
+// @Success      200  {object}  map[string]any  "User logged in via Google successfully"
+// @Failure      401  {object}  map[string]any  "Invalid OAuth state"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /oauth/google/callback [get]
 func CallbackHandler(c *gin.Context) {
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")

@@ -17,7 +17,9 @@ func StartCourseRoutes(r *gin.Engine) {
 	courseGroup.Use(middleware.AuthMiddleware())
 	{
 		courseGroup.GET("/:id", service.GetCourseByIDFunc) // Authenticated users - all roles
-		courseGroup.GET("/", service.GetAllCoursesFunc)    // Admin only
+		courseGroup.GET("/", service.GetAllCoursesFunc)    // Authenticated users - all roles
 		courseGroup.POST("/", service.PostAdminCourseFunc) // Admin only
+
+		courseGroup.POST("/:id/join", service.JoinCourseFunc) // Students only
 	}
 }

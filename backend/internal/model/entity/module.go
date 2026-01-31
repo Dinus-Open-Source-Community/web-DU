@@ -11,6 +11,6 @@ type Module struct {
 	CreatedAt  time.Time `gorm:"autoCreateTime" json:"created_at"`
 
 	// Relations
-	Course  *Course
-	Lessons []Lesson
+	Course  *Course  `json:"course"`
+	Lessons []Lesson `json:"lessons"`
 }

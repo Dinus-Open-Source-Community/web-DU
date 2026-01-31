@@ -13,12 +13,20 @@ import (
 	"github.com/google/uuid"
 )
 
-// PostAvatarFunc merupakan contoh handler (endpoint) yang hanya bisa diakses
-// jika user sudah terautentikasi menggunakan JWT token yang valid.
-//
-// Fungsi ini menggunakan middleware `AuthMiddleware` untuk memverifikasi token JWT.
-// Setelah token terverifikasi, data klaim seperti `Name` dan `Email` disimpan
-// ke dalam context (c.Set) dan dapat diambil kembali di handler ini.
+// @Summary      Update user avatar
+// @Description  Upload and update authenticated user's avatar image. Only authenticated users can access this endpoint.
+// @Tags         User
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        avatar  formData  file  true  "Avatar image file (max 5MB, supported: JPG, PNG, GIF)"
+// @Success      200  {object}  map[string]any  "Avatar updated successfully"
+// @Failure      400  {object}  map[string]any  "Failed to process avatar file"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      413  {object}  map[string]any  "File size exceeds 5MB limit"
+// @Failure      404  {object}  map[string]any  "User not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /avatar [post]
 func PostAvatarFunc(c *gin.Context) {
 	// Ambil data userID dari context yang sudah diset oleh middleware
 	userID, _ := c.Get(middleware.IDCK)

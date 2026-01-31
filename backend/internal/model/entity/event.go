@@ -16,5 +16,5 @@ type Event struct {
 	UpdatedAt        time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Courses []Course `gorm:"foreignKey:EventID"`
+	Courses []Course `gorm:"foreignKey:EventID" json:"courses"`
 }

@@ -11,6 +11,6 @@ type CourseReview struct {
 	Comment   string    `gorm:"type:text" json:"comment"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
-	User   *User
-	Course *Course
+	User   *User `json:"user"`
+	Course *Course `json:"course"`
 }

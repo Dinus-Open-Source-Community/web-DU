@@ -3,8 +3,8 @@ package service
 import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
-	"backend/internal/model/entity"
 	"backend/internal/model/dto"
+	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"net/http"
 	"time"
@@ -12,10 +12,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PostLoginFunc merupakan handler untuk proses login user.
-// Fungsi ini menerima input email dan password dari client (dalam format JSON),
-// memverifikasi data tersebut dengan database, dan jika valid — akan
-// menghasilkan token JWT yang dikirim kembali ke client.
+// @Summary      User login
+// @Description  Authenticate user with email and password, returns JWT token valid for 24 hours
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.LoginRequest  true  "Login credentials (email and password)"
+// @Success      200  {object}  map[string]any  "User logged in successfully"
+// @Failure      400  {object}  map[string]any  "Invalid request data"
+// @Failure      401  {object}  map[string]any  "Invalid credentials"
+// @Failure      500  {object}  map[string]any  "Failed to generate token"
+// @Router       /login [post]
 func PostLoginFunc(c *gin.Context) {
 	var req dto.LoginRequest
 
@@ -68,8 +75,8 @@ func PostLoginFunc(c *gin.Context) {
 		"success": true,
 		"message": "User logged in successfully!",
 		"data": gin.H{
-			"token":       token,
-			"expires_at":  expiration.Format(time.RFC3339),
+			"token":      token,
+			"expires_at": expiration.Format(time.RFC3339),
 		},
 		"error": nil,
 	})

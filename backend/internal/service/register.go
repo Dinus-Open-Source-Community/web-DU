@@ -13,16 +13,15 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// @Summary      Register route initialization
-// @Description  Group of routes used for user registration
+// @Summary      Register new user
+// @Description  Register a new user with name, email, and password. Returns JWT token on success.
 // @Tags         Auth
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        name      formData  string  true   "User's name"
-// @Param        email     formData  string  true   "User's email"
-// @Param        password  formData  string  true   "User's password"
-// @Param        avatar    formData  file    false  "User's avatar image (opsional)"
-// @Success      200  {object}  map[string]any  "User registered successfully!"
+// @Param        name      formData  string  true   "User's full name"
+// @Param        email     formData  string  true   "User's email address (must be unique)"
+// @Param        password  formData  string  true   "User's password (min 6 characters)"
+// @Success      200  {object}  map[string]any  "User registered successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      409  {object}  map[string]any  "Email already registered"
 // @Failure      500  {object}  map[string]any  "Internal server error"

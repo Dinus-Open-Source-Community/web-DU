@@ -1,6 +1,51 @@
 basePath: /
 definitions:
-  model.LoginRequest:
+  dto.CreateModuleRequest:
+    properties:
+      course_id:
+        example: 1
+        type: integer
+      order_index:
+        example: 1
+        type: integer
+      title:
+        example: Module 1
+        type: string
+    required:
+    - course_id
+    - order_index
+    - title
+    type: object
+  dto.LessonCreateRequest:
+    properties:
+      content:
+        type: string
+      module_id:
+        type: integer
+      order_index:
+        type: integer
+      title:
+        type: string
+      video_url:
+        type: string
+    required:
+    - module_id
+    - title
+    type: object
+  dto.LessonUpdateRequest:
+    properties:
+      content:
+        type: string
+      module_id:
+        type: integer
+      order_index:
+        type: integer
+      title:
+        type: string
+      video_url:
+        type: string
+    type: object
+  dto.LoginRequest:
     properties:
       email:
         example: user@example.com
@@ -12,21 +57,22 @@ definitions:
     - email
     - password
     type: object
-  model.RegisterRequest:
+  dto.UpdateModuleRequest:
     properties:
-      email:
-        example: user@example.com
+      order_index:
+        example: 2
+        type: integer
+      title:
+        example: Updated Module 1
         type: string
-      name:
-        example: User DU
-        type: string
-      password:
-        example: StrongPassword123
+    type: object
+  dto.UpdateUserRoleRequest:
+    properties:
+      role:
+        example: admin
         type: string
     required:
-    - email
-    - name
-    - password
+    - role
     type: object
 host: localhost:8080
 info:
@@ -35,19 +81,43 @@ info:
   title: Web DU Backend
   version: "1.0"
 paths:
-  /data:
-    get:
-      description: Get user data using JWT authentication
+  /avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload and update authenticated user's avatar image. Only authenticated
+        users can access this endpoint.
+      parameters:
+      - description: 'Avatar image file (max 5MB, supported: JPG, PNG, GIF)'
+        in: formData
+        name: avatar
+        required: true
+        type: file
       produces:
       - application/json
       responses:
         "200":
-          description: Success response
+          description: Avatar updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Failed to process avatar file
           schema:
             additionalProperties: true
             type: object
         "401":
-          description: Unauthorized - Invalid or missing token
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "413":
+          description: File size exceeds 5MB limit
           schema:
             additionalProperties: true
             type: object
@@ -58,21 +128,475 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Protected data route
+      summary: Update user avatar
       tags:
-      - Protected
-  /login:
+      - User
+  /courses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated list of courses with optional filters (mentor_id,
+        title, price, is_premium)
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by mentor ID
+        in: query
+        name: mentor_id
+        type: integer
+      - description: Search by title (case-insensitive)
+        in: query
+        name: title
+        type: string
+      - description: Filter by exact price
+        in: query
+        name: price
+        type: number
+      - description: Filter by premium status
+        in: query
+        name: is_premium
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Courses retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve courses
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all courses with pagination and filters
+      tags:
+      - Course
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new course with details and optional thumbnail. Admin
+        only.
+      parameters:
+      - description: Course title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Course slug (unique identifier, lowercase with hyphens)
+        in: formData
+        name: slug
+        required: true
+        type: string
+      - description: Course description
+        in: formData
+        name: description
+        type: string
+      - description: Course thumbnail image (JPG, PNG recommended)
+        in: formData
+        name: thumbnail
+        type: file
+      - description: Course price (optional for free courses)
+        in: formData
+        name: price
+        type: integer
+      - description: 'Whether course is premium (default: false)'
+        in: formData
+        name: is_premium
+        type: boolean
+      - description: 'Whether course is published (default: false)'
+        in: formData
+        name: is_published
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Course created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create course
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create new course
+      tags:
+      - Course
+  /courses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve complete information of a specific course including all
+        modules
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get course by ID
+      tags:
+      - Course
+  /courses/{id}/join:
     post:
       consumes:
       - application/json
-      description: Group of routes used for user authentication (login)
+      description: Allow authenticated students to enroll in a course. Creates an
+        enrollment record.
       parameters:
-      - description: User login data
+      - description: Course ID to enroll in
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully enrolled in course
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Already enrolled in this course
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Students only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to join course
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Join a course (Students only)
+      tags:
+      - Course
+  /lessons:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all lessons with optional module_id filter. Admin only.
+      parameters:
+      - description: Filter by module ID
+        in: query
+        name: module_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lessons retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve lessons
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all lessons
+      tags:
+      - Lesson
+    post:
+      consumes:
+      - application/json
+      description: Create a new lesson for a module. Admin only. Requires module_id
+        and title. Content and video_url are optional.
+      parameters:
+      - description: Lesson data with module_id, title, content
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.LoginRequest'
+          $ref: '#/definitions/dto.LessonCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Lesson created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User or module not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create lesson
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create new lesson
+      tags:
+      - Lesson
+  /lessons/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a lesson by ID (Admin only)
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete lesson
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete lesson
+      tags:
+      - Lesson
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed information of a specific lesson. Admin only.
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve lesson
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get lesson by ID
+      tags:
+      - Lesson
+    put:
+      consumes:
+      - application/json
+      description: Update an existing lesson by ID. Admin only. All fields are optional
+        - only provided fields will be updated.
+      parameters:
+      - description: Lesson ID to update
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated lesson data (all fields optional)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update lesson
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update lesson
+      tags:
+      - Lesson
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, returns JWT token valid
+        for 24 hours
+      parameters:
+      - description: Login credentials (email and password)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
@@ -96,39 +620,306 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Login route initialization
+      summary: User login
+      tags:
+      - Auth
+  /modules:
+    post:
+      consumes:
+      - application/json
+      description: Create a new module in a course (Admin only)
+      parameters:
+      - description: Module data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Module created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found or User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create module
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create new module
+      tags:
+      - Module
+  /modules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a module and all its associated lessons. Admin only.
+      parameters:
+      - description: Module ID to delete
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Module deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Module or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete module
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete module
+      tags:
+      - Module
+    get:
+      description: Retrieve a specific module with all its lessons
+      parameters:
+      - description: Module ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Module retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Module not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve module
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get module by ID
+      tags:
+      - Module
+    put:
+      consumes:
+      - application/json
+      description: Update an existing module's information. Admin only.
+      parameters:
+      - description: Module ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Module data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Module updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Module or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update module
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update module
+      tags:
+      - Module
+  /modules/course/{course_id}:
+    get:
+      description: Retrieve all modules for a specific course ordered by sequence
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Modules retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve modules
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all modules by course
+      tags:
+      - Module
+  /oauth/google:
+    get:
+      consumes:
+      - application/json
+      description: Initiates Google OAuth 2.0 authentication flow. Redirects user
+        to Google consent screen.
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirect to Google OAuth consent screen
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Initiate Google OAuth login
+      tags:
+      - Auth
+  /oauth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: Handles OAuth callback from Google. Exchanges authorization code
+        for token and creates/updates user account.
+      parameters:
+      - description: OAuth state parameter for CSRF protection
+        in: query
+        name: state
+        required: true
+        type: string
+      - description: OAuth authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logged in via Google successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid OAuth state
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Google OAuth callback
       tags:
       - Auth
   /register:
     post:
       consumes:
       - multipart/form-data
-      description: Group of routes used for user registration
+      description: Register a new user with name, email, and password. Returns JWT
+        token on success.
       parameters:
-      - description: User's name
+      - description: User's full name
         in: formData
         name: name
         required: true
         type: string
-      - description: User's email
+      - description: User's email address (must be unique)
         in: formData
         name: email
         required: true
         type: string
-      - description: User's password
+      - description: User's password (min 6 characters)
         in: formData
         name: password
         required: true
         type: string
-      - description: User's avatar image (opsional)
-        in: formData
-        name: avatar
-        type: file
       produces:
       - application/json
       responses:
         "200":
-          description: User registered successfully!
+          description: User registered successfully
           schema:
             additionalProperties: true
             type: object
@@ -147,7 +938,206 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Register route initialization
+      summary: Register new user
       tags:
       - Auth
+  /user/data:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve current authenticated user's complete profile including
+        personal data and enrolled courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found in database
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get authenticated user profile
+      tags:
+      - User
+  /user/manage/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user account permanently. Only administrators can perform
+        this action. Admins cannot delete their own account.
+      parameters:
+      - description: User ID to delete
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - Only admins can delete users
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user account (Admin only)
+      tags:
+      - User Management
+    patch:
+      consumes:
+      - application/json
+      description: 'Update a specific user''s role. Only administrators can perform
+        this action. Valid roles are: admin, mentor, student.'
+      parameters:
+      - description: User ID to update
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Role assignment (admin/mentor/student)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User role updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid role value
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - Only admins can update roles
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user role (Admin only)
+      tags:
+      - User Management
+  /user/manage/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated list of all users with optional filtering by
+        role and search. Supports sorting by created_at or name. Admin only.
+      parameters:
+      - description: 'Page number (default: 1, minimum: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 5, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by role (admin/mentor/student)
+        in: query
+        name: role
+        type: string
+      - description: Search by name or email (case-insensitive)
+        in: query
+        name: search
+        type: string
+      - description: 'Sort field: created_at (default) or name'
+        in: query
+        name: sort
+        type: string
+      - description: 'Sort order: asc or desc (default: desc)'
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully with pagination metadata
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - Only admins can access this endpoint
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all users with pagination (Admin only)
+      tags:
+      - User Management
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

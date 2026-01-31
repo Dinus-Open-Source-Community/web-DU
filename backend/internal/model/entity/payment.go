@@ -26,5 +26,5 @@ type Payment struct {
 	PaidAt        *time.Time    `json:"paid_at"`
 	CreatedAt     time.Time     `gorm:"autoCreateTime" json:"created_at"`
 
-	Enrollment *Enrollment
+	Enrollment *Enrollment `json:"enrollment"`
 }

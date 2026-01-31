@@ -18,10 +18,10 @@ type Course struct {
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Event          *Event
-	Mentor         *User
-	Modules        []Module
-	Enrollments    []Enrollment
-	Reviews        []CourseReview
-	Announcements  []CourseAnnouncement
+	Event         *Event               `json:"event"`
+	Mentor        *User                `json:"mentor"`
+	Modules       []Module             `json:"modules"`
+	Enrollments   []Enrollment         `json:"enrollments"`
+	Reviews       []CourseReview       `json:"course_reviews"`
+	Announcements []CourseAnnouncement `json:"course_announcements"`
 }

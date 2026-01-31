@@ -4,6 +4,11 @@
 
 // @host localhost:8080
 // @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 package main
 
 import (
@@ -17,6 +22,8 @@ import (
 
 	// Swagger import
 	_ "backend/docs"
+
+	_ "backend/internal/handler/routes"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

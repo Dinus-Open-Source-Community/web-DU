@@ -26,7 +26,7 @@ type User struct {
 	UpdatedAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Courses     []Course     `gorm:"foreignKey:MentorID"`
-	Enrollments []Enrollment `gorm:"foreignKey:UserID"`
-	Reviews     []CourseReview
+	Courses     []Course       `gorm:"foreignKey:MentorID" json:"courses"`
+	Enrollments []Enrollment   `gorm:"foreignKey:UserID" json:"enrollments"`
+	Reviews     []CourseReview `json:"course_reviews"`
 }
