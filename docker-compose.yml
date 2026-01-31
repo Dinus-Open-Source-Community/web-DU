@@ -28,6 +28,9 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - AES_KEY=${AES_KEY}
       - HMAC_KEY=${HMAC_KEY}
+      - TRIPAY_API_KEY=${TRIPAY_API_KEY}
+      - TRIPAY_PRIVATE_KEY=${TRIPAY_PRIVATE_KEY}
+      - TRIPAY_MERCHANT_CODE=${TRIPAY_MERCHANT_CODE}
     depends_on:
       - db
     volumes:
