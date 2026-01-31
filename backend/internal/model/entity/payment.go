@@ -23,8 +23,7 @@ type Payment struct {
 	Method        PaymentMethod `gorm:"type:payment_method" json:"payment_method"`
 	Status        PaymentStatus `gorm:"type:payment_status" json:"payment_status"`
 	TransactionID string        `gorm:"type:varchar(100)" json:"transaction_id"`
+	CheckoutURL   string        `gorm:"type:text" json:"checkout_url"`
 	PaidAt        *time.Time    `json:"paid_at"`
 	CreatedAt     time.Time     `gorm:"autoCreateTime" json:"created_at"`
-
-	Enrollment *Enrollment `json:"enrollment"`
 }

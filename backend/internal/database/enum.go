@@ -95,7 +95,7 @@ func createEnrollmentStatusEnum(db *gorm.DB) {
 // Parameter:
 //   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
 func createPaymentMethodEnum(db *gorm.DB) {
-	query := `CREATE TYPE payment_method AS ENUM ('credit_card', 'bank_transfer', 'ewallet');`
+	query := `CREATE TYPE payment_method AS ENUM ('PERMATAVA', 'BNIVA', 'BRIVA', 'MANDIRIVA', 'BCAVA', 'MUAMALATVA', 'CIMBVA', 'BSIVA', 'OCBCVA', 'DANAMONVA', 'OVO', 'DANA', 'QRIS2');`
 	db.Exec(query)
 
 	log.Println("[Success] ENUM payment_method is ready for use")

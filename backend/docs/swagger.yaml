@@ -1,5 +1,14 @@
 basePath: /
 definitions:
+  dto.APIResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.CreatePaymentResponse'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   dto.CreateModuleRequest:
     properties:
       course_id:
@@ -16,10 +25,98 @@ definitions:
     - order_index
     - title
     type: object
+  dto.CreatePaymentRequest:
+    properties:
+      amount:
+        type: integer
+      callback_url:
+        type: string
+      enrollment_id:
+        type: integer
+      method:
+        enum:
+        - PERMATAVA
+        - BNIVA
+        - BRIVA
+        - MANDIRIVA
+        - BCAVA
+        - MUAMALATVA
+        - CIMBVA
+        - BSIVA
+        - OCBCVA
+        - DANAMONVA
+        - OVO
+        - DANA
+        - QRIS2
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/dto.OrderItem'
+        minItems: 1
+        type: array
+      return_url:
+        type: string
+    required:
+    - amount
+    - method
+    - order_items
+    type: object
+  dto.CreatePaymentResponse:
+    properties:
+      amount:
+        type: integer
+      amount_received:
+        type: integer
+      callback_url:
+        type: string
+      checkout_url:
+        type: string
+      customer_email:
+        type: string
+      customer_name:
+        type: string
+      customer_phone:
+        type: string
+      expired_time:
+        type: integer
+      fee_customer:
+        type: integer
+      fee_merchant:
+        type: integer
+      instructions:
+        items:
+          $ref: '#/definitions/dto.PaymentInstruction'
+        type: array
+      merchant_ref:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/dto.OrderItemResponse'
+        type: array
+      pay_code:
+        type: string
+      pay_url: {}
+      payment_method:
+        type: string
+      payment_name:
+        type: string
+      payment_selection_type:
+        type: string
+      qr_string: {}
+      qr_url: {}
+      reference:
+        type: string
+      return_url:
+        type: string
+      status:
+        type: string
+      total_fee:
+        type: integer
+    type: object
   dto.LessonCreateRequest:
     properties:
       content:
-        type: string
+        description: accepts any JSON value
       module_id:
         type: integer
       order_index:
@@ -35,7 +132,7 @@ definitions:
   dto.LessonUpdateRequest:
     properties:
       content:
-        type: string
+        description: accepts any JSON value
       module_id:
         type: integer
       order_index:
@@ -56,6 +153,51 @@ definitions:
     required:
     - email
     - password
+    type: object
+  dto.OrderItem:
+    properties:
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      product_url:
+        type: string
+      quantity:
+        type: integer
+      sku:
+        type: string
+    required:
+    - name
+    - price
+    - quantity
+    type: object
+  dto.OrderItemResponse:
+    properties:
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      product_url:
+        type: string
+      quantity:
+        type: integer
+      sku:
+        type: string
+      subtotal:
+        type: integer
+    type: object
+  dto.PaymentInstruction:
+    properties:
+      steps:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
     type: object
   dto.UpdateModuleRequest:
     properties:
@@ -893,6 +1035,123 @@ paths:
       summary: Google OAuth callback
       tags:
       - Auth
+  /payment:
+    get:
+      consumes:
+      - application/json
+      description: Get payment details by payment reference
+      parameters:
+      - description: Payment Reference
+        in: query
+        name: reference
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment details retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Reference parameter is missing
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Payment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Payment
+      tags:
+      - Payment
+  /payment/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new payment request to Tripay for a course enrollment
+      parameters:
+      - description: Payment Request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment created successfully
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Invalid request or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create Payment
+      tags:
+      - Payment
+  /payment/callback:
+    post:
+      consumes:
+      - application/json
+      description: Receive and process payment callback from Tripay webhook. This endpoint
+        handles payment status updates and updates enrollment status accordingly.
+      parameters:
+      - description: Payment Callback Request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PaymentCallbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment status updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid callback format or failed to update payment status
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Payment Callback Webhook
+      tags:
+      - Payment
   /register:
     post:
       consumes:

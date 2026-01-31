@@ -1214,6 +1214,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/payment": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get payment details by payment reference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Get Payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment Reference",
+                        "name": "reference",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment details retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Reference parameter is missing",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new payment request to Tripay for a course enrollment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Create Payment",
+                "parameters": [
+                    {
+                        "description": "Payment Request",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or validation failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "Register a new user with name, email, and password. Returns JWT token on success.",
@@ -1568,6 +1694,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dto.CreatePaymentResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "dto.CreateModuleRequest": {
             "type": "object",
             "required": [
@@ -1590,6 +1730,130 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreatePaymentRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "method",
+                "order_items"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "callback_url": {
+                    "type": "string"
+                },
+                "enrollment_id": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "string",
+                    "enum": [
+                        "PERMATAVA",
+                        "BNIVA",
+                        "BRIVA",
+                        "MANDIRIVA",
+                        "BCAVA",
+                        "MUAMALATVA",
+                        "CIMBVA",
+                        "BSIVA",
+                        "OCBCVA",
+                        "DANAMONVA",
+                        "OVO",
+                        "DANA",
+                        "QRIS2"
+                    ]
+                },
+                "order_items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderItem"
+                    }
+                },
+                "return_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreatePaymentResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "amount_received": {
+                    "type": "integer"
+                },
+                "callback_url": {
+                    "type": "string"
+                },
+                "checkout_url": {
+                    "type": "string"
+                },
+                "customer_email": {
+                    "type": "string"
+                },
+                "customer_name": {
+                    "type": "string"
+                },
+                "customer_phone": {
+                    "type": "string"
+                },
+                "expired_time": {
+                    "type": "integer"
+                },
+                "fee_customer": {
+                    "type": "integer"
+                },
+                "fee_merchant": {
+                    "type": "integer"
+                },
+                "instructions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PaymentInstruction"
+                    }
+                },
+                "merchant_ref": {
+                    "type": "string"
+                },
+                "order_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderItemResponse"
+                    }
+                },
+                "pay_code": {
+                    "type": "string"
+                },
+                "pay_url": {},
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_name": {
+                    "type": "string"
+                },
+                "payment_selection_type": {
+                    "type": "string"
+                },
+                "qr_string": {},
+                "qr_url": {},
+                "reference": {
+                    "type": "string"
+                },
+                "return_url": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_fee": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.LessonCreateRequest": {
             "type": "object",
             "required": [
@@ -1598,7 +1862,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "content": {
-                    "type": "string"
+                    "description": "accepts any JSON value"
                 },
                 "module_id": {
                     "type": "integer"
@@ -1618,7 +1882,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
-                    "type": "string"
+                    "description": "accepts any JSON value"
                 },
                 "module_id": {
                     "type": "integer"
@@ -1648,6 +1912,74 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "StrongPassword123"
+                }
+            }
+        },
+        "dto.OrderItem": {
+            "type": "object",
+            "required": [
+                "name",
+                "price",
+                "quantity"
+            ],
+            "properties": {
+                "image_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "product_url": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderItemResponse": {
+            "type": "object",
+            "properties": {
+                "image_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "product_url": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "subtotal": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PaymentInstruction": {
+            "type": "object",
+            "properties": {
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

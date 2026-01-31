@@ -20,7 +20,6 @@ type Enrollment struct {
 	Status     EnrollmentStatus `gorm:"type:enrollment_status;default:'active'" json:"status"`
 
 	// Relations
-	// User    *User     `json:"user,omitempty"`
-	Course  *Course   `json:"course"`
-	Payment []Payment `gorm:"foreignKey:EnrollmentID" json:"payment"`
+	User   *User   `gorm:"foreignKey:UserID" json:"user"`
+	Course *Course `gorm:"foreignKey:CourseID" json:"course"`
 }
