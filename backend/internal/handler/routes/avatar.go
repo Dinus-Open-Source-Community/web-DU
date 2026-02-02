@@ -16,6 +16,6 @@ func StartAvatarRoutes(r *gin.Engine) {
 	avatarGroup := r.Group("/avatar")
 	avatarGroup.Use(middleware.AuthMiddleware())
 	{
-		avatarGroup.POST("/", service.PostAvatarFunc)
+		avatarGroup.POST("", service.PostAvatarFunc)
 	}
 }

@@ -12,7 +12,7 @@ import (
 // Konstanta context key yang digunakan untuk menyimpan data user (Name dan Email)
 // di dalam context Gin agar bisa diakses pada handler selanjutnya.
 const (
-	IDCK    = "id"
+	IDCK = "id"
 )
 
 // AuthMiddleware adalah middleware yang digunakan untuk memverifikasi token JWT
@@ -33,12 +33,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Pisahkan string Authorization menjadi dua bagian berdasarkan spasi.
-		// Contoh: "Bearer <token>" akan menjadi ["Bearer", "<token>"].
+		// Support both formats: "Bearer <token>" atau langsung "<token>"
+		var tokenStr string
 		authSplit := strings.Fields(auth)
 
-		// Pastikan formatnya benar: harus terdiri dari 2 bagian dan diawali dengan kata "Bearer".
-		if len(authSplit) != 2 || strings.ToLower(authSplit[0]) != "bearer" {
+		if len(authSplit) == 2 && strings.ToLower(authSplit[0]) == "bearer" {
+			// Format: "Bearer <token>"
+			tokenStr = authSplit[1]
+		} else if len(authSplit) == 1 {
+			// Format: langsung token tanpa "Bearer"
+			tokenStr = authSplit[0]
+		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"success": false,
 				"message": "Invalid Authorization header format",
@@ -50,7 +55,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Verifikasi token JWT menggunakan fungsi ParseToken().
-		claims, err := ParseToken(authSplit[1])
+		claims, err := ParseToken(tokenStr)
 		if err != nil {
 			// Jika token tidak valid atau parsing gagal, kirim response error 401 Unauthorized.
 			c.JSON(http.StatusUnauthorized, gin.H{

@@ -4,12 +4,11 @@ import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // @Summary      Create new course
@@ -66,18 +65,19 @@ func PostAdminCourseFunc(c *gin.Context) {
 	var thumbnailURL string
 	file, err := c.FormFile("thumbnail")
 	if err == nil && file != nil {
-		extension := filepath.Ext(file.Filename)
-		uniqueFilename := uuid.New().String() + extension
-		uploadDir := "./public/uploads/courses"
-		savePath := filepath.Join(uploadDir, uniqueFilename)
-
-		if err := c.SaveUploadedFile(file, savePath); err != nil {
+		// Upload to MinIO
+		bucket := utils.GetBucketCourses()
+		url, err := utils.UploadFile(file, bucket)
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
+				"success": false,
+				"message": "Failed to upload thumbnail file",
+				"data":    nil,
+				"error":   err.Error(),
 			})
 			return
 		}
-		thumbnailURL = "/uploads/courses/" + uniqueFilename
+		thumbnailURL = url
 	}
 
 	course := entity.Course{

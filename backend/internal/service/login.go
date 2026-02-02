@@ -43,6 +43,16 @@ func PostLoginFunc(c *gin.Context) {
 	emailHash := utils.GenerateBlindIndex(req.Email)
 	database.DB.Where("email_hash = ?", emailHash).First(&userData)
 
+	if userData.ID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Invalid credentials",
+			"data":    nil,
+			"error":   "Authentication failed",
+		})
+		return
+	}
+
 	// Verifikasi password yang dimasukkan user
 	// utils.CheckPassword akan membandingkan antara password asli dan hash yang tersimpan
 	validPassword := utils.CheckPassword(userData.Password, req.Password)

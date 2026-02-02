@@ -15,6 +15,7 @@ import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
+	"backend/internal/utils"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,12 @@ func main() {
 	r.Use(gin.Recovery())
 
 	database.ConnectDB()
+
+	// Initialize MinIO
+	if err := utils.InitMinio(); err != nil {
+		log.Printf("Warning: MinIO initialization failed: %v", err)
+		log.Println("File uploads will fallback to local storage if MinIO is unavailable")
+	}
 
 	// Static file server untuk mengakses file upload (avatar, dll)
 	uploads := r.Group("/uploads")

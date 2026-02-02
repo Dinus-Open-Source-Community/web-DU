@@ -6,11 +6,10 @@ import (
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // @Summary      Update user avatar
@@ -58,18 +57,19 @@ func PostAvatarFunc(c *gin.Context) {
 	}
 
 	if file != nil {
-		extension := filepath.Ext(file.Filename)
-		uniqueFilename := uuid.New().String() + extension
-		uploadDir := "./public/uploads/avatars"
-		savePath := filepath.Join(uploadDir, uniqueFilename)
-
-		if err := c.SaveUploadedFile(file, savePath); err != nil {
+		// Upload to MinIO
+		bucket := utils.GetBucketAvatars()
+		url, err := utils.UploadFile(file, bucket)
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
+				"success": false,
+				"message": "Failed to upload avatar file",
+				"data":    nil,
+				"error":   err.Error(),
 			})
 			return
 		}
-		avatarURL = "/uploads/avatars/" + uniqueFilename
+		avatarURL = url
 	}
 
 	avatar := entity.User{
