@@ -22,8 +22,10 @@ func CreateAllEnums(db *gorm.DB) {
 	// 2️⃣ Buat ENUM baru dengan nilai-nilai terbaru
 	createUserRoleEnum(db)
 	createEnrollmentStatusEnum(db)
+	createAttendanceStatusEnum(db)
 	createPaymentMethodEnum(db)
 	createPaymentStatusEnum(db)
+	migrateLessonAttendanceStatusEnum(db)
 
 	// 3️⃣ Log bahwa seluruh ENUM berhasil diinisialisasi
 	log.Println("[Success] All ENUMs have been created")
@@ -37,7 +39,7 @@ func CreateAllEnums(db *gorm.DB) {
 //   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
 func dropAllEnums(db *gorm.DB) {
 	// Urutkan drop berdasarkan dependency (payment_status dan payment_method tidak ada dependency)
-	enums := []string{"payment_status", "payment_method", "enrollment_status", "user_role"}
+	enums := []string{"payment_status", "payment_method", "attendance_status", "enrollment_status", "user_role"}
 
 	for _, enumName := range enums {
 		query := `DROP TYPE IF EXISTS ` + enumName + ` CASCADE;`
@@ -82,6 +84,58 @@ func createEnrollmentStatusEnum(db *gorm.DB) {
 	db.Exec(query)
 
 	log.Println("[Success] ENUM enrollment_status is ready for use")
+}
+
+// createAttendanceStatusEnum digunakan untuk membuat ENUM bernama `attendance_status`
+// di database PostgreSQL.
+//
+// ENUM ini berisi empat nilai tetap:
+// - 'present' → untuk status kehadiran tepat waktu
+// - 'late'    → untuk status kehadiran terlambat
+// - 'absent'  → untuk status tidak hadir
+// - 'excused' → untuk status izin
+//
+// Parameter:
+//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
+func createAttendanceStatusEnum(db *gorm.DB) {
+	query := `CREATE TYPE attendance_status AS ENUM ('present', 'late', 'absent', 'excused');`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM attendance_status is ready for use")
+}
+
+// migrateLessonAttendanceStatusEnum memastikan kolom status pada lesson_attendances
+// menggunakan tipe attendance_status dan default 'present' tanpa error casting.
+//
+// Parameter:
+//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
+func migrateLessonAttendanceStatusEnum(db *gorm.DB) {
+	query := `DO $$
+DECLARE
+	current_type text;
+BEGIN
+	SELECT udt_name INTO current_type
+	FROM information_schema.columns
+	WHERE table_name = 'lesson_attendances' AND column_name = 'status';
+
+	IF current_type IS NULL THEN
+		RETURN;
+	END IF;
+
+	IF current_type <> 'attendance_status' THEN
+		EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status DROP DEFAULT';
+		EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status TYPE attendance_status USING status::attendance_status';
+	END IF;
+
+	EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status SET DEFAULT ''present''';
+END $$;`
+
+	if err := db.Exec(query).Error; err != nil {
+		log.Printf("[Warning] Failed to migrate lesson_attendances.status: %v\n", err)
+		return
+	}
+
+	log.Println("[Success] lesson_attendances.status migrated to attendance_status")
 }
 
 // createPaymentMethodEnum digunakan untuk membuat ENUM bernama `payment_method`

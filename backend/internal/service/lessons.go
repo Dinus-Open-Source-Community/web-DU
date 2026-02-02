@@ -8,11 +8,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary      Create new lesson
+// @Summary      Create new lesson (Admin Only)
 // @Description  Create a new lesson for a module. Admin only. Requires module_id and title. Content and video_url are optional.
 // @Tags         Lesson
 // @Accept       json
@@ -77,11 +78,26 @@ func CreateLessonFunc(c *gin.Context) {
 		content = contentBytes
 	}
 
+	// Parse StartTime and EndTime
+	var startTime, endTime time.Time
+	if req.StartTime != "" {
+		if parsed, err := time.Parse(time.RFC3339, req.StartTime); err == nil {
+			startTime = parsed
+		}
+	}
+	if req.EndTime != "" {
+		if parsed, err := time.Parse(time.RFC3339, req.EndTime); err == nil {
+			endTime = parsed
+		}
+	}
+
 	lesson := entity.Lesson{
 		ModuleID:   req.ModuleID,
 		Title:      req.Title,
 		Content:    content,
 		VideoURL:   req.VideoURL,
+		StartTime:  startTime,
+		EndTime:    endTime,
 		OrderIndex: req.OrderIndex,
 	}
 
@@ -103,16 +119,23 @@ func CreateLessonFunc(c *gin.Context) {
 	})
 }
 
-// GetAllLessonsFunc retrieves all lessons with optional module filter.
+// GetAllLessonsFunc retrieves all lessons with pagination and optional module filter.
 //
-// @Summary      Get all lessons
-// @Description  Retrieve all lessons with optional module_id filter. Admin only.
+// Query parameters (all optional):
+// - page (int, default 1)
+// - per_page (int, default 10, max 100)
+// - module_id (int) -> filter by module ID
+//
+// @Summary      Get all lessons with pagination (Admin Only)
+// @Description  Retrieve paginated list of all lessons with optional module_id filter. Admin only.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
+// @Param        page       query  int  false  "Page number (default: 1, minimum: 1)"
+// @Param        per_page   query  int  false  "Items per page (default: 10, max: 100)"
 // @Param        module_id  query  int  false  "Filter by module ID"
-// @Success      200  {object}  map[string]any  "Lessons retrieved successfully"
+// @Success      200  {object}  map[string]any  "Lessons retrieved successfully with pagination metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "User not found"
@@ -142,10 +165,27 @@ func GetAllLessonsFunc(c *gin.Context) {
 		return
 	}
 
+	// Parse query params
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+	moduleIDStr := c.Query("module_id")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
 	db := database.DB.Model(&entity.Lesson{})
 
 	// Filter by module_id if provided
-	moduleIDStr := c.Query("module_id")
 	if moduleIDStr != "" {
 		moduleID, err := strconv.Atoi(moduleIDStr)
 		if err == nil {
@@ -153,8 +193,22 @@ func GetAllLessonsFunc(c *gin.Context) {
 		}
 	}
 
+	// Count total records
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count lessons",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Apply pagination
+	offset := (page - 1) * perPage
 	var lessons []entity.Lesson
-	if err := db.Order("order_index ASC").Find(&lessons).Error; err != nil {
+	if err := db.Order("order_index ASC").Limit(perPage).Offset(offset).Find(&lessons).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve lessons",
@@ -164,17 +218,27 @@ func GetAllLessonsFunc(c *gin.Context) {
 		return
 	}
 
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lessons retrieved successfully",
-		"data":    lessons,
-		"error":   nil,
+		"data": gin.H{
+			"lessons": lessons,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
+		"error": nil,
 	})
 }
 
 // GetLessonByIDFunc retrieves a single lesson by ID.
 //
-// @Summary      Get lesson by ID
+// @Summary      Get lesson by ID (Admin Only)
 // @Description  Retrieve detailed information of a specific lesson. Admin only.
 // @Tags         Lesson
 // @Accept       json
@@ -234,7 +298,7 @@ func GetLessonByIDFunc(c *gin.Context) {
 
 // UpdateLessonFunc updates an existing lesson (Admin only).
 //
-// @Summary      Update lesson
+// @Summary      Update lesson (Admin Only)
 // @Description  Update an existing lesson by ID. Admin only. All fields are optional - only provided fields will be updated.
 // @Tags         Lesson
 // @Accept       json
@@ -320,6 +384,16 @@ func UpdateLessonFunc(c *gin.Context) {
 	if req.VideoURL != "" {
 		lesson.VideoURL = req.VideoURL
 	}
+	if req.StartTime != "" {
+		if parsed, err := time.Parse(time.RFC3339, req.StartTime); err == nil {
+			lesson.StartTime = parsed
+		}
+	}
+	if req.EndTime != "" {
+		if parsed, err := time.Parse(time.RFC3339, req.EndTime); err == nil {
+			lesson.EndTime = parsed
+		}
+	}
 	lesson.OrderIndex = req.OrderIndex
 
 	if err := database.DB.Save(&lesson).Error; err != nil {
@@ -342,7 +416,7 @@ func UpdateLessonFunc(c *gin.Context) {
 
 // DeleteLessonFunc deletes a lesson by ID (Admin only).
 //
-// @Summary      Delete lesson
+// @Summary      Delete lesson (Admin Only)
 // @Description  Delete a lesson by ID (Admin only)
 // @Tags         Lesson
 // @Accept       json

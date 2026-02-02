@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary      Get authenticated user profile
+// @Summary      Get authenticated user profile (All Roles)
 // @Description  Retrieve current authenticated user's complete profile including personal data and enrolled courses
 // @Tags         User
 // @Accept       json
@@ -66,7 +66,7 @@ func GetUserDataService(c *gin.Context) {
 	})
 }
 
-// @Summary      Update user role (Admin only)
+// @Summary      Update user role (Admin Only)
 // @Description  Update a specific user's role. Only administrators can perform this action. Valid roles are: admin, mentor, student.
 // @Tags         User Management
 // @Accept       json
@@ -206,7 +206,7 @@ func UpdateUserRoleService(c *gin.Context) {
 
 // DeleteUserService deletes a user. Only admin can use this endpoint.
 //
-// @Summary      Delete user account (Admin only)
+// @Summary      Delete user account (Admin Only)
 // @Description  Delete a user account permanently. Only administrators can perform this action. Admins cannot delete their own account.
 // @Tags         User Management
 // @Accept       json
@@ -309,7 +309,7 @@ func DeleteUserService(c *gin.Context) {
 // - sort (string)         -> "created_at" (default) or "name"
 // - order (string)        -> "asc" or "desc" (default "desc")
 //
-// @Summary      Get all users with pagination (Admin only)
+// @Summary      Get all users with pagination (Admin Only)
 // @Description  Retrieve paginated list of all users with optional filtering by role and search. Supports sorting by created_at or name. Admin only.
 // @Tags         User Management
 // @Accept       json

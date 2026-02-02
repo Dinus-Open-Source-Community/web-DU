@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary      User login
+// @Summary      User login (Public)
 // @Description  Authenticate user with email and password, returns JWT token valid for 24 hours
 // @Tags         Auth
 // @Accept       json

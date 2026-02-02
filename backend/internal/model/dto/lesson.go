@@ -6,6 +6,8 @@ type LessonCreateRequest struct {
 	Title      string      `json:"title" binding:"required"`
 	Content    interface{} `json:"content"` // accepts any JSON value
 	VideoURL   string      `json:"video_url"`
+	StartTime  string      `json:"start_time"` // RFC3339 format
+	EndTime    string      `json:"end_time"`   // RFC3339 format
 	OrderIndex int         `json:"order_index"`
 }
 
@@ -15,5 +17,7 @@ type LessonUpdateRequest struct {
 	Title      string      `json:"title"`
 	Content    interface{} `json:"content"` // accepts any JSON value
 	VideoURL   string      `json:"video_url"`
+	StartTime  string      `json:"start_time"` // RFC3339 format
+	EndTime    string      `json:"end_time"`   // RFC3339 format
 	OrderIndex int         `json:"order_index"`
 }

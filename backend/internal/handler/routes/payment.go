@@ -16,8 +16,8 @@ func StartPaymentRoutes(r *gin.Engine) {
 	paymentGroup := r.Group("/payment")
 	paymentGroup.Use(middleware.AuthMiddleware())
 	{
-		paymentGroup.POST("/create", service.CreatePaymentFunc)
-		paymentGroup.GET("", service.GetPaymentFunc)
+		paymentGroup.POST("/create", service.CreatePaymentFunc) // user
+		paymentGroup.GET("", service.GetPaymentFunc)            // user
 	}
 
 	// Tidak masuk dalam grup payment karena tidak perlu autentikasi

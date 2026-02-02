@@ -12,7 +12,7 @@ import (
 // Konstanta context key yang digunakan untuk menyimpan data user (Name dan Email)
 // di dalam context Gin agar bisa diakses pada handler selanjutnya.
 const (
-	IDCK    = "id"
+	IDCK = "id"
 )
 
 // AuthMiddleware adalah middleware yang digunakan untuk memverifikasi token JWT

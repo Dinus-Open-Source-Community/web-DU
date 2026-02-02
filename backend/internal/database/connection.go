@@ -60,6 +60,7 @@ func ConnectDB() {
 		&entity.Payment{},
 		&entity.CourseReview{},
 		&entity.CourseAnnouncement{},
+		&entity.LessonAttendance{},
 	)
 
 	log.Println("[Success] Berhasil terhubung ke database")

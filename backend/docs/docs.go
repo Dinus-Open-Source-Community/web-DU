@@ -32,7 +32,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Update user avatar",
+                "summary": "Update user avatar (All Roles)",
                 "parameters": [
                     {
                         "type": "file",
@@ -105,7 +105,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all courses with pagination and filters",
+                "summary": "Get all courses with pagination and filters (All Roles)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -191,7 +191,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Create new course",
+                "summary": "Create new course (Admin Only)",
                 "parameters": [
                     {
                         "type": "string",
@@ -294,7 +294,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get course by ID",
+                "summary": "Get course by ID (All Roles)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -353,7 +353,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Join a course (Students only)",
+                "summary": "Join a course (Student Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -426,7 +426,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get all lessons",
+                "summary": "Get all lessons (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -489,7 +489,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Create new lesson",
+                "summary": "Create new lesson (Admin Only)",
                 "parameters": [
                     {
                         "description": "Lesson data with module_id, title, content",
@@ -547,6 +547,481 @@ const docTemplate = `{
                 }
             }
         },
+        "/lessons/attendances": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Students can only check in once per lesson. Status is set automatically based on lesson start time.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Check in attendance for a lesson (Student Only)",
+                "parameters": [
+                    {
+                        "description": "Attendance data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAttendanceCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Attendance recorded successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson or enrollment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Already checked in for this lesson",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to record attendance",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/attendances/check-status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Check if student has already checked in for a specific lesson.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Check student attendance status for a lesson (Student Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Lesson ID",
+                        "name": "lesson_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Enrollment ID",
+                        "name": "enrollment_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendance status retrieved",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "No attendance record found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve attendance status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/attendances/lesson/{lesson_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all attendance records for a specific lesson. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Get all attendances for a lesson (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Lesson ID",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendances retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve attendances",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/attendances/my-history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all attendance records for a student based on their enrollments.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Get student attendance history (Student Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by enrollment ID",
+                        "name": "enrollment_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendance history retrieved",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve attendance history",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/attendances/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a specific attendance record by ID. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Get attendance by ID (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendance retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User or attendance not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve attendance",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update attendance status and note. Admin only. Can only update status and note, not lesson/enrollment.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Update attendance status and note (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated attendance data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAttendanceUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendance updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Attendance or user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update attendance",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an attendance record by ID. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Attendance"
+                ],
+                "summary": "Delete attendance record (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attendance deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Attendance not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete attendance",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/lessons/{id}": {
             "get": {
                 "security": [
@@ -564,7 +1039,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get lesson by ID",
+                "summary": "Get lesson by ID (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -628,7 +1103,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Update lesson",
+                "summary": "Update lesson (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -708,7 +1183,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Delete lesson",
+                "summary": "Delete lesson (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -769,7 +1244,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "User login",
+                "summary": "User login (Public)",
                 "parameters": [
                     {
                         "description": "Login credentials (email and password)",
@@ -830,7 +1305,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Create new module",
+                "summary": "Create new module (Admin Only)",
                 "parameters": [
                     {
                         "description": "Module data",
@@ -895,7 +1370,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Get all modules by course",
+                "summary": "Get all modules by course (All Roles)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -951,7 +1426,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Get module by ID",
+                "summary": "Get module by ID (All Roles)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1008,7 +1483,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Update module",
+                "summary": "Update module (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1081,7 +1556,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Delete module",
+                "summary": "Delete module (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1142,7 +1617,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Initiate Google OAuth login",
+                "summary": "Initiate Google OAuth login (Public)",
                 "responses": {
                     "307": {
                         "description": "Redirect to Google OAuth consent screen",
@@ -1172,7 +1647,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Google OAuth callback",
+                "summary": "Google OAuth callback (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1231,14 +1706,19 @@ const docTemplate = `{
                 "tags": [
                     "Payment"
                 ],
-                "summary": "Get Payment",
+                "summary": "Get Payment (All Roles)",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Payment Reference",
                         "name": "reference",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Enrollment ID",
+                        "name": "enrollmentId",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1297,7 +1777,7 @@ const docTemplate = `{
                 "tags": [
                     "Payment"
                 ],
-                "summary": "Create Payment",
+                "summary": "Create Payment (All Roles)",
                 "parameters": [
                     {
                         "description": "Payment Request",
@@ -1344,7 +1824,7 @@ const docTemplate = `{
             "post": {
                 "description": "Register a new user with name, email, and password. Returns JWT token on success.",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -1352,28 +1832,16 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register new user",
+                "summary": "Register new user (Public)",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User's full name",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's email address (must be unique)",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's password (min 6 characters)",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "Register payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1425,7 +1893,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get authenticated user profile",
+                "summary": "Get authenticated user profile (All Roles)",
                 "responses": {
                     "200": {
                         "description": "User data retrieved successfully",
@@ -1475,7 +1943,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Get all users with pagination (Admin only)",
+                "summary": "Get all users with pagination (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1563,7 +2031,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Delete user account (Admin only)",
+                "summary": "Delete user account (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1627,7 +2095,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Update user role (Admin only)",
+                "summary": "Update user role (Admin Only)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1854,6 +2322,50 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.LessonAttendanceCreateRequest": {
+            "type": "object",
+            "required": [
+                "enrollment_id",
+                "lesson_id"
+            ],
+            "properties": {
+                "enrollment_id": {
+                    "type": "integer"
+                },
+                "lesson_id": {
+                    "type": "integer"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "present",
+                        "late",
+                        "absent",
+                        "excused"
+                    ]
+                }
+            }
+        },
+        "dto.LessonAttendanceUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "note": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "present",
+                        "late",
+                        "absent",
+                        "excused"
+                    ]
+                }
+            }
+        },
         "dto.LessonCreateRequest": {
             "type": "object",
             "required": [
@@ -1864,11 +2376,19 @@ const docTemplate = `{
                 "content": {
                     "description": "accepts any JSON value"
                 },
+                "end_time": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
                 "module_id": {
                     "type": "integer"
                 },
                 "order_index": {
                     "type": "integer"
+                },
+                "start_time": {
+                    "description": "RFC3339 format",
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -1884,11 +2404,19 @@ const docTemplate = `{
                 "content": {
                     "description": "accepts any JSON value"
                 },
+                "end_time": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
                 "module_id": {
                     "type": "integer"
                 },
                 "order_index": {
                     "type": "integer"
+                },
+                "start_time": {
+                    "description": "RFC3339 format",
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -1980,6 +2508,28 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "User DU"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "StrongPassword123"
                 }
             }
         },
