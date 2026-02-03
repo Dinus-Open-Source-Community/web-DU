@@ -7,6 +7,13 @@ import (
 	"strconv"
 )
 
+// HMACSHA256 generates a hex-encoded HMAC SHA256 signature for a given message and key
+func HMACSHA256(key, message string) string {
+	mac := hmac.New(sha256.New, []byte(key))
+	mac.Write([]byte(message))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
 // GeneratePaymentSignature generates HMAC SHA256 signature for payment verification
 // Parameters:
 //   - privateKey: the private key for HMAC signature

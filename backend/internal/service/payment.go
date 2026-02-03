@@ -449,8 +449,28 @@ func PaymentCallbackFunc(c *gin.Context) {
 		return
 	}
 
-	// Verify callback signature (optional but recommended)
-	// You can add signature verification here using HMAC
+	privateKey := os.Getenv("TRIPAY_PRIVATE_KEY")
+	if privateKey == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Server misconfiguration: TRIPAY_PRIVATE_KEY not set",
+			"data":    nil,
+			"error":   "missing TRIPAY_PRIVATE_KEY",
+		})
+		return
+	}
+
+	dataToSign := callbackData.Reference + callbackData.Status + fmt.Sprintf("%v", callbackData.TotalAmount)
+	h := utils.HMACSHA256(privateKey, dataToSign)
+	if callbackData.Signature != h {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid callback signature",
+			"data":    nil,
+			"error":   "signature verification failed",
+		})
+		return
+	}
 
 	if err := HandlePaymentCallback(&callbackData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
