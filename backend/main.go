@@ -13,7 +13,6 @@ package main
 
 import (
 	"backend/internal/database"
-	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
@@ -41,25 +40,21 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
+
+	// Initialize MinIO
+	if err := utils.InitMinio(); err != nil {
+		log.Fatalf("MinIO initialization failed: %v", err)
+	}
 }
 
 func main() {
 	r := gin.Default()
 	r.Use(gin.Recovery())
 
+	// Connect to the database
 	database.ConnectDB()
 
-	// Initialize MinIO
-	if err := utils.InitMinio(); err != nil {
-		log.Printf("Warning: MinIO initialization failed: %v", err)
-		log.Println("File uploads will fallback to local storage if MinIO is unavailable")
-	}
-
-	// Static file server untuk mengakses file upload (avatar, dll)
-	uploads := r.Group("/uploads")
-	uploads.Use(middleware.AuthMiddleware())
-	uploads.Static("/", "./public/uploads")
-
+	// Setup all routes
 	setup.SetupAllRoutes(r)
 
 	// Swagger endpoint (dynamic host/scheme for devtunnels/https)
