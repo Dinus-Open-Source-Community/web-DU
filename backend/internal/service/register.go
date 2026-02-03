@@ -13,14 +13,12 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// @Summary      Register new user
+// @Summary      Register new user (Public)
 // @Description  Register a new user with name, email, and password. Returns JWT token on success.
 // @Tags         Auth
-// @Accept       multipart/form-data
+// @Accept       application/json
 // @Produce      json
-// @Param        name      formData  string  true   "User's full name"
-// @Param        email     formData  string  true   "User's email address (must be unique)"
-// @Param        password  formData  string  true   "User's password (min 6 characters)"
+// @Param        request  body  dto.RegisterRequest  true  "Register payload"
 // @Success      200  {object}  map[string]any  "User registered successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      409  {object}  map[string]any  "Email already registered"
@@ -29,9 +27,9 @@ import (
 func PostRegisterFunc(c *gin.Context) {
 	var req dto.RegisterRequest // <-- KITA GUNAKAN MODEL YANG SUDAH DIPERBAIKI
 
-	// 1. Ambil dan validasi data form (name, email, password)
-	// Gin akan otomatis memvalidasi form data berdasarkan tag 'binding'
-	if err := c.ShouldBind(&req); err != nil {
+	// 1. Ambil dan validasi data JSON (name, email, password)
+	// Gin akan otomatis memvalidasi JSON berdasarkan tag 'binding'
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Invalid request data",

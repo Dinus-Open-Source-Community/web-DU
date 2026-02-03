@@ -17,12 +17,13 @@ import (
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	// Swagger import
-	_ "backend/docs"
+	"backend/docs"
 
 	_ "backend/internal/handler/routes"
 
@@ -61,8 +62,26 @@ func main() {
 
 	setup.SetupAllRoutes(r)
 
-	// Swagger endpoint
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Swagger endpoint (dynamic host/scheme for devtunnels/https)
+	r.GET("/swagger/*any", func(c *gin.Context) {
+		forwardedProto := strings.ToLower(c.GetHeader("X-Forwarded-Proto"))
+		if forwardedProto == "https" || c.Request.TLS != nil {
+			docs.SwaggerInfo.Schemes = []string{"https"}
+		} else {
+			docs.SwaggerInfo.Schemes = []string{"http"}
+		}
+
+		forwardedHost := c.GetHeader("X-Forwarded-Host")
+		if forwardedHost == "" {
+			forwardedHost = c.GetHeader("X-Original-Host")
+		}
+		if forwardedHost != "" {
+			docs.SwaggerInfo.Host = forwardedHost
+		} else {
+			docs.SwaggerInfo.Host = c.Request.Host
+		}
+		ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+	})
 
 	log.Println("Server running on http://localhost:8080")
 	r.Run(":8080")

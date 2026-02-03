@@ -16,8 +16,8 @@ func StartModuleRoutes(r *gin.Engine) {
 	moduleGroup := r.Group("/modules")
 	moduleGroup.Use(middleware.AuthMiddleware())
 	{
-		moduleGroup.GET("/:id", service.GetModuleByIDFunc)               // Authenticated users - all roles
-		moduleGroup.GET("/course/:course_id", service.GetAllModulesFunc) // Authenticated users - all roles
+		moduleGroup.GET("/:id", service.GetModuleByIDFunc)               // users - all roles
+		moduleGroup.GET("/course/:course_id", service.GetAllModulesFunc) // users - all roles
 		moduleGroup.POST("/", service.PostAdminModuleFunc)               // Admin only
 		moduleGroup.PUT("/:id", service.UpdateAdminModuleFunc)           // Admin only
 		moduleGroup.DELETE("/:id", service.DeleteAdminModuleFunc)        // Admin only

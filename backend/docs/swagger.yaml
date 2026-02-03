@@ -113,14 +113,51 @@ definitions:
       total_fee:
         type: integer
     type: object
+  dto.LessonAttendanceCreateRequest:
+    properties:
+      enrollment_id:
+        type: integer
+      lesson_id:
+        type: integer
+      note:
+        type: string
+      status:
+        enum:
+        - present
+        - late
+        - absent
+        - excused
+        type: string
+    required:
+    - enrollment_id
+    - lesson_id
+    type: object
+  dto.LessonAttendanceUpdateRequest:
+    properties:
+      note:
+        type: string
+      status:
+        enum:
+        - present
+        - late
+        - absent
+        - excused
+        type: string
+    type: object
   dto.LessonCreateRequest:
     properties:
       content:
         description: accepts any JSON value
+      end_time:
+        description: RFC3339 format
+        type: string
       module_id:
         type: integer
       order_index:
         type: integer
+      start_time:
+        description: RFC3339 format
+        type: string
       title:
         type: string
       video_url:
@@ -133,10 +170,16 @@ definitions:
     properties:
       content:
         description: accepts any JSON value
+      end_time:
+        description: RFC3339 format
+        type: string
       module_id:
         type: integer
       order_index:
         type: integer
+      start_time:
+        description: RFC3339 format
+        type: string
       title:
         type: string
       video_url:
@@ -198,6 +241,22 @@ definitions:
         type: array
       title:
         type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      name:
+        example: User DU
+        type: string
+      password:
+        example: StrongPassword123
+        type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   dto.UpdateModuleRequest:
     properties:
@@ -270,7 +329,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update user avatar
+      summary: Update user avatar (All Roles)
       tags:
       - User
   /courses:
@@ -329,7 +388,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all courses with pagination and filters
+      summary: Get all courses with pagination and filters (All Roles)
       tags:
       - Course
     post:
@@ -398,7 +457,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new course
+      summary: Create new course (Admin Only)
       tags:
       - Course
   /courses/{id}:
@@ -438,7 +497,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get course by ID
+      summary: Get course by ID (All Roles)
       tags:
       - Course
   /courses/{id}/join:
@@ -488,7 +547,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Join a course (Students only)
+      summary: Join a course (Student Only)
       tags:
       - Course
   /lessons:
@@ -531,7 +590,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all lessons
+      summary: Get all lessons (Admin Only)
       tags:
       - Lesson
     post:
@@ -581,7 +640,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new lesson
+      summary: Create new lesson (Admin Only)
       tags:
       - Lesson
   /lessons/{id}:
@@ -625,7 +684,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete lesson
+      summary: Delete lesson (Admin Only)
       tags:
       - Lesson
     get:
@@ -668,7 +727,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get lesson by ID
+      summary: Get lesson by ID (Admin Only)
       tags:
       - Lesson
     put:
@@ -723,9 +782,328 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update lesson
+      summary: Update lesson (Admin Only)
       tags:
       - Lesson
+  /lessons/attendances:
+    post:
+      consumes:
+      - application/json
+      description: Students can only check in once per lesson. Status is set automatically
+        based on lesson start time.
+      parameters:
+      - description: Attendance data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonAttendanceCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Attendance recorded successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or enrollment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Already checked in for this lesson
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to record attendance
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Check in attendance for a lesson (Student Only)
+      tags:
+      - Lesson Attendance
+  /lessons/attendances/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an attendance record by ID. Admin only.
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendance deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Attendance not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete attendance
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete attendance record (Admin Only)
+      tags:
+      - Lesson Attendance
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific attendance record by ID. Admin only.
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendance retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User or attendance not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve attendance
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get attendance by ID (Admin Only)
+      tags:
+      - Lesson Attendance
+    put:
+      consumes:
+      - application/json
+      description: Update attendance status and note. Admin only. Can only update
+        status and note, not lesson/enrollment.
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated attendance data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonAttendanceUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendance updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Attendance or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update attendance
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update attendance status and note (Admin Only)
+      tags:
+      - Lesson Attendance
+  /lessons/attendances/check-status:
+    get:
+      consumes:
+      - application/json
+      description: Check if student has already checked in for a specific lesson.
+      parameters:
+      - description: Lesson ID
+        in: query
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Enrollment ID
+        in: query
+        name: enrollment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendance status retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: No attendance record found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve attendance status
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Check student attendance status for a lesson (Student Only)
+      tags:
+      - Lesson Attendance
+  /lessons/attendances/lesson/{lesson_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all attendance records for a specific lesson. Admin only.
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendances retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve attendances
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all attendances for a lesson (Admin Only)
+      tags:
+      - Lesson Attendance
+  /lessons/attendances/my-history:
+    get:
+      consumes:
+      - application/json
+      description: Get all attendance records for a student based on their enrollments.
+      parameters:
+      - description: Filter by enrollment ID
+        in: query
+        name: enrollment_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attendance history retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve attendance history
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get student attendance history (Student Only)
+      tags:
+      - Lesson Attendance
   /login:
     post:
       consumes:
@@ -762,7 +1140,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: User login
+      summary: User login (Public)
       tags:
       - Auth
   /modules:
@@ -807,7 +1185,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new module
+      summary: Create new module (Admin Only)
       tags:
       - Module
   /modules/{id}:
@@ -851,7 +1229,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete module
+      summary: Delete module (Admin Only)
       tags:
       - Module
     get:
@@ -887,7 +1265,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get module by ID
+      summary: Get module by ID (All Roles)
       tags:
       - Module
     put:
@@ -936,7 +1314,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update module
+      summary: Update module (Admin Only)
       tags:
       - Module
   /modules/course/{course_id}:
@@ -973,7 +1351,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all modules by course
+      summary: Get all modules by course (All Roles)
       tags:
       - Module
   /oauth/google:
@@ -994,7 +1372,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Initiate Google OAuth login
+      summary: Initiate Google OAuth login (Public)
       tags:
       - Auth
   /oauth/google/callback:
@@ -1032,7 +1410,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Google OAuth callback
+      summary: Google OAuth callback (Public)
       tags:
       - Auth
   /payment:
@@ -1044,8 +1422,11 @@ paths:
       - description: Payment Reference
         in: query
         name: reference
-        required: true
         type: string
+      - description: Enrollment ID
+        in: query
+        name: enrollmentId
+        type: integer
       produces:
       - application/json
       responses:
@@ -1076,7 +1457,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get Payment
+      summary: Get Payment (All Roles)
       tags:
       - Payment
   /payment/create:
@@ -1115,65 +1496,22 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create Payment
-      tags:
-      - Payment
-  /payment/callback:
-    post:
-      consumes:
-      - application/json
-      description: Receive and process payment callback from Tripay webhook. This endpoint
-        handles payment status updates and updates enrollment status accordingly.
-      parameters:
-      - description: Payment Callback Request
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PaymentCallbackRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment status updated successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid callback format or failed to update payment status
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Payment Callback Webhook
+      summary: Create Payment (All Roles)
       tags:
       - Payment
   /register:
     post:
       consumes:
-      - multipart/form-data
+      - application/json
       description: Register a new user with name, email, and password. Returns JWT
         token on success.
       parameters:
-      - description: User's full name
-        in: formData
-        name: name
+      - description: Register payload
+        in: body
+        name: request
         required: true
-        type: string
-      - description: User's email address (must be unique)
-        in: formData
-        name: email
-        required: true
-        type: string
-      - description: User's password (min 6 characters)
-        in: formData
-        name: password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -1197,7 +1535,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Register new user
+      summary: Register new user (Public)
       tags:
       - Auth
   /user/data:
@@ -1231,7 +1569,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get authenticated user profile
+      summary: Get authenticated user profile (All Roles)
       tags:
       - User
   /user/manage/{id}:
@@ -1276,7 +1614,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete user account (Admin only)
+      summary: Delete user account (Admin Only)
       tags:
       - User Management
     patch:
@@ -1331,7 +1669,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update user role (Admin only)
+      summary: Update user role (Admin Only)
       tags:
       - User Management
   /user/manage/all:
@@ -1390,7 +1728,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all users with pagination (Admin only)
+      summary: Get all users with pagination (Admin Only)
       tags:
       - User Management
 securityDefinitions:

@@ -14,7 +14,7 @@ func init() {
 func StartOauth2Routes(r *gin.Engine) {
 	oAuthGroup := r.Group("/oauth")
 	{
-		oAuthGroup.GET("/google/login", service.LoginOAuth)
-		oAuthGroup.GET("/google/callback", service.CallbackHandler)
+		oAuthGroup.GET("/google/login", service.LoginOAuth)         // initiate Google OAuth2 login
+		oAuthGroup.GET("/google/callback", service.CallbackHandler) // handle Google OAuth2 callback
 	}
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary      Update user avatar
+// @Summary      Update user avatar (All Roles)
 // @Description  Upload and update authenticated user's avatar image. Only authenticated users can access this endpoint.
 // @Tags         User
 // @Accept       multipart/form-data

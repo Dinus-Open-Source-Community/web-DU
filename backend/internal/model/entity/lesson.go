@@ -13,6 +13,8 @@ type Lesson struct {
 	Title      string          `gorm:"type:varchar(200);not null" json:"title"`
 	Content    json.RawMessage `gorm:"type:jsonb" json:"content"` // JSONB stored as json.RawMessage
 	VideoURL   string          `gorm:"type:varchar(255)" json:"video_url"`
+	StartTime  time.Time       `json:"start_time"`
+	EndTime    time.Time       `json:"end_time"`
 	OrderIndex int             `json:"order_index"`
 	CreatedAt  time.Time       `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt  time.Time       `gorm:"autoUpdateTime" json:"updated_at"`

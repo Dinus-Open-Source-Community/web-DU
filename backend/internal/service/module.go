@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary      Get all modules by course
+// @Summary      Get all modules by course (All Roles)
 // @Description  Retrieve all modules for a specific course ordered by sequence
 // @Tags         Module
 // @Produce      json
@@ -54,7 +54,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get module by ID
+// @Summary      Get module by ID (All Roles)
 // @Description  Retrieve a specific module with all its lessons
 // @Tags         Module
 // @Produce      json
@@ -89,7 +89,7 @@ func GetModuleByIDFunc(c *gin.Context) {
 
 // PostAdminModuleFunc creates a new module (Admin only)
 //
-// @Summary      Create new module
+// @Summary      Create new module (Admin Only)
 // @Description  Create a new module in a course (Admin only)
 // @Tags         Module
 // @Accept       json
@@ -174,7 +174,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 
 // UpdateAdminModuleFunc updates a module (Admin only)
 //
-// @Summary      Update module
+// @Summary      Update module (Admin Only)
 // @Description  Update an existing module's information. Admin only.
 // @Tags         Module
 // @Accept       json
@@ -263,7 +263,7 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 
 // DeleteAdminModuleFunc deletes a module (Admin only)
 //
-// @Summary      Delete module
+// @Summary      Delete module (Admin Only)
 // @Description  Delete a module and all its associated lessons. Admin only.
 // @Tags         Module
 // @Accept       json

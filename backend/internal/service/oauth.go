@@ -29,7 +29,7 @@ func generateRandomString(length int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(bytes)[:length], nil
 }
 
-// @Summary      Initiate Google OAuth login
+// @Summary      Initiate Google OAuth login (Public)
 // @Description  Initiates Google OAuth 2.0 authentication flow. Redirects user to Google consent screen.
 // @Tags         Auth
 // @Accept       json
@@ -59,7 +59,7 @@ func LoginOAuth(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-// @Summary      Google OAuth callback
+// @Summary      Google OAuth callback (Public)
 // @Description  Handles OAuth callback from Google. Exchanges authorization code for token and creates/updates user account.
 // @Tags         Auth
 // @Accept       json

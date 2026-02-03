@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary      Create new course
+// @Summary      Create new course (Admin Only)
 // @Description  Create a new course with details and optional thumbnail. Admin only.
 // @Tags         Course
 // @Accept       multipart/form-data
@@ -128,7 +128,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 // - price (float)         -> filter by exact price
 // - is_premium (bool)     -> filter by premium status (true/false)
 //
-// @Summary      Get all courses with pagination and filters
+// @Summary      Get all courses with pagination and filters (All Roles)
 // @Description  Retrieve paginated list of courses with optional filters (mentor_id, title, price, is_premium)
 // @Tags         Course
 // @Accept       json
@@ -253,7 +253,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get course by ID
+// @Summary      Get course by ID (All Roles)
 // @Description  Retrieve complete information of a specific course including all modules
 // @Tags         Course
 // @Accept       json
@@ -287,7 +287,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Join a course (Students only)
+// @Summary      Join a course (Student Only)
 // @Description  Allow authenticated students to enroll in a course. Creates an enrollment record.
 // @Tags         Course
 // @Accept       json
@@ -389,5 +389,124 @@ func JoinCourseFunc(c *gin.Context) {
 		"message": "Successfully enrolled in course",
 		"data":    enrollment,
 		"error":   nil,
+	})
+}
+
+// @Summary      Get all enrolled students in a course (Admin Only)
+// @Description  Retrieve list of all students enrolled in a specific course. Admin only endpoint.
+// @Tags         Course
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path  int  true   "Course ID"
+// @Param        page     query int  false  "Page number (default: 1)"
+// @Param        per_page query int  false  "Items per page (default: 10, max: 100)"
+// @Success      200  {object}  map[string]any  "Students retrieved successfully"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      404  {object}  map[string]any  "Course not found"
+// @Failure      500  {object}  map[string]any  "Failed to retrieve students"
+// @Router       /courses/{id}/students [get]
+func GetCourseStudentsFunc(c *gin.Context) {
+	userID, _ := c.Get(middleware.IDCK)
+
+	// Verify user is admin
+	var userData entity.User
+	if err := database.DB.First(&userData, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if userData.Role != entity.AdminRole {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Get Course Students Access denied: Admins only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	courseID := c.Param("id")
+
+	// Verify course exists
+	var course entity.Course
+	if err := database.DB.First(&course, courseID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Parse pagination params
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	// Count total enrollments for this course
+	var total int64
+	if err := database.DB.Model(&entity.Enrollment{}).Where("course_id = ?", course.ID).Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count students",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Get paginated enrollments
+	offset := (page - 1) * perPage
+	var enrollments []entity.Enrollment
+	if err := database.DB.Where("course_id = ?", course.ID).
+		Preload("User").
+		Order("enrolled_at DESC").
+		Limit(perPage).
+		Offset(offset).
+		Find(&enrollments).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve students",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Students retrieved successfully",
+		"data": gin.H{
+			"enrollments": enrollments,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
+		"error": nil,
 	})
 }

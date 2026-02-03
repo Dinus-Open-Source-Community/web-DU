@@ -318,7 +318,7 @@ func HandlePaymentCallback(callbackData *dto.PaymentCallbackRequest) error {
 	return nil
 }
 
-// @Summary      Create Payment
+// @Summary      Create Payment (All Roles)
 // @Description  Create a new payment request to Tripay for a course enrollment
 // @Tags         Payment
 // @Accept       json
@@ -372,7 +372,7 @@ func CreatePaymentFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get Payment
+// @Summary      Get Payment (All Roles)
 // @Description  Get payment details by payment reference
 // @Tags         Payment
 // @Accept       json
