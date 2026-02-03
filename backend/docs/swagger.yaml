@@ -9,6 +9,28 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  dto.CreateCourseReviewRequest:
+    properties:
+      comment:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - comment
+    - rating
+    type: object
   dto.CreateModuleRequest:
     properties:
       course_id:
@@ -265,6 +287,15 @@ definitions:
         type: integer
       title:
         example: Updated Module 1
+        type: string
+    type: object
+  dto.UpdateUserProfileRequest:
+    properties:
+      description:
+        type: string
+      email:
+        type: string
+      name:
         type: string
     type: object
   dto.UpdateUserRoleRequest:
@@ -550,12 +581,131 @@ paths:
       summary: Join a course (Student Only)
       tags:
       - Course
+  /courses/{id}/review:
+    post:
+      consumes:
+      - application/json
+      description: Create a review for a course. User must be enrolled in the course
+        with active status. Each user can only submit one review per course. Review
+        comments are encrypted before storage.
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course ID or request body
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: User not enrolled in course
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: User already reviewed this course
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create course review (Enrolled Students Only)
+      tags:
+      - Course
+  /courses/{id}/students:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve list of all students enrolled in a specific course. Admin
+        only endpoint.
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Students retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve students
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all enrolled students in a course (Admin Only)
+      tags:
+      - Course
   /lessons:
     get:
       consumes:
       - application/json
-      description: Retrieve all lessons with optional module_id filter. Admin only.
+      description: Retrieve paginated list of all lessons with optional module_id
+        filter. Admin only.
       parameters:
+      - description: 'Page number (default: 1, minimum: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
       - description: Filter by module ID
         in: query
         name: module_id
@@ -564,7 +714,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Lessons retrieved successfully
+          description: Lessons retrieved successfully with pagination metadata
           schema:
             additionalProperties: true
             type: object
@@ -590,7 +740,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all lessons (Admin Only)
+      summary: Get all lessons with pagination (Admin Only)
       tags:
       - Lesson
     post:
@@ -1731,6 +1881,98 @@ paths:
       summary: Get all users with pagination (Admin Only)
       tags:
       - User Management
+  /user/password:
+    patch:
+      consumes:
+      - application/json
+      description: Change authenticated user's password after verifying the old password.
+        Requires old password verification before setting new password.
+      parameters:
+      - description: Password change data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data or password validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized or incorrect old password
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change user password (All Roles)
+      tags:
+      - User
+  /user/profile:
+    patch:
+      consumes:
+      - application/json
+      description: Update authenticated user's profile information including name,
+        email, and description. All fields are optional and encrypted before storage.
+      parameters:
+      - description: Profile update data (all fields optional)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Email already registered
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile (All Roles)
+      tags:
+      - User
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

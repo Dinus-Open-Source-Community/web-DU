@@ -5,6 +5,7 @@ import (
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"net/http"
 	"strconv"
 	"time"
@@ -97,12 +98,27 @@ func CreateAttendanceFunc(c *gin.Context) {
 		attendanceStatus = entity.AttendanceLate
 	}
 
+	var encryptedNote string
+	if req.Note != "" {
+		encNote, err := utils.Encrypt(req.Note)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to encrypt attendance note",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		encryptedNote = encNote
+	}
+
 	// Create attendance record
 	attendance := entity.LessonAttendance{
 		LessonID:     req.LessonID,
 		EnrollmentID: req.EnrollmentID,
 		Status:       attendanceStatus,
-		Note:         req.Note,
+		Note:         encryptedNote,
 	}
 
 	if err := database.DB.Create(&attendance).Error; err != nil {
@@ -124,6 +140,8 @@ func CreateAttendanceFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	attendance.Note, _ = utils.Decrypt(attendance.Note)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -194,6 +212,10 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 		return
 	}
 
+	for i := range attendances {
+		attendances[i].Note, _ = utils.Decrypt(attendances[i].Note)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Attendances retrieved successfully",
@@ -251,6 +273,8 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	attendance.Note, _ = utils.Decrypt(attendance.Note)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -328,7 +352,17 @@ func UpdateAttendanceFunc(c *gin.Context) {
 		attendance.Status = entity.AttendanceStatus(req.Status)
 	}
 	if req.Note != "" {
-		attendance.Note = req.Note
+		encNote, err := utils.Encrypt(req.Note)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to encrypt attendance note",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		attendance.Note = encNote
 	}
 
 	if err := database.DB.Save(&attendance).Error; err != nil {
@@ -340,6 +374,8 @@ func UpdateAttendanceFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	attendance.Note, _ = utils.Decrypt(attendance.Note)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -485,6 +521,8 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 		return
 	}
 
+	attendance.Note, _ = utils.Decrypt(attendance.Note)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Attendance status retrieved successfully",
@@ -570,6 +608,10 @@ func GetMyAttendanceHistoryFunc(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	for i := range attendances {
+		attendances[i].Note, _ = utils.Decrypt(attendances[i].Note)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
