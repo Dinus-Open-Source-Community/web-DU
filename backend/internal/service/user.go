@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"sort"
 	"strconv"
 	"strings"
@@ -47,6 +49,7 @@ func GetUserDataService(c *gin.Context) {
 
 	nameDecrypted, _ := utils.Decrypt(userData.Name)
 	emailDecrypted, _ := utils.Decrypt(userData.Email)
+	descriptionDecrypted, _ := utils.Decrypt(userData.Description)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -58,11 +61,290 @@ func GetUserDataService(c *gin.Context) {
 			"avatar_url":  userData.AvatarURL,
 			"role":        userData.Role,
 			"is_verified": userData.IsVerified,
+			"description": descriptionDecrypted,
 			"enrollments": userData.Enrollments,
 			"created_at":  userData.CreatedAt,
 			"updated_at":  userData.UpdatedAt,
 		},
 		"error": nil,
+	})
+}
+
+// @Summary      Update user profile (All Roles)
+// @Description  Update authenticated user's profile information including name, email, and description. All fields are optional and encrypted before storage.
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body  body  dto.UpdateUserProfileRequest  true  "Profile update data (all fields optional)"
+// @Success      200  {object}  map[string]any  "Profile updated successfully"
+// @Failure      400  {object}  map[string]any  "Invalid request data"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      409  {object}  map[string]any  "Email already registered"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /user/profile [patch]
+func UpdateUserProfileService(c *gin.Context) {
+	userID, _ := c.Get(middleware.IDCK)
+
+	var req dto.UpdateUserProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid request data",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if req.Name == nil && req.Email == nil && req.Description == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "No profile fields provided",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	var user entity.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	updateData := map[string]any{}
+
+	if req.Name != nil {
+		name := strings.TrimSpace(*req.Name)
+		if name == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Name cannot be empty",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		encName, err := utils.Encrypt(name)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to encrypt name",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		updateData["name"] = encName
+	}
+
+	if req.Email != nil {
+		email := strings.TrimSpace(*req.Email)
+		if email == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Email cannot be empty",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		if _, err := mail.ParseAddress(email); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Invalid email format",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+
+		emailHash := utils.GenerateBlindIndex(email)
+		var existing entity.User
+		if err := database.DB.Where("email_hash = ? AND id <> ?", emailHash, userID).First(&existing).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"message": "Email already registered",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to check email availability",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		encEmail, err := utils.Encrypt(email)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to encrypt email",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		updateData["email"] = encEmail
+		updateData["email_hash"] = emailHash
+	}
+
+	if req.Description != nil {
+		description := strings.TrimSpace(*req.Description)
+		if description == "" {
+			updateData["description"] = ""
+		} else {
+			encDescription, err := utils.Encrypt(description)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"success": false,
+					"message": "Failed to encrypt description",
+					"data":    nil,
+					"error":   err.Error(),
+				})
+				return
+			}
+			updateData["description"] = encDescription
+		}
+	}
+
+	if err := database.DB.Model(&user).Updates(updateData).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update profile",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve updated profile",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	nameDecrypted, _ := utils.Decrypt(user.Name)
+	emailDecrypted, _ := utils.Decrypt(user.Email)
+	descriptionDecrypted, _ := utils.Decrypt(user.Description)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Profile updated successfully",
+		"data": gin.H{
+			"id":          user.ID,
+			"name":        nameDecrypted,
+			"email":       emailDecrypted,
+			"avatar_url":  user.AvatarURL,
+			"role":        user.Role,
+			"is_verified": user.IsVerified,
+			"description": descriptionDecrypted,
+			"created_at":  user.CreatedAt,
+			"updated_at":  user.UpdatedAt,
+		},
+		"error": nil,
+	})
+}
+
+// @Summary      Change user password (All Roles)
+// @Description  Change authenticated user's password after verifying the old password. Requires old password verification before setting new password.
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body  body  dto.ChangePasswordRequest  true  "Password change data"
+// @Success      200  {object}  map[string]any  "Password changed successfully"
+// @Failure      400  {object}  map[string]any  "Invalid request data or password validation failed"
+// @Failure      401  {object}  map[string]any  "Unauthorized or incorrect old password"
+// @Failure      404  {object}  map[string]any  "User not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /user/password [patch]
+func ChangePasswordService(c *gin.Context) {
+	userID, _ := c.Get(middleware.IDCK)
+
+	var req dto.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid request data",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if strings.TrimSpace(req.OldPassword) == "" || strings.TrimSpace(req.NewPassword) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Old and new password are required",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	var user entity.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if !utils.CheckPassword(user.Password, req.OldPassword) {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Invalid old password",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to hash new password",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if err := database.DB.Model(&user).Update("password", hashedPassword).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to change password",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Password changed successfully",
+		"data":    nil,
+		"error":   nil,
 	})
 }
 
