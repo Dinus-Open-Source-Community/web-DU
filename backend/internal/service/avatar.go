@@ -1,5 +1,3 @@
-// Example penggunaan token JWT dengan middleware AuthMiddleware
-
 package service
 
 import (

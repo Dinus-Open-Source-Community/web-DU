@@ -1,13 +1,13 @@
 package routes
 
 import (
-	"backend/internal/handler/middleware"
+	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 func InvoiceRoutes(router *gin.Engine) {
-	handler := middleware.NewInvoiceHandler()
+	handler := service.NewInvoiceHandler()
 
 	invoice := router.Group("/invoice")
 	{

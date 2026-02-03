@@ -1,19 +1,18 @@
-package middleware
+package service
 
 import (
-	"backend/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type InvoiceHandler struct {
-	invoiceService *service.InvoiceService
+	invoiceService *InvoiceService
 }
 
 func NewInvoiceHandler() *InvoiceHandler {
 	return &InvoiceHandler{
-		invoiceService: service.NewInvoiceService(),
+		invoiceService: NewInvoiceService(),
 	}
 }
 
