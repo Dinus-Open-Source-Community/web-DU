@@ -360,6 +360,10 @@ paths:
         in: formData
         name: price
         type: integer
+      - description: Course slot capacity (0 = unlimited)
+        in: formData
+        name: slot
+        type: integer
       - description: 'Whether course is premium (default: false)'
         in: formData
         name: is_premium
@@ -1044,8 +1048,11 @@ paths:
       - description: Payment Reference
         in: query
         name: reference
-        required: true
         type: string
+      - description: Enrollment ID
+        in: query
+        name: enrollmentId
+        type: integer
       produces:
       - application/json
       responses:
@@ -1116,40 +1123,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Create Payment
-      tags:
-      - Payment
-  /payment/callback:
-    post:
-      consumes:
-      - application/json
-      description: Receive and process payment callback from Tripay webhook. This endpoint
-        handles payment status updates and updates enrollment status accordingly.
-      parameters:
-      - description: Payment Callback Request
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PaymentCallbackRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment status updated successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid callback format or failed to update payment status
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Payment Callback Webhook
       tags:
       - Payment
   /register:

@@ -220,6 +220,12 @@
                         "in": "formData"
                     },
                     {
+                        "type": "integer",
+                        "description": "Course slot capacity (0 = unlimited)",
+                        "name": "slot",
+                        "in": "formData"
+                    },
+                    {
                         "type": "boolean",
                         "description": "Whether course is premium (default: false)",
                         "name": "is_premium",
@@ -1231,8 +1237,13 @@
                         "type": "string",
                         "description": "Payment Reference",
                         "name": "reference",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Enrollment ID",
+                        "name": "enrollmentId",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1319,55 +1330,6 @@
                     },
                     "401": {
                         "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/payment/callback": {
-            "post": {
-                "description": "Receive and process payment callback from Tripay webhook. This endpoint handles payment status updates and updates enrollment status accordingly.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Payment Callback Webhook",
-                "parameters": [
-                    {
-                        "description": "Payment Callback Request",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.PaymentCallbackRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Payment status updated successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid callback format or failed to update payment status",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

@@ -226,6 +226,12 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
+                        "type": "integer",
+                        "description": "Course slot capacity (0 = unlimited)",
+                        "name": "slot",
+                        "in": "formData"
+                    },
+                    {
                         "type": "boolean",
                         "description": "Whether course is premium (default: false)",
                         "name": "is_premium",
@@ -1237,8 +1243,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Payment Reference",
                         "name": "reference",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Enrollment ID",
+                        "name": "enrollmentId",
+                        "in": "query"
                     }
                 ],
                 "responses": {

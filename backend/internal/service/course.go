@@ -23,6 +23,7 @@ import (
 // @Param        description   formData  string  false  "Course description"
 // @Param        thumbnail     formData  file    false  "Course thumbnail image (JPG, PNG recommended)"
 // @Param        price         formData  integer false  "Course price (optional for free courses)"
+// @Param        slot          formData  int     false  "Course slot capacity (0 = unlimited)"
 // @Param        is_premium    formData  boolean false  "Whether course is premium (default: false)"
 // @Param        is_published  formData  boolean false  "Whether course is published (default: false)"
 // @Success      201  {object}  map[string]any  "Course created successfully"
@@ -32,90 +33,99 @@ import (
 // @Failure      500  {object}  map[string]any  "Failed to create course"
 // @Router       /courses [post]
 func PostAdminCourseFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+    userID, _ := c.Get(middleware.IDCK)
 
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    var userData entity.User
+    if err := database.DB.First(&userData, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "success": false,
+            "message": "User not found",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
 
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Create Course Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
+    if userData.Role != entity.AdminRole {
+        c.JSON(http.StatusForbidden, gin.H{
+            "success": false,
+            "message": "Create Course Access denied: Admins only",
+            "data":    nil,
+            "error":   nil,
+        })
+        return
+    }
 
-	priceStr := c.PostForm("price")
-	priceInt := 0
-	if priceStr != "" {
-		if p, err := strconv.Atoi(priceStr); err == nil {
-			priceInt = p
-		}
-	}
+    priceStr := c.PostForm("price")
+    priceInt := 0
+    if priceStr != "" {
+        if p, err := strconv.Atoi(priceStr); err == nil {
+            priceInt = p
+        }
+    }
 
-	var thumbnailURL string
-	file, err := c.FormFile("thumbnail")
-	if err == nil && file != nil {
-		extension := filepath.Ext(file.Filename)
-		uniqueFilename := uuid.New().String() + extension
-		uploadDir := "./public/uploads/courses"
-		savePath := filepath.Join(uploadDir, uniqueFilename)
+    slotStr := c.PostForm("slot")
+    slotInt := 0
+    if slotStr != "" {
+        if s, err := strconv.Atoi(slotStr); err == nil {
+            slotInt = s
+        }
+    }
 
-		if err := c.SaveUploadedFile(file, savePath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
-			})
-			return
-		}
-		thumbnailURL = "/uploads/courses/" + uniqueFilename
-	}
+    var thumbnailURL string
+    file, err := c.FormFile("thumbnail")
+    if err == nil && file != nil {
+        extension := filepath.Ext(file.Filename)
+        uniqueFilename := uuid.New().String() + extension
+        uploadDir := "./public/uploads/courses"
+        savePath := filepath.Join(uploadDir, uniqueFilename)
 
-	course := entity.Course{
-		Title:        c.PostForm("title"),
-		Slug:         c.PostForm("slug"),
-		Description:  c.PostForm("description"),
-		ThumbnailURL: thumbnailURL,
-		Price:        float64(priceInt),
-		IsPremium:    c.PostForm("is_premium") == "true",
-		IsPublished:  c.PostForm("is_published") == "true",
-	}
+        if err := c.SaveUploadedFile(file, savePath); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{
+                "success": false, "message": "Failed to save avatar file", "data": nil, "error": err.Error(),
+            })
+            return
+        }
+        thumbnailURL = "/uploads/courses/" + uniqueFilename
+    }
 
-	if err := database.DB.Create(&course).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to create course",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    course := entity.Course{
+        Title:        c.PostForm("title"),
+        Slug:         c.PostForm("slug"),
+        Description:  c.PostForm("description"),
+        ThumbnailURL: thumbnailURL,
+        Slot:         slotInt,
+        Price:        float64(priceInt),
+        IsPremium:    c.PostForm("is_premium") == "true",
+        IsPublished:  c.PostForm("is_published") == "true",
+    }
 
-	if err := database.DB.First(&course, course.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve created course",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    if err := database.DB.Create(&course).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Failed to create course",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
 
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "Course created successfully",
-		"data":    course,
-		"error":   nil,
-	})
+    if err := database.DB.First(&course, course.ID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Failed to retrieve created course",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusCreated, gin.H{
+        "success": true,
+        "message": "Course created successfully",
+        "data":    course,
+        "error":   nil,
+    })
 }
 
 // GetAllCoursesFunc returns a paginated list of courses with optional filters.
@@ -302,92 +312,108 @@ func GetCourseByIDFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to join course"
 // @Router       /courses/{id}/join [post]
 func JoinCourseFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+    userID, _ := c.Get(middleware.IDCK)
 
-	// Fetch user data
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    var userData entity.User
+    if err := database.DB.First(&userData, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "success": false,
+            "message": "User not found",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
 
-	// Check if user is a student
-	if userData.Role != entity.StudentRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Join Course Access denied: Students only. Admins and Mentors cannot join courses",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
+    if userData.Role != entity.StudentRole {
+        c.JSON(http.StatusForbidden, gin.H{
+            "success": false,
+            "message": "Join Course Access denied: Students only. Admins and Mentors cannot join courses",
+            "data":    nil,
+            "error":   nil,
+        })
+        return
+    }
 
-	courseID := c.Param("id")
+    courseID := c.Param("id")
 
-	// Fetch course data
-	var course entity.Course
-	if err := database.DB.First(&course, courseID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "Course not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    var course entity.Course
+    if err := database.DB.First(&course, courseID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "success": false,
+            "message": "Course not found",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
 
-	// Check if user is already enrolled
-	var existingEnrollment entity.Enrollment
-	err := database.DB.Where("user_id = ? AND course_id = ?", userData.ID, course.ID).First(&existingEnrollment).Error
-	if err == nil {
-		// Enrollment already exists
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Already enrolled in this course",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
+    var existingEnrollment entity.Enrollment
+    err := database.DB.Where("user_id = ? AND course_id = ?", userData.ID, course.ID).First(&existingEnrollment).Error
+    if err == nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "success": false,
+            "message": "Already enrolled in this course",
+            "data":    nil,
+            "error":   nil,
+        })
+        return
+    }
 
-	// Create new enrollment
-	enrollment := entity.Enrollment{
-		UserID:   userData.ID,
-		CourseID: course.ID,
-		Status:   entity.EnrollmentPending,
-		Progress: 0,
-	}
+    if course.Slot > 0 {
+        var totalParticipants int64
+        if err := database.DB.Model(&entity.Enrollment{}).Where("course_id = ?", course.ID).Count(&totalParticipants).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{
+                "success": false,
+                "message": "Failed to check course quota",
+                "data":    nil,
+                "error":   err.Error(),
+            })
+            return
+        }
 
-	if err := database.DB.Create(&enrollment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to join course",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+        if int(totalParticipants) >= course.Slot {
+            c.JSON(http.StatusBadRequest, gin.H{
+                "success": false,
+                "message": "Class is full",
+                "data":    nil,
+                "error":   nil,
+            })
+            return
+        }
+    }
 
-	// Fetch the created enrollment with relations
-	if err := database.DB.Preload("User").Preload("Course").First(&enrollment, enrollment.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve enrollment",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
+    enrollment := entity.Enrollment{
+        UserID:   userData.ID,
+        CourseID: course.ID,
+        Status:   entity.EnrollmentPending,
+        Progress: 0,
+    }
 
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "Successfully enrolled in course",
-		"data":    enrollment,
-		"error":   nil,
-	})
+    if err := database.DB.Create(&enrollment).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Failed to join course",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
+
+    if err := database.DB.Preload("User").Preload("Course").First(&enrollment, enrollment.ID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Failed to retrieve enrollment",
+            "data":    nil,
+            "error":   err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusCreated, gin.H{
+        "success": true,
+        "message": "Successfully enrolled in course",
+        "data":    enrollment,
+        "error":   nil,
+    })
 }
