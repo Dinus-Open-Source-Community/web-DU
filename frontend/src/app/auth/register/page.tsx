@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Poppins } from "next/font/google";
 import { EyeOff, Calendar, ChevronDown } from "lucide-react";
 import bunderImg from "../../../../public/bunder.png";
 import kembangImg from "../../../../public/kembang.png";
@@ -9,100 +8,47 @@ import pinguinImg from "../../../../public/pinguin.png";
 import shurikenImg from "../../../../public/shuriken.png";
 import logoImg from "../../../../public/logo.png";
 
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
-
 export default function RegisterPage() {
   return (
-    <main
-      className={`relative flex min-h-screen w-full items-center justify-center overflow-x-hidden bg-white p-4 md:p-6 ${poppins.variable} font-poppins`}
-    >
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-x-hidden bg-white p-4 md:p-6">
       {/* --- BACKGROUND DECORATION --- */}
-      
-      {/* Bunder */}
       <div className="absolute bottom-0 left-0 z-0 pointer-events-none select-none">
-        <Image
-          src={bunderImg}
-          alt="Circle Decoration"
-          className="w-48 md:w-72 lg:w-[500px] object-contain opacity-90"
-          priority
-        />
+        <Image src={bunderImg} alt="Circle Decoration" className="w-48 md:w-72 lg:w-[500px] object-contain opacity-90" priority />
       </div>
 
-      {/* Kembang */}
       <div className="absolute top-0 right-[-20px] md:right-24 z-20 pointer-events-none select-none">
-        <Image
-          src={kembangImg}
-          alt="Flower Decoration"
-          className="w-24 md:w-40 lg:w-64 object-contain opacity-90"
-          priority
-        />
+        <Image src={kembangImg} alt="Flower Decoration" className="w-24 md:w-40 lg:w-64 object-contain opacity-90" priority />
       </div>
 
       {/* --- CONTENT WRAPPER --- */}
       <div className="relative z-10 w-full max-w-[1440px] flex items-center justify-center lg:justify-start lg:px-10">
         
         {/* --- GLASS FORM CONTAINER --- */}
-        <div 
-            className="
-                relative z-20 flex flex-col justify-center
-                border border-white/20 bg-white/30 backdrop-blur-[50px] shadow-2xl shadow-blue-100/20
-                
-                /* RESPONSIVE SIZE */
-                w-full max-w-md lg:max-w-none lg:w-[692px] 
-                h-auto py-8 lg:py-0 lg:h-[726px] 
-                
-                /* RADIUS & PADDING */
-                rounded-[20px] lg:rounded-[30px]
-                p-6 lg:p-[30px]
-            "
-        >
-          {/* Inner Content Form */}
+        <div className="relative z-20 flex flex-col justify-center border border-white/20 bg-white/30 backdrop-blur-[50px] shadow-2xl shadow-blue-100/20 w-full max-w-md lg:max-w-none lg:w-[692px] h-auto py-8 lg:py-0 lg:h-[726px] rounded-[20px] lg:rounded-[30px] p-6 lg:p-[30px]">
+          
           <div className="flex w-full flex-col gap-5 h-full justify-center">
             
-            {/* HEADER LOGO & TITLE */}
             <div className="flex flex-col gap-2 text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-3">
-                <Image 
-                  src={logoImg} 
-                  alt="Doscom Logo" 
-                  width={26.7} 
-                  height={25.35} 
-                  className="object-contain"
-                />
-                <h1 className="text-[18.13px] font-bold text-[#0A84DC]">
-                  Doscom University
-                </h1>
+                <Image src={logoImg} alt="Doscom Logo" width={26.7} height={25.35} className="object-contain" />
+                <h1 className="text-[18.13px] font-bold text-[#0A84DC]">Doscom University</h1>
               </div>
               <p className="text-[14px] lg:text-[15px] font-normal text-black leading-relaxed">
                 Doscom University is one of DOSCOM's open source intensive training programs (bootcamps).
               </p>
             </div>
 
-            {/* FORM INPUTS */}
             <form className="flex flex-col gap-4">
               
-              {/* ROW 1: Full Name & Gender */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-[12px] md:text-sm font-medium text-[#2D3748]">Full Name</label>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    className="h-[40px] w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]"
-                  />
+                  <input type="text" placeholder="Full Name" className="h-[40px] w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-[12px] md:text-sm font-medium text-[#2D3748]">Gender</label>
                   <div className="relative h-[40px] w-full">
-                    <select
-                      className="h-full w-full appearance-none rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#BFBFBF] outline-none focus:border-[#0A84DC] cursor-pointer"
-                      defaultValue=""
-                    >
+                    <select className="h-full w-full appearance-none rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#BFBFBF] outline-none focus:border-[#0A84DC] cursor-pointer" defaultValue="">
                       <option value="" disabled>Male/Female</option>
                       <option value="male" className="text-black">Male</option>
                       <option value="female" className="text-black">Female</option>
@@ -112,95 +58,60 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* ROW 2: Email & DOB */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-[12px] md:text-sm font-medium text-[#2D3748]">Email</label>
-                  <input
-                    type="email"
-                    placeholder="111223344@mhs.dinus.ac.id"
-                    className="h-[40px] w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]"
-                  />
+                  <input type="email" placeholder="111223344@mhs.dinus.ac.id" className="h-[40px] w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="flex items-center gap-1 text-[11.94px] font-normal text-[#2D3748]">
                     Date of birth <span className="text-[8.53px] text-[#2D3748]">(MM/DD/YY)</span>
                   </label>
                   <div className="relative h-[40px] w-full">
-                    <input
-                      type="text"
-                      placeholder="15/02/2030"
-                      className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]"
-                    />
+                    <input type="text" placeholder="15/02/2030" className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]" />
                     <Calendar className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#BFBFBF]" />
                   </div>
                 </div>
               </div>
 
-              {/* ROW 3: Passwords */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-[12px] md:text-sm font-medium text-[#2D3748]">Password</label>
                   <div className="relative h-[40px] w-full">
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] pr-10 text-[11.84px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]"
-                    />
+                    <input type="password" placeholder="Password" className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] pr-10 text-[11.84px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]" />
                     <EyeOff className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 cursor-pointer text-[#BFBFBF]" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-[11.94px] font-normal text-[#2D3748]">Confirm password</label>
                   <div className="relative h-[40px] w-full">
-                    <input
-                      type="password"
-                      placeholder="****************"
-                      className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] pr-10 text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]"
-                    />
+                    <input type="password" placeholder="****************" className="h-full w-full rounded-[3.64px] border-[0.7px] border-gray-400 bg-white px-[14.57px] pr-10 text-[12px] text-[#2D3748] outline-none placeholder:text-[#BFBFBF] focus:border-[#0A84DC]" />
                     <EyeOff className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 cursor-pointer text-[#BFBFBF]" />
                   </div>
                 </div>
               </div>
 
-              {/* Checkboxes */}
               <div className="flex flex-col gap-3 mt-1">
                 <div className="flex items-center gap-2">
-                  <input 
-                    type="checkbox" 
-                    id="remember" 
-                    className="h-[17.06px] w-[17.06px] rounded border-gray-300 text-[#007AFF] focus:ring-[#007AFF]"
-                  />
+                  <input type="checkbox" id="remember" className="h-[17.06px] w-[17.06px] rounded border-gray-300 text-[#007AFF] focus:ring-[#007AFF]" />
                   <label htmlFor="remember" className="text-[12px] text-[#2D3748]">Remember me</label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input 
-                    type="checkbox" 
-                    id="terms" 
-                    className="h-[17.06px] w-[17.06px] rounded border-gray-300 text-[#007AFF] focus:ring-[#007AFF]"
-                  />
+                  <input type="checkbox" id="terms" className="h-[17.06px] w-[17.06px] rounded border-gray-300 text-[#007AFF] focus:ring-[#007AFF]" />
                   <label htmlFor="terms" className="text-[12px] text-[#2D3748] leading-tight">
                     I agree to all the <Link href="#" className="text-[#007AFF]">Terms</Link> and <Link href="#" className="text-[#007AFF]">Privacy policy</Link>
                   </label>
                 </div>
               </div>
 
-              {/* Create Account Button */}
               <div className="flex justify-center mt-2">
-                <button
-                  type="button"
-                  className="h-[40.94px] w-full md:max-w-[305.35px] rounded-[4.61px] bg-[#007AFF] text-[14px] font-medium text-white transition-colors hover:bg-blue-600 shadow-md"
-                >
+                <button type="button" className="h-[40.94px] w-full md:max-w-[305.35px] rounded-[4.61px] bg-[#007AFF] text-[14px] font-medium text-white transition-colors hover:bg-blue-600 shadow-md">
                   Create account
                 </button>
               </div>
 
-              {/* Divider */}
               <div className="flex flex-col items-center gap-3">
-                <span className="text-[12.09px] font-normal text-[#333333]">
-                  Or Continue With
-                </span>
-
+                <span className="text-[12.09px] font-normal text-[#333333]">Or Continue With</span>
                 <div className="flex flex-col md:flex-row w-full justify-center gap-3 md:gap-4">
                   <button className="flex h-[54.86px] w-full md:max-w-[306.59px] items-center justify-center gap-3 rounded-[44.61px] bg-white border-[1.21px] border-[#A7A7A7] shadow-[0px_4.84px_4.84px_0px_#00000040] transition-transform hover:scale-105">
                      <svg className="h-6 w-6" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
@@ -228,43 +139,13 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* --- RIGHT SIDE: MASKOT & SHURIKEN (HIDDEN ON MOBILE) --- */}
-        
-        {/* Shuriken */}
-        <div
-          className="absolute z-20 hidden lg:block"
-          style={{
-            width: "170px",
-            height: "170px",
-            top: "50px",
-            left: "720px",
-          }}
-        >
-          <Image
-            src={shurikenImg}
-            alt="Shuriken Decoration"
-            placeholder="blur" 
-            className="object-contain drop-shadow-[0_0_15px_rgba(37,130,225,0.6)]"
-          />
+        {/* --- RIGHT SIDE: MASKOT & SHURIKEN --- */}
+        <div className="absolute z-20 hidden lg:block" style={{ width: "170px", height: "170px", top: "50px", left: "720px" }}>
+          <Image src={shurikenImg} alt="Shuriken Decoration" placeholder="blur" className="object-contain drop-shadow-[0_0_15px_rgba(37,130,225,0.6)]" />
         </div>
 
-        {/* Penguin */}
-        <div
-          className="absolute z-10 hidden lg:block"
-          style={{
-            width: "577px",
-            height: "668px",
-            top: "103px",
-            left: "747px",
-          }}
-        >
-          <Image
-            src={pinguinImg}
-            alt="Doscom Mascot"
-            priority
-            placeholder="blur"
-            className="object-contain"
-          />
+        <div className="absolute z-10 hidden lg:block" style={{ width: "577px", height: "668px", top: "103px", left: "747px" }}>
+          <Image src={pinguinImg} alt="Doscom Mascot" priority placeholder="blur" className="object-contain" />
         </div>
 
       </div>
