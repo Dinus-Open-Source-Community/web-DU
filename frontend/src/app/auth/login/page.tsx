@@ -17,7 +17,7 @@ export default function LoginPage() {
         <Image src={kembangImg} alt="Flower Decoration" className="w-40 object-contain opacity-90 md:w-64" priority />
       </div>
 
-      {/* --- GLASS CARD CONTAINER --- */}
+      {/* --- GLASS CARD CONTAINERR --- */}
       <div className="relative z-10 grid min-h-[800px] w-full max-w-[1324px] grid-cols-1 items-center rounded-[60px] border border-white/20 bg-white/30 shadow-2xl shadow-blue-100/20 backdrop-blur-[50px] lg:grid-cols-2">
         
         {/* --- LEFT SIDE: LOGIN FORM --- */}
