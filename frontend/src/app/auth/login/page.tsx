@@ -1,30 +1,19 @@
 import Image from "next/image";
-import { Poppins } from "next/font/google";
 import { EyeOff } from "lucide-react";
-import bunderImg from "../../../../public/bunder.png";
-import kembangImg from "../../../../public/kembang.png";
-import pinguinImg from "../../../../public/pinguin.png";
-import shurikenImg from "../../../../public/shuriken.png";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
 
 export default function LoginPage() {
   return (
-    <main
-      className={`relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white p-6 md:p-10 ${poppins.variable} font-poppins`}
-    >
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white p-6 md:p-10">
       {/* --- BACKGROUND LAYERS --- */}
 
       {/* Bunder */}
       <div className="absolute bottom-0 left-0 z-0 pointer-events-none select-none">
         <Image
-          src={bunderImg}
+          src="/bunder.png"
           alt="Circle Decoration"
-          className="w-72 object-contain opacity-90 md:w-[500px]"
+          width={500}
+          height={500}
+          className="w-72 object-contain opacity-90 md:w-125"
           priority
         />
       </div>
@@ -32,21 +21,23 @@ export default function LoginPage() {
       {/* Kembang */}
       <div className="absolute top-0 right-24 z-20 pointer-events-none select-none">
         <Image
-          src={kembangImg}
+          src="/kembang.png"
           alt="Flower Decoration"
+          width={256}
+          height={256}
           className="w-40 object-contain opacity-90 md:w-64"
           priority
         />
       </div>
 
       {/* --- GLASS CARD CONTAINER --- */}
-      <div className="relative z-10 grid min-h-[800px] w-full max-w-[1324px] grid-cols-1 items-center rounded-[60px] border border-white/20 bg-white/30 shadow-2xl shadow-blue-100/20 backdrop-blur-[50px] lg:grid-cols-2">
+      <div className="relative z-10 grid min-h-200 w-full max-w-331 grid-cols-1 items-center rounded-[60px] border border-white/20 bg-white/30 shadow-2xl shadow-blue-100/20 backdrop-blur-[50px] lg:grid-cols-2">
         
         {/* --- LEFT SIDE: LOGIN FORM --- */}
-        <div className="flex h-full w-full flex-col justify-center px-10 py-10 lg:pl-[100px] lg:pr-10">
+        <div className="flex h-full w-full flex-col justify-center px-10 py-10 lg:pl-25 lg:pr-10">
           
           {/* Form Container */}
-          <div className="flex w-full max-w-[434.4px] flex-col gap-[38px]">
+          <div className="flex w-full max-w-[434.4px] flex-col gap-9.5">
             
             {/* Header Section */}
             <div>
@@ -148,9 +139,10 @@ export default function LoginPage() {
             }}
         >
             <Image
-                src={shurikenImg}
+                src="/shuriken.png"
                 alt="Shuriken Decoration"
-                fill
+                width={200}
+                height={200}
                 className="object-contain drop-shadow-[0_0_15px_rgba(37,130,225,0.6)]"
             />
         </div>
@@ -166,9 +158,10 @@ export default function LoginPage() {
             }}
         >
             <Image
-                src={pinguinImg}
+                src="/pinguin.png"
                 alt="Doscom Mascot"
-                fill
+                width={600}
+                height={691}
                 className="object-contain"
                 priority
             />
