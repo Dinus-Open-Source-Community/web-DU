@@ -1,74 +1,93 @@
-"use client"; 
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React from 'react';
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
-const Navbar: React.FC = () => {
+const navLinks = [
+    { label: "Home", href: "/" },
+    { label: "Course", href: "/course" },
+    { label: "Community", href: "/community" },
+    { label: "About", href: "/about" },
+];
 
-  const pathname = usePathname();
+export default function Navbar() {
+    const pathname = usePathname();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Course', href: '/course' },
-    { name: 'Community', href: '/community' },
-    { name: 'About', href: '/about' },
-  ];
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isMenuOpen]);
 
-  return (
-    <div className="w-full bg-[#0A84DC] flex justify-center">
-      <nav className="w-full max-w-360 h-26.5 px-2 py-6 flex items-center justify-between">
-        
-        {/* --- Logo --- */}
-        <div className="flex-1 flex justify-start">
-          <Link href="/" className="font-bold text-[24px] leading-[1.2] text-[#F2F2F2]">
-            Doscom<br />University
-          </Link>
-        </div>
-
-        {/* --- Menu Navigasi --- */}
-        <div className="flex-none">
-          <ul className="flex items-center gap-4">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-
-              return (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href} 
-                    className={`inline-block px-6 py-2 rounded-3xl text-[18px] leading-[1.2] transition-all duration-300 hover:scale-105 ${
-                      isActive 
-                        ? 'bg-[#F2F2F2] text-[#0A84DC] font-semibold' // Aktif: Putih, Teks Biru, Tebal
-                        : 'text-[#F2F2F2] font-normal hover:bg-[#F2F2F2] hover:text-[#0A84DC]' // Tidak Aktif: Teks Putih. Saat hover -> Bg Putih, Teks Biru
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* --- Menu Autentikasi --- */}
-        <div className="flex-1 flex justify-end items-center gap-3">
-          <Link 
-            href="/auth/register" 
-            className="flex items-center justify-center px-7.5 py-2.5 h-10.5 border border-[#F2F2F2] rounded-3xl text-[#F2F2F2] font-semibold text-[16px] hover:bg-white/10 transition-colors"
-          >
-            Daftar
-          </Link>
-          <Link 
-            href="/auth/login" 
-            className="flex items-center justify-center px-7.5 py-2.5 h-10.5 bg-[#F2F2F2] rounded-3xl text-[#0A84DC] font-semibold text-[16px] hover:bg-white hover:shadow-md transition-all"
-          >
-            Masuk
-          </Link>
-        </div>
-
-      </nav>
-    </div>
-  );
-};
-
-export default Navbar;
+    return (
+        <nav className="fixed left-0 top-0 z-50 w-full bg-primary text-popover shadow-md">
+            <div className="mx-auto flex w-full max-w-400 items-center justify-between px-32 py-4">
+                <Link href="/" className="text-2xl font-bold whitespace-pre text-white">
+                    Doscom{"\n"}University
+                </Link>
+                <div className="hidden items-center gap-8 lg:flex">
+                    <div className="flex">
+                        {navLinks.map((navLink) => (
+                            <Link
+                                key={navLink.href}
+                                href={navLink.href}
+                                className={`text-lg px-7 py-1 transition ${pathname === navLink.href ? "font-medium bg-popover text-primary rounded-2xl" : "text-white hover:text-white/80"}`}
+                            >
+                                {navLink.label}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+                <div className="hidden gap-4 lg:flex">
+                    <Link href="/auth/register">
+                        <Button className="rounded-2xl bg-primary text-popover px-7" variant="outline">Daftar</Button>
+                    </Link>
+                    <Link href="/auth/login">
+                        <Button className="rounded-2xl bg-popover text-primary px-7" variant={"ghost"}>Masuk</Button>
+                    </Link>
+                </div>
+                <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-2xl border border-white/40 px-3 py-2 text-white lg:hidden"
+                    aria-label="Toggle menu"
+                    onClick={() => setIsMenuOpen((prev) => !prev)}
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+            </div>
+            <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+                <div className="mx-auto flex w-full max-w-400 flex-col gap-3 px-32 pb-6">
+                    <div className="flex flex-col gap-2">
+                        {navLinks.map((navLink) => (
+                            <Link
+                                key={navLink.href}
+                                href={navLink.href}
+                                className={`text-base px-4 py-2 transition ${pathname === navLink.href ? "font-medium bg-popover text-primary rounded-2xl" : "text-white hover:text-white/80"}`}
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                {navLink.label}
+                            </Link>
+                        ))}
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
+                            <Button className="w-full rounded-2xl bg-primary text-popover px-7" variant="outline">Daftar</Button>
+                        </Link>
+                        <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
+                            <Button className="w-full rounded-2xl bg-popover text-primary px-7" variant={"ghost"}>Masuk</Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+}
