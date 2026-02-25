@@ -1,7 +1,7 @@
-import "../styles/globals.css";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Poppins } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
+import "../styles/globals.css";
 
 const jakartaPlus = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -15,13 +15,12 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-
 export const metadata: Metadata = {
   title: "Doscom University",
   description: "Open Source Bootcamp",
   icons: {
     icon: "/favicon.ico",
-  }
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${jakartaPlus.variable} ${poppins.variable} font-sans antialiased`}>
+      <body className={` ${poppins.className} font-sans antialiased`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
