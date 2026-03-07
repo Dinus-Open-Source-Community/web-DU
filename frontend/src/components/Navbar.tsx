@@ -30,7 +30,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-primary text-popover fixed top-0 left-0 z-50 w-full shadow-md">
-      <div className="mx-auto flex w-full max-w-400 items-center justify-between px-32 py-4">
+      <div className="container mx-auto flex w-full items-center justify-between px-20 py-4">
         <Link href="/" className="text-2xl font-bold whitespace-pre text-white">
           Doscom{"\n"}University
         </Link>
