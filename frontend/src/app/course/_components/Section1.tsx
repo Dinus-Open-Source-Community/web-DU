@@ -4,6 +4,9 @@ import { Search } from "@/components/ui/search";
 import { useState } from "react";
 import { ICardData } from "@/lib/types";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LogoDuBig } from "@/components/ui/icons";
+import Link from "next/link";
 
 const filter = [
   { name: "All" },
@@ -24,7 +27,7 @@ const categories = [
 export default function ({ Data }: { Data: ICardData[] }) {
   const [isActiveFilter, setIsActiveFilter] = useState<string>("All");
   return (
-    <section className="bg-muted relative h-full min-h-screen w-full py-20">
+    <section className="bg-muted relative h-full min-h-screen w-full pt-20 pb-10">
       <div className="relative container mx-auto h-full w-full px-10">
         {/*search section*/}
         <div className="h-full w-full pt-20 text-center">
@@ -126,6 +129,37 @@ export default function ({ Data }: { Data: ICardData[] }) {
               ))}
             </div>
           </div>
+        </div>
+
+        {/**/}
+        <div className="relative mt-30 h-full w-full p-15">
+          <div className="from-primary to-muted 2Xl:w-7xl mx-auto flex h-full w-full rounded-[20px] bg-linear-to-r from-10% to-75% px-25 py-21">
+            <div className="max-w-2xl gap-5">
+              <h3 className="mb-4 align-middle text-4xl leading-[1.3] font-bold">
+                Ready to Start Your Journey?
+              </h3>
+              <p className="text-xl leading-[1.3] font-normal">
+                Join thousands of developers who are already learning and
+                growing with Doscom University. Start with free courses today!
+              </p>
+              <div className="mt-6 flex gap-3">
+                <Button
+                  asChild
+                  variant={"secondary"}
+                  className="text-primary bg-white px-5 py-6 text-center text-lg font-medium"
+                >
+                  <Link href={"/auth/register"}>Join Now - It’s Free</Link>
+                </Button>
+                <Button
+                  variant={"default"}
+                  className="p-3 px-5 py-6 text-center text-lg font-medium text-white"
+                >
+                  Browse All Course
+                </Button>
+              </div>
+            </div>
+          </div>
+          <LogoDuBig className="absolute top-2 right-0" />
         </div>
       </div>
     </section>
