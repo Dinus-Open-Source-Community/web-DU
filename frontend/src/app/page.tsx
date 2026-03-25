@@ -7,12 +7,12 @@ import Community from "@/components/home/Community";
 
 export default function Home() {
   return (
-    <section id="home" className="w-full pt-24">
+    <section id="home" className="bg-muted w-full pt-24">
       <GuestLayout>
         <Hero />
         <Feature Data={DataCourse} />
         <Benefit DataFeatures={ProgramFeatures} />
-        <Community/>
+        <Community />
       </GuestLayout>
     </section>
   );

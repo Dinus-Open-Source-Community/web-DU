@@ -4,7 +4,7 @@ import { SquareIcon } from "../ui/icons";
 
 export default function Hero() {
   return (
-    <div className="bg-primary/90 relative w-full py-20 md:py-32">
+    <section className="bg-primary/90 relative w-full py-20 md:py-32">
       <div className="container mx-auto flex items-center justify-between gap-10 px-20">
         {/*Hero Description*/}
         <div className="w-full max-w-130 space-y-2 text-start">
@@ -43,6 +43,6 @@ export default function Hero() {
         {/* Shadow effect */}
         <div className="shadow"></div>
       </div>
-    </div>
+    </section>
   );
 }

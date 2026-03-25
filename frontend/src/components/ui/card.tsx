@@ -17,7 +17,36 @@ interface CardProps {
   };
   rating: number;
   totalReviews: number;
+  size?: "sm" | "md" | "lg";
 }
+
+const sizes = {
+  container: {
+    sm: "max-w-xs",
+    md: "max-w-sm",
+    lg: "max-w-md",
+  },
+  imageWrapper: {
+    sm: "min-h-[160px]",
+    md: "min-h-[203px]",
+    lg: "min-h-[250px]",
+  },
+  contentWrapper: {
+    sm: "min-h-[160px] p-3 -mt-6",
+    md: "min-h-[208px] p-4 -mt-6",
+    lg: "min-h-[250px] p-6 -mt-8",
+  },
+  title: {
+    sm: "text-base",
+    md: "text-lg",
+    lg: "text-xl",
+  },
+  description: {
+    sm: "text-sm",
+    md: "text-lg",
+    lg: "text-lg",
+  },
+};
 
 function Card({
   image,
@@ -27,11 +56,16 @@ function Card({
   author,
   rating,
   totalReviews,
+  size = "md",
 }: CardProps) {
   return (
-    <div className="flex h-full w-full max-w-sm flex-col overflow-hidden drop-shadow-xl">
+    <div
+      className={`flex h-full w-full ${sizes.container[size]} flex-col overflow-hidden drop-shadow-xl`}
+    >
       {/* Image Content*/}
-      <div className="relative aspect-video min-h-[203px] w-full shrink-0 rounded-[10px]">
+      <div
+        className={`relative aspect-video w-full shrink-0 rounded-[10px] ${sizes.imageWrapper[size]}`}
+      >
         {image ? (
           <Image
             src={image}
@@ -47,19 +81,25 @@ function Card({
         )}
       </div>
 
-      {/* 4. Content description */}
-      <div className="relative z-10 -mt-6 flex min-h-[208px] grow flex-col rounded-xl bg-white p-4">
+      {/* Content description */}
+      <div
+        className={`relative z-10 flex grow flex-col rounded-xl bg-white ${sizes.contentWrapper[size]}`}
+      >
         <div className="mb-2.5 flex items-center justify-between">
           <Badge variant={variantBadge} />
           <Rating rating={rating} totalReviews={totalReviews} />
         </div>
 
         <div className="mb-5 w-full">
-          <h3 className="mb-2 line-clamp-2 text-lg leading-snug font-medium text-black">
+          <h3
+            className={`mb-2 line-clamp-2 leading-snug font-medium text-black ${sizes.title[size]}`}
+          >
             {title}
           </h3>
 
-          <p className="line-clamp-3 grow text-lg leading-[1.3] font-normal text-[var(--text-secondary)]">
+          <p
+            className={`line-clamp-2 grow leading-[1.3] font-normal text-[var(--text-secondary)] ${sizes.description[size]}`}
+          >
             {description}
           </p>
         </div>

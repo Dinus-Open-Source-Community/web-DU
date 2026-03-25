@@ -6,7 +6,7 @@ export default function ({
   DataFeatures: IProgramFeatures[];
 }) {
   return (
-    <section className="relative mb-15 h-full w-full bg-white">
+    <section className="relative mb-15 h-full w-full bg-muted">
       <div className="container mx-auto flex h-full w-full items-center justify-between gap-20 px-20">
         <div className="w-full max-w-sm">
           <h1 className="text-[44px] leading-[1.3] font-semibold text-black">

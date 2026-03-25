@@ -4,6 +4,7 @@ export default function ImpactSection() {
   return (
     <section className="bg-primary relative h-full w-full overflow-hidden">
       <div className="container mx-auto flex h-full w-full items-center gap-6 px-20 py-20 pb-20">
+        {/*section description*/}
         <div className="flex w-full max-w-[460] flex-col">
           <h3 className="mb-3 text-[44px] leading-[1.3] font-semibold text-white">
             Dampak Nyata untuk Komunitas IT.
@@ -41,6 +42,7 @@ export default function ImpactSection() {
           </div>
         </div>
 
+        {/*section image*/}
         <div className="relative flex w-full items-end justify-end">
           <Image
             src="https://picsum.photos/650/550"
