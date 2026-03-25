@@ -450,6 +450,10 @@ paths:
         in: formData
         name: price
         type: integer
+      - description: Course slot capacity (0 = unlimited)
+        in: formData
+        name: slot
+        type: integer
       - description: 'Whether course is premium (default: false)'
         in: formData
         name: is_premium
@@ -1646,7 +1650,11 @@ paths:
             type: object
       security:
       - BearerAuth: []
+<<<<<<< HEAD
       summary: Create Payment (All Roles)
+=======
+      summary: Create Payment
+>>>>>>> feature/backend-rafi-baru
       tags:
       - Payment
   /register:

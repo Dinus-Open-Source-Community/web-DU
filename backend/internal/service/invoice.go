@@ -1,41 +1,40 @@
-package service
+func (s *InvoiceService) GenerateAndSendInvoice(email string, amountCents int64) (string, error) {
 
-import (
-	"fmt"
-	"time"
+	now := time.Now().UTC()
+	invoiceID := uuid.NewString()
 
-	"backend/internal/model/dto"
-	"backend/internal/utils"
+	invoiceNumber := fmt.Sprintf(
+		"INV-%d-%s",
+		now.Year(),
+		invoiceID[:8],
+	)
 
-	"github.com/google/uuid"
-)
-
-type InvoiceService struct {
-	emailService *EmailService
-}
-
-func NewInvoiceService() *InvoiceService {
-	return &InvoiceService{
-		emailService: NewEmailService(),
-	}
-}
-
-func (s *InvoiceService) GenerateAndSendInvoice(email string, amount float64) (string, error) {
-	invoice := dto.Invoice{
-		ID:        uuid.NewString(),
-		UserEmail: email,
-		Amount:    amount,
-		CreatedAt: time.Now(),
+	invoice := dto.InvoiceResponse{
+		ID:            invoiceID,
+		InvoiceNumber: invoiceNumber,
+		Email:         email,
+		Amount:        amountCents / 100,
+		Currency:      "IDR",
+		Status:        "PAID",
+		CreatedAt:     now,
 	}
 
-	filePath := fmt.Sprintf("invoices/%s.pdf", invoice.ID)
-
-	if err := utils.GenerateInvoicePDF(invoice, filePath); err != nil {
-		return "", err
+	// 🔹 PASTIKAN FOLDER ADA
+	err := os.MkdirAll("invoices", os.ModePerm)
+	if err != nil {
+		return "", fmt.Errorf("failed to create invoices folder: %w", err)
 	}
 
-	if err := s.emailService.SendInvoice(email, filePath); err != nil {
-		return "", err
+	filePath := fmt.Sprintf("invoices/%s.pdf", invoiceID)
+
+	err = utils.GenerateInvoicePDF(invoice, filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate invoice pdf: %w", err)
+	}
+
+	err = s.emailService.SendInvoice(email, filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to send invoice email: %w", err)
 	}
 
 	return filePath, nil

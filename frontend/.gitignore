@@ -47,3 +47,7 @@ package-lock.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# lock files
+package-lock.json
+*.lock

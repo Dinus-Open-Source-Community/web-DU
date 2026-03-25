@@ -8,6 +8,9 @@ type Course struct {
 	EventID      *uint     `json:"event_id"`
 	MentorID     *uint     `json:"mentor_id"`
 	Title        string    `gorm:"type:varchar(200);not null" json:"title"`
+
+	Slot         int       `gorm:"default:0" json:"slot"`
+
 	Slug         string    `gorm:"type:varchar(255);unique;not null" json:"slug"`
 	Description  string    `gorm:"type:text" json:"description"`
 	ThumbnailURL string    `gorm:"type:varchar(255)" json:"thumbnail_url"`
