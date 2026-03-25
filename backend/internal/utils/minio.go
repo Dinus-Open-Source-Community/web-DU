@@ -42,6 +42,7 @@ func InitMinio() error {
 	buckets := []string{
 		os.Getenv("MINIO_BUCKET_AVATARS"),
 		os.Getenv("MINIO_BUCKET_COURSES"),
+		os.Getenv("MINIO_BUCKET_INVOICES"),
 	}
 
 	ctx := context.Background()
@@ -197,4 +198,16 @@ func GetBucketAvatars() string {
 // GetBucketCourses returns the courses bucket name from env
 func GetBucketCourses() string {
 	return os.Getenv("MINIO_BUCKET_COURSES")
+}
+
+// GetBucketInvoices returns the invoices bucket name from env
+func GetBucketInvoices() string {
+	return os.Getenv("MINIO_BUCKET_INVOICES")
+}
+
+// NewPutObjectOptions creates a new PutObjectOptions with the specified content type
+func NewPutObjectOptions(contentType string) minio.PutObjectOptions {
+	return minio.PutObjectOptions{
+		ContentType: contentType,
+	}
 }

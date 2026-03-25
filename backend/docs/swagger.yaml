@@ -441,26 +441,31 @@ paths:
       - description: Course description
         in: formData
         name: description
+        required: true
         type: string
       - description: Course thumbnail image (JPG, PNG recommended)
         in: formData
         name: thumbnail
         type: file
-      - description: Course price (optional for free courses)
+      - description: Course price in cents
         in: formData
         name: price
+        required: true
         type: integer
       - description: Course slot capacity (0 = unlimited)
         in: formData
         name: slot
+        required: true
         type: integer
       - description: 'Whether course is premium (default: false)'
         in: formData
         name: is_premium
+        required: true
         type: boolean
       - description: 'Whether course is published (default: false)'
         in: formData
         name: is_published
+        required: true
         type: boolean
       produces:
       - application/json
@@ -695,6 +700,100 @@ paths:
       summary: Get all enrolled students in a course (Admin Only)
       tags:
       - Course
+  /enrollments/{enrollment_id}/invoice:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve or generate invoice for a specific enrollment
+      parameters:
+      - description: Enrollment ID
+        in: path
+        name: enrollment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Enrollment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve invoice
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get course enrollment invoice (All Roles)
+      tags:
+      - Course
+  /invoices/url:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve invoice URL by providing enrollment_id, user_id, and course_id
+        as query parameters
+      parameters:
+      - description: Enrollment ID
+        in: query
+        name: enrollment_id
+        required: true
+        type: integer
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice URL retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing required parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Enrollment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get invoice URL by enrollment details (All Roles)
+      tags:
+      - Invoice
   /lessons:
     get:
       consumes:
@@ -1650,11 +1749,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-<<<<<<< HEAD
       summary: Create Payment (All Roles)
-=======
-      summary: Create Payment
->>>>>>> feature/backend-rafi-baru
       tags:
       - Payment
   /register:

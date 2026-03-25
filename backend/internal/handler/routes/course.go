@@ -25,4 +25,12 @@ func StartCourseRoutes(r *gin.Engine) {
 		courseGroup.GET("/:id/students", service.GetCourseStudentsFunc) // Admin only
 		courseGroup.POST("/", service.PostAdminCourseFunc)              // Admin only
 	}
+
+	// Invoice routes
+	invoiceGroup := r.Group("/invoices")
+	invoiceGroup.Use(middleware.AuthMiddleware())
+	{
+		invoiceGroup.GET("/url", service.GetInvoiceURLFunc)                   // Query params: enrollment_id, user_id, course_id
+		invoiceGroup.GET("/:enrollment_id", service.GetEnrollmentInvoiceFunc) // Path param: enrollment_id
+	}
 }
