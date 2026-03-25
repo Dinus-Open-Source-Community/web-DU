@@ -1,74 +1,119 @@
-"use client"; 
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React from 'react';
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
-const Navbar: React.FC = () => {
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Course", href: "/course" },
+  { label: "Community", href: "/community" },
+  { label: "About", href: "/about" },
+];
 
+export default function Navbar() {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Course', href: '/course' },
-    { name: 'Community', href: '/community' },
-    { name: 'About', href: '/about' },
-  ];
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMenuOpen]);
 
   return (
-    <div className="w-full bg-[#0A84DC] flex justify-center">
-      <nav className="w-full max-w-360 h-26.5 px-2 py-6 flex items-center justify-between">
-        
-        {/* --- Logo --- */}
-        <div className="flex-1 flex justify-start">
-          <Link href="/" className="font-bold text-[24px] leading-[1.2] text-[#F2F2F2]">
-            Doscom<br />University
+    <nav className="bg-primary text-popover fixed top-0 left-0 z-50 w-full shadow-md">
+      <div className="container mx-auto flex w-full items-center justify-between px-20 py-4">
+        <Link href="/" className="text-2xl font-bold whitespace-pre text-white">
+          Doscom{"\n"}University
+        </Link>
+        <div className="hidden items-center lg:flex">
+          <nav className="flex w-full flex-wrap items-center justify-center gap-2">
+            {navLinks.map((navLink) => (
+              <Link
+                key={navLink.href}
+                href={navLink.href}
+                className={`flex items-center justify-center rounded-2xl py-2 text-lg font-medium transition-all ${
+                  pathname === navLink.href
+                    ? "bg-popover text-primary px-6"
+                    : "px-2 text-white hover:text-white/80"
+                }`}
+              >
+                {navLink.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="hidden gap-4 lg:flex">
+          <Link href="/auth/register">
+            <Button
+              className="bg-primary text-popover rounded-2xl px-7"
+              variant="outline"
+            >
+              Daftar
+            </Button>
+          </Link>
+          <Link href="/auth/login">
+            <Button
+              className="bg-popover text-primary rounded-2xl px-7"
+              variant={"ghost"}
+            >
+              Masuk
+            </Button>
           </Link>
         </div>
-
-        {/* --- Menu Navigasi --- */}
-        <div className="flex-none">
-          <ul className="flex items-center gap-4">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-
-              return (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href} 
-                    className={`inline-block px-6 py-2 rounded-3xl text-[18px] leading-[1.2] transition-all duration-300 hover:scale-105 ${
-                      isActive 
-                        ? 'bg-[#F2F2F2] text-[#0A84DC] font-semibold' // Aktif: Putih, Teks Biru, Tebal
-                        : 'text-[#F2F2F2] font-normal hover:bg-[#F2F2F2] hover:text-[#0A84DC]' // Tidak Aktif: Teks Putih. Saat hover -> Bg Putih, Teks Biru
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center rounded-2xl border border-white/40 px-3 py-2 text-white lg:hidden"
+          aria-label="Toggle menu"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+      >
+        <div className="mx-auto flex w-full max-w-400 flex-col gap-3 px-32 pb-6">
+          <div className="flex flex-col gap-2">
+            {navLinks.map((navLink) => (
+              <Link
+                key={navLink.href}
+                href={navLink.href}
+                className={`px-4 py-2 text-base transition ${pathname === navLink.href ? "bg-popover text-primary rounded-2xl font-medium" : "text-white hover:text-white/80"}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {navLink.label}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-col gap-3">
+            <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
+              <Button
+                className="bg-primary text-popover w-full rounded-2xl px-7"
+                variant="outline"
+              >
+                Daftar
+              </Button>
+            </Link>
+            <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
+              <Button
+                className="bg-popover text-primary w-full rounded-2xl px-7"
+                variant={"ghost"}
+              >
+                Masuk
+              </Button>
+            </Link>
+          </div>
         </div>
-
-        {/* --- Menu Autentikasi --- */}
-        <div className="flex-1 flex justify-end items-center gap-3">
-          <Link 
-            href="/auth/register" 
-            className="flex items-center justify-center px-7.5 py-2.5 h-10.5 border border-[#F2F2F2] rounded-3xl text-[#F2F2F2] font-semibold text-[16px] hover:bg-white/10 transition-colors"
-          >
-            Daftar
-          </Link>
-          <Link 
-            href="/auth/login" 
-            className="flex items-center justify-center px-7.5 py-2.5 h-10.5 bg-[#F2F2F2] rounded-3xl text-[#0A84DC] font-semibold text-[16px] hover:bg-white hover:shadow-md transition-all"
-          >
-            Masuk
-          </Link>
-        </div>
-
-      </nav>
-    </div>
+      </div>
+    </nav>
   );
-};
-
-export default Navbar;
+}
