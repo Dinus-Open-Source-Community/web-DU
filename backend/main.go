@@ -16,6 +16,7 @@ import (
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,11 @@ func main() {
 
 	// Connect to the database
 	database.ConnectDB()
+
+	// Run seeder jika SEED=true di environment variable
+	if os.Getenv("SEED") == "true" {
+		database.RunSeeder(database.DB)
+	}
 
 	// Setup all routes
 	setup.SetupAllRoutes(r)

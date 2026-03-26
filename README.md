@@ -13,6 +13,7 @@ A full-stack learning management system built with **Next.js + Go + PostgreSQL**
 - [Getting Started](#getting-started)
 - [API Documentation](#api-documentation)
 - [Database](#database)
+- [Database Seeder](#-database-seeder)
 - [Development](#development)
 - [Deployment](#deployment)
 
@@ -244,6 +245,90 @@ The PostgreSQL database is automatically initialized via Docker Compose. The dat
 - User: `postgres`
 - Password: (from `.env` `POSTGRES_PASSWORD`)
 - Database: (from `.env` `POSTGRES_DB`)
+
+---
+
+## 🌱 Database Seeder
+
+The project includes a database seeder to automatically populate the database with sample data for development and testing.
+
+### Seeder Features
+
+The seeder creates:
+
+- **3 Users**: 1 admin + 2 students with different roles
+
+  - Admin User (admin@doscom.id / admin123)
+  - Budi Santoso (budi@doscom.id / student123)
+  - Siti Nurhaliza (siti@doscom.id / student123)
+- **5 Courses**: Premium and free courses with realistic pricing
+
+  - Golang Fundamentals (Rp 299.000)
+  - Web Development dengan Next.js (Rp 349.000)
+  - Database Design dan SQL (Free)
+  - REST API Development (Rp 299.000)
+  - DevOps Essentials (Rp 329.000)
+- **Multiple Modules**: 2-3 modules per course (~15 total)
+- **Multiple Lessons**: 2-3 lessons per module (~35 total)
+
+### Running the Seeder
+
+#### Using Docker Compose
+
+1. **Set environment variable in `.env`**:
+
+   ```env
+   SEED=true
+   ```
+2. **Start the application**:
+
+   ```bash
+   docker-compose up
+   ```
+
+   The seeder will automatically run when the backend starts.
+
+#### Local Development
+
+1. **Update `.env` file in the `backend/` directory**:
+
+   ```env
+   SEED=true
+   ```
+2. **Run the backend**:
+
+   ```bash
+   cd backend
+   go mod tidy
+   go run main.go
+   ```
+3. **Verify in logs**:
+
+   ```
+   [Seeder] Memulai proses seeding database...
+   [Success] User Admin User berhasil dibuat
+   ...
+   [Seeder] Seeding database selesai!
+   ```
+
+### Seeder Configuration
+
+- **Default**: `SEED=false` (disabled)
+- **Enable**: Set `SEED=true` in `.env` to run seeder on application startup
+- **Safety**: The seeder uses idempotent operations, so it can be run multiple times without creating duplicate data
+
+### Seeder Details
+
+The seeder is implemented in `backend/internal/database/seeder.go` with the following functions:
+
+- `RunSeeder()` - Main seeder function
+- `seedUsers()` - Creates user data
+- `seedCourses()` - Creates course data
+- `seedModules()` - Creates module data for each course
+- `seedLessons()` - Creates lesson data for each module
+- `hashPassword()` - Hashes passwords using bcrypt
+
+All passwords are securely hashed using bcrypt with the default cost factor. The seeder prevents duplicate entries by checking if records already exist before insertion.
 
 ---
 
