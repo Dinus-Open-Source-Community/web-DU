@@ -1,7 +1,7 @@
 import { MapPin, Users } from 'lucide-react'
 import { MentorCalendarEvent } from './calendarUtils'
 import { formatTime, formatCompactDate } from './eventUtils'
-import ClassTypeBadge from './ClassTypeBadge'
+import { ClassTypeBadge } from '@/components/ui/badge'
 
 interface UpcomingGroupProps {
   title: string

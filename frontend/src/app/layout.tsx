@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { AppProviders } from "@/components/providers/app-providers";
 import { QueryProvider } from "@/providers/query-provider";
 import "../styles/globals.css";
 
@@ -31,7 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={` ${poppins.className} font-sans antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <AppProviders>{children}</AppProviders>
+        </QueryProvider>
       </body>
     </html>
   );

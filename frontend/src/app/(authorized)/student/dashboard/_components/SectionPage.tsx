@@ -1,8 +1,7 @@
 import { DashboardStats, Deadlines, Feedbacks, ResumeCourses } from '@/lib/dummyData'
 import React from 'react'
 import { Award, Book, Calendar, CheckCircle, ClipboardCheck, LucideIcon, MessageSquare, PlayCircle } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import StatCard from '@/components/dashboard/StatCard'
+import { Card, StatCard } from '@/components/ui/card'
 import DeadlineItem from '@/components/dashboard/DeadlineItem'
 import FeedbackCard from '@/components/dashboard/FeedbackCard'
 

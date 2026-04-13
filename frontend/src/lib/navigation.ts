@@ -40,15 +40,12 @@ export const adminNavigation: NavItem[] = [
 export const mentorNavigation: NavItem[] = [
   { name: 'Dashboard', icon: LayoutGrid, path: '/mentor/dashboard' },
   {
-    name: 'My Courses',
+    name: 'Courses',
     icon: BookMarked,
-    children: [
-      { name: 'Active Courses', path: '/mentor/courses/active' },
-      { name: 'Drafts', path: '/mentor/courses/drafts' },
-      { name: 'Create Course', path: '/mentor/courses/create' },
-    ],
+    path: '/mentor/courses',
   },
-  { name: 'Assignments', icon: ScrollText, path: '/mentor/assignments' },
+  { name: 'Absensi', icon: Calendar, path: '/mentor/attendeance' },
+  { name: 'Tugas', icon: ScrollText, path: '/mentor/assignments' },
   { name: 'Earnings', icon: Banknote, path: '/mentor/earnings' },
 ]
 

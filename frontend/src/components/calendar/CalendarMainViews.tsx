@@ -5,7 +5,7 @@ import { MONTH_LABELS, WEEKDAY_LABELS } from './constants'
 import { addDays, endOfDay, isDateInRange, startOfDay, startOfMonth, startOfWeek } from './dateUtils'
 import { formatTime, getTypeStyles } from './eventUtils'
 import { cn } from '@/lib/utils'
-import ClassTypeBadge from './ClassTypeBadge'
+import { ClassTypeBadge } from '@/components/ui/badge'
 
 interface CalendarMainViewsProps {
   viewMode: CalendarViewMode

@@ -29,7 +29,21 @@ import {
   ChevronRight,
 } from "lucide-react";
 import QuickInsight from "./QuickInsight";
+import { Badge } from "@/components/ui/badge";
 import type { User, Role, Status } from "./types";
+
+function statusVariant(
+  status: Status,
+): "userActive" | "userInactive" | "userPending" {
+  switch (status) {
+    case "Active":
+      return "userActive";
+    case "Inactive":
+      return "userInactive";
+    case "Pending":
+      return "userPending";
+  }
+}
 
 const DUMMY_USER: User[] = [
   {
@@ -129,30 +143,6 @@ const DUMMY_USER: User[] = [
     status: "Pending",
   },
 ];
-
-function StatusBadge({ status }: { status: Status }) {
-  const styles: Record<Status, string> = {
-    Active: "bg-[#E6F9EE] text-[#22C55E]",
-    Inactive: "bg-[#F3F4F6] text-[#6B7280]",
-    Pending: "bg-[#FFF7E6] text-[#F59E0B]",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold leading-tight ${styles[status]}`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function RoleBadge({ role }: { role: Role }) {
-  return (
-    <span className="inline-flex items-center justify-center rounded-full bg-[#E9EAF0] px-3 py-1 text-xs font-semibold text-[#4B5563] leading-tight">
-      {role}
-    </span>
-  );
-}
 
 function UserAvatarCell({ user }: { user: User }) {
   const initials = user.name
@@ -317,10 +307,10 @@ export default function UserDataTable() {
                     <UserAvatarCell user={user} />
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <RoleBadge role={user.role} />
+                    <Badge variant="userRole">{user.role}</Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <StatusBadge status={user.status} />
+                    <Badge variant={statusVariant(user.status)}>{user.status}</Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     <div className="flex items-center gap-1.5">

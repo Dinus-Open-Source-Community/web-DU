@@ -1,4 +1,4 @@
-import StatCard from '../../../../components/dashboard/StatCard'
+import { StatCard } from '@/components/ui/card'
 import { Book, CalendarCheck, FileWarning, User } from 'lucide-react'
 import UserDataTable from './_components/UserDataTable'
 

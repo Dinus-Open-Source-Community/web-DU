@@ -53,3 +53,4 @@ package-lock.json
 *.lock
 
 .agents/*
+skills-lock.json

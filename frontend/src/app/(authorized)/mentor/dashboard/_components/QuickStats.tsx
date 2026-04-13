@@ -1,4 +1,4 @@
-import StatCard from '@/components/dashboard/StatCard'
+import { StatCard } from '@/components/ui/card'
 import { BarChart3, HelpCircle, Users, BookOpen } from 'lucide-react'
 import { IMentorStats } from '@/lib/types'
 
@@ -8,10 +8,10 @@ interface QuickStatsProps {
 
 export default function QuickStats({ stats }: QuickStatsProps) {
   const statsData = [
-    { label: 'Pending Grading', value: stats.pendingGrading, icon: <BarChart3 size={24} /> },
-    { label: 'Q&A Unanswered', value: stats.unansweredQA, icon: <HelpCircle size={24} /> },
-    { label: 'Active Students', value: stats.activeStudents, icon: <Users size={24} /> },
-    { label: 'Total Courses', value: stats.totalCourses, icon: <BookOpen size={24} /> },
+    { label: 'Menunggu dinilai', value: stats.pendingGrading, icon: <BarChart3 size={24} /> },
+    { label: 'Pertanyaan belum dijawab', value: stats.unansweredQA, icon: <HelpCircle size={24} /> },
+    { label: 'Siswa aktif', value: stats.activeStudents, icon: <Users size={24} /> },
+    { label: 'Total kursus', value: stats.totalCourses, icon: <BookOpen size={24} /> },
   ]
 
   return (

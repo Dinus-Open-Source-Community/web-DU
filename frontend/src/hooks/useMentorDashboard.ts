@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { MentorDashboardStats, MentorScheduleItems, MentorSubmissionItems } from '@/lib/dummyData'
+import { MentorDashboardStats, MentorScheduleItems } from '@/lib/dummyData'
 import { IScheduleItem } from '@/lib/types'
 
 const MENTOR_SCHEDULES_ENDPOINT = process.env.NEXT_PUBLIC_MENTOR_SCHEDULES_ENDPOINT
@@ -98,7 +98,6 @@ export const useMentorDashboard = () => {
     () => ({
       stats: MentorDashboardStats,
       schedules: schedulesQuery.data ?? MentorScheduleItems,
-      submissions: MentorSubmissionItems,
       isLoading: schedulesQuery.isPending,
       isRefreshing: schedulesQuery.isFetching,
       error: schedulesQuery.error,
