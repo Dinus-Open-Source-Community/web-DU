@@ -1,10 +1,10 @@
 import { DashboardStats, Deadlines, Feedbacks, ResumeCourses } from '@/lib/dummyData'
 import React from 'react'
-import Stats from './stats'
 import { Award, Book, Calendar, CheckCircle, ClipboardCheck, LucideIcon, MessageSquare, PlayCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import DeadlineItem from './deadline'
-import FeedbackCard from './feedback'
+import StatCard from '@/components/dashboard/StatCard'
+import DeadlineItem from '@/components/dashboard/DeadlineItem'
+import FeedbackCard from '@/components/dashboard/FeedbackCard'
 
 const iconMap: Record<string, LucideIcon> = {
   Book,
@@ -24,9 +24,11 @@ const SectionPage = () => {
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {DashboardStats.map((stat) => (
-          <Stats key={stat.label} label={stat.label} value={stat.value} icon={iconMap[stat.iconName]} />
-        ))}
+        {DashboardStats.map((stat) => {
+          const Icon = iconMap[stat.iconName]
+
+          return <StatCard key={stat.label} variant="compact" label={stat.label} value={stat.value} icon={Icon ? <Icon className="h-5 w-5" /> : undefined} />
+        })}
       </div>
 
       {/* Resume Learning Section */}

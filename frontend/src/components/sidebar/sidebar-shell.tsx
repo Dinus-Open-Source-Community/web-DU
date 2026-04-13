@@ -28,7 +28,7 @@ interface SidebarProps {
 
 export function Sidebar({ navigation, isOpen, onClose, isMinimized, onToggleMinimize, user, onLogout, onProfile }: SidebarProps) {
   const [flyout, setFlyout] = useState<FlyoutState | null>(null)
-  const flyoutTimer = useRef<ReturnType<typeof setTimeout>>()
+  const flyoutTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const openFlyout = useCallback((e: React.MouseEvent, item: NavItem) => {
     if (!item.children) return

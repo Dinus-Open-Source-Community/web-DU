@@ -3,8 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
 import { studentNavigation } from '@/lib/navigation'
-import { useSidebar } from '@/hooks/use-sidebar'
-import { Menu } from 'lucide-react'
+import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
 
 // TODO: Replace with actual user data from JWT/auth context
@@ -17,7 +16,7 @@ const mockUser = {
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const { isOpen, isMinimized, close, toggleMinimize } = useSidebar()
+  const { isOpen, isMinimized, close, toggleMinimize } = useSidebarContext()
 
   return (
     <div className="min-h-screen w-full bg-[#f5f5f5]">
@@ -33,7 +32,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           router.push('/auth/login')
         }}
         onProfile={() => {
-          router.push('/student/profile')
+          router.push('/profile')
         }}
       />
 

@@ -1,5 +1,3 @@
-import { ReactElement } from 'react'
-
 export type BadgeVariant = 'free' | 'premium' | 'event' | 'draft'
 
 export interface ICardData {
@@ -90,4 +88,82 @@ export interface ICertificate {
   category: string
   credentialId: string
   imageUrl?: string
+}
+
+// Attendance types
+export type AttendanceStatus = 'Hadir' | 'Izin' | 'Alpha'
+
+export interface IAttendanceSummary {
+  totalMeetings: number
+  hadir: number
+  izin: number
+  alpha: number
+  progressPercentage: number
+}
+
+export interface IAttendanceRecord {
+  uid: string
+  meetingNumber: number
+  date: string
+  topic: string
+  status: AttendanceStatus
+  notes?: string
+}
+
+export interface ICourseAttendance {
+  courseId: string
+  courseName: string
+  author: {
+    name: string
+    avatar?: string
+  }
+  image?: string
+  summary: IAttendanceSummary
+  records: IAttendanceRecord[]
+}
+
+// User Profile types
+export interface IUserProfile {
+  uid: string
+  name: string
+  email: string
+  role: string
+  avatar: string
+  lastUpdated: string
+  currency: string
+  language: string
+}
+
+// Mentor Dashboard types
+export type SubmissionStatus = 'Submitted' | 'Late' | 'Pending'
+export type ClassType = 'online' | 'offline'
+
+export interface IMentorStats {
+  pendingGrading: number
+  unansweredQA: number
+  activeStudents: number
+  totalCourses: number
+}
+
+export interface IScheduleItem {
+  uid: string
+  courseId: string
+  courseName: string
+  scheduleDate: string
+  scheduleTime: string
+  endTime: string
+  location: string
+  classType: ClassType
+  studentCount: number
+}
+
+export interface ISubmissionItem {
+  uid: string
+  studentName: string
+  studentAvatar: string
+  courseName: string
+  assignmentTitle: string
+  submissionDate: string
+  status: SubmissionStatus
+  daysLate?: number
 }

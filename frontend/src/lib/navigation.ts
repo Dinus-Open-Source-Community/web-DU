@@ -1,4 +1,4 @@
-import { LayoutGrid, Users2, Library, TrendingUp, SlidersHorizontal, BookMarked, ScrollText, Banknote, Layers, Globe, Trophy, ArrowRightLeft, Shield } from 'lucide-react'
+import { LayoutGrid, Users2, Library, TrendingUp, SlidersHorizontal, BookMarked, ScrollText, Banknote, Layers, Globe, Trophy, ArrowRightLeft, Shield, Calendar } from 'lucide-react'
 
 import type { NavItem } from '@/components/sidebar/types'
 
@@ -57,6 +57,7 @@ export const mentorNavigation: NavItem[] = [
 export const studentNavigation: NavItem[] = [
   { name: 'Dashboard', icon: LayoutGrid, path: '/student/dashboard' },
   { name: 'My Learning', icon: Layers, path: '/student/learning' },
+  { name: 'Attendance', icon: Calendar, path: '/student/attendeance' },
   { name: 'Browse Courses', icon: Globe, path: '/student/browse' },
   { name: 'Certificates', icon: Trophy, path: '/student/certificates' },
   { name: 'Transactions', icon: ArrowRightLeft, path: '/student/transactions' },

@@ -37,17 +37,7 @@ export const filterTransactions = (transactions: TransactionHistoryItem[], searc
 
   const keyword = normalizeText(searchQuery)
   return transactions.filter((transaction) => {
-    return [
-      transaction.uid,
-      transaction.transactionId,
-      transaction.courseName,
-      transaction.classType,
-      transaction.paymentStatus,
-      transaction.paymentMethod,
-    ]
-      .join(' ')
-      .toLowerCase()
-      .includes(keyword)
+    return [transaction.uid, transaction.transactionId, transaction.courseName, transaction.classType, transaction.paymentStatus, transaction.paymentMethod].join(' ').toLowerCase().includes(keyword)
   })
 }
 
@@ -76,6 +66,52 @@ export const sortTransactions = (transactions: TransactionHistoryItem[], sortKey
 export const paginateTransactions = (transactions: TransactionHistoryItem[], currentPage: number, rowsPerPage: number) => {
   const startIndex = (currentPage - 1) * rowsPerPage
   return transactions.slice(startIndex, startIndex + rowsPerPage)
+}
+
+// ──── Payment Progress Utilities ─────────────────────────────────────────────
+
+export interface PaymentStepConfig {
+  label: string
+  subtitle: string
+}
+
+export const getPaymentStepsConfig = (status: PaymentStatus, formattedDate: string): PaymentStepConfig[] => {
+  if (status === 'PAID') {
+    return [
+      { label: 'Invoice Dibuat', subtitle: formattedDate },
+      { label: 'Pembayaran Diterima', subtitle: 'Terverifikasi' },
+      { label: 'Akses Dibuka', subtitle: 'Kelas aktif' },
+    ]
+  }
+  if (status === 'FAILED') {
+    return [
+      { label: 'Invoice Dibuat', subtitle: formattedDate },
+      { label: 'Gagal', subtitle: 'Pembayaran ditolak' },
+      { label: 'Akses Ditutup', subtitle: 'Hubungi support' },
+    ]
+  }
+  // PENDING
+  return [
+    { label: 'Invoice Dibuat', subtitle: formattedDate },
+    { label: 'Pending', subtitle: 'Menunggu konfirmasi' },
+    { label: 'Akses Dibuka', subtitle: 'Estimasi 5-10 menit' },
+  ]
+}
+
+export const getPaymentActiveStep = (status: PaymentStatus): number => {
+  if (status === 'PAID') return 3
+  if (status === 'FAILED') return 3
+  return 2 // PENDING stays at step 2
+}
+
+export const formatPaymentDate = (purchasedAt: string): string => {
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(purchasedAt))
 }
 
 export const getTransactionByUid = (uid: string) => {
@@ -147,4 +183,3 @@ export const getPaymentInstructions = (method: PaymentMethodKey): PaymentInstruc
       }
   }
 }
-

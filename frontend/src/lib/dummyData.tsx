@@ -1,4 +1,20 @@
-import { ICardData, IDashboardStat, IDeadlineItem, IFeedbackItem, IProgramFeatures, IResumeCourse, PaymentStatus, TransactionHistoryItem, ICertificate } from './types'
+import {
+  ICardData,
+  IDashboardStat,
+  IDeadlineItem,
+  IFeedbackItem,
+  IProgramFeatures,
+  IResumeCourse,
+  PaymentStatus,
+  TransactionHistoryItem,
+  ICertificate,
+  IAttendanceSummary,
+  IAttendanceRecord,
+  ICourseAttendance,
+  IMentorStats,
+  IScheduleItem,
+  ISubmissionItem,
+} from './types'
 import { BookIcons, CertificateIcons, GlobeLearningIcon, JobIcons } from '@/components/ui/icons'
 
 export const DataCourse: ICardData[] = [
@@ -203,7 +219,7 @@ export const DataCourse: ICardData[] = [
     },
     rating: 4.8,
     totalReviews: 6990,
-  }
+  },
 ]
 
 export const ProgramFeatures: IProgramFeatures[] = [
@@ -640,5 +656,254 @@ export const DataCertificates: ICertificate[] = [
     category: 'Data Science & AI',
     credentialId: 'WEB-DU-2025-ML-0754',
     imageUrl: 'https://picsum.photos/seed/cert5/800/600',
+  },
+]
+
+// Attendance data
+export const CourseAttendanceData: ICourseAttendance[] = [
+  {
+    courseId: 'crs-react-01',
+    courseName: 'Advanced React Patterns & Next.js 15 Architecture',
+    author: {
+      name: 'Sarah Drasner',
+      avatar: 'https://i.pravatar.cc/150?u=sarah_d',
+    },
+    image: 'https://picsum.photos/seed/react/600/400',
+    summary: {
+      totalMeetings: 12,
+      hadir: 8,
+      izin: 1,
+      alpha: 1,
+      progressPercentage: 80,
+    },
+    records: [
+      { uid: 'rec-01', meetingNumber: 1, date: '02 September 2025', topic: 'Pengenalan React Architecture', status: 'Hadir' },
+      { uid: 'rec-02', meetingNumber: 2, date: '09 September 2025', topic: 'Komponen Fundamental', status: 'Hadir' },
+      { uid: 'rec-03', meetingNumber: 3, date: '16 September 2025', topic: 'Stateless dan Stateful', status: 'Izin', notes: 'Sakit' },
+      { uid: 'rec-04', meetingNumber: 4, date: '23 September 2025', topic: 'React Hook: useState', status: 'Hadir' },
+      { uid: 'rec-05', meetingNumber: 5, date: '30 September 2025', topic: 'React Hook: useEffect', status: 'Hadir' },
+      { uid: 'rec-06', meetingNumber: 6, date: '07 Oktober 2025', topic: 'Custom Hooks', status: 'Hadir' },
+      { uid: 'rec-07', meetingNumber: 7, date: '14 Oktober 2025', topic: 'Context API Dasar', status: 'Alpha' },
+      { uid: 'rec-08', meetingNumber: 8, date: '21 Oktober 2025', topic: 'Review Materi', status: 'Hadir' },
+      { uid: 'rec-09', meetingNumber: 9, date: '28 Oktober 2025', topic: 'Pengenalan Next.js Route', status: 'Hadir' },
+      { uid: 'rec-10', meetingNumber: 10, date: '04 November 2025', topic: 'Server Component vs Client', status: 'Hadir' },
+    ],
+  },
+  {
+    courseId: 'crs-uiux-02',
+    courseName: 'UI/UX Fundamentals',
+    author: {
+      name: 'Jessica Wong',
+      avatar: 'https://i.pravatar.cc/150?u=jess_w',
+    },
+    image: 'https://picsum.photos/seed/uiux/600/400',
+    summary: {
+      totalMeetings: 8,
+      hadir: 8,
+      izin: 0,
+      alpha: 0,
+      progressPercentage: 100,
+    },
+    records: [
+      { uid: 'rec-11', meetingNumber: 1, date: '10 September 2025', topic: 'Design Thinking', status: 'Hadir' },
+      { uid: 'rec-12', meetingNumber: 2, date: '17 September 2025', topic: 'Wireframing', status: 'Hadir' },
+      { uid: 'rec-13', meetingNumber: 3, date: '24 September 2025', topic: 'Prototyping', status: 'Hadir' },
+      { uid: 'rec-14', meetingNumber: 4, date: '01 Oktober 2025', topic: 'User Testing', status: 'Hadir' },
+      { uid: 'rec-15', meetingNumber: 5, date: '08 Oktober 2025', topic: 'Visual Hierarchy', status: 'Hadir' },
+      { uid: 'rec-16', meetingNumber: 6, date: '15 Oktober 2025', topic: 'Color Theory', status: 'Hadir' },
+      { uid: 'rec-17', meetingNumber: 7, date: '22 Oktober 2025', topic: 'Typography', status: 'Hadir' },
+      { uid: 'rec-18', meetingNumber: 8, date: '29 Oktober 2025', topic: 'Final Review', status: 'Hadir' },
+    ],
+  },
+  {
+    courseId: 'crs-tailwind-03',
+    courseName: 'Mastering Tailwind CSS v4 & Framer Motion',
+    author: {
+      name: 'Marcus Levin',
+      avatar: 'https://i.pravatar.cc/150?u=marcus_l',
+    },
+    image: 'https://picsum.photos/seed/tailwind/600/400',
+    summary: {
+      totalMeetings: 10,
+      hadir: 4,
+      izin: 0,
+      alpha: 1,
+      progressPercentage: 50,
+    },
+    records: [
+      { uid: 'rec-19', meetingNumber: 1, date: '05 September 2025', topic: 'Utility-first Concept', status: 'Hadir' },
+      { uid: 'rec-20', meetingNumber: 2, date: '12 September 2025', topic: 'Setup & Installation', status: 'Hadir' },
+      { uid: 'rec-21', meetingNumber: 3, date: '19 September 2025', topic: 'Layouting Flexbox', status: 'Alpha' },
+      { uid: 'rec-22', meetingNumber: 4, date: '26 September 2025', topic: 'Layouting Grid', status: 'Hadir' },
+      { uid: 'rec-23', meetingNumber: 5, date: '03 Oktober 2025', topic: 'Responsive Design', status: 'Hadir' },
+    ],
+  },
+]
+
+// Profile data
+export const ProfileData = {
+  uid: 'usr-8921md',
+  name: 'Zapp',
+  email: 'saptogusty@gmail.com',
+  role: 'STUDENT',
+  avatar: 'https://i.pravatar.cc/150?img=11',
+  lastUpdated: '12 Apr 2026',
+}
+
+// Mentor Dashboard data
+export const MentorDashboardStats: IMentorStats = {
+  pendingGrading: 12,
+  unansweredQA: 5,
+  activeStudents: 24,
+  totalCourses: 4,
+}
+
+export const MentorScheduleItems: IScheduleItem[] = [
+  {
+    uid: 'sch-001',
+    courseId: 'crs-react-01',
+    courseName: 'Advanced React Patterns & Next.js 15 Architecture',
+    scheduleDate: '13 April 2026',
+    scheduleTime: '09:00',
+    endTime: '11:00',
+    location: 'Zoom - Room 1',
+    classType: 'online',
+    studentCount: 28,
+  },
+  {
+    uid: 'sch-002',
+    courseId: 'crs-uiux-02',
+    courseName: 'UI/UX Fundamentals',
+    scheduleDate: '13 April 2026',
+    scheduleTime: '14:00',
+    endTime: '16:00',
+    location: 'Ruang 201, Gedung A',
+    classType: 'offline',
+    studentCount: 24,
+  },
+  {
+    uid: 'sch-003',
+    courseId: 'crs-tailwind-03',
+    courseName: 'Mastering Tailwind CSS v4 & Framer Motion',
+    scheduleDate: '14 April 2026',
+    scheduleTime: '10:00',
+    endTime: '12:00',
+    location: 'Zoom - Room 2',
+    classType: 'online',
+    studentCount: 19,
+  },
+  {
+    uid: 'sch-004',
+    courseId: 'crs-python-04',
+    courseName: 'Python Data Science & Machine Learning',
+    scheduleDate: '14 April 2026',
+    scheduleTime: '13:00',
+    endTime: '15:00',
+    location: 'Ruang 301, Gedung B',
+    classType: 'offline',
+    studentCount: 22,
+  },
+  {
+    uid: 'sch-005',
+    courseId: 'crs-react-01',
+    courseName: 'Advanced React Patterns & Next.js 15 Architecture',
+    scheduleDate: '15 April 2026',
+    scheduleTime: '08:00',
+    endTime: '10:00',
+    location: 'Zoom - Room 1',
+    classType: 'online',
+    studentCount: 28,
+  },
+  {
+    uid: 'sch-006',
+    courseId: 'crs-golang-05',
+    courseName: 'Go (Golang) Microservices & Backend',
+    scheduleDate: '15 April 2026',
+    scheduleTime: '15:00',
+    endTime: '17:00',
+    location: 'Ruang 102, Gedung A',
+    classType: 'offline',
+    studentCount: 18,
+  },
+  {
+    uid: 'sch-007',
+    courseId: 'crs-uiux-02',
+    courseName: 'UI/UX Fundamentals',
+    scheduleDate: '16 April 2026',
+    scheduleTime: '11:00',
+    endTime: '13:00',
+    location: 'Zoom - Room 3',
+    classType: 'online',
+    studentCount: 24,
+  },
+  {
+    uid: 'sch-008',
+    courseId: 'crs-cyber-06',
+    courseName: 'Cybersecurity Analyst Bootcamp',
+    scheduleDate: '17 April 2026',
+    scheduleTime: '09:00',
+    endTime: '11:30',
+    location: 'Ruang 401, Gedung C',
+    classType: 'offline',
+    studentCount: 15,
+  },
+]
+
+export const MentorSubmissionItems: ISubmissionItem[] = [
+  {
+    uid: 'sub-001',
+    studentName: 'Ahmad Rizki',
+    studentAvatar: 'https://i.pravatar.cc/150?u=ahmad_r',
+    courseName: 'Advanced React Patterns & Next.js 15 Architecture',
+    assignmentTitle: 'Build Custom React Hook Library',
+    submissionDate: '12 April 2026 14:30',
+    status: 'Submitted',
+  },
+  {
+    uid: 'sub-002',
+    studentName: 'Siti Nurhaliza',
+    studentAvatar: 'https://i.pravatar.cc/150?u=siti_n',
+    courseName: 'UI/UX Fundamentals',
+    assignmentTitle: 'Mobile App Redesign Project',
+    submissionDate: '11 April 2026 09:15',
+    status: 'Submitted',
+  },
+  {
+    uid: 'sub-003',
+    studentName: 'Budi Santoso',
+    studentAvatar: 'https://i.pravatar.cc/150?u=budi_s',
+    courseName: 'Mastering Tailwind CSS v4 & Framer Motion',
+    assignmentTitle: 'Responsive Dashboard Build',
+    submissionDate: '10 April 2026 16:45',
+    status: 'Late',
+    daysLate: 2,
+  },
+  {
+    uid: 'sub-004',
+    studentName: 'Rina Wijaya',
+    studentAvatar: 'https://i.pravatar.cc/150?u=rina_w',
+    courseName: 'Advanced React Patterns & Next.js 15 Architecture',
+    assignmentTitle: 'State Management with Context API',
+    submissionDate: '09 April 2026 13:20',
+    status: 'Submitted',
+  },
+  {
+    uid: 'sub-005',
+    studentName: 'Doni Hermanto',
+    studentAvatar: 'https://i.pravatar.cc/150?u=doni_h',
+    courseName: 'Python Data Science & Machine Learning',
+    assignmentTitle: 'Data Analysis & Visualization',
+    submissionDate: 'Pending',
+    status: 'Pending',
+  },
+  {
+    uid: 'sub-006',
+    studentName: 'Lestari Putri',
+    studentAvatar: 'https://i.pravatar.cc/150?u=lestari_p',
+    courseName: 'UI/UX Fundamentals',
+    assignmentTitle: 'User Research Report',
+    submissionDate: '08 April 2026 11:00',
+    status: 'Late',
+    daysLate: 4,
   },
 ]

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, ChevronDown, Clock, Copy, Check as CheckIcon, Download, QrCode, Landmark, Wallet, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { StatusBadge } from '@/components/ui/StatusBadge'
+import { Badge } from '@/components/ui/badge'
 import { PaymentProgressStepper, PaymentResultBanner } from '@/components/ui/PaymentProgressStepper'
 import { formatCountdown, formatDateTime, formatRupiah, getTransactionByUid, getPaymentInstructions, type PaymentInstructionSet } from '@/lib/func'
 
@@ -274,7 +274,7 @@ export default function TransactionDetailPage() {
               <div className="flex items-center justify-between py-2.5">
                 <dt className="font-medium text-slate-500">Status</dt>
                 <dd>
-                  <StatusBadge status={transaction.paymentStatus} />
+                  <Badge type="payment" status={transaction.paymentStatus} />
                 </dd>
               </div>
             </dl>

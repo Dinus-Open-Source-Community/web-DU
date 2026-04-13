@@ -3,60 +3,20 @@
 import { useEffect, useState } from 'react'
 import { Check, X, RefreshCw, Loader2, Unlock } from 'lucide-react'
 import { PaymentStatus } from '@/lib/types'
+import { getPaymentStepsConfig, getPaymentActiveStep, formatPaymentDate } from '@/lib/func'
 
 interface PaymentProgressStepperProps {
   status: PaymentStatus
   purchasedAt: string
 }
 
-interface StepConfig {
-  label: string
-  subtitle: string
-}
-
-const getStepsConfig = (status: PaymentStatus, formattedDate: string): StepConfig[] => {
-  if (status === 'PAID') {
-    return [
-      { label: 'Invoice Dibuat', subtitle: formattedDate },
-      { label: 'Pembayaran Diterima', subtitle: 'Terverifikasi' },
-      { label: 'Akses Dibuka', subtitle: 'Kelas aktif' },
-    ]
-  }
-  if (status === 'FAILED') {
-    return [
-      { label: 'Invoice Dibuat', subtitle: formattedDate },
-      { label: 'Gagal', subtitle: 'Pembayaran ditolak' },
-      { label: 'Akses Ditutup', subtitle: 'Hubungi support' },
-    ]
-  }
-  // PENDING
-  return [
-    { label: 'Invoice Dibuat', subtitle: formattedDate },
-    { label: 'Pending', subtitle: 'Menunggu konfirmasi' },
-    { label: 'Akses Dibuka', subtitle: 'Estimasi 5-10 menit' },
-  ]
-}
-
-const getActiveStep = (status: PaymentStatus): number => {
-  if (status === 'PAID') return 3
-  if (status === 'FAILED') return 3
-  return 2 // PENDING stays at step 2
-}
-
 export function PaymentProgressStepper({ status, purchasedAt }: PaymentProgressStepperProps) {
   const [animatedStep, setAnimatedStep] = useState(0)
   const [progressWidth, setProgressWidth] = useState(0)
 
-  const formattedDate = new Intl.DateTimeFormat('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(purchasedAt))
-
-  const steps = getStepsConfig(status, formattedDate)
-  const activeStep = getActiveStep(status)
+  const formattedDate = formatPaymentDate(purchasedAt)
+  const steps = getPaymentStepsConfig(status, formattedDate)
+  const activeStep = getPaymentActiveStep(status)
 
   // Animate steps appearing one by one
   useEffect(() => {

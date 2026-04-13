@@ -6,7 +6,6 @@ import { Rating } from './rating'
 import { BadgeVariant, PaymentStatus } from '@/lib/types'
 import { Profile } from './profile'
 import { Button } from './button'
-import { StatusBadge } from './StatusBadge'
 
 interface CardProps {
   variant?: 'course' | 'resume' | 'transaction'
@@ -100,22 +99,14 @@ function Card({
           {/* Top row: Badge + Status */}
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              {classType && (
-                <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                  {classType}
-                </span>
-              )}
-              {transactionId && (
-                <span className="text-xs font-medium text-slate-400">{transactionId}</span>
-              )}
+              {classType && <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">{classType}</span>}
+              {transactionId && <span className="text-xs font-medium text-slate-400">{transactionId}</span>}
             </div>
-            {paymentStatus && <StatusBadge status={paymentStatus} />}
+            {paymentStatus && <Badge type="payment" status={paymentStatus} />}
           </div>
 
           {/* Title */}
-          <h3 className="mb-1.5 line-clamp-2 text-base font-semibold leading-snug text-slate-900 md:text-lg">
-            {title}
-          </h3>
+          <h3 className="mb-1.5 line-clamp-2 text-base font-semibold leading-snug text-slate-900 md:text-lg">{title}</h3>
 
           {/* Meta info row */}
           <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-slate-500">
@@ -124,16 +115,12 @@ function Card({
                 <span className="font-medium text-slate-400">Via</span> {paymentMethod}
               </span>
             )}
-            {purchasedAt && (
-              <span>{purchasedAt}</span>
-            )}
+            {purchasedAt && <span>{purchasedAt}</span>}
           </div>
 
           {/* Bottom row: Price + Action */}
           <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-            {price && (
-              <span className="text-lg font-bold tracking-tight text-slate-900">{price}</span>
-            )}
+            {price && <span className="text-lg font-bold tracking-tight text-slate-900">{price}</span>}
             {detailHref && (
               <Button
                 asChild
