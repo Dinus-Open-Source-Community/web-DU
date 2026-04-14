@@ -5,6 +5,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_USE_MOCK_DATA=${NEXT_PUBLIC_USE_MOCK_DATA}
     depends_on:
       - backend
     volumes:
@@ -47,7 +48,6 @@ services:
 
   db:
     image: postgres:15
-    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -59,13 +59,11 @@ services:
 
   adminer:
     image: adminer
-    restart: always
     ports:
       - "8012:8080"
 
   minio:
     image: minio/minio:latest
-    restart: always
     ports:
       - "9000:9000"
       - "9001:9001"
