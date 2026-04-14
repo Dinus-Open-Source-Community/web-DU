@@ -33,6 +33,8 @@ export interface IResumeCourse {
   image?: string
   description?: string
   variantBadge?: BadgeVariant
+  /** Jika diisi, kartu "Lanjut" menuju preview modul kursus ini */
+  courseUid?: string
   author?: {
     name: string
     avatar: string
@@ -60,13 +62,14 @@ export interface IFeedbackItem {
   }
 }
 
-// Transaction types
+// ─── Transaksi (selaraskan dengan respons API pembayaran / invoice) ───
 export type PaymentStatus = 'PAID' | 'PENDING' | 'FAILED'
 
 export type TransactionSortKey = 'transactionId' | 'courseName' | 'classType' | 'price' | 'paymentStatus'
 
 export type SortDirection = 'asc' | 'desc'
 
+/** Satu baris riwayat transaksi pembelian kursus (FE). */
 export interface TransactionHistoryItem {
   uid: string
   transactionId: string
@@ -180,7 +183,7 @@ export interface ICourseModulesState {
   contents: Record<string, string>
 }
 
-/** Kursus milik mentor (daftar + kartu + penyimpanan lokal demo) */
+/** Kursus milik mentor — metadata tampilan editor & daftar (sinkronkan dengan API kursus). */
 export interface IMentorCourse {
   uid: string
   title: string
@@ -198,7 +201,7 @@ export interface IMentorCourse {
   updatedAt?: string
 }
 
-/** Status peserta di halaman detail mentor (demo) */
+/** Status peserta pada tabel mentor. */
 export type MentorCourseStudentStatus = 'Aktif' | 'Selesai' | 'Terlambat' | 'Belum mulai'
 
 /** Baris peserta per kursus — progress & absensi untuk tabel mentor */
@@ -214,7 +217,7 @@ export interface IMentorCourseStudent {
   lastActiveLabel: string
 }
 
-// ─── Mentor attendance (jadwal kelas + sesi per tanggal, demo localStorage) ─
+// ─── Mentor attendance (jadwal + sesi per tanggal; sementara client storage) ─
 
 /** Jadwal pertemuan berulang: cocok jika weekday sama dengan hari ini */
 export interface IMentorClassScheduleEntry {
@@ -264,16 +267,20 @@ export interface IMentorCourseAssignment {
   /** Pertemuan ke-1 … ke-N (N = meetingCount kursus) */
   meetingNumber: number
   title: string
+  /** HTML dari editor (atau teks polos lama) */
   description: string
   deadlineAt: string
   status: MentorAssignmentLifecycleStatus
   autoCloseAfterDeadline: boolean
   allowResubmit: boolean
   maxAttempts?: number
+  /** Lampiran instruksi mentor (URL aman / signed URL dari API). */
+  instructionAttachments?: { fileName: string; url: string; mime?: string }[]
 }
 
 export type SubmissionContentBlock =
   | { type: 'text'; text: string }
+  | { type: 'html'; html: string }
   | { type: 'image'; url: string; alt?: string }
   | { type: 'file'; fileName: string; url: string; mime?: string }
   | { type: 'videoEmbed'; provider: 'youtube' | 'vimeo' | 'other'; embedUrl: string; title?: string }

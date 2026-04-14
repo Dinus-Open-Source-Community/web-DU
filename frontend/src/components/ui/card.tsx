@@ -35,6 +35,8 @@ interface CardProps {
   paymentMethod?: string
   purchasedAt?: string
   detailHref?: string
+  /** Variant `resume`: tautan tombol Lanjut / Lihat kursus */
+  resumeDetailHref?: string
   /** Variant `mentorCourse`: subtitle di bawah judul */
   mentorHeader?: string
   mentorPublished?: boolean
@@ -93,6 +95,7 @@ function Card({
   paymentMethod,
   purchasedAt,
   detailHref,
+  resumeDetailHref,
   mentorHeader,
   mentorPublished,
   mentorModuleCount,
@@ -238,7 +241,7 @@ function Card({
 
   if (variant === 'resume') {
     return (
-      <div className="flex h-full w-full flex-col overflow-hidden drop-shadow-md transition-all hover:drop-shadow-lg duration-300">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white transition-colors hover:border-slate-300/90">
         {/* Image Content */}
         <div className="relative aspect-video w-full shrink-0 rounded-[10px] min-h-[203px]">
           {image ? (
@@ -251,7 +254,7 @@ function Card({
         </div>
 
         {/* Content description */}
-        <div className="relative z-10 -mt-6 flex grow flex-col rounded-xl bg-white p-5 border border-slate-100/50">
+        <div className="relative z-10 -mt-6 flex grow flex-col rounded-xl bg-white p-5">
           {/* Top Info (Badge & Rating) */}
           {(variantBadge || rating !== undefined) && (
             <div className="mb-3 flex items-center justify-between">
@@ -286,8 +289,12 @@ function Card({
               <Profile image={author.avatar ?? '/pinguin.png'} name={author.name ?? ''} />
               {progress === 100 ? (
                 <Badge variant="progressComplete" />
+              ) : resumeDetailHref ? (
+                <Button asChild className="px-5 py-2 text-sm font-semibold rounded-lg shadow-none" variant="default" size="sm">
+                  <Link href={resumeDetailHref}>Lanjut</Link>
+                </Button>
               ) : (
-                <Button className="px-5 py-2 text-sm font-semibold rounded-lg shadow-xs" variant="default" size="sm">
+                <Button className="px-5 py-2 text-sm font-semibold rounded-lg shadow-none" variant="default" size="sm">
                   Lanjut
                 </Button>
               )}

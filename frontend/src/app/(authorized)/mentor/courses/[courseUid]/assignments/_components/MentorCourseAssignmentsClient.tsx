@@ -21,7 +21,6 @@ import {
   getDeadlineUrgency,
   getEffectiveAssignmentStatus,
   getSubmissionsForCourse,
-  isSeedAssignmentUid,
   type SubmissionFilterStatus,
 } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
@@ -247,7 +246,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
             <p className="mt-1 text-sm text-slate-500">
               <span className="font-medium text-slate-600">Create</span> buat baru ·{' '}
               <span className="font-medium text-slate-600">Update</span> edit ·{' '}
-              <span className="font-medium text-slate-600">Delete</span> hapus. Tugas bertanda demo tetap bisa disunting atau dihapus dari daftar.
+              <span className="font-medium text-slate-600">Delete</span> hapus dari daftar.
             </p>
           </div>
           <Button type="button" className="w-fit shrink-0 gap-1.5 rounded-xl" onClick={openCreate}>
@@ -279,7 +278,6 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
                 const eff = getEffectiveAssignmentStatus(a, now)
                 const urg = getDeadlineUrgency(a, now)
                 const urgentVariant = deadlineUrgencyVariant(urg)
-                const seed = isSeedAssignmentUid(a.uid)
                 return (
                   <tr
                     key={a.uid}
@@ -288,12 +286,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
                       urg === 'due_soon' && 'border-l-4 border-l-amber-400 bg-amber-50/40',
                       urg === 'overdue' && 'border-l-4 border-l-rose-300 bg-rose-50/35'
                     )}>
-                    <td className="px-3 py-3 font-medium text-slate-900">
-                      {a.title}
-                      {seed && (
-                        <Badge variant="demo" className="ml-2" />
-                      )}
-                    </td>
+                    <td className="px-3 py-3 font-medium text-slate-900">{a.title}</td>
                     <td className="px-3 py-3 tabular-nums text-slate-600">#{a.meetingNumber}</td>
                     <td className="px-3 py-3 tabular-nums text-slate-600">
                       {format(new Date(a.deadlineAt), 'd MMM yyyy HH:mm', { locale: id })}

@@ -5,16 +5,10 @@ import { Sidebar } from '@/components/sidebar'
 import { studentNavigation } from '@/lib/navigation'
 import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
-
-// TODO: Replace with actual user data from JWT/auth context
-const mockUser = {
-  name: 'Student User',
-  email: 'student@doscom.org',
-  role: 'Student',
-  avatar: '',
-}
+import { getSidebarUser } from '@/lib/auth/sidebar-user'
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
+  const user = getSidebarUser()
   const router = useRouter()
   const { isOpen, isMinimized, close, toggleMinimize } = useSidebarContext()
 
@@ -26,9 +20,8 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         onClose={close}
         isMinimized={isMinimized}
         onToggleMinimize={toggleMinimize}
-        user={mockUser}
+        user={user}
         onLogout={() => {
-          console.log('Logout clicked')
           router.push('/auth/login')
         }}
         onProfile={() => {

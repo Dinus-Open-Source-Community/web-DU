@@ -5,29 +5,22 @@ import { Sidebar } from '@/components/sidebar'
 import { mentorNavigation } from '@/lib/navigation'
 import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
+import { getSidebarUser } from '@/lib/auth/sidebar-user'
 
-// TODO: Replace with actual user data from JWT/auth context
-const mockUser = {
-  name: 'Mentor User',
-  email: 'mentor@doscom.org',
-  role: 'Mentor',
-  avatar: '',
-}
-
-/** Preview/detail kursus atau absensi per kursus: layar tanpa sidebar */
-function isMentorCourseDetailRoute(pathname: string) {
+/** Attendance per-course: full-screen without sidebar */
+function isMentorFullScreenRoute(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
-  if (segments.length !== 3 || segments[0] !== 'mentor') return false
-  if (segments[1] === 'courses' && segments[2] !== 'create') return true
-  if (segments[1] === 'attendeance') return true
+  if (segments.length < 3 || segments[0] !== 'mentor') return false
+  if (segments[1] === 'attendance' && segments.length >= 3) return true
   return false
 }
 
 export default function MentorLayout({ children }: { children: React.ReactNode }) {
+  const user = getSidebarUser()
   const pathname = usePathname()
   const router = useRouter()
   const { isOpen, isMinimized, close, toggleMinimize } = useSidebarContext()
-  const hideSidebar = isMentorCourseDetailRoute(pathname)
+  const hideSidebar = isMentorFullScreenRoute(pathname)
 
   return (
     <div className="flex min-h-screen bg-[#f5f5f5]">
@@ -38,9 +31,8 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
           onClose={close}
           isMinimized={isMinimized}
           onToggleMinimize={toggleMinimize}
-          user={mockUser}
+          user={user}
           onLogout={() => {
-            console.log('Logout clicked')
             router.push('/auth/login')
           }}
           onProfile={() => {

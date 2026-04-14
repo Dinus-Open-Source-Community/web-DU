@@ -5,6 +5,7 @@ import type {
   MentorAttendanceApprovalMode,
   MentorSessionAttendanceStatus,
 } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { getMergedMentorCourses, getCourseMeetingCount } from '@/lib/mentorCourseStorage'
 import type { IMentorCourse } from '@/lib/types'
 import { getMentorCourseStudents } from '@/lib/mentorCourseStudents'
@@ -47,9 +48,10 @@ function writeSchedules(entries: IMentorClassScheduleEntry[]) {
   localStorage.setItem(SCHEDULES_KEY, JSON.stringify(entries))
 }
 
-/** Seed Senin 09:00 & 14:00 untuk demo (13 Apr 2026 = Senin) */
+/** Seed jadwal contoh hanya saat fixture mock aktif (pengembangan / `NEXT_PUBLIC_USE_MOCK_DATA=true`). */
 function ensureScheduleSeed() {
   if (typeof window === 'undefined') return
+  if (!isMockDataEnabled()) return
   if (localStorage.getItem(SCHEDULES_KEY) != null) return
   const seed: IMentorClassScheduleEntry[] = [
     { id: 'seed-mc001', courseUid: 'mc-001', weekday: 1, timeLabel: '09:00' },
@@ -247,7 +249,7 @@ export function rejectMentorStudentPending(courseUid: string, isoDate: string, s
   writeSession(courseUid, isoDate, nextState)
 }
 
-/** Simulasi ajuan siswa — mode auto langsung terapkan */
+/** Mencatat ajuan kehadiran/izin dari siswa (client storage sampai API tersedia). */
 export function submitStudentAttendanceRequest(
   courseUid: string,
   isoDate: string,

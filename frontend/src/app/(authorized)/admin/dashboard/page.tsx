@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import { StatCard } from '@/components/ui/card'
+
+export const metadata: Metadata = {
+  title: 'Dashboard Admin',
+  description: 'Ringkasan aktivitas platform.',
+  robots: { index: false, follow: false },
+}
 import { Book, CalendarCheck, FileWarning, User } from 'lucide-react'
 import UserDataTable from './_components/UserDataTable'
 

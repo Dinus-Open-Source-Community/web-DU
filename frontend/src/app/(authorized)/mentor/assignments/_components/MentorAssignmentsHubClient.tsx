@@ -46,7 +46,7 @@ export function MentorAssignmentsHubClient() {
                 key={c.uid}
                 className={cn(
                   CARD_PANEL_CLASS,
-                  'flex flex-col overflow-hidden transition-colors hover:border-slate-300/90'
+                  'flex flex-col overflow-hidden border-slate-200/80 shadow-none transition-colors hover:border-slate-300/90'
                 )}>
                 <div className="relative aspect-16/10 w-full bg-slate-100">
                   {c.image?.startsWith('data:') ? (

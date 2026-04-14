@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { DataCertificates } from '@/lib/dummyData'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { useParams, notFound } from 'next/navigation'
 import GuestLayout from '@/components/layout/GuestLayout'
 import CertificateDetail from './_components/CertificateDetail'
@@ -9,7 +10,8 @@ export default function CertificatePage() {
   const params = useParams()
   const uid = params?.uid as string
 
-  const certificate = DataCertificates.find((cert) => cert.uid === uid)
+  const list = isMockDataEnabled() ? DataCertificates : []
+  const certificate = list.find((cert) => cert.uid === uid)
 
   if (!certificate) {
     notFound()

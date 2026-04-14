@@ -1,13 +1,13 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { CoursePreviewClient } from './_components/CoursePreviewClient'
+import { CourseHubClient } from './_components/CourseHubClient'
 
-export default function MentorCoursePreviewPage() {
+export default function MentorCourseHubPage() {
   const params = useParams<{ courseUid: string }>()
   const courseUid = Array.isArray(params.courseUid) ? params.courseUid[0] : params.courseUid
 
   if (!courseUid) return null
 
-  return <CoursePreviewClient courseUid={courseUid} />
+  return <CourseHubClient courseUid={courseUid} />
 }

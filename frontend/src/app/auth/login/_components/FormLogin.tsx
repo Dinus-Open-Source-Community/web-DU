@@ -19,8 +19,7 @@ const FormLogin = () => {
       </div>
 
       <p className="mb-8 align-middle text-lg leading-[1.2] font-normal tracking-normal">
-        Doscom University is one of DOSCOM's open source intensive training
-        programs (bootcamps).
+        Doscom University is one of DOSCOM&apos;s open source intensive training programs (bootcamps).
       </p>
 
       {/* Input Form*/}

@@ -3,7 +3,8 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MentorDashboardStats, MentorScheduleItems } from '@/lib/dummyData'
-import { IScheduleItem } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
+import type { IScheduleItem } from '@/lib/types'
 
 const MENTOR_SCHEDULES_ENDPOINT = process.env.NEXT_PUBLIC_MENTOR_SCHEDULES_ENDPOINT
 
@@ -55,9 +56,11 @@ const extractScheduleCandidates = (payload: unknown): unknown[] => {
   return []
 }
 
+const fallbackSchedules = (): IScheduleItem[] => (isMockDataEnabled() ? MentorScheduleItems : [])
+
 const fetchMentorSchedules = async (): Promise<IScheduleItem[]> => {
   if (!MENTOR_SCHEDULES_ENDPOINT) {
-    return MentorScheduleItems
+    return fallbackSchedules()
   }
 
   try {
@@ -77,32 +80,34 @@ const fetchMentorSchedules = async (): Promise<IScheduleItem[]> => {
     const candidates = extractScheduleCandidates(payload)
     const normalized = candidates.filter(isScheduleItem)
 
-    return normalized.length > 0 ? normalized : MentorScheduleItems
+    return normalized.length > 0 ? normalized : fallbackSchedules()
   } catch {
-    return MentorScheduleItems
+    return fallbackSchedules()
   }
 }
 
 export const useMentorDashboard = () => {
+  const initialSchedules = useMemo(() => fallbackSchedules(), [])
+
   const schedulesQuery = useQuery({
     queryKey: ['mentor-dashboard', 'calendar-events'],
     queryFn: fetchMentorSchedules,
-    initialData: MentorScheduleItems,
-    staleTime: 0,
-    refetchInterval: 20_000,
-    refetchIntervalInBackground: true,
-    refetchOnWindowFocus: true,
+    initialData: initialSchedules,
+    staleTime: 60_000,
+    refetchInterval: MENTOR_SCHEDULES_ENDPOINT ? 20_000 : false,
+    refetchIntervalInBackground: Boolean(MENTOR_SCHEDULES_ENDPOINT),
+    refetchOnWindowFocus: Boolean(MENTOR_SCHEDULES_ENDPOINT),
   })
 
   const data = useMemo(
     () => ({
-      stats: MentorDashboardStats,
-      schedules: schedulesQuery.data ?? MentorScheduleItems,
+      stats: isMockDataEnabled() ? MentorDashboardStats : { pendingGrading: 0, unansweredQA: 0, activeStudents: 0, totalCourses: 0 },
+      schedules: schedulesQuery.data ?? initialSchedules,
       isLoading: schedulesQuery.isPending,
       isRefreshing: schedulesQuery.isFetching,
       error: schedulesQuery.error,
     }),
-    [schedulesQuery.data, schedulesQuery.error, schedulesQuery.isFetching, schedulesQuery.isPending],
+    [schedulesQuery.data, schedulesQuery.error, schedulesQuery.isFetching, schedulesQuery.isPending, initialSchedules],
   )
 
   return data

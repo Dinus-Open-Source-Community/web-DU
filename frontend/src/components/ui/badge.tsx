@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 import type { BadgeVariant } from '@/lib/types'
 import type { PaymentStatus } from '@/lib/types'
-import { statusLabels } from '@/lib/dummyData'
+import { paymentStatusLabels } from '@/lib/constants/payment-status'
 import type { ClassType } from '@/lib/types'
 
 /**
@@ -58,6 +58,18 @@ export const appBadgeVariants = cva(
         // Progress / selesai (kartu resume)
         progressComplete:
           'rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-600 shadow-sm',
+        // Mentor absensi — status peserta kursus (tabel / kartu)
+        attendanceStudentActive:
+          'rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-800',
+        attendanceStudentComplete:
+          'rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-800',
+        attendanceStudentLate:
+          'rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-900',
+        attendanceStudentNotStarted:
+          'rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600',
+        // Ajuan absensi menunggu review
+        attendanceAjuanPending:
+          'rounded-md border border-amber-200/90 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-950',
       },
     },
     defaultVariants: {
@@ -73,9 +85,9 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   premium: 'Premium',
   event: 'Event',
   draft: 'Draft',
-  paymentPaid: statusLabels.PAID,
-  paymentPending: statusLabels.PENDING,
-  paymentFailed: statusLabels.FAILED,
+  paymentPaid: paymentStatusLabels.PAID,
+  paymentPending: paymentStatusLabels.PENDING,
+  paymentFailed: paymentStatusLabels.FAILED,
   assignmentDraft: 'Draf',
   assignmentPublished: 'Terbit',
   assignmentClosed: 'Ditutup',
@@ -90,6 +102,11 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   classOnline: 'online',
   classOffline: 'offline',
   progressComplete: 'Selesai',
+  attendanceStudentActive: 'Aktif',
+  attendanceStudentComplete: 'Selesai',
+  attendanceStudentLate: 'Terlambat',
+  attendanceStudentNotStarted: 'Belum mulai',
+  attendanceAjuanPending: 'Menunggu',
 }
 
 export type BadgeProps = {
@@ -112,13 +129,13 @@ export function CourseBadge({ variant, className }: { variant: BadgeVariant; cla
   return <Badge variant={variant} className={className} />
 }
 
-/** Kompatibilitas: status pembayaran + gaya dari dummyData */
+/** Status pembayaran dengan gaya badge aplikasi. */
 export function PaymentBadge({ status, className }: { status: PaymentStatus; className?: string }) {
   const v =
     status === 'PAID' ? 'paymentPaid' : status === 'PENDING' ? 'paymentPending' : 'paymentFailed'
   return (
     <Badge variant={v} className={className}>
-      {statusLabels[status]}
+      {paymentStatusLabels[status]}
     </Badge>
   )
 }

@@ -44,7 +44,7 @@ export const mentorNavigation: NavItem[] = [
     icon: BookMarked,
     path: '/mentor/courses',
   },
-  { name: 'Absensi', icon: Calendar, path: '/mentor/attendeance' },
+  { name: 'Absensi', icon: Calendar, path: '/mentor/attendance' },
   { name: 'Tugas', icon: ScrollText, path: '/mentor/assignments' },
   { name: 'Earnings', icon: Banknote, path: '/mentor/earnings' },
 ]
@@ -53,8 +53,15 @@ export const mentorNavigation: NavItem[] = [
 
 export const studentNavigation: NavItem[] = [
   { name: 'Dashboard', icon: LayoutGrid, path: '/student/dashboard' },
-  { name: 'My Learning', icon: Layers, path: '/student/learning' },
-  { name: 'Attendance', icon: Calendar, path: '/student/attendeance' },
+  {
+    name: 'My Learning',
+    icon: Layers,
+    children: [
+      { name: 'Course', path: '/student/learning' },
+      { name: 'Assignment', path: '/student/assignments' },
+      { name: 'Attendance', path: '/student/attendance' },
+    ],
+  },
   { name: 'Browse Courses', icon: Globe, path: '/student/browse' },
   { name: 'Certificates', icon: Trophy, path: '/student/certificates' },
   { name: 'Transactions', icon: ArrowRightLeft, path: '/student/transactions' },

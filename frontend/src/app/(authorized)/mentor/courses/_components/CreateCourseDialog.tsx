@@ -87,7 +87,7 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
         notifyCourseDraft()
         onOpenChange(false)
         reset()
-        router.push(`/mentor/courses/create/${uid}`)
+        router.push(`/mentor/courses/${uid}/edit`)
       } finally {
         setSubmitting(false)
       }

@@ -5,10 +5,13 @@ import type {
   IMentorCourseAssignment,
   MentorAssignmentLifecycleStatus,
 } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
+import { getMergedMentorCourses } from '@/lib/mentorCourseStorage'
 
 const REVIEW_STORAGE_KEY = 'mentor_assignment_submission_reviews_v1'
 const EXTRA_ASSIGNMENTS_KEY = 'mentor_assignments_extra_v1'
-/** Edit/hapus tugas seed (demo) — disimpan di localStorage */
+const EXTRA_SUBMISSIONS_KEY = 'mentor_assignment_submissions_extra_v1'
+/** Edit/hapus tugas seed — disimpan di localStorage */
 const SEED_ASSIGNMENT_STATE_KEY = 'mentor_assignments_seed_state_v1'
 
 type SeedAssignmentState = {
@@ -50,6 +53,13 @@ export const ASSIGNMENT_SEED: IMentorCourseAssignment[] = [
     autoCloseAfterDeadline: true,
     allowResubmit: true,
     maxAttempts: 3,
+    instructionAttachments: [
+      {
+        fileName: 'brief-tugas.pdf',
+        url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        mime: 'application/pdf',
+      },
+    ],
   },
   {
     uid: 'asg-mc001-2',
@@ -115,6 +125,7 @@ function sortByDeadline(list: IMentorCourseAssignment[]): IMentorCourseAssignmen
 }
 
 function getSeedAssignmentsForCourse(courseId: string): IMentorCourseAssignment[] {
+  if (!isMockDataEnabled()) return []
   const state = readSeedAssignmentState()
   const removed = new Set(state.removedUids)
   return ASSIGNMENT_SEED.filter((a) => a.courseId === courseId && !removed.has(a.uid)).map(
@@ -325,13 +336,51 @@ export function saveSubmissionReview(
   localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(prev))
 }
 
+function readExtraSubmissions(): IMentorAssignmentSubmission[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(EXTRA_SUBMISSIONS_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as IMentorAssignmentSubmission[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+export function pushExtraSubmission(row: IMentorAssignmentSubmission) {
+  if (typeof window === 'undefined') return
+  const list = readExtraSubmissions()
+  list.push(row)
+  localStorage.setItem(EXTRA_SUBMISSIONS_KEY, JSON.stringify(list))
+}
+
+function mergeSubmissionReview(s: IMentorAssignmentSubmission): IMentorAssignmentSubmission {
+  const o = readReviewOverrides()[s.uid]
+  if (!o) return s
+  return { ...s, ...o }
+}
+
+/** Seed + kiriman tambahan dari siswa (localStorage). */
+export function getAllSubmissionsMerged(): IMentorAssignmentSubmission[] {
+  return [...SUBMISSION_SEED, ...readExtraSubmissions()].map(mergeSubmissionReview)
+}
+
 export function getSubmissionsForCourse(courseId: string): IMentorAssignmentSubmission[] {
-  const overrides = readReviewOverrides()
-  return SUBMISSION_SEED.filter((s) => s.courseId === courseId).map((s) => {
-    const o = overrides[s.uid]
-    if (!o) return s
-    return { ...s, ...o }
-  })
+  return getAllSubmissionsMerged().filter((s) => s.courseId === courseId)
+}
+
+export function getSubmissionsForStudent(studentUid: string): IMentorAssignmentSubmission[] {
+  return getAllSubmissionsMerged().filter((s) => s.studentUid === studentUid)
+}
+
+export function findAssignmentByUid(assignmentUid: string): IMentorCourseAssignment | null {
+  for (const c of getMergedMentorCourses()) {
+    const list = getAssignmentsForCourse(c.uid)
+    const found = list.find((a) => a.uid === assignmentUid)
+    if (found) return found
+  }
+  return null
 }
 
 const DUE_SOON_MS = 72 * 60 * 60 * 1000

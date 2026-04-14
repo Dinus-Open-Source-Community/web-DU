@@ -1,9 +1,10 @@
 import type { IMentorCourseStudent } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
 
 const MEETINGS_MC001 = 12
 const MEETINGS_MC002 = 10
 
-/** Dummy per courseUid — deterministik untuk demo; ganti dengan fetch API jika tersedia */
+/** Fixture peserta per courseUid; nonaktif saat mock dimatikan — ganti dengan GET dari API. */
 const STUDENTS_BY_COURSE: Record<string, IMentorCourseStudent[]> = {
   'mc-001': [
     {
@@ -254,6 +255,7 @@ const STUDENTS_BY_COURSE: Record<string, IMentorCourseStudent[]> = {
 }
 
 export function getMentorCourseStudents(courseUid: string): IMentorCourseStudent[] {
+  if (!isMockDataEnabled()) return []
   const list = STUDENTS_BY_COURSE[courseUid]
   if (list) return list
   return []

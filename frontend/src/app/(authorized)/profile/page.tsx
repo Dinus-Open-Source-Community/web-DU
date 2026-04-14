@@ -1,33 +1,27 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Section from './_components/Section'
 import { Sidebar } from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { studentNavigation, mentorNavigation, adminNavigation } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
-
-// TODO: Replace with actual user data from JWT/auth context
-const mockUser = {
-  name: 'Zapp',
-  email: 'saptogusty@gmail.com',
-  role: 'Student', // Ubah ini ke 'Mentor' atau 'Admin' untuk ngetes dinamis
-  avatar: 'https://i.pravatar.cc/150?img=11',
-}
+import { getSidebarUser } from '@/lib/auth/sidebar-user'
 
 const Page = () => {
   const router = useRouter()
   const { isOpen, isMinimized, close, toggleMinimize } = useSidebar()
+  const session = useMemo(() => getSidebarUser(), [])
   const [navigationModel, setNavigationModel] = useState(studentNavigation)
 
-  // Dynamically switch navigation UI depending on the role
   useEffect(() => {
-    switch (mockUser.role.toLowerCase()) {
+    switch (session.role.toLowerCase()) {
       case 'mentor':
         setNavigationModel(mentorNavigation)
         break
       case 'admin':
+      case 'administrator':
         setNavigationModel(adminNavigation)
         break
       case 'student':
@@ -35,7 +29,7 @@ const Page = () => {
         setNavigationModel(studentNavigation)
         break
     }
-  }, [mockUser.role])
+  }, [session.role])
 
   return (
     <div className="min-h-screen w-full bg-[#f5f5f5]">
@@ -45,9 +39,8 @@ const Page = () => {
         onClose={close}
         isMinimized={isMinimized}
         onToggleMinimize={toggleMinimize}
-        user={mockUser}
+        user={session}
         onLogout={() => {
-          console.log('Logout clicked')
           router.push('/auth/login')
         }}
         onProfile={() => {
@@ -65,4 +58,3 @@ const Page = () => {
 }
 
 export default Page
-

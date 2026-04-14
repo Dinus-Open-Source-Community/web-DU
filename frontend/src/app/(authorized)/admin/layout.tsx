@@ -5,16 +5,10 @@ import { Sidebar } from '@/components/sidebar'
 import { adminNavigation } from '@/lib/navigation'
 import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
-
-// TODO: Replace with actual user data from JWT/auth context
-const mockUser = {
-  name: 'Admin User',
-  email: 'admin@doscom.org',
-  role: 'Administrator',
-  avatar: '',
-}
+import { getSidebarUser } from '@/lib/auth/sidebar-user'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const user = getSidebarUser()
   const router = useRouter()
   const { isOpen, close, isMinimized, toggleMinimize } = useSidebarContext()
 
@@ -26,10 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onClose={close}
         isMinimized={isMinimized}
         onToggleMinimize={toggleMinimize}
-        user={mockUser}
+        user={user}
         onLogout={() => {
-          // TODO: Call logout API, clear JWT, redirect
-          console.log('Logout clicked')
           router.push('/auth/login')
         }}
         onProfile={() => {

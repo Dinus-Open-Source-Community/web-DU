@@ -1,4 +1,5 @@
 import type { ICourseModule, ICourseModulesState, IMentorCourse } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { mentorCoursesDummy } from '@/lib/dummyData'
 
 const STORAGE_KEY = 'mentor_courses_extra'
@@ -33,12 +34,12 @@ function normalizeModules(modules: ICourseModule[]): ICourseModule[] {
 }
 
 function createModulesStateFromLegacy(uid: string): ICourseModulesState {
-  const module = createDefaultModule(1)
+  const defaultModule = createDefaultModule(1)
   const legacyHtml = getSessionEditorContent(uid) ?? ''
   return {
     version: COURSE_MODULES_VERSION,
-    modules: [module],
-    contents: { [module.id]: legacyHtml },
+    modules: [defaultModule],
+    contents: { [defaultModule.id]: legacyHtml },
   }
 }
 
@@ -67,7 +68,7 @@ export function upsertExtraCourse(course: IMentorCourse) {
   saveExtraCourses(list)
 }
 
-/** Default jumlah pertemuan jika tidak diset (demo / kursus lama). */
+/** Default jumlah pertemuan jika tidak diset pada metadata kursus. */
 export function getCourseMeetingCount(course: IMentorCourse): number {
   if (course.meetingCount != null && course.meetingCount >= 1) return course.meetingCount
   if (course.moduleCount > 0) return Math.max(1, course.moduleCount)
@@ -126,11 +127,11 @@ export function setSessionCourseModules(uid: string, state: ICourseModulesState)
 
 export function getSessionCourseModules(uid: string): ICourseModulesState {
   if (typeof window === 'undefined') {
-    const module = createDefaultModule(1)
+    const defaultModule = createDefaultModule(1)
     return {
       version: COURSE_MODULES_VERSION,
-      modules: [module],
-      contents: { [module.id]: '' },
+      modules: [defaultModule],
+      contents: { [defaultModule.id]: '' },
     }
   }
 
@@ -178,13 +179,16 @@ export function setPublishedOverride(uid: string, published: boolean) {
   localStorage.setItem(PUBLISHED_OVERRIDES_KEY, JSON.stringify(next))
 }
 
-/** Gabungan dummy + kursus buatan user + override status publish */
+/** Gabungan fixture (jika mock aktif) + kursus dari penyimpanan lokal + override publish */
 export function getMergedMentorCourses(): IMentorCourse[] {
   if (typeof window === 'undefined') {
-    return mentorCoursesDummy
+    return isMockDataEnabled() ? mentorCoursesDummy : []
+  }
+  const extra = getExtraCourses()
+  if (!isMockDataEnabled()) {
+    return extra
   }
   const overrides = getPublishedOverrides()
-  const extra = getExtraCourses()
   const dummyIds = new Set(mentorCoursesDummy.map((c) => c.uid))
   const base = mentorCoursesDummy.map((c) => ({
     ...c,
@@ -218,7 +222,7 @@ export function getMentorCourseByUid(uid: string): IMentorCourse | null {
   }
 }
 
-/** Ubah status terbit/draf (dummy → localStorage override; kursus buatan → upsert extra). */
+/** Ubah status terbit/draf (fixture → override; kursus buatan → upsert extra). */
 export function setMentorCoursePublished(uid: string, published: boolean) {
   if (typeof window === 'undefined') return
   const extras = getExtraCourses()

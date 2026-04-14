@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { PaymentBadge } from '@/components/ui/badge'
 import { PaymentProgressStepper, PaymentResultBanner } from '@/components/ui/PaymentProgressStepper'
 import { formatCountdown, formatDateTime, formatRupiah, getTransactionByUid, getPaymentInstructions, type PaymentInstructionSet } from '@/lib/func'
+import type { TransactionHistoryItem } from '@/lib/types'
 
 // Simulated discount constant (would come from API in production)
 const DISCOUNT_PERCENTAGE = 0
@@ -46,25 +47,21 @@ function CollapsibleSection({ title, icon, children, defaultOpen = false }: { ti
   )
 }
 
-export default function TransactionDetailPage() {
-  const params = useParams<{ uid: string }>()
-  const uidParam = Array.isArray(params.uid) ? params.uid[0] : params.uid
-  const transaction = uidParam ? getTransactionByUid(uidParam) : undefined
+function TransactionNotFound() {
+  return (
+    <main className="w-full px-5 py-8 md:px-8 md:py-10">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-8">
+        <h1 className="text-xl font-semibold text-slate-900">Detail transaksi tidak ditemukan</h1>
+        <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-slate-500">Transaksi dengan UID tersebut tidak tersedia. Silakan kembali ke halaman riwayat transaksi.</p>
+        <Button asChild className="mt-6 h-10 rounded-lg px-4 text-sm font-semibold">
+          <Link href="/student/transactions">Kembali ke Riwayat Transaksi</Link>
+        </Button>
+      </section>
+    </main>
+  )
+}
 
-  if (!transaction) {
-    return (
-      <main className="w-full px-5 py-8 md:px-8 md:py-10">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-8">
-          <h1 className="text-xl font-semibold text-slate-900">Detail transaksi tidak ditemukan</h1>
-          <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-slate-500">Transaksi dengan UID tersebut tidak tersedia. Silakan kembali ke halaman riwayat transaksi.</p>
-          <Button asChild className="mt-6 h-10 rounded-lg px-4 text-sm font-semibold">
-            <Link href="/student/transactions">Kembali ke Riwayat Transaksi</Link>
-          </Button>
-        </section>
-      </main>
-    )
-  }
-
+function TransactionDetailContent({ transaction }: { transaction: TransactionHistoryItem }) {
   const subtotal = transaction.price
   const discountAmount = Math.round(subtotal * (DISCOUNT_PERCENTAGE / 100))
   const total = subtotal - discountAmount
@@ -73,13 +70,14 @@ export default function TransactionDetailPage() {
 
   const pendingExpiredAt = useMemo(() => new Date(new Date(transaction.purchasedAt).getTime() + PENDING_PAYMENT_WINDOW_MINUTES * 60 * 1000), [transaction.purchasedAt])
 
-  const getRemainingSeconds = () => {
+  /** Hanya dipanggil di efek/klien — hindari Date.now() pada state awal (SSR vs hydrate). */
+  const getRemainingSeconds = useCallback(() => {
     if (!isPending) return 0
     const remaining = Math.ceil((pendingExpiredAt.getTime() - Date.now()) / 1000)
     return Math.max(0, remaining)
-  }
+  }, [isPending, pendingExpiredAt])
 
-  const [secondsLeft, setSecondsLeft] = useState(getRemainingSeconds)
+  const [secondsLeft, setSecondsLeft] = useState(0)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -95,7 +93,7 @@ export default function TransactionDetailPage() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isPending, pendingExpiredAt])
+  }, [isPending, getRemainingSeconds])
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(transaction.transactionId)
@@ -303,4 +301,16 @@ export default function TransactionDetailPage() {
       </div>
     </main>
   )
+}
+
+export default function TransactionDetailPage() {
+  const params = useParams<{ uid: string }>()
+  const uidParam = Array.isArray(params.uid) ? params.uid[0] : params.uid
+  const transaction = uidParam ? getTransactionByUid(uidParam) : undefined
+
+  if (!transaction) {
+    return <TransactionNotFound />
+  }
+
+  return <TransactionDetailContent transaction={transaction} />
 }

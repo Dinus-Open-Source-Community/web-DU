@@ -1,13 +1,15 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { Paperclip, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { IMentorCourse, IMentorCourseAssignment, MentorAssignmentLifecycleStatus } from '@/lib/types'
 import { getCourseMeetingCount } from '@/lib/mentorCourseStorage'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { createMentorAssignment, type MentorAssignmentInput, updateMentorAssignment } from '@/lib/mentorAssignmentsData'
 import { notifyCreated, notifyError, notifyUpdated } from '@/lib/notify'
+import { TiptapRichTextEditor } from '@/components/rich-text/TiptapRichTextEditor'
+import { toPreviewHtmlFragment } from '@/lib/htmlEscape'
 
 function isoToDatetimeLocalValue(iso: string): string {
   const d = new Date(iso)
@@ -32,16 +34,26 @@ type CourseAssignmentDialogProps = {
   onSaved: () => void
 }
 
+type Attachment = { fileName: string; url: string; mime?: string }
+
 const defaultInput = (): MentorAssignmentInput => ({
   meetingNumber: 1,
   title: '',
-  description: '',
+  description: '<p></p>',
   deadlineAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   status: 'draft' as MentorAssignmentLifecycleStatus,
   autoCloseAfterDeadline: true,
   allowResubmit: true,
   maxAttempts: undefined,
+  instructionAttachments: [],
 })
+
+function normalizeDescriptionForEditor(raw: string): string {
+  const t = raw.trim()
+  if (!t) return '<p></p>'
+  if (t.startsWith('<')) return raw
+  return toPreviewHtmlFragment(raw)
+}
 
 export function CourseAssignmentDialog({
   open,
@@ -55,36 +67,43 @@ export function CourseAssignmentDialog({
   const confirm = useConfirm()
   const maxMeetings = getCourseMeetingCount(course)
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  const [description, setDescription] = useState('<p></p>')
+  const [instructionAttachments, setInstructionAttachments] = useState<Attachment[]>([])
   const [meetingNumber, setMeetingNumber] = useState(1)
   const [deadlineLocal, setDeadlineLocal] = useState('')
   const [status, setStatus] = useState<MentorAssignmentLifecycleStatus>('draft')
   const [autoCloseAfterDeadline, setAutoCloseAfterDeadline] = useState(true)
   const [allowResubmit, setAllowResubmit] = useState(true)
   const [maxAttempts, setMaxAttempts] = useState<string>('')
+  const [editorResetKey, setEditorResetKey] = useState(0)
+
   const resetCreate = useCallback(() => {
     const d = defaultInput()
     setTitle(d.title)
-    setDescription(d.description)
+    setDescription(d.description ?? '<p></p>')
+    setInstructionAttachments(d.instructionAttachments ?? [])
     setMeetingNumber(1)
     setDeadlineLocal(isoToDatetimeLocalValue(d.deadlineAt))
     setStatus(d.status)
     setAutoCloseAfterDeadline(d.autoCloseAfterDeadline)
     setAllowResubmit(d.allowResubmit)
     setMaxAttempts('')
-  }, [maxMeetings])
+    setEditorResetKey((k) => k + 1)
+  }, [])
 
   useEffect(() => {
     if (!open) return
     if (mode === 'edit' && editing) {
       setTitle(editing.title)
-      setDescription(editing.description)
+      setDescription(normalizeDescriptionForEditor(editing.description))
+      setInstructionAttachments(editing.instructionAttachments ? [...editing.instructionAttachments] : [])
       setMeetingNumber(Math.min(Math.max(1, editing.meetingNumber), maxMeetings))
       setDeadlineLocal(isoToDatetimeLocalValue(editing.deadlineAt))
       setStatus(editing.status)
       setAutoCloseAfterDeadline(editing.autoCloseAfterDeadline)
       setAllowResubmit(editing.allowResubmit)
       setMaxAttempts(editing.maxAttempts != null ? String(editing.maxAttempts) : '')
+      setEditorResetKey((k) => k + 1)
     } else {
       resetCreate()
     }
@@ -94,26 +113,43 @@ export function CourseAssignmentDialog({
     onOpenChange(false)
   }, [onOpenChange])
 
+  const onPickInstructionFiles = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files?.length) return
+    for (const file of Array.from(files)) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const url = typeof reader.result === 'string' ? reader.result : ''
+        if (!url) return
+        setInstructionAttachments((prev) => [...prev, { fileName: file.name, url, mime: file.type || undefined }])
+      }
+      reader.readAsDataURL(file)
+    }
+    e.target.value = ''
+  }, [])
+
+  const removeAttachment = useCallback((index: number) => {
+    setInstructionAttachments((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       const t = title.trim()
       if (!t) {
-        notifyError("Judul wajib diisi.")
+        notifyError('Judul wajib diisi.')
         return
       }
       const iso = datetimeLocalToIso(deadlineLocal)
       if (!iso) {
-        notifyError("Tenggat wajib diisi dengan valid.")
+        notifyError('Tenggat wajib diisi dengan valid.')
         return
       }
       const agreed = await confirm({
-        title: mode === "create" ? "Buat tugas ini?" : "Simpan perubahan tugas?",
+        title: mode === 'create' ? 'Buat tugas ini?' : 'Simpan perubahan tugas?',
         description:
-          mode === "create"
-            ? "Tugas baru akan ditambahkan ke kursus ini."
-            : "Perubahan akan diterapkan pada tugas yang sedang diedit.",
-        confirmLabel: mode === "create" ? "Buat" : "Simpan",
+          mode === 'create' ? 'Tugas baru akan ditambahkan ke kursus ini.' : 'Perubahan akan diterapkan pada tugas yang sedang diedit.',
+        confirmLabel: mode === 'create' ? 'Buat' : 'Simpan',
       })
       if (!agreed) return
 
@@ -126,24 +162,25 @@ export function CourseAssignmentDialog({
       const input: MentorAssignmentInput = {
         meetingNumber: mn,
         title: t,
-        description: description.trim(),
+        description: description.trim() || '<p></p>',
         deadlineAt: iso,
         status,
         autoCloseAfterDeadline,
         allowResubmit,
         maxAttempts: allowResubmit ? maxA : undefined,
+        instructionAttachments: instructionAttachments.length ? instructionAttachments : undefined,
       }
 
-      if (mode === "create") {
+      if (mode === 'create') {
         createMentorAssignment(courseUid, input)
-        notifyCreated("Tugas dibuat.")
+        notifyCreated('Tugas dibuat.')
       } else if (editing) {
         const updated = updateMentorAssignment(editing.uid, input)
         if (!updated) {
-          notifyError("Tidak dapat memperbarui tugas ini.")
+          notifyError('Tidak dapat memperbarui tugas ini.')
           return
         }
-        notifyUpdated("Tugas diperbarui.")
+        notifyUpdated('Tugas diperbarui.')
       } else {
         return
       }
@@ -154,6 +191,7 @@ export function CourseAssignmentDialog({
       confirm,
       title,
       description,
+      instructionAttachments,
       deadlineLocal,
       meetingNumber,
       maxMeetings,
@@ -174,7 +212,7 @@ export function CourseAssignmentDialog({
   return (
     <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
       <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />
-      <div className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <div className="relative z-10 max-h-[92vh] w-full max-w-[min(96rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-slate-900">{mode === 'create' ? 'Tugas baru' : 'Edit tugas'}</h2>
@@ -217,16 +255,36 @@ export function CourseAssignmentDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="asg-desc" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Deskripsi
-            </label>
-            <textarea
-              id="asg-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Deskripsi</span>
+            <TiptapRichTextEditor
+              key={editorResetKey}
+              variant="compact"
+              initialContent={description}
+              onChange={setDescription}
+              placeholder="Instruksi tugas untuk peserta: format teks, tautan, atau sisipkan media."
             />
+          </div>
+
+          <div className="flex flex-col gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lampiran instruksi (opsional)</span>
+            <p className="text-xs text-slate-500">File terpisah dari deskripsi — berguna untuk PDF, ZIP, atau contoh kode.</p>
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-primary">
+              <Paperclip className="h-4 w-4" aria-hidden />
+              <span>Pilih file</span>
+              <input type="file" className="sr-only" multiple onChange={onPickInstructionFiles} />
+            </label>
+            {instructionAttachments.length > 0 && (
+              <ul className="mt-1 space-y-1.5">
+                {instructionAttachments.map((f, i) => (
+                  <li key={`${f.fileName}-${i}`} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700">
+                    <span className="truncate">{f.fileName}</span>
+                    <Button type="button" variant="ghost" size="sm" className="h-8 shrink-0 px-2 shadow-none" onClick={() => removeAttachment(i)}>
+                      Hapus
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -259,11 +317,7 @@ export function CourseAssignmentDialog({
           </div>
 
           <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={autoCloseAfterDeadline}
-              onChange={(e) => setAutoCloseAfterDeadline(e.target.checked)}
-            />
+            <input type="checkbox" checked={autoCloseAfterDeadline} onChange={(e) => setAutoCloseAfterDeadline(e.target.checked)} />
             Tutup otomatis setelah tenggat
           </label>
 
@@ -293,7 +347,7 @@ export function CourseAssignmentDialog({
             <Button type="button" variant="outline" className="rounded-xl shadow-none" onClick={handleClose}>
               Batal
             </Button>
-            <Button type="submit" className="rounded-xl">
+            <Button type="submit" className="rounded-xl shadow-none">
               {mode === 'create' ? 'Simpan' : 'Perbarui'}
             </Button>
           </div>

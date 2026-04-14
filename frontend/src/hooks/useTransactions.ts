@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { filterTransactions, sortTransactions, paginateTransactions } from '@/lib/func'
-import { transactionsHistoryData } from '@/lib/dummyData'
-import type { TransactionHistoryItem, TransactionSortKey, SortDirection } from '@/lib/types'
+import { getTransactionsSource } from '@/lib/data/transactions-source'
+import type { TransactionSortKey, SortDirection } from '@/lib/types'
 
 interface UseTransactionsOptions {
   searchQuery?: string
@@ -12,22 +12,21 @@ interface UseTransactionsOptions {
 }
 
 /**
- * Hook untuk fetch dan manipulasi transaction history
- * Supports searching, sorting, dan pagination
- * Data sumber: dummyData.tsx
+ * Riwayat transaksi; sumber data dari fixture hanya jika mock aktif.
  */
-export function useTransactions({ searchQuery = '', sortKey = 'transactionId', sortDirection = 'desc', currentPage = 1, rowsPerPage = 10 }: UseTransactionsOptions = {}) {
+export function useTransactions({
+  searchQuery = '',
+  sortKey = 'transactionId',
+  sortDirection = 'desc',
+  currentPage = 1,
+  rowsPerPage = 10,
+}: UseTransactionsOptions = {}) {
   const { filtered, sorted, paginated, totalPages } = useMemo(() => {
-    // 1. Filter berdasarkan search query
-    const filtered = filterTransactions(transactionsHistoryData, searchQuery)
-
-    // 2. Sort hasil filter
+    const source = getTransactionsSource()
+    const filtered = filterTransactions(source, searchQuery)
     const sorted = sortTransactions(filtered, sortKey, sortDirection)
-
-    // 3. Paginate hasil sort
     const paginated = paginateTransactions(sorted, currentPage, rowsPerPage)
-    const totalPages = Math.ceil(sorted.length / rowsPerPage)
-
+    const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage))
     return { filtered, sorted, paginated, totalPages }
   }, [searchQuery, sortKey, sortDirection, currentPage, rowsPerPage])
 
@@ -40,12 +39,9 @@ export function useTransactions({ searchQuery = '', sortKey = 'transactionId', s
   }
 }
 
-/**
- * Hook untuk mendapatkan transaction detail berdasarkan UID
- */
 export function useTransaction(uid: string) {
   const transaction = useMemo(() => {
-    return transactionsHistoryData.find((t) => t.uid === uid) || null
+    return getTransactionsSource().find((t) => t.uid === uid) || null
   }, [uid])
 
   return {
@@ -55,16 +51,13 @@ export function useTransaction(uid: string) {
   }
 }
 
-/**
- * Hook untuk mendapatkan transaction statistics
- */
 export function useTransactionStats() {
   const stats = useMemo(() => {
+    const transactionsHistoryData = getTransactionsSource()
     const total = transactionsHistoryData.length
     const paid = transactionsHistoryData.filter((t) => t.paymentStatus === 'PAID').length
     const pending = transactionsHistoryData.filter((t) => t.paymentStatus === 'PENDING').length
     const failed = transactionsHistoryData.filter((t) => t.paymentStatus === 'FAILED').length
-
     const totalAmount = transactionsHistoryData.reduce((sum, t) => sum + t.price, 0)
 
     return {

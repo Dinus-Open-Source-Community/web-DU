@@ -16,6 +16,16 @@ import {
   IMentorCourse,
 } from './types'
 import { BookIcons, CertificateIcons, GlobeLearningIcon, JobIcons } from '@/components/ui/icons'
+import {
+  paymentStatusLabels,
+  paymentStatusSortRank,
+  paymentStatusStyles,
+} from './constants/payment-status'
+
+/** Alias kompatibilitas — prefer impor dari `@/lib/constants/payment-status`. */
+export const statusLabels = paymentStatusLabels
+export const statusRank = paymentStatusSortRank
+export const statusStyles = paymentStatusStyles
 
 export const DataCourse: ICardData[] = [
   {
@@ -254,32 +264,34 @@ export const DashboardStats: IDashboardStat[] = [
 
 export const ResumeCourses: IResumeCourse[] = [
   {
-    title: 'Mastering UI/UX Design: From Zero to Hero',
-    description: 'Pelajari dasar-dasar desain antarmuka pengguna, prototyping, dan cara membangun pengalaman pengguna yang memukau.',
+    title: 'Full Stack Web dengan Next.js',
+    description: 'Arsitektur App Router, autentikasi, dan integrasi API — lanjutkan dari materi mentor.',
     module: 'Modul 4 dari 12',
-    progress: 100,
-    image: 'https://picsum.photos/seed/uidesign/400/300',
+    progress: 42,
+    courseUid: 'mc-001',
+    image: 'https://picsum.photos/seed/mc-web/400/300',
     variantBadge: 'premium',
     author: {
-      name: 'Jessica Wong',
-      avatar: 'https://i.pravatar.cc/150?u=jess_w',
-    },
-    rating: 4.8,
-    totalReviews: 2450,
-  },
-  {
-    title: 'Web Development with React & Next.js',
-    description: 'Bangun aplikasi web modern menggunakan React dan Next.js dengan arsitektur yang scalable.',
-    module: 'Modul 7 dari 10',
-    progress: 42,
-    image: 'https://picsum.photos/seed/webdev/400/300',
-    variantBadge: 'free',
-    author: {
-      name: 'Sarah Drasner',
+      name: 'Tim Doscom',
       avatar: 'https://i.pravatar.cc/150?u=sarah_d',
     },
-    rating: 4.9,
-    totalReviews: 8432,
+    rating: 4.8,
+    totalReviews: 126,
+  },
+  {
+    title: 'UI Engineering & Design System',
+    description: 'Pola komposisi, token warna, dan dokumentasi komponen.',
+    module: 'Modul 3 dari 8',
+    progress: 28,
+    courseUid: 'mc-002',
+    image: 'https://picsum.photos/seed/mc-ui/400/300',
+    variantBadge: 'free',
+    author: {
+      name: 'Tim Doscom',
+      avatar: 'https://i.pravatar.cc/150?u=budi_dev',
+    },
+    rating: 4.6,
+    totalReviews: 54,
   },
   {
     title: 'Data Structure & Algorithm',
@@ -422,25 +434,7 @@ export const Feedbacks: IFeedbackItem[] = [
   },
 ]
 
-// Transaction data
-export const statusStyles: Record<PaymentStatus, string> = {
-  PAID: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  PENDING: 'border-amber-200 bg-amber-50 text-amber-700',
-  FAILED: 'border-rose-200 bg-rose-50 text-rose-700',
-}
-
-export const statusLabels: Record<PaymentStatus, string> = {
-  PAID: 'Paid',
-  PENDING: 'Pending',
-  FAILED: 'Failed',
-}
-
-export const statusRank: Record<PaymentStatus, number> = {
-  FAILED: 1,
-  PENDING: 2,
-  PAID: 3,
-}
-
+// Transaction data (fixture — nonaktif di production bila mock dimatikan)
 export const transactionsHistoryData: TransactionHistoryItem[] = [
   {
     uid: 'txn-a8f29h',

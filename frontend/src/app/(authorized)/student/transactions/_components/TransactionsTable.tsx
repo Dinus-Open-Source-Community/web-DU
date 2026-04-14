@@ -2,15 +2,23 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
+import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { Pagination } from '@/components/ui/pagination'
 import { PaymentStatus } from '@/lib/types'
-import { transactionsHistoryData } from '@/lib/dummyData'
+import { getTransactionsSource } from '@/lib/data/transactions-source'
 import { filterTransactions, formatDateTime, formatRupiah, paginateTransactions } from '@/lib/func'
 
 type StatusFilter = 'ALL' | PaymentStatus
 
 const ITEMS_PER_PAGE = 6
+
+const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'ALL', label: 'Semua' },
+  { value: 'PAID', label: 'Paid' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'FAILED', label: 'Failed' },
+]
 
 export default function TransactionsList() {
   const [searchInput, setSearchInput] = useState('')
@@ -24,10 +32,7 @@ export default function TransactionsList() {
   }, [searchQuery, statusFilter])
 
   // Filter by search query
-  const searchFiltered = useMemo(
-    () => filterTransactions(transactionsHistoryData, searchQuery),
-    [searchQuery],
-  )
+  const searchFiltered = useMemo(() => filterTransactions(getTransactionsSource(), searchQuery), [searchQuery])
 
   // Filter by status dropdown
   const filteredData = useMemo(() => {
@@ -56,23 +61,16 @@ export default function TransactionsList() {
           onChange={setSearchInput}
           onSubmit={() => setSearchQuery(searchInput)}
           placeholder="Cari ID transaksi atau nama kelas..."
+          className="md:flex-1"
         />
 
-        <div className="flex items-center gap-2 shrink-0">
-          <label htmlFor="status-filter" className="text-xs font-medium text-slate-500 whitespace-nowrap">
-            Status
-          </label>
-          <select
-            id="status-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="h-10 rounded-xl border border-slate-200 bg-white px-3 pr-8 text-sm font-medium text-slate-700 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary">
-            <option value="ALL">Semua</option>
-            <option value="PAID">Paid</option>
-            <option value="PENDING">Pending</option>
-            <option value="FAILED">Failed</option>
-          </select>
-        </div>
+        <FilterSelect
+          id="status-filter"
+          label="Status"
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={STATUS_FILTER_OPTIONS}
+        />
       </div>
 
       {/* Summary */}

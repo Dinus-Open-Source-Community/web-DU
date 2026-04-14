@@ -1,21 +1,36 @@
 import { useMemo } from 'react'
-import { DashboardStats, Deadlines, Feedbacks, ResumeCourses } from '@/lib/dummyData'
+import {
+  DashboardStats,
+  Deadlines,
+  Feedbacks,
+  ResumeCourses,
+} from '@/lib/dummyData'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
+import type { IDashboardStat, IDeadlineItem, IFeedbackItem, IResumeCourse } from '@/lib/types'
+
+function emptyDashboard() {
+  return {
+    kpiStats: [] as IDashboardStat[],
+    deadlines: [] as IDeadlineItem[],
+    feedbacks: [] as IFeedbackItem[],
+    resumeCourses: [] as IResumeCourse[],
+  }
+}
 
 /**
- * Hook untuk fetch dashboard statistics
- * Returns KPI cards, deadlines, feedback, dan courses yang sedang diambil
- * Data sumber: dummyData.tsx
+ * Data dashboard siswa; sementara dari fixture jika mock aktif.
+ * Ganti dengan fetch API + TanStack Query saat backend siap.
  */
 export function useDashboardData() {
-  const stats = useMemo(
-    () => ({
+  const stats = useMemo(() => {
+    if (!isMockDataEnabled()) return emptyDashboard()
+    return {
       kpiStats: DashboardStats,
       deadlines: Deadlines,
       feedbacks: Feedbacks,
       resumeCourses: ResumeCourses,
-    }),
-    [],
-  )
+    }
+  }, [])
 
   return {
     stats,
@@ -24,51 +39,39 @@ export function useDashboardData() {
   }
 }
 
-/**
- * Hook khusus untuk KPI statistics
- */
 export function useDashboardStats() {
-  const stats = useMemo(() => DashboardStats, [])
+  const stats = useMemo(() => (isMockDataEnabled() ? DashboardStats : ([] as IDashboardStat[])), [])
   return {
     stats,
     isLoading: false,
   }
 }
 
-/**
- * Hook khusus untuk deadlines
- */
 export function useDeadlines() {
-  const deadlines = useMemo(() => Deadlines, [])
+  const deadlines = useMemo(() => (isMockDataEnabled() ? Deadlines : ([] as IDeadlineItem[])), [])
   return {
     deadlines,
     isLoading: false,
   }
 }
 
-/**
- * Hook khusus untuk feedbacks
- */
 export function useFeedbacks() {
-  const feedbacks = useMemo(() => Feedbacks, [])
+  const feedbacks = useMemo(() => (isMockDataEnabled() ? Feedbacks : ([] as IFeedbackItem[])), [])
   return {
     feedbacks,
     isLoading: false,
   }
 }
 
-/**
- * Hook khusus untuk courses yang sedang diambil
- */
 export function useResumeCourses(limit?: number) {
   const courses = useMemo(() => {
-    const data = ResumeCourses
+    const data = isMockDataEnabled() ? ResumeCourses : ([] as IResumeCourse[])
     return limit ? data.slice(0, limit) : data
   }, [limit])
 
   return {
     courses,
-    totalCount: ResumeCourses.length,
+    totalCount: isMockDataEnabled() ? ResumeCourses.length : 0,
     isLoading: false,
   }
 }

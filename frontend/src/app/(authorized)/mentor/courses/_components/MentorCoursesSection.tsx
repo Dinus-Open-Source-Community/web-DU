@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, Plus } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
+import { SearchForm } from '@/components/ui/SearchForm'
+import { SegmentedFilter } from '@/components/ui/SegmentedFilter'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
-import { mentorCoursesDummy } from '@/lib/dummyData'
 import { getMergedMentorCourses, setMentorCoursePublished } from '@/lib/mentorCourseStorage'
 import type { IMentorCourse } from '@/lib/types'
 import { CreateCourseDialog } from './CreateCourseDialog'
@@ -16,14 +17,12 @@ const filters = ['Semua', 'Aktif', 'Draf'] as const
 const ITEMS_PER_PAGE = 6
 
 export default function MentorCoursesSection() {
-  const [courses, setCourses] = useState<IMentorCourse[]>(mentorCoursesDummy)
+  const [courses, setCourses] = useState<IMentorCourse[]>([])
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]>('Semua')
   const [search, setSearch] = useState('')
   const [searchApplied, setSearchApplied] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
-  const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
     const refresh = () => setCourses(getMergedMentorCourses())
@@ -31,17 +30,6 @@ export default function MentorCoursesSection() {
     window.addEventListener('focus', refresh)
     return () => window.removeEventListener('focus', refresh)
   }, [])
-
-  useEffect(() => {
-    const activeIndex = filters.indexOf(activeFilter)
-    const activeTab = tabsRef.current[activeIndex]
-    if (activeTab) {
-      setIndicatorStyle({
-        left: activeTab.offsetLeft,
-        width: activeTab.offsetWidth,
-      })
-    }
-  }, [activeFilter])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -60,8 +48,6 @@ export default function MentorCoursesSection() {
   const totalPages = Math.max(1, Math.ceil(filteredCourses.length / ITEMS_PER_PAGE))
   const paginatedCourses = filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
-  const applySearch = () => setSearchApplied(search)
-
   const handleTogglePublish = (uid: string, currentlyPublished: boolean) => {
     setMentorCoursePublished(uid, !currentlyPublished)
     setCourses(getMergedMentorCourses())
@@ -74,24 +60,14 @@ export default function MentorCoursesSection() {
           <PageHeader title="Courses" subtitle="Kelola kursus Anda, peserta, dan konten modul." />
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex w-full flex-col gap-3 md:max-w-3xl md:flex-row md:items-center">
-              <div className="relative flex w-full flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                  <Search className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && applySearch()}
-                  placeholder="Cari kursus..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <Button type="button" className="h-[46px] shrink-0 rounded-xl px-8 font-semibold md:w-[120px]" onClick={applySearch}>
-                Cari
-              </Button>
-            </div>
+            <SearchForm
+              value={search}
+              onChange={setSearch}
+              onSubmit={() => setSearchApplied(search)}
+              placeholder="Cari kursus..."
+              className="w-full lg:max-w-3xl lg:flex-1"
+              submitButtonClassName="h-[46px]"
+            />
 
             <Button className="h-[46px] shrink-0 gap-2 rounded-xl px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
               <Plus className="h-5 w-5" />
@@ -100,32 +76,12 @@ export default function MentorCoursesSection() {
           </div>
         </div>
 
-        <div className="relative flex w-max max-w-full items-center overflow-x-auto rounded-xl bg-slate-100 p-1.5 shadow-inner">
-          <div
-            className="pointer-events-none absolute rounded-lg border border-slate-200/60 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300 ease-in-out"
-            style={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-              top: '6px',
-              bottom: '6px',
-              opacity: indicatorStyle.width > 0 ? 1 : 0,
-            }}
-          />
-          {filters.map((filter, index) => (
-            <button
-              key={filter}
-              type="button"
-              ref={(el) => {
-                tabsRef.current[index] = el
-              }}
-              onClick={() => setActiveFilter(filter)}
-              className={`relative z-10 whitespace-nowrap rounded-lg px-5 py-2 text-sm transition-colors ${
-                activeFilter === filter ? 'font-semibold text-primary' : 'font-medium text-slate-500 hover:text-slate-800'
-              }`}>
-              {filter}
-            </button>
-          ))}
-        </div>
+        <SegmentedFilter
+          items={filters.map((f) => ({ value: f, label: f }))}
+          value={activeFilter}
+          onChange={setActiveFilter}
+          variant="scroll"
+        />
 
         {filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-10">

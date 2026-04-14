@@ -1,5 +1,6 @@
 import { PaymentStatus, SortDirection, TransactionHistoryItem, TransactionSortKey } from './types'
-import { statusRank, transactionsHistoryData } from './dummyData'
+import { paymentStatusSortRank } from './constants/payment-status'
+import { getTransactionsSource } from './data/transactions-source'
 
 const normalizeText = (value: string) => value.toLowerCase().trim()
 
@@ -56,7 +57,7 @@ export const sortTransactions = (transactions: TransactionHistoryItem[], sortKey
     } else if (sortKey === 'price') {
       comparison = a.price - b.price
     } else {
-      comparison = statusRank[a.paymentStatus] - statusRank[b.paymentStatus]
+      comparison = paymentStatusSortRank[a.paymentStatus] - paymentStatusSortRank[b.paymentStatus]
     }
 
     return sortDirection === 'asc' ? comparison : -comparison
@@ -115,7 +116,7 @@ export const formatPaymentDate = (purchasedAt: string): string => {
 }
 
 export const getTransactionByUid = (uid: string) => {
-  return transactionsHistoryData.find((transaction) => transaction.uid === uid)
+  return getTransactionsSource().find((transaction) => transaction.uid === uid)
 }
 
 /* ─── Payment Instructions ─── */

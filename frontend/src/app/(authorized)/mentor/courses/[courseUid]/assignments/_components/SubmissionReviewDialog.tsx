@@ -5,67 +5,11 @@ import { X } from 'lucide-react'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
-import type { IMentorAssignmentSubmission, SubmissionContentBlock } from '@/lib/types'
+import type { IMentorAssignmentSubmission } from '@/lib/types'
+import { SubmissionContentView } from '@/components/assignments/SubmissionContentView'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { saveSubmissionReview } from '@/lib/mentorAssignmentsData'
 import { notifyError, notifyReviewSaved } from '@/lib/notify'
-
-function ContentBlocksView({ blocks }: { blocks: SubmissionContentBlock[] }) {
-  return (
-    <div className="space-y-4">
-      {blocks.map((b, i) => {
-        switch (b.type) {
-          case 'text':
-            return (
-              <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                {b.text}
-              </p>
-            )
-          case 'image':
-            return (
-              <figure key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.url} alt={b.alt ?? 'Lampiran gambar'} className="max-h-72 w-full object-contain" loading="lazy" />
-              </figure>
-            )
-          case 'file':
-            return (
-              <a
-                key={i}
-                href={b.url}
-                download={b.fileName}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-slate-50">
-                Unduh {b.fileName}
-              </a>
-            )
-          case 'videoEmbed':
-            return (
-              <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-black/5">
-                <div className="aspect-video w-full">
-                  <iframe title={b.title ?? 'Video'} src={b.embedUrl} className="h-full w-full" allowFullScreen />
-                </div>
-              </div>
-            )
-          case 'link':
-            return (
-              <a
-                key={i}
-                href={b.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-all text-sm font-medium text-primary underline-offset-2 hover:underline">
-                {b.label ?? b.url}
-              </a>
-            )
-          default:
-            return null
-        }
-      })}
-    </div>
-  )
-}
 
 type SubmissionReviewDialogProps = {
   open: boolean
@@ -130,7 +74,7 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
   return (
     <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
       <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />
-      <div className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <div className="relative z-10 flex max-h-[min(92vh,960px)] w-full max-w-[min(96rem,calc(100vw-2rem))] flex-col rounded-2xl border border-slate-200 bg-white">
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Review kiriman</p>
@@ -147,7 +91,7 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Konten siswa</p>
-          <ContentBlocksView blocks={submission.contentBlocks} />
+          <SubmissionContentView blocks={submission.contentBlocks} />
         </div>
 
         <div className="shrink-0 space-y-4 border-t border-slate-100 px-5 py-4">
