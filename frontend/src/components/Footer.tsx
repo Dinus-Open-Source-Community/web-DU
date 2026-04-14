@@ -94,8 +94,7 @@ export default function Footer() {
               Doscom University
             </Link>
             <p className="text-popover mt-4 leading-relaxed">
-              Doscom University is one of DOSCOM's open source intensive
-              training programs (bootcamps).
+              Doscom University is one of DOSCOM&apos;s open source intensive training programs (bootcamps).
             </p>
             <div className="mt-6 flex gap-4">
               {socialLinks.map((social) => {

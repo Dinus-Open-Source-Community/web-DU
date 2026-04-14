@@ -298,3 +298,19 @@ export const LogoDuBig = ({
     </svg>
   );
 };
+
+export const EmptyCourseIcon = ({
+  className,
+  ...props
+}: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <circle cx="120" cy="120" r="90" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="2" strokeDasharray="8 8" />
+    <rect x="85" y="90" width="70" height="50" rx="8" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="4" />
+    <path d="M85 105H155" stroke="#CBD5E1" strokeWidth="4" />
+    <circle cx="140" cy="140" r="24" fill="white" stroke="#0A84DC" strokeWidth="4" />
+    <path d="M158 158L175 175" stroke="#0A84DC" strokeWidth="6" strokeLinecap="round" />
+    <circle cx="60" cy="70" r="6" fill="#94A3B8" opacity="0.4" />
+    <circle cx="180" cy="80" r="8" fill="#94A3B8" opacity="0.3" />
+    <circle cx="70" cy="170" r="10" fill="#0A84DC" opacity="0.2" />
+  </svg>
+);

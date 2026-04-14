@@ -1,5 +1,5 @@
 import { ICardData } from "@/lib/types";
-import { Card } from "../ui/card";
+import { Card } from '@/components/ui/card'
 
 export default function Feature({ Data }: { Data: ICardData[] }) {
   return (

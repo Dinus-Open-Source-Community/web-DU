@@ -24,7 +24,7 @@ const categories = [
   "Open Source",
 ];
 
-export default function ({ Data }: { Data: ICardData[] }) {
+export default function CourseSection1({ Data }: { Data: ICardData[] }) {
   const [isActiveFilter, setIsActiveFilter] = useState<string>("All");
   return (
     <section className="bg-muted relative h-full min-h-screen w-full pt-20 pb-10">

@@ -24,8 +24,7 @@ const FormRegister = () => {
       </div>
 
       <p className="mb-7 px-3 align-middle text-lg leading-[1.2] font-normal">
-        Doscom University is one of DOSCOM's open source intensive training
-        programs (bootcamps).
+        Doscom University is one of DOSCOM&apos;s open source intensive training programs (bootcamps).
       </p>
 
       {/* Input Form*/}
@@ -166,7 +165,7 @@ const FormRegister = () => {
 
       {/* Footer Link */}
       <div className="mt-8 text-center text-lg text-gray-600">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <a href="/auth/login" className="font-normal text-[#1F84E6]">
           Log In
         </a>
