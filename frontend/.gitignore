@@ -55,3 +55,5 @@ package-lock.json
 
 .agents/*
 skills-lock.json
+.cursor
+skills-lock.json
