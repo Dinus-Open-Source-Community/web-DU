@@ -70,6 +70,67 @@ export const appBadgeVariants = cva(
         // Ajuan absensi menunggu review
         attendanceAjuanPending:
           'rounded-md border border-amber-200/90 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-950',
+        // Admin — severity (support tickets)
+        severityHigh:
+          'rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-rose-700',
+        severityMedium:
+          'rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700',
+        severityLow:
+          'rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700',
+        // Admin — payout
+        payoutRequested:
+          'rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700',
+        payoutApproved:
+          'rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
+        payoutPaid:
+          'rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-indigo-700',
+        payoutRejected:
+          'rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-rose-700',
+        // Admin — audit
+        auditCreate:
+          'rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
+        auditUpdate:
+          'rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700',
+        auditDelete:
+          'rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-rose-700',
+        auditView:
+          'rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600',
+        // Admin — coupons
+        couponActive:
+          'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
+        couponExpired:
+          'rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500',
+        couponScheduled:
+          'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700',
+        // Admin — course status
+        coursePublished:
+          'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
+        courseDraft:
+          'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700',
+        coursePending:
+          'rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700',
+        courseRejected:
+          'rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-rose-700',
+        // Admin — QA
+        qaAnswered:
+          'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
+        qaUnanswered:
+          'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700',
+        // Category chips (multi badge untuk mentor specialization)
+        categoryDev:
+          'rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700',
+        categoryDesign:
+          'rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700',
+        categoryData:
+          'rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700',
+        categoryMarketing:
+          'rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-700',
+        categoryBusiness:
+          'rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700',
+        categoryLanguage:
+          'rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700',
+        categoryDefault:
+          'rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600',
       },
     },
     defaultVariants: {
@@ -107,6 +168,26 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   attendanceStudentLate: 'Terlambat',
   attendanceStudentNotStarted: 'Belum mulai',
   attendanceAjuanPending: 'Menunggu',
+  severityHigh: 'High',
+  severityMedium: 'Medium',
+  severityLow: 'Low',
+  payoutRequested: 'Requested',
+  payoutApproved: 'Approved',
+  payoutPaid: 'Paid',
+  payoutRejected: 'Rejected',
+  auditCreate: 'CREATE',
+  auditUpdate: 'UPDATE',
+  auditDelete: 'DELETE',
+  auditView: 'VIEW',
+  couponActive: 'Aktif',
+  couponExpired: 'Kedaluwarsa',
+  couponScheduled: 'Terjadwal',
+  coursePublished: 'Published',
+  courseDraft: 'Draft',
+  coursePending: 'Pending',
+  courseRejected: 'Rejected',
+  qaAnswered: 'Terjawab',
+  qaUnanswered: 'Belum dijawab',
 }
 
 export type BadgeProps = {

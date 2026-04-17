@@ -2,8 +2,6 @@ import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BookOpen, Users } from 'lucide-react'
-import { cva, type VariantProps } from 'class-variance-authority'
-import type { ReactNode } from 'react'
 import { ReactIcon } from './icons'
 import { Badge, PaymentBadge } from './badge'
 import { Rating } from './rating'
@@ -13,7 +11,7 @@ import { Button } from './button'
 import { cn } from '@/lib/utils'
 
 interface CardProps {
-  variant?: 'course' | 'resume' | 'transaction' | 'mentorCourse'
+  variant?: 'course' | 'resume' | 'resumeAdmin' | 'transaction' | 'mentorCourse'
   image?: string
   title: string
   description?: string
@@ -239,6 +237,47 @@ function Card({
     )
   }
 
+  if (variant === 'resumeAdmin') {
+    return (
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-slate-300/90">
+        <div className="relative aspect-16/10 w-full shrink-0">
+          {image ? (
+            <Image src={image} alt={title} loading="lazy" fill className="object-cover" sizes="(max-width: 768px) 100vw, 384px" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+              <ReactIcon />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col gap-3 p-5">
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-slate-900">
+            {title}
+          </h3>
+          {module && (
+            <p className="line-clamp-1 text-xs font-medium uppercase tracking-wider text-slate-400">
+              {module}
+            </p>
+          )}
+          {progress !== undefined && (
+            <div className="mt-auto w-full">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-500">Progres</span>
+                <span className="text-xs font-bold text-primary tabular-nums">{progress}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   if (variant === 'resume') {
     return (
       <div className="flex h-full w-full flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white transition-colors hover:border-slate-300/90">
@@ -360,61 +399,6 @@ export function CardPanel({ className, ...props }: React.ComponentProps<'div'>) 
   return <div className={cn(CARD_PANEL_CLASS, 'p-5', className)} {...props} />
 }
 
-const statCardShellVariants = cva('rounded-2xl border border-slate-100 bg-white flex items-center justify-between', {
-  variants: {
-    variant: {
-      default: 'w-72 h-32 p-6 mt-5',
-      compact: 'p-6 shadow-2xs',
-      legacy: 'w-72 h-32 p-6 mt-5 border-gray-400',
-    },
-    size: {
-      sm: 'p-4',
-      md: 'p-6',
-      lg: 'p-8',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-    size: 'md',
-  },
-})
-
-export type StatCardProps = {
-  title?: string
-  label?: string
-  value: string | number
-  icon?: ReactNode
-  themeIcon?: string
-  colorClass?: string
-  bgClass?: string
-  className?: string
-} & VariantProps<typeof statCardShellVariants>
-
-export function StatCard({ title, label, value, icon, themeIcon, variant, size, className }: StatCardProps) {
-  const displayLabel = label || title
-  return (
-    <div className={cn(statCardShellVariants({ variant, size }), 'shadow-sm', className)}>
-      <div className="flex flex-col">
-        <span
-          className={cn(
-            'mb-1 font-semibold uppercase tracking-wider',
-            variant === 'legacy' ? 'text-lg text-gray-500' : 'text-xs text-slate-400'
-          )}>
-          {displayLabel}
-        </span>
-        <span className={cn('font-bold', variant === 'legacy' ? 'text-xl text-gray-800' : 'text-2xl text-slate-900')}>{value}</span>
-      </div>
-      {icon && (
-        <div
-          className={cn(
-            'flex shrink-0 items-center justify-center rounded-xl',
-            variant === 'legacy' ? `p-2 bg-blue-100 ${themeIcon}` : `h-11 w-11 bg-primary/10 text-primary`
-          )}>
-          {icon}
-        </div>
-      )}
-    </div>
-  )
-}
+export { StatCard, type StatCardProps, type TrendDirection } from '@/components/dashboard/StatCard'
 
 export { Card }
