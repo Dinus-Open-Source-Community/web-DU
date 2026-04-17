@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function MentorDashboardPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-surface">
+    <main>
       <MentorDashboardContent />
     </main>
   )

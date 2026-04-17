@@ -3,12 +3,14 @@
 import { useMentorDashboard } from '@/hooks/useMentorDashboard'
 import QuickStats from './QuickStats'
 import CalendarView from '@/components/calendar/CalendarView'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export default function MentorDashboardContent() {
   const { stats, schedules, isLoading, isRefreshing } = useMentorDashboard()
 
   return (
-    <section className="pt-10 px-8 pb-12">
+    <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <PageHeader title="Halo Mentor Budi!" subtitle="Selamat datang di dashboard Anda." />
       <div className="mb-10">
         <QuickStats stats={stats} />
       </div>

@@ -1,6 +1,6 @@
 import { MapPin, Users } from 'lucide-react'
 import { MentorCalendarEvent } from './calendarUtils'
-import { formatTime, formatCompactDate } from './eventUtils'
+import { formatTime } from './eventUtils'
 import { ClassTypeBadge } from '@/components/ui/badge'
 
 interface UpcomingGroupProps {
@@ -24,22 +24,21 @@ export default function UpcomingGroup({ title, entries }: UpcomingGroupProps) {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold text-slate-900">{formatTime(event.start)}</p>
-                <p className="text-xs text-slate-500">{formatCompactDate(event.start)}</p>
               </div>
               <ClassTypeBadge classType={event.resource.classType} />
             </div>
 
             <h5 className="mt-2 text-sm font-semibold text-slate-900 line-clamp-2">{event.title}</h5>
 
-            <div className="mt-2 space-y-1 text-xs text-slate-500">
-              <p className="flex items-center gap-1">
+            <div className="mt-3  flex gap-2 items-center justify-start text-xs text-slate-500">
+              <span className="flex items-center gap-1">
                 <MapPin size={13} />
                 {event.resource.location}
-              </p>
-              <p className="flex items-center gap-1">
+              </span>
+              <span className="flex items-center gap-1">
                 <Users size={13} />
                 {event.resource.studentCount} students
-              </p>
+              </span>
             </div>
           </div>
         ))}

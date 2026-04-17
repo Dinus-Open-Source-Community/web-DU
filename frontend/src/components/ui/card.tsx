@@ -390,21 +390,10 @@ export type StatCardProps = {
   className?: string
 } & VariantProps<typeof statCardShellVariants>
 
-export function StatCard({
-  title,
-  label,
-  value,
-  icon,
-  themeIcon,
-  variant,
-  size,
-  colorClass,
-  bgClass,
-  className,
-}: StatCardProps) {
+export function StatCard({ title, label, value, icon, themeIcon, variant, size, className }: StatCardProps) {
   const displayLabel = label || title
   return (
-    <div className={cn(statCardShellVariants({ variant, size }), className)}>
+    <div className={cn(statCardShellVariants({ variant, size }), 'shadow-sm', className)}>
       <div className="flex flex-col">
         <span
           className={cn(

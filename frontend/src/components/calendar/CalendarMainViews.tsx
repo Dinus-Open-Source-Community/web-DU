@@ -29,11 +29,11 @@ export default function CalendarMainViews({ viewMode, cursorDate, events }: Cale
 
   if (viewMode === 'week') {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1  gap-3">
         {weekDays.map((weekDate) => {
           const eventsForDay = events.filter((event) => isSameCalendarDay(event.start, weekDate))
           return (
-            <div key={weekDate.toISOString()} className="rounded-xl border border-slate-100 bg-white p-3">
+            <div key={weekDate.toISOString()} className="rounded-xl shadow-sm border border-slate-100 bg-white p-3">
               <div className="mb-3">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{WEEKDAY_LABELS[weekDate.getDay()]}</p>
                 <p className="text-sm font-semibold text-slate-800">
@@ -42,7 +42,7 @@ export default function CalendarMainViews({ viewMode, cursorDate, events }: Cale
               </div>
 
               <div className="space-y-2">
-                {eventsForDay.length === 0 && <p className="text-xs text-slate-400">No session</p>}
+                {eventsForDay.length === 0 && <p className="text-sm text-slate-500">No session</p>}
                 {eventsForDay.map((event) => (
                   <div key={event.id} className={cn('rounded-lg border px-2.5 py-2 text-[11px]', getTypeStyles(event.resource.classType))}>
                     <p className="font-semibold">
