@@ -1,0 +1,162 @@
+[
+  {
+    "id": "men-001",
+    "bio": "Senior Frontend Engineer & Technical Writer.",
+    "specializations": ["Development"],
+    "studentsCount": 12450,
+    "totalCourses": 6,
+    "status": "active",
+    "createdAt": "2024-01-12",
+    "updatedAt": "2026-04-17"
+  },
+  {
+    "id": "men-002",
+    "bio": "Design Lead dengan fokus pada design system.",
+    "specializations": ["Design", "Marketing"],
+    "studentsCount": 8920,
+    "totalCourses": 4,
+    "status": "active",
+    "createdAt": "2024-02-02",
+    "updatedAt": "2026-04-15"
+  },
+  {
+    "id": "men-003",
+    "bio": "PhD in Computer Science, spesialis ML.",
+    "specializations": ["Data & AI"],
+    "studentsCount": 7320,
+    "totalCourses": 3,
+    "status": "active",
+    "createdAt": "2024-02-22",
+    "updatedAt": "2026-04-14"
+  },
+  {
+    "id": "men-004",
+    "bio": "Fullstack developer & design engineer.",
+    "specializations": ["Development", "Design"],
+    "studentsCount": 6450,
+    "totalCourses": 5,
+    "status": "active",
+    "createdAt": "2024-03-14",
+    "updatedAt": "2026-04-13"
+  },
+  {
+    "id": "men-005",
+    "bio": "Security researcher & ethical hacker.",
+    "specializations": ["Development"],
+    "studentsCount": 4200,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2024-03-19",
+    "updatedAt": "2026-04-12"
+  },
+  {
+    "id": "men-006",
+    "bio": "Creator of Vue.js, passionate about open source.",
+    "specializations": ["Development"],
+    "studentsCount": 240,
+    "totalCourses": 1,
+    "status": "pending",
+    "createdAt": "2024-04-08",
+    "updatedAt": "2026-04-08"
+  },
+  {
+    "id": "men-007",
+    "bio": "Author of The Lean Startup, entrepreneur & advisor.",
+    "specializations": ["Business"],
+    "studentsCount": 1840,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2024-04-11",
+    "updatedAt": "2026-04-11"
+  },
+  {
+    "id": "men-008",
+    "bio": "Serial entrepreneur, marketing strategist & content creator.",
+    "specializations": ["Marketing", "Business"],
+    "studentsCount": 15800,
+    "totalCourses": 3,
+    "status": "active",
+    "createdAt": "2024-04-18",
+    "updatedAt": "2026-04-17"
+  },
+  {
+    "id": "men-009",
+    "bio": "Co-founder of Coursera, deep learning pioneer.",
+    "specializations": ["Data & AI"],
+    "studentsCount": 9110,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2024-04-24",
+    "updatedAt": "2026-04-16"
+  },
+  {
+    "id": "men-010",
+    "bio": "Co-creator of Go programming language.",
+    "specializations": ["Development"],
+    "studentsCount": 420,
+    "totalCourses": 1,
+    "status": "inactive",
+    "createdAt": "2024-05-02",
+    "updatedAt": "2025-12-01"
+  },
+  {
+    "id": "men-011",
+    "bio": "UI designer & language instructor bilingual.",
+    "specializations": ["Design", "Language"],
+    "studentsCount": 2200,
+    "totalCourses": 3,
+    "status": "active",
+    "createdAt": "2024-05-08",
+    "updatedAt": "2026-04-10"
+  },
+  {
+    "id": "men-012",
+    "bio": "Backend developer, Go & Node.js specialist.",
+    "specializations": ["Development"],
+    "studentsCount": 480,
+    "totalCourses": 1,
+    "status": "active",
+    "createdAt": "2024-05-14",
+    "updatedAt": "2026-04-09"
+  },
+  {
+    "id": "men-013",
+    "bio": "Fullstack engineer with data science background.",
+    "specializations": ["Development", "Data & AI"],
+    "studentsCount": 7800,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2024-06-02",
+    "updatedAt": "2026-04-15"
+  },
+  {
+    "id": "men-014",
+    "bio": "Open source advocate & systems programmer.",
+    "specializations": ["Development"],
+    "studentsCount": 9600,
+    "totalCourses": 4,
+    "status": "active",
+    "createdAt": "2024-06-18",
+    "updatedAt": "2026-04-16"
+  },
+  {
+    "id": "men-015",
+    "bio": "Software architecture thought leader & author.",
+    "specializations": ["Business", "Development"],
+    "studentsCount": 2100,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2024-06-28",
+    "updatedAt": "2026-04-14"
+  },
+  {
+    "id": "usr-mentor-01",
+    "bio": "Mentor aktif untuk pengembangan web dan UI engineering.",
+    "specializations": ["Development", "Design"],
+    "studentsCount": 80,
+    "totalCourses": 2,
+    "status": "active",
+    "createdAt": "2026-01-01",
+    "updatedAt": "2026-04-18"
+  }
+]

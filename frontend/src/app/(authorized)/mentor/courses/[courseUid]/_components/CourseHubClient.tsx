@@ -92,7 +92,7 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
       icon: Eye,
       label: 'Preview Materi',
       description: 'Lihat tampilan materi seperti yang dilihat peserta.',
-      href: `/mentor/courses/${courseUid}/preview`,
+      href: `/course/${courseUid}/view`,
     },
     {
       icon: ClipboardList,

@@ -1,46 +1,59 @@
-import type { ICourseModule, ICourseModulesState, IMentorCourse } from '@/lib/types'
+import type { IModule, ICourseModulesState, IMentorCourse } from '@/lib/types'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
-import { mentorCoursesDummy } from '@/lib/dummyData'
+import { listCoursesByMentor, getCourseByUid, toMentorCourseView } from '@/lib/data/repository'
+import { getActiveUser } from '@/lib/data/dummyUsers'
 
 const STORAGE_KEY = 'mentor_courses_extra'
 const PUBLISHED_OVERRIDES_KEY = 'mentor_course_published_overrides'
 const SESSION_META_PREFIX = 'mentor_course_meta_'
-const SESSION_CONTENT_PREFIX = 'mentor_course_content_'
-const SESSION_MODULES_PREFIX = 'mentor_course_modules_v1_'
-const COURSE_MODULES_VERSION = 1 as const
+const SESSION_MODULES_PREFIX = 'mentor_course_modules_v2_'
+const COURSE_MODULES_VERSION = 2 as const
+
+function createLessonId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `les_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+}
 
 function createModuleId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
   }
-  return `module_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+  return `mod_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
 }
 
-function createDefaultModule(order = 1): ICourseModule {
+export function createDefaultLesson(order = 1): IModule['lessons'][number] {
+  return {
+    id: createLessonId(),
+    title: `Lesson ${order}`,
+    order,
+    durationMinutes: 10,
+    contentType: 'tiptap',
+    contentHtml: '',
+  }
+}
+
+export function createDefaultModule(order = 1): IModule {
   return {
     id: createModuleId(),
     title: `Modul ${order}`,
     order,
+    lessons: [createDefaultLesson(1)],
   }
 }
 
-function normalizeModules(modules: ICourseModule[]): ICourseModule[] {
+function normalizeModules(modules: IModule[]): IModule[] {
   if (!modules.length) return [createDefaultModule(1)]
-  return modules.map((module, index) => ({
-    id: module.id || createModuleId(),
-    title: module.title?.trim() ? module.title : `Modul ${index + 1}`,
-    order: index + 1,
+  return modules.map((m, i) => ({
+    ...m,
+    id: m.id || createModuleId(),
+    title: m.title?.trim() ? m.title : `Modul ${i + 1}`,
+    order: i + 1,
+    lessons: m.lessons?.length
+      ? m.lessons.map((l, j) => ({ ...l, order: j + 1 }))
+      : [createDefaultLesson(1)],
   }))
-}
-
-function createModulesStateFromLegacy(uid: string): ICourseModulesState {
-  const defaultModule = createDefaultModule(1)
-  const legacyHtml = getSessionEditorContent(uid) ?? ''
-  return {
-    version: COURSE_MODULES_VERSION,
-    modules: [defaultModule],
-    contents: { [defaultModule.id]: legacyHtml },
-  }
 }
 
 export function getExtraCourses(): IMentorCourse[] {
@@ -68,7 +81,6 @@ export function upsertExtraCourse(course: IMentorCourse) {
   saveExtraCourses(list)
 }
 
-/** Default jumlah pertemuan jika tidak diset pada metadata kursus. */
 export function getCourseMeetingCount(course: IMentorCourse): number {
   if (course.meetingCount != null && course.meetingCount >= 1) return course.meetingCount
   if (course.moduleCount > 0) return Math.max(1, course.moduleCount)
@@ -77,19 +89,15 @@ export function getCourseMeetingCount(course: IMentorCourse): number {
 
 export function setSessionCourseMeta(
   uid: string,
-  data: Pick<IMentorCourse, 'title' | 'header' | 'image'> & { published?: boolean; meetingCount?: number }
+  data: Pick<IMentorCourse, 'title' | 'header' | 'image'> & { published?: boolean; meetingCount?: number },
 ) {
   if (typeof window === 'undefined') return
-  sessionStorage.setItem(
-    `${SESSION_META_PREFIX}${uid}`,
-    JSON.stringify(data)
-  )
+  sessionStorage.setItem(`${SESSION_META_PREFIX}${uid}`, JSON.stringify(data))
 }
 
-export function getSessionCourseMeta(uid: string): (Pick<
-  IMentorCourse,
-  'title' | 'header' | 'image'
-> & { published?: boolean; meetingCount?: number }) | null {
+export function getSessionCourseMeta(
+  uid: string,
+): (Pick<IMentorCourse, 'title' | 'header' | 'image'> & { published?: boolean; meetingCount?: number }) | null {
   if (typeof window === 'undefined') return null
   try {
     const raw = sessionStorage.getItem(`${SESSION_META_PREFIX}${uid}`)
@@ -100,65 +108,42 @@ export function getSessionCourseMeta(uid: string): (Pick<
   }
 }
 
-export function setSessionEditorContent(uid: string, html: string) {
-  if (typeof window === 'undefined') return
-  sessionStorage.setItem(`${SESSION_CONTENT_PREFIX}${uid}`, html)
-}
-
-export function getSessionEditorContent(uid: string): string | null {
-  if (typeof window === 'undefined') return null
-  return sessionStorage.getItem(`${SESSION_CONTENT_PREFIX}${uid}`)
-}
-
 export function setSessionCourseModules(uid: string, state: ICourseModulesState) {
   if (typeof window === 'undefined') return
-  const normalizedModules = normalizeModules(state.modules)
-  const normalizedContents = normalizedModules.reduce<Record<string, string>>((acc, module) => {
-    acc[module.id] = state.contents[module.id] ?? ''
-    return acc
-  }, {})
   const payload: ICourseModulesState = {
     version: COURSE_MODULES_VERSION,
-    modules: normalizedModules,
-    contents: normalizedContents,
+    modules: normalizeModules(state.modules),
   }
   sessionStorage.setItem(`${SESSION_MODULES_PREFIX}${uid}`, JSON.stringify(payload))
 }
 
 export function getSessionCourseModules(uid: string): ICourseModulesState {
-  if (typeof window === 'undefined') {
-    const defaultModule = createDefaultModule(1)
-    return {
-      version: COURSE_MODULES_VERSION,
-      modules: [defaultModule],
-      contents: { [defaultModule.id]: '' },
+  const fallback = (): ICourseModulesState => {
+    const course = getCourseByUid(uid)
+    if (course && course.modules.length > 0) {
+      return { version: COURSE_MODULES_VERSION, modules: course.modules }
     }
+    return { version: COURSE_MODULES_VERSION, modules: [createDefaultModule(1)] }
   }
+
+  if (typeof window === 'undefined') return fallback()
 
   const key = `${SESSION_MODULES_PREFIX}${uid}`
   try {
     const raw = sessionStorage.getItem(key)
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<ICourseModulesState>
-      const modules = Array.isArray(parsed.modules) ? normalizeModules(parsed.modules as ICourseModule[]) : [createDefaultModule(1)]
-      const contents = modules.reduce<Record<string, string>>((acc, module) => {
-        const value = parsed.contents && typeof parsed.contents === 'object' ? parsed.contents[module.id] : ''
-        acc[module.id] = typeof value === 'string' ? value : ''
-        return acc
-      }, {})
-      return {
-        version: COURSE_MODULES_VERSION,
-        modules,
-        contents,
+      if (Array.isArray(parsed.modules) && parsed.modules.length > 0) {
+        return { version: COURSE_MODULES_VERSION, modules: normalizeModules(parsed.modules as IModule[]) }
       }
     }
   } catch {
-    // fallback ke migrasi legacy di bawah
+    // fall through to seed from repository
   }
 
-  const migrated = createModulesStateFromLegacy(uid)
-  setSessionCourseModules(uid, migrated)
-  return migrated
+  const seeded = fallback()
+  setSessionCourseModules(uid, seeded)
+  return seeded
 }
 
 export function getPublishedOverrides(): Record<string, boolean> {
@@ -179,22 +164,20 @@ export function setPublishedOverride(uid: string, published: boolean) {
   localStorage.setItem(PUBLISHED_OVERRIDES_KEY, JSON.stringify(next))
 }
 
-/** Gabungan fixture (jika mock aktif) + kursus dari penyimpanan lokal + override publish */
 export function getMergedMentorCourses(): IMentorCourse[] {
+  const user = getActiveUser()
   if (typeof window === 'undefined') {
-    return isMockDataEnabled() ? mentorCoursesDummy : []
+    return isMockDataEnabled() ? listCoursesByMentor(user.id).map(toMentorCourseView) : []
   }
   const extra = getExtraCourses()
-  if (!isMockDataEnabled()) {
-    return extra
-  }
+  if (!isMockDataEnabled()) return extra
   const overrides = getPublishedOverrides()
-  const dummyIds = new Set(mentorCoursesDummy.map((c) => c.uid))
-  const base = mentorCoursesDummy.map((c) => ({
+  const base = listCoursesByMentor(user.id).map(toMentorCourseView).map((c) => ({
     ...c,
     published: overrides[c.uid] !== undefined ? overrides[c.uid] : c.published,
   }))
-  const extrasOnly = extra.filter((e) => !dummyIds.has(e.uid))
+  const baseIds = new Set(base.map((c) => c.uid))
+  const extrasOnly = extra.filter((e) => !baseIds.has(e.uid))
   return [...base, ...extrasOnly]
 }
 
@@ -222,7 +205,6 @@ export function getMentorCourseByUid(uid: string): IMentorCourse | null {
   }
 }
 
-/** Ubah status terbit/draf (fixture → override; kursus buatan → upsert extra). */
 export function setMentorCoursePublished(uid: string, published: boolean) {
   if (typeof window === 'undefined') return
   const extras = getExtraCourses()
@@ -239,7 +221,6 @@ export function setMentorCoursePublished(uid: string, published: boolean) {
   setPublishedOverride(uid, published)
 }
 
-/** Tandai kursus sebagai dipublikasikan (dummy → override; buatan user → upsert extra). */
 export function publishMentorCourse(uid: string) {
   setMentorCoursePublished(uid, true)
 }

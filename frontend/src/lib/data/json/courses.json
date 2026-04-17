@@ -1,0 +1,2185 @@
+[
+  {
+    "uid": "crs-001",
+    "variantBadge": "event",
+    "title": "Advanced React Patterns & Next.js 15 Architecture",
+    "description": "Berhenti menulis kode reaktif yang berantakan. Pelajari cara membangun aplikasi skala enterprise dengan teknik rendering hybrid, manajemen state terdesentralisasi, dan optimasi performa ekstrem.",
+    "category": "Pengembangan Web",
+    "mentorId": "men-001",
+    "rating": 4.9,
+    "totalReviews": 1450,
+    "image": "https://picsum.photos/seed/react/600/400",
+    "price": 499000,
+    "strikePrice": 899000,
+    "status": "published",
+    "enrolled": 1820,
+    "duration": "42h",
+    "createdAt": "12 Jan 2024",
+    "updatedAt": "10 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-001-01",
+        "title": "Introduction to React 19",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-001-01-01",
+            "title": "Evolusi React: Dari Class ke Server Components",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Evolusi React</h2><p>React telah berevolusi dari class components menuju paradigma server-first. Di pelajaran ini kita akan menelusuri timeline perubahan besar React dan memahami motivasi di balik Server Components.</p>"
+          },
+          {
+            "id": "les-001-01-02",
+            "title": "Setup Project Next.js 15 dengan App Router",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Video walkthrough membuat project Next.js 15 dari nol menggunakan App Router dan TypeScript.</p>"
+          },
+          {
+            "id": "les-001-01-03",
+            "title": "Quiz: Dasar-dasar React & Next.js",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa keuntungan utama Server Components di React?",
+                  "options": [
+                    { "id": "a", "label": "Mengurangi bundle size di client" },
+                    { "id": "b", "label": "Membuat animasi lebih smooth" },
+                    { "id": "c", "label": "Menghilangkan kebutuhan CSS" },
+                    { "id": "d", "label": "Menggantikan TypeScript" }
+                  ],
+                  "correctOptionId": "a",
+                  "explanation": "Server Components dirender di server sehingga JavaScript-nya tidak dikirim ke browser, mengurangi bundle size secara signifikan."
+                },
+                {
+                  "id": "q2",
+                  "prompt": "File konvensi mana yang digunakan Next.js App Router untuk layout?",
+                  "options": [
+                    { "id": "a", "label": "_app.tsx" },
+                    { "id": "b", "label": "layout.tsx" },
+                    { "id": "c", "label": "template.tsx" },
+                    { "id": "d", "label": "wrapper.tsx" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "layout.tsx adalah file konvensi di App Router yang membungkus halaman dan bersifat persistent antar navigasi."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-001-02",
+        "title": "Advanced Rendering Patterns",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-001-02-01",
+            "title": "SSR, SSG, ISR, dan PPR Explained",
+            "order": 1,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Penjelasan mendalam tentang strategi rendering di Next.js: Static, Dynamic, Incremental, dan Partial Pre-rendering.</p>"
+          },
+          {
+            "id": "les-001-02-02",
+            "title": "Streaming & Suspense Boundaries",
+            "order": 2,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Streaming dengan Suspense</h2><p>Gunakan <code>Suspense</code> untuk memecah halaman menjadi bagian-bagian yang bisa di-stream secara independen. Ini meningkatkan TTFB dan perceived performance secara drastis.</p>"
+          },
+          {
+            "id": "les-001-02-03",
+            "title": "Hands-on: Hybrid Rendering App",
+            "order": 3,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Praktik langsung membangun aplikasi dashboard dengan kombinasi SSG untuk halaman statis dan SSR untuk data real-time.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-001-03",
+        "title": "State Management & Performance",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-001-03-01",
+            "title": "Zustand vs Jotai vs React Context",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Memilih State Manager</h2><p>Perbandingan tiga pendekatan populer: Zustand untuk global store sederhana, Jotai untuk atomic state, dan React Context untuk state terlokalisasi. Masing-masing punya trade-off tersendiri.</p>"
+          },
+          {
+            "id": "les-001-03-02",
+            "title": "Profiling & Optimasi React DevTools",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Tutorial menggunakan React DevTools Profiler untuk menemukan re-render yang tidak perlu dan cara mengoptimalkannya.</p>"
+          },
+          {
+            "id": "les-001-03-03",
+            "title": "Quiz: Rendering & State",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Kapan sebaiknya menggunakan React.memo?",
+                  "options": [
+                    { "id": "a", "label": "Pada setiap komponen" },
+                    { "id": "b", "label": "Hanya pada komponen yang sering re-render tanpa perubahan props" },
+                    { "id": "c", "label": "Hanya pada Server Components" },
+                    { "id": "d", "label": "Tidak pernah, karena sudah deprecated" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "React.memo hanya berguna untuk mencegah re-render pada komponen yang menerima props yang sama. Menggunakannya di mana-mana justru menambah overhead."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-002",
+    "variantBadge": "event",
+    "title": "UI/UX Fundamentals",
+    "description": "Kuasai prinsip desain yang membuat produk digital terasa intuitif. Dari riset pengguna hingga prototyping, bangun fondasi kuat untuk karir UI/UX.",
+    "category": "Desain UI/UX",
+    "mentorId": "men-002",
+    "rating": 4.8,
+    "totalReviews": 2450,
+    "image": "https://picsum.photos/seed/uiux/600/400",
+    "price": 349000,
+    "strikePrice": 599000,
+    "status": "published",
+    "enrolled": 1540,
+    "duration": "28h",
+    "createdAt": "02 Feb 2024",
+    "updatedAt": "06 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-002-01",
+        "title": "Prinsip Dasar UI Design",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-002-01-01",
+            "title": "Visual Hierarchy & Typography",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Visual Hierarchy</h2><p>Hierarki visual mengarahkan mata pengguna ke elemen terpenting terlebih dahulu. Gunakan ukuran, warna, kontras, dan spacing untuk menciptakan alur baca yang jelas.</p>"
+          },
+          {
+            "id": "les-002-01-02",
+            "title": "Color Theory untuk Digital Product",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Pelajari cara memilih palet warna yang accessible dan konsisten untuk aplikasi digital.</p>"
+          },
+          {
+            "id": "les-002-01-03",
+            "title": "Quiz: Prinsip Visual",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa rasio kontras minimum yang direkomendasikan WCAG AA untuk teks normal?",
+                  "options": [
+                    { "id": "a", "label": "2:1" },
+                    { "id": "b", "label": "3:1" },
+                    { "id": "c", "label": "4.5:1" },
+                    { "id": "d", "label": "7:1" }
+                  ],
+                  "correctOptionId": "c",
+                  "explanation": "WCAG AA mensyaratkan rasio kontras minimal 4.5:1 untuk teks berukuran normal agar mudah dibaca oleh semua pengguna."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-002-02",
+        "title": "UX Research & User Journey",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-002-02-01",
+            "title": "User Persona & Empathy Map",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Cara membuat persona pengguna yang data-driven dan empathy map untuk memahami kebutuhan user.</p>"
+          },
+          {
+            "id": "les-002-02-02",
+            "title": "Membuat User Journey Map",
+            "order": 2,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>User Journey Map</h2><p>Journey map memvisualisasikan pengalaman pengguna dari awal hingga akhir. Identifikasi <strong>pain points</strong> dan <strong>opportunities</strong> di setiap tahap interaksi.</p>"
+          },
+          {
+            "id": "les-002-02-03",
+            "title": "Usability Testing 101",
+            "order": 3,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Panduan lengkap melakukan usability testing: dari rekrutmen partisipan hingga analisis hasil.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-002-03",
+        "title": "Wireframing & Prototyping",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-002-03-01",
+            "title": "Low-fi vs High-fi Wireframe",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Wireframing</h2><p>Low-fidelity wireframe cocok untuk eksplorasi awal, sementara high-fidelity wireframe digunakan untuk validasi detail sebelum masuk ke tahap prototyping.</p>"
+          },
+          {
+            "id": "les-002-03-02",
+            "title": "Interactive Prototype di Figma",
+            "order": 2,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Live demo membuat prototype interaktif dengan transitions dan micro-interactions di Figma.</p>"
+          },
+          {
+            "id": "les-002-03-03",
+            "title": "Quiz: UX & Prototyping",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa tujuan utama dari low-fidelity wireframe?",
+                  "options": [
+                    { "id": "a", "label": "Menampilkan desain final" },
+                    { "id": "b", "label": "Eksplorasi layout dan alur tanpa detail visual" },
+                    { "id": "c", "label": "Menguji performa aplikasi" },
+                    { "id": "d", "label": "Membuat dokumentasi API" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Low-fi wireframe bertujuan untuk mengeksplorasi struktur dan alur tanpa terdistraksi oleh detail visual."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-003",
+    "variantBadge": "premium",
+    "title": "Machine Learning with Python: Zero to Hero",
+    "description": "Mulai dari nol hingga mahir membangun model ML. Pelajari scikit-learn, TensorFlow, dan teknik feature engineering yang digunakan di industri.",
+    "category": "Data Science & AI",
+    "mentorId": "men-003",
+    "rating": 4.6,
+    "totalReviews": 842,
+    "image": "https://picsum.photos/seed/ml/600/400",
+    "price": 899000,
+    "strikePrice": 1299000,
+    "status": "published",
+    "enrolled": 1320,
+    "duration": "48h",
+    "createdAt": "22 Feb 2024",
+    "updatedAt": "01 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-003-01",
+        "title": "Fondasi Python untuk Data Science",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-003-01-01",
+            "title": "NumPy & Pandas Crash Course",
+            "order": 1,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Pengenalan cepat library NumPy dan Pandas untuk manipulasi data tabular dan operasi array.</p>"
+          },
+          {
+            "id": "les-003-01-02",
+            "title": "Eksplorasi Data dengan Matplotlib & Seaborn",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Visualisasi Data</h2><p>Gunakan <code>matplotlib</code> dan <code>seaborn</code> untuk membuat visualisasi yang informatif. Histogram, scatter plot, dan heatmap adalah tiga jenis chart yang wajib dikuasai.</p>"
+          },
+          {
+            "id": "les-003-01-03",
+            "title": "Quiz: Dasar Python Data Science",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Fungsi Pandas mana yang digunakan untuk membaca file CSV?",
+                  "options": [
+                    { "id": "a", "label": "pd.load_csv()" },
+                    { "id": "b", "label": "pd.read_csv()" },
+                    { "id": "c", "label": "pd.import_csv()" },
+                    { "id": "d", "label": "pd.open_csv()" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "pd.read_csv() adalah fungsi standar Pandas untuk membaca file CSV ke dalam DataFrame."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-003-02",
+        "title": "Supervised Learning",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-003-02-01",
+            "title": "Linear & Logistic Regression",
+            "order": 1,
+            "durationMinutes": 30,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Regresi</h2><p>Linear regression memprediksi nilai kontinu, sedangkan logistic regression mengklasifikasikan data ke dalam kategori. Keduanya adalah fondasi penting sebelum masuk ke algoritma yang lebih kompleks.</p>"
+          },
+          {
+            "id": "les-003-02-02",
+            "title": "Decision Trees & Random Forest",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Memahami cara kerja decision tree dan bagaimana ensemble method Random Forest meningkatkan akurasi prediksi.</p>"
+          },
+          {
+            "id": "les-003-02-03",
+            "title": "Hands-on: Klasifikasi dengan scikit-learn",
+            "order": 3,
+            "durationMinutes": 35,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Praktik langsung membangun pipeline klasifikasi lengkap menggunakan scikit-learn.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-003-03",
+        "title": "Neural Networks & Deep Learning",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-003-03-01",
+            "title": "Pengantar Neural Network",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Neural Network</h2><p>Neural network terinspirasi dari cara otak bekerja. Pelajari konsep neuron, layer, activation function, dan backpropagation secara intuitif.</p>"
+          },
+          {
+            "id": "les-003-03-02",
+            "title": "Membangun CNN dengan TensorFlow",
+            "order": 2,
+            "durationMinutes": 35,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Tutorial step-by-step membuat Convolutional Neural Network untuk image classification menggunakan TensorFlow dan Keras.</p>"
+          },
+          {
+            "id": "les-003-03-03",
+            "title": "Quiz: Machine Learning",
+            "order": 3,
+            "durationMinutes": 15,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa perbedaan utama antara supervised dan unsupervised learning?",
+                  "options": [
+                    { "id": "a", "label": "Supervised lebih cepat" },
+                    { "id": "b", "label": "Supervised menggunakan data berlabel, unsupervised tidak" },
+                    { "id": "c", "label": "Unsupervised membutuhkan GPU" },
+                    { "id": "d", "label": "Tidak ada perbedaan" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Supervised learning membutuhkan data berlabel (input-output pairs), sementara unsupervised learning mencari pola tanpa label."
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Activation function mana yang paling umum digunakan di hidden layer?",
+                  "options": [
+                    { "id": "a", "label": "Sigmoid" },
+                    { "id": "b", "label": "Tanh" },
+                    { "id": "c", "label": "ReLU" },
+                    { "id": "d", "label": "Softmax" }
+                  ],
+                  "correctOptionId": "c",
+                  "explanation": "ReLU (Rectified Linear Unit) adalah pilihan default untuk hidden layer karena sederhana dan efektif mengatasi vanishing gradient problem."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-004",
+    "variantBadge": "free",
+    "title": "Mastering Tailwind CSS v4 & Framer Motion",
+    "description": "Bangun UI modern tanpa menulis CSS kustom. Kuasai utility-first workflow Tailwind v4 dan animasi fluid dengan Framer Motion.",
+    "category": "Pengembangan Web",
+    "mentorId": "men-004",
+    "rating": 5.0,
+    "totalReviews": 999,
+    "image": "https://picsum.photos/seed/tailwind/600/400",
+    "price": 299000,
+    "status": "published",
+    "enrolled": 1180,
+    "duration": "26h",
+    "createdAt": "14 Mar 2024",
+    "updatedAt": "05 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-004-01",
+        "title": "Tailwind CSS v4 Essentials",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-004-01-01",
+            "title": "Apa yang Baru di Tailwind v4",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Tailwind v4</h2><p>Tailwind v4 membawa perubahan besar: engine baru berbasis Rust, CSS-first configuration, dan <code>@theme</code> directive. Migrasi dari v3 menjadi lebih mudah dengan codemod resmi.</p>"
+          },
+          {
+            "id": "les-004-01-02",
+            "title": "Responsive Design & Dark Mode",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara membangun layout responsif dan dark mode yang elegan menggunakan Tailwind v4.</p>"
+          },
+          {
+            "id": "les-004-01-03",
+            "title": "Quiz: Tailwind Fundamentals",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Bagaimana cara mengaktifkan dark mode di Tailwind v4?",
+                  "options": [
+                    { "id": "a", "label": "darkMode: 'class' di tailwind.config.js" },
+                    { "id": "b", "label": "Dark mode otomatis via CSS prefers-color-scheme" },
+                    { "id": "c", "label": "Import file dark.css" },
+                    { "id": "d", "label": "Tidak didukung di v4" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Tailwind v4 menggunakan CSS prefers-color-scheme secara default, menghilangkan kebutuhan konfigurasi manual."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-004-02",
+        "title": "Framer Motion Animations",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-004-02-01",
+            "title": "Motion Components & Variants",
+            "order": 1,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Pengenalan motion components, variants, dan cara membuat animasi deklaratif yang smooth di React.</p>"
+          },
+          {
+            "id": "les-004-02-02",
+            "title": "Gesture & Scroll Animations",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Gesture Animations</h2><p>Framer Motion mendukung <code>whileHover</code>, <code>whileTap</code>, dan <code>whileInView</code> untuk animasi berbasis interaksi. Scroll-linked animations membuat halaman terasa hidup.</p>"
+          },
+          {
+            "id": "les-004-02-03",
+            "title": "Layout Animations & AnimatePresence",
+            "order": 3,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Teknik layout animation untuk transisi antar state dan AnimatePresence untuk animasi mount/unmount.</p>"
+          },
+          {
+            "id": "les-004-02-04",
+            "title": "Quiz: Animasi & Motion",
+            "order": 4,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Komponen apa yang digunakan untuk animasi exit di Framer Motion?",
+                  "options": [
+                    { "id": "a", "label": "motion.div" },
+                    { "id": "b", "label": "AnimatePresence" },
+                    { "id": "c", "label": "MotionConfig" },
+                    { "id": "d", "label": "LayoutGroup" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "AnimatePresence memungkinkan komponen menjalankan animasi exit sebelum di-unmount dari DOM."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-005",
+    "variantBadge": "premium",
+    "title": "Go (Golang) Microservices",
+    "description": "Pelajari cara membangun microservices yang scalable dan performant dengan Go. Dari REST API hingga gRPC, message queues, dan deployment ke Kubernetes.",
+    "category": "Pengembangan Web",
+    "mentorId": "men-010",
+    "rating": 4.7,
+    "totalReviews": 240,
+    "image": "https://picsum.photos/seed/golang/600/400",
+    "price": 429000,
+    "status": "published",
+    "enrolled": 920,
+    "duration": "22h",
+    "createdAt": "02 May 2024",
+    "updatedAt": "28 Mar 2026",
+    "modules": [
+      {
+        "id": "mod-005-01",
+        "title": "Go Fundamentals",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-005-01-01",
+            "title": "Goroutines & Channels",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Concurrency di Go</h2><p>Goroutines adalah lightweight thread yang dikelola Go runtime. Channels memungkinkan komunikasi aman antar goroutine tanpa shared memory.</p>"
+          },
+          {
+            "id": "les-005-01-02",
+            "title": "Membangun REST API dengan Gin",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Setup project Go dengan Gin framework, routing, middleware, dan JSON response handling.</p>"
+          },
+          {
+            "id": "les-005-01-03",
+            "title": "Quiz: Go Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa keyword untuk menjalankan fungsi sebagai goroutine?",
+                  "options": [
+                    { "id": "a", "label": "async" },
+                    { "id": "b", "label": "go" },
+                    { "id": "c", "label": "spawn" },
+                    { "id": "d", "label": "thread" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Keyword 'go' digunakan untuk menjalankan fungsi secara concurrent sebagai goroutine."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-005-02",
+        "title": "Microservices Architecture",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-005-02-01",
+            "title": "gRPC & Protocol Buffers",
+            "order": 1,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Implementasi komunikasi antar service menggunakan gRPC dengan Protocol Buffers sebagai format serialisasi.</p>"
+          },
+          {
+            "id": "les-005-02-02",
+            "title": "Event-Driven Architecture dengan NATS",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Event-Driven</h2><p>NATS adalah message broker yang ringan dan cepat. Gunakan pub/sub pattern untuk komunikasi asinkron antar microservices tanpa tight coupling.</p>"
+          },
+          {
+            "id": "les-005-02-03",
+            "title": "Docker & Kubernetes Deployment",
+            "order": 3,
+            "durationMinutes": 28,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Containerisasi service Go dengan Docker dan deployment ke Kubernetes cluster.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-006",
+    "variantBadge": "premium",
+    "title": "Cybersecurity Analyst Bootcamp",
+    "description": "Bootcamp intensif untuk menjadi cybersecurity analyst. Pelajari network security, penetration testing, incident response, dan compliance framework.",
+    "category": "Cybersecurity",
+    "mentorId": "men-005",
+    "rating": 4.9,
+    "totalReviews": 541,
+    "image": "https://picsum.photos/seed/cyber/600/400",
+    "price": 1250000,
+    "status": "published",
+    "enrolled": 780,
+    "duration": "60h",
+    "createdAt": "19 Mar 2024",
+    "updatedAt": "12 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-006-01",
+        "title": "Network Security Fundamentals",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-006-01-01",
+            "title": "OSI Model & TCP/IP Deep Dive",
+            "order": 1,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>OSI Model</h2><p>Memahami 7 layer OSI dan bagaimana data mengalir di jaringan. Pengetahuan ini krusial untuk menganalisis serangan di berbagai layer.</p>"
+          },
+          {
+            "id": "les-006-01-02",
+            "title": "Wireshark Packet Analysis",
+            "order": 2,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Praktik menggunakan Wireshark untuk capture dan analisis network traffic, mengidentifikasi anomali dan serangan.</p>"
+          },
+          {
+            "id": "les-006-01-03",
+            "title": "Quiz: Network Security",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Layer OSI mana yang bertanggung jawab untuk enkripsi?",
+                  "options": [
+                    { "id": "a", "label": "Layer 3 (Network)" },
+                    { "id": "b", "label": "Layer 4 (Transport)" },
+                    { "id": "c", "label": "Layer 6 (Presentation)" },
+                    { "id": "d", "label": "Layer 7 (Application)" }
+                  ],
+                  "correctOptionId": "c",
+                  "explanation": "Presentation layer (Layer 6) bertanggung jawab untuk enkripsi, dekripsi, dan format data."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-006-02",
+        "title": "Penetration Testing",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-006-02-01",
+            "title": "Reconnaissance & Scanning",
+            "order": 1,
+            "durationMinutes": 28,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Teknik information gathering menggunakan Nmap, Shodan, dan OSINT tools untuk menemukan attack surface.</p>"
+          },
+          {
+            "id": "les-006-02-02",
+            "title": "Web Application Security (OWASP Top 10)",
+            "order": 2,
+            "durationMinutes": 35,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>OWASP Top 10</h2><p>Pelajari 10 kerentanan web aplikasi paling kritis: injection, broken authentication, XSS, SSRF, dan lainnya. Setiap kerentanan disertai contoh eksploitasi dan mitigasi.</p>"
+          },
+          {
+            "id": "les-006-02-03",
+            "title": "Hands-on: Exploit & Report Writing",
+            "order": 3,
+            "durationMinutes": 40,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Praktik eksploitasi kerentanan pada lab environment dan cara menulis laporan penetration testing yang profesional.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-006-03",
+        "title": "Incident Response & Compliance",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-006-03-01",
+            "title": "Incident Response Framework",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Incident Response</h2><p>Pelajari framework NIST untuk menangani insiden keamanan: Preparation, Detection, Containment, Eradication, Recovery, dan Lessons Learned.</p>"
+          },
+          {
+            "id": "les-006-03-02",
+            "title": "SIEM & Log Analysis",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Konfigurasi SIEM dan teknik analisis log untuk mendeteksi ancaman secara real-time.</p>"
+          },
+          {
+            "id": "les-006-03-03",
+            "title": "Quiz: Pentest & IR",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Tahap pertama dalam NIST Incident Response lifecycle adalah?",
+                  "options": [
+                    { "id": "a", "label": "Detection" },
+                    { "id": "b", "label": "Preparation" },
+                    { "id": "c", "label": "Containment" },
+                    { "id": "d", "label": "Eradication" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Preparation adalah tahap pertama: memastikan organisasi memiliki rencana, tools, dan tim yang siap sebelum insiden terjadi."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-007",
+    "variantBadge": "premium",
+    "title": "Product Management Strategy",
+    "description": "Pelajari strategi product management dari ideation hingga go-to-market. Kuasai prioritization framework, roadmapping, dan data-driven decision making.",
+    "category": "Bisnis & Manajemen",
+    "mentorId": "men-015",
+    "rating": 4.7,
+    "totalReviews": 890,
+    "image": "https://picsum.photos/seed/pm/600/400",
+    "price": 399000,
+    "status": "published",
+    "enrolled": 540,
+    "duration": "20h",
+    "createdAt": "28 Jun 2024",
+    "updatedAt": "12 Mar 2026",
+    "modules": [
+      {
+        "id": "mod-007-01",
+        "title": "Product Discovery & Strategy",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-007-01-01",
+            "title": "Problem-Solution Fit",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Problem-Solution Fit</h2><p>Sebelum membangun produk, pastikan masalah yang ingin dipecahkan benar-benar ada dan cukup besar. Gunakan teknik customer interview dan Jobs-to-be-Done framework.</p>"
+          },
+          {
+            "id": "les-007-01-02",
+            "title": "Competitive Analysis & Market Sizing",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara menganalisis kompetitor dan menghitung TAM, SAM, SOM untuk memvalidasi peluang pasar.</p>"
+          },
+          {
+            "id": "les-007-01-03",
+            "title": "Quiz: Product Discovery",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa tujuan utama dari Jobs-to-be-Done framework?",
+                  "options": [
+                    { "id": "a", "label": "Mendesain UI yang cantik" },
+                    { "id": "b", "label": "Memahami alasan mendasar pengguna menggunakan produk" },
+                    { "id": "c", "label": "Membuat roadmap produk" },
+                    { "id": "d", "label": "Menghitung revenue" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "JTBD berfokus pada 'pekerjaan' yang ingin diselesaikan pengguna, bukan fitur produk."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-007-02",
+        "title": "Roadmapping & Prioritization",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-007-02-01",
+            "title": "RICE, ICE, dan MoSCoW Framework",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Prioritization</h2><p>RICE (Reach, Impact, Confidence, Effort) membantu mengurutkan fitur secara objektif. Kombinasikan dengan MoSCoW untuk komunikasi yang jelas dengan stakeholder.</p>"
+          },
+          {
+            "id": "les-007-02-02",
+            "title": "Membuat Product Roadmap yang Efektif",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Dari Now-Next-Later hingga timeline-based roadmap. Pilih format yang tepat untuk audiens Anda.</p>"
+          },
+          {
+            "id": "les-007-02-03",
+            "title": "Product Metrics & OKR",
+            "order": 3,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Definisikan North Star Metric dan susun OKR yang aligned dengan strategi bisnis.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-008",
+    "variantBadge": "event",
+    "title": "Social Media Organic Marketing",
+    "description": "Kuasai strategi organic marketing di Instagram, TikTok, dan LinkedIn. Pelajari content planning, copywriting, dan analytics tanpa budget iklan.",
+    "category": "Bisnis & Manajemen",
+    "mentorId": "men-008",
+    "rating": 4.8,
+    "totalReviews": 6990,
+    "image": "https://picsum.photos/seed/social/600/400",
+    "price": 249000,
+    "status": "published",
+    "enrolled": 410,
+    "duration": "12h",
+    "createdAt": "18 Apr 2024",
+    "updatedAt": "08 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-008-01",
+        "title": "Content Strategy & Planning",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-008-01-01",
+            "title": "Content Pillar & Calendar",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Content Pillar</h2><p>Tentukan 3-5 content pillar yang selaras dengan brand values. Buat content calendar bulanan untuk konsistensi posting dan variasi format.</p>"
+          },
+          {
+            "id": "les-008-01-02",
+            "title": "Copywriting untuk Social Media",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Teknik menulis caption yang engaging: hook, story, CTA. Perbedaan gaya copywriting untuk setiap platform.</p>"
+          },
+          {
+            "id": "les-008-01-03",
+            "title": "Quiz: Content Strategy",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa fungsi utama content pillar?",
+                  "options": [
+                    { "id": "a", "label": "Meningkatkan followers secara instan" },
+                    { "id": "b", "label": "Memberikan struktur dan konsistensi pada konten" },
+                    { "id": "c", "label": "Menggantikan iklan berbayar" },
+                    { "id": "d", "label": "Mengotomasi posting" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Content pillar memberikan kerangka tematik sehingga konten tetap konsisten, relevan, dan tidak keluar dari brand identity."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-008-02",
+        "title": "Platform-Specific Tactics",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-008-02-01",
+            "title": "Instagram Reels & Algorithm 2026",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Update terbaru algoritma Instagram dan strategi Reels yang terbukti meningkatkan reach organik.</p>"
+          },
+          {
+            "id": "les-008-02-02",
+            "title": "TikTok Growth Hacking",
+            "order": 2,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>TikTok Strategy</h2><p>TikTok memprioritaskan <strong>watch time</strong> dan <strong>completion rate</strong>. Hook 3 detik pertama menentukan performa video. Gunakan trending sounds dan format storytelling.</p>"
+          },
+          {
+            "id": "les-008-02-03",
+            "title": "Analytics & Reporting",
+            "order": 3,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara membaca metrics yang penting: engagement rate, reach, saves, dan shares. Buat laporan bulanan yang actionable.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-009",
+    "variantBadge": "draft",
+    "title": "Pengantar Vue 3 Composition API",
+    "description": "Pelajari Vue 3 dari dasar dengan Composition API. Bangun aplikasi reaktif yang clean dan scalable dengan setup script dan composables.",
+    "category": "Pengembangan Web",
+    "mentorId": "men-006",
+    "rating": 0,
+    "totalReviews": 0,
+    "image": "https://picsum.photos/seed/vue/600/400",
+    "price": 299000,
+    "status": "draft",
+    "enrolled": 0,
+    "duration": "14h",
+    "createdAt": "08 Apr 2024",
+    "updatedAt": "Draft",
+    "modules": [
+      {
+        "id": "mod-009-01",
+        "title": "Vue 3 Basics",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-009-01-01",
+            "title": "Setup Script & Reactivity System",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Reactivity di Vue 3</h2><p>Vue 3 menggunakan <code>ref()</code> dan <code>reactive()</code> untuk membuat data reaktif. Setup script menyederhanakan penulisan component tanpa boilerplate.</p>"
+          },
+          {
+            "id": "les-009-01-02",
+            "title": "Template Syntax & Directives",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Penjelasan v-if, v-for, v-model, dan custom directives di Vue 3 template.</p>"
+          },
+          {
+            "id": "les-009-01-03",
+            "title": "Quiz: Vue 3 Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa perbedaan ref() dan reactive() di Vue 3?",
+                  "options": [
+                    { "id": "a", "label": "ref() untuk primitif, reactive() untuk objek" },
+                    { "id": "b", "label": "Tidak ada perbedaan" },
+                    { "id": "c", "label": "reactive() lebih cepat" },
+                    { "id": "d", "label": "ref() sudah deprecated" }
+                  ],
+                  "correctOptionId": "a",
+                  "explanation": "ref() membungkus nilai primitif dalam objek reaktif dengan .value, sedangkan reactive() langsung membuat objek menjadi reaktif."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-009-02",
+        "title": "Composables & State Management",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-009-02-01",
+            "title": "Membuat Custom Composables",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Composables adalah cara Vue 3 untuk reuse logic. Buat composable untuk fetch data, form validation, dan local storage.</p>"
+          },
+          {
+            "id": "les-009-02-02",
+            "title": "Pinia State Management",
+            "order": 2,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Pinia</h2><p>Pinia menggantikan Vuex sebagai state manager resmi Vue. Sintaksnya lebih sederhana dengan full TypeScript support dan devtools integration.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-010",
+    "variantBadge": "free",
+    "title": "Lean Startup for Digital Nomads",
+    "description": "Bangun startup dari mana saja di dunia. Pelajari metodologi Lean Startup, MVP development, dan cara mengelola remote team secara efektif.",
+    "category": "Bisnis & Manajemen",
+    "mentorId": "men-007",
+    "rating": 0,
+    "totalReviews": 0,
+    "image": "https://picsum.photos/seed/lean/600/400",
+    "price": 199000,
+    "status": "draft",
+    "enrolled": 0,
+    "duration": "10h",
+    "createdAt": "11 Apr 2024",
+    "updatedAt": "Draft",
+    "modules": [
+      {
+        "id": "mod-010-01",
+        "title": "Lean Startup Methodology",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-010-01-01",
+            "title": "Build-Measure-Learn Loop",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Build-Measure-Learn</h2><p>Siklus Lean Startup dimulai dari hipotesis, membangun MVP minimal, mengukur hasilnya, dan belajar dari data. Kecepatan iterasi menentukan keberhasilan startup.</p>"
+          },
+          {
+            "id": "les-010-01-02",
+            "title": "Validasi Ide dengan Landing Page",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara memvalidasi ide bisnis tanpa coding: buat landing page, jalankan iklan kecil, dan ukur conversion rate.</p>"
+          },
+          {
+            "id": "les-010-01-03",
+            "title": "Quiz: Lean Startup",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa tujuan utama MVP (Minimum Viable Product)?",
+                  "options": [
+                    { "id": "a", "label": "Membuat produk sempurna" },
+                    { "id": "b", "label": "Belajar dari pengguna secepat mungkin dengan effort minimal" },
+                    { "id": "c", "label": "Menghemat biaya development" },
+                    { "id": "d", "label": "Menarik investor" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "MVP bertujuan untuk memvalidasi asumsi bisnis dan belajar dari pengguna nyata dengan usaha dan waktu seminimal mungkin."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-010-02",
+        "title": "Remote Work & Digital Nomad Life",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-010-02-01",
+            "title": "Mengelola Tim Remote",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Tools dan framework untuk mengelola tim distributed: async communication, documentation-first culture, dan timezone management.</p>"
+          },
+          {
+            "id": "les-010-02-02",
+            "title": "Produktivitas & Work-Life Balance",
+            "order": 2,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Produktivitas Nomad</h2><p>Time blocking, deep work, dan batasan kerja yang sehat sangat penting untuk digital nomad. Jangan biarkan fleksibilitas menjadi jebakan burnout.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-011",
+    "variantBadge": "event",
+    "title": "Deep Learning x Finance Market",
+    "description": "Terapkan deep learning untuk analisis pasar keuangan. Pelajari time series forecasting, sentiment analysis, dan algorithmic trading dengan Python.",
+    "category": "Data Science & AI",
+    "mentorId": "men-009",
+    "rating": 0,
+    "totalReviews": 0,
+    "image": "https://picsum.photos/seed/finml/600/400",
+    "price": 699000,
+    "status": "pending",
+    "enrolled": 0,
+    "duration": "34h",
+    "createdAt": "20 Mar 2026",
+    "updatedAt": "10 Apr 2026",
+    "submittedAt": "10 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-011-01",
+        "title": "Financial Data & Feature Engineering",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-011-01-01",
+            "title": "Sumber Data Keuangan & API",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Financial Data</h2><p>Akses data pasar melalui API seperti Yahoo Finance dan Alpha Vantage. Pelajari format OHLCV dan cara membersihkan data time series keuangan.</p>"
+          },
+          {
+            "id": "les-011-01-02",
+            "title": "Technical Indicators sebagai Features",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara menghitung dan menggunakan RSI, MACD, Bollinger Bands, dan indikator teknikal lainnya sebagai input model ML.</p>"
+          },
+          {
+            "id": "les-011-01-03",
+            "title": "Quiz: Data Keuangan",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa kepanjangan OHLCV dalam data saham?",
+                  "options": [
+                    { "id": "a", "label": "Open, High, Low, Close, Volume" },
+                    { "id": "b", "label": "Order, Holding, Limit, Cost, Value" },
+                    { "id": "c", "label": "Output, Hidden, Layer, Cost, Variance" },
+                    { "id": "d", "label": "Open, Hedge, Long, Call, Volatility" }
+                  ],
+                  "correctOptionId": "a",
+                  "explanation": "OHLCV adalah format standar data saham: harga pembukaan, tertinggi, terendah, penutupan, dan volume perdagangan."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-011-02",
+        "title": "Deep Learning untuk Time Series",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-011-02-01",
+            "title": "LSTM & GRU untuk Price Prediction",
+            "order": 1,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Implementasi LSTM dan GRU network untuk memprediksi harga saham menggunakan PyTorch.</p>"
+          },
+          {
+            "id": "les-011-02-02",
+            "title": "Transformer-based Models untuk Finance",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Transformer di Finance</h2><p>Arsitektur Transformer terbukti efektif untuk time series forecasting. Self-attention mechanism menangkap dependensi jangka panjang lebih baik dari RNN tradisional.</p>"
+          },
+          {
+            "id": "les-011-02-03",
+            "title": "Backtesting & Risk Management",
+            "order": 3,
+            "durationMinutes": 28,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara melakukan backtesting yang benar dan menghitung metrik risiko: Sharpe Ratio, Maximum Drawdown, dan Value at Risk.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-012",
+    "variantBadge": "premium",
+    "title": "Rust for WebAssembly",
+    "description": "Pelajari Rust dari nol dan compile ke WebAssembly untuk performa web yang mendekati native. Ideal untuk game, editor, dan aplikasi komputasi berat.",
+    "category": "Pengembangan Web",
+    "mentorId": "men-013",
+    "rating": 0,
+    "totalReviews": 0,
+    "image": "https://picsum.photos/seed/rust/600/400",
+    "price": 399000,
+    "status": "pending",
+    "enrolled": 0,
+    "duration": "18h",
+    "createdAt": "28 Mar 2026",
+    "updatedAt": "14 Apr 2026",
+    "submittedAt": "14 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-012-01",
+        "title": "Rust Language Essentials",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-012-01-01",
+            "title": "Ownership & Borrowing",
+            "order": 1,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Ownership</h2><p>Sistem ownership Rust menjamin memory safety tanpa garbage collector. Setiap nilai punya satu owner, dan borrowing memungkinkan akses tanpa transfer ownership.</p>"
+          },
+          {
+            "id": "les-012-01-02",
+            "title": "Structs, Enums & Pattern Matching",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Fondasi tipe data Rust: struct untuk data, enum untuk variants, dan match untuk control flow yang exhaustive.</p>"
+          },
+          {
+            "id": "les-012-01-03",
+            "title": "Quiz: Rust Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa yang terjadi ketika ownership di-move di Rust?",
+                  "options": [
+                    { "id": "a", "label": "Data di-copy otomatis" },
+                    { "id": "b", "label": "Variable lama tidak bisa digunakan lagi" },
+                    { "id": "c", "label": "Reference counting bertambah" },
+                    { "id": "d", "label": "Garbage collector menghapus data" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Setelah move, variable asli menjadi invalid dan compiler akan menolak akses ke variable tersebut."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-012-02",
+        "title": "WebAssembly dengan wasm-bindgen",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-012-02-01",
+            "title": "Setup wasm-pack & Toolchain",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Konfigurasi environment Rust untuk WebAssembly: install wasm-pack, setup project, dan build pertama.</p>"
+          },
+          {
+            "id": "les-012-02-02",
+            "title": "Interop JavaScript & Rust via wasm-bindgen",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>JS-Rust Interop</h2><p>wasm-bindgen memungkinkan Rust memanggil Web API dan sebaliknya. Gunakan <code>#[wasm_bindgen]</code> macro untuk mengekspos fungsi Rust ke JavaScript.</p>"
+          },
+          {
+            "id": "les-012-02-03",
+            "title": "Hands-on: Image Processing di Browser",
+            "order": 3,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Bangun aplikasi image processing yang berjalan di browser menggunakan Rust + WebAssembly untuk performa near-native.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-013",
+    "variantBadge": "free",
+    "title": "Figma to Code",
+    "description": "Ubah desain Figma menjadi kode production-ready. Pelajari teknik slicing, auto layout mapping ke CSS Flexbox/Grid, dan design token extraction.",
+    "category": "Desain UI/UX",
+    "mentorId": "men-012",
+    "rating": 4.2,
+    "totalReviews": 125,
+    "image": "https://picsum.photos/seed/figma-code/600/400",
+    "price": 0,
+    "status": "published",
+    "enrolled": 480,
+    "duration": "14h",
+    "createdAt": "14 May 2024",
+    "updatedAt": "20 Feb 2026",
+    "modules": [
+      {
+        "id": "mod-013-01",
+        "title": "Figma untuk Developer",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-013-01-01",
+            "title": "Membaca Design Spec di Figma",
+            "order": 1,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Design Spec</h2><p>Pelajari cara membaca spacing, typography, dan color dari panel Inspect di Figma. Developer yang memahami design spec menghasilkan implementasi yang lebih akurat.</p>"
+          },
+          {
+            "id": "les-013-01-02",
+            "title": "Auto Layout → Flexbox/Grid",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara memetakan Auto Layout Figma ke CSS Flexbox dan Grid. Setiap properti Auto Layout punya padanan langsung di CSS.</p>"
+          },
+          {
+            "id": "les-013-01-03",
+            "title": "Quiz: Figma Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Properti Auto Layout 'Space between' di Figma setara dengan CSS apa?",
+                  "options": [
+                    { "id": "a", "label": "gap" },
+                    { "id": "b", "label": "margin" },
+                    { "id": "c", "label": "padding" },
+                    { "id": "d", "label": "justify-content: space-between" }
+                  ],
+                  "correctOptionId": "a",
+                  "explanation": "Space between di Auto Layout Figma paling akurat dipetakan ke properti CSS gap, yang mengatur jarak antar child elements."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-013-02",
+        "title": "Design Tokens & Component Library",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-013-02-01",
+            "title": "Mengekstrak Design Tokens",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Gunakan plugin Figma Tokens untuk mengekstrak warna, typography, dan spacing menjadi JSON yang bisa dikonsumsi oleh kode.</p>"
+          },
+          {
+            "id": "les-013-02-02",
+            "title": "Membangun Component Library dengan React",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Component Library</h2><p>Terjemahkan Figma components ke React components yang reusable. Gunakan <strong>Storybook</strong> untuk dokumentasi dan testing visual.</p>"
+          },
+          {
+            "id": "les-013-02-03",
+            "title": "Responsive Implementation",
+            "order": 3,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Strategi mengimplementasikan responsive design dari Figma: mobile-first approach dan breakpoint mapping.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-014",
+    "variantBadge": "free",
+    "title": "Data Analytics dengan Tableau",
+    "description": "Kuasai Tableau untuk visualisasi data interaktif. Dari koneksi data hingga dashboard yang menceritakan insight bisnis secara visual.",
+    "category": "Data Science & AI",
+    "mentorId": "men-009",
+    "rating": 4.5,
+    "totalReviews": 1250,
+    "image": "https://picsum.photos/seed/tableau/600/400",
+    "price": 0,
+    "status": "published",
+    "enrolled": 340,
+    "duration": "18h",
+    "createdAt": "24 Apr 2024",
+    "updatedAt": "15 Mar 2026",
+    "modules": [
+      {
+        "id": "mod-014-01",
+        "title": "Tableau Fundamentals",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-014-01-01",
+            "title": "Koneksi Data & Data Preparation",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara menghubungkan Tableau ke berbagai sumber data: Excel, CSV, database SQL, dan cloud services.</p>"
+          },
+          {
+            "id": "les-014-01-02",
+            "title": "Dimensions vs Measures",
+            "order": 2,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Dimensions & Measures</h2><p>Dimensions adalah data kategorikal (nama, region), sementara measures adalah data numerik (revenue, quantity). Memahami perbedaan ini krusial untuk membuat visualisasi yang tepat.</p>"
+          },
+          {
+            "id": "les-014-01-03",
+            "title": "Quiz: Tableau Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Field mana yang termasuk dimension di Tableau?",
+                  "options": [
+                    { "id": "a", "label": "Total Sales" },
+                    { "id": "b", "label": "Product Category" },
+                    { "id": "c", "label": "Profit Margin" },
+                    { "id": "d", "label": "Average Price" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Product Category adalah data kategorikal (dimension), sedangkan Total Sales, Profit Margin, dan Average Price adalah data numerik (measures)."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-014-02",
+        "title": "Advanced Visualizations & Dashboard",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-014-02-01",
+            "title": "Calculated Fields & Table Calculations",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Calculated Fields</h2><p>Buat custom metrics dengan calculated fields. Table calculations seperti Running Total, Percent of Total, dan Moving Average memberikan insight yang lebih dalam.</p>"
+          },
+          {
+            "id": "les-014-02-02",
+            "title": "Membuat Interactive Dashboard",
+            "order": 2,
+            "durationMinutes": 30,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Desain dashboard interaktif dengan filters, parameters, dan actions yang memungkinkan user mengeksplorasi data secara mandiri.</p>"
+          },
+          {
+            "id": "les-014-02-03",
+            "title": "Storytelling dengan Data",
+            "order": 3,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara menyusun data story yang compelling menggunakan Tableau Story feature.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-015",
+    "variantBadge": "premium",
+    "title": "Figma Pro Prototyping",
+    "description": "Tingkatkan skill prototyping Figma ke level profesional. Kuasai advanced interactions, variable-driven prototypes, dan responsive component design.",
+    "category": "Desain UI/UX",
+    "mentorId": "men-002",
+    "rating": 4.8,
+    "totalReviews": 450,
+    "image": "https://picsum.photos/seed/proto/600/400",
+    "price": 299000,
+    "strikePrice": 499000,
+    "status": "published",
+    "enrolled": 560,
+    "duration": "20h",
+    "createdAt": "02 Feb 2024",
+    "updatedAt": "18 Mar 2026",
+    "modules": [
+      {
+        "id": "mod-015-01",
+        "title": "Advanced Prototyping Techniques",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-015-01-01",
+            "title": "Smart Animate & Spring Animations",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Pelajari Smart Animate untuk transisi otomatis dan spring animations yang menghasilkan motion natural.</p>"
+          },
+          {
+            "id": "les-015-01-02",
+            "title": "Variables & Conditional Logic",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Variables di Figma</h2><p>Figma Variables memungkinkan prototype yang dinamis. Buat logic kondisional untuk menampilkan state berbeda tanpa duplikasi frame.</p>"
+          },
+          {
+            "id": "les-015-01-03",
+            "title": "Quiz: Prototyping",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Fitur Figma apa yang memungkinkan prototype dengan logic kondisional?",
+                  "options": [
+                    { "id": "a", "label": "Auto Layout" },
+                    { "id": "b", "label": "Components" },
+                    { "id": "c", "label": "Variables" },
+                    { "id": "d", "label": "Constraints" }
+                  ],
+                  "correctOptionId": "c",
+                  "explanation": "Variables memungkinkan Anda membuat prototype interaktif dengan kondisi, state management, dan data dinamis."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-015-02",
+        "title": "Component Architecture",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-015-02-01",
+            "title": "Component Variants & Properties",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Component System</h2><p>Bangun component library yang scalable dengan variants untuk size, state, dan theme. Component properties mengurangi jumlah variant yang dibutuhkan.</p>"
+          },
+          {
+            "id": "les-015-02-02",
+            "title": "Responsive Components dengan Auto Layout",
+            "order": 2,
+            "durationMinutes": 28,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Teknik membuat komponen yang responsif di berbagai breakpoint menggunakan Auto Layout dan Min/Max width.</p>"
+          },
+          {
+            "id": "les-015-02-03",
+            "title": "Design System Documentation",
+            "order": 3,
+            "durationMinutes": 18,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Cara mendokumentasikan design system di Figma agar mudah digunakan oleh seluruh tim desain dan development.</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-016",
+    "variantBadge": "premium",
+    "title": "Mastering Linux & Ethical Hacking",
+    "description": "Kuasai Linux dari command line hingga system administration, lalu terapkan untuk ethical hacking. Pelajari Kali Linux, bash scripting, dan penetration testing.",
+    "category": "Cybersecurity",
+    "mentorId": "men-014",
+    "rating": 4.9,
+    "totalReviews": 11000,
+    "image": "https://picsum.photos/seed/linux/600/400",
+    "price": 399000,
+    "status": "published",
+    "enrolled": 640,
+    "duration": "32h",
+    "createdAt": "18 Jun 2024",
+    "updatedAt": "22 Mar 2026",
+    "modules": [
+      {
+        "id": "mod-016-01",
+        "title": "Linux Command Line Mastery",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-016-01-01",
+            "title": "Navigasi & File Management",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Linux CLI</h2><p>Kuasai perintah dasar: <code>ls</code>, <code>cd</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>, <code>chmod</code>, <code>chown</code>. Pahami file permission system Linux yang berbasis user, group, dan others.</p>"
+          },
+          {
+            "id": "les-016-01-02",
+            "title": "Bash Scripting Essentials",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Tulis bash script untuk automasi tugas: variabel, kondisi, loop, dan fungsi di shell script.</p>"
+          },
+          {
+            "id": "les-016-01-03",
+            "title": "Quiz: Linux Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Perintah apa untuk mengubah permission file di Linux?",
+                  "options": [
+                    { "id": "a", "label": "chown" },
+                    { "id": "b", "label": "chmod" },
+                    { "id": "c", "label": "chgrp" },
+                    { "id": "d", "label": "chperm" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "chmod (change mode) digunakan untuk mengubah permission read, write, dan execute pada file dan direktori."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-016-02",
+        "title": "Ethical Hacking dengan Kali Linux",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-016-02-01",
+            "title": "Setup Kali Linux Lab",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Setup virtual lab dengan Kali Linux dan vulnerable machines untuk praktik ethical hacking yang aman.</p>"
+          },
+          {
+            "id": "les-016-02-02",
+            "title": "Network Scanning & Enumeration",
+            "order": 2,
+            "durationMinutes": 28,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Scanning & Enumeration</h2><p>Gunakan <code>nmap</code> untuk network scanning dan <code>enum4linux</code> untuk enumeration. Langkah ini mengidentifikasi target, port terbuka, dan service yang berjalan.</p>"
+          },
+          {
+            "id": "les-016-02-03",
+            "title": "Exploitation & Post-Exploitation",
+            "order": 3,
+            "durationMinutes": 35,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Hands-on exploitation menggunakan Metasploit framework dan teknik post-exploitation untuk privilege escalation.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-016-03",
+        "title": "System Hardening & Defense",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-016-03-01",
+            "title": "Firewall & IPTables Configuration",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Konfigurasi firewall Linux menggunakan iptables dan nftables untuk melindungi server dari serangan.</p>"
+          },
+          {
+            "id": "les-016-03-02",
+            "title": "Security Audit & Compliance",
+            "order": 2,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Security Audit</h2><p>Gunakan tools seperti <code>lynis</code> dan <code>chkrootkit</code> untuk audit keamanan sistem. Pastikan konfigurasi sesuai dengan CIS Benchmarks.</p>"
+          },
+          {
+            "id": "les-016-03-03",
+            "title": "Quiz: Ethical Hacking",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Tool apa yang digunakan untuk network scanning di Kali Linux?",
+                  "options": [
+                    { "id": "a", "label": "Wireshark" },
+                    { "id": "b", "label": "Nmap" },
+                    { "id": "c", "label": "Burp Suite" },
+                    { "id": "d", "label": "John the Ripper" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Nmap (Network Mapper) adalah tool utama untuk network scanning, port scanning, dan service detection."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-017",
+    "variantBadge": "premium",
+    "title": "Full Stack Web dengan Next.js",
+    "description": "Bangun aplikasi full stack modern dengan Next.js dari frontend hingga backend. Pelajari API routes, database integration, authentication, dan deployment.",
+    "category": "Pengembangan Web",
+    "mentorId": "usr-mentor-01",
+    "rating": 4.8,
+    "totalReviews": 126,
+    "image": "https://picsum.photos/seed/mc-web/640/360",
+    "price": 349000,
+    "status": "published",
+    "enrolled": 48,
+    "duration": "24h",
+    "createdAt": "01 Jan 2026",
+    "updatedAt": "10 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-017-01",
+        "title": "Next.js Full Stack Foundations",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-017-01-01",
+            "title": "App Router & File-based Routing",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>App Router</h2><p>Next.js App Router menggunakan file system sebagai router. Pelajari konvensi <code>page.tsx</code>, <code>layout.tsx</code>, <code>loading.tsx</code>, dan <code>error.tsx</code> untuk membangun navigasi yang robust.</p>"
+          },
+          {
+            "id": "les-017-01-02",
+            "title": "Server Actions & Data Mutations",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Gunakan Server Actions untuk mutasi data tanpa API route terpisah. Pelajari form handling dan optimistic updates.</p>"
+          },
+          {
+            "id": "les-017-01-03",
+            "title": "Quiz: Next.js Basics",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa perbedaan utama antara page.tsx dan layout.tsx di App Router?",
+                  "options": [
+                    { "id": "a", "label": "page.tsx untuk API, layout.tsx untuk UI" },
+                    { "id": "b", "label": "layout.tsx persistent antar navigasi, page.tsx di-remount" },
+                    { "id": "c", "label": "page.tsx hanya untuk home page" },
+                    { "id": "d", "label": "Tidak ada perbedaan" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Layout bersifat persistent dan tidak di-remount saat navigasi antar child routes, sedangkan page di-remount setiap kali route berubah."
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Server Actions di Next.js ditandai dengan directive apa?",
+                  "options": [
+                    { "id": "a", "label": "'use client'" },
+                    { "id": "b", "label": "'use server'" },
+                    { "id": "c", "label": "'use action'" },
+                    { "id": "d", "label": "'server only'" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "'use server' directive menandai fungsi sebagai Server Action yang berjalan di server dan bisa dipanggil dari client."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-017-02",
+        "title": "Database & Authentication",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-017-02-01",
+            "title": "Prisma ORM & PostgreSQL",
+            "order": 1,
+            "durationMinutes": 28,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Setup Prisma dengan PostgreSQL: schema design, migrations, dan CRUD operations dengan type safety.</p>"
+          },
+          {
+            "id": "les-017-02-02",
+            "title": "Authentication dengan NextAuth.js",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>NextAuth.js</h2><p>Implementasikan authentication lengkap: OAuth providers (Google, GitHub), credential login, session management, dan route protection menggunakan middleware.</p>"
+          },
+          {
+            "id": "les-017-02-03",
+            "title": "Authorization & Role-based Access",
+            "order": 3,
+            "durationMinutes": 20,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Bangun sistem RBAC (Role-Based Access Control) untuk mengatur akses berdasarkan peran user.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-017-03",
+        "title": "Deployment & Production",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-017-03-01",
+            "title": "CI/CD Pipeline & Vercel Deployment",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Setup GitHub Actions untuk CI/CD dan deploy ke Vercel dengan preview deployments per pull request.</p>"
+          },
+          {
+            "id": "les-017-03-02",
+            "title": "Monitoring & Error Tracking",
+            "order": 2,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Production Monitoring</h2><p>Integrasikan Sentry untuk error tracking dan Vercel Analytics untuk monitoring performa. Setup alerting agar tim langsung tahu saat terjadi masalah.</p>"
+          },
+          {
+            "id": "les-017-03-03",
+            "title": "Quiz: Full Stack Deployment",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa keuntungan preview deployment di Vercel?",
+                  "options": [
+                    { "id": "a", "label": "Mengurangi biaya hosting" },
+                    { "id": "b", "label": "Setiap PR mendapat URL unik untuk review sebelum merge" },
+                    { "id": "c", "label": "Otomatis fix bug" },
+                    { "id": "d", "label": "Menggantikan staging server" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Preview deployments memberikan URL unik per pull request sehingga tim bisa review perubahan di environment yang identik dengan production."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "crs-018",
+    "variantBadge": "free",
+    "title": "UI Engineering & Design System",
+    "description": "Pelajari cara membangun design system yang scalable. Dari atomic design, component API, theming, hingga documentation yang developer-friendly.",
+    "category": "Desain UI/UX",
+    "mentorId": "usr-mentor-01",
+    "rating": 4.6,
+    "totalReviews": 54,
+    "image": "https://picsum.photos/seed/mc-ui/640/360",
+    "price": 0,
+    "status": "published",
+    "enrolled": 32,
+    "duration": "16h",
+    "createdAt": "15 Jan 2026",
+    "updatedAt": "8 Apr 2026",
+    "modules": [
+      {
+        "id": "mod-018-01",
+        "title": "Atomic Design & Component Architecture",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "les-018-01-01",
+            "title": "Metodologi Atomic Design",
+            "order": 1,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Atomic Design</h2><p>Brad Frost's Atomic Design membagi UI menjadi atoms, molecules, organisms, templates, dan pages. Pendekatan ini memastikan komponen bisa di-reuse secara konsisten.</p>"
+          },
+          {
+            "id": "les-018-01-02",
+            "title": "Component API Design Patterns",
+            "order": 2,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Desain API komponen yang intuitif: compound components, render props, dan controlled vs uncontrolled patterns.</p>"
+          },
+          {
+            "id": "les-018-01-03",
+            "title": "Quiz: Atomic Design",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Dalam Atomic Design, Button termasuk ke level apa?",
+                  "options": [
+                    { "id": "a", "label": "Atom" },
+                    { "id": "b", "label": "Molecule" },
+                    { "id": "c", "label": "Organism" },
+                    { "id": "d", "label": "Template" }
+                  ],
+                  "correctOptionId": "a",
+                  "explanation": "Button adalah atom karena merupakan elemen UI terkecil yang tidak bisa dipecah lagi menjadi komponen yang lebih kecil."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      },
+      {
+        "id": "mod-018-02",
+        "title": "Theming & Design Tokens",
+        "order": 2,
+        "lessons": [
+          {
+            "id": "les-018-02-01",
+            "title": "CSS Variables & Token Architecture",
+            "order": 1,
+            "durationMinutes": 20,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Design Tokens</h2><p>Design tokens adalah single source of truth untuk visual decisions: warna, spacing, typography, shadows. Implementasikan dengan CSS custom properties dan JSON token files.</p>"
+          },
+          {
+            "id": "les-018-02-02",
+            "title": "Multi-theme Support (Light/Dark/Brand)",
+            "order": 2,
+            "durationMinutes": 25,
+            "contentType": "video",
+            "videoUrl": "https://vimeo.com/123456789",
+            "contentHtml": "<p>Bangun sistem theming yang mendukung light, dark, dan custom brand themes menggunakan CSS variables dan React context.</p>"
+          },
+          {
+            "id": "les-018-02-03",
+            "title": "Accessibility dalam Design System",
+            "order": 3,
+            "durationMinutes": 18,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Accessibility</h2><p>Design system yang baik menjamin aksesibilitas: kontras warna WCAG AA/AAA, keyboard navigation, screen reader support, dan focus management di setiap komponen.</p>"
+          }
+        ]
+      },
+      {
+        "id": "mod-018-03",
+        "title": "Documentation & Storybook",
+        "order": 3,
+        "lessons": [
+          {
+            "id": "les-018-03-01",
+            "title": "Storybook Setup & Stories",
+            "order": 1,
+            "durationMinutes": 22,
+            "contentType": "video",
+            "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "contentHtml": "<p>Setup Storybook 8, tulis stories untuk setiap komponen, dan konfigurasi addons untuk accessibility testing dan visual regression.</p>"
+          },
+          {
+            "id": "les-018-03-02",
+            "title": "Living Documentation",
+            "order": 2,
+            "durationMinutes": 15,
+            "contentType": "tiptap",
+            "contentHtml": "<h2>Living Docs</h2><p>Dokumentasi design system harus hidup bersama kode. Gunakan MDX di Storybook untuk menulis docs yang selalu up-to-date dengan implementasi terbaru.</p>"
+          },
+          {
+            "id": "les-018-03-03",
+            "title": "Quiz: Design System",
+            "order": 3,
+            "durationMinutes": 10,
+            "contentType": "quiz",
+            "quiz": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Apa keuntungan utama menggunakan Storybook untuk design system?",
+                  "options": [
+                    { "id": "a", "label": "Menggantikan unit testing" },
+                    { "id": "b", "label": "Mengembangkan dan mendokumentasikan komponen secara terisolasi" },
+                    { "id": "c", "label": "Otomatis generate komponen" },
+                    { "id": "d", "label": "Mengurangi bundle size" }
+                  ],
+                  "correctOptionId": "b",
+                  "explanation": "Storybook memungkinkan pengembangan komponen secara terisolasi dari aplikasi, sekaligus berfungsi sebagai dokumentasi visual yang interaktif."
+                }
+              ],
+              "passingScore": 70
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

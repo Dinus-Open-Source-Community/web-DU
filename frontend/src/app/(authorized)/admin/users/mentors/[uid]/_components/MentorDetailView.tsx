@@ -155,7 +155,7 @@ export function MentorDetailView({ mentor }: MentorDetailViewProps) {
                     </div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1">
-                        <BookMarked className="h-3 w-3" aria-hidden /> {c.modules} modul
+                        <BookMarked className="h-3 w-3" aria-hidden /> {c.modules.length} modul
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Users2 className="h-3 w-3" aria-hidden />{' '}

@@ -17,6 +17,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Hide navbar on /course/[uid]
+  // match "/course/anything" except exactly "/course"
+  const isCourseDetail =
+    pathname?.startsWith("/course/") && pathname !== "/course";
+
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -27,6 +32,10 @@ export default function Navbar() {
       document.body.style.overflow = "unset";
     };
   }, [isMenuOpen]);
+
+  if (isCourseDetail) {
+    return null;
+  }
 
   return (
     <nav className="bg-primary text-popover fixed top-0 left-0 z-50 w-full shadow-md">

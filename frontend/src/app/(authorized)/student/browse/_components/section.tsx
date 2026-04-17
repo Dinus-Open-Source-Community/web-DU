@@ -7,6 +7,7 @@ import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { FilterCheckboxPanel } from '@/components/ui/FilterCheckboxPanel'
+import { formatRupiah } from '@/lib/func'
 
 // Mock categories that will come from backend response
 const DUMMY_CATEGORIES = ['Pengembangan Web', 'Desain UI/UX', 'Data Science & AI', 'Bisnis & Manajemen', 'Cybersecurity']
@@ -69,7 +70,7 @@ const Section = () => {
                 className="grid grid-cols-1 gap-6 duration-500 ease-out animate-in fade-in slide-in-from-bottom-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedCourses.map((course, idx) => (
                   <Card
-                    key={`${course.title}-${idx}`}
+                    key={`${course.uid}-${idx}`}
                     variant="course"
                     title={course.title}
                     description={course.description}
@@ -78,6 +79,8 @@ const Section = () => {
                     author={course.author}
                     rating={course.rating}
                     totalReviews={course.totalReviews}
+                    price={course.price === 0 ? 'Gratis' : formatRupiah(course.price)}
+                    detailHref={`/course/${course.uid}`}
                   />
                 ))}
               </div>

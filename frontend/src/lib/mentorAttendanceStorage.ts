@@ -54,8 +54,8 @@ function ensureScheduleSeed() {
   if (!isMockDataEnabled()) return
   if (localStorage.getItem(SCHEDULES_KEY) != null) return
   const seed: IMentorClassScheduleEntry[] = [
-    { id: 'seed-mc001', courseUid: 'mc-001', weekday: 1, timeLabel: '09:00' },
-    { id: 'seed-mc002', courseUid: 'mc-002', weekday: 1, timeLabel: '14:00' },
+    { id: 'seed-mc001', courseUid: 'crs-017', weekday: 1, timeLabel: '09:00' },
+    { id: 'seed-mc002', courseUid: 'crs-018', weekday: 1, timeLabel: '14:00' },
   ]
   localStorage.setItem(SCHEDULES_KEY, JSON.stringify(seed))
 }

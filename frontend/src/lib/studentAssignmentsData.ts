@@ -15,7 +15,7 @@ export const STUDENT_DEMO_NAME = 'Rina Kusuma'
 export const STUDENT_DEMO_AVATAR = 'https://i.pravatar.cc/150?img=32'
 
 /** Kursus yang diikuti siswa demo (sinkron My Learning) */
-export const STUDENT_ENROLLED_COURSE_IDS = ['mc-001', 'mc-002'] as const
+export const STUDENT_ENROLLED_COURSE_IDS = ['crs-017', 'crs-018'] as const
 
 export type StudentAssignmentFeedCategory =
   | 'all'

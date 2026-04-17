@@ -1,5 +1,15 @@
 import type { AppBadgeVariant } from '@/components/ui/badge'
-import type { PaymentStatus, TransactionHistoryItem } from '@/lib/types'
+import type { ICardData, PaymentStatus, TransactionHistoryItem } from '@/lib/types'
+import {
+  listCourses,
+  listMentors as repoListMentors,
+  listCategories as repoListCategories,
+  listAllReviews,
+  listAllQaThreads,
+  listPopularCourses,
+} from './repository'
+
+export type { CourseStatus } from '@/lib/types'
 
 // ─── KPI Dashboard ─────────────────────────────────────────────────────────
 
@@ -10,15 +20,7 @@ export interface AdminKpi {
   trendValue: number
   trendDirection: 'up' | 'down' | 'neutral'
   trendLabel: string
-  iconName:
-    | 'revenue'
-    | 'users'
-    | 'transactions'
-    | 'conversion'
-    | 'ticket'
-    | 'paid'
-    | 'pending'
-    | 'failed'
+  iconName: 'revenue' | 'users' | 'transactions' | 'conversion' | 'ticket' | 'paid' | 'pending' | 'failed'
 }
 
 export const adminDashboardKpis: AdminKpi[] = [
@@ -64,11 +66,7 @@ export const adminDashboardKpis: AdminKpi[] = [
 
 export const revenueLine30d = Array.from({ length: 30 }).map((_, i) => ({
   label: `${i + 1}`,
-  value:
-    35_000_000 +
-    Math.round(
-      Math.sin(i / 3.2) * 12_000_000 + Math.cos(i / 5.7) * 6_500_000 + i * 850_000
-    ),
+  value: 35_000_000 + Math.round(Math.sin(i / 3.2) * 12_000_000 + Math.cos(i / 5.7) * 6_500_000 + i * 850_000),
 }))
 
 export const newUsersWeek = [
@@ -241,14 +239,53 @@ export interface AdminStudent {
 }
 
 const firstNames = [
-  'Ayu', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hendra', 'Indah', 'Joko',
-  'Kirana', 'Lukman', 'Melisa', 'Novi', 'Oka', 'Putri', 'Rizal', 'Sinta', 'Taufik', 'Umar',
-  'Vina', 'Wahyu', 'Xena', 'Yoga', 'Zahra',
+  'Ayu',
+  'Budi',
+  'Citra',
+  'Dewi',
+  'Eko',
+  'Fajar',
+  'Gita',
+  'Hendra',
+  'Indah',
+  'Joko',
+  'Kirana',
+  'Lukman',
+  'Melisa',
+  'Novi',
+  'Oka',
+  'Putri',
+  'Rizal',
+  'Sinta',
+  'Taufik',
+  'Umar',
+  'Vina',
+  'Wahyu',
+  'Xena',
+  'Yoga',
+  'Zahra',
 ]
 const lastNames = [
-  'Pratama', 'Lestari', 'Wijaya', 'Santoso', 'Gunawan', 'Saputra', 'Hidayat', 'Ramadhani',
-  'Kurniawan', 'Mahendra', 'Nugraha', 'Parwati', 'Saputri', 'Wibowo', 'Anggraeni', 'Purnama',
-  'Permatasari', 'Hartono', 'Lesmana', 'Setiawan',
+  'Pratama',
+  'Lestari',
+  'Wijaya',
+  'Santoso',
+  'Gunawan',
+  'Saputra',
+  'Hidayat',
+  'Ramadhani',
+  'Kurniawan',
+  'Mahendra',
+  'Nugraha',
+  'Parwati',
+  'Saputri',
+  'Wibowo',
+  'Anggraeni',
+  'Purnama',
+  'Permatasari',
+  'Hartono',
+  'Lesmana',
+  'Setiawan',
 ]
 
 export const adminStudents: AdminStudent[] = Array.from({ length: 25 }).map((_, i) => {
@@ -257,8 +294,7 @@ export const adminStudents: AdminStudent[] = Array.from({ length: 25 }).map((_, 
   const name = `${first} ${last}`
   const enrolled = 1 + ((i * 7) % 9)
   const avg = 10 + ((i * 13) % 90)
-  const status: AdminStatus =
-    i % 8 === 7 ? 'pending' : i % 5 === 4 ? 'inactive' : 'active'
+  const status: AdminStatus = i % 8 === 7 ? 'pending' : i % 5 === 4 ? 'inactive' : 'active'
   return {
     uid: `stu-${String(i + 1).padStart(3, '0')}`,
     name,
@@ -341,206 +377,7 @@ export interface AdminMentor {
   studentsCount: number
 }
 
-export const adminMentors: AdminMentor[] = [
-  {
-    uid: 'men-001',
-    name: 'Sarah Drasner',
-    email: 'sarah.drasner@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=sarah_d',
-    joinedAt: '12 Jan 2024',
-    totalCourses: 6,
-    rating: 4.9,
-    totalReviews: 1450,
-    status: 'active',
-    specializations: ['Development'],
-    bio: 'Senior Frontend Engineer & Technical Writer.',
-    studentsCount: 12_450,
-  },
-  {
-    uid: 'men-002',
-    name: 'Jessica Wong',
-    email: 'jessica.wong@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=jess_w',
-    joinedAt: '02 Feb 2024',
-    totalCourses: 4,
-    rating: 4.8,
-    totalReviews: 980,
-    status: 'active',
-    specializations: ['Design', 'Marketing'],
-    bio: 'Design Lead dengan fokus pada design system.',
-    studentsCount: 8_920,
-  },
-  {
-    uid: 'men-003',
-    name: 'Dr. Alex Chen',
-    email: 'alex.chen@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=alex_c',
-    joinedAt: '22 Feb 2024',
-    totalCourses: 3,
-    rating: 4.6,
-    totalReviews: 842,
-    status: 'active',
-    specializations: ['Data & AI'],
-    bio: 'PhD in Computer Science, spesialis ML.',
-    studentsCount: 7_320,
-  },
-  {
-    uid: 'men-004',
-    name: 'Marcus Levin',
-    email: 'marcus.levin@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=marcus_l',
-    joinedAt: '14 Mar 2024',
-    totalCourses: 5,
-    rating: 5.0,
-    totalReviews: 999,
-    status: 'active',
-    specializations: ['Development', 'Design'],
-    studentsCount: 6_450,
-  },
-  {
-    uid: 'men-005',
-    name: 'Kevin Mitnick',
-    email: 'kevin.mitnick@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=kevin_m',
-    joinedAt: '19 Mar 2024',
-    totalCourses: 2,
-    rating: 4.9,
-    totalReviews: 541,
-    status: 'active',
-    specializations: ['Development'],
-    studentsCount: 4_200,
-  },
-  {
-    uid: 'men-006',
-    name: 'Evan You',
-    email: 'evan.you@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=evan_y',
-    joinedAt: '08 Apr 2024',
-    totalCourses: 1,
-    rating: 4.3,
-    totalReviews: 55,
-    status: 'pending',
-    specializations: ['Development'],
-    studentsCount: 240,
-  },
-  {
-    uid: 'men-007',
-    name: 'Eric Ries',
-    email: 'eric.ries@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=eric_r',
-    joinedAt: '11 Apr 2024',
-    totalCourses: 2,
-    rating: 4.5,
-    totalReviews: 331,
-    status: 'active',
-    specializations: ['Business'],
-    studentsCount: 1_840,
-  },
-  {
-    uid: 'men-008',
-    name: 'Gary Vaynerchuk',
-    email: 'gary.v@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=gary_v',
-    joinedAt: '18 Apr 2024',
-    totalCourses: 3,
-    rating: 4.8,
-    totalReviews: 6_990,
-    status: 'active',
-    specializations: ['Marketing', 'Business'],
-    studentsCount: 15_800,
-  },
-  {
-    uid: 'men-009',
-    name: 'Andrew Ng',
-    email: 'andrew.ng@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=andrew_n',
-    joinedAt: '24 Apr 2024',
-    totalCourses: 2,
-    rating: 5.0,
-    totalReviews: 955,
-    status: 'active',
-    specializations: ['Data & AI'],
-    studentsCount: 9_110,
-  },
-  {
-    uid: 'men-010',
-    name: 'Rob Pike',
-    email: 'rob.pike@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=rob_p',
-    joinedAt: '02 May 2024',
-    totalCourses: 1,
-    rating: 4.7,
-    totalReviews: 240,
-    status: 'inactive',
-    specializations: ['Development'],
-    studentsCount: 420,
-  },
-  {
-    uid: 'men-011',
-    name: 'Nadia Putri',
-    email: 'nadia.putri@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=nadia',
-    joinedAt: '08 May 2024',
-    totalCourses: 3,
-    rating: 4.6,
-    totalReviews: 420,
-    status: 'active',
-    specializations: ['Design', 'Language'],
-    studentsCount: 2_200,
-  },
-  {
-    uid: 'men-012',
-    name: 'Budi Prakoso',
-    email: 'budi.prakoso@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=budip',
-    joinedAt: '14 May 2024',
-    totalCourses: 1,
-    rating: 4.2,
-    totalReviews: 125,
-    status: 'active',
-    specializations: ['Development'],
-    studentsCount: 480,
-  },
-  {
-    uid: 'men-013',
-    name: 'Elena Rostova',
-    email: 'elena.rostova@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=elena_r',
-    joinedAt: '02 Jun 2024',
-    totalCourses: 2,
-    rating: 4.8,
-    totalReviews: 21_500,
-    status: 'active',
-    specializations: ['Development', 'Data & AI'],
-    studentsCount: 7_800,
-  },
-  {
-    uid: 'men-014',
-    name: 'Linus Benedict',
-    email: 'linus.b@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=linus_b',
-    joinedAt: '18 Jun 2024',
-    totalCourses: 4,
-    rating: 4.9,
-    totalReviews: 11_000,
-    status: 'active',
-    specializations: ['Development'],
-    studentsCount: 9_600,
-  },
-  {
-    uid: 'men-015',
-    name: 'Martin Fowler',
-    email: 'martin.fowler@doscom.id',
-    avatar: 'https://i.pravatar.cc/150?u=martin_f',
-    joinedAt: '28 Jun 2024',
-    totalCourses: 2,
-    rating: 4.7,
-    totalReviews: 890,
-    status: 'active',
-    specializations: ['Business', 'Development'],
-    studentsCount: 2_100,
-  },
-]
+export const adminMentors: AdminMentor[] = repoListMentors() as AdminMentor[]
 
 // ─── Administrators ────────────────────────────────────────────────────────
 
@@ -610,302 +447,32 @@ export const adminAdministrators: AdminAdministrator[] = [
 
 // ─── Courses (extended) ────────────────────────────────────────────────────
 
-export type CourseStatus = 'published' | 'draft' | 'pending' | 'rejected'
-export type CourseCategory =
-  | 'Development'
-  | 'Design'
-  | 'Data & AI'
-  | 'Business'
-  | 'Marketing'
-  | 'Cybersecurity'
+/**
+ * Kategori admin (label Bahasa Indonesia) — selaras dengan `ICardData.category`
+ * pada `DataCourse`. Digunakan oleh `adminCategoryList` dan komponen admin.
+ */
+export type CourseCategory = 'Pengembangan Web' | 'Desain UI/UX' | 'Data Science & AI' | 'Bisnis & Manajemen' | 'Cybersecurity'
 
-export interface AdminCourse {
+/**
+ * `AdminCourse` adalah alias `ICardData` — seluruh data kursus (baik untuk
+ * katalog browse maupun halaman detail admin) berasal dari `DataCourse` di
+ * `@/lib/dummyData`. Lihat `adminCourses` di bawah.
+ */
+export type AdminCourse = ICardData
+
+export const adminCourses: AdminCourse[] = listCourses()
+
+export const adminCategoryList: {
   uid: string
-  title: string
-  description: string
-  image: string
-  category: CourseCategory
-  status: CourseStatus
-  mentorUid: string
-  mentorName: string
-  mentorAvatar: string
-  enrolled: number
-  modules: number
-  duration: string
-  price: number
-  strikePrice?: number
-  rating: number
-  reviews: number
-  createdAt: string
-  updatedAt: string
-  submittedAt?: string
-}
-
-export const adminCourses: AdminCourse[] = [
-  {
-    uid: 'crs-001',
-    title: 'Advanced React Patterns & Next.js 15 Architecture',
-    description:
-      'Bangun aplikasi skala enterprise dengan rendering hybrid, state terdesentralisasi, dan optimasi performa.',
-    image: 'https://picsum.photos/seed/react/600/400',
-    category: 'Development',
-    status: 'published',
-    mentorUid: 'men-001',
-    mentorName: 'Sarah Drasner',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=sarah_d',
-    enrolled: 1820,
-    modules: 12,
-    duration: '42h',
-    price: 499000,
-    strikePrice: 899000,
-    rating: 4.9,
-    reviews: 1450,
-    createdAt: '12 Jan 2024',
-    updatedAt: '10 Apr 2026',
-  },
-  {
-    uid: 'crs-002',
-    title: 'UI/UX Fundamentals',
-    description:
-      'Pahami hierarki visual, tipografi, dan spasi yang rasional. Gunakan sistem, bukan tebakan.',
-    image: 'https://picsum.photos/seed/uiux/600/400',
-    category: 'Design',
-    status: 'published',
-    mentorUid: 'men-002',
-    mentorName: 'Jessica Wong',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=jess_w',
-    enrolled: 1540,
-    modules: 8,
-    duration: '28h',
-    price: 349000,
-    strikePrice: 599000,
-    rating: 4.8,
-    reviews: 2450,
-    createdAt: '02 Feb 2024',
-    updatedAt: '06 Apr 2026',
-  },
-  {
-    uid: 'crs-003',
-    title: 'Machine Learning with Python: Zero to Hero',
-    description:
-      'Kuasai algoritma prediksi, manipulasi data dengan Pandas, dan bangun model AI pertama Anda.',
-    image: 'https://picsum.photos/seed/ml/600/400',
-    category: 'Data & AI',
-    status: 'published',
-    mentorUid: 'men-003',
-    mentorName: 'Dr. Alex Chen',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=alex_c',
-    enrolled: 1320,
-    modules: 14,
-    duration: '48h',
-    price: 899000,
-    strikePrice: 1299000,
-    rating: 4.6,
-    reviews: 842,
-    createdAt: '22 Feb 2024',
-    updatedAt: '01 Apr 2026',
-  },
-  {
-    uid: 'crs-004',
-    title: 'Mastering Tailwind CSS v4 & Framer Motion',
-    description:
-      'Eksplorasi animasi kompleks dan layout responsif tingkat lanjut menggunakan utility-first framework.',
-    image: 'https://picsum.photos/seed/tailwind/600/400',
-    category: 'Development',
-    status: 'published',
-    mentorUid: 'men-004',
-    mentorName: 'Marcus Levin',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=marcus_l',
-    enrolled: 1180,
-    modules: 10,
-    duration: '26h',
-    price: 299000,
-    rating: 5.0,
-    reviews: 999,
-    createdAt: '14 Mar 2024',
-    updatedAt: '05 Apr 2026',
-  },
-  {
-    uid: 'crs-005',
-    title: 'Go (Golang) Microservices',
-    description:
-      'Sistem bahasa berkinerja tinggi. Bangun server API tercepat via gRPC dan mekanisme goroutines.',
-    image: 'https://picsum.photos/seed/golang/600/400',
-    category: 'Development',
-    status: 'published',
-    mentorUid: 'men-010',
-    mentorName: 'Rob Pike',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=rob_p',
-    enrolled: 920,
-    modules: 9,
-    duration: '22h',
-    price: 429000,
-    rating: 4.7,
-    reviews: 240,
-    createdAt: '02 May 2024',
-    updatedAt: '28 Mar 2026',
-  },
-  {
-    uid: 'crs-006',
-    title: 'Cybersecurity Analyst Bootcamp',
-    description:
-      'Analisis serangan dan ancaman cyber terkini. Praktek offensive hacking dengan tool industri nyata.',
-    image: 'https://picsum.photos/seed/cyber/600/400',
-    category: 'Cybersecurity',
-    status: 'published',
-    mentorUid: 'men-005',
-    mentorName: 'Kevin Mitnick',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=kevin_m',
-    enrolled: 780,
-    modules: 16,
-    duration: '60h',
-    price: 1250000,
-    rating: 4.9,
-    reviews: 541,
-    createdAt: '19 Mar 2024',
-    updatedAt: '12 Apr 2026',
-  },
-  {
-    uid: 'crs-007',
-    title: 'Product Management Strategy',
-    description:
-      'Strategi membangun produk yang digemari pasar dari ideasi hingga monetisasi berdasarkan metrik.',
-    image: 'https://picsum.photos/seed/pm/600/400',
-    category: 'Business',
-    status: 'published',
-    mentorUid: 'men-015',
-    mentorName: 'Martin Fowler',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=martin_f',
-    enrolled: 540,
-    modules: 8,
-    duration: '20h',
-    price: 399000,
-    rating: 4.7,
-    reviews: 890,
-    createdAt: '28 Jun 2024',
-    updatedAt: '12 Mar 2026',
-  },
-  {
-    uid: 'crs-008',
-    title: 'Social Media Organic Marketing',
-    description:
-      'Teknik efisien mengembangkan audiens murni menggunakan personal branding yang terorganisir.',
-    image: 'https://picsum.photos/seed/social/600/400',
-    category: 'Marketing',
-    status: 'published',
-    mentorUid: 'men-008',
-    mentorName: 'Gary Vaynerchuk',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=gary_v',
-    enrolled: 410,
-    modules: 6,
-    duration: '12h',
-    price: 249000,
-    rating: 4.8,
-    reviews: 6990,
-    createdAt: '18 Apr 2024',
-    updatedAt: '08 Apr 2026',
-  },
-  {
-    uid: 'crs-009',
-    title: 'Pengantar Vue 3 Composition API',
-    description:
-      'Fundamental menggunakan framework antarmuka Vue.js terbaru secara reaktif.',
-    image: 'https://picsum.photos/seed/vue/600/400',
-    category: 'Development',
-    status: 'draft',
-    mentorUid: 'men-006',
-    mentorName: 'Evan You',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=evan_y',
-    enrolled: 0,
-    modules: 6,
-    duration: '14h',
-    price: 299000,
-    rating: 0,
-    reviews: 0,
-    createdAt: '08 Apr 2024',
-    updatedAt: 'Draft',
-  },
-  {
-    uid: 'crs-010',
-    title: 'Lean Startup for Digital Nomads',
-    description:
-      'Panduan membangun bisnis rintisan tanpa perlu pendanaan besar memanfaatkan ide dan validasi gesit.',
-    image: 'https://picsum.photos/seed/lean/600/400',
-    category: 'Business',
-    status: 'draft',
-    mentorUid: 'men-007',
-    mentorName: 'Eric Ries',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=eric_r',
-    enrolled: 0,
-    modules: 4,
-    duration: '10h',
-    price: 199000,
-    rating: 0,
-    reviews: 0,
-    createdAt: '11 Apr 2024',
-    updatedAt: 'Draft',
-  },
-  {
-    uid: 'crs-011',
-    title: 'Deep Learning x Finance Market',
-    description:
-      'Penggunaan machine learning mutakhir untuk analisis sentimen pasar finansial secara real-time.',
-    image: 'https://picsum.photos/seed/finml/600/400',
-    category: 'Data & AI',
-    status: 'pending',
-    mentorUid: 'men-009',
-    mentorName: 'Andrew Ng',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=andrew_n',
-    enrolled: 0,
-    modules: 12,
-    duration: '34h',
-    price: 699000,
-    rating: 0,
-    reviews: 0,
-    createdAt: '20 Mar 2026',
-    updatedAt: '10 Apr 2026',
-    submittedAt: '10 Apr 2026',
-  },
-  {
-    uid: 'crs-012',
-    title: 'Rust for WebAssembly',
-    description:
-      'Tingkatkan performa aplikasi web Anda hingga 10x lipat dengan mengkompilasi Rust ke Wasm.',
-    image: 'https://picsum.photos/seed/rust/600/400',
-    category: 'Development',
-    status: 'pending',
-    mentorUid: 'men-013',
-    mentorName: 'Elena Rostova',
-    mentorAvatar: 'https://i.pravatar.cc/150?u=elena_r',
-    enrolled: 0,
-    modules: 8,
-    duration: '18h',
-    price: 399000,
-    rating: 0,
-    reviews: 0,
-    createdAt: '28 Mar 2026',
-    updatedAt: '14 Apr 2026',
-    submittedAt: '14 Apr 2026',
-  },
-]
-
-export const adminCategoryList: { uid: string; name: CourseCategory; coursesCount: number; colorVariant: AppBadgeVariant }[] = [
-  { uid: 'cat-dev', name: 'Development', coursesCount: 42, colorVariant: 'categoryDev' },
-  { uid: 'cat-design', name: 'Design', coursesCount: 24, colorVariant: 'categoryDesign' },
-  { uid: 'cat-data', name: 'Data & AI', coursesCount: 18, colorVariant: 'categoryData' },
-  { uid: 'cat-biz', name: 'Business', coursesCount: 14, colorVariant: 'categoryBusiness' },
-  { uid: 'cat-mkt', name: 'Marketing', coursesCount: 9, colorVariant: 'categoryMarketing' },
-  { uid: 'cat-cyber', name: 'Cybersecurity', coursesCount: 6, colorVariant: 'categoryDefault' },
-]
-
-export const adminCourseSyllabus = [
-  { title: 'Introduction to React 19', lessonsCount: 4, durationLabel: '1h 20m' },
-  { title: 'Server Components & Streaming', lessonsCount: 6, durationLabel: '2h 10m' },
-  { title: 'Advanced State Management', lessonsCount: 5, durationLabel: '1h 50m' },
-  { title: 'Data Fetching Patterns', lessonsCount: 5, durationLabel: '1h 35m' },
-  { title: 'Performance & Profiling', lessonsCount: 4, durationLabel: '1h 05m' },
-  { title: 'Deployment & Observability', lessonsCount: 3, durationLabel: '50m' },
-]
+  name: CourseCategory
+  coursesCount: number
+  colorVariant: AppBadgeVariant
+}[] = repoListCategories().map((c) => ({
+  uid: c.uid,
+  name: c.name as CourseCategory,
+  coursesCount: c.coursesCount,
+  colorVariant: c.colorVariant as AppBadgeVariant,
+}))
 
 export const adminCourseWhatYouLearn = [
   'Build scalable Next.js applications with App Router',
@@ -938,63 +505,7 @@ export interface AdminReview {
   reply?: { author: string; comment: string; createdAt: string }
 }
 
-export const adminReviews: AdminReview[] = [
-  {
-    uid: 'rev-001',
-    courseUid: 'crs-001',
-    courseTitle: 'Advanced React Patterns & Next.js 15',
-    studentName: 'Ayu Lestari',
-    studentAvatar: 'https://i.pravatar.cc/150?u=ayu',
-    rating: 5,
-    comment: 'Kurikulumnya sangat relevan dengan kebutuhan real-world. Mentor sabar menjawab pertanyaan.',
-    createdAt: '2 hari lalu',
-  },
-  {
-    uid: 'rev-002',
-    courseUid: 'crs-002',
-    courseTitle: 'UI/UX Fundamentals',
-    studentName: 'Budi Santoso',
-    studentAvatar: 'https://i.pravatar.cc/150?u=budi',
-    rating: 4,
-    comment: 'Materinya mudah dipahami. Tapi contoh casenya bisa diperbanyak lagi.',
-    createdAt: '4 hari lalu',
-    reply: {
-      author: 'Jessica Wong',
-      comment: 'Terima kasih masukannya! Kami sedang menambah 3 case study baru bulan depan.',
-      createdAt: '3 hari lalu',
-    },
-  },
-  {
-    uid: 'rev-003',
-    courseUid: 'crs-003',
-    courseTitle: 'Machine Learning with Python',
-    studentName: 'Citra Dewi',
-    studentAvatar: 'https://i.pravatar.cc/150?u=citra',
-    rating: 5,
-    comment: 'Terstruktur dan mudah diikuti. Materi praktis langsung bisa dicoba.',
-    createdAt: '1 minggu lalu',
-  },
-  {
-    uid: 'rev-004',
-    courseUid: 'crs-001',
-    courseTitle: 'Advanced React Patterns & Next.js 15',
-    studentName: 'Rizal Pratama',
-    studentAvatar: 'https://i.pravatar.cc/150?u=rizal',
-    rating: 3,
-    comment: 'Sebagian video agak lama loadingnya. Isi materinya mantap.',
-    createdAt: '1 minggu lalu',
-  },
-  {
-    uid: 'rev-005',
-    courseUid: 'crs-004',
-    courseTitle: 'Mastering Tailwind CSS v4',
-    studentName: 'Melisa Wijaya',
-    studentAvatar: 'https://i.pravatar.cc/150?u=melisa',
-    rating: 5,
-    comment: 'Marcus sangat detail menjelaskan utility class. Recommended banget!',
-    createdAt: '2 minggu lalu',
-  },
-]
+export const adminReviews: AdminReview[] = listAllReviews() as AdminReview[]
 
 export interface AdminQaThread {
   uid: string
@@ -1019,88 +530,7 @@ export interface AdminQaReply {
   createdAt: string
 }
 
-export const adminQaThreads: AdminQaThread[] = [
-  {
-    uid: 'qa-001',
-    courseUid: 'crs-001',
-    courseTitle: 'Advanced React Patterns & Next.js 15',
-    title: 'Perbedaan Server Component vs Client Component dalam case real-world?',
-    author: 'Hendra Gunawan',
-    authorAvatar: 'https://i.pravatar.cc/150?u=hendra',
-    body:
-      'Halo, saya masih bingung kapan harus pakai Server Component dan kapan Client Component. Bisa tolong jelaskan dengan case nyata?',
-    createdAt: '2 jam lalu',
-    repliesCount: 2,
-    status: 'answered',
-    replies: [
-      {
-        uid: 'qa-001-r1',
-        author: 'Sarah Drasner',
-        authorAvatar: 'https://i.pravatar.cc/150?u=sarah_d',
-        role: 'mentor',
-        body:
-          'Gunakan Server Component untuk data-heavy yang tidak butuh interaksi. Client Component untuk form, animasi, dan state interaktif.',
-        createdAt: '1 jam lalu',
-      },
-      {
-        uid: 'qa-001-r2',
-        author: 'Rizki Saputra',
-        authorAvatar: 'https://i.pravatar.cc/150?u=rizki',
-        role: 'admin',
-        body: 'Sudah kami arsipkan sebagai FAQ, akan dirilis di minggu depan.',
-        createdAt: '30 menit lalu',
-      },
-    ],
-  },
-  {
-    uid: 'qa-002',
-    courseUid: 'crs-002',
-    courseTitle: 'UI/UX Fundamentals',
-    title: 'Tool terbaik untuk membuat design system awal?',
-    author: 'Putri Kirana',
-    authorAvatar: 'https://i.pravatar.cc/150?u=putri',
-    body: 'Untuk proyek personal kecil, lebih efisien pakai Figma atau langsung Tailwind tokens?',
-    createdAt: '5 jam lalu',
-    repliesCount: 0,
-    status: 'unanswered',
-    replies: [],
-  },
-  {
-    uid: 'qa-003',
-    courseUid: 'crs-004',
-    courseTitle: 'Mastering Tailwind CSS v4',
-    title: 'Error saat setup Tailwind v4 di Next.js 16 turbopack',
-    author: 'Lukman Hakim',
-    authorAvatar: 'https://i.pravatar.cc/150?u=lukman',
-    body: 'Saya dapat error "tw-animate-css" tidak terdeteksi padahal sudah install. Solusi?',
-    createdAt: '1 hari lalu',
-    repliesCount: 1,
-    status: 'answered',
-    replies: [
-      {
-        uid: 'qa-003-r1',
-        author: 'Marcus Levin',
-        authorAvatar: 'https://i.pravatar.cc/150?u=marcus_l',
-        role: 'mentor',
-        body: 'Pastikan postcss.config.mjs sudah mendaftar plugin tailwindcss/postcss. Restart dev server.',
-        createdAt: '20 jam lalu',
-      },
-    ],
-  },
-  {
-    uid: 'qa-004',
-    courseUid: 'crs-003',
-    courseTitle: 'Machine Learning with Python',
-    title: 'Dataset apa yang cocok untuk latihan regresi pemula?',
-    author: 'Novi Permatasari',
-    authorAvatar: 'https://i.pravatar.cc/150?u=novi',
-    body: 'Saya masih awal belajar ML. Mentor bisa rekomendasikan dataset beginner?',
-    createdAt: '2 hari lalu',
-    repliesCount: 0,
-    status: 'unanswered',
-    replies: [],
-  },
-]
+export const adminQaThreads: AdminQaThread[] = listAllQaThreads() as AdminQaThread[]
 
 // ─── Transactions (extended; dipakai admin finance/transactions) ───────────
 
@@ -1120,13 +550,7 @@ export const adminTransactions: AdminTransaction[] = Array.from({ length: 28 }).
     classType: ['Premium', 'Bootcamp', 'Free'][i % 3] as 'Premium' | 'Bootcamp' | 'Free',
     price: 199000 + ((i * 50000) % 1_100_000),
     paymentStatus: (['PAID', 'PENDING', 'FAILED', 'PAID', 'PAID'] as PaymentStatus[])[i % 5],
-    purchasedAt: new Date(
-      2026,
-      3,
-      Math.max(1, (i % 28) + 1),
-      (i * 3) % 24,
-      (i * 7) % 60
-    ).toISOString(),
+    purchasedAt: new Date(2026, 3, Math.max(1, (i % 28) + 1), (i * 3) % 24, (i * 7) % 60).toISOString(),
     paymentMethod: (['Bank Transfer', 'Virtual Account', 'E-Wallet', 'QRIS'] as const)[i % 4],
   }
   const student = studentPool[i % studentPool.length]
@@ -1439,32 +863,15 @@ export interface AdminRole {
 export const adminPermissionGroups = [
   {
     group: 'Users',
-    items: [
-      'users.view',
-      'users.create',
-      'users.update',
-      'users.delete',
-      'users.reset_credentials',
-    ],
+    items: ['users.view', 'users.create', 'users.update', 'users.delete', 'users.reset_credentials'],
   },
   {
     group: 'Courses',
-    items: [
-      'courses.view',
-      'courses.create',
-      'courses.update',
-      'courses.approve',
-      'courses.delete',
-    ],
+    items: ['courses.view', 'courses.create', 'courses.update', 'courses.approve', 'courses.delete'],
   },
   {
     group: 'Finance',
-    items: [
-      'finance.view',
-      'finance.refund',
-      'finance.payout_approve',
-      'finance.export',
-    ],
+    items: ['finance.view', 'finance.refund', 'finance.payout_approve', 'finance.export'],
   },
   {
     group: 'Reports',
@@ -1489,31 +896,14 @@ export const adminRoles: AdminRole[] = [
     name: 'Admin',
     description: 'Mengelola pengguna, kursus, dan transaksi tanpa akses settings sistem.',
     membersCount: 5,
-    permissions: [
-      'users.view',
-      'users.create',
-      'users.update',
-      'users.reset_credentials',
-      'courses.view',
-      'courses.create',
-      'courses.update',
-      'courses.approve',
-      'finance.view',
-      'reports.view',
-    ],
+    permissions: ['users.view', 'users.create', 'users.update', 'users.reset_credentials', 'courses.view', 'courses.create', 'courses.update', 'courses.approve', 'finance.view', 'reports.view'],
   },
   {
     uid: 'role-finance',
     name: 'Finance',
     description: 'Fokus pada transaksi, refund, dan payout mentor.',
     membersCount: 3,
-    permissions: [
-      'finance.view',
-      'finance.refund',
-      'finance.payout_approve',
-      'finance.export',
-      'reports.view',
-    ],
+    permissions: ['finance.view', 'finance.refund', 'finance.payout_approve', 'finance.export', 'reports.view'],
   },
   {
     uid: 'role-mentor',
@@ -1556,9 +946,7 @@ export const dropOffFunnel = [
   { label: 'Selesai', value: 2600 },
 ]
 
-export const monthlyRevenue12m = [
-  'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr',
-].map((m, i) => ({
+export const monthlyRevenue12m = ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr'].map((m, i) => ({
   label: m,
   value: 720_000_000 + i * 65_000_000 + ((i * 13) % 100_000_000),
 }))
@@ -1580,14 +968,11 @@ export const revenueSourceRatio = [
 
 // ─── Popular Courses (for detail page bottom strip) ────────────────────────
 
-export const popularCoursesStrip = adminCourses
-  .filter((c) => c.status === 'published')
-  .slice(0, 4)
-  .map((c) => ({
-    uid: c.uid,
-    title: c.title,
-    image: c.image,
-    rating: c.rating,
-    price: `Rp${(c.price / 1000).toFixed(0)}k`,
-    mentor: c.mentorName,
-  }))
+export const popularCoursesStrip = listPopularCourses(4).map((c) => ({
+  uid: c.uid,
+  title: c.title,
+  image: c.image,
+  rating: c.rating,
+  price: `Rp${(c.price / 1000).toFixed(0)}k`,
+  mentor: c.author.name,
+}))

@@ -1,6 +1,9 @@
 export type BadgeVariant = 'free' | 'premium' | 'event' | 'draft'
 
+export type CourseStatus = 'published' | 'draft' | 'pending' | 'rejected'
+
 export interface ICardData {
+  uid: string
   variantBadge: BadgeVariant
   title: string
   description: string
@@ -11,7 +14,17 @@ export interface ICardData {
   }
   rating: number
   totalReviews: number
-  image?: string
+  image: string
+  price: number
+  status: CourseStatus
+  mentorUid: string
+  enrolled: number
+  modules: IModule[]
+  duration: string
+  strikePrice?: number
+  createdAt: string
+  updatedAt: string
+  submittedAt?: string
 }
 
 export interface IProgramFeatures {
@@ -171,16 +184,53 @@ export interface ISubmissionItem {
   daysLate?: number
 }
 
-export interface ICourseModule {
+// ─── Quiz & Lesson types ────────────────────────────────────────────────────
+
+export interface IQuizOption {
+  id: string
+  label: string
+}
+
+export interface IQuizQuestion {
+  id: string
+  prompt: string
+  options: IQuizOption[]
+  correctOptionId: string
+  explanation?: string
+}
+
+export interface IQuiz {
+  questions: IQuizQuestion[]
+  passingScore?: number
+}
+
+export type LessonContentType = 'tiptap' | 'video' | 'quiz'
+
+interface ILessonBase {
   id: string
   title: string
   order: number
+  durationMinutes: number
 }
 
+export type ILesson =
+  | (ILessonBase & { contentType: 'tiptap'; contentHtml: string })
+  | (ILessonBase & { contentType: 'video'; videoUrl: string; contentHtml?: string })
+  | (ILessonBase & { contentType: 'quiz'; quiz: IQuiz })
+
+export interface IModule {
+  id: string
+  title: string
+  order: number
+  lessons: ILesson[]
+}
+
+/** @deprecated Alias — gunakan `IModule` untuk kode baru. */
+export type ICourseModule = IModule
+
 export interface ICourseModulesState {
-  version: 1
-  modules: ICourseModule[]
-  contents: Record<string, string>
+  version: 2
+  modules: IModule[]
 }
 
 /** Kursus milik mentor — metadata tampilan editor & daftar (sinkronkan dengan API kursus). */

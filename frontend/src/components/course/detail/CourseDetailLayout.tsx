@@ -5,19 +5,10 @@ import { CourseDescription } from '@/components/course/detail/CourseDescription'
 import { CourseDetailHero } from '@/components/course/detail/CourseDetailHero'
 import { CourseDetailSidebar } from '@/components/course/detail/CourseDetailSidebar'
 import { CourseInstructorCard } from '@/components/course/detail/CourseInstructorCard'
-import {
-  CourseSyllabusList,
-  type SyllabusSection,
-} from '@/components/course/detail/CourseSyllabusList'
+import { CourseSyllabusList, type SyllabusSection } from '@/components/course/detail/CourseSyllabusList'
 import { CourseWhatYouLearn } from '@/components/course/detail/CourseWhatYouLearn'
-import {
-  PopularCoursesStrip,
-  type PopularCourseItem,
-} from '@/components/course/detail/PopularCoursesStrip'
-import {
-  StudentFeedbackPanel,
-  type FeedbackBreakdown,
-} from '@/components/course/detail/StudentFeedbackPanel'
+import { PopularCoursesStrip, type PopularCourseItem } from '@/components/course/detail/PopularCoursesStrip'
+import { StudentFeedbackPanel, type FeedbackBreakdown } from '@/components/course/detail/StudentFeedbackPanel'
 
 interface CourseDetailLayoutProps {
   backHref?: string
@@ -100,9 +91,7 @@ export function CourseDetailLayout({
           <div className="flex flex-col gap-5">
             <CourseWhatYouLearn items={whatYouLearn} />
 
-            <CourseDescription>
-              {descriptionContent ?? <p>{description}</p>}
-            </CourseDescription>
+            <CourseDescription>{descriptionContent ?? <p>{description}</p>}</CourseDescription>
 
             <CourseSyllabusList sections={syllabus} />
 
@@ -115,20 +104,11 @@ export function CourseDetailLayout({
               coursesCount={instructor.coursesCount}
             />
 
-            <StudentFeedbackPanel
-              rating={rating}
-              totalReviews={totalReviews}
-              breakdown={feedbackBreakdown}
-            />
+            <StudentFeedbackPanel rating={rating} totalReviews={totalReviews} breakdown={feedbackBreakdown} />
           </div>
 
           <div className="lg:sticky lg:top-20 lg:self-start">
-            <CourseDetailSidebar
-              previewImage={previewImage}
-              price={price}
-              strikePrice={strikePrice}
-              discountLabel={discountLabel}
-              includes={includes}>
+            <CourseDetailSidebar previewImage={previewImage} price={price} strikePrice={strikePrice} discountLabel={discountLabel} includes={includes}>
               {sidebarCta}
             </CourseDetailSidebar>
           </div>

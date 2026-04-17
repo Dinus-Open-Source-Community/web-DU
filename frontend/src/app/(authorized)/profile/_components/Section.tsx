@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Image as ImageIcon, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
-import { getSidebarUser } from '@/lib/auth/sidebar-user'
+import { useUser } from '@/hooks/useUser'
 
 function initialsFromName(name: string) {
   const parts = name.trim().split(/\s+/)
@@ -13,15 +13,15 @@ function initialsFromName(name: string) {
 }
 
 const Section = () => {
-  const session = useMemo(() => getSidebarUser(), [])
-  const [name, setName] = useState(session.name)
-  const [email, setEmail] = useState(session.email)
+  const user = useUser()
+  const [name, setName] = useState(user.nama)
+  const [email, setEmail] = useState(user.email)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  const [newEmail, setNewEmail] = useState(session.email)
+  const [newEmail, setNewEmail] = useState(user.email)
   const [passwordForEmail, setPasswordForEmail] = useState('')
 
   /** Tanggal diformat hanya di klien agar output Intl konsisten dengan SSR. */
@@ -48,7 +48,7 @@ const Section = () => {
     toast.info('Perubahan email memerlukan layanan backend yang terhubung.')
   }
 
-  const roleLabel = session.role
+  const roleLabel = user.role
 
   return (
     <section className="px-5 md:px-8 py-10 w-full max-w-4xl flex flex-col gap-8 mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -61,15 +61,15 @@ const Section = () => {
         <div className="flex items-center gap-6">
           <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-50 shrink-0 border border-slate-100 p-1">
             <div className="w-full h-full relative rounded-xl overflow-hidden bg-emerald-50 flex items-center justify-center">
-              {session.avatar ? (
-                <Image src={session.avatar} alt="" fill className="object-cover" sizes="96px" />
+              {user.avatar ? (
+                <Image src={user.avatar} alt="" fill className="object-cover" sizes="96px" />
               ) : (
-                <span className="text-2xl font-bold text-emerald-800">{initialsFromName(session.name)}</span>
+                <span className="text-2xl font-bold text-emerald-800">{initialsFromName(user.nama)}</span>
               )}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{session.name}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{user.nama}</h2>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">{roleLabel}</span>
             </div>

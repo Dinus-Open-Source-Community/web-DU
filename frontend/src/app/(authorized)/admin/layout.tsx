@@ -5,10 +5,11 @@ import { Sidebar } from '@/components/sidebar'
 import { adminNavigation } from '@/lib/navigation'
 import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
-import { getSidebarUser } from '@/lib/auth/sidebar-user'
+import { useUser } from '@/hooks/useUser'
+import { toSidebarUser } from '@/lib/data/dummyUsers'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const user = getSidebarUser()
+  const user = useUser()
   const router = useRouter()
   const { isOpen, close, isMinimized, toggleMinimize } = useSidebarContext()
 
@@ -20,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         onClose={close}
         isMinimized={isMinimized}
         onToggleMinimize={toggleMinimize}
-        user={user}
+        user={toSidebarUser(user)}
         onLogout={() => {
           router.push('/auth/login')
         }}

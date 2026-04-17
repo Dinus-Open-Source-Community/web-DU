@@ -9,6 +9,7 @@ import { BadgeVariant, PaymentStatus } from '@/lib/types'
 import { Profile } from './profile'
 import { Button } from './button'
 import { cn } from '@/lib/utils'
+import { router } from 'next/client'
 
 interface CardProps {
   variant?: 'course' | 'resume' | 'resumeAdmin' | 'transaction' | 'mentorCourse'
@@ -144,33 +145,33 @@ function Card({
             </div>
           </div>
 
-          <div
-            className={cn(
-              'mt-auto flex flex-wrap items-stretch gap-2 border-t border-slate-100 pt-4 sm:items-center sm:justify-end',
-              mentorOnStatusClick && 'sm:justify-between'
-            )}>
+          <div className={cn('mt-auto flex flex-wrap items-stretch gap-2 border-t border-slate-100 pt-4 sm:items-center sm:justify-end', mentorOnStatusClick && 'sm:justify-between')}>
             {mentorOnStatusClick ? (
               <Button
                 type="button"
                 variant={isLive ? 'outline' : 'default'}
                 size="sm"
-                className={cn(
-                  'h-9 rounded-xl px-4 text-xs font-semibold shadow-none',
-                  isLive &&
-                    'border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100/90'
-                )}
+                className={cn('h-9 rounded-xl px-4 text-xs font-semibold shadow-none', isLive && 'border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100/90')}
                 onClick={mentorOnStatusClick}>
                 {isLive ? 'Jadikan draf' : 'Terbitkan'}
               </Button>
             ) : null}
             <div className="flex flex-wrap gap-2 sm:ml-auto sm:justify-end">
               {mentorAssignmentsHref ? (
-                <Button asChild variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
                   <Link href={mentorAssignmentsHref}>Tugas</Link>
                 </Button>
               ) : null}
               {detailHref ? (
-                <Button asChild variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
                   <Link href={detailHref}>Kelola kursus</Link>
                 </Button>
               ) : null}
@@ -251,14 +252,8 @@ function Card({
         </div>
 
         <div className="flex flex-1 flex-col gap-3 p-5">
-          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-slate-900">
-            {title}
-          </h3>
-          {module && (
-            <p className="line-clamp-1 text-xs font-medium uppercase tracking-wider text-slate-400">
-              {module}
-            </p>
-          )}
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-slate-900">{title}</h3>
+          {module && <p className="line-clamp-1 text-xs font-medium uppercase tracking-wider text-slate-400">{module}</p>}
           {progress !== undefined && (
             <div className="mt-auto w-full">
               <div className="mb-1.5 flex items-center justify-between">
@@ -266,10 +261,7 @@ function Card({
                 <span className="text-xs font-bold text-primary tabular-nums">{progress}%</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
+                <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
             </div>
           )}
@@ -367,24 +359,32 @@ function Card({
           </div>
         )}
 
-        <div className="mb-5 flex flex-col w-full">
-          <h3 className={`mb-1.5 line-clamp-2 leading-snug font-bold text-slate-900 ${sizes.title[size]}`}>{title}</h3>
-          {module && <p className="mb-2 text-xs font-semibold text-slate-400 tracking-wide uppercase">{module}</p>}
-
-          {description && <p className={`line-clamp-2 grow leading-[1.4] font-normal text-slate-500 ${sizes.description[size]}`}>{description}</p>}
+        <div className="mb-5 flex w-full flex-col gap-1.5">
+          <h3 className={`mb-1 line-clamp-2 font-bold leading-tight text-slate-900 ${sizes.title[size]}`}>{title}</h3>
+          {module && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{module}</p>}
+          <div className="flex flex-col grow">
+            {description && <p className={`line-clamp-2 text-xs font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{description}</p>}
+            {price && <span className="mt-2 text-base font-semibold text-primary ">{price}</span>}
+          </div>
         </div>
 
         {/* Bottom Section (Author & Action) */}
         <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
           {author ? <Profile image={author.avatar ?? '/pinguin.png'} name={author.name ?? ''} /> : <div />}
 
-          {progress === 100 ? (
-            <Badge variant="progressComplete" />
-          ) : (
-            <Button className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">
-              Mulai
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {progress === 100 ? (
+              <Badge variant="progressComplete" />
+            ) : detailHref ? (
+              <Button asChild className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">
+                <Link href={detailHref}>Mulai</Link>
+              </Button>
+            ) : (
+              <Button className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">
+                Mulai
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -392,8 +392,7 @@ function Card({
 }
 
 /** Panel permukaan standar (section berborder) — dipakai ulang di dashboard mentor, hub, dll. */
-export const CARD_PANEL_CLASS =
-  'rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
+export const CARD_PANEL_CLASS = 'rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
 
 export function CardPanel({ className, ...props }: React.ComponentProps<'div'>) {
   return <div className={cn(CARD_PANEL_CLASS, 'p-5', className)} {...props} />

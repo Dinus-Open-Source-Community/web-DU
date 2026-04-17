@@ -5,7 +5,8 @@ import { Sidebar } from '@/components/sidebar'
 import { mentorNavigation } from '@/lib/navigation'
 import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
-import { getSidebarUser } from '@/lib/auth/sidebar-user'
+import { useUser } from '@/hooks/useUser'
+import { toSidebarUser } from '@/lib/data/dummyUsers'
 
 /** Attendance per-course: full-screen without sidebar */
 function isMentorFullScreenRoute(pathname: string) {
@@ -16,7 +17,7 @@ function isMentorFullScreenRoute(pathname: string) {
 }
 
 export default function MentorLayout({ children }: { children: React.ReactNode }) {
-  const user = getSidebarUser()
+  const user = useUser()
   const pathname = usePathname()
   const router = useRouter()
   const { isOpen, isMinimized, close, toggleMinimize } = useSidebarContext()
@@ -31,7 +32,7 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
           onClose={close}
           isMinimized={isMinimized}
           onToggleMinimize={toggleMinimize}
-          user={user}
+          user={toSidebarUser(user)}
           onLogout={() => {
             router.push('/auth/login')
           }}

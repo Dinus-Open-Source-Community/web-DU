@@ -44,7 +44,7 @@ export function AdminCourseCard({ course }: AdminCourseCardProps) {
           <div className="flex items-center gap-1 text-xs text-slate-500">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden />
             <span className="font-semibold text-slate-700">{course.rating.toFixed(1)}</span>
-            <span>({course.reviews})</span>
+            <span>({course.totalReviews})</span>
           </div>
         </div>
 
@@ -55,19 +55,19 @@ export function AdminCourseCard({ course }: AdminCourseCardProps) {
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <div className="relative h-5 w-5 overflow-hidden rounded-full bg-slate-100">
             <Image
-              src={course.mentorAvatar}
-              alt={course.mentorName}
+              src={course.author.avatar}
+              alt={course.author.name}
               fill
               className="object-cover"
               sizes="20px"
             />
           </div>
-          <span className="font-medium text-slate-600">{course.mentorName}</span>
+          <span className="font-medium text-slate-600">{course.author.name}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
           <span className="inline-flex items-center gap-1">
-            <BookOpen className="h-3 w-3" aria-hidden /> {course.modules} modul
+            <BookOpen className="h-3 w-3" aria-hidden /> {course.modules.length} modul
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" aria-hidden /> {course.duration}

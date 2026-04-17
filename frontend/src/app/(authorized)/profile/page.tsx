@@ -1,27 +1,27 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import  { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Section from './_components/Section'
 import { Sidebar } from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
+import { useUser } from '@/hooks/useUser'
+import { toSidebarUser } from '@/lib/data/dummyUsers'
 import { studentNavigation, mentorNavigation, adminNavigation } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
-import { getSidebarUser } from '@/lib/auth/sidebar-user'
 
 const Page = () => {
   const router = useRouter()
   const { isOpen, isMinimized, close, toggleMinimize } = useSidebar()
-  const session = useMemo(() => getSidebarUser(), [])
+  const user = useUser()
   const [navigationModel, setNavigationModel] = useState(studentNavigation)
 
   useEffect(() => {
-    switch (session.role.toLowerCase()) {
+    switch (user.role) {
       case 'mentor':
         setNavigationModel(mentorNavigation)
         break
       case 'admin':
-      case 'administrator':
         setNavigationModel(adminNavigation)
         break
       case 'student':
@@ -29,7 +29,7 @@ const Page = () => {
         setNavigationModel(studentNavigation)
         break
     }
-  }, [session.role])
+  }, [user.role])
 
   return (
     <div className="min-h-screen w-full bg-[#f5f5f5]">
@@ -39,7 +39,7 @@ const Page = () => {
         onClose={close}
         isMinimized={isMinimized}
         onToggleMinimize={toggleMinimize}
-        user={session}
+        user={toSidebarUser(user)}
         onLogout={() => {
           router.push('/auth/login')
         }}

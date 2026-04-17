@@ -57,17 +57,17 @@ export function PendingApprovalsList() {
               <div className="flex items-center gap-2">
                 <div className="relative h-6 w-6 overflow-hidden rounded-full bg-slate-100">
                   <Image
-                    src={c.mentorAvatar}
-                    alt={c.mentorName}
+                    src={c.author.avatar}
+                    alt={c.author.name}
                     fill
                     className="object-cover"
                     sizes="24px"
                   />
                 </div>
-                <span className="font-medium">{c.mentorName}</span>
+                <span className="font-medium">{c.author.name}</span>
               </div>
               <span className="inline-flex items-center gap-1">
-                <BookMarked className="h-3 w-3" aria-hidden /> {c.modules} modul • {c.duration}
+                <BookMarked className="h-3 w-3" aria-hidden /> {c.modules.length} modul • {c.duration}
               </span>
               <span className="font-semibold text-slate-700">
                 {c.price === 0 ? 'Gratis' : formatRupiah(c.price)}

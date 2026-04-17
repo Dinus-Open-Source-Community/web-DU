@@ -1,236 +1,27 @@
 import {
-  ICardData,
   IDashboardStat,
   IDeadlineItem,
   IFeedbackItem,
   IProgramFeatures,
   IResumeCourse,
-  PaymentStatus,
   TransactionHistoryItem,
   ICertificate,
-  IAttendanceSummary,
-  IAttendanceRecord,
   ICourseAttendance,
   IMentorStats,
   IScheduleItem,
   IMentorCourse,
 } from './types'
 import { BookIcons, CertificateIcons, GlobeLearningIcon, JobIcons } from '@/components/ui/icons'
-import {
-  paymentStatusLabels,
-  paymentStatusSortRank,
-  paymentStatusStyles,
-} from './constants/payment-status'
+import { paymentStatusLabels, paymentStatusSortRank, paymentStatusStyles } from './constants/payment-status'
+import { listCourses, toMentorCourseView } from './data/repository'
 
 /** Alias kompatibilitas — prefer impor dari `@/lib/constants/payment-status`. */
 export const statusLabels = paymentStatusLabels
 export const statusRank = paymentStatusSortRank
 export const statusStyles = paymentStatusStyles
 
-export const DataCourse: ICardData[] = [
-  {
-    variantBadge: 'event',
-    title: 'Advanced React Patterns & Next.js 15 Architecture',
-    description:
-      'Berhenti menulis kode reaktif yang berantakan. Pelajari cara membangun aplikasi skala enterprise dengan teknik rendering hybrid, manajemen state terdesentralisasi, dan optimasi performa ekstrem.',
-    category: 'Pengembangan Web',
-    author: {
-      name: 'Sarah Drasner',
-      avatar: 'https://i.pravatar.cc/150?u=sarah_d',
-    },
-    rating: 4.9,
-    totalReviews: 1450000,
-    image: 'https://picsum.photos/seed/react/600/400',
-  },
-  {
-    variantBadge: 'free',
-    title: 'Figma to Code',
-    description: 'Beralih dari mockup Figma murni menuju web interaktif dengan fundamental terstruktur.',
-    category: 'Desain UI/UX',
-    author: {
-      name: 'Budi',
-      avatar: 'https://i.pravatar.cc/150?u=budi_dev',
-    },
-    rating: 4.2,
-    totalReviews: 125,
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Machine Learning with Python: Zero to Hero',
-    description: 'Kuasai algoritma prediksi, manipulasi data dengan Pandas, dan bangun model AI pertama Anda dalam 30 hari.',
-    category: 'Data Science & AI',
-    author: {
-      name: 'Dr. Alex Chen',
-      avatar: 'https://i.pravatar.cc/150?u=alex_c',
-    },
-    rating: 4.6,
-    totalReviews: 8432,
-    image: 'https://picsum.photos/seed/ml/600/400',
-  },
-  {
-    variantBadge: 'event',
-    title: 'UI/UX Fundamentals',
-    description: 'Memahami hierarki visual, tipografi, dan spasi yang rasional. Berhenti menebak-nebak dan gunakan sistem.',
-    category: 'Desain UI/UX',
-    author: {
-      name: 'Jessica Wong',
-      avatar: 'https://i.pravatar.cc/150?u=jess_w',
-    },
-    rating: 4.8,
-    totalReviews: 2450,
-  },
-  {
-    variantBadge: 'free',
-    title: 'Mastering Tailwind CSS v4 & Framer Motion',
-    description: 'Eksplorasi animasi kompleks dan layout responsif tingkat lanjut menggunakan utility-first framework.',
-    category: 'Pengembangan Web',
-    author: {
-      name: 'Marcus Levin',
-      avatar: 'https://i.pravatar.cc/150?u=marcus_l',
-    },
-    rating: 5.0,
-    totalReviews: 999,
-    image: 'https://picsum.photos/seed/tailwind/600/400',
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Rust for WebAssembly',
-    description: 'Tingkatkan performa aplikasi web Anda hingga 10x lipat dengan mengkompilasi Rust ke Wasm.',
-    category: 'Pengembangan Web',
-    author: {
-      name: 'Elena Rostova',
-      avatar: 'https://i.pravatar.cc/150?u=elena_r',
-    },
-    rating: 4.8,
-    totalReviews: 21500,
-    image: 'https://picsum.photos/seed/rust/600/400',
-  },
-  // 10 Data Kursus Tambahan
-  {
-    variantBadge: 'premium',
-    title: 'Cybersecurity Analyst Bootcamp',
-    description: 'Analisis serangan dan ancaman cyber terkini. Praktek offensive hacking dengan tool industri nyata.',
-    category: 'Cybersecurity',
-    author: {
-      name: 'Kevin Mitnick',
-      avatar: 'https://i.pravatar.cc/150?u=kevin_m',
-    },
-    rating: 4.9,
-    totalReviews: 54100,
-    image: 'https://picsum.photos/seed/cyber/600/400',
-  },
-  {
-    variantBadge: 'free',
-    title: 'Data Analytics dengan Tableau',
-    description: 'Pahami cara memodelkan data mentah dan merubahnya menjadi visualisasi tabel dinamis yang profesional.',
-    category: 'Data Science & AI',
-    author: {
-      name: 'Jordan Walke',
-      avatar: 'https://i.pravatar.cc/150?u=jordan_w',
-    },
-    rating: 4.5,
-    totalReviews: 1250,
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Product Management Strategy',
-    description: 'Strategi membangun produk yang digemari pasar dari ideasi hingga monetisasi berdasarkan metrik.',
-    category: 'Bisnis & Manajemen',
-    author: {
-      name: 'Martin Fowler',
-      avatar: 'https://i.pravatar.cc/150?u=martin_f',
-    },
-    rating: 4.7,
-    totalReviews: 890,
-    image: 'https://picsum.photos/seed/business/600/400',
-  },
-  {
-    variantBadge: 'draft',
-    title: 'Pengantar Vue 3 Composition API',
-    description: 'Fundamental menggunakan framework antarmuka Vue.js terbaru secara reaktif.',
-    category: 'Pengembangan Web',
-    author: {
-      name: 'Evan You',
-      avatar: 'https://i.pravatar.cc/150?u=evan_y',
-    },
-    rating: 4.3,
-    totalReviews: 55,
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Figma Pro Prototyping',
-    description: 'Buat animasi mutakhir dan smart animate antarmuka terintegrasi pada layout prototip web modern Anda.',
-    category: 'Desain UI/UX',
-    author: {
-      name: 'DesignCourse',
-      avatar: 'https://i.pravatar.cc/150?u=gary_s',
-    },
-    rating: 4.8,
-    totalReviews: 450,
-    image: 'https://picsum.photos/seed/proto/600/400',
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Mastering Linux & Ethical Hacking',
-    description: 'Menyelam jauh ke sistem dasar Linux untuk testing injeksi dan deteksi kelemahan jaringan internal.',
-    category: 'Cybersecurity',
-    author: {
-      name: 'Linus B.',
-      avatar: 'https://i.pravatar.cc/150?u=linus_b',
-    },
-    rating: 4.9,
-    totalReviews: 11000,
-  },
-  {
-    variantBadge: 'free',
-    title: 'Lean Startup for Digital Nomads',
-    description: 'Panduan membangun bisnis rintisan tanpa perlu pendanaan besar memanfaatkan ide dan validasi gesit.',
-    category: 'Bisnis & Manajemen',
-    author: {
-      name: 'Eric Ries',
-      avatar: 'https://i.pravatar.cc/150?u=eric_r',
-    },
-    rating: 4.5,
-    totalReviews: 331,
-  },
-  {
-    variantBadge: 'event',
-    title: 'Deep Learning x Finance Market',
-    description: 'Penggunaan machine learning mutakhir untuk analisis sentimen pasar finansial secara real-time.',
-    category: 'Data Science & AI',
-    author: {
-      name: 'Andrew Ng',
-      avatar: 'https://i.pravatar.cc/150?u=andrew_n',
-    },
-    rating: 5.0,
-    totalReviews: 955,
-    image: 'https://picsum.photos/seed/financeai/600/400',
-  },
-  {
-    variantBadge: 'premium',
-    title: 'Go (Golang) Microservices',
-    description: 'Sistem dan bahasa berkinerja tinggi. Bangun server API tercepat via gRPC dan mekanisme goroutines.',
-    category: 'Pengembangan Web',
-    author: {
-      name: 'Rob Pike',
-      avatar: 'https://i.pravatar.cc/150?u=rob_p',
-    },
-    rating: 4.7,
-    totalReviews: 240,
-  },
-  {
-    variantBadge: 'event',
-    title: 'Social Media Organic Marketing',
-    description: 'Teknik efisien mengembangkan audiens audiens murni menggunakan personal branding yang terorganisir.',
-    category: 'Bisnis & Manajemen',
-    author: {
-      name: 'Gary Vaynerchuk',
-      avatar: 'https://i.pravatar.cc/150?u=gary_v',
-    },
-    rating: 4.8,
-    totalReviews: 6990,
-  },
-]
+/** Semua kursus di katalog — sumber kebenaran dari repository JSON. */
+export const DataCourse = listCourses()
 
 export const ProgramFeatures: IProgramFeatures[] = [
   {
@@ -268,7 +59,7 @@ export const ResumeCourses: IResumeCourse[] = [
     description: 'Arsitektur App Router, autentikasi, dan integrasi API — lanjutkan dari materi mentor.',
     module: 'Modul 4 dari 12',
     progress: 42,
-    courseUid: 'mc-001',
+    courseUid: 'crs-017',
     image: 'https://picsum.photos/seed/mc-web/400/300',
     variantBadge: 'premium',
     author: {
@@ -283,7 +74,7 @@ export const ResumeCourses: IResumeCourse[] = [
     description: 'Pola komposisi, token warna, dan dokumentasi komponen.',
     module: 'Modul 3 dari 8',
     progress: 28,
-    courseUid: 'mc-002',
+    courseUid: 'crs-018',
     image: 'https://picsum.photos/seed/mc-ui/400/300',
     variantBadge: 'free',
     author: {
@@ -843,61 +634,5 @@ export const MentorScheduleItems: IScheduleItem[] = [
   },
 ]
 
-export const mentorCoursesDummy: IMentorCourse[] = [
-  {
-    uid: 'mc-001',
-    title: 'Full Stack Web dengan Next.js',
-    header: 'Dari nol hingga deploy production',
-    description: 'Arsitektur App Router, autentikasi, dan integrasi API.',
-    image: 'https://picsum.photos/seed/mc-web/640/360',
-    published: true,
-    moduleCount: 12,
-    meetingCount: 12,
-    studentCount: 48,
-    rating: 4.8,
-    totalReviews: 126,
-    updatedAt: '10 Apr 2026',
-  },
-  {
-    uid: 'mc-002',
-    title: 'UI Engineering & Design System',
-    header: 'Komponen reusable dan aksesibilitas',
-    description: 'Pola komposisi, token warna, dan dokumentasi Storybook.',
-    image: 'https://picsum.photos/seed/mc-ui/640/360',
-    published: true,
-    moduleCount: 8,
-    meetingCount: 8,
-    studentCount: 32,
-    rating: 4.6,
-    totalReviews: 54,
-    updatedAt: '8 Apr 2026',
-  },
-  {
-    uid: 'mc-003',
-    title: 'DevOps Praktis untuk Developer',
-    header: 'CI/CD dan observabilitas dasar',
-    description: 'Pipeline GitHub Actions, Docker, dan log terpusat.',
-    image: 'https://picsum.photos/seed/mc-devops/640/360',
-    published: false,
-    moduleCount: 0,
-    meetingCount: 10,
-    studentCount: 0,
-    rating: 0,
-    totalReviews: 0,
-    updatedAt: 'Draft',
-  },
-  {
-    uid: 'mc-004',
-    title: 'Algoritma & Struktur Data',
-    header: 'Persiapan wawancara teknis',
-    description: 'Big-O, struktur klasik, dan latihan soal.',
-    image: 'https://picsum.photos/seed/mc-dsa/640/360',
-    published: false,
-    moduleCount: 3,
-    meetingCount: 6,
-    studentCount: 0,
-    rating: 0,
-    totalReviews: 0,
-    updatedAt: 'Draft',
-  },
-]
+/** Mentor courses seed — derived dari DataCourse milik active mentor user. */
+export const mentorCoursesDummy: IMentorCourse[] = DataCourse.map(toMentorCourseView)

@@ -1,0 +1,80 @@
+[
+  {
+    "uid": "qa-001",
+    "courseUid": "crs-001",
+    "courseTitle": "Advanced React Patterns & Next.js 15",
+    "title": "Perbedaan Server Component vs Client Component dalam case real-world?",
+    "author": "Hendra Gunawan",
+    "authorAvatar": "https://i.pravatar.cc/150?u=hendra",
+    "body": "Halo, saya masih bingung kapan harus pakai Server Component dan kapan Client Component. Bisa tolong jelaskan dengan case nyata?",
+    "createdAt": "2 jam lalu",
+    "repliesCount": 2,
+    "status": "answered",
+    "replies": [
+      {
+        "uid": "qa-001-r1",
+        "author": "Sarah Drasner",
+        "authorAvatar": "https://i.pravatar.cc/150?u=sarah_d",
+        "role": "mentor",
+        "body": "Gunakan Server Component untuk data-heavy yang tidak butuh interaksi. Client Component untuk form, animasi, dan state interaktif.",
+        "createdAt": "1 jam lalu"
+      },
+      {
+        "uid": "qa-001-r2",
+        "author": "Rizki Saputra",
+        "authorAvatar": "https://i.pravatar.cc/150?u=rizki",
+        "role": "admin",
+        "body": "Sudah kami arsipkan sebagai FAQ, akan dirilis di minggu depan.",
+        "createdAt": "30 menit lalu"
+      }
+    ]
+  },
+  {
+    "uid": "qa-002",
+    "courseUid": "crs-002",
+    "courseTitle": "UI/UX Fundamentals",
+    "title": "Tool terbaik untuk membuat design system awal?",
+    "author": "Putri Kirana",
+    "authorAvatar": "https://i.pravatar.cc/150?u=putri",
+    "body": "Untuk proyek personal kecil, lebih efisien pakai Figma atau langsung Tailwind tokens?",
+    "createdAt": "5 jam lalu",
+    "repliesCount": 0,
+    "status": "unanswered",
+    "replies": []
+  },
+  {
+    "uid": "qa-003",
+    "courseUid": "crs-004",
+    "courseTitle": "Mastering Tailwind CSS v4",
+    "title": "Error saat setup Tailwind v4 di Next.js 16 turbopack",
+    "author": "Lukman Hakim",
+    "authorAvatar": "https://i.pravatar.cc/150?u=lukman",
+    "body": "Saya dapat error \"tw-animate-css\" tidak terdeteksi padahal sudah install. Solusi?",
+    "createdAt": "1 hari lalu",
+    "repliesCount": 1,
+    "status": "answered",
+    "replies": [
+      {
+        "uid": "qa-003-r1",
+        "author": "Marcus Levin",
+        "authorAvatar": "https://i.pravatar.cc/150?u=marcus_l",
+        "role": "mentor",
+        "body": "Pastikan postcss.config.mjs sudah mendaftar plugin tailwindcss/postcss. Restart dev server.",
+        "createdAt": "20 jam lalu"
+      }
+    ]
+  },
+  {
+    "uid": "qa-004",
+    "courseUid": "crs-003",
+    "courseTitle": "Machine Learning with Python",
+    "title": "Dataset apa yang cocok untuk latihan regresi pemula?",
+    "author": "Novi Permatasari",
+    "authorAvatar": "https://i.pravatar.cc/150?u=novi",
+    "body": "Saya masih awal belajar ML. Mentor bisa rekomendasikan dataset beginner?",
+    "createdAt": "2 hari lalu",
+    "repliesCount": 0,
+    "status": "unanswered",
+    "replies": []
+  }
+]
