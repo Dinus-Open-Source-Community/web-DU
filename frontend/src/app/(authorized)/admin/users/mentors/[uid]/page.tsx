@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { adminMentors } from '@/lib/data/admin-fixtures'
+import { listMentors } from '@/lib/data/repository'
 
 import { MentorDetailView } from './_components/MentorDetailView'
 
@@ -16,7 +16,8 @@ interface PageProps {
 
 export default async function AdminMentorDetailPage({ params }: PageProps) {
   const { uid } = await params
-  const mentor = adminMentors.find((m) => m.uid === uid)
+  const mentors = listMentors()
+  const mentor = mentors.find((m) => m.uid === uid)
 
   if (!mentor) notFound()
 

@@ -8,10 +8,13 @@ import { EmptyState } from '@/components/admin/EmptyState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { adminReviews, type AdminReview } from '@/lib/data/admin-fixtures'
+import { listAllReviews } from '@/lib/data/repository'
+import type { AdminReview } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 export function ReviewsPanel() {
+  const adminReviews = listAllReviews()
+
   if (adminReviews.length === 0) {
     return (
       <EmptyState

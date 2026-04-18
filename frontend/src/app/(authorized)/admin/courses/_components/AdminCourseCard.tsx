@@ -4,7 +4,7 @@ import { BookOpen, Clock, Eye, Star, Users2 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import type { AdminCourse } from '@/lib/data/admin-fixtures'
+import type { AdminCourse } from '@/lib/types'
 import { formatRupiah } from '@/lib/func'
 
 const statusVariantMap = {

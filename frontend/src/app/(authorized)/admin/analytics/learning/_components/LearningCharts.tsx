@@ -3,13 +3,11 @@
 import { CategoryBarChart } from '@/components/charts/CategoryBarChart'
 import { ChartCard } from '@/components/charts/ChartCard'
 import { TimelineAreaChart } from '@/components/charts/TimelineAreaChart'
-import {
-  completionRateByCategory,
-  dropOffFunnel,
-  learningEngagementTrend,
-} from '@/lib/data/admin-fixtures'
+import { getCompletionRateByCategory, getDropOffFunnel, getLearningEngagementTrend } from '@/lib/data/repository'
 
 export function EngagementCharts() {
+  const engagementTrend = getLearningEngagementTrend()
+  const completionRate = getCompletionRateByCategory()
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       <ChartCard
@@ -17,7 +15,7 @@ export function EngagementCharts() {
         subtitle="Siswa aktif vs siswa yang menyelesaikan modul per minggu."
         className="xl:col-span-2">
         <TimelineAreaChart
-          data={learningEngagementTrend}
+          data={engagementTrend}
           height={300}
           series={[
             { dataKey: 'active', label: 'Active', color: 'var(--chart-1)' },
@@ -29,7 +27,7 @@ export function EngagementCharts() {
         title="Completion Rate / Category"
         subtitle="Persentase siswa yang menyelesaikan kursus.">
         <CategoryBarChart
-          data={completionRateByCategory}
+          data={completionRate}
           height={300}
           orientation="horizontal"
           valueFormatter={(v) => `${v}%`}
@@ -40,6 +38,7 @@ export function EngagementCharts() {
 }
 
 export function LearnerFunnel() {
+  const dropOffFunnel = getDropOffFunnel()
   const funnelMax = Math.max(...dropOffFunnel.map((s) => s.value))
 
   return (

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { CourseAttendanceData } from '@/lib/dummyData'
+import { listAttendance } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { ICourseAttendance } from '@/lib/types'
 import { User, XCircle } from 'lucide-react'
@@ -8,7 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const Section = () => {
-  const attendanceRows = isMockDataEnabled() ? CourseAttendanceData : []
+  const attendanceRows = isMockDataEnabled() ? listAttendance() : []
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [permissionReason, setPermissionReason] = useState('')

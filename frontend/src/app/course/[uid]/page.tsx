@@ -4,8 +4,7 @@ import { notFound } from 'next/navigation'
 import GuestLayout from '@/components/layout/GuestLayout'
 import { CourseDetailLayout } from '@/components/course/detail/CourseDetailLayout'
 import { Button } from '@/components/ui/button'
-import { adminCourseFeedbackBreakdown, adminCourseWhatYouLearn, adminCourses, adminMentors } from '@/lib/data/admin-fixtures'
-import { getSyllabusFromCourse } from '@/lib/data/repository'
+import { listCourses, listMentors, getCourseFeedbackBreakdown, getCourseWhatYouLearn, getSyllabusFromCourse } from '@/lib/data/repository'
 import { getCurrentUser, type UserRole } from '@/lib/data/dummyUsers'
 import { formatRupiah } from '@/lib/func'
 import Link from 'next/link'
@@ -22,10 +21,12 @@ interface PageProps {
 
 export default async function PublicCourseDetailPage({ params }: PageProps) {
   const { uid } = await params
-  const course = adminCourses.find((c) => c.uid === uid)
+  const courses = listCourses()
+  const course = courses.find((c) => c.uid === uid)
   if (!course) notFound()
 
-  const mentor = adminMentors.find((m) => m.uid === course.mentorUid)
+  const mentors = listMentors()
+  const mentor = mentors.find((m) => m.uid === course.mentorUid)
 
   const viewer = getCurrentUser()
   const canManageCourse = PRIVILEGED_ROLES.includes(viewer.role)
@@ -49,9 +50,9 @@ export default async function PublicCourseDetailPage({ params }: PageProps) {
           price={course.price === 0 ? 'Gratis' : formatRupiah(course.price)}
           strikePrice={course.strikePrice ? formatRupiah(course.strikePrice) : undefined}
           discountLabel={discountLabel}
-          whatYouLearn={adminCourseWhatYouLearn}
+          whatYouLearn={getCourseWhatYouLearn()}
           syllabus={getSyllabusFromCourse(course)}
-          feedbackBreakdown={adminCourseFeedbackBreakdown}
+          feedbackBreakdown={getCourseFeedbackBreakdown()}
           instructor={{
             name: course.author.name,
             role: mentor?.specializations.join(', ') ?? 'Mentor',

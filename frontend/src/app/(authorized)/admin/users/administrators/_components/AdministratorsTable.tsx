@@ -10,11 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminAdministrators,
-  type AdminAdministrator,
-  type AdminStatus,
-} from '@/lib/data/admin-fixtures'
+import { listAdministrators } from '@/lib/data/repository'
+import type { AdminAdministrator, AdminStatus } from '@/lib/types'
 
 import { InviteAdminDialog } from './InviteAdminDialog'
 
@@ -52,6 +49,7 @@ const statusLabel: Record<AdminStatus, string> = {
 }
 
 export function AdministratorsTable() {
+  const administrators = listAdministrators()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
@@ -61,7 +59,7 @@ export function AdministratorsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminAdministrators.filter((a) => {
+    return administrators.filter((a) => {
       const matchRole = roleFilter === 'all' || a.role === roleFilter
       const matchStatus = statusFilter === 'all' || a.status === statusFilter
       const matchQuery =

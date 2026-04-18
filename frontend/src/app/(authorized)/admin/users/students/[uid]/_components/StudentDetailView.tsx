@@ -11,12 +11,8 @@ import { Badge, PaymentBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  adminTransactions,
-  studentEnrolledCourses,
-  type AdminStudent,
-  type AdminTransaction,
-} from '@/lib/data/admin-fixtures'
+import { listAdminTransactions, listStudentEnrolledCourses } from '@/lib/data/repository'
+import type { AdminStudent, AdminTransaction } from '@/lib/types'
 import { formatRupiah } from '@/lib/func'
 import { cn } from '@/lib/utils'
 
@@ -45,12 +41,15 @@ export function StudentDetailView({ student }: StudentDetailViewProps) {
   const [resetOpen, setResetOpen] = useState(false)
   const [txLayout, setTxLayout] = useState<LayoutMode>('table')
 
+  const transactions = listAdminTransactions()
+  const enrolledCourses = listStudentEnrolledCourses()
+
   const studentTransactions = useMemo<AdminTransaction[]>(
     () =>
-      adminTransactions
+      transactions
         .filter((_, i) => i % 3 === Number(student.uid.slice(-1)) % 3)
         .slice(0, 6),
-    [student.uid]
+    [student.uid, transactions]
   )
 
   const transactionColumns: AdminDataTableColumn<AdminTransaction>[] = [
@@ -159,13 +158,13 @@ export function StudentDetailView({ student }: StudentDetailViewProps) {
         </TabsList>
 
         <TabsContent value="courses" className="mt-2">
-          {studentEnrolledCourses.length === 0 ? (
+          {enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-10 text-center text-sm text-slate-500">
               Belum ada kursus terdaftar.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {studentEnrolledCourses.map((course) => (
+              {enrolledCourses.map((course) => (
                 <Card
                   key={course.uid}
                   variant="resumeAdmin"

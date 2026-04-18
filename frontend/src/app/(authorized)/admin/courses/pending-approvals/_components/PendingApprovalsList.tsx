@@ -7,10 +7,11 @@ import { Check, Clock, ExternalLink, X, BookMarked } from 'lucide-react'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { adminCourses } from '@/lib/data/admin-fixtures'
+import { listCourses } from '@/lib/data/repository'
 import { formatRupiah } from '@/lib/func'
 
 export function PendingApprovalsList() {
+  const adminCourses = listCourses()
   const pending = adminCourses.filter((c) => c.status === 'pending')
 
   if (pending.length === 0) {

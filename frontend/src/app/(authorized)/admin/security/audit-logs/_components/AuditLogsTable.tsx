@@ -20,11 +20,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminAuditLogs,
-  type AdminAuditLog,
-  type AuditAction,
-} from '@/lib/data/admin-fixtures'
+import { listAuditLogs } from '@/lib/data/repository'
+import type { AdminAuditLog, AuditAction } from '@/lib/types'
 
 type ActionFilter = 'all' | AuditAction
 type ResourceFilter = 'all' | string
@@ -47,6 +44,7 @@ const auditVariantMap = {
 const PAGE_SIZE = 10
 
 export function AuditLogsTable() {
+  const auditLogs = listAuditLogs()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [actionFilter, setActionFilter] = useState<ActionFilter>('all')
@@ -55,7 +53,7 @@ export function AuditLogsTable() {
   const [selected, setSelected] = useState<AdminAuditLog | null>(null)
 
   const resourceOptions = useMemo<{ value: ResourceFilter; label: string }[]>(() => {
-    const unique = Array.from(new Set(adminAuditLogs.map((a) => a.resource)))
+    const unique = Array.from(new Set(auditLogs.map((a) => a.resource)))
     return [
       { value: 'all', label: 'Semua Resource' },
       ...unique.map((r) => ({ value: r, label: r })),
@@ -64,7 +62,7 @@ export function AuditLogsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminAuditLogs.filter((a) => {
+    return auditLogs.filter((a) => {
       const matchAction = actionFilter === 'all' || a.action === actionFilter
       const matchResource = resourceFilter === 'all' || a.resource === resourceFilter
       const matchQuery =

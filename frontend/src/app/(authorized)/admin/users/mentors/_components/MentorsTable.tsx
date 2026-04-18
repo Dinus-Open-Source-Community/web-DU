@@ -7,17 +7,12 @@ import { Plus, UsersRound, Star } from 'lucide-react'
 
 import { AdminDataTable, type AdminDataTableColumn } from '@/components/admin/AdminDataTable'
 import { EmptyState } from '@/components/admin/EmptyState'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type AppBadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminMentors,
-  mentorSpecColors,
-  type AdminMentor,
-  type AdminStatus,
-  type MentorSpecialization,
-} from '@/lib/data/admin-fixtures'
+import { getMentorSpecColors, listMentors } from '@/lib/data/repository'
+import type { AdminMentor, AdminStatus, MentorSpecialization } from '@/lib/types'
 
 type StatusFilter = 'all' | AdminStatus
 type SpecFilter = 'all' | MentorSpecialization
@@ -31,9 +26,11 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'pending', label: 'Pending' },
 ]
 
+const specColors = getMentorSpecColors()
+
 const specOptions: { value: SpecFilter; label: string }[] = [
   { value: 'all', label: 'Semua' },
-  ...(Object.keys(mentorSpecColors) as MentorSpecialization[]).map((s) => ({
+  ...(Object.keys(specColors) as MentorSpecialization[]).map((s) => ({
     value: s,
     label: s,
   })),
@@ -52,6 +49,7 @@ const statusLabel: Record<AdminStatus, string> = {
 }
 
 export function MentorsTable() {
+  const mentors = listMentors()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -60,7 +58,7 @@ export function MentorsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminMentors.filter((m) => {
+    return mentors.filter((m) => {
       const matchStatus = statusFilter === 'all' || m.status === statusFilter
       const matchSpec = specFilter === 'all' || m.specializations.includes(specFilter)
       const matchQuery =
@@ -97,7 +95,7 @@ export function MentorsTable() {
       cell: (m) => (
         <div className="flex flex-wrap gap-1.5">
           {m.specializations.slice(0, 2).map((spec) => (
-            <Badge key={spec} variant={mentorSpecColors[spec]}>
+            <Badge key={spec} variant={specColors[spec] as AppBadgeVariant}>
               {spec}
             </Badge>
           ))}

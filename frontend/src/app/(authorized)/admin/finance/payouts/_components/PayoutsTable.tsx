@@ -11,11 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminPayouts,
-  type AdminPayout,
-  type PayoutStatus,
-} from '@/lib/data/admin-fixtures'
+import { listPayouts } from '@/lib/data/repository'
+import type { AdminPayout, PayoutStatus } from '@/lib/types'
 import { formatRupiah } from '@/lib/func'
 
 type StatusFilter = 'all' | PayoutStatus
@@ -38,6 +35,7 @@ const statusVariantMap = {
 const PAGE_SIZE = 10
 
 export function PayoutsTable() {
+  const payouts = listPayouts()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -45,7 +43,7 @@ export function PayoutsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminPayouts.filter((p) => {
+    return payouts.filter((p) => {
       const matchStatus = statusFilter === 'all' || p.status === statusFilter
       const matchQuery =
         q === '' ||
@@ -59,11 +57,11 @@ export function PayoutsTable() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const totalRequested = adminPayouts.filter((p) => p.status === 'requested').length
-  const totalPaid = adminPayouts
+  const totalRequested = payouts.filter((p) => p.status === 'requested').length
+  const totalPaid = payouts
     .filter((p) => p.status === 'paid')
     .reduce((acc, p) => acc + p.amount, 0)
-  const totalPending = adminPayouts
+  const totalPending = payouts
     .filter((p) => p.status === 'requested' || p.status === 'approved')
     .reduce((acc, p) => acc + p.amount, 0)
 

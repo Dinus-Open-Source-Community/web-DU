@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Materi Open Source & Gratis",
+    "description": "Belajar tanpa hambatan biaya dengan kurikulum yang dikembangkan secara terbuka oleh komunitas.",
+    "iconName": "book"
+  },
+  {
+    "title": "Project-Based Learning",
+    "description": "Kamu tidak hanya menonton video, tapi langsung membangun portofolio nyata untuk melamar kerja.",
+    "iconName": "globe"
+  },
+  {
+    "title": "Kurikulum standar industri",
+    "description": "Materi yang disusun berdasarkan kebutuhan dunia kerja nyata, bukan sekadar teori teks buku.",
+    "iconName": "job"
+  },
+  {
+    "title": "Sertifikat Eksklusif",
+    "description": "Dapatkan bukti kompetensi yang diakui untuk meningkatkan nilai jual kamu di pasar kerja.",
+    "iconName": "certificate"
+  }
+]

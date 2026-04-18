@@ -18,12 +18,8 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { PaymentBadge } from '@/components/ui/badge'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminTransactions,
-  transactionRatio,
-  transactionTimeline30d,
-  type AdminTransaction,
-} from '@/lib/data/admin-fixtures'
+import { getTransactionRatio, getTransactionTimeline30d, listAdminTransactions } from '@/lib/data/repository'
+import type { AdminTransaction } from '@/lib/types'
 import { formatDateTime, formatRupiah } from '@/lib/func'
 import type { PaymentStatus } from '@/lib/types'
 
@@ -48,6 +44,9 @@ const methodOptions: { value: MethodFilter; label: string }[] = [
 ]
 
 export function TransactionsDashboard() {
+  const allTransactions = listAdminTransactions()
+  const timeline30d = getTransactionTimeline30d()
+  const ratioData = getTransactionRatio()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -56,7 +55,7 @@ export function TransactionsDashboard() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminTransactions.filter((t) => {
+    return allTransactions.filter((t) => {
       const matchStatus = statusFilter === 'all' || t.paymentStatus === statusFilter
       const matchMethod = methodFilter === 'all' || t.paymentMethod === methodFilter
       const matchQuery =
@@ -71,12 +70,12 @@ export function TransactionsDashboard() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const totalGross = adminTransactions
+  const totalGross = allTransactions
     .filter((t) => t.paymentStatus === 'PAID')
     .reduce((acc, t) => acc + t.price, 0)
-  const totalFailed = adminTransactions.filter((t) => t.paymentStatus === 'FAILED').length
-  const totalPending = adminTransactions.filter((t) => t.paymentStatus === 'PENDING').length
-  const totalPaid = adminTransactions.filter((t) => t.paymentStatus === 'PAID').length
+  const totalFailed = allTransactions.filter((t) => t.paymentStatus === 'FAILED').length
+  const totalPending = allTransactions.filter((t) => t.paymentStatus === 'PENDING').length
+  const totalPaid = allTransactions.filter((t) => t.paymentStatus === 'PAID').length
 
   const columns: AdminDataTableColumn<AdminTransaction>[] = [
     {
@@ -175,7 +174,7 @@ export function TransactionsDashboard() {
           subtitle="Distribusi paid / pending / failed 30 hari."
           className="xl:col-span-2">
           <TimelineAreaChart
-            data={transactionTimeline30d}
+            data={timeline30d}
             height={280}
             series={[
               { dataKey: 'paid', label: 'Paid', color: 'var(--chart-1)' },
@@ -187,7 +186,7 @@ export function TransactionsDashboard() {
         <ChartCard
           title="Rasio Status"
           subtitle="Proporsi status transaksi bulan ini.">
-          <TransactionRatioChart data={transactionRatio} height={280} />
+          <TransactionRatioChart data={ratioData} height={280} />
         </ChartCard>
       </div>
 

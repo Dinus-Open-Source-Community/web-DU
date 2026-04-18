@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
-import { ResumeCourses, DataCourse } from '@/lib/dummyData'
+import { getResumeCourses, listCourses } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
@@ -23,7 +23,7 @@ const Section = () => {
 
   const mock = isMockDataEnabled()
   const resumed = mock
-    ? ResumeCourses.map((c) => ({
+    ? getResumeCourses().map((c) => ({
         ...c,
         simulatedProgress: c.progress,
         type: 'resume' as const,
@@ -31,7 +31,7 @@ const Section = () => {
     : []
 
   const newCourses = mock
-    ? DataCourse.map((c) => ({
+    ? listCourses().map((c) => ({
         ...c,
         simulatedProgress: 0,
         type: 'course' as const,

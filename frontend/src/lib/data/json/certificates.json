@@ -1,0 +1,47 @@
+[
+  {
+    "uid": "crt-9f4c3a",
+    "title": "Advanced React Architecture",
+    "courseName": "Advanced React Patterns & Next.js 15 Architecture",
+    "issuedDate": "12 April 2026",
+    "category": "Pengembangan Web",
+    "credentialId": "WEB-DU-2026-REACT-0045",
+    "imageUrl": "https://picsum.photos/seed/cert1/800/600"
+  },
+  {
+    "uid": "crt-2b8e7d",
+    "title": "Mastering Tailwind CSS v4",
+    "courseName": "Mastering Tailwind CSS v4 & Framer Motion",
+    "issuedDate": "24 Maret 2026",
+    "category": "Pengembangan Web",
+    "credentialId": "WEB-DU-2026-TW-0112",
+    "imageUrl": "https://picsum.photos/seed/cert2/800/600"
+  },
+  {
+    "uid": "crt-1a5b9c",
+    "title": "UI/UX Fundamentals Excellence",
+    "courseName": "UI/UX Fundamentals",
+    "issuedDate": "15 Februari 2026",
+    "category": "Desain UI/UX",
+    "credentialId": "WEB-DU-2026-UIUX-0892",
+    "imageUrl": "https://picsum.photos/seed/cert3/800/600"
+  },
+  {
+    "uid": "crt-8d2f1e",
+    "title": "Cybersecurity Analyst Certificate",
+    "courseName": "Cybersecurity Analyst Bootcamp",
+    "issuedDate": "10 Januari 2026",
+    "category": "Cybersecurity",
+    "credentialId": "WEB-DU-2026-CYBER-0321",
+    "imageUrl": "https://picsum.photos/seed/cert4/800/600"
+  },
+  {
+    "uid": "crt-5c6a3b",
+    "title": "Data Science Specialist",
+    "courseName": "Machine Learning with Python: Zero to Hero",
+    "issuedDate": "05 Desember 2025",
+    "category": "Data Science & AI",
+    "credentialId": "WEB-DU-2025-ML-0754",
+    "imageUrl": "https://picsum.photos/seed/cert5/800/600"
+  }
+]

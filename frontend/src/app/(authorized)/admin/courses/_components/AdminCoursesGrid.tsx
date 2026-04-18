@@ -7,7 +7,7 @@ import { SearchForm } from '@/components/ui/SearchForm'
 import { FilterCheckboxPanel } from '@/components/ui/FilterCheckboxPanel'
 import { Pagination } from '@/components/ui/pagination'
 import { Card } from '@/components/ui/card'
-import { DataCourse } from '@/lib/dummyData'
+import { listCourses } from '@/lib/data/repository'
 import { formatRupiah } from '@/lib/func'
 
 const CATEGORIES = [
@@ -32,7 +32,7 @@ export function AdminCoursesGrid() {
 
   const filteredCourses = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
-    return DataCourse.filter((course) => {
+    return listCourses().filter((course) => {
       const matchesSearch =
         !q ||
         course.title.toLowerCase().includes(q) ||

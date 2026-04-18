@@ -2,10 +2,12 @@ import Link from 'next/link'
 
 import { ChartCard } from '@/components/charts/ChartCard'
 import { PaymentBadge } from '@/components/ui/badge'
-import { recentTransactions } from '@/lib/data/admin-fixtures'
+import { listRecentTransactions } from '@/lib/data/repository'
 import { formatRupiah } from '@/lib/func'
 
 export function RecentTransactions() {
+  const recentTransactions = listRecentTransactions()
+
   return (
     <ChartCard
       title="Recent Transactions"

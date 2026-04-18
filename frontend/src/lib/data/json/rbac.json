@@ -1,0 +1,128 @@
+{
+  "permissionGroups": [
+    {
+      "group": "Users",
+      "items": [
+        "users.view",
+        "users.create",
+        "users.update",
+        "users.delete",
+        "users.reset_credentials"
+      ]
+    },
+    {
+      "group": "Courses",
+      "items": [
+        "courses.view",
+        "courses.create",
+        "courses.update",
+        "courses.approve",
+        "courses.delete"
+      ]
+    },
+    {
+      "group": "Finance",
+      "items": [
+        "finance.view",
+        "finance.refund",
+        "finance.payout_approve",
+        "finance.export"
+      ]
+    },
+    {
+      "group": "Reports",
+      "items": [
+        "reports.view",
+        "reports.export",
+        "reports.share"
+      ]
+    },
+    {
+      "group": "System",
+      "items": [
+        "system.settings",
+        "system.integrations",
+        "system.audit_logs"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "uid": "role-super",
+      "name": "Super Admin",
+      "description": "Akses penuh ke seluruh modul dan konfigurasi platform.",
+      "membersCount": 2,
+      "permissions": [
+        "users.view",
+        "users.create",
+        "users.update",
+        "users.delete",
+        "users.reset_credentials",
+        "courses.view",
+        "courses.create",
+        "courses.update",
+        "courses.approve",
+        "courses.delete",
+        "finance.view",
+        "finance.refund",
+        "finance.payout_approve",
+        "finance.export",
+        "reports.view",
+        "reports.export",
+        "reports.share",
+        "system.settings",
+        "system.integrations",
+        "system.audit_logs"
+      ]
+    },
+    {
+      "uid": "role-admin",
+      "name": "Admin",
+      "description": "Mengelola pengguna, kursus, dan transaksi tanpa akses settings sistem.",
+      "membersCount": 5,
+      "permissions": [
+        "users.view",
+        "users.create",
+        "users.update",
+        "users.reset_credentials",
+        "courses.view",
+        "courses.create",
+        "courses.update",
+        "courses.approve",
+        "finance.view",
+        "reports.view"
+      ]
+    },
+    {
+      "uid": "role-finance",
+      "name": "Finance",
+      "description": "Fokus pada transaksi, refund, dan payout mentor.",
+      "membersCount": 3,
+      "permissions": [
+        "finance.view",
+        "finance.refund",
+        "finance.payout_approve",
+        "finance.export",
+        "reports.view"
+      ]
+    },
+    {
+      "uid": "role-mentor",
+      "name": "Mentor",
+      "description": "Mengelola kursus yang dimiliki dan menjawab Q&A.",
+      "membersCount": 24,
+      "permissions": [
+        "courses.view",
+        "courses.update",
+        "users.view"
+      ]
+    },
+    {
+      "uid": "role-student",
+      "name": "Student",
+      "description": "Akses kursus yang dibeli dan fitur pembelajaran.",
+      "membersCount": 8432,
+      "permissions": []
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { adminStudents } from '@/lib/data/admin-fixtures'
+import { listStudents } from '@/lib/data/repository'
 
 import { StudentDetailView } from './_components/StudentDetailView'
 
@@ -16,7 +16,8 @@ interface PageProps {
 
 export default async function AdminStudentDetailPage({ params }: PageProps) {
   const { uid } = await params
-  const student = adminStudents.find((s) => s.uid === uid)
+  const students = listStudents()
+  const student = students.find((s) => s.uid === uid)
 
   if (!student) notFound()
 

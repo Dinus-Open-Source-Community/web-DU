@@ -5,7 +5,7 @@ import { MessageSquareWarning, ChevronRight } from 'lucide-react'
 import { ChartCard } from '@/components/charts/ChartCard'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/admin/EmptyState'
-import { unresolvedTickets } from '@/lib/data/admin-fixtures'
+import { listTickets } from '@/lib/data/repository'
 import { cn } from '@/lib/utils'
 
 const severityMap = {
@@ -15,6 +15,8 @@ const severityMap = {
 } as const
 
 export function UnresolvedTickets() {
+  const unresolvedTickets = listTickets()
+
   return (
     <ChartCard
       title="Unresolved Support Tickets"

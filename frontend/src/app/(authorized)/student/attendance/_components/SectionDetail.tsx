@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { CourseAttendanceData } from '@/lib/dummyData'
+import { listAttendance } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { AttendanceStatus } from '@/lib/types'
 import { User, CheckCircle2, Clock, XCircle, Info, Calendar, ArrowLeft } from 'lucide-react'
@@ -10,7 +10,7 @@ import { useParams } from 'next/navigation'
 const SectionDetail = () => {
   const params = useParams()
   const uid = params.uid as string
-  const attendanceRows = isMockDataEnabled() ? CourseAttendanceData : []
+  const attendanceRows = isMockDataEnabled() ? listAttendance() : []
   const selectedCourse = attendanceRows.find((c) => c.courseId === uid)
 
   const [isModalOpen, setIsModalOpen] = useState(false)

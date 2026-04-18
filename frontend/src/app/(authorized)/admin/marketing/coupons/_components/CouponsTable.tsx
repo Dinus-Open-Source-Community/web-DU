@@ -9,11 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import {
-  adminCoupons,
-  type AdminCoupon,
-  type CouponStatus,
-} from '@/lib/data/admin-fixtures'
+import { listCoupons } from '@/lib/data/repository'
+import type { AdminCoupon, CouponStatus } from '@/lib/types'
 import { formatRupiah } from '@/lib/func'
 
 import { CouponFormDialog } from './CouponFormDialog'
@@ -36,6 +33,7 @@ const statusVariantMap = {
 const PAGE_SIZE = 10
 
 export function CouponsTable() {
+  const coupons = listCoupons()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -45,7 +43,7 @@ export function CouponsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminCoupons.filter((c) => {
+    return coupons.filter((c) => {
       const matchStatus = statusFilter === 'all' || c.status === statusFilter
       const matchQuery = q === '' || c.code.toLowerCase().includes(q)
       return matchStatus && matchQuery

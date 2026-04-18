@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
-import { DataCourse } from '@/lib/dummyData'
+import { listCourses } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
@@ -24,7 +24,7 @@ const Section = () => {
     setCurrentPage(1)
   }, [selectedCategories, searchQuery])
 
-  const catalog = isMockDataEnabled() ? DataCourse : []
+  const catalog = isMockDataEnabled() ? listCourses() : []
 
   const filteredCourses = catalog.filter((course) => {
     const q = searchQuery.trim().toLowerCase()

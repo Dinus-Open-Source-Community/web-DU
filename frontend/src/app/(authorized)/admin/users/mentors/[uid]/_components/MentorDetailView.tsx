@@ -6,13 +6,10 @@ import { useState } from 'react'
 import { ArrowLeft, KeyRound, Mail, Star, CalendarDays, BookMarked, Users2 } from 'lucide-react'
 
 import { ResetCredentialsDialog } from '@/components/admin/ResetCredentialsDialog'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type AppBadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  adminCourses,
-  mentorSpecColors,
-  type AdminMentor,
-} from '@/lib/data/admin-fixtures'
+import { getMentorSpecColors, listCourses } from '@/lib/data/repository'
+import type { AdminMentor } from '@/lib/types'
 import { formatRupiah } from '@/lib/func'
 
 interface MentorDetailViewProps {
@@ -31,7 +28,10 @@ const statusMap: Record<
 export function MentorDetailView({ mentor }: MentorDetailViewProps) {
   const [resetOpen, setResetOpen] = useState(false)
 
-  const ownedCourses = adminCourses.filter((c) => c.mentorUid === mentor.uid)
+  const courses = listCourses()
+  const specColors = getMentorSpecColors()
+
+  const ownedCourses = courses.filter((c) => c.mentorUid === mentor.uid)
   const status = statusMap[mentor.status]
 
   return (
@@ -70,7 +70,7 @@ export function MentorDetailView({ mentor }: MentorDetailViewProps) {
             {mentor.bio && <p className="text-sm leading-relaxed text-slate-600">{mentor.bio}</p>}
             <div className="flex flex-wrap gap-1.5 pt-1">
               {mentor.specializations.map((s) => (
-                <Badge key={s} variant={mentorSpecColors[s]}>
+                <Badge key={s} variant={specColors[s] as AppBadgeVariant}>
                   {s}
                 </Badge>
               ))}

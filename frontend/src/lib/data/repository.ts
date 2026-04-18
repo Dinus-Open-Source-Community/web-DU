@@ -15,7 +15,44 @@ import type {
   IMentorCourse,
   BadgeVariant,
   CourseStatus,
+  AdminStudent,
+  StudentEnrolledCourse,
+  AdminAdministrator,
+  AdminTicket,
+  TransactionHistoryItem,
+  AdminTransaction,
+  AdminPayout,
+  AdminCoupon,
+  AdminAuditLog,
+  AdminRole,
+  AdminPermissionGroup,
+  AdminKpi,
+  AdminMentor,
+  AdminStatus,
+  MentorSpecialization,
+  ICertificate,
+  ICourseAttendance,
+  IScheduleItem,
+  IDashboardStat,
+  IResumeCourse,
+  IDeadlineItem,
+  IFeedbackItem,
+  IMentorStats,
+  IProgramFeatureData,
+  CourseFeedbackBreakdown,
+  AdminCategoryItem,
+  CourseCategory,
+  AnalyticsData,
+  DashboardData,
+  TransactionsData,
+  RbacData,
+  CourseExtrasData,
+  ChartDataPoint,
+  TransactionTimelinePoint,
+  EngagementTrendPoint,
+  ChartRatioPoint,
 } from '@/lib/types'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
 
 import usersRaw from './json/users.json'
 import mentorsRaw from './json/mentors.json'
@@ -23,8 +60,24 @@ import categoriesRaw from './json/categories.json'
 import coursesRaw from './json/courses.json'
 import reviewsRaw from './json/reviews.json'
 import qaThreadsRaw from './json/qa-threads.json'
+import studentsRaw from './json/students.json'
+import studentEnrolledRaw from './json/student-enrolled-courses.json'
+import administratorsRaw from './json/administrators.json'
+import ticketsRaw from './json/tickets.json'
+import transactionsRaw from './json/transactions.json'
+import payoutsRaw from './json/payouts.json'
+import couponsRaw from './json/coupons.json'
+import auditLogsRaw from './json/audit-logs.json'
+import rbacRaw from './json/rbac.json'
+import analyticsRaw from './json/analytics.json'
+import certificatesRaw from './json/certificates.json'
+import attendanceRaw from './json/attendance.json'
+import schedulesRaw from './json/schedules.json'
+import dashboardRaw from './json/dashboard.json'
+import programFeaturesRaw from './json/program-features.json'
+import courseExtrasRaw from './json/course-extras.json'
 
-// ─── Raw JSON shapes ────────────────────────────────────────────────────────
+// ─── Raw JSON shapes (core entities) ────────────────────────────────────────
 
 interface RawUser {
   id: string
@@ -128,7 +181,7 @@ export interface RepoMentor {
   totalCourses: number
   rating: number
   totalReviews: number
-  status: string
+  status: 'active' | 'inactive' | 'pending'
   specializations: string[]
   bio?: string
   studentsCount: number
@@ -146,7 +199,7 @@ export interface RepoCategory {
 export type RepoReview = RawReview
 export type RepoQaThread = RawQaThread
 
-// ─── Index building ──────────────────────────────────────────────────────────
+// ─── Index building (core entities) ─────────────────────────────────────────
 
 const users = usersRaw as RawUser[]
 const mentorProfiles = mentorsRaw as RawMentor[]
@@ -156,7 +209,6 @@ const reviews = reviewsRaw as RawReview[]
 const qaThreads = qaThreadsRaw as RawQaThread[]
 
 const userById = new Map(users.map((u) => [u.id, u]))
-const mentorById = new Map(mentorProfiles.map((m) => [m.id, m]))
 
 function resolveAuthor(mentorId: string): { name: string; avatar: string } {
   const u = userById.get(mentorId)
@@ -214,7 +266,26 @@ for (const t of qaThreads) {
   qaByCourse.set(t.courseUid, arr)
 }
 
-// ─── Public API ──────────────────────────────────────────────────────────────
+// ─── Index building (extended entities) ─────────────────────────────────────
+
+const studentsData = studentsRaw as AdminStudent[]
+const studentEnrolledData = studentEnrolledRaw as StudentEnrolledCourse[]
+const administratorsData = administratorsRaw as AdminAdministrator[]
+const ticketsData = ticketsRaw as AdminTicket[]
+const txnData = transactionsRaw as TransactionsData
+const payoutsData = payoutsRaw as AdminPayout[]
+const couponsData = couponsRaw as AdminCoupon[]
+const auditLogsData = auditLogsRaw as AdminAuditLog[]
+const rbacData = rbacRaw as RbacData
+const analyticsData = analyticsRaw as AnalyticsData
+const certificatesData = certificatesRaw as ICertificate[]
+const attendanceData = attendanceRaw as ICourseAttendance[]
+const schedulesData = schedulesRaw as IScheduleItem[]
+const dashData = dashboardRaw as DashboardData
+const programFeaturesData = programFeaturesRaw as IProgramFeatureData[]
+const courseExtrasData = courseExtrasRaw as CourseExtrasData
+
+// ─── Public API: Core entities ──────────────────────────────────────────────
 
 export function listUsers(): RepoUser[] {
   return users
@@ -224,7 +295,7 @@ export function getUserById(id: string): RepoUser | undefined {
   return userById.get(id)
 }
 
-export function listMentors(): RepoMentor[] {
+export function listMentors(): AdminMentor[] {
   return mentorProfiles.map((mp) => {
     const u = userById.get(mp.id)
     return {
@@ -236,15 +307,15 @@ export function listMentors(): RepoMentor[] {
       totalCourses: mp.totalCourses,
       rating: 0,
       totalReviews: 0,
-      status: mp.status,
-      specializations: mp.specializations,
+      status: mp.status as AdminStatus,
+      specializations: mp.specializations as MentorSpecialization[],
       bio: mp.bio,
       studentsCount: mp.studentsCount,
     }
   })
 }
 
-export function getMentorById(id: string): RepoMentor | undefined {
+export function getMentorById(id: string): AdminMentor | undefined {
   return listMentors().find((m) => m.uid === id)
 }
 
@@ -298,10 +369,6 @@ export function listQaThreadsForCourse(courseId: string): RepoQaThread[] {
   return qaByCourse.get(courseId) ?? []
 }
 
-/**
- * Derive silabus dari modul+lesson yang ada di course.
- * Mengembalikan array section untuk `CourseSyllabusList`.
- */
 export function getSyllabusFromCourse(
   course: ICardData,
 ): { title: string; lessonsCount: number; durationLabel: string }[] {
@@ -318,9 +385,6 @@ export function getSyllabusFromCourse(
   })
 }
 
-/**
- * Project course ke bentuk `IMentorCourse` untuk mentor course list.
- */
 export function toMentorCourseView(c: ICardData): IMentorCourse {
   return {
     uid: c.uid,
@@ -335,4 +399,224 @@ export function toMentorCourseView(c: ICardData): IMentorCourse {
     totalReviews: c.totalReviews,
     updatedAt: c.updatedAt,
   }
+}
+
+// ─── Public API: Students ───────────────────────────────────────────────────
+
+export function listStudents(): AdminStudent[] {
+  return studentsData
+}
+
+export function getStudentByUid(uid: string): AdminStudent | undefined {
+  return studentsData.find((s) => s.uid === uid)
+}
+
+export function listStudentEnrolledCourses(): StudentEnrolledCourse[] {
+  return studentEnrolledData
+}
+
+// ─── Public API: Administrators ─────────────────────────────────────────────
+
+export function listAdministrators(): AdminAdministrator[] {
+  return administratorsData
+}
+
+// ─── Public API: Tickets ────────────────────────────────────────────────────
+
+export function listTickets(): AdminTicket[] {
+  return ticketsData
+}
+
+// ─── Public API: Transactions ───────────────────────────────────────────────
+
+export function listRecentTransactions(): TransactionHistoryItem[] {
+  return txnData.recent
+}
+
+export function listHistoryTransactions(): TransactionHistoryItem[] {
+  return txnData.history
+}
+
+export function listAdminTransactions(): AdminTransaction[] {
+  return txnData.admin
+}
+
+export function getTransactionsSource(): TransactionHistoryItem[] {
+  return isMockDataEnabled() ? txnData.history : []
+}
+
+// ─── Public API: Payouts ────────────────────────────────────────────────────
+
+export function listPayouts(): AdminPayout[] {
+  return payoutsData
+}
+
+// ─── Public API: Coupons ────────────────────────────────────────────────────
+
+export function listCoupons(): AdminCoupon[] {
+  return couponsData
+}
+
+// ─── Public API: Audit Logs ─────────────────────────────────────────────────
+
+export function listAuditLogs(): AdminAuditLog[] {
+  return auditLogsData
+}
+
+// ─── Public API: RBAC ───────────────────────────────────────────────────────
+
+export function listRoles(): AdminRole[] {
+  return rbacData.roles
+}
+
+export function listPermissionGroups(): AdminPermissionGroup[] {
+  return rbacData.permissionGroups
+}
+
+// ─── Public API: Analytics ──────────────────────────────────────────────────
+
+export function getDashboardKpis(): AdminKpi[] {
+  return analyticsData.kpis
+}
+
+export function getRevenueLine30d(): ChartDataPoint[] {
+  return analyticsData.revenueLine30d
+}
+
+export function getNewUsersWeek(): ChartDataPoint[] {
+  return analyticsData.newUsersWeek
+}
+
+export function getTopCoursesByEnrolment(): ChartDataPoint[] {
+  return analyticsData.topCoursesByEnrolment
+}
+
+export function getTransactionTimeline30d(): TransactionTimelinePoint[] {
+  return analyticsData.transactionTimeline30d
+}
+
+export function getTransactionRatio(): ChartRatioPoint[] {
+  return analyticsData.transactionRatio
+}
+
+export function getLearningEngagementTrend(): EngagementTrendPoint[] {
+  return analyticsData.learningEngagementTrend
+}
+
+export function getCompletionRateByCategory(): ChartDataPoint[] {
+  return analyticsData.completionRateByCategory
+}
+
+export function getDropOffFunnel(): ChartDataPoint[] {
+  return analyticsData.dropOffFunnel
+}
+
+export function getMonthlyRevenue12m(): ChartDataPoint[] {
+  return analyticsData.monthlyRevenue12m
+}
+
+export function getRevenueByCategory(): ChartDataPoint[] {
+  return analyticsData.revenueByCategory
+}
+
+export function getRevenueSourceRatio(): ChartRatioPoint[] {
+  return analyticsData.revenueSourceRatio
+}
+
+// ─── Public API: Certificates ───────────────────────────────────────────────
+
+export function listCertificates(): ICertificate[] {
+  return certificatesData
+}
+
+export function getCertificateByUid(uid: string): ICertificate | undefined {
+  return certificatesData.find((c) => c.uid === uid)
+}
+
+// ─── Public API: Attendance ─────────────────────────────────────────────────
+
+export function listAttendance(): ICourseAttendance[] {
+  return attendanceData
+}
+
+// ─── Public API: Schedules ──────────────────────────────────────────────────
+
+export function listSchedules(): IScheduleItem[] {
+  return schedulesData
+}
+
+// ─── Public API: Dashboard ──────────────────────────────────────────────────
+
+export function getDashboardStats(): IDashboardStat[] {
+  return dashData.stats
+}
+
+export function getResumeCourses(): IResumeCourse[] {
+  return dashData.resumeCourses
+}
+
+export function getDeadlines(): IDeadlineItem[] {
+  return dashData.deadlines
+}
+
+export function getFeedbacks(): IFeedbackItem[] {
+  return dashData.feedbacks
+}
+
+export function getProfileData(): DashboardData['profile'] {
+  return dashData.profile
+}
+
+export function getMentorDashboardStats(): IMentorStats {
+  return dashData.mentorStats
+}
+
+// ─── Public API: Program Features ───────────────────────────────────────────
+
+export function getProgramFeatures(): IProgramFeatureData[] {
+  return programFeaturesData
+}
+
+// ─── Public API: Course Extras ──────────────────────────────────────────────
+
+export function getCourseWhatYouLearn(): string[] {
+  return courseExtrasData.whatYouLearn
+}
+
+export function getCourseFeedbackBreakdown(): CourseFeedbackBreakdown[] {
+  return courseExtrasData.feedbackBreakdown
+}
+
+export function getMentorSpecColors(): Record<string, string> {
+  return courseExtrasData.mentorSpecColors
+}
+
+// ─── Public API: Admin Category List ────────────────────────────────────────
+
+export function listAdminCategories(): AdminCategoryItem[] {
+  return listCategories().map((c) => ({
+    uid: c.uid,
+    name: c.name as CourseCategory,
+    coursesCount: c.coursesCount,
+    colorVariant: c.colorVariant,
+  }))
+}
+
+// ─── Public API: Popular Courses Strip ──────────────────────────────────────
+
+export function getPopularCoursesStrip() {
+  return listPopularCourses(4).map((c) => ({
+    uid: c.uid,
+    title: c.title,
+    image: c.image,
+    rating: c.rating,
+    price: `Rp${(c.price / 1000).toFixed(0)}k`,
+    mentor: c.author.name,
+  }))
+}
+
+// ─── Public API: Mentor courses seed ────────────────────────────────────────
+
+export function listMentorCoursesDummy(): IMentorCourse[] {
+  return listCourses().map(toMentorCourseView)
 }

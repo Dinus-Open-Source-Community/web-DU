@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import GuestLayout from "@/components/layout/GuestLayout"
 import Section1 from "./_components/Section1"
-import { DataCourse } from "@/lib/dummyData"
+import { listCourses } from "@/lib/data/repository"
 import { isMockDataEnabled } from "@/lib/config/mock-data"
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export default function CoursePage() {
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
       <GuestLayout>
-        <Section1 Data={isMockDataEnabled() ? DataCourse : []} />
+        <Section1 Data={isMockDataEnabled() ? listCourses() : []} />
       </GuestLayout>
     </main>
   )

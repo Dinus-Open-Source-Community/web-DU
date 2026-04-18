@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
-import { DataCertificates } from '@/lib/dummyData'
+import { listCertificates } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import type { ICertificate } from '@/lib/types'
 
 export type Certificate = ICertificate
 
 function certificateList(): ICertificate[] {
-  return isMockDataEnabled() ? DataCertificates : []
+  return isMockDataEnabled() ? listCertificates() : []
 }
 
 export function useCertificate(uid: string) {

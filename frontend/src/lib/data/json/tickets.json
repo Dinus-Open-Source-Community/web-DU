@@ -1,0 +1,47 @@
+[
+  {
+    "uid": "tkt-001",
+    "subject": "Pembayaran VA tidak ter-verifikasi selama 24 jam",
+    "studentName": "Ayu Lestari",
+    "studentAvatar": "https://i.pravatar.cc/150?u=ayu",
+    "createdAt": "2 jam lalu",
+    "severity": "high",
+    "category": "Payment"
+  },
+  {
+    "uid": "tkt-002",
+    "subject": "Video modul 4 tidak bisa diputar (React Advanced)",
+    "studentName": "Rizal Pratama",
+    "studentAvatar": "https://i.pravatar.cc/150?u=rizal",
+    "createdAt": "4 jam lalu",
+    "severity": "medium",
+    "category": "Course Content"
+  },
+  {
+    "uid": "tkt-003",
+    "subject": "Tidak bisa reset password (link expired berkali-kali)",
+    "studentName": "Budi Santoso",
+    "studentAvatar": "https://i.pravatar.cc/150?u=budi",
+    "createdAt": "6 jam lalu",
+    "severity": "medium",
+    "category": "Account"
+  },
+  {
+    "uid": "tkt-004",
+    "subject": "Sertifikat belum terbit meski kursus selesai",
+    "studentName": "Melisa Wijaya",
+    "studentAvatar": "https://i.pravatar.cc/150?u=melisa",
+    "createdAt": "1 hari lalu",
+    "severity": "low",
+    "category": "Certificate"
+  },
+  {
+    "uid": "tkt-005",
+    "subject": "Request refund: salah beli kursus (pembelian dobel)",
+    "studentName": "Hendra Gunawan",
+    "studentAvatar": "https://i.pravatar.cc/150?u=hendra",
+    "createdAt": "1 hari lalu",
+    "severity": "high",
+    "category": "Payment"
+  }
+]

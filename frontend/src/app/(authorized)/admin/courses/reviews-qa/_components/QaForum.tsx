@@ -8,7 +8,8 @@ import { EmptyState } from '@/components/admin/EmptyState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { adminQaThreads, type AdminQaThread } from '@/lib/data/admin-fixtures'
+import { listAllQaThreads } from '@/lib/data/repository'
+import type { AdminQaThread } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const roleLabel: Record<'student' | 'mentor' | 'admin', string> = {
@@ -24,6 +25,7 @@ const roleColor: Record<'student' | 'mentor' | 'admin', string> = {
 }
 
 export function QaForum() {
+  const adminQaThreads = listAllQaThreads()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   if (adminQaThreads.length === 0) {

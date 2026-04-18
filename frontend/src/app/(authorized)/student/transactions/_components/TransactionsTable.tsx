@@ -6,7 +6,7 @@ import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { Pagination } from '@/components/ui/pagination'
 import { PaymentStatus } from '@/lib/types'
-import { getTransactionsSource } from '@/lib/data/transactions-source'
+import { getTransactionsSource } from '@/lib/data/repository'
 import { filterTransactions, formatDateTime, formatRupiah, paginateTransactions } from '@/lib/func'
 
 type StatusFilter = 'ALL' | PaymentStatus

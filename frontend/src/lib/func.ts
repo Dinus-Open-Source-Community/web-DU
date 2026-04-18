@@ -1,6 +1,6 @@
 import { PaymentStatus, SortDirection, TransactionHistoryItem, TransactionSortKey } from './types'
 import { paymentStatusSortRank } from './constants/payment-status'
-import { getTransactionsSource } from './data/transactions-source'
+import { getTransactionsSource } from './data/repository'
 
 const normalizeText = (value: string) => value.toLowerCase().trim()
 

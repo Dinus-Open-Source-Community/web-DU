@@ -3,7 +3,7 @@ import { DollarSign, Percent, ShoppingBag, TrendingUp } from 'lucide-react'
 
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { StatCard } from '@/components/dashboard/StatCard'
-import { monthlyRevenue12m } from '@/lib/data/admin-fixtures'
+import { getMonthlyRevenue12m } from '@/lib/data/repository'
 import { formatRupiah } from '@/lib/func'
 
 import {
@@ -17,9 +17,10 @@ export const metadata: Metadata = {
 }
 
 export default function AdminFinancialAnalyticsPage() {
-  const totalRevenue12m = monthlyRevenue12m.reduce((acc, m) => acc + m.value, 0)
-  const lastMonth = monthlyRevenue12m[monthlyRevenue12m.length - 1].value
-  const prevMonth = monthlyRevenue12m[monthlyRevenue12m.length - 2].value
+  const monthlyRevenue = getMonthlyRevenue12m()
+  const totalRevenue12m = monthlyRevenue.reduce((acc, m) => acc + m.value, 0)
+  const lastMonth = monthlyRevenue[monthlyRevenue.length - 1].value
+  const prevMonth = monthlyRevenue[monthlyRevenue.length - 2].value
   const momPct = ((lastMonth - prevMonth) / prevMonth) * 100
 
   return (

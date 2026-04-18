@@ -6,10 +6,10 @@ import { NewUsersBarChart } from '@/components/charts/NewUsersBarChart'
 import { RevenueLineChart } from '@/components/charts/RevenueLineChart'
 import { TopCoursesChart } from '@/components/charts/TopCoursesChart'
 import {
-  newUsersWeek,
-  revenueLine30d,
-  topCoursesByEnrolment,
-} from '@/lib/data/admin-fixtures'
+  getNewUsersWeek,
+  getRevenueLine30d,
+  getTopCoursesByEnrolment,
+} from '@/lib/data/repository'
 
 import { KpiGrid } from './_components/KpiGrid'
 import { RecentTransactions } from './_components/RecentTransactions'
@@ -22,6 +22,10 @@ export const metadata: Metadata = {
 }
 
 export default function DashboardPage() {
+  const revenueLine30d = getRevenueLine30d()
+  const newUsersWeek = getNewUsersWeek()
+  const topCoursesByEnrolment = getTopCoursesByEnrolment()
+
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader

@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
-import { adminStudents, type AdminStatus, type AdminStudent } from '@/lib/data/admin-fixtures'
+import { listStudents } from '@/lib/data/repository'
+import type { AdminStatus, AdminStudent } from '@/lib/types'
 
 type StatusFilter = 'all' | AdminStatus
 
@@ -53,6 +54,7 @@ function ProgressCell({ value }: { value: number }) {
 }
 
 export function StudentsTable() {
+  const students = listStudents()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -60,7 +62,7 @@ export function StudentsTable() {
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
-    return adminStudents.filter((s) => {
+    return students.filter((s) => {
       const matchStatus = statusFilter === 'all' || s.status === statusFilter
       const matchQuery =
         q === '' ||

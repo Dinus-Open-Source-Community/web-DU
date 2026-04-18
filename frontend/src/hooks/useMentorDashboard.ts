@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { MentorDashboardStats, MentorScheduleItems } from '@/lib/dummyData'
+import { getMentorDashboardStats, listSchedules } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import type { IScheduleItem } from '@/lib/types'
 
@@ -56,7 +56,7 @@ const extractScheduleCandidates = (payload: unknown): unknown[] => {
   return []
 }
 
-const fallbackSchedules = (): IScheduleItem[] => (isMockDataEnabled() ? MentorScheduleItems : [])
+const fallbackSchedules = (): IScheduleItem[] => (isMockDataEnabled() ? listSchedules() : [])
 
 const fetchMentorSchedules = async (): Promise<IScheduleItem[]> => {
   if (!MENTOR_SCHEDULES_ENDPOINT) {
@@ -101,7 +101,7 @@ export const useMentorDashboard = () => {
 
   const data = useMemo(
     () => ({
-      stats: isMockDataEnabled() ? MentorDashboardStats : { pendingGrading: 0, unansweredQA: 0, activeStudents: 0, totalCourses: 0 },
+      stats: isMockDataEnabled() ? getMentorDashboardStats() : { pendingGrading: 0, unansweredQA: 0, activeStudents: 0, totalCourses: 0 },
       schedules: schedulesQuery.data ?? initialSchedules,
       isLoading: schedulesQuery.isPending,
       isRefreshing: schedulesQuery.isFetching,

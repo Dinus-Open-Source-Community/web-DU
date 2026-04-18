@@ -6,15 +6,14 @@ import { Check, Plus, Shield, ShieldCheck, Users2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
-import {
-  adminPermissionGroups,
-  adminRoles,
-  type AdminRole,
-} from '@/lib/data/admin-fixtures'
+import { listPermissionGroups, listRoles } from '@/lib/data/repository'
+import type { AdminRole } from '@/lib/types'
 
 export function RbacPanel() {
-  const [selectedRoleId, setSelectedRoleId] = useState<string>(adminRoles[0].uid)
-  const role = adminRoles.find((r) => r.uid === selectedRoleId) ?? adminRoles[0]
+  const roles = listRoles()
+  const permissionGroups = listPermissionGroups()
+  const [selectedRoleId, setSelectedRoleId] = useState<string>(roles[0].uid)
+  const role = roles.find((r) => r.uid === selectedRoleId) ?? roles[0]
 
   return (
     <section className="grid grid-cols-1 gap-5 lg:grid-cols-[320px_1fr]">
@@ -31,7 +30,7 @@ export function RbacPanel() {
         </div>
 
         <ul className="flex flex-col gap-2">
-          {adminRoles.map((r) => (
+          {roles.map((r) => (
             <li key={r.uid}>
               <RoleButton
                 role={r}
@@ -89,6 +88,7 @@ function RoleButton({
 }
 
 function PermissionsMatrix({ role }: { role: AdminRole }) {
+  const permissionGroups = listPermissionGroups()
   const has = (perm: string) => role.permissions.includes(perm)
 
   return (
@@ -109,7 +109,7 @@ function PermissionsMatrix({ role }: { role: AdminRole }) {
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {adminPermissionGroups.map((group) => (
+        {permissionGroups.map((group) => (
           <div
             key={group.group}
             className="flex flex-col gap-2 rounded-xl border border-slate-200/60 bg-slate-50/40 p-4">

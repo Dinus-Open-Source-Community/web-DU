@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
+import { Badge, type AppBadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { adminCategoryList } from '@/lib/data/admin-fixtures'
+import { listAdminCategories } from '@/lib/data/repository'
 
 import { CategoryFormDialog } from './CategoryFormDialog'
 
 export function CategoryManager() {
+  const adminCategoryList = listAdminCategories()
   const [dialogState, setDialogState] = useState<
     | { open: false }
     | { open: true; mode: 'create' }
@@ -41,7 +42,7 @@ export function CategoryManager() {
               className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
-                  <Badge variant={cat.colorVariant}>{cat.name}</Badge>
+                  <Badge variant={cat.colorVariant as AppBadgeVariant}>{cat.name}</Badge>
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">
                     {cat.name}
                   </h3>

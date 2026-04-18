@@ -1,4 +1,4 @@
-import { DashboardStats, Deadlines, Feedbacks, ResumeCourses } from '@/lib/dummyData'
+import { getDashboardStats, getDeadlines, getFeedbacks, getResumeCourses } from '@/lib/data/repository'
 import React from 'react'
 import { Award, Book, Calendar, CheckCircle, ClipboardCheck, LucideIcon, MessageSquare, PlayCircle } from 'lucide-react'
 import { Card, StatCard } from '@/components/ui/card'
@@ -13,6 +13,11 @@ const iconMap: Record<string, LucideIcon> = {
 }
 
 const SectionPage = () => {
+  const dashboardStats = getDashboardStats()
+  const resumeCourses = getResumeCourses()
+  const deadlines = getDeadlines()
+  const feedbacks = getFeedbacks()
+
   return (
     <section className="pt-10 px-8 pb-12 ">
       {/* Welcome Section */}
@@ -23,7 +28,7 @@ const SectionPage = () => {
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {DashboardStats.map((stat) => {
+        {dashboardStats.map((stat) => {
           const Icon = iconMap[stat.iconName]
 
           return <StatCard key={stat.label} variant="compact" label={stat.label} value={stat.value} icon={Icon ? <Icon className="h-5 w-5" /> : undefined} />
@@ -37,7 +42,7 @@ const SectionPage = () => {
           Lanjutkan Belajar
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ResumeCourses.slice(0, 3).map((course, i) => (
+          {resumeCourses.slice(0, 3).map((course, i) => (
             <Card key={i} variant="resume" {...course} />
           ))}
         </div>
@@ -55,7 +60,7 @@ const SectionPage = () => {
           </div>
 
           <div className="space-y-4">
-            {Deadlines.slice(0, 5).map((d, i) => (
+            {deadlines.slice(0, 5).map((d, i) => (
               <DeadlineItem key={i} month={d.month} day={d.day} title={d.title} course={d.course} isPast={d.isPast} />
             ))}
           </div>
@@ -69,7 +74,7 @@ const SectionPage = () => {
           </h2>
 
           <div className="space-y-4">
-            {Feedbacks.slice(0, 3).map((fb, i) => (
+            {feedbacks.slice(0, 3).map((fb, i) => (
               <FeedbackCard key={i} status={fb.status} time={fb.time} title={fb.title} comment={fb.comment} instructor={fb.instructor} />
             ))}
           </div>

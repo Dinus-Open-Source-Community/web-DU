@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import {
-  DashboardStats,
-  Deadlines,
-  Feedbacks,
-  ResumeCourses,
-} from '@/lib/dummyData'
+  getDashboardStats,
+  getDeadlines,
+  getFeedbacks,
+  getResumeCourses,
+} from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import type { IDashboardStat, IDeadlineItem, IFeedbackItem, IResumeCourse } from '@/lib/types'
 
@@ -25,10 +25,10 @@ export function useDashboardData() {
   const stats = useMemo(() => {
     if (!isMockDataEnabled()) return emptyDashboard()
     return {
-      kpiStats: DashboardStats,
-      deadlines: Deadlines,
-      feedbacks: Feedbacks,
-      resumeCourses: ResumeCourses,
+      kpiStats: getDashboardStats(),
+      deadlines: getDeadlines(),
+      feedbacks: getFeedbacks(),
+      resumeCourses: getResumeCourses(),
     }
   }, [])
 
@@ -40,7 +40,7 @@ export function useDashboardData() {
 }
 
 export function useDashboardStats() {
-  const stats = useMemo(() => (isMockDataEnabled() ? DashboardStats : ([] as IDashboardStat[])), [])
+  const stats = useMemo(() => (isMockDataEnabled() ? getDashboardStats() : ([] as IDashboardStat[])), [])
   return {
     stats,
     isLoading: false,
@@ -48,7 +48,7 @@ export function useDashboardStats() {
 }
 
 export function useDeadlines() {
-  const deadlines = useMemo(() => (isMockDataEnabled() ? Deadlines : ([] as IDeadlineItem[])), [])
+  const deadlines = useMemo(() => (isMockDataEnabled() ? getDeadlines() : ([] as IDeadlineItem[])), [])
   return {
     deadlines,
     isLoading: false,
@@ -56,7 +56,7 @@ export function useDeadlines() {
 }
 
 export function useFeedbacks() {
-  const feedbacks = useMemo(() => (isMockDataEnabled() ? Feedbacks : ([] as IFeedbackItem[])), [])
+  const feedbacks = useMemo(() => (isMockDataEnabled() ? getFeedbacks() : ([] as IFeedbackItem[])), [])
   return {
     feedbacks,
     isLoading: false,
@@ -65,13 +65,13 @@ export function useFeedbacks() {
 
 export function useResumeCourses(limit?: number) {
   const courses = useMemo(() => {
-    const data = isMockDataEnabled() ? ResumeCourses : ([] as IResumeCourse[])
+    const data = isMockDataEnabled() ? getResumeCourses() : ([] as IResumeCourse[])
     return limit ? data.slice(0, limit) : data
   }, [limit])
 
   return {
     courses,
-    totalCount: isMockDataEnabled() ? ResumeCourses.length : 0,
+    totalCount: isMockDataEnabled() ? getResumeCourses().length : 0,
     isLoading: false,
   }
 }

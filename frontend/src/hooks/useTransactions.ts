@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { filterTransactions, sortTransactions, paginateTransactions } from '@/lib/func'
-import { getTransactionsSource } from '@/lib/data/transactions-source'
+import { getTransactionsSource } from '@/lib/data/repository'
 import type { TransactionSortKey, SortDirection } from '@/lib/types'
 
 interface UseTransactionsOptions {

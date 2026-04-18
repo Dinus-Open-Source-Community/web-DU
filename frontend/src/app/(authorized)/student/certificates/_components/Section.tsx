@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Download, Share2, Check } from 'lucide-react'
-import { DataCertificates } from '@/lib/dummyData'
+import { listCertificates } from '@/lib/data/repository'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
@@ -24,7 +24,7 @@ const Section = () => {
     setCurrentPage(1)
   }, [selectedCategories, searchQuery])
 
-  const certificateRows = isMockDataEnabled() ? DataCertificates : []
+  const certificateRows = isMockDataEnabled() ? listCertificates() : []
 
   const filteredCertificates = certificateRows.filter((cert) => {
     const q = searchQuery.trim().toLowerCase()

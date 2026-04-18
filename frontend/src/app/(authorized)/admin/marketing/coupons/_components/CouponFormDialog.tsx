@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { CouponType } from '@/lib/data/admin-fixtures'
+import type { CouponType } from '@/lib/types'
 
 interface CouponFormDialogProps {
   open: boolean

@@ -7,7 +7,8 @@ import {
 } from 'lucide-react'
 
 import { StatCard } from '@/components/dashboard/StatCard'
-import { adminDashboardKpis, type AdminKpi } from '@/lib/data/admin-fixtures'
+import { getDashboardKpis } from '@/lib/data/repository'
+import type { AdminKpi } from '@/lib/types'
 
 const iconMap: Record<AdminKpi['iconName'], LucideIcon> = {
   revenue: DollarSign,
@@ -21,6 +22,8 @@ const iconMap: Record<AdminKpi['iconName'], LucideIcon> = {
 }
 
 export function KpiGrid() {
+  const adminDashboardKpis = getDashboardKpis()
+
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       {adminDashboardKpis.map((k) => {
