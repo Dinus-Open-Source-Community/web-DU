@@ -10,17 +10,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { TimelinePoint, TimelineSeries } from '@/lib/types/components/charts'
 
-export interface TimelinePoint {
-  label: string
-  [key: string]: string | number
-}
-
-export interface TimelineSeries {
-  dataKey: string
-  label: string
-  color: string
-}
+export type { TimelinePoint, TimelineSeries }
 
 interface TimelineAreaChartProps {
   data: TimelinePoint[]

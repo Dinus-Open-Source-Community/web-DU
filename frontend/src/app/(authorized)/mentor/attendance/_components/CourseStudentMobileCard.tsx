@@ -16,6 +16,7 @@ import { CourseStudentStatusBadge } from './CourseStudentStatusBadge'
 import { LeaveDetailModal } from './LeaveDetailModal'
 import { SessionAttendanceDropdown } from './SessionAttendanceDropdown'
 import { useMentorAttendanceStudentActions } from './useMentorAttendanceStudentActions'
+import Image from 'next/image';
 
 type CourseStudentMobileCardProps = {
   student: IMentorCourseStudent
@@ -41,12 +42,11 @@ export function CourseStudentMobileCard({
   const actions = useMentorAttendanceStudentActions(courseUid, isoDate, student.uid, onRefresh)
 
   return (
-    <li className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <li className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
       <LeaveDetailModal open={leaveOpen} onOpenChange={setLeaveOpen} studentName={student.name} isoDate={isoDate} />
       <div className="flex items-start gap-3">
         {student.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={student.avatar} alt="" className="size-10 shrink-0 rounded-full object-cover ring-1 ring-slate-100" />
+          <Image src={student.avatar} width={40} height={40} loading="lazy" alt="" className="size-10 shrink-0 rounded-full object-cover ring-1 ring-slate-100" />
         ) : (
           <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
             {initials(student.name)}

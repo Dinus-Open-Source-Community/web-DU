@@ -2,13 +2,27 @@
 
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Home } from 'lucide-react'
 
-function resolveSegmentLabel(pathname: string): string | null {
-  if (pathname.endsWith('/edit')) return 'Editor'
-  if (pathname.endsWith('/preview')) return 'Preview'
-  if (pathname.endsWith('/assignments')) return 'Tugas'
-  return null
+type Crumb = { label: string; href?: string }
+
+function buildCrumbs(pathname: string, courseUid: string): Crumb[] {
+  const crumbs: Crumb[] = [
+    { label: 'Courses', href: '/mentor/courses' },
+    { label: 'Detail Kursus', href: `/mentor/courses/${courseUid}` },
+  ]
+
+  if (pathname.endsWith('/edit')) {
+    crumbs.push({ label: 'Editor' })
+  } else if (pathname.endsWith('/preview')) {
+    crumbs.push({ label: 'Preview' })
+  } else if (pathname.endsWith('/assignments')) {
+    crumbs.push({ label: 'Tugas' })
+  } else {
+    crumbs[crumbs.length - 1] = { label: 'Detail Kursus' }
+  }
+
+  return crumbs
 }
 
 export default function CourseDetailLayout({ children }: { children: React.ReactNode }) {
@@ -16,24 +30,35 @@ export default function CourseDetailLayout({ children }: { children: React.React
   const params = useParams<{ courseUid: string }>()
   const courseUid = Array.isArray(params.courseUid) ? params.courseUid[0] : params.courseUid
 
-  const segmentLabel = resolveSegmentLabel(pathname)
-  const isSubPage = segmentLabel !== null
+  const crumbs = buildCrumbs(pathname, courseUid)
 
   return (
-    <div className="flex flex-col gap-0">
-      {isSubPage && (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 px-4 pt-2 text-xs text-slate-500 sm:px-6 lg:px-8">
-          <Link href="/mentor/courses" className="transition-colors hover:text-slate-900">
-            Courses
-          </Link>
-          <ChevronRight className="size-3 opacity-50" />
-          <Link href={`/mentor/courses/${courseUid}`} className="transition-colors hover:text-slate-900">
-            Detail Kursus
-          </Link>
-          <ChevronRight className="size-3 opacity-50" />
-          <span className="font-medium text-slate-700">{segmentLabel}</span>
-        </nav>
-      )}
+    <div className="flex flex-col gap-6">
+      <nav aria-label="Breadcrumb" className="-mx-6 -mt-6 px-6 py-3 backdrop-blur-sm">
+        <ol className="flex items-center gap-1.5 text-sm">
+          <li className="flex items-center">
+            <Link href="/mentor/dashboard" className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+              <Home className="size-3.5" />
+            </Link>
+          </li>
+          {crumbs.map((crumb, i) => {
+            const isLast = i === crumbs.length - 1
+            return (
+              <li key={i} className="flex items-center gap-1.5">
+                <ChevronRight className="size-3 text-slate-300" />
+                {isLast || !crumb.href ? (
+                  <span className="font-medium text-slate-800">{crumb.label}</span>
+                ) : (
+                  <Link href={crumb.href} className="text-slate-500 transition-colors hover:text-slate-800">
+                    {crumb.label}
+                  </Link>
+                )}
+              </li>
+            )
+          })}
+        </ol>
+      </nav>
+
       {children}
     </div>
   )

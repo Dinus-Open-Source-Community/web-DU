@@ -1,26 +1,24 @@
-import {
-  LayoutDashboard,
-  Users2,
-  GraduationCap,
-  Wallet,
-  LineChart,
-  Megaphone,
-  ShieldCheck,
-  Settings2,
-  BookMarked,
-  ScrollText,
-  Banknote,
-  Layers,
-  Globe,
-  Trophy,
-  ArrowRightLeft,
-  Calendar,
-  LayoutGrid,
-} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, BookMarked, ScrollText, Layers, Globe, Trophy, ArrowRightLeft, Calendar, LayoutGrid } from 'lucide-react'
 
 import type { NavItem } from '@/components/sidebar/types'
 
-// ─── Admin Navigation ────────────────────────────────────────────────────────
+/** Link datar untuk menu (mis. dropdown Navbar) — anak grup memakai ikon induk. */
+export type FlatNavLink = { name: string; path: string; icon?: LucideIcon }
+
+export function flattenNavItems(items: NavItem[]): FlatNavLink[] {
+  const out: FlatNavLink[] = []
+  for (const item of items) {
+    if (item.children?.length) {
+      for (const child of item.children) {
+        out.push({ name: child.name, path: child.path, icon: item.icon })
+      }
+    } else if (item.path) {
+      out.push({ name: item.name, path: item.path, icon: item.icon })
+    }
+  }
+  return out
+}
 
 export const adminNavigation: NavItem[] = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -38,47 +36,18 @@ export const adminNavigation: NavItem[] = [
     icon: GraduationCap,
     children: [
       { name: 'All Courses', path: '/admin/courses' },
-      { name: 'Categories', path: '/admin/courses/categories' },
-      { name: 'Pending Approvals', path: '/admin/courses/pending-approvals' },
       { name: 'Reviews & Q&A', path: '/admin/courses/reviews-qa' },
     ],
   },
   {
-    name: 'Sales & Finance',
+    name: 'Transactions',
+    path: '/admin/transactions',
     icon: Wallet,
-    children: [
-      { name: 'Transactions', path: '/admin/finance/transactions' },
-      { name: 'Payouts', path: '/admin/finance/payouts' },
-    ],
   },
   {
-    name: 'Analytics & Reports',
+    name: 'Financial Reports',
+    path: '/admin/financial',
     icon: LineChart,
-    children: [
-      { name: 'Learning Metrics', path: '/admin/analytics/learning' },
-      { name: 'Financial Reports', path: '/admin/analytics/financial' },
-    ],
-  },
-  {
-    name: 'Marketing',
-    icon: Megaphone,
-    children: [{ name: 'Coupons & Promotions', path: '/admin/marketing/coupons' }],
-  },
-  {
-    name: 'System & Security',
-    icon: ShieldCheck,
-    children: [
-      { name: 'RBAC', path: '/admin/security/rbac' },
-      { name: 'Audit Logs', path: '/admin/security/audit-logs' },
-    ],
-  },
-  {
-    name: 'Settings',
-    icon: Settings2,
-    children: [
-      { name: 'General', path: '/admin/settings/general' },
-      { name: 'Integrations', path: '/admin/settings/integrations' },
-    ],
   },
 ]
 
@@ -93,7 +62,6 @@ export const mentorNavigation: NavItem[] = [
   },
   { name: 'Absensi', icon: Calendar, path: '/mentor/attendance' },
   { name: 'Tugas', icon: ScrollText, path: '/mentor/assignments' },
-  { name: 'Earnings', icon: Banknote, path: '/mentor/earnings' },
 ]
 
 // ─── Student Navigation ──────────────────────────────────────────────────────

@@ -2,32 +2,243 @@
 
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { IMentorCourse } from '@/lib/types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import type { IMentorCourse, CourseCategory, CourseLevel, CourseClassType } from '@/lib/types'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { setSessionCourseMeta, upsertExtraCourse } from '@/lib/mentorCourseStorage'
+import { listCategories } from '@/lib/data/repository'
 import { notifyCourseDraft, notifyError } from '@/lib/notify'
+import Image from 'next/image';
 
 type CreateCourseDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+const LEVELS: CourseLevel[] = ['Pemula', 'Menengah', 'Lanjutan']
+const CLASS_TYPES: CourseClassType[] = ['Free', 'Premium', 'Event']
+
+const inputClass =
+  'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary'
+const labelClass = 'text-xs font-semibold uppercase tracking-wide text-slate-500'
+
+function formatRupiahDisplay(value: number): string {
+  if (value === 0) return 'Rp 0'
+  return 'Rp ' + value.toLocaleString('id-ID')
+}
+
+function parseRupiahInput(raw: string): number {
+  const digits = raw.replace(/[^\d]/g, '')
+  return digits ? parseInt(digits, 10) : 0
+}
+
+function RupiahInput({
+  id,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+}: {
+  id: string
+  value: number | ''
+  onChange: (v: number | '') => void
+  disabled?: boolean
+  placeholder?: string
+}) {
+  const [focused, setFocused] = useState(false)
+  const [rawText, setRawText] = useState(() =>
+    typeof value === 'number' && value > 0 ? value.toString() : '',
+  )
+
+  const displayValue = (() => {
+    if (disabled) return ''
+    if (focused) return rawText
+    if (value === '' || value === 0) return ''
+    return formatRupiahDisplay(value)
+  })()
+
+  return (
+    <div className="relative">
+      {!focused && !disabled && value !== '' && value > 0 && (
+        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+          Rp
+        </span>
+      )}
+      <input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        value={displayValue}
+        onChange={(e) => {
+          const parsed = parseRupiahInput(e.target.value)
+          setRawText(parsed > 0 ? parsed.toString() : '')
+          onChange(parsed > 0 ? parsed : '')
+        }}
+        onFocus={() => {
+          setFocused(true)
+          setRawText(typeof value === 'number' && value > 0 ? value.toString() : '')
+        }}
+        onBlur={() => setFocused(false)}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={`${inputClass} ${disabled ? 'bg-slate-50 text-slate-400' : ''}`}
+      />
+    </div>
+  )
+}
+
+function DynamicListField({
+  label,
+  items,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  items: string[]
+  onChange: (items: string[]) => void
+  placeholder: string
+}) {
+  const [draft, setDraft] = useState('')
+
+  const add = () => {
+    const v = draft.trim()
+    if (!v) return
+    onChange([...items, v])
+    setDraft('')
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className={labelClass}>{label}</span>
+      {items.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {items.map((item, i) => (
+            <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-1.5 text-sm text-slate-700">
+              <span className="flex-1">{item}</span>
+              <button
+                type="button"
+                onClick={() => onChange(items.filter((_, j) => j !== i))}
+                className="shrink-0 rounded p-0.5 text-slate-400 hover:text-red-500"
+              >
+                <X className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              add()
+            }
+          }}
+          placeholder={placeholder}
+          className={inputClass}
+        />
+        <Button type="button" variant="outline" size="sm" className="shrink-0 rounded-xl border-slate-300 px-3 text-xs" onClick={add}>
+          <Plus className="size-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function TagsField({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const [draft, setDraft] = useState('')
+
+  const addTag = (raw: string) => {
+    const t = raw.trim().toLowerCase()
+    if (!t || tags.includes(t)) return
+    onChange([...tags, t])
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addTag(draft)
+      setDraft('')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className={labelClass}>Tag / Keyword</span>
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {tags.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+              {t}
+              <button type="button" onClick={() => onChange(tags.filter((x) => x !== t))} className="rounded-full p-0.5 text-slate-400 hover:text-red-500">
+                <X className="size-2.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Ketik lalu Enter atau koma untuk menambah"
+        className={inputClass}
+      />
+    </div>
+  )
+}
+
 export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogProps) {
   const confirm = useConfirm()
   const router = useRouter()
+
   const [title, setTitle] = useState('')
   const [header, setHeader] = useState('')
-  const [meetingCount, setMeetingCount] = useState(8)
   const [imageDataUrl, setImageDataUrl] = useState<string | undefined>(undefined)
+  const [category, setCategory] = useState<CourseCategory | ''>('')
+  const [level, setLevel] = useState<CourseLevel>('Pemula')
+  const [classType, setClassType] = useState<CourseClassType>('Premium')
+
+  const [price, setPrice] = useState<number | ''>('')
+  const [strikePrice, setStrikePrice] = useState<number | ''>('')
+  const [duration, setDuration] = useState('')
+  const [meetingCount, setMeetingCount] = useState(8)
+
+  const [whatYouLearn, setWhatYouLearn] = useState<string[]>([])
+  const [prerequisites, setPrerequisites] = useState<string[]>([])
+  const [targetAudience, setTargetAudience] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+
   const [submitting, setSubmitting] = useState(false)
+
+  const categories = listCategories()
 
   const reset = useCallback(() => {
     setTitle('')
     setHeader('')
-    setMeetingCount(8)
     setImageDataUrl(undefined)
+    setCategory('')
+    setLevel('Pemula')
+    setClassType('Premium')
+    setPrice('')
+    setStrikePrice('')
+    setDuration('')
+    setMeetingCount(8)
+    setWhatYouLearn([])
+    setPrerequisites([])
+    setTargetAudience('')
+    setTags([])
     setSubmitting(false)
   }, [])
 
@@ -39,7 +250,7 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
   const onFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !file.type.startsWith('image/')) {
-      notifyError("Pilih file gambar (JPG, PNG, WebP, …).")
+      notifyError('Pilih file gambar (JPG, PNG, WebP, …).')
       return
     }
     const reader = new FileReader()
@@ -55,19 +266,32 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
       const t = title.trim()
       const h = header.trim()
       if (!t || !h) {
-        notifyError("Judul dan header wajib diisi.")
+        notifyError('Judul dan header wajib diisi.')
         return
       }
+      if (!category) {
+        notifyError('Kategori wajib dipilih.')
+        return
+      }
+      if (classType !== 'Free' && (price === '' || price < 0)) {
+        notifyError('Harga wajib diisi untuk kelas Premium/Event.')
+        return
+      }
+
       const agreed = await confirm({
-        title: "Lanjut ke editor kursus?",
-        description: "Kursus akan dibuat sebagai draf. Anda bisa mengisi modul setelahnya.",
-        confirmLabel: "Lanjutkan",
+        title: 'Lanjut ke editor kursus?',
+        description: 'Kursus akan dibuat sebagai draf. Anda bisa mengisi modul setelahnya.',
+        confirmLabel: 'Lanjutkan',
       })
       if (!agreed) return
+
       const meetings = Math.max(1, Math.floor(meetingCount) || 1)
       setSubmitting(true)
       try {
         const uid = crypto.randomUUID()
+        const finalPrice = classType === 'Free' ? 0 : (typeof price === 'number' ? price : 0)
+        const finalStrikePrice = classType === 'Free' ? undefined : (typeof strikePrice === 'number' && strikePrice > 0 ? strikePrice : undefined)
+
         const row: IMentorCourse = {
           uid,
           title: t,
@@ -81,9 +305,35 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
           rating: 0,
           totalReviews: 0,
           updatedAt: 'Baru',
+          category: category as CourseCategory,
+          level,
+          classType,
+          price: finalPrice,
+          strikePrice: finalStrikePrice,
+          duration: duration.trim() || undefined,
+          whatYouLearn: whatYouLearn.length > 0 ? whatYouLearn : undefined,
+          tags: tags.length > 0 ? tags : undefined,
+          prerequisites: prerequisites.length > 0 ? prerequisites : undefined,
+          targetAudience: targetAudience.trim() || undefined,
         }
         upsertExtraCourse(row)
-        setSessionCourseMeta(uid, { title: t, header: h, image: imageDataUrl, published: false, meetingCount: meetings })
+        setSessionCourseMeta(uid, {
+          title: t,
+          header: h,
+          image: imageDataUrl,
+          published: false,
+          meetingCount: meetings,
+          category: row.category,
+          level: row.level,
+          classType: row.classType,
+          price: row.price,
+          strikePrice: row.strikePrice,
+          duration: row.duration,
+          whatYouLearn: row.whatYouLearn,
+          tags: row.tags,
+          prerequisites: row.prerequisites,
+          targetAudience: row.targetAudience,
+        })
         notifyCourseDraft()
         onOpenChange(false)
         reset()
@@ -92,94 +342,217 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
         setSubmitting(false)
       }
     },
-    [confirm, title, header, meetingCount, imageDataUrl, onOpenChange, reset, router]
+    [confirm, title, header, category, classType, price, strikePrice, imageDataUrl, level, duration, meetingCount, whatYouLearn, prerequisites, targetAudience, tags, onOpenChange, reset, router],
   )
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
-      <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">Kursus baru</h2>
-            <p className="mt-1 text-sm text-slate-500">Isi judul, header, dan cover. Status awal belum dipublikasikan.</p>
-          </div>
-          <button type="button" onClick={handleClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl border-slate-200">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
+          <DialogTitle className="text-lg font-semibold tracking-tight text-slate-900">
+            Kursus baru
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500">
+            Isi detail kursus lengkap. Status awal draf — Anda bisa edit modul setelahnya.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cover</label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label className="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm font-medium text-slate-600 hover:border-primary/40 hover:bg-primary/5">
-                <input type="file" accept="image/*" className="sr-only" onChange={onFile} />
-                {imageDataUrl ? 'Ganti gambar' : 'Unggah gambar'}
-              </label>
-              {imageDataUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={imageDataUrl} alt="Pratinjau cover" className="h-24 max-w-full rounded-lg border border-slate-200 object-cover" />
-              )}
-            </div>
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="max-h-[65vh] overflow-y-auto px-6 py-5 space-y-6">
+            {/* ── Section 1: Informasi Dasar ── */}
+            <section className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                Informasi Dasar
+              </h3>
+
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Cover</label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <label className="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-medium text-slate-600 transition hover:border-primary/40 hover:bg-primary/5">
+                    <input type="file" accept="image/*" className="sr-only" onChange={onFile} />
+                    {imageDataUrl ? 'Ganti gambar' : 'Unggah gambar'}
+                  </label>
+                  {imageDataUrl && (
+                    <Image src={imageDataUrl} width={320} height={200} loading="lazy" alt="Pratinjau cover" className="h-20 max-w-full rounded-lg border border-slate-200 object-cover" />
+                  )}
+                </div>  
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label htmlFor="cc-title" className={labelClass}>Judul</label>
+                  <input
+                    id="cc-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    placeholder="Contoh: Full Stack Web Modern"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label htmlFor="cc-header" className={labelClass}>Header / Subtitle</label>
+                  <input
+                    id="cc-header"
+                    value={header}
+                    onChange={(e) => setHeader(e.target.value)}
+                    required
+                    placeholder="Subjudul singkat yang tampil di kartu"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-category" className={labelClass}>Kategori</label>
+                  <select
+                    id="cc-category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as CourseCategory)}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="" disabled>Pilih kategori</option>
+                    {categories.map((c) => (
+                      <option key={c.uid} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-level" className={labelClass}>Level</label>
+                  <select
+                    id="cc-level"
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value as CourseLevel)}
+                    className={inputClass}
+                  >
+                    {LEVELS.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-classtype" className={labelClass}>Tipe Kelas</label>
+                  <select
+                    id="cc-classtype"
+                    value={classType}
+                    onChange={(e) => {
+                      const ct = e.target.value as CourseClassType
+                      setClassType(ct)
+                      if (ct === 'Free') {
+                        setPrice(0)
+                        setStrikePrice('')
+                      }
+                    }}
+                    className={inputClass}
+                  >
+                    {CLASS_TYPES.map((ct) => (
+                      <option key={ct} value={ct}>{ct}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            {/* ── Section 2: Harga & Durasi ── */}
+            <section className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                Harga & Durasi
+              </h3>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-price" className={labelClass}>Harga</label>
+                  <RupiahInput
+                    id="cc-price"
+                    value={price}
+                    onChange={setPrice}
+                    disabled={classType === 'Free'}
+                    placeholder={classType === 'Free' ? 'Gratis' : 'Contoh: 150000'}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-strike" className={labelClass}>Harga Coret (Opsional)</label>
+                  <RupiahInput
+                    id="cc-strike"
+                    value={strikePrice}
+                    onChange={setStrikePrice}
+                    disabled={classType === 'Free'}
+                    placeholder="Harga sebelum diskon"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-duration" className={labelClass}>Durasi</label>
+                  <input
+                    id="cc-duration"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    placeholder="Contoh: 8 minggu"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-meetings" className={labelClass}>Jumlah Pertemuan</label>
+                  <input
+                    id="cc-meetings"
+                    type="number"
+                    min={1}
+                    value={meetingCount}
+                    onChange={(e) => setMeetingCount(Number(e.target.value))}
+                    required
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* ── Section 3: Kurikulum & Audiens ── */}
+            <section className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                Kurikulum & Audiens
+              </h3>
+
+              <DynamicListField
+                label="Yang Akan Dipelajari"
+                items={whatYouLearn}
+                onChange={setWhatYouLearn}
+                placeholder="Contoh: Memahami arsitektur REST API"
+              />
+
+              <DynamicListField
+                label="Prasyarat"
+                items={prerequisites}
+                onChange={setPrerequisites}
+                placeholder="Contoh: Dasar pemrograman JavaScript"
+              />
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="cc-audience" className={labelClass}>Target Audiens</label>
+                <textarea
+                  id="cc-audience"
+                  value={targetAudience}
+                  onChange={(e) => setTargetAudience(e.target.value)}
+                  placeholder="Siapa yang cocok mengikuti kursus ini?"
+                  rows={2}
+                  className={`${inputClass} resize-none`}
+                />
+              </div>
+
+              <TagsField tags={tags} onChange={setTags} />
+            </section>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="cc-title" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Judul
-            </label>
-            <input
-              id="cc-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              placeholder="Contoh: Full Stack Web Modern"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="cc-header" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Header
-            </label>
-            <input
-              id="cc-header"
-              value={header}
-              onChange={(e) => setHeader(e.target.value)}
-              required
-              placeholder="Subjudul singkat yang tampil di kartu"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="cc-meetings" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Jumlah pertemuan
-            </label>
-            <input
-              id="cc-meetings"
-              type="number"
-              min={1}
-              value={meetingCount}
-              onChange={(e) => setMeetingCount(Number(e.target.value))}
-              required
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-            <p className="text-xs text-slate-500">Digunakan untuk memetakan tugas per pertemuan (minimal 1).</p>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
+          <DialogFooter className="border-t border-slate-100 px-6 py-4">
             <Button type="button" variant="outline" className="rounded-xl" onClick={handleClose}>
               Batal
             </Button>
             <Button type="submit" className="rounded-xl" disabled={submitting}>
               {submitting ? 'Menyimpan…' : 'Lanjut ke editor'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

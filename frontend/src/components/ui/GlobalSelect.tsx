@@ -6,20 +6,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import type { GlobalSelectProps, SelectOption } from "@/lib/types/components/ui";
 
-export interface SelectOption {
-  label: string;
-  value: string;
-}
-
-export interface GlobalSelectProps {
-  label?: string;
-  placeholder?: string;
-  options: SelectOption[];
-  value?: string;
-  onValueChange?: (value: string) => void;
-  className?: string;
-}
+export type { GlobalSelectProps, SelectOption };
 
 export const GlobalSelect = ({
   label,

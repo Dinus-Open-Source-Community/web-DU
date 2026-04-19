@@ -1,12 +1,9 @@
 'use client'
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import type { TransactionRatioPoint } from '@/lib/types/components/charts'
 
-export interface TransactionRatioPoint {
-  label: string
-  value: number
-  color?: string
-}
+export type { TransactionRatioPoint }
 
 interface TransactionRatioChartProps {
   data: TransactionRatioPoint[]

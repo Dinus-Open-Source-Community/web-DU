@@ -30,7 +30,7 @@ export function LeaveDetailModal({
       aria-labelledby="mentor-leave-detail-title"
       onClick={() => onOpenChange(false)}>
       <div
-        className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-lg"
+        className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm"
         onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700">

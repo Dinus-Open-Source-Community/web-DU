@@ -29,15 +29,13 @@ import { cn } from '@/lib/utils'
 import { SubmissionReviewDialog } from './SubmissionReviewDialog'
 import { CourseAssignmentDialog } from './CourseAssignmentDialog'
 import { ReviewSubmissionDateRange } from './ReviewSubmissionDateRange'
+import Image from 'next/image'
 
 type MentorCourseAssignmentsClientProps = {
   courseUid: string
 }
 
-function assignmentLifecycleVariant(
-  a: IMentorCourseAssignment,
-  effectiveClosed: boolean
-): 'assignmentDraft' | 'assignmentPublished' | 'assignmentClosed' {
+function assignmentLifecycleVariant(a: IMentorCourseAssignment, effectiveClosed: boolean): 'assignmentDraft' | 'assignmentPublished' | 'assignmentClosed' {
   if (a.status === 'draft') return 'assignmentDraft'
   if (effectiveClosed || a.status === 'closed') return 'assignmentClosed'
   return 'assignmentPublished'
@@ -50,9 +48,7 @@ function deadlineUrgencyVariant(urg: ReturnType<typeof getDeadlineUrgency>): 'de
   return null
 }
 
-function submissionReviewVariant(
-  status: IMentorAssignmentSubmission['reviewStatus']
-): 'reviewPending' | 'reviewGraded' | 'reviewReturned' {
+function submissionReviewVariant(status: IMentorAssignmentSubmission['reviewStatus']): 'reviewPending' | 'reviewGraded' | 'reviewReturned' {
   switch (status) {
     case 'pending_review':
       return 'reviewPending'
@@ -110,14 +106,8 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
   const now = useMemo(() => new Date(), [])
   const stats = useMemo(() => computeAssignmentStats(assignments, submissions, now), [assignments, submissions, now])
 
-  const reviewDateFrom = useMemo(
-    () => (submissionDateRange?.from ? format(submissionDateRange.from, 'yyyy-MM-dd') : undefined),
-    [submissionDateRange]
-  )
-  const reviewDateTo = useMemo(
-    () => (submissionDateRange?.to ? format(submissionDateRange.to, 'yyyy-MM-dd') : undefined),
-    [submissionDateRange]
-  )
+  const reviewDateFrom = useMemo(() => (submissionDateRange?.from ? format(submissionDateRange.from, 'yyyy-MM-dd') : undefined), [submissionDateRange])
+  const reviewDateTo = useMemo(() => (submissionDateRange?.to ? format(submissionDateRange.to, 'yyyy-MM-dd') : undefined), [submissionDateRange])
 
   const filteredSubmissions = useMemo(
     () =>
@@ -127,7 +117,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
         from: reviewDateFrom,
         to: reviewDateTo,
       }),
-    [submissions, assignmentUid, submissionStatus, reviewDateFrom, reviewDateTo]
+    [submissions, assignmentUid, submissionStatus, reviewDateFrom, reviewDateTo],
   )
 
   const assignmentTitleMap = useMemo(() => {
@@ -143,12 +133,9 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
     setReviewOpen(true)
   }, [])
 
-  const onReviewSaved = useCallback(
-    (updated: IMentorAssignmentSubmission) => {
-      setSubmissions((prev) => prev.map((x) => (x.uid === updated.uid ? updated : x)))
-    },
-    []
-  )
+  const onReviewSaved = useCallback((updated: IMentorAssignmentSubmission) => {
+    setSubmissions((prev) => prev.map((x) => (x.uid === updated.uid ? updated : x)))
+  }, [])
 
   const openCreate = useCallback(() => {
     setAssignmentFormMode('create')
@@ -165,10 +152,10 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
   const handleDelete = useCallback(
     async (a: IMentorCourseAssignment) => {
       const ok = await confirm({
-        title: "Hapus tugas?",
+        title: 'Hapus tugas?',
         description: `Tugas "${a.title}" akan dihapus dari daftar.`,
-        confirmLabel: "Hapus",
-        variant: "destructive",
+        confirmLabel: 'Hapus',
+        variant: 'destructive',
       })
       if (!ok) return
       if (deleteMentorAssignment(a.uid)) {
@@ -177,10 +164,10 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
         refreshSubmissions()
         if (assignmentUid === a.uid) setAssignmentUid('all')
       } else {
-        notifyError("Gagal menghapus tugas.")
+        notifyError('Gagal menghapus tugas.')
       }
     },
-    [confirm, refreshAssignments, refreshSubmissions, assignmentUid]
+    [confirm, refreshAssignments, refreshSubmissions, assignmentUid],
   )
 
   const onAssignmentFormSaved = useCallback(() => {
@@ -208,35 +195,13 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
 
   return (
     <section className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-      <Button asChild variant="outline" size="sm" className="w-fit gap-2 rounded-lg border-border bg-card font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground">
-        <Link href={`/mentor/courses/${courseUid}`}>
-          <ArrowLeft className="size-3.5 opacity-80" aria-hidden />
-          Kembali ke kursus
-        </Link>
-      </Button>
-
-      <PageHeader
-        title="Kelola tugas"
-        subtitle={`${course.title} — ${meetingMax} pertemuan. Buat dan sunting tugas, atur tenggat, tinjau kiriman, dan beri feedback.`}
-      />
+      <PageHeader title="Kelola tugas" subtitle={`${course.title} — ${meetingMax} pertemuan. Buat dan sunting tugas, atur tenggat, tinjau kiriman, dan beri feedback.`} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          variant="compact"
-          className="shadow-none"
-          label="Tugas aktif"
-          value={stats.activeAssignments}
-          icon={<ClipboardList className="h-6 w-6" />}
-        />
+        <StatCard variant="compact" className="shadow-none" label="Tugas aktif" value={stats.activeAssignments} icon={<ClipboardList className="h-6 w-6" />} />
         <StatCard variant="compact" className="shadow-none" label="Menunggu review" value={stats.awaitingReview} icon={<FileCheck className="h-6 w-6" />} />
         <StatCard variant="compact" className="shadow-none" label="Mendekati tenggat (≤72j)" value={stats.dueSoonCount} icon={<Timer className="h-6 w-6" />} />
-        <StatCard
-          variant="compact"
-          className="shadow-none"
-          label="Resubmit menunggu review"
-          value={stats.resubmitAwaitingReview}
-          icon={<RefreshCw className="h-6 w-6" />}
-        />
+        <StatCard variant="compact" className="shadow-none" label="Resubmit menunggu review" value={stats.resubmitAwaitingReview} icon={<RefreshCw className="h-6 w-6" />} />
       </div>
 
       <CardPanel>
@@ -244,8 +209,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
           <div>
             <h2 className="text-sm font-semibold tracking-tight text-slate-900">CRUD tugas</h2>
             <p className="mt-1 text-sm text-slate-500">
-              <span className="font-medium text-slate-600">Create</span> buat baru ·{' '}
-              <span className="font-medium text-slate-600">Update</span> edit ·{' '}
+              <span className="font-medium text-slate-600">Create</span> buat baru · <span className="font-medium text-slate-600">Update</span> edit ·{' '}
               <span className="font-medium text-slate-600">Delete</span> hapus dari daftar.
             </p>
           </div>
@@ -284,13 +248,11 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
                     className={cn(
                       'border-b border-slate-100',
                       urg === 'due_soon' && 'border-l-4 border-l-amber-400 bg-amber-50/40',
-                      urg === 'overdue' && 'border-l-4 border-l-rose-300 bg-rose-50/35'
+                      urg === 'overdue' && 'border-l-4 border-l-rose-300 bg-rose-50/35',
                     )}>
                     <td className="px-3 py-3 font-medium text-slate-900">{a.title}</td>
                     <td className="px-3 py-3 tabular-nums text-slate-600">#{a.meetingNumber}</td>
-                    <td className="px-3 py-3 tabular-nums text-slate-600">
-                      {format(new Date(a.deadlineAt), 'd MMM yyyy HH:mm', { locale: id })}
-                    </td>
+                    <td className="px-3 py-3 tabular-nums text-slate-600">{format(new Date(a.deadlineAt), 'd MMM yyyy HH:mm', { locale: id })}</td>
                     <td className="px-3 py-3">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Badge variant={assignmentLifecycleVariant(a, eff === 'closed')} />
@@ -303,13 +265,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
                     </td>
                     <td className="px-3 py-3 text-right">
                       <div className="flex flex-wrap justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon-sm"
-                          className="rounded-xl border-slate-200 shadow-none"
-                          onClick={() => openEdit(a)}
-                          aria-label={`Edit tugas: ${a.title}`}>
+                        <Button type="button" variant="outline" size="icon-sm" className="rounded-xl border-slate-200 shadow-none" onClick={() => openEdit(a)} aria-label={`Edit tugas: ${a.title}`}>
                           <Pencil className="h-3.5 w-3.5" aria-hidden />
                         </Button>
                         <Button
@@ -362,12 +318,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
               <option value="returned">Minta revisi</option>
             </select>
           </div>
-          <ReviewSubmissionDateRange
-            htmlForId="review-submission-date-range"
-            value={submissionDateRange}
-            onChange={setSubmissionDateRange}
-            className="min-w-[220px] flex-1 lg:max-w-[280px]"
-          />
+          <ReviewSubmissionDateRange htmlForId="review-submission-date-range" value={submissionDateRange} onChange={setSubmissionDateRange} className="min-w-[220px] flex-1 lg:max-w-[280px]" />
         </div>
 
         <div className="mt-4 overflow-x-auto">
@@ -387,8 +338,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
                 <tr key={s.uid} className="border-b border-slate-100">
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={s.studentAvatar} alt="" className="h-8 w-8 rounded-full object-cover" />
+                      <Image src={s.studentAvatar} width={32} height={32} loading="lazy" alt={s.studentName} className="h-8 w-8 rounded-full object-cover" />
                       <span className="font-medium text-slate-900">{s.studentName}</span>
                     </div>
                   </td>
@@ -415,7 +365,7 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
         open={reviewOpen}
         onOpenChange={setReviewOpen}
         submission={activeSubmission}
-        assignmentTitle={activeSubmission ? assignmentTitleMap.get(activeSubmission.assignmentUid) ?? '—' : '—'}
+        assignmentTitle={activeSubmission ? (assignmentTitleMap.get(activeSubmission.assignmentUid) ?? '—') : '—'}
         onSaved={onReviewSaved}
       />
 

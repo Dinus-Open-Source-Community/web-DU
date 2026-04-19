@@ -76,12 +76,7 @@ export default function MentorCoursesSection() {
           </div>
         </div>
 
-        <SegmentedFilter
-          items={filters.map((f) => ({ value: f, label: f }))}
-          value={activeFilter}
-          onChange={setActiveFilter}
-          variant="scroll"
-        />
+        <SegmentedFilter items={filters.map((f) => ({ value: f, label: f }))} value={activeFilter} onChange={setActiveFilter} variant="scroll" />
 
         {filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-10">
@@ -100,7 +95,6 @@ export default function MentorCoursesSection() {
                   rating={c.rating}
                   totalReviews={c.totalReviews}
                   detailHref={`/mentor/courses/${c.uid}`}
-                  mentorAssignmentsHref={`/mentor/courses/${c.uid}/assignments`}
                   mentorOnStatusClick={() => handleTogglePublish(c.uid, c.published)}
                 />
               ))}

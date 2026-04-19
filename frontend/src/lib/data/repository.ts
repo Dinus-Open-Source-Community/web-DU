@@ -1,7 +1,7 @@
 /**
  * Repository sinkron — single entry point untuk seluruh seed data.
  *
- * Membaca JSON saat module pertama kali di-import, lalu meng-index ke Map
+ * Membaca `seed-data.json` saat module pertama kali di-import, lalu meng-index ke Map
  * untuk lookup cepat. Mengembalikan objek yang sudah di-join (mentor +
  * category di-embed pada course) supaya konsumen tidak perlu join manual.
  *
@@ -54,28 +54,7 @@ import type {
 } from '@/lib/types'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 
-import usersRaw from './json/users.json'
-import mentorsRaw from './json/mentors.json'
-import categoriesRaw from './json/categories.json'
-import coursesRaw from './json/courses.json'
-import reviewsRaw from './json/reviews.json'
-import qaThreadsRaw from './json/qa-threads.json'
-import studentsRaw from './json/students.json'
-import studentEnrolledRaw from './json/student-enrolled-courses.json'
-import administratorsRaw from './json/administrators.json'
-import ticketsRaw from './json/tickets.json'
-import transactionsRaw from './json/transactions.json'
-import payoutsRaw from './json/payouts.json'
-import couponsRaw from './json/coupons.json'
-import auditLogsRaw from './json/audit-logs.json'
-import rbacRaw from './json/rbac.json'
-import analyticsRaw from './json/analytics.json'
-import certificatesRaw from './json/certificates.json'
-import attendanceRaw from './json/attendance.json'
-import schedulesRaw from './json/schedules.json'
-import dashboardRaw from './json/dashboard.json'
-import programFeaturesRaw from './json/program-features.json'
-import courseExtrasRaw from './json/course-extras.json'
+import seedData from './json/seed-data.json'
 
 // ─── Raw JSON shapes (core entities) ────────────────────────────────────────
 
@@ -111,7 +90,8 @@ interface RawCourse {
   variantBadge: string
   title: string
   description: string
-  category: string
+  /** FK ke categories[].id */
+  categoryId: string
   mentorId: string
   rating: number
   totalReviews: number
@@ -130,6 +110,7 @@ interface RawCourse {
 interface RawReview {
   uid: string
   courseUid: string
+  studentUid?: string
   courseTitle: string
   studentName: string
   studentAvatar: string
@@ -151,6 +132,7 @@ interface RawQaReply {
 interface RawQaThread {
   uid: string
   courseUid: string
+  authorUid?: string
   courseTitle: string
   title: string
   author: string
@@ -201,14 +183,15 @@ export type RepoQaThread = RawQaThread
 
 // ─── Index building (core entities) ─────────────────────────────────────────
 
-const users = usersRaw as RawUser[]
-const mentorProfiles = mentorsRaw as RawMentor[]
-const categories = categoriesRaw as RawCategory[]
-const rawCourses = coursesRaw as RawCourse[]
-const reviews = reviewsRaw as RawReview[]
-const qaThreads = qaThreadsRaw as RawQaThread[]
+const users = seedData.users as RawUser[]
+const mentorProfiles = seedData.mentors as RawMentor[]
+const categories = seedData.categories as RawCategory[]
+const rawCourses = seedData.courses as RawCourse[]
+const reviews = seedData.reviews as RawReview[]
+const qaThreads = seedData.qaThreads as RawQaThread[]
 
 const userById = new Map(users.map((u) => [u.id, u]))
+const categoryById = new Map(categories.map((c) => [c.id, c]))
 
 function resolveAuthor(mentorId: string): { name: string; avatar: string } {
   const u = userById.get(mentorId)
@@ -229,12 +212,14 @@ function formatDate(iso: string): string {
 
 const coursesIndex: ICardData[] = rawCourses.map((rc) => {
   const author = resolveAuthor(rc.mentorId)
+  const cat = categoryById.get(rc.categoryId)
   return {
     uid: rc.uid,
     variantBadge: rc.variantBadge as BadgeVariant,
     title: rc.title,
     description: rc.description,
-    category: rc.category,
+    categoryId: rc.categoryId,
+    category: cat?.name,
     author,
     rating: rc.rating,
     totalReviews: rc.totalReviews,
@@ -268,22 +253,22 @@ for (const t of qaThreads) {
 
 // ─── Index building (extended entities) ─────────────────────────────────────
 
-const studentsData = studentsRaw as AdminStudent[]
-const studentEnrolledData = studentEnrolledRaw as StudentEnrolledCourse[]
-const administratorsData = administratorsRaw as AdminAdministrator[]
-const ticketsData = ticketsRaw as AdminTicket[]
-const txnData = transactionsRaw as TransactionsData
-const payoutsData = payoutsRaw as AdminPayout[]
-const couponsData = couponsRaw as AdminCoupon[]
-const auditLogsData = auditLogsRaw as AdminAuditLog[]
-const rbacData = rbacRaw as RbacData
-const analyticsData = analyticsRaw as AnalyticsData
-const certificatesData = certificatesRaw as ICertificate[]
-const attendanceData = attendanceRaw as ICourseAttendance[]
-const schedulesData = schedulesRaw as IScheduleItem[]
-const dashData = dashboardRaw as DashboardData
-const programFeaturesData = programFeaturesRaw as IProgramFeatureData[]
-const courseExtrasData = courseExtrasRaw as CourseExtrasData
+const studentsData = seedData.students as AdminStudent[]
+const studentEnrolledData = seedData.studentEnrolledCourses as StudentEnrolledCourse[]
+const administratorsData = seedData.administrators as AdminAdministrator[]
+const ticketsData = seedData.tickets as AdminTicket[]
+const txnData = seedData.transactions as TransactionsData
+const payoutsData = seedData.payouts as AdminPayout[]
+const couponsData = seedData.coupons as AdminCoupon[]
+const auditLogsData = seedData.auditLogs as AdminAuditLog[]
+const rbacData = seedData.rbac as RbacData
+const analyticsData = seedData.analytics as AnalyticsData
+const certificatesData = seedData.certificates as ICertificate[]
+const attendanceData = seedData.attendance as ICourseAttendance[]
+const schedulesData = seedData.schedules as IScheduleItem[]
+const dashData = seedData.dashboard as DashboardData
+const programFeaturesData = seedData.programFeatures as IProgramFeatureData[]
+const courseExtrasData = seedData.courseExtras as CourseExtrasData
 
 // ─── Public API: Core entities ──────────────────────────────────────────────
 
@@ -326,7 +311,7 @@ export function listCategories(): RepoCategory[] {
     description: cat.description,
     status: cat.status,
     colorVariant: cat.colorVariant,
-    coursesCount: coursesIndex.filter((c) => c.category === cat.name).length,
+    coursesCount: coursesIndex.filter((c) => c.categoryId === cat.id).length,
   }))
 }
 
@@ -336,6 +321,18 @@ export function listCourses(): ICardData[] {
 
 export function getCourseByUid(uid: string): ICardData | undefined {
   return courseByUid.get(uid)
+}
+
+export function getCourseBySlug(slug: string): ICardData | undefined {
+  return coursesIndex.find((c) => {
+    const s = c.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+    return s === slug
+  })
 }
 
 export function listCoursesByMentor(mentorId: string): ICardData[] {
@@ -610,8 +607,12 @@ export function getPopularCoursesStrip() {
     title: c.title,
     image: c.image,
     rating: c.rating,
+    totalReviews: c.totalReviews,
     price: `Rp${(c.price / 1000).toFixed(0)}k`,
     mentor: c.author.name,
+    mentorAvatar: c.author.avatar,
+    description: c.description,
+    variantBadge: c.variantBadge,
   }))
 }
 

@@ -102,7 +102,7 @@ function AddScheduleDialog({ onClose, onSaved }: { onClose: () => void; onSaved:
   return (
     <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
       <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-slate-900">Tambah jadwal kelas</h2>

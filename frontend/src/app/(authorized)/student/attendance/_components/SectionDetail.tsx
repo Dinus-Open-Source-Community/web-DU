@@ -76,7 +76,7 @@ const SectionDetail = () => {
 
   return (
     <section className="px-5 md:px-8 py-10 w-full flex flex-col gap-10">
-      <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col gap-10">
         {/* Detail Header */}
         <div className="flex flex-col gap-4 pb-6 border-b border-slate-100">
           <Link href="/student/attendance" className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors w-fit">
@@ -94,12 +94,12 @@ const SectionDetail = () => {
             <div className="flex gap-3 w-full md:w-auto mt-2 md:mt-0 shrink-0">
               <button
                 onClick={handleHadir}
-                className="flex-1 md:flex-none px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                className="flex-1 md:flex-none px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-xs">
                 Hadir
               </button>
               <button
                 onClick={handleOpenModal}
-                className="flex-1 md:flex-none px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/95 transition-all shadow-sm border border-transparent">
+                className="flex-1 md:flex-none px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/95 transition-colors shadow-sm border border-transparent">
                 Ajukan Izin
               </button>
             </div>
@@ -107,7 +107,7 @@ const SectionDetail = () => {
         </div>
 
         {/* Overview Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
           <h2 className="text-lg font-semibold text-slate-800 mb-6">Ringkasan Kehadiran</h2>
 
           {/* Progress Bar */}
@@ -117,7 +117,7 @@ const SectionDetail = () => {
               <span className="text-2xl font-bold text-slate-900">{selectedCourse.summary.progressPercentage}%</span>
             </div>
             <div className="w-full bg-slate-50 border border-slate-100 rounded-full h-3 overflow-hidden">
-              <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${selectedCourse.summary.progressPercentage}%` }}></div>
+              <div className="bg-primary h-full rounded-full transition-[width] duration-200 ease-out" style={{ width: `${selectedCourse.summary.progressPercentage}%` }}></div>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ const SectionDetail = () => {
             {selectedCourse.records.map((record) => (
               <div
                 key={record.uid}
-                className="group flex flex-col md:flex-row md:items-center justify-between p-5 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)] gap-4">
+                className="group flex flex-col md:flex-row md:items-center justify-between p-5 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors shadow-xs gap-4">
                 <div className="flex items-start md:items-center gap-4">
                   <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-slate-50 border border-slate-100 group-hover:bg-primary/5 transition-colors">
                     {getStatusIcon(record.status)}
@@ -178,8 +178,8 @@ const SectionDetail = () => {
 
       {/* -------------------- MODAL IZIN -------------------- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 animate-in zoom-in-95 duration-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-md border border-slate-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
               <div className="pr-4">
                 <h3 className="text-lg font-bold text-slate-900">Mengajukan Izin</h3>
@@ -198,7 +198,7 @@ const SectionDetail = () => {
                   required
                   value={permissionDate}
                   onChange={(e) => setPermissionDate(e.target.value)}
-                  className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-4 py-3 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                  className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-4 py-3 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
                 />
               </div>
 
@@ -210,7 +210,7 @@ const SectionDetail = () => {
                   placeholder="Ceritakan alasan Anda dengan jelas..."
                   value={permissionReason}
                   onChange={(e) => setPermissionReason(e.target.value)}
-                  className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-4 py-3 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"></textarea>
+                  className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-4 py-3 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-xs"></textarea>
               </div>
 
               <div className="flex gap-3 justify-end pt-2">
@@ -219,7 +219,7 @@ const SectionDetail = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/95 transition-all outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/95 transition-colors outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                   Kirim Izin
                 </button>
               </div>

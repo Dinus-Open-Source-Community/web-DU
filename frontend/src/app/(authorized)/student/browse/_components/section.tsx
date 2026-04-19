@@ -67,7 +67,7 @@ const Section = () => {
             <div className="flex flex-col gap-10">
               <div
                 key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`}
-                className="grid grid-cols-1 gap-6 duration-500 ease-out animate-in fade-in slide-in-from-bottom-6 md:grid-cols-2 xl:grid-cols-3">
+                className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedCourses.map((course, idx) => (
                   <Card
                     key={`${course.uid}-${idx}`}
@@ -88,7 +88,7 @@ const Section = () => {
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-100 bg-slate-50/50 py-24 text-center duration-500 animate-in fade-in zoom-in">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-100 bg-slate-50/50 py-24 text-center">
               <EmptyCourseIcon className="mb-6 h-40 w-40" />
               <h3 className="mb-2 text-xl font-bold text-slate-900">Ups, hasil tidak ditemukan</h3>
               <p className="max-w-sm text-sm leading-relaxed text-slate-500">

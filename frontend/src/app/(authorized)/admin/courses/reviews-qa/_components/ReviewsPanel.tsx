@@ -39,7 +39,7 @@ function ReviewCard({ review }: { review: AdminReview }) {
   const [reply, setReply] = useState('')
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <article className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
       <div className="flex items-start gap-3">
         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
           <Image src={review.studentAvatar} alt={review.studentName} fill className="object-cover" sizes="40px" />

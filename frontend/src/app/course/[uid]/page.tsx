@@ -6,7 +6,7 @@ import { CourseDetailLayout } from '@/components/course/detail/CourseDetailLayou
 import { Button } from '@/components/ui/button'
 import { listCourses, listMentors, getCourseFeedbackBreakdown, getCourseWhatYouLearn, getSyllabusFromCourse } from '@/lib/data/repository'
 import { getCurrentUser, type UserRole } from '@/lib/data/dummyUsers'
-import { formatRupiah } from '@/lib/func'
+import { formatRupiah, slugify } from '@/lib/func'
 import Link from 'next/link'
 
 const PRIVILEGED_ROLES: UserRole[] = ['mentor', 'admin']
@@ -32,6 +32,7 @@ export default async function PublicCourseDetailPage({ params }: PageProps) {
   const canManageCourse = PRIVILEGED_ROLES.includes(viewer.role)
 
   const discountLabel = course.strikePrice ? `Hemat ${Math.round(((course.strikePrice - course.price) / course.strikePrice) * 100)}%` : undefined
+  const courseSlug = slugify(course.title)
 
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
@@ -75,7 +76,9 @@ export default async function PublicCourseDetailPage({ params }: PageProps) {
               </>
             ) : (
               <>
-                <Button className="h-11 rounded-xl text-sm font-semibold">Beli Sekarang</Button>
+                <Button asChild className="h-11 rounded-xl text-sm font-semibold">
+                  <Link href={`/checkout/${courseSlug}`}>Beli Sekarang</Link>
+                </Button>
               </>
             )
           }

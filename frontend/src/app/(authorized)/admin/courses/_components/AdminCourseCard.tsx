@@ -22,13 +22,13 @@ export function AdminCourseCard({ course }: AdminCourseCardProps) {
   const statusVariant = statusVariantMap[course.status]
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-slate-300/90">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs transition-colors hover:border-slate-300/90">
       <div className="relative aspect-video w-full shrink-0 overflow-hidden">
         <Image
           src={course.image}
           alt={course.title}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 400px"
         />
         <div className="absolute left-3 top-3 flex items-center gap-1.5">

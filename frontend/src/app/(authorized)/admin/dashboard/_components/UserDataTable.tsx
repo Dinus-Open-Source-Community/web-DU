@@ -216,7 +216,7 @@ export default function UserDataTable() {
   return (
     <div className="flex flex-col lg:flex-row gap-4 w-full items-start">
       {/* ── Table Panel ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 rounded-xl border border-[#E5E7EB] bg-white shadow-sm overflow-hidden">
+      <div className="flex-1 min-w-0 rounded-xl border border-[#E5E7EB] bg-white shadow-xs overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
           <h2 className="text-lg font-bold text-[#111827]">

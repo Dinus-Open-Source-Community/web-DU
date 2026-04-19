@@ -89,7 +89,7 @@ export function AdminCoursesGrid() {
             <div className="flex flex-col gap-8">
               <div
                 key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`}
-                className="grid grid-cols-1 gap-6 duration-500 ease-out animate-in fade-in slide-in-from-bottom-6 md:grid-cols-2 xl:grid-cols-3">
+                className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedCourses.map((course, idx) => (
                   <Card
                     key={`${course.uid}-${idx}`}

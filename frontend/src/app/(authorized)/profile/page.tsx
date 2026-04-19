@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { useUser } from '@/hooks/useUser'
 import { toSidebarUser } from '@/lib/data/dummyUsers'
+import { clearGuestSession } from '@/lib/auth/guest-session'
 import { studentNavigation, mentorNavigation, adminNavigation } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
 
@@ -41,6 +42,7 @@ const Page = () => {
         onToggleMinimize={toggleMinimize}
         user={toSidebarUser(user)}
         onLogout={() => {
+          clearGuestSession()
           router.push('/auth/login')
         }}
         onProfile={() => {
@@ -48,7 +50,7 @@ const Page = () => {
         }}
       />
 
-      <div className={cn('flex flex-col flex-1 transition-all duration-300 ease-in-out', isMinimized ? 'lg:ml-20' : 'lg:ml-64')}>
+      <div className={cn('flex flex-col flex-1 transition-[margin] duration-150 ease-out', isMinimized ? 'lg:ml-20' : 'lg:ml-64')}>
         <main className="flex-1 p-6">
           <Section />
         </main>

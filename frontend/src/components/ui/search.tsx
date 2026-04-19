@@ -1,11 +1,9 @@
 import * as React from "react";
 import { Search as SearchIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ISearchProps } from "@/lib/types/components/ui";
 
-export interface ISearchProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  showIcon?: boolean;
-  containerClassName?: string;
-}
+export type { ISearchProps };
 
 const Search = React.forwardRef<HTMLInputElement, ISearchProps>(
   ({ className, containerClassName, showIcon = true, ...props }, ref) => {

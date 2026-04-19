@@ -68,7 +68,7 @@ export function MentorsTable() {
         m.uid.toLowerCase().includes(q)
       return matchStatus && matchSpec && matchQuery
     })
-  }, [committedSearch, statusFilter, specFilter])
+  }, [mentors, committedSearch, statusFilter, specFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)

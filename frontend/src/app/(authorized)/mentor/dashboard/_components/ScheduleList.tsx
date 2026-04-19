@@ -12,7 +12,7 @@ export default function ScheduleList({ items }: ScheduleListProps) {
       {items.map((item) => (
         <div
           key={item.uid}
-          className="bg-white p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 border border-slate-100 shadow-xs hover:shadow-sm transition-shadow">
+          className="bg-white p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 border border-slate-100 shadow-xs">
           <div className="flex flex-row items-center gap-4 flex-1">
             {/* Time Badge */}
             <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 bg-primary/10 text-primary">

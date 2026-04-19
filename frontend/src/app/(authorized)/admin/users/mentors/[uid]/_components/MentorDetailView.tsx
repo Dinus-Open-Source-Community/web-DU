@@ -47,7 +47,7 @@ export function MentorDetailView({ mentor }: MentorDetailViewProps) {
         </Link>
       </Button>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:flex-row md:items-start md:justify-between">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-100">
             <Image src={mentor.avatar} alt={mentor.name} fill className="object-cover" sizes="64px" />
@@ -105,7 +105,7 @@ export function MentorDetailView({ mentor }: MentorDetailViewProps) {
         <StatTile label="Total Review" value={mentor.totalReviews.toLocaleString('id-ID')} />
       </section>
 
-      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-xs">
         <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
             <h3 className="text-base font-semibold tracking-tight text-slate-900">
@@ -191,7 +191,7 @@ export function MentorDetailView({ mentor }: MentorDetailViewProps) {
 
 function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="flex flex-col gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
       <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
         {label}
       </span>

@@ -44,7 +44,7 @@ function writeSeedAssignmentState(state: SeedAssignmentState) {
 export const ASSIGNMENT_SEED: IMentorCourseAssignment[] = [
   {
     uid: 'asg-mc001-1',
-    courseId: 'crs-017',
+    courseId: 'crs-001',
     meetingNumber: 4,
     title: 'Mini project: REST API + auth',
     description: 'Bangun endpoint CRUD dengan JWT refresh token.',
@@ -63,7 +63,7 @@ export const ASSIGNMENT_SEED: IMentorCourseAssignment[] = [
   },
   {
     uid: 'asg-mc001-2',
-    courseId: 'crs-017',
+    courseId: 'crs-001',
     meetingNumber: 3,
     title: 'Essay: arsitektur App Router',
     description: 'Ringkas pola RSC vs client components.',
@@ -74,7 +74,7 @@ export const ASSIGNMENT_SEED: IMentorCourseAssignment[] = [
   },
   {
     uid: 'asg-mc001-3',
-    courseId: 'crs-017',
+    courseId: 'crs-001',
     meetingNumber: 5,
     title: 'Workshop UI (draf)',
     description: 'Akan dipublikasikan minggu depan.',
@@ -85,7 +85,7 @@ export const ASSIGNMENT_SEED: IMentorCourseAssignment[] = [
   },
   {
     uid: 'asg-mc002-1',
-    courseId: 'crs-018',
+    courseId: 'crs-002',
     meetingNumber: 2,
     title: 'Design tokens & dokumentasi',
     description: 'Ekspor token ke CSS variables.',
@@ -215,8 +215,8 @@ export const SUBMISSION_SEED: IMentorAssignmentSubmission[] = [
   {
     uid: 'sub-mc001-1',
     assignmentUid: 'asg-mc001-1',
-    courseId: 'crs-017',
-    studentUid: 'stu-1',
+    courseId: 'crs-001',
+    studentUid: 'stu-001',
     studentName: 'Rina Kusuma',
     studentAvatar: 'https://i.pravatar.cc/150?img=32',
     submittedAt: '2026-04-12T08:30:00.000Z',
@@ -249,7 +249,7 @@ export const SUBMISSION_SEED: IMentorAssignmentSubmission[] = [
   {
     uid: 'sub-mc001-2',
     assignmentUid: 'asg-mc001-1',
-    courseId: 'crs-017',
+    courseId: 'crs-001',
     studentUid: 'stu-2',
     studentName: 'Bagas Pratama',
     studentAvatar: 'https://i.pravatar.cc/150?img=12',
@@ -271,8 +271,8 @@ export const SUBMISSION_SEED: IMentorAssignmentSubmission[] = [
   {
     uid: 'sub-mc001-3',
     assignmentUid: 'asg-mc001-2',
-    courseId: 'crs-017',
-    studentUid: 'stu-1',
+    courseId: 'crs-001',
+    studentUid: 'stu-001',
     studentName: 'Rina Kusuma',
     studentAvatar: 'https://i.pravatar.cc/150?img=32',
     submittedAt: '2026-04-09T10:00:00.000Z',
@@ -286,7 +286,7 @@ export const SUBMISSION_SEED: IMentorAssignmentSubmission[] = [
   {
     uid: 'sub-mc002-1',
     assignmentUid: 'asg-mc002-1',
-    courseId: 'crs-018',
+    courseId: 'crs-002',
     studentUid: 'stu-3',
     studentName: 'Dewi Lestari',
     studentAvatar: 'https://i.pravatar.cc/150?img=45',

@@ -72,7 +72,7 @@ const Section = () => {
           options={DUMMY_CATEGORIES}
           selected={selectedCategories}
           onToggle={toggleCategory}
-          innerClassName="border-slate-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+          innerClassName="border-slate-200 shadow-xs"
         />
 
         <div className="min-w-0 flex-1">
@@ -80,11 +80,11 @@ const Section = () => {
             <div className="flex flex-col gap-10">
               <div
                 key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`}
-                className="grid grid-cols-1 gap-6 duration-500 ease-out animate-in fade-in slide-in-from-bottom-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                 {paginatedCertificates.map((cert) => (
                   <div
                     key={cert.uid}
-                    className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors duration-300 hover:border-slate-300">
+                    className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-colors hover:border-slate-300">
                     <div className="relative flex aspect-[4/3] w-full items-center justify-center border-b border-slate-100 bg-slate-50 p-6">
                       <Image src={cert.imageUrl || 'https://picsum.photos/seed/cert/800/600'} alt={cert.title} fill className="object-cover" />
                     </div>
@@ -97,13 +97,13 @@ const Section = () => {
                       </div>
 
                       <div className="mt-auto flex gap-3">
-                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2 px-4 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900">
+                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2 px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900">
                           <Download className="h-4 w-4" />
                           Unduh
                         </button>
                         <button
                           onClick={() => handleShare(cert.uid)}
-                          className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-2 px-4 text-sm font-medium transition-all ${
+                          className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-2 px-4 text-sm font-medium transition-colors ${
                             copiedUid === cert.uid
                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                               : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
@@ -129,7 +129,7 @@ const Section = () => {
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[2rem] border border-slate-200 bg-white py-24 text-center shadow-[0_1px_2px_rgba(0,0,0,0.02)] duration-500 animate-in fade-in zoom-in">
+            <div className="flex flex-col items-center justify-center rounded-[2rem] border border-slate-200 bg-white py-24 text-center shadow-xs">
               <EmptyCourseIcon className="mb-6 h-40 w-40" />
               <h3 className="mb-2 text-xl font-bold text-slate-900">Ups, sertifikat tidak ditemukan</h3>
               <p className="max-w-sm text-sm leading-relaxed text-slate-500">

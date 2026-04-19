@@ -9,11 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { TopCoursePoint } from '@/lib/types/components/charts'
 
-export interface TopCoursePoint {
-  label: string
-  value: number
-}
+export type { TopCoursePoint }
 
 interface TopCoursesChartProps {
   data: TopCoursePoint[]

@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import type { SegmentedFilterVariant, SegmentedItem } from '@/lib/types/components/ui'
 
-export type SegmentedItem<T extends string = string> = { value: T; label: string }
-
-export type SegmentedFilterVariant = 'scroll' | 'wrap'
+export type { SegmentedFilterVariant, SegmentedItem }
 
 type SegmentedFilterProps<T extends string> = {
   items: SegmentedItem<T>[]

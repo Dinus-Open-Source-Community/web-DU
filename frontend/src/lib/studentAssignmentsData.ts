@@ -9,13 +9,13 @@ import {
   pushExtraSubmission,
 } from '@/lib/mentorAssignmentsData'
 
-/** Selaras dengan seed `SUBMISSION_SEED` (Rina Kusuma) */
-export const STUDENT_DEMO_UID = 'stu-1'
-export const STUDENT_DEMO_NAME = 'Rina Kusuma'
-export const STUDENT_DEMO_AVATAR = 'https://i.pravatar.cc/150?img=32'
+/** Selaras dengan seed `SUBMISSION_SEED` & `seed-data.json` users/students */
+export const STUDENT_DEMO_UID = 'stu-001'
+export const STUDENT_DEMO_NAME = 'Ayu Pratama'
+export const STUDENT_DEMO_AVATAR = 'https://i.pravatar.cc/150?u=ayu0'
 
 /** Kursus yang diikuti siswa demo (sinkron My Learning) */
-export const STUDENT_ENROLLED_COURSE_IDS = ['crs-017', 'crs-018'] as const
+export const STUDENT_ENROLLED_COURSE_IDS = ['crs-001', 'crs-002'] as const
 
 export type StudentAssignmentFeedCategory =
   | 'all'

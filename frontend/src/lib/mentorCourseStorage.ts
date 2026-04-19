@@ -1,4 +1,4 @@
-import type { IModule, ICourseModulesState, IMentorCourse } from '@/lib/types'
+import type { IModule, ICourseModulesState, IMentorCourse, CourseCategory, CourseLevel, CourseClassType } from '@/lib/types'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { listCoursesByMentor, getCourseByUid, toMentorCourseView } from '@/lib/data/repository'
 import { getActiveUser } from '@/lib/data/dummyUsers'
@@ -87,17 +87,27 @@ export function getCourseMeetingCount(course: IMentorCourse): number {
   return 8
 }
 
-export function setSessionCourseMeta(
-  uid: string,
-  data: Pick<IMentorCourse, 'title' | 'header' | 'image'> & { published?: boolean; meetingCount?: number },
-) {
+type SessionCourseMeta = Pick<IMentorCourse, 'title' | 'header' | 'image'> & {
+  published?: boolean
+  meetingCount?: number
+  category?: CourseCategory
+  level?: CourseLevel
+  classType?: CourseClassType
+  price?: number
+  strikePrice?: number
+  duration?: string
+  whatYouLearn?: string[]
+  tags?: string[]
+  prerequisites?: string[]
+  targetAudience?: string
+}
+
+export function setSessionCourseMeta(uid: string, data: SessionCourseMeta) {
   if (typeof window === 'undefined') return
   sessionStorage.setItem(`${SESSION_META_PREFIX}${uid}`, JSON.stringify(data))
 }
 
-export function getSessionCourseMeta(
-  uid: string,
-): (Pick<IMentorCourse, 'title' | 'header' | 'image'> & { published?: boolean; meetingCount?: number }) | null {
+export function getSessionCourseMeta(uid: string): SessionCourseMeta | null {
   if (typeof window === 'undefined') return null
   try {
     const raw = sessionStorage.getItem(`${SESSION_META_PREFIX}${uid}`)
@@ -202,6 +212,16 @@ export function getMentorCourseByUid(uid: string): IMentorCourse | null {
     rating: 0,
     totalReviews: 0,
     updatedAt: 'Baru',
+    category: fromSession.category,
+    level: fromSession.level,
+    classType: fromSession.classType,
+    price: fromSession.price,
+    strikePrice: fromSession.strikePrice,
+    duration: fromSession.duration,
+    whatYouLearn: fromSession.whatYouLearn,
+    tags: fromSession.tags,
+    prerequisites: fromSession.prerequisites,
+    targetAudience: fromSession.targetAudience,
   }
 }
 

@@ -35,7 +35,7 @@ function getEmbedUrl(url: string): string | null {
       if (match) return `https://player.vimeo.com/video/${match[1]}`
     }
   } catch {
-    /* invalid url */
+    return null
   }
   return null
 }

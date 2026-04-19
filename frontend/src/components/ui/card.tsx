@@ -43,8 +43,6 @@ interface CardProps {
   mentorStudentCount?: number
   /** Tombol Draf / Terbitkan — dipanggil saat mentor mengubah status */
   mentorOnStatusClick?: () => void
-  /** Tautan ke halaman tugas per kursus mentor */
-  mentorAssignmentsHref?: string
 }
 
 const sizes = {
@@ -100,7 +98,6 @@ function Card({
   mentorModuleCount,
   mentorStudentCount,
   mentorOnStatusClick,
-  mentorAssignmentsHref,
 }: CardProps) {
   if (variant === 'mentorCourse') {
     const isLive = mentorPublished === true
@@ -108,10 +105,9 @@ function Card({
       <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-slate-300/90">
         <div className="relative aspect-16/10 w-full shrink-0">
           {image?.startsWith('data:') ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt={title} className="h-full w-full object-cover" />
+            <Image src={image} width={384} height={256} loading="lazy" alt={title} className="h-full w-full object-cover" />
           ) : image ? (
-            <Image src={image} alt={title} loading="lazy" fill className="object-cover" sizes="(max-width: 768px) 100vw, 384px" />
+            <Image src={image} width={384} height={256} loading="lazy" alt={title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full min-h-[140px] w-full items-center justify-center bg-slate-100 text-slate-300">
               <ReactIcon />
@@ -125,7 +121,7 @@ function Card({
         <div className="flex flex-1 flex-col gap-3 p-5">
           <div className="flex flex-col gap-1">
             <h3 className="line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-slate-900">{title}</h3>
-            {mentorHeader && <p className="line-clamp-1 text-sm font-medium text-primary">{mentorHeader}</p>}
+
             {description && <p className="line-clamp-2 text-sm leading-relaxed text-slate-500">{description}</p>}
           </div>
 
@@ -157,15 +153,6 @@ function Card({
               </Button>
             ) : null}
             <div className="flex flex-wrap gap-2 sm:ml-auto sm:justify-end">
-              {mentorAssignmentsHref ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
-                  <Link href={mentorAssignmentsHref}>Tugas</Link>
-                </Button>
-              ) : null}
               {detailHref ? (
                 <Button
                   asChild

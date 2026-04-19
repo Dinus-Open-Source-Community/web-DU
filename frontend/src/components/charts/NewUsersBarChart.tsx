@@ -9,11 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { NewUsersPoint } from '@/lib/types/components/charts'
 
-export interface NewUsersPoint {
-  label: string
-  value: number
-}
+export type { NewUsersPoint }
 
 interface NewUsersBarChartProps {
   data: NewUsersPoint[]

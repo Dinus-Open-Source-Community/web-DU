@@ -41,11 +41,11 @@ export function CourseDetailHero({
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-8 md:px-8 md:py-10">
         <Breadcrumb className="text-white/85">
-          <BreadcrumbList className="text-xs text-white/80">
+          <BreadcrumbList className="text-sm text-white/80">
             <BreadcrumbItem>
               <BreadcrumbLink asChild className="text-white/80 hover:text-white">
                 <Link href={backHref} className="inline-flex items-center gap-1">
-                  <ChevronLeft className="h-3.5 w-3.5" /> {backLabel}
+                  <ChevronLeft className="h-5 w-5" /> {backLabel}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>

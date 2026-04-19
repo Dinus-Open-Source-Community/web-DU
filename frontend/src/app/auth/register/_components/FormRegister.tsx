@@ -1,177 +1,134 @@
-"use client";
+'use client'
 
-import { GitHubIcon, GoogleIcon, LogoDu } from "@/components/ui/icons";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { GlobalInput } from "@/components/ui/GlobalInput";
-import { GlobalSelect } from "@/components/ui/GlobalSelect";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
+import { GitHubIcon, GoogleIcon, LogoDu } from '@/components/ui/icons'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { GlobalInput } from '@/components/ui/GlobalInput'
+import { GlobalSelect } from '@/components/ui/GlobalSelect'
+import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator'
+import { setGuestSession } from '@/lib/auth/guest-session'
+import { getActiveUser, ROLE_DASHBOARD_PATH } from '@/lib/data/dummyUsers'
 
-const FormRegister = () => {
-  const [isShowPassword, setIsShowPassword] = useState<boolean>(false);
-  const [isShowConfirmPassword, setIsShowConfirmPassword] =
-    useState<boolean>(false);
+export default function FormRegister() {
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwordMismatch) return
+    setGuestSession()
+    const u = getActiveUser()
+    router.push(ROLE_DASHBOARD_PATH[u.role])
+  }
 
   return (
-    <div className="relative z-10 w-full max-w-4xl rounded-[32px] bg-[#E5E5E54D]/30 p-10 text-gray-800 shadow-sm backdrop-blur-md">
-      {/* Header */}
-      <div className="mb-6 flex flex-row items-center gap-2 px-3">
-        <LogoDu className="h-8 w-8" />
-        <h1 className="text-xl font-bold tracking-tight text-[#0A84DC]">
-          Doscom University
-        </h1>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col items-center gap-3 lg:items-start">
+        <Link href="/" className="mb-2 flex items-center gap-2 lg:hidden">
+          <LogoDu className="size-8 text-primary" />
+          <span className="text-lg font-bold tracking-tight text-primary">Doscom University</span>
+        </Link>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Buat Akun Baru</h1>
+        <p className="text-sm text-slate-500">
+          Sudah punya akun?{' '}
+          <Link href="/auth/login" className="font-semibold text-primary hover:underline">
+            Masuk
+          </Link>
+        </p>
       </div>
 
-      <p className="mb-7 px-3 align-middle text-lg leading-[1.2] font-normal">
-        Doscom University is one of DOSCOM&apos;s open source intensive training programs (bootcamps).
-      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+          <GoogleIcon className="mr-2 size-5" />
+          Google
+        </Button>
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+          <GitHubIcon className="mr-2 size-5" />
+          GitHub
+        </Button>
+      </div>
 
-      {/* Input Form*/}
-      <form className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/*Menggunakan custom ui yang dimana agar lebih clean dan reusable*/}
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-medium text-slate-400">atau daftar dengan email</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
 
-          {/*Name*/}
-          <GlobalInput label="Full Name" placeholder="Full Name" type="text" />
-
-          {/*Gender*/}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <GlobalInput label="Nama Lengkap" placeholder="Nama lengkap" type="text" />
           <GlobalSelect
-            label="Gender"
-            placeholder="Male/Female"
+            label="Jenis Kelamin"
+            placeholder="Pilih"
             options={[
-              { label: "Male", value: "male" },
-              { label: "Female", value: "female" },
+              { label: 'Laki-laki', value: 'male' },
+              { label: 'Perempuan', value: 'female' },
             ]}
           />
+        </div>
 
-          {/*Email*/}
-          <GlobalInput
-            label="Email"
-            placeholder="111223344@mhs.dinus.ac.id"
-            type="email"
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <GlobalInput label="Email" placeholder="nama@email.com" type="email" />
+          <GlobalInput label="Tanggal Lahir" placeholder="DD/MM/YYYY" type="date" />
+        </div>
 
-          {/*Date or birth*/}
-          <GlobalInput
-            label="Date of birth"
-            subLabel="(MM/DD/YY)"
-            placeholder="15/02/2030"
-            type="date"
-            className="text-gray-500"
-          />
-
-          {/*Password*/}
+        <div>
           <GlobalInput
             label="Password"
-            placeholder="Password"
-            type={isShowPassword ? "text" : "password"}
+            placeholder="Buat password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             rightIcon={
-              <button
-                type="button"
-                onClick={() => setIsShowPassword(!isShowPassword)}
-                className="flex items-center justify-center transition-colors hover:text-gray-600 focus:outline-none"
-              >
-                {isShowPassword ? (
-                  <Eye className="h-5 w-5 cursor-pointer text-gray-400" />
-                ) : (
-                  <EyeOff className="h-5 w-5 cursor-pointer text-gray-400" />
-                )}
+              <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
+                {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
           />
+          <PasswordStrengthIndicator password={password} className="mt-3" />
+        </div>
 
-          {/*Confirm Password*/}
+        <div>
           <GlobalInput
-            label="Confirm password"
-            placeholder="••••••••••••••"
-            type={isShowConfirmPassword ? "text" : "password"}
+            label="Konfirmasi Password"
+            placeholder="Ulangi password"
+            type={showConfirm ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             rightIcon={
-              <button
-                type="button"
-                onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
-                className="flex items-center justify-center transition-colors hover:text-gray-600 focus:outline-none"
-              >
-                {isShowConfirmPassword ? (
-                  <Eye className="h-5 w-5 cursor-pointer text-gray-400" />
-                ) : (
-                  <EyeOff className="h-5 w-5 cursor-pointer text-gray-400" />
-                )}
+              <button type="button" onClick={() => setShowConfirm((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
+                {showConfirm ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
           />
+          {passwordMismatch && (
+            <p className="mt-1.5 text-xs font-medium text-rose-500">Password tidak cocok</p>
+          )}
         </div>
 
-        {/* Checkboxes */}
-        <div className="mt-2 flex flex-col gap-3">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="remember" className="h-4 w-4 border-[#D1D1D1]" />
-            <label
-              htmlFor="remember"
-              className="cursor-pointer text-base leading-[1.4] font-normal tracking-tight text-[#2D3748]"
-            >
-              Remember me
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="terms" className="h-4 w-4 border-[#D1D1D1]" />
-            <label
-              htmlFor="terms"
-              className="cursor-pointer text-base leading-[1.4] font-normal tracking-tight text-[#2D3748]"
-            >
-              I agree to all the{" "}
-              <a href="#" className="text-blue-500 hover:underline">
-                Terms
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-blue-500 hover:underline">
-                Privacy policy
-              </a>
-            </label>
-          </div>
+        <div className="flex items-start gap-2">
+          <Checkbox id="terms" className="mt-0.5 size-4 border-slate-300" />
+          <label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-slate-600">
+            Saya menyetujui{' '}
+            <Link href="#" className="font-semibold text-primary hover:underline">Syarat & Ketentuan</Link>
+            {' '}dan{' '}
+            <Link href="#" className="font-semibold text-primary hover:underline">Kebijakan Privasi</Link>
+          </label>
         </div>
 
-        {/*Button Submit*/}
-        <Button className="mt-4 h-12 w-full rounded-md bg-[#1E88E5] text-lg leading-[1.3] font-semibold text-white hover:bg-blue-700">
-          Create account
+        <Button type="submit" className="h-12 rounded-xl text-sm font-bold" disabled={passwordMismatch}>
+          Buat Akun
         </Button>
       </form>
-
-      {/* Divider */}
-      <div className="flex items-center justify-center py-8">
-        <span className="text-lg font-normal text-[#333333]">
-          Or Continue With
-        </span>
-      </div>
-
-      {/* OAuth  */}
-      <div className="grid w-full grid-cols-2 gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex h-16 w-full cursor-pointer items-center justify-center rounded-sm border border-gray-300 bg-white hover:bg-gray-50"
-        >
-          <GoogleIcon className="" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="flex h-16 w-full cursor-pointer items-center justify-center rounded-sm border border-gray-300 bg-white hover:bg-gray-50"
-        >
-          <GitHubIcon className="h-10 w-10" />
-        </Button>
-      </div>
-
-      {/* Footer Link */}
-      <div className="mt-8 text-center text-lg text-gray-600">
-        Don&apos;t have an account?{" "}
-        <a href="/auth/login" className="font-normal text-[#1F84E6]">
-          Log In
-        </a>
-      </div>
     </div>
-  );
-};
-
-export default FormRegister;
+  )
+}

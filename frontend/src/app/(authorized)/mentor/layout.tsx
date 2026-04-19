@@ -7,12 +7,17 @@ import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
 import { toSidebarUser } from '@/lib/data/dummyUsers'
+import { clearGuestSession } from '@/lib/auth/guest-session'
 
-/** Attendance per-course: full-screen without sidebar */
 function isMentorFullScreenRoute(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length < 3 || segments[0] !== 'mentor') return false
   if (segments[1] === 'attendance' && segments.length >= 3) return true
+  if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'edit') return true
+  if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'preview') return true
+  if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'assignments') return true
+  if (segments[1] === 'courses' && segments.length >= 2 && !!segments[2]  ) return true
+
   return false
 }
 
@@ -34,6 +39,7 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
           onToggleMinimize={toggleMinimize}
           user={toSidebarUser(user)}
           onLogout={() => {
+            clearGuestSession()
             router.push('/auth/login')
           }}
           onProfile={() => {
@@ -42,11 +48,7 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
         />
       )}
 
-      <div
-        className={cn(
-          'flex flex-1 flex-col transition-all duration-300 ease-in-out',
-          !hideSidebar && (isMinimized ? 'lg:ml-20' : 'lg:ml-64')
-        )}>
+      <div className={cn('flex flex-1 flex-col transition-[margin] duration-150 ease-out', !hideSidebar && (isMinimized ? 'lg:ml-20' : 'lg:ml-64'))}>
         <main className={cn('flex-1', hideSidebar ? 'p-4 sm:p-6 lg:p-8' : 'p-6')}>{children}</main>
       </div>
     </div>

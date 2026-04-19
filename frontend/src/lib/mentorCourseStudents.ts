@@ -6,7 +6,7 @@ const MEETINGS_MC002 = 10
 
 /** Fixture peserta per courseUid; nonaktif saat mock dimatikan — ganti dengan GET dari API. */
 const STUDENTS_BY_COURSE: Record<string, IMentorCourseStudent[]> = {
-  'crs-017': [
+  'crs-001': [
     {
       uid: 'stu-mc001-1',
       name: 'Aditya Pratama',
@@ -148,7 +148,7 @@ const STUDENTS_BY_COURSE: Record<string, IMentorCourseStudent[]> = {
       lastActiveLabel: '1 hari lalu',
     },
   ],
-  'crs-018': [
+  'crs-002': [
     {
       uid: 'stu-mc002-1',
       name: 'Omar Hakim',

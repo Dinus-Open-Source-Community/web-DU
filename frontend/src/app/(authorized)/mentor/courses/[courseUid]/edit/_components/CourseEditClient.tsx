@@ -4,39 +4,23 @@ import dynamic from 'next/dynamic'
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import type { IModule, ILesson, IMentorCourse } from '@/lib/types'
-import {
-  getMergedMentorCourses,
-  getSessionCourseModules,
-  getSessionCourseMeta,
-  publishMentorCourse,
-  setSessionCourseModules,
-  upsertExtraCourse,
-} from '@/lib/mentorCourseStorage'
+import { getMergedMentorCourses, getSessionCourseModules, getSessionCourseMeta, publishMentorCourse, setSessionCourseModules, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { notifyPublished, notifySaved } from '@/lib/notify'
 import { CourseModuleOutline } from './CourseModuleOutline'
+import Image from 'next/image';
 
-const CourseTipTapEditor = dynamic(
-  () => import('./CourseTipTapEditor').then((m) => ({ default: m.CourseTipTapEditor })),
-  {
-    ssr: false,
-    loading: () => <div className="min-h-[240px] animate-pulse rounded-xl border border-slate-100 bg-slate-50" />,
-  }
-)
+const CourseTipTapEditor = dynamic(() => import('./CourseTipTapEditor').then((m) => ({ default: m.CourseTipTapEditor })), {
+  ssr: false,
+  loading: () => <div className="min-h-[240px] animate-pulse rounded-xl border border-slate-100 bg-slate-50" />,
+})
 
-const LessonVideoEditor = dynamic(
-  () => import('./LessonVideoEditor').then((m) => ({ default: m.LessonVideoEditor })),
-  { ssr: false }
-)
+const LessonVideoEditor = dynamic(() => import('./LessonVideoEditor').then((m) => ({ default: m.LessonVideoEditor })), { ssr: false })
 
-const LessonQuizEditor = dynamic(
-  () => import('./LessonQuizEditor').then((m) => ({ default: m.LessonQuizEditor })),
-  { ssr: false }
-)
+const LessonQuizEditor = dynamic(() => import('./LessonQuizEditor').then((m) => ({ default: m.LessonQuizEditor })), { ssr: false })
 
 type CourseEditClientProps = {
   courseUid: string
@@ -109,7 +93,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
       prev.map((m) => ({
         ...m,
         lessons: m.lessons.map((l) => (l.id === lessonId ? updater(l) : l)),
-      }))
+      })),
     )
   }
 
@@ -171,9 +155,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
   if (course === null) {
     return (
       <section className="flex flex-col gap-4 py-10">
-        <p className="text-slate-600">
-          Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah membuat kursus baru.
-        </p>
+        <p className="text-slate-600">Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah membuat kursus baru.</p>
         <Button asChild variant="outline" className="w-fit rounded-xl">
           <Link href="/mentor/courses">Kembali ke daftar</Link>
         </Button>
@@ -182,30 +164,14 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
   }
 
   return (
-    <section className="flex w-full flex-col gap-8">
+    <section className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-3">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="mt-1 gap-2 rounded-lg border-border bg-card font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
-          >
-            <Link href={`/mentor/courses/${courseUid}`}>
-              <ArrowLeft className="size-3.5 opacity-80" aria-hidden />
-              Kembali
-            </Link>
-          </Button>
-          <PageHeader title={course.title} subtitle={course.header} />
-        </div>
+        <PageHeader title={course.title} subtitle={course.header} />
         <div className="flex shrink-0 flex-wrap items-center gap-3">
           <span
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-              course.published
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'border-slate-200 bg-slate-100 text-slate-600'
-            }`}
-          >
+              course.published ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-100 text-slate-600'
+            }`}>
             {course.published ? 'Aktif' : 'Belum dipublikasikan'}
           </span>
           {!course.published && (
@@ -217,9 +183,9 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
       </div>
 
       {course.image && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={course.image} alt="" className="max-h-56 w-full object-cover" />
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+          
+          <Image src={course.image} width={384} height={256} loading="lazy" alt={course.title} className="max-h-56 w-full object-cover" />
         </div>
       )}
 
@@ -229,11 +195,8 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
             <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Konten lesson</h2>
             {activeLesson && (
               <p className="text-sm font-medium text-slate-700">
-                Sedang mengedit:{' '}
-                <span className="text-slate-900">{activeLesson.title}</span>
-                <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500">
-                  {activeLesson.contentType}
-                </span>
+                Sedang mengedit: <span className="text-slate-900">{activeLesson.title}</span>
+                <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500">{activeLesson.contentType}</span>
               </p>
             )}
           </div>
@@ -289,21 +252,14 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
           )}
 
           <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">
-              Semua perubahan disimpan ke sesi lokal setelah menekan tombol Simpan.
-            </p>
+            <p className="text-xs text-slate-500">Semua perubahan disimpan ke sesi lokal setelah menekan tombol Simpan.</p>
             <Button type="button" className="rounded-xl px-5" onClick={() => void handleSaveClick()}>
               Save
             </Button>
           </div>
         </div>
 
-        <CourseModuleOutline
-          modules={modules}
-          activeLessonId={activeLessonId}
-          onSelectLesson={setActiveLessonId}
-          onModulesChange={setModules}
-        />
+        <CourseModuleOutline modules={modules} activeLessonId={activeLessonId} onSelectLesson={setActiveLessonId} onModulesChange={setModules} />
       </div>
     </section>
   )

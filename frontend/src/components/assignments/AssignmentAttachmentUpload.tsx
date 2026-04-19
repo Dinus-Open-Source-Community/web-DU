@@ -5,6 +5,7 @@ import { Paperclip, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import Image from 'next/image';
 
 export type AssignmentAttachmentItem = {
   id: string
@@ -152,8 +153,7 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
                 key={item.id}
                 className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 py-2.5 text-sm">
                 {isImg ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.dataUrl} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                  <Image src={item.dataUrl} width={40} height={40} loading="lazy" alt={item.fileName} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                 ) : (
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500">
                     <Paperclip className="h-4 w-4" aria-hidden />

@@ -50,10 +50,9 @@ export function MentorAssignmentsHubClient() {
                 )}>
                 <div className="relative aspect-16/10 w-full bg-slate-100">
                   {c.image?.startsWith('data:') ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.image} alt="" className="h-full w-full object-cover" />
+                    <Image src={c.image} width={384} height={256} loading="lazy" alt="" className="h-full w-full object-cover" />
                   ) : c.image ? (
-                    <Image src={c.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 400px" />
+                    <Image src={c.image} width={384} height={256} loading="lazy" alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full min-h-[120px] items-center justify-center text-slate-300">
                       <BookMarked className="h-10 w-10" aria-hidden />

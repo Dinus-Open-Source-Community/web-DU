@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { PaginationProps } from '@/lib/types/components/ui'
 
-export interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
-}
+export type { PaginationProps }
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })

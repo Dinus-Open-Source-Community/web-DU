@@ -51,7 +51,7 @@ export function QaForum() {
           key={t.uid}
           type="button"
           onClick={() => setSelectedId(t.uid)}
-          className="group flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-slate-300/90">
+          className="group flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-xs transition-colors hover:border-slate-300/90">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
             <Image src={t.authorAvatar} alt={t.author} fill className="object-cover" sizes="40px" />
           </div>
@@ -96,7 +96,7 @@ function QaThreadView({ thread, onBack }: { thread: AdminQaThread; onBack: () =>
         Kembali ke daftar Q&A
       </Button>
 
-      <article className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <article className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
         <div className="flex items-start gap-3">
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100">
             <Image src={thread.authorAvatar} alt={thread.author} fill className="object-cover" sizes="48px" />
@@ -125,7 +125,7 @@ function QaThreadView({ thread, onBack }: { thread: AdminQaThread; onBack: () =>
           thread.replies.map((rep) => (
             <div
               key={rep.uid}
-              className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
               <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
                 <Image src={rep.authorAvatar} alt={rep.author} fill className="object-cover" sizes="40px" />
               </div>
@@ -148,7 +148,7 @@ function QaThreadView({ thread, onBack }: { thread: AdminQaThread; onBack: () =>
         )}
       </section>
 
-      <section className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
         <h3 className="text-sm font-semibold text-slate-800">Tulis balasan Anda</h3>
         <Textarea
           value={reply}

@@ -49,7 +49,7 @@ export function ReviewSubmissionDateRange({ htmlForId, value, onChange, classNam
             <span className="truncate">{label}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] border-slate-200 p-3 shadow-lg" align="start">
+        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] border-slate-200 p-3 shadow-sm" align="start">
           <DayPicker mode="range" selected={value} onSelect={onChange} numberOfMonths={2} className="rdp-root" />
           <div className="mt-3 flex justify-end border-t border-slate-100 pt-3">
             <Button type="button" variant="ghost" size="sm" className="text-slate-600" onClick={() => onChange(undefined)}>

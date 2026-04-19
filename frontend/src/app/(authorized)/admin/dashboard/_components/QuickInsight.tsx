@@ -8,7 +8,7 @@ const RECENT_ROLE_CHANGES: RoleChange[] = [
 
 export default function QuickInsight() {
   return (
-    <div className="w-full lg:w-[260] shrink-0 rounded-xl border border-[#E5E7EB] bg-white shadow-sm p-5 flex flex-col gap-4 self-start">
+    <div className="w-full lg:w-[260] shrink-0 rounded-xl border border-[#E5E7EB] bg-white shadow-xs p-5 flex flex-col gap-4 self-start">
       {/* Title */}
       <h3 className="text-base font-bold text-[#111827]">Quick Insight</h3>
 

@@ -1,8 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import type { FilterSelectOption } from '@/lib/types/components/ui'
 
-export type FilterSelectOption<T extends string = string> = { value: T; label: string }
+export type { FilterSelectOption }
 
 type FilterSelectProps<T extends string> = {
   id: string

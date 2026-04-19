@@ -1,12 +1,8 @@
-import { ReactNode, InputHTMLAttributes } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import type { GlobalInputProps } from "@/lib/types/components/ui";
 
-export interface GlobalInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  subLabel?: string;
-  rightIcon?: ReactNode;
-}
+export type { GlobalInputProps };
 
 export const GlobalInput = ({
   label,

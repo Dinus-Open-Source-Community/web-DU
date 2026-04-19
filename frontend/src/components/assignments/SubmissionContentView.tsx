@@ -2,6 +2,7 @@
 
 import type { SubmissionContentBlock } from '@/lib/types'
 import '@/styles/tiptap-editor.css'
+import Image from 'next/image';
 
 type SubmissionContentViewProps = {
   blocks: SubmissionContentBlock[]
@@ -29,8 +30,7 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
             case 'image':
               return (
                 <figure key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.url} alt={b.alt ?? 'Lampiran gambar'} className="max-h-72 w-full object-contain" loading="lazy" />
+                  <Image src={b.url} width={320} height={200} loading="lazy" alt={b.alt ?? 'Lampiran gambar'} className="max-h-72 w-full object-contain" />
                 </figure>
               )
             case 'file':

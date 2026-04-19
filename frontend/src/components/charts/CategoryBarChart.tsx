@@ -9,11 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { CategoryPoint } from '@/lib/types/components/charts'
 
-export interface CategoryPoint {
-  label: string
-  value: number
-}
+export type { CategoryPoint }
 
 interface CategoryBarChartProps {
   data: CategoryPoint[]

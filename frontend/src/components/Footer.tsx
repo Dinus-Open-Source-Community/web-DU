@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Github, Linkedin, Twitter, Instagram, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { usePathname } from "next/navigation";
 
 const footerLinks = {
   Product: [
@@ -37,6 +38,9 @@ const socialLinks = [
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const pathname = usePathname()
+
+  const isFooterHidden = (pathname?.startsWith('/course/') && pathname !== '/course') || pathname.startsWith('/checkout/')
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +48,10 @@ export default function Footer() {
     console.log("Subscribing email:", email);
     setEmail("");
   };
+
+  if (isFooterHidden) {
+    return null
+  }
 
   return (
     <footer className="bg-secondary-foreground text-popover w-full">

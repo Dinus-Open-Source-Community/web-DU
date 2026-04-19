@@ -47,30 +47,15 @@ export default function TransactionsList() {
     if (currentPage > totalPages) setCurrentPage(totalPages)
   }, [currentPage, totalPages])
 
-  const paginatedData = useMemo(
-    () => paginateTransactions(filteredData, currentPage, ITEMS_PER_PAGE),
-    [filteredData, currentPage],
-  )
+  const paginatedData = useMemo(() => paginateTransactions(filteredData, currentPage, ITEMS_PER_PAGE), [filteredData, currentPage])
 
   return (
     <div className="w-full space-y-6">
       {/* Toolbar: Search + Filter */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <SearchForm
-          value={searchInput}
-          onChange={setSearchInput}
-          onSubmit={() => setSearchQuery(searchInput)}
-          placeholder="Cari ID transaksi atau nama kelas..."
-          className="md:flex-1"
-        />
+        <SearchForm value={searchInput} onChange={setSearchInput} onSubmit={() => setSearchQuery(searchInput)} placeholder="Cari ID transaksi atau nama kelas..." className="md:flex-1" />
 
-        <FilterSelect
-          id="status-filter"
-          label="Status"
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={STATUS_FILTER_OPTIONS}
-        />
+        <FilterSelect id="status-filter" label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_FILTER_OPTIONS} />
       </div>
 
       {/* Summary */}
@@ -97,7 +82,7 @@ export default function TransactionsList() {
               paymentStatus={item.paymentStatus}
               paymentMethod={item.paymentMethod}
               purchasedAt={formatDateTime(item.purchasedAt)}
-              detailHref={`/student/transactions/${item.uid}`}
+              detailHref={`/checkout/invoice/${item.uid}`}
             />
           ))}
         </div>

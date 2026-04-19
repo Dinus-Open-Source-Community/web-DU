@@ -25,6 +25,7 @@ import { CourseStudentStatusBadge } from './CourseStudentStatusBadge'
 import { LeaveDetailModal } from './LeaveDetailModal'
 import { SessionAttendanceDropdown } from './SessionAttendanceDropdown'
 import { useMentorAttendanceStudentActions } from './useMentorAttendanceStudentActions'
+import Image from 'next/image';
 
 type CourseStudentsTableProps = {
   courseUid: string
@@ -63,8 +64,7 @@ function StudentTableRow({
         <TableCell className="px-4 py-3.5 align-middle whitespace-normal">
           <div className="flex items-center gap-3">
             {student.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={student.avatar} alt="" className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-100" />
+              <Image src={student.avatar} width={36} height={36} loading="lazy" alt={student.name} className="size-9 shrink-0 rounded-full object-cover ring-1 ring-slate-100" />
             ) : (
               <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
                 {initials(student.name)}
@@ -127,7 +127,7 @@ export function CourseStudentsTable({
   onRefresh,
 }: CourseStudentsTableProps) {
   return (
-    <div className="hidden overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:block">
+    <div className="hidden overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-xs md:block">
       <Table className="min-w-[920px] table-fixed">
         <TableHeader>
           <TableRow className="border-slate-100 bg-slate-50/90 hover:bg-slate-50/90">

@@ -45,7 +45,7 @@ function ProgressCell({ value }: { value: number }) {
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-500"
+          className="h-full rounded-full bg-primary transition-[width] duration-200"
           style={{ width: `${value}%` }}
         />
       </div>
@@ -71,7 +71,7 @@ export function StudentsTable() {
         s.uid.toLowerCase().includes(q)
       return matchStatus && matchQuery
     })
-  }, [committedSearch, statusFilter])
+  }, [students, committedSearch, statusFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)

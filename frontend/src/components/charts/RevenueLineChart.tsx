@@ -9,11 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { RevenuePoint } from '@/lib/types/components/charts'
 
-export interface RevenuePoint {
-  label: string
-  value: number
-}
+export type { RevenuePoint }
 
 interface RevenueLineChartProps {
   data: RevenuePoint[]
