@@ -107,6 +107,8 @@ erDiagram
 
 ## Tabel `lessons`
 
+**Dokumentasi mendalam** (bentuk JSON `content`, ERD, kontrak API): [lesson/01-database-and-erd.md](../lesson/01-database-and-erd.md), [lesson/03-rest-api-complete.md](../lesson/03-rest-api-complete.md).
+
 | Kolom | Tipe | Keterangan |
 |-------|------|------------|
 | `id` | PK | |

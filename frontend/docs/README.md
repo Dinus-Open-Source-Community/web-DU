@@ -21,6 +21,8 @@ Setiap file di `student/`, `admin/`, `mentor/`, `shared/` mengikuti pola berikut
 | [`admin/`](./admin/) | Fitur area admin |
 | [`mentor/`](./mentor/) | Fitur area mentor |
 | [`shared/`](./shared/) | Auth, checkout publik, profil, katalog publik, sertifikat — lintas peran |
+| [`lesson/`](./lesson/) | Lesson: DB, TipTap/quiz/video, REST `/lessons` lengkap, matriks HTTP — [`lesson/README.md`](./lesson/README.md) |
+| [`features/`](./features/) | Katalog fitur seluruh aplikasi — [`APP-FEATURE-CATALOG.md`](./features/APP-FEATURE-CATALOG.md) |
 
 ## Arsitektur data (ringkas)
 
@@ -55,6 +57,8 @@ flowchart TB
 - [`admin/README.md`](./admin/README.md)
 - [`mentor/README.md`](./mentor/README.md)
 - [`shared/README.md`](./shared/README.md)
+- [`lesson/README.md`](./lesson/README.md) — modul, `content` JSONB, WYSIWYG, API lesson
+- [`features/APP-FEATURE-CATALOG.md`](./features/APP-FEATURE-CATALOG.md) — ringkasan fitur per area
 
 Diagram teknis memakai **Mermaid** (render di GitHub, VS Code, banyak viewer Markdown).
 

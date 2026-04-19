@@ -389,6 +389,8 @@ Admin only — `data.enrollments` + `meta` pagination (sama pola dengan list).
 
 ## 5. Lessons & attendances (JWT)
 
+**CRUD lesson (contoh JSON, envelope, status HTTP):** [lesson/03-rest-api-complete.md](../lesson/03-rest-api-complete.md) · [lesson/04-http-status-matrix.md](../lesson/04-http-status-matrix.md).
+
 | Method | Path | Catatan |
 |--------|------|---------|
 | POST | `/lessons/` | Admin — JSON `LessonCreateRequest` |
