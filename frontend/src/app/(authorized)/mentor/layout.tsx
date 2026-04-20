@@ -12,11 +12,10 @@ import { clearGuestSession } from '@/lib/auth/guest-session'
 function isMentorFullScreenRoute(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length < 3 || segments[0] !== 'mentor') return false
-  if (segments[1] === 'attendance' && segments.length >= 3) return true
   if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'edit') return true
   if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'preview') return true
   if (segments[1] === 'courses' && segments.length >= 4 && segments[3] === 'assignments') return true
-  if (segments[1] === 'courses' && segments.length >= 2 && !!segments[2]  ) return true
+  if (segments[1] === 'courses' && segments.length >= 2 && !!segments[2]) return true
 
   return false
 }

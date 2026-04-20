@@ -5,7 +5,7 @@ import { Paperclip, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import Image from 'next/image';
+import Image from 'next/image'
 
 export type AssignmentAttachmentItem = {
   id: string
@@ -13,6 +13,7 @@ export type AssignmentAttachmentItem = {
   dataUrl: string
   mime: string
   size: number
+  description?: string
 }
 
 const MAX_FILES = 8
@@ -49,10 +50,7 @@ function ingestFiles(fileList: File[], onAdd: (item: AssignmentAttachmentItem) =
       const url = typeof reader.result === 'string' ? reader.result : ''
       if (!url) return
       onAdd({
-        id:
-          typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-            ? crypto.randomUUID()
-            : `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         fileName: file.name,
         dataUrl: url,
         size: file.size,
@@ -67,11 +65,13 @@ type AssignmentAttachmentUploadProps = {
   items: AssignmentAttachmentItem[]
   onAdd: (item: AssignmentAttachmentItem) => void
   onRemove: (id: string) => void
+  onChangeDescription?: (id: string, description: string) => void
+  showDescriptionField?: boolean
   disabled?: boolean
   className?: string
 }
 
-export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, className }: AssignmentAttachmentUploadProps) {
+export function AssignmentAttachmentUpload({ items, onAdd, onRemove, onChangeDescription, showDescriptionField, disabled, className }: AssignmentAttachmentUploadProps) {
   const inputId = useId()
   const [dragOver, setDragOver] = useState(false)
 
@@ -80,7 +80,7 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
       if (!files.length || disabled) return
       ingestFiles(files, onAdd)
     },
-    [disabled, onAdd]
+    [disabled, onAdd],
   )
 
   const onInputChange = useCallback(
@@ -89,7 +89,7 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
       if (f?.length) runPick(Array.from(f))
       e.target.value = ''
     },
-    [runPick]
+    [runPick],
   )
 
   const onDrop = useCallback(
@@ -100,7 +100,7 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
       const f = e.dataTransfer.files
       if (f?.length) runPick(Array.from(f))
     },
-    [disabled, runPick]
+    [disabled, runPick],
   )
 
   return (
@@ -125,21 +125,12 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
         className={cn(
           'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 transition-colors',
           disabled ? 'cursor-not-allowed border-slate-200 bg-slate-50/50 opacity-60' : 'border-slate-200 bg-slate-50/30 hover:border-slate-300 hover:bg-slate-50/60',
-          dragOver && !disabled && 'border-primary/50 bg-primary/5'
+          dragOver && !disabled && 'border-primary/50 bg-primary/5',
         )}>
-        <input
-          id={inputId}
-          type="file"
-          accept={ACCEPT}
-          multiple
-          className="sr-only"
-          disabled={disabled}
-          onChange={onInputChange}
-        />
+        <input id={inputId} type="file" accept={ACCEPT} multiple className="sr-only" disabled={disabled} onChange={onInputChange} />
         <Upload className="h-8 w-8 text-slate-400" aria-hidden />
         <span className="text-center text-sm font-medium text-slate-700">
-          Seret berkas ke sini atau{' '}
-          <span className="text-primary underline-offset-2">pilih dari perangkat</span>
+          Seret berkas ke sini atau <span className="text-primary underline-offset-2">pilih dari perangkat</span>
         </span>
         <span className="text-xs text-slate-400">ZIP, PNG, JPG, GIF, WebP, …</span>
       </label>
@@ -149,9 +140,7 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
           {items.map((item) => {
             const isImg = item.mime.startsWith('image/')
             return (
-              <li
-                key={item.id}
-                className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 py-2.5 text-sm">
+              <li key={item.id} className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 py-2.5 text-sm">
                 {isImg ? (
                   <Image src={item.dataUrl} width={40} height={40} loading="lazy" alt={item.fileName} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                 ) : (
@@ -164,6 +153,16 @@ export function AssignmentAttachmentUpload({ items, onAdd, onRemove, disabled, c
                   <p className="text-xs text-slate-500">
                     {isImg ? 'Gambar' : 'Berkas'} · {formatBytes(item.size)} · {item.mime || '—'}
                   </p>
+                  {showDescriptionField && (
+                    <input
+                      type="text"
+                      value={item.description ?? ''}
+                      onChange={(e) => onChangeDescription?.(item.id, e.target.value)}
+                      placeholder="Deskripsi file"
+                      disabled={disabled}
+                      className="mt-1.5 w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  )}
                 </div>
                 <Button
                   type="button"

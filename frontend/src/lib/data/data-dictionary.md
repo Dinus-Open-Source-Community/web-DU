@@ -8,30 +8,29 @@ Dokumen ini menjelaskan struktur **satu file** seed frontend (`src/lib/data/json
 
 ## Ringkasan
 
-| Bagian JSON | Jumlah baris logis | Fungsi |
-|-------------|-------------------|--------|
-| `categories` | 5 | Kategori kursus (FK `id` → `courses[].categoryId`) |
-| `users` | 18 | Identitas login + profil dasar (`id` unik; dipakai mentor/admin/siswa) |
-| `mentors` | 5 | Profil ekstensi mentor (`id` = `users.id` untuk role mentor) |
-| `students` | 5 | Ringkasan admin untuk siswa (`uid` = `users.id` siswa seed) |
-| `administrators` | 5 | Tabel admin (`uid` = `users.id` admin seed) |
-| `courses` | 5 | Katalog + **modules + lessons** (tiptap / video / quiz) |
-| `reviews` | 5 | Ulasan per kursus (`courseUid`, `studentUid`) |
-| `qaThreads` | 5 | Forum Q&A (`courseUid`, `authorUid`) |
-| `transactions` | 5 + 5 + 5 | `recent`, `history`, `admin` — masing-masing punya `courseUid` + `studentUid` |
-| `certificates` | 5 | Sertifikat (`courseUid`, `studentUid`) |
-| `attendance` | 5 | Absensi per kursus (`courseId` = `courses[].uid`) |
-| `schedules` | 5 | Jadwal mentor (`courseId` = `courses[].uid`) |
-| `studentEnrolledCourses` | 5 | Enrollment dummy (`courseUid`, `studentUid`) |
-| `tickets` | 5 | Tiket support (`studentUid`) |
-| `payouts` | 5 | Payout mentor (`mentorUid`) |
-| `coupons` | 5 | Kupon |
-| `auditLogs` | 5 | Audit trail (`resource` + `resourceId` polimorfik) |
-| `analytics` | objek agregat | KPI + deret chart (bukan 5 baris per chart — disederhanakan) |
-| `dashboard` | objek | Statistik siswa, resume kursus, deadline, feedback, profile, mentorStats |
-| `rbac` | objek | `permissionGroups` + `roles` |
-| `programFeatures` | 4 | Fitur landing (ikon = string, di-map di UI) |
-| `courseExtras` | objek | `whatYouLearn`, `feedbackBreakdown`, `mentorSpecColors` |
+| Bagian JSON              | Jumlah baris logis | Fungsi                                                                        |
+| ------------------------ | ------------------ | ----------------------------------------------------------------------------- |
+| `categories`             | 5                  | Kategori kursus (FK `id` → `courses[].categoryId`)                            |
+| `users`                  | 18                 | Identitas login + profil dasar (`id` unik; dipakai mentor/admin/siswa)        |
+| `mentors`                | 5                  | Profil ekstensi mentor (`id` = `users.id` untuk role mentor)                  |
+| `students`               | 5                  | Ringkasan admin untuk siswa (`uid` = `users.id` siswa seed)                   |
+| `administrators`         | 5                  | Tabel admin (`uid` = `users.id` admin seed)                                   |
+| `courses`                | 5                  | Katalog + **modules + lessons** (tiptap / video / quiz)                       |
+| `reviews`                | 5                  | Ulasan per kursus (`courseUid`, `studentUid`)                                 |
+| `qaThreads`              | 5                  | Forum Q&A (`courseUid`, `authorUid`)                                          |
+| `transactions`           | 5 + 5 + 5          | `recent`, `history`, `admin` — masing-masing punya `courseUid` + `studentUid` |
+| `certificates`           | 5                  | Sertifikat (`courseUid`, `studentUid`)                                        |
+| `schedules`              | 5                  | Jadwal mentor (`courseId` = `courses[].uid`)                                  |
+| `studentEnrolledCourses` | 5                  | Enrollment dummy (`courseUid`, `studentUid`)                                  |
+| `tickets`                | 5                  | Tiket support (`studentUid`)                                                  |
+| `payouts`                | 5                  | Payout mentor (`mentorUid`)                                                   |
+| `coupons`                | 5                  | Kupon                                                                         |
+| `auditLogs`              | 5                  | Audit trail (`resource` + `resourceId` polimorfik)                            |
+| `analytics`              | objek agregat      | KPI + deret chart (bukan 5 baris per chart — disederhanakan)                  |
+| `dashboard`              | objek              | Statistik siswa, resume kursus, deadline, feedback, profile, mentorStats      |
+| `rbac`                   | objek              | `permissionGroups` + `roles`                                                  |
+| `programFeatures`        | 4                  | Fitur landing (ikon = string, di-map di UI)                                   |
+| `courseExtras`           | objek              | `whatYouLearn`, `feedbackBreakdown`, `mentorSpecColors`                       |
 
 **Course UIDs untuk uji preview materi:** `crs-001` … `crs-005` — setiap kursus punya 2 modul × beberapa lesson (tiptap, video YouTube, quiz).
 
@@ -78,29 +77,28 @@ Response **join** ke frontend (contoh `listCourses()`): `ICardData` memuat `cate
 
 ## Pemetaan: bagian JSON → halaman / fitur
 
-| Key / area | Fungsi repository (utama) | Route / area UI |
-|------------|---------------------------|-----------------|
-| `courses`, `categories`, `users` + `mentors` | `listCourses`, `listCategories`, `getCourseByUid`, `listMentors`, `getSyllabusFromCourse` | `/`, `/course`, `/course/[uid]` |
-| `courseExtras` | `getCourseWhatYouLearn`, `getCourseFeedbackBreakdown` | `/course/[uid]` (detail) |
-| `programFeatures` | `getProgramFeatures` | `/` (landing) |
-| `courses` (modules) | `getCourseByUid` + [`mentorCourseStorage`](../mentorCourseStorage.ts) | `/course/[uid]/view` — **CourseModulePreview**; `/mentor/courses/.../edit` |
-| `certificates` | `listCertificates`, `getCertificateByUid` | `/certificate/[uid]`, `/student/certificates` |
-| `dashboard` | `getDashboardStats`, `getResumeCourses`, `getDeadlines`, `getFeedbacks`, `getProfileData` | `/student/dashboard`, hooks `useDashboard` |
-| `dashboard.mentorStats`, `schedules` | `getMentorDashboardStats`, `listSchedules` | `/mentor/dashboard`, `useMentorDashboard` |
-| `analytics` | `getDashboardKpis`, `getRevenueLine30d`, `getNewUsersWeek`, `getTopCoursesByEnrolment`, … | `/admin/dashboard`, `/admin/financial`, `/admin/transactions`, `/admin/analytics/*` |
-| `transactions` | `listRecentTransactions`, `listHistoryTransactions`, `listAdminTransactions`, `getTransactionsSource` | Admin dashboard widget, `/admin/transactions`, `/student/transactions` |
-| `tickets` | `listTickets` | `/admin/dashboard` (widget) |
-| `courses` | `listCourses`, `listAdminCategories` | `/admin/courses` |
-| `reviews`, `qaThreads` | `listAllReviews`, `listAllQaThreads` | `/admin/courses/reviews-qa` |
-| `students`, `transactions.admin`, `studentEnrolledCourses` | `listStudents`, `listAdminTransactions`, `listStudentEnrolledCourses` | `/admin/users/students`, `/admin/users/students/[uid]` |
-| `mentors`, `courseExtras.mentorSpecColors` | `listMentors`, `getMentorSpecColors`, `listCourses` | `/admin/users/mentors`, detail mentor |
-| `administrators` | `listAdministrators` | `/admin/users/administrators` |
-| `payouts` | `listPayouts` | Admin finance / payout UI |
-| `coupons` | `listCoupons` | Admin marketing |
-| `auditLogs` | `listAuditLogs` | `/admin/security` (audit) |
-| `rbac` | `listRoles`, `listPermissionGroups` | `/admin/security` (RBAC) |
-| `attendance` | `listAttendance` | `/student/attendance` |
-| `users` | `listUsers` | `dummyUsers`, middleware, `useUser` |
+| Key / area                                                 | Fungsi repository (utama)                                                                             | Route / area UI                                                                     |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `courses`, `categories`, `users` + `mentors`               | `listCourses`, `listCategories`, `getCourseByUid`, `listMentors`, `getSyllabusFromCourse`             | `/`, `/course`, `/course/[uid]`                                                     |
+| `courseExtras`                                             | `getCourseWhatYouLearn`, `getCourseFeedbackBreakdown`                                                 | `/course/[uid]` (detail)                                                            |
+| `programFeatures`                                          | `getProgramFeatures`                                                                                  | `/` (landing)                                                                       |
+| `courses` (modules)                                        | `getCourseByUid` + [`mentorCourseStorage`](../mentorCourseStorage.ts)                                 | `/course/[uid]/view` — **CourseModulePreview**; `/mentor/courses/.../edit`          |
+| `certificates`                                             | `listCertificates`, `getCertificateByUid`                                                             | `/certificate/[uid]`, `/student/certificates`                                       |
+| `dashboard`                                                | `getDashboardStats`, `getResumeCourses`, `getDeadlines`, `getFeedbacks`, `getProfileData`             | `/student/dashboard`, hooks `useDashboard`                                          |
+| `dashboard.mentorStats`, `schedules`                       | `getMentorDashboardStats`, `listSchedules`                                                            | `/mentor/dashboard`, `useMentorDashboard`                                           |
+| `analytics`                                                | `getDashboardKpis`, `getRevenueLine30d`, `getNewUsersWeek`, `getTopCoursesByEnrolment`, …             | `/admin/dashboard`, `/admin/financial`, `/admin/transactions`, `/admin/analytics/*` |
+| `transactions`                                             | `listRecentTransactions`, `listHistoryTransactions`, `listAdminTransactions`, `getTransactionsSource` | Admin dashboard widget, `/admin/transactions`, `/student/transactions`              |
+| `tickets`                                                  | `listTickets`                                                                                         | `/admin/dashboard` (widget)                                                         |
+| `courses`                                                  | `listCourses`, `listAdminCategories`                                                                  | `/admin/courses`                                                                    |
+| `reviews`, `qaThreads`                                     | `listAllReviews`, `listAllQaThreads`                                                                  | `/admin/courses/reviews-qa`                                                         |
+| `students`, `transactions.admin`, `studentEnrolledCourses` | `listStudents`, `listAdminTransactions`, `listStudentEnrolledCourses`                                 | `/admin/users/students`, `/admin/users/students/[uid]`                              |
+| `mentors`, `courseExtras.mentorSpecColors`                 | `listMentors`, `getMentorSpecColors`, `listCourses`                                                   | `/admin/users/mentors`, detail mentor                                               |
+| `administrators`                                           | `listAdministrators`                                                                                  | `/admin/users/administrators`                                                       |
+| `payouts`                                                  | `listPayouts`                                                                                         | Admin finance / payout UI                                                           |
+| `coupons`                                                  | `listCoupons`                                                                                         | Admin marketing                                                                     |
+| `auditLogs`                                                | `listAuditLogs`                                                                                       | `/admin/security` (audit)                                                           |
+| `rbac`                                                     | `listRoles`, `listPermissionGroups`                                                                   | `/admin/security` (RBAC)                                                            |
+| `users`                                                    | `listUsers`                                                                                           | `dummyUsers`, middleware, `useUser`                                                 |
 
 ---
 

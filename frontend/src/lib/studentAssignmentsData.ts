@@ -1,13 +1,8 @@
 import type { DeadlineUrgency, IMentorAssignmentSubmission, IMentorCourseAssignment, SubmissionContentBlock } from '@/lib/types'
 import { getMentorCourseByUid } from '@/lib/mentorCourseStorage'
-import {
-  findAssignmentByUid,
-  getAssignmentsForCourse,
-  getDeadlineUrgency,
-  getEffectiveAssignmentStatus,
-  getSubmissionsForStudent,
-  pushExtraSubmission,
-} from '@/lib/mentorAssignmentsData'
+import { findAssignmentByUid, getAssignmentsForCourse, getDeadlineUrgency, getEffectiveAssignmentStatus, getSubmissionsForStudent, pushExtraSubmission } from '@/lib/mentorAssignmentsData'
+import { getActiveUser } from '@/lib/data/dummyUsers'
+import { getUserById, listStudentEnrolledCourses } from '@/lib/data/repository'
 
 /** Selaras dengan seed `SUBMISSION_SEED` & `seed-data.json` users/students */
 export const STUDENT_DEMO_UID = 'stu-001'
@@ -17,12 +12,51 @@ export const STUDENT_DEMO_AVATAR = 'https://i.pravatar.cc/150?u=ayu0'
 /** Kursus yang diikuti siswa demo (sinkron My Learning) */
 export const STUDENT_ENROLLED_COURSE_IDS = ['crs-001', 'crs-002'] as const
 
-export type StudentAssignmentFeedCategory =
-  | 'all'
-  | 'todo'
-  | 'pending_review'
-  | 'done'
-  | 'late'
+const DEV_STUDENT_ALIAS_BY_USER_ID: Record<string, string> = {
+  'usr-student-01': 'stu-001',
+}
+
+export type StudentAssignmentActor = {
+  studentUid: string
+  studentName: string
+  studentAvatar: string
+  enrolledCourseIds: string[]
+}
+
+function getEnrolledCourseIdsByStudentUid(studentUid: string): string[] {
+  return listStudentEnrolledCourses()
+    .filter((row) => row.studentUid === studentUid)
+    .map((row) => row.courseUid)
+    .filter((courseUid): courseUid is string => typeof courseUid === 'string' && courseUid.length > 0)
+}
+
+function resolveStudentUid(candidateUid: string): string {
+  const directEnrollments = getEnrolledCourseIdsByStudentUid(candidateUid)
+  if (directEnrollments.length > 0) return candidateUid
+
+  const alias = DEV_STUDENT_ALIAS_BY_USER_ID[candidateUid]
+  if (alias && getEnrolledCourseIdsByStudentUid(alias).length > 0) {
+    return alias
+  }
+
+  return STUDENT_DEMO_UID
+}
+
+export function getActiveStudentAssignmentActor(): StudentAssignmentActor {
+  const active = getActiveUser()
+  const resolvedUid = resolveStudentUid(active.id)
+  const user = getUserById(resolvedUid)
+  const enrolledCourseIds = getEnrolledCourseIdsByStudentUid(resolvedUid)
+
+  return {
+    studentUid: resolvedUid,
+    studentName: user?.nama ?? active.nama ?? STUDENT_DEMO_NAME,
+    studentAvatar: user?.avatar ?? active.avatar ?? STUDENT_DEMO_AVATAR,
+    enrolledCourseIds: enrolledCourseIds.length > 0 ? enrolledCourseIds : [...STUDENT_ENROLLED_COURSE_IDS],
+  }
+}
+
+export type StudentAssignmentFeedCategory = 'all' | 'todo' | 'pending_review' | 'done' | 'late'
 
 export type StudentAssignmentFeedRow = {
   assignment: IMentorCourseAssignment
@@ -54,14 +88,17 @@ function rowKind(latest: IMentorAssignmentSubmission | null): StudentAssignmentF
 }
 
 export function listStudentAssignmentFeed(studentUid: string, now: Date = new Date()): StudentAssignmentFeedRow[] {
+  const resolvedStudentUid = resolveStudentUid(studentUid)
+  const enrolledCourseIds = getEnrolledCourseIdsByStudentUid(resolvedStudentUid)
+  const courseIds = enrolledCourseIds.length > 0 ? enrolledCourseIds : [...STUDENT_ENROLLED_COURSE_IDS]
   const out: StudentAssignmentFeedRow[] = []
-  for (const courseId of STUDENT_ENROLLED_COURSE_IDS) {
+  for (const courseId of courseIds) {
     const course = getMentorCourseByUid(courseId)
     if (!course) continue
     const assignments = getAssignmentsForCourse(courseId)
     for (const a of assignments) {
       if (a.status === 'draft') continue
-      const latest = submissionsForAssignment(studentUid, a.uid)[0] ?? null
+      const latest = submissionsForAssignment(resolvedStudentUid, a.uid)[0] ?? null
       const urg = getDeadlineUrgency(a, now)
       out.push({
         assignment: a,
@@ -75,11 +112,7 @@ export function listStudentAssignmentFeed(studentUid: string, now: Date = new Da
   return out.sort((x, y) => new Date(x.assignment.deadlineAt).getTime() - new Date(y.assignment.deadlineAt).getTime())
 }
 
-export function getStudentAssignmentFeedRow(
-  studentUid: string,
-  assignmentUid: string,
-  now: Date = new Date()
-): StudentAssignmentFeedRow | null {
+export function getStudentAssignmentFeedRow(studentUid: string, assignmentUid: string, now: Date = new Date()): StudentAssignmentFeedRow | null {
   return listStudentAssignmentFeed(studentUid, now).find((r) => r.assignment.uid === assignmentUid) ?? null
 }
 
@@ -144,10 +177,7 @@ export function canStudentOpenAssignmentDetail(row: StudentAssignmentFeedRow, no
   return true
 }
 
-export function getStudentAssignmentDetailAccessDeniedReason(
-  row: StudentAssignmentFeedRow | null,
-  now: Date = new Date()
-): string | null {
+export function getStudentAssignmentDetailAccessDeniedReason(row: StudentAssignmentFeedRow | null, now: Date = new Date()): string | null {
   if (!row) return 'Tugas tidak ditemukan atau Anda tidak terdaftar di kursus ini.'
   if (canStudentOpenAssignmentDetail(row, now)) return null
 
@@ -164,11 +194,7 @@ export function getStudentAssignmentDetailAccessDeniedReason(
   return 'Halaman tugas tidak tersedia untuk status ini.'
 }
 
-export function filterStudentFeed(
-  rows: StudentAssignmentFeedRow[],
-  category: StudentAssignmentFeedCategory,
-  now: Date = new Date()
-): StudentAssignmentFeedRow[] {
+export function filterStudentFeed(rows: StudentAssignmentFeedRow[], category: StudentAssignmentFeedCategory, now: Date = new Date()): StudentAssignmentFeedRow[] {
   if (category === 'all') return rows
   return rows.filter((r) => {
     const a = r.assignment
@@ -188,21 +214,35 @@ export function filterStudentFeed(
   })
 }
 
-export type SubmitStudentAssignmentResult =
-  | { ok: true; submission: IMentorAssignmentSubmission }
-  | { ok: false; message: string }
+export type SubmitStudentAssignmentResult = { ok: true; submission: IMentorAssignmentSubmission } | { ok: false; message: string }
 
 export type AssignmentSubmitState = { allowed: true } | { allowed: false; message: string }
 
 /** Untuk men-disable tombol kirim di UI */
 export function getAssignmentSubmitState(studentUid: string, assignmentUid: string, now: Date = new Date()): AssignmentSubmitState {
+  const resolvedStudentUid = resolveStudentUid(studentUid)
   const a = findAssignmentByUid(assignmentUid)
   if (!a) return { allowed: false, message: 'Tugas tidak ditemukan.' }
+  if ((a.taskType ?? 'text') === 'quiz' && (!a.quiz || a.quiz.questions.length === 0)) {
+    return { allowed: false, message: 'Quiz belum dikonfigurasi mentor.' }
+  }
+  if ((a.taskType ?? 'text') !== 'quiz') {
+    const config = {
+      allowFile: a.submissionConfig?.allowFile ?? true,
+      allowPlainText: a.submissionConfig?.allowPlainText ?? false,
+      allowRichText: a.submissionConfig?.allowRichText ?? true,
+    }
+    if (!config.allowFile && !config.allowPlainText && !config.allowRichText) {
+      return { allowed: false, message: 'Mode pengumpulan belum diatur untuk tugas ini.' }
+    }
+  }
   if (a.status === 'draft') return { allowed: false, message: 'Tugas belum terbit.' }
-  if (!(STUDENT_ENROLLED_COURSE_IDS as readonly string[]).includes(a.courseId)) {
+  const enrolledCourseIds = getEnrolledCourseIdsByStudentUid(resolvedStudentUid)
+  const courseIds = enrolledCourseIds.length > 0 ? enrolledCourseIds : [...STUDENT_ENROLLED_COURSE_IDS]
+  if (!courseIds.includes(a.courseId)) {
     return { allowed: false, message: 'Anda tidak terdaftar di kursus ini.' }
   }
-  const subs = submissionsForAssignment(studentUid, a.uid)
+  const subs = submissionsForAssignment(resolvedStudentUid, a.uid)
   const latest = subs[0]
   if (latest?.reviewStatus === 'pending_review') {
     return { allowed: false, message: 'Menunggu review kiriman sebelumnya.' }
@@ -230,27 +270,26 @@ export function submitStudentAssignment(input: {
   studentAvatar: string
   contentBlocks: SubmissionContentBlock[]
 }): SubmitStudentAssignmentResult {
-  const gate = getAssignmentSubmitState(input.studentUid, input.assignmentUid)
+  const resolvedStudentUid = resolveStudentUid(input.studentUid)
+  const identityUser = getUserById(resolvedStudentUid)
+  const gate = getAssignmentSubmitState(resolvedStudentUid, input.assignmentUid)
   if (!gate.allowed) return { ok: false, message: gate.message }
 
   const a = findAssignmentByUid(input.assignmentUid)
   if (!a) return { ok: false, message: 'Tugas tidak ditemukan.' }
   const now = new Date()
-  const subs = submissionsForAssignment(input.studentUid, a.uid)
+  const subs = submissionsForAssignment(resolvedStudentUid, a.uid)
   const nextAttempt = subs.length ? Math.max(...subs.map((s) => s.attemptNumber)) + 1 : 1
 
-  const uid =
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `sub_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`
+  const uid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `sub_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`
 
   const row: IMentorAssignmentSubmission = {
     uid,
     assignmentUid: a.uid,
     courseId: a.courseId,
-    studentUid: input.studentUid,
-    studentName: input.studentName,
-    studentAvatar: input.studentAvatar,
+    studentUid: resolvedStudentUid,
+    studentName: identityUser?.nama ?? input.studentName,
+    studentAvatar: identityUser?.avatar ?? input.studentAvatar,
     submittedAt: now.toISOString(),
     attemptNumber: nextAttempt,
     contentBlocks: input.contentBlocks,

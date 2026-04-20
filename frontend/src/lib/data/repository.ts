@@ -31,7 +31,6 @@ import type {
   AdminStatus,
   MentorSpecialization,
   ICertificate,
-  ICourseAttendance,
   IScheduleItem,
   IDashboardStat,
   IResumeCourse,
@@ -51,6 +50,8 @@ import type {
   TransactionTimelinePoint,
   EngagementTrendPoint,
   ChartRatioPoint,
+  IMentorCourseAssignment,
+  IMentorAssignmentSubmission,
 } from '@/lib/types'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
 
@@ -264,7 +265,8 @@ const auditLogsData = seedData.auditLogs as AdminAuditLog[]
 const rbacData = seedData.rbac as RbacData
 const analyticsData = seedData.analytics as AnalyticsData
 const certificatesData = seedData.certificates as ICertificate[]
-const attendanceData = seedData.attendance as ICourseAttendance[]
+const assignmentSeedsData = seedData.assignmentSeeds as IMentorCourseAssignment[]
+const submissionSeedsData = seedData.submissionSeeds as IMentorAssignmentSubmission[]
 const schedulesData = seedData.schedules as IScheduleItem[]
 const dashData = seedData.dashboard as DashboardData
 const programFeaturesData = seedData.programFeatures as IProgramFeatureData[]
@@ -530,10 +532,14 @@ export function getCertificateByUid(uid: string): ICertificate | undefined {
   return certificatesData.find((c) => c.uid === uid)
 }
 
-// ─── Public API: Attendance ─────────────────────────────────────────────────
+// ─── Public API: Assignment seeds ───────────────────────────────────────────
 
-export function listAttendance(): ICourseAttendance[] {
-  return attendanceData
+export function listMentorAssignmentSeeds(): IMentorCourseAssignment[] {
+  return assignmentSeedsData
+}
+
+export function listMentorSubmissionSeeds(): IMentorAssignmentSubmission[] {
+  return submissionSeedsData
 }
 
 // ─── Public API: Schedules ──────────────────────────────────────────────────

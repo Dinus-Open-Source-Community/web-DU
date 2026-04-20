@@ -8,9 +8,9 @@ import { CARD_PANEL_CLASS } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
+  getActiveStudentAssignmentActor,
   getStudentAssignmentDetailAccessDeniedReason,
   getStudentAssignmentFeedRow,
-  STUDENT_DEMO_UID,
 } from '@/lib/studentAssignmentsData'
 import { StudentAssignmentDetailClient } from './StudentAssignmentDetailClient'
 
@@ -30,7 +30,11 @@ export function StudentAssignmentDetailGate() {
   }, [load])
 
   const row = useMemo(
-    () => (assignmentUid ? getStudentAssignmentFeedRow(STUDENT_DEMO_UID, assignmentUid, now) : null),
+    () => {
+      if (!assignmentUid) return null
+      const actor = getActiveStudentAssignmentActor()
+      return getStudentAssignmentFeedRow(actor.studentUid, assignmentUid, now)
+    },
     [assignmentUid, now]
   )
 

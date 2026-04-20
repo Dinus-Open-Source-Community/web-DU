@@ -1419,164 +1419,207 @@
       "imageUrl": "https://picsum.photos/seed/cert5/800/600"
     }
   ],
-  "attendance": [
+  "assignmentSeeds": [
     {
+      "uid": "asg-mc001-1",
       "courseId": "crs-001",
-      "courseName": "Advanced React Patterns & Next.js 15",
-      "author": {
-        "name": "Dewi Anggraini",
-        "avatar": "https://i.pravatar.cc/150?u=dewi_m"
+      "meetingNumber": 4,
+      "title": "Mini project: REST API + auth",
+      "taskType": "text",
+      "description": "<p>Bangun endpoint CRUD dengan JWT refresh token.</p>",
+      "deadlineAt": "2026-04-25T23:59:59.000Z",
+      "status": "published",
+      "autoCloseAfterDeadline": true,
+      "allowResubmit": true,
+      "maxAttempts": 3,
+      "submissionConfig": {
+        "allowFile": true,
+        "allowPlainText": true,
+        "allowRichText": true,
+        "requireFileDescription": false
       },
-      "image": "https://picsum.photos/seed/crs001/600/400",
-      "summary": {
-        "totalMeetings": 8,
-        "hadir": 5,
-        "izin": 1,
-        "alpha": 0,
-        "progressPercentage": 70
-      },
-      "records": [
+      "instructionAttachments": [
         {
-          "uid": "rec-crs-001-1",
-          "meetingNumber": 1,
-          "date": "02 Sep 2025",
-          "topic": "Kickoff",
-          "status": "Hadir"
-        },
-        {
-          "uid": "rec-crs-001-2",
-          "meetingNumber": 2,
-          "date": "09 Sep 2025",
-          "topic": "Praktik",
-          "status": "Hadir"
+          "fileName": "brief-tugas.pdf",
+          "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          "mime": "application/pdf"
         }
       ]
     },
     {
+      "uid": "asg-mc001-quiz-1",
+      "courseId": "crs-001",
+      "meetingNumber": 5,
+      "title": "Quiz: Next.js App Router fundamentals",
+      "taskType": "quiz",
+      "description": "<p>Kerjakan quiz sesuai materi lesson. Pilih satu jawaban paling tepat untuk tiap soal.</p>",
+      "quiz": {
+        "passingScore": 70,
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Komponen default di folder app pada Next.js berjalan sebagai apa?",
+            "options": [
+              { "id": "q1a", "label": "Client Component" },
+              { "id": "q1b", "label": "Server Component" },
+              { "id": "q1c", "label": "API Handler" }
+            ],
+            "correctOptionId": "q1b"
+          },
+          {
+            "id": "q2",
+            "prompt": "Kapan sebaiknya menambahkan directive use client?",
+            "options": [
+              { "id": "q2a", "label": "Saat butuh state, effect, atau event browser" },
+              { "id": "q2b", "label": "Untuk semua file page.tsx" },
+              { "id": "q2c", "label": "Hanya untuk route API" }
+            ],
+            "correctOptionId": "q2a"
+          }
+        ]
+      },
+      "deadlineAt": "2026-04-29T18:00:00.000Z",
+      "status": "published",
+      "autoCloseAfterDeadline": true,
+      "allowResubmit": true,
+      "maxAttempts": 2,
+      "submissionConfig": {
+        "allowFile": false,
+        "allowPlainText": false,
+        "allowRichText": false,
+        "requireFileDescription": false
+      }
+    },
+    {
+      "uid": "asg-mc001-3",
+      "courseId": "crs-001",
+      "meetingNumber": 6,
+      "title": "Workshop UI (draf)",
+      "taskType": "text",
+      "description": "<p>Akan dipublikasikan minggu depan.</p>",
+      "deadlineAt": "2026-05-01T23:59:59.000Z",
+      "status": "draft",
+      "autoCloseAfterDeadline": false,
+      "allowResubmit": true,
+      "submissionConfig": {
+        "allowFile": true,
+        "allowPlainText": false,
+        "allowRichText": true,
+        "requireFileDescription": false
+      }
+    },
+    {
+      "uid": "asg-mc002-1",
       "courseId": "crs-002",
-      "courseName": "UI/UX Fundamentals",
-      "author": {
-        "name": "Jessica Wong",
-        "avatar": "https://i.pravatar.cc/150?u=jess_w"
-      },
-      "image": "https://picsum.photos/seed/crs002/600/400",
-      "summary": {
-        "totalMeetings": 8,
-        "hadir": 6,
-        "izin": 1,
-        "alpha": 0,
-        "progressPercentage": 72
-      },
-      "records": [
+      "meetingNumber": 2,
+      "title": "Design tokens & dokumentasi",
+      "taskType": "text",
+      "description": "<p>Ekspor token ke CSS variables.</p>",
+      "deadlineAt": "2026-04-27T18:00:00.000Z",
+      "status": "published",
+      "autoCloseAfterDeadline": true,
+      "allowResubmit": true,
+      "maxAttempts": 2,
+      "submissionConfig": {
+        "allowFile": true,
+        "allowPlainText": false,
+        "allowRichText": true,
+        "requireFileDescription": true
+      }
+    },
+    {
+      "uid": "asg-mc002-closed-1",
+      "courseId": "crs-002",
+      "meetingNumber": 1,
+      "title": "Closed task sample",
+      "taskType": "text",
+      "description": "<p>Tugas ini sudah ditutup untuk simulasi status.</p>",
+      "deadlineAt": "2026-04-01T09:00:00.000Z",
+      "status": "closed",
+      "autoCloseAfterDeadline": true,
+      "allowResubmit": false,
+      "submissionConfig": {
+        "allowFile": false,
+        "allowPlainText": true,
+        "allowRichText": false,
+        "requireFileDescription": false
+      }
+    }
+  ],
+  "submissionSeeds": [
+    {
+      "uid": "sub-mc001-1",
+      "assignmentUid": "asg-mc001-1",
+      "courseId": "crs-001",
+      "studentUid": "stu-001",
+      "studentName": "Ayu Pratama",
+      "studentAvatar": "https://i.pravatar.cc/150?u=ayu0",
+      "submittedAt": "2026-04-21T08:30:00.000Z",
+      "attemptNumber": 1,
+      "reviewStatus": "pending_review",
+      "rating": null,
+      "mentorComment": null,
+      "reviewedAt": null,
+      "contentBlocks": [
+        { "type": "text", "text": "Berikut lampiran tugas saya. Saya sudah menambahkan refresh token di cookie httpOnly." },
+        { "type": "link", "url": "https://github.com/example/next-api-demo", "label": "Repositori GitHub" }
+      ]
+    },
+    {
+      "uid": "sub-mc001-quiz-1",
+      "assignmentUid": "asg-mc001-quiz-1",
+      "courseId": "crs-001",
+      "studentUid": "stu-002",
+      "studentName": "Budi Santoso",
+      "studentAvatar": "https://i.pravatar.cc/150?u=budi1",
+      "submittedAt": "2026-04-21T10:00:00.000Z",
+      "attemptNumber": 1,
+      "reviewStatus": "graded",
+      "rating": 4,
+      "mentorComment": "Pemahaman konsep sudah baik, lanjutkan ke nested layout.",
+      "reviewedAt": "2026-04-21T12:00:00.000Z",
+      "contentBlocks": [
         {
-          "uid": "rec-crs-002-1",
-          "meetingNumber": 1,
-          "date": "02 Sep 2025",
-          "topic": "Kickoff",
-          "status": "Hadir"
-        },
-        {
-          "uid": "rec-crs-002-2",
-          "meetingNumber": 2,
-          "date": "09 Sep 2025",
-          "topic": "Praktik",
-          "status": "Hadir"
+          "type": "quiz",
+          "passingScore": 70,
+          "answers": [
+            {
+              "questionId": "q1",
+              "prompt": "Komponen default di folder app pada Next.js berjalan sebagai apa?",
+              "selectedOptionId": "q1b",
+              "selectedLabel": "Server Component"
+            },
+            {
+              "questionId": "q2",
+              "prompt": "Kapan sebaiknya menambahkan directive use client?",
+              "selectedOptionId": "q2a",
+              "selectedLabel": "Saat butuh state, effect, atau event browser"
+            }
+          ]
         }
       ]
     },
     {
-      "courseId": "crs-003",
-      "courseName": "Machine Learning with Python",
-      "author": {
-        "name": "Dr. Alex Chen",
-        "avatar": "https://i.pravatar.cc/150?u=alex_c"
-      },
-      "image": "https://picsum.photos/seed/crs003/600/400",
-      "summary": {
-        "totalMeetings": 8,
-        "hadir": 7,
-        "izin": 1,
-        "alpha": 0,
-        "progressPercentage": 74
-      },
-      "records": [
+      "uid": "sub-mc002-1",
+      "assignmentUid": "asg-mc002-1",
+      "courseId": "crs-002",
+      "studentUid": "stu-001",
+      "studentName": "Ayu Pratama",
+      "studentAvatar": "https://i.pravatar.cc/150?u=ayu0",
+      "submittedAt": "2026-04-20T09:00:00.000Z",
+      "attemptNumber": 1,
+      "reviewStatus": "returned",
+      "rating": 3,
+      "mentorComment": "Struktur sudah benar, tambahkan penjelasan naming token sebelum resubmit.",
+      "reviewedAt": "2026-04-20T15:30:00.000Z",
+      "contentBlocks": [
+        { "type": "text", "text": "Token warna diekspor ke JSON dan CSS variables." },
         {
-          "uid": "rec-crs-003-1",
-          "meetingNumber": 1,
-          "date": "02 Sep 2025",
-          "topic": "Kickoff",
-          "status": "Hadir"
-        },
-        {
-          "uid": "rec-crs-003-2",
-          "meetingNumber": 2,
-          "date": "09 Sep 2025",
-          "topic": "Praktik",
-          "status": "Hadir"
-        }
-      ]
-    },
-    {
-      "courseId": "crs-004",
-      "courseName": "Product Strategy Sprint",
-      "author": {
-        "name": "Marcus Levin",
-        "avatar": "https://i.pravatar.cc/150?u=marcus_l"
-      },
-      "image": "https://picsum.photos/seed/crs004/600/400",
-      "summary": {
-        "totalMeetings": 8,
-        "hadir": 8,
-        "izin": 1,
-        "alpha": 0,
-        "progressPercentage": 76
-      },
-      "records": [
-        {
-          "uid": "rec-crs-004-1",
-          "meetingNumber": 1,
-          "date": "02 Sep 2025",
-          "topic": "Kickoff",
-          "status": "Hadir"
-        },
-        {
-          "uid": "rec-crs-004-2",
-          "meetingNumber": 2,
-          "date": "09 Sep 2025",
-          "topic": "Praktik",
-          "status": "Hadir"
-        }
-      ]
-    },
-    {
-      "courseId": "crs-005",
-      "courseName": "Cybersecurity Analyst Bootcamp",
-      "author": {
-        "name": "Kevin Mitnick",
-        "avatar": "https://i.pravatar.cc/150?u=kevin_m"
-      },
-      "image": "https://picsum.photos/seed/crs005/600/400",
-      "summary": {
-        "totalMeetings": 8,
-        "hadir": 9,
-        "izin": 1,
-        "alpha": 0,
-        "progressPercentage": 78
-      },
-      "records": [
-        {
-          "uid": "rec-crs-005-1",
-          "meetingNumber": 1,
-          "date": "02 Sep 2025",
-          "topic": "Kickoff",
-          "status": "Hadir"
-        },
-        {
-          "uid": "rec-crs-005-2",
-          "meetingNumber": 2,
-          "date": "09 Sep 2025",
-          "topic": "Praktik",
-          "status": "Hadir"
+          "type": "file",
+          "fileName": "tokens.json",
+          "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          "mime": "application/json",
+          "description": "File export token"
         }
       ]
     }

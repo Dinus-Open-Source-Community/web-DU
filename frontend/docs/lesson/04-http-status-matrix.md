@@ -8,79 +8,63 @@ Semua respons memakai envelope `success`, `message`, `data`, `error` ([response-
 
 ### `POST /lessons/`
 
-| HTTP | Kondisi | `message` (contoh) |
-|------|---------|---------------------|
-| **201** | Lesson tersimpan | `Lesson created successfully` |
-| **400** | Body tidak valid | `Invalid request data` |
-| **401** | Tanpa JWT / JWT invalid | `Authorization header missing` / pesan dari middleware |
-| **403** | User bukan admin | `Access denied: Admins only` |
-| **404** | User ID dari token tidak ada di DB | `User not found` |
-| **500** | Error insert | `Failed to create lesson` |
+| HTTP    | Kondisi                            | `message` (contoh)                                     |
+| ------- | ---------------------------------- | ------------------------------------------------------ |
+| **201** | Lesson tersimpan                   | `Lesson created successfully`                          |
+| **400** | Body tidak valid                   | `Invalid request data`                                 |
+| **401** | Tanpa JWT / JWT invalid            | `Authorization header missing` / pesan dari middleware |
+| **403** | User bukan admin                   | `Access denied: Admins only`                           |
+| **404** | User ID dari token tidak ada di DB | `User not found`                                       |
+| **500** | Error insert                       | `Failed to create lesson`                              |
 
 ---
 
 ### `GET /lessons/`
 
-| HTTP | Kondisi | `message` (contoh) |
-|------|---------|---------------------|
-| **200** | OK | `Lessons retrieved successfully` |
-| **401** | Middleware | — |
-| **403** | Bukan admin | `Access denied: Admins only` |
-| **404** | User tidak ditemukan | `User not found` |
-| **500** | Count/query gagal | `Failed to count lessons` / `Failed to retrieve lessons` |
+| HTTP    | Kondisi              | `message` (contoh)                                       |
+| ------- | -------------------- | -------------------------------------------------------- |
+| **200** | OK                   | `Lessons retrieved successfully`                         |
+| **401** | Middleware           | —                                                        |
+| **403** | Bukan admin          | `Access denied: Admins only`                             |
+| **404** | User tidak ditemukan | `User not found`                                         |
+| **500** | Count/query gagal    | `Failed to count lessons` / `Failed to retrieve lessons` |
 
 ---
 
 ### `GET /lessons/:id`
 
-| HTTP | Kondisi |
-|------|---------|
-| **200** | `Lesson retrieved successfully` |
-| **401** | Middleware |
-| **403** | `Access denied: Admins only` |
+| HTTP    | Kondisi                                  |
+| ------- | ---------------------------------------- |
+| **200** | `Lesson retrieved successfully`          |
+| **401** | Middleware                               |
+| **403** | `Access denied: Admins only`             |
 | **404** | `User not found` atau `Lesson not found` |
-| **500** | Jarang — query gagal |
+| **500** | Jarang — query gagal                     |
 
 ---
 
 ### `PUT /lessons/:id`
 
-| HTTP | Kondisi |
-|------|---------|
-| **200** | `Lesson updated successfully` |
-| **400** | `Invalid request data` |
-| **401** | Middleware |
-| **403** | `Access denied: Admins only` |
+| HTTP    | Kondisi                          |
+| ------- | -------------------------------- |
+| **200** | `Lesson updated successfully`    |
+| **400** | `Invalid request data`           |
+| **401** | Middleware                       |
+| **403** | `Access denied: Admins only`     |
 | **404** | User atau lesson tidak ditemukan |
-| **500** | `Failed to update lesson` |
+| **500** | `Failed to update lesson`        |
 
 ---
 
 ### `DELETE /lessons/:id`
 
-| HTTP | Kondisi |
-|------|---------|
+| HTTP    | Kondisi                                     |
+| ------- | ------------------------------------------- |
 | **200** | `Lesson deleted successfully`, `data: null` |
-| **401** | Middleware |
-| **403** | `Access denied: Admins only` |
-| **404** | User atau lesson tidak ditemukan |
-| **500** | `Failed to delete lesson` |
-
----
-
-## `/lessons/attendances/*` (ringkas)
-
-| Endpoint | 200/201 | 400 | 401 | 403 | 404 | 409 | 500 |
-|----------|---------|-----|-----|-----|-----|-----|-----|
-| POST `/` | 201 | ya | ya | — | ya | 409 duplikat | ya |
-| GET `check-status` | 200 | ya | ya | — | ya | — | ya |
-| GET `my-history` | 200 | — | ya | — | — | — | ya |
-| GET `/:id` | 200 | — | ya | ya admin | ya | — | ya |
-| PUT `/:id` | 200 | ya | ya | ya admin | ya | — | ya |
-| DELETE `/:id` | 200 | — | ya | ya admin | ya | — | ya |
-| GET `lesson/:lesson_id` | 200 | ya | ya | ya admin | ya | — | ya |
-
-Detail contoh body/response: [student/04-attendance.md](../student/04-attendance.md).
+| **401** | Middleware                                  |
+| **403** | `Access denied: Admins only`                |
+| **404** | User atau lesson tidak ditemukan            |
+| **500** | `Failed to delete lesson`                   |
 
 ---
 

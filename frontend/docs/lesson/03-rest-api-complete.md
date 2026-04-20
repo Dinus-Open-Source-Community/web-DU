@@ -10,15 +10,13 @@
 
 ## Ringkasan endpoint
 
-| Method | Path | Fungsi |
-|--------|------|--------|
-| POST | `/lessons/` | Buat lesson |
-| GET | `/lessons/` | Daftar lesson (pagination + filter `module_id`) |
-| GET | `/lessons/:id` | Detail satu lesson |
-| PUT | `/lessons/:id` | Update lesson |
-| DELETE | `/lessons/:id` | Hapus lesson |
-
-Grup **attendance** ada di `/lessons/attendances/*` — dokumen terpisah di [student/04-attendance](../student/04-attendance.md); di bawah ini hanya CRUD lesson.
+| Method | Path           | Fungsi                                          |
+| ------ | -------------- | ----------------------------------------------- |
+| POST   | `/lessons/`    | Buat lesson                                     |
+| GET    | `/lessons/`    | Daftar lesson (pagination + filter `module_id`) |
+| GET    | `/lessons/:id` | Detail satu lesson                              |
+| PUT    | `/lessons/:id` | Update lesson                                   |
+| DELETE | `/lessons/:id` | Hapus lesson                                    |
 
 ---
 
@@ -26,15 +24,15 @@ Grup **attendance** ada di `/lessons/attendances/*` — dokumen terpisah di [stu
 
 ### `LessonCreateRequest`
 
-| Field | JSON | Wajib | Keterangan |
-|-------|------|--------|------------|
-| `module_id` | number | Ya | FK modul |
-| `title` | string | Ya | |
-| `content` | any | Tidak | JSON → disimpan `jsonb` |
-| `video_url` | string | Tidak | |
-| `start_time` | string | Tidak | **RFC3339**, mis. `2026-04-20T10:00:00+07:00` |
-| `end_time` | string | Tidak | RFC3339 |
-| `order_index` | number | Tidak | |
+| Field         | JSON   | Wajib | Keterangan                                    |
+| ------------- | ------ | ----- | --------------------------------------------- |
+| `module_id`   | number | Ya    | FK modul                                      |
+| `title`       | string | Ya    |                                               |
+| `content`     | any    | Tidak | JSON → disimpan `jsonb`                       |
+| `video_url`   | string | Tidak |                                               |
+| `start_time`  | string | Tidak | **RFC3339**, mis. `2026-04-20T10:00:00+07:00` |
+| `end_time`    | string | Tidak | RFC3339                                       |
+| `order_index` | number | Tidak |                                               |
 
 ### `LessonUpdateRequest`
 
@@ -91,16 +89,16 @@ Semua field **opsional** di JSON; perilaku [`UpdateLessonFunc`](../../../backend
 }
 ```
 
-*Field tanggal di JSON response mengikuti serialisasi Go (`time.Time`).*
+_Field tanggal di JSON response mengikuti serialisasi Go (`time.Time`)._
 
 ### Response error (ringkas)
 
-| HTTP | Kapan |
-|------|--------|
-| 400 | `ShouldBindJSON` gagal |
-| 403 | Bukan admin |
-| 404 | User dari token tidak ditemukan |
-| 500 | Gagal insert (termasuk **violasi FK** jika `module_id` tidak ada di `modules`) |
+| HTTP | Kapan                                                                          |
+| ---- | ------------------------------------------------------------------------------ |
+| 400  | `ShouldBindJSON` gagal                                                         |
+| 403  | Bukan admin                                                                    |
+| 404  | User dari token tidak ditemukan                                                |
+| 500  | Gagal insert (termasuk **violasi FK** jika `module_id` tidak ada di `modules`) |
 
 Handler **tidak** memvalidasi keberadaan modul sebelum `Create`; error database biasanya muncul sebagai **500** dengan `error` berisi pesan PG/GORM.
 
@@ -132,11 +130,11 @@ Handler **tidak** memvalidasi keberadaan modul sebelum `Create`; error database 
 
 ### Query
 
-| Param | Default | Max | Keterangan |
-|-------|---------|-----|------------|
-| `page` | 1 | — | |
-| `per_page` | 10 | 100 | |
-| `module_id` | — | — | Filter `module_id` |
+| Param       | Default | Max | Keterangan         |
+| ----------- | ------- | --- | ------------------ |
+| `page`      | 1       | —   |                    |
+| `per_page`  | 10      | 100 |                    |
+| `module_id` | —       | —   | Filter `module_id` |
 
 ### Response 200
 
@@ -238,30 +236,14 @@ Lesson tidak ada atau gagal hapus.
 
 ---
 
-## Attendance (bukan CRUD lesson)
-
-| Method | Path |
-|--------|------|
-| POST | `/lessons/attendances/` |
-| GET | `/lessons/attendances/check-status` |
-| GET | `/lessons/attendances/my-history` |
-| GET | `/lessons/attendances/:id` |
-| PUT | `/lessons/attendances/:id` |
-| DELETE | `/lessons/attendances/:id` |
-| GET | `/lessons/attendances/lesson/:lesson_id` |
-
-Detail: [student/04-attendance.md](../student/04-attendance.md).
-
----
-
 ## Modul (parent lesson)
 
-| Method | Path |
-|--------|------|
-| GET | `/modules/course/:course_id` |
-| GET | `/modules/:id` |
-| POST | `/modules/` |
-| PUT | `/modules/:id` |
-| DELETE | `/modules/:id` |
+| Method | Path                         |
+| ------ | ---------------------------- |
+| GET    | `/modules/course/:course_id` |
+| GET    | `/modules/:id`               |
+| POST   | `/modules/`                  |
+| PUT    | `/modules/:id`               |
+| DELETE | `/modules/:id`               |
 
 Detail: [api/route-map.md](../api/route-map.md).

@@ -7,11 +7,7 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  AssignmentAttachmentUpload,
-  MAX_FILES,
-  type AssignmentAttachmentItem,
-} from '@/components/assignments/AssignmentAttachmentUpload'
+import { AssignmentAttachmentUpload, MAX_FILES, type AssignmentAttachmentItem } from '@/components/assignments/AssignmentAttachmentUpload'
 import { DeadlineUrgencyBadges } from '@/components/assignments/DeadlineUrgencyBadges'
 import { SubmissionContentView } from '@/components/assignments/SubmissionContentView'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -22,29 +18,50 @@ import { cn } from '@/lib/utils'
 import { getDeadlineUrgency } from '@/lib/mentorAssignmentsData'
 import {
   formatAssignmentDeadlineRelative,
+  getActiveStudentAssignmentActor,
   getAssignmentSubmitState,
   listStudentAssignmentFeed,
   submitStudentAssignment,
-  STUDENT_DEMO_AVATAR,
-  STUDENT_DEMO_NAME,
-  STUDENT_DEMO_UID,
 } from '@/lib/studentAssignmentsData'
-import type { SubmissionContentBlock } from '@/lib/types'
+import type { IQuizQuestion, SubmissionContentBlock } from '@/lib/types'
 
 type Props = { assignmentUid: string }
 
-function buildSubmissionBlocks(html: string, attachments: AssignmentAttachmentItem[]): SubmissionContentBlock[] {
+function buildSubmissionBlocks(html: string, plainText: string, attachments: AssignmentAttachmentItem[]): SubmissionContentBlock[] {
   const blocks: SubmissionContentBlock[] = []
   const stripped = html.replace(/<[^>]+>/g, '').trim()
+  const plain = plainText.trim()
   if (stripped) blocks.push({ type: 'html', html })
+  if (plain) blocks.push({ type: 'text', text: plain })
   for (const att of attachments) {
     if (att.mime.startsWith('image/')) {
-      blocks.push({ type: 'image', url: att.dataUrl, alt: att.fileName })
+      blocks.push({ type: 'image', url: att.dataUrl, alt: att.description?.trim() || att.fileName })
     } else {
-      blocks.push({ type: 'file', fileName: att.fileName, url: att.dataUrl, mime: att.mime })
+      blocks.push({ type: 'file', fileName: att.fileName, url: att.dataUrl, mime: att.mime, description: att.description?.trim() || undefined })
     }
   }
   return blocks
+}
+
+function buildQuizSubmissionBlocks(questions: IQuizQuestion[], answers: Record<string, string>, passingScore?: number): SubmissionContentBlock[] {
+  const quizAnswers = questions.map((question) => {
+    const selectedOptionId = answers[question.id]
+    const selectedOption = question.options.find((option) => option.id === selectedOptionId)
+    return {
+      questionId: question.id,
+      prompt: question.prompt,
+      selectedOptionId,
+      selectedLabel: selectedOption?.label ?? '-',
+    }
+  })
+
+  return [
+    {
+      type: 'quiz',
+      passingScore,
+      answers: quizAnswers,
+    },
+  ]
 }
 
 const panel = cn(CARD_PANEL_CLASS, 'p-5 sm:p-6')
@@ -53,8 +70,10 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
   const router = useRouter()
   const [now, setNow] = useState(() => new Date())
   const [answerHtml, setAnswerHtml] = useState('<p></p>')
+  const [answerPlainText, setAnswerPlainText] = useState('')
   const [editorKey, setEditorKey] = useState(0)
   const [attachments, setAttachments] = useState<AssignmentAttachmentItem[]>([])
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
   const load = useCallback(() => {
@@ -71,7 +90,8 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
   }, [load])
 
   const row = useMemo(() => {
-    return listStudentAssignmentFeed(STUDENT_DEMO_UID, now).find((r) => r.assignment.uid === assignmentUid) ?? null
+    const actor = getActiveStudentAssignmentActor()
+    return listStudentAssignmentFeed(actor.studentUid, now).find((r) => r.assignment.uid === assignmentUid) ?? null
   }, [assignmentUid, now])
 
   const a = row?.assignment
@@ -79,8 +99,18 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
 
   const submitState = useMemo(() => {
     if (!assignmentUid) return { allowed: false as const, message: '' }
-    return getAssignmentSubmitState(STUDENT_DEMO_UID, assignmentUid, now)
+    const actor = getActiveStudentAssignmentActor()
+    return getAssignmentSubmitState(actor.studentUid, assignmentUid, now)
   }, [assignmentUid, now])
+
+  const submissionConfig = a?.submissionConfig ?? {
+    allowFile: true,
+    allowPlainText: false,
+    allowRichText: true,
+    requireFileDescription: false,
+  }
+
+  const isQuizTask = (a?.taskType ?? 'text') === 'quiz'
 
   const handleAddAttachment = useCallback((item: AssignmentAttachmentItem) => {
     setAttachments((prev) => {
@@ -94,29 +124,88 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
 
   const handleSubmit = () => {
     if (!a) return
+
+    if (isQuizTask) {
+      const quiz = a.quiz
+      if (!quiz || quiz.questions.length === 0) {
+        toast.error('Quiz belum tersedia untuk tugas ini.')
+        return
+      }
+      const unanswered = quiz.questions.find((q) => !quizAnswers[q.id])
+      if (unanswered) {
+        toast.error('Semua soal quiz wajib dijawab sebelum dikirim.')
+        return
+      }
+
+      const contentBlocks = buildQuizSubmissionBlocks(quiz.questions, quizAnswers, quiz.passingScore)
+      setSubmitting(true)
+      try {
+        const actor = getActiveStudentAssignmentActor()
+        const result = submitStudentAssignment({
+          assignmentUid: a.uid,
+          studentUid: actor.studentUid,
+          studentName: actor.studentName,
+          studentAvatar: actor.studentAvatar,
+          contentBlocks,
+        })
+        if (result.ok) {
+          toast.success('Quiz berhasil dikirim. Menunggu review mentor.')
+          setQuizAnswers({})
+          load()
+          router.refresh()
+        } else {
+          toast.error(result.message)
+        }
+      } finally {
+        setSubmitting(false)
+      }
+      return
+    }
+
     const stripped = answerHtml.replace(/<[^>]+>/g, '').trim()
-    if (!stripped && attachments.length === 0) {
+    const plain = answerPlainText.trim()
+    const hasRichText = submissionConfig.allowRichText && Boolean(stripped)
+    const hasPlainText = submissionConfig.allowPlainText && Boolean(plain)
+    const hasFiles = submissionConfig.allowFile && attachments.length > 0
+
+    if (!hasRichText && !hasPlainText && !hasFiles) {
       toast.error('Isi jawaban atau lampirkan minimal satu berkas.')
       return
     }
-    const contentBlocks = buildSubmissionBlocks(answerHtml, attachments)
+
+    if (submissionConfig.allowFile && submissionConfig.requireFileDescription) {
+      const hasMissingDescriptions = attachments.some((f) => !(f.description ?? '').trim())
+      if (hasMissingDescriptions) {
+        toast.error('Setiap file wajib memiliki deskripsi.')
+        return
+      }
+    }
+
+    const contentBlocks = buildSubmissionBlocks(
+      submissionConfig.allowRichText ? answerHtml : '<p></p>',
+      submissionConfig.allowPlainText ? answerPlainText : '',
+      submissionConfig.allowFile ? attachments : [],
+    )
     if (contentBlocks.length === 0) {
       toast.error('Isi jawaban atau lampirkan minimal satu berkas.')
       return
     }
     setSubmitting(true)
     try {
+      const actor = getActiveStudentAssignmentActor()
       const result = submitStudentAssignment({
         assignmentUid: a.uid,
-        studentUid: STUDENT_DEMO_UID,
-        studentName: STUDENT_DEMO_NAME,
-        studentAvatar: STUDENT_DEMO_AVATAR,
+        studentUid: actor.studentUid,
+        studentName: actor.studentName,
+        studentAvatar: actor.studentAvatar,
         contentBlocks,
       })
       if (result.ok) {
         toast.success('Tugas terkirim. Menunggu review mentor.')
         setAnswerHtml('<p></p>')
+        setAnswerPlainText('')
         setAttachments([])
+        setQuizAnswers({})
         setEditorKey((k) => k + 1)
         load()
         router.refresh()
@@ -129,11 +218,7 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
   }
 
   if (!row || !a) {
-    return (
-      <p className="px-5 py-10 text-center text-sm text-slate-500 md:px-8">
-        Memuat data tugas… Jika ini berlanjut, kembali ke daftar tugas.
-      </p>
-    )
+    return <p className="px-5 py-10 text-center text-sm text-slate-500 md:px-8">Memuat data tugas… Jika ini berlanjut, kembali ke daftar tugas.</p>
   }
 
   const latest = row.latestSubmission
@@ -143,11 +228,7 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
 
   return (
     <main className="w-full px-5 py-6 md:px-8 md:py-8">
-      <Button
-        asChild
-        variant="outline"
-        size="sm"
-        className="mb-6 h-9 rounded-lg border-slate-200 text-sm font-medium text-slate-600 shadow-none hover:bg-slate-50">
+      <Button asChild variant="outline" size="sm" className="mb-6 h-9 rounded-lg border-slate-200 text-sm font-medium text-slate-600 shadow-none hover:bg-slate-50">
         <Link href="/student/assignments" className="gap-1.5">
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Kembali ke daftar tugas
@@ -177,12 +258,7 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
             <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
               {a.instructionAttachments.map((f, i) => (
                 <li key={`${f.fileName}-${i}`}>
-                  <a
-                    href={f.url}
-                    download={f.fileName}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-primary underline-offset-2 hover:underline">
+                  <a href={f.url} download={f.fileName} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary underline-offset-2 hover:underline">
                     Lampiran: {f.fileName}
                   </a>
                 </li>
@@ -193,18 +269,12 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
 
         {latest && (
           <section className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 sm:p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Kiriman terakhir (percobaan {latest.attemptNumber})
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {format(new Date(latest.submittedAt), 'd MMM yyyy · HH:mm', { locale: id })}
-            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Kiriman terakhir (percobaan {latest.attemptNumber})</p>
+            <p className="mt-1 text-xs text-slate-500">{format(new Date(latest.submittedAt), 'd MMM yyyy · HH:mm', { locale: id })}</p>
             <div className="mt-4">
               <SubmissionContentView blocks={latest.contentBlocks} />
             </div>
-            {latest.reviewStatus === 'graded' && latest.rating != null && (
-              <p className="mt-4 text-sm font-medium text-slate-800">Nilai: {latest.rating}</p>
-            )}
+            {latest.reviewStatus === 'graded' && latest.rating != null && <p className="mt-4 text-sm font-medium text-slate-800">Nilai: {latest.rating}</p>}
             {(latest.reviewStatus === 'graded' || latest.reviewStatus === 'returned') && latest.mentorComment && (
               <div className="mt-3 rounded-lg border border-slate-200/90 bg-white p-3 text-sm leading-relaxed text-slate-700">
                 <span className="font-semibold text-slate-900">Komentar mentor: </span>
@@ -216,30 +286,88 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
 
         {submitState.allowed ? (
           <>
-            <section className={panel}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Jawaban Anda</p>
-              <div className="mt-3">
-                <TiptapRichTextEditor
-                  key={editorKey}
-                  initialContent={answerHtml}
-                  onChange={setAnswerHtml}
-                  placeholder="Tulis jawaban di sini. Anda dapat menyisipkan gambar atau tautan dari toolbar."
-                  variant="compact"
-                />
-              </div>
-            </section>
+            {isQuizTask && a.quiz && (
+              <section className={panel}>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Quiz</p>
+                <div className="mt-3 space-y-4">
+                  {a.quiz.questions.map((question, idx) => (
+                    <div key={question.id} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                      <p className="text-sm font-semibold text-slate-800">
+                        {idx + 1}. {question.prompt}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {question.options.map((option) => {
+                          const checked = quizAnswers[question.id] === option.id
+                          return (
+                            <label key={option.id} className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-slate-300">
+                              <input
+                                type="radio"
+                                name={`quiz-${question.id}`}
+                                value={option.id}
+                                checked={checked}
+                                onChange={() =>
+                                  setQuizAnswers((prev) => ({
+                                    ...prev,
+                                    [question.id]: option.id,
+                                  }))
+                                }
+                                className="mt-0.5"
+                                disabled={submitting}
+                              />
+                              <span>{option.label}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            <section className={panel}>
-              <AssignmentAttachmentUpload
-                items={attachments}
-                onAdd={handleAddAttachment}
-                onRemove={(id) => setAttachments((prev) => prev.filter((x) => x.id !== id))}
-                disabled={submitting}
-              />
-            </section>
+            {!isQuizTask && submissionConfig.allowRichText && (
+              <section className={panel}>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Jawaban WYSIWYG</p>
+                <div className="mt-3">
+                  <TiptapRichTextEditor
+                    key={editorKey}
+                    initialContent={answerHtml}
+                    onChange={setAnswerHtml}
+                    placeholder="Tulis jawaban di sini. Anda dapat menyisipkan gambar atau tautan dari toolbar."
+                    variant="compact"
+                  />
+                </div>
+              </section>
+            )}
+
+            {!isQuizTask && submissionConfig.allowPlainText && (
+              <section className={panel}>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Jawaban Text Biasa</p>
+                <textarea
+                  value={answerPlainText}
+                  onChange={(e) => setAnswerPlainText(e.target.value)}
+                  rows={6}
+                  placeholder="Tulis jawaban text biasa di sini."
+                  className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </section>
+            )}
+
+            {!isQuizTask && submissionConfig.allowFile && (
+              <section className={panel}>
+                <AssignmentAttachmentUpload
+                  items={attachments}
+                  onAdd={handleAddAttachment}
+                  onRemove={(id) => setAttachments((prev) => prev.filter((x) => x.id !== id))}
+                  onChangeDescription={(id, description) => setAttachments((prev) => prev.map((item) => (item.id === id ? { ...item, description } : item)))}
+                  showDescriptionField={submissionConfig.requireFileDescription}
+                  disabled={submitting}
+                />
+              </section>
+            )}
 
             <div className="flex justify-end">
-              <Button type="button" onClick={handleSubmit} disabled={submitting} className="min-w-[140px] shadow-none">
+              <Button type="button" onClick={handleSubmit} disabled={submitting} className="min-w-35 shadow-none">
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -252,9 +380,7 @@ export function StudentAssignmentDetailClient({ assignmentUid }: Props) {
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 px-4 py-3.5 text-sm leading-relaxed text-amber-950">
-            {submitState.message}
-          </div>
+          <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 px-4 py-3.5 text-sm leading-relaxed text-amber-950">{submitState.message}</div>
         )}
       </div>
     </main>

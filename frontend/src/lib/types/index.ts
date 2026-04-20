@@ -2,7 +2,6 @@
 
 export * from './transaction'
 export * from './user-profile'
-export * from './attendance'
 export * from './course'
 export * from './mentor'
 export * from './admin'

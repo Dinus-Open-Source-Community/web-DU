@@ -31,12 +31,17 @@ export interface IQuiz {
 }
 
 export type LessonContentType = 'tiptap' | 'video' | 'quiz'
+export type HomeworkTaskType = 'text' | 'quiz'
 
 interface ILessonBase {
   id: string
   title: string
   order: number
   durationMinutes: number
+  hasHomework?: boolean
+  homeworkType?: HomeworkTaskType
+  homeworkDescriptionHtml?: string
+  homeworkQuiz?: IQuiz
 }
 
 export type ILesson =
