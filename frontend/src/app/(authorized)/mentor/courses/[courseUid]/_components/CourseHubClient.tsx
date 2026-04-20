@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BookOpen, ClipboardList, Clock, Eye, GraduationCap, Layers, Pencil, Sparkles, Tag, Trash2, Users } from 'lucide-react'
+import { BookOpen, ClipboardList, Eye, GraduationCap, Layers, Pencil, Sparkles, Tag, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { IMentorCourse } from '@/lib/types'
-import { getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
+import { deleteManagedCourse, getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { countAssignmentsForCourse } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
-import { notifyPublished } from '@/lib/notify'
+import { notifyDeleted, notifyError, notifyPublished } from '@/lib/notify'
 import { formatRupiah } from '@/lib/func'
 import Image from 'next/image'
 import { CourseParticipantsSection } from './CourseParticipantsSection'
+import { CourseReviewsSection } from './CourseReviewsSection'
 
 type CourseHubClientProps = {
   courseUid: string
@@ -69,6 +70,26 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
     router.refresh()
   }
 
+  const handleDeleteCourse = async () => {
+    if (!course || !isAdmin) return
+    const ok = await confirm({
+      title: 'Hapus kursus?',
+      description: 'Aksi ini akan menghapus kursus dari pengelolaan frontend dan tidak membuka page baru.',
+      confirmLabel: 'Hapus',
+      variant: 'destructive',
+    })
+    if (!ok) return
+
+    try {
+      deleteManagedCourse(courseUid)
+      notifyDeleted()
+      router.push('/admin/courses')
+      router.refresh()
+    } catch {
+      notifyError('Gagal menghapus kursus.')
+    }
+  }
+
   if (course === undefined) {
     return (
       <section className="space-y-6 py-10">
@@ -112,12 +133,6 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       label: 'Tugas',
       accent: 'bg-amber-50 text-amber-600',
     },
-    {
-      icon: Users,
-      value: course.studentCount,
-      label: 'Peserta',
-      accent: 'bg-emerald-50 text-emerald-600',
-    },
   ]
 
   const actions = [
@@ -135,21 +150,13 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       href: `/course/${courseUid}/view`,
       accent: 'group-hover:bg-violet-50 group-hover:text-violet-600',
     },
-    isAdmin
-      ? {
-          icon: Trash2,
-          label: 'Hapus Kursus',
-          description: 'Hapus kursus dari pengelolaan platform.',
-          href: `/admin/courses/${courseUid}/delete`,
-          accent: 'group-hover:bg-rose-50 group-hover:text-rose-600',
-        }
-      : {
-          icon: ClipboardList,
-          label: 'Kelola Tugas',
-          description: 'Buat, sunting tugas, dan tinjau kiriman peserta.',
-          href: `/mentor/courses/${courseUid}/assignments`,
-          accent: 'group-hover:bg-amber-50 group-hover:text-amber-600',
-        },
+    {
+      icon: isAdmin ? ClipboardList : ClipboardList,
+      label: isAdmin ? 'Reviews Peserta' : 'Kelola Tugas',
+      description: isAdmin ? 'Baca seluruh review peserta untuk kursus ini.' : 'Buat, sunting tugas, dan tinjau kiriman peserta.',
+      href: isAdmin ? '#reviews-peserta' : `/mentor/courses/${courseUid}/assignments`,
+      accent: isAdmin ? 'group-hover:bg-emerald-50 group-hover:text-emerald-600' : 'group-hover:bg-amber-50 group-hover:text-amber-600',
+    },
   ]
 
   return (
@@ -214,7 +221,7 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       </div>
 
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {stats.map((s) => (
           <div key={s.label} className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5">
             <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${s.accent}`}>
@@ -229,23 +236,47 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       </div>
 
       {/* ── Actions grid ── */}
-      <div>
-        <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Kelola kursus</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {actions.map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="group flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-colors hover:border-slate-300/90">
-              <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors ${action.accent}`}>
-                <action.icon className="size-5" />
+      <div className="rounded-2xl border border-slate-200/80 bg-transparent p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Kelola kursus</h2>
+            <p className="mt-1 text-sm text-slate-500">Atur konten, preview, dan akses kursus tanpa berpindah halaman.</p>
+          </div>
+
+          {isAdmin ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => void handleDeleteCourse()}
+              className="size-10 rounded-xl border-rose-200 bg-white text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
+              aria-label="Hapus kursus">
+              <Trash2 className="size-4" aria-hidden />
+            </Button>
+          ) : null}
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          {actions.map((action) =>
+            action.label === 'Reviews Peserta' ? (
+              <div key={action.label} className="lg:col-span-1" id="reviews-peserta">
+                <CourseReviewsSection courseUid={courseUid} />
               </div>
-              <div className="min-w-0 pt-0.5">
-                <p className="text-sm font-semibold text-slate-900">{action.label}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{action.description}</p>
-              </div>
-            </Link>
-          ))}
+            ) : (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="group flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-colors hover:border-slate-300/90">
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors ${action.accent}`}>
+                  <action.icon className="size-5" />
+                </div>
+                <div className="min-w-0 pt-0.5">
+                  <p className="text-sm font-semibold text-slate-900">{action.label}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{action.description}</p>
+                </div>
+              </Link>
+            ),
+          )}
         </div>
       </div>
 

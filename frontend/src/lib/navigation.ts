@@ -34,10 +34,7 @@ export const adminNavigation: NavItem[] = [
   {
     name: 'Course Catalog',
     icon: GraduationCap,
-    children: [
-      { name: 'All Courses', path: '/admin/courses' },
-      { name: 'Reviews & Q&A', path: '/admin/courses/reviews-qa' },
-    ],
+    children: [{ name: 'All Courses', path: '/admin/courses' }],
   },
   {
     name: 'Transactions',
