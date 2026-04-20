@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type PaymentMethod string
 type PaymentStatus string
@@ -17,8 +21,8 @@ const (
 
 // Model Payment Migrations
 type Payment struct {
-	ID            uint          `gorm:"primaryKey" json:"id"`
-	EnrollmentID  *uint         `json:"enrollment_id"`
+	Uid           uuid.UUID     `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
+	EnrollmentUid *uuid.UUID    `gorm:"type:uuid;index" json:"enrollment_uid"`
 	Amount        float64       `gorm:"type:decimal(10,2)" json:"amount"`
 	Method        PaymentMethod `gorm:"type:payment_method" json:"payment_method"`
 	Status        PaymentStatus `gorm:"type:payment_status" json:"payment_status"`

@@ -1,16 +1,20 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // Model CourseReview Migrations
 type CourseReview struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"not null" json:"user_id"`
-	CourseID  uint      `gorm:"not null" json:"course_id"`
+	Uid       uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
+	UserUid   uuid.UUID `gorm:"type:uuid;not null;index" json:"user_uid"`
+	CourseUid uuid.UUID `gorm:"type:uuid;not null;index" json:"course_uid"`
 	Rating    int       `gorm:"check:rating >= 1 AND rating <= 5" json:"rating"`
 	Comment   string    `gorm:"type:text" json:"comment"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
-	User   *User `json:"user"`
-	Course *Course `json:"course"`
+	User   *User   `gorm:"foreignKey:UserUid" json:"user"`
+	Course *Course `gorm:"foreignKey:CourseUid" json:"course"`
 }

@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type EnrollmentStatus string
 
@@ -12,14 +16,14 @@ const (
 )
 
 type Enrollment struct {
-	ID         uint             `gorm:"primaryKey" json:"id"`
-	UserID     uint             `gorm:"not null" json:"user_id"`
-	CourseID   uint             `gorm:"not null" json:"course_id"`
+	Uid        uuid.UUID        `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
+	UserUid    uuid.UUID        `gorm:"type:uuid;not null;index" json:"user_uid"`
+	CourseUid  uuid.UUID        `gorm:"type:uuid;not null;index" json:"course_uid"`
 	EnrolledAt time.Time        `gorm:"autoCreateTime" json:"enrolled_at"`
 	Progress   float64          `gorm:"type:decimal(5,2);default:0" json:"progress"`
 	Status     EnrollmentStatus `gorm:"type:enrollment_status;default:'active'" json:"status"`
 
 	// Relations
-	User   *User   `gorm:"foreignKey:UserID" json:"user"`
-	Course *Course `gorm:"foreignKey:CourseID" json:"course"`
+	User   *User   `gorm:"foreignKey:UserUid" json:"user"`
+	Course *Course `gorm:"foreignKey:CourseUid" json:"course"`
 }

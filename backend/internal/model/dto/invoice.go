@@ -2,16 +2,17 @@ package dto
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type InvoiceDTO struct {
-	ID            uint      `json:"id"`
-	EnrollmentID  uint      `json:"enrollment_id"`
-	UserID        uint      `json:"user_id"`
-	CourseID      uint      `json:"course_id"`
+	Uid           uuid.UUID `json:"uid"`
+	EnrollmentUid uuid.UUID `json:"enrollment_uid"`
+	UserUid       uuid.UUID `json:"user_uid"`
+	CourseUid     uuid.UUID `json:"course_uid"`
 	UserName      string    `json:"user_name"`
 	UserEmail     string    `json:"user_email"`
 	CourseTitle   string    `json:"course_title"`
@@ -24,26 +25,31 @@ type InvoiceDTO struct {
 	CreatedAt     time.Time `json:"created_at"`
 }
 
-// GenerateInvoiceFilename generates filename in format: {enrollmentID}T{userID}T{courseID}T{dateYYYYMMDD}.pdf
-func GenerateInvoiceFilename(enrollmentID uint, userID uint, courseID uint, date time.Time) string {
-	return fmt.Sprintf("%dT%dT%dT%s.pdf", enrollmentID, userID, courseID, date.Format("20060102"))
+// GenerateInvoiceFilename format: {enrollmentUid}__{userUid}__{courseUid}__{dateYYYYMMDD}.pdf
+func GenerateInvoiceFilename(enrollmentUid, userUid, courseUid uuid.UUID, date time.Time) string {
+	return fmt.Sprintf("%s__%s__%s__%s.pdf",
+		enrollmentUid.String(), userUid.String(), courseUid.String(), date.Format("20060102"))
 }
 
-// ParseInvoiceFilename parses filename to extract enrollmentID, userID, and courseID
-// Format: {enrollmentID}T{userID}T{courseID}T{dateYYYYMMDD}.pdf
-// Example: "1T4T3T20251201.pdf" -> enrollmentID=1, userID=4, courseID=3, date="20251201"
-func ParseInvoiceFilename(filename string) (enrollmentID uint, userID uint, courseID uint, date string) {
-	// Remove .pdf extension
-	parts := strings.Split(strings.TrimSuffix(filename, ".pdf"), "T")
+// ParseInvoiceFilename parses filename into UUIDs and date suffix.
+func ParseInvoiceFilename(filename string) (enrollmentUid, userUid, courseUid uuid.UUID, date string, err error) {
+	base := strings.TrimSuffix(filename, ".pdf")
+	parts := strings.Split(base, "__")
 	if len(parts) < 4 {
-		return 0, 0, 0, ""
+		return uuid.Nil, uuid.Nil, uuid.Nil, "", fmt.Errorf("invalid invoice filename")
 	}
-
-	// Parse each part
-	var eID, uID, cID uint64
-	eID, _ = strconv.ParseUint(parts[0], 10, 32)
-	uID, _ = strconv.ParseUint(parts[1], 10, 32)
-	cID, _ = strconv.ParseUint(parts[2], 10, 32)
-
-	return uint(eID), uint(uID), uint(cID), parts[3]
+	enrollmentUid, err = uuid.Parse(parts[0])
+	if err != nil {
+		return uuid.Nil, uuid.Nil, uuid.Nil, "", err
+	}
+	userUid, err = uuid.Parse(parts[1])
+	if err != nil {
+		return uuid.Nil, uuid.Nil, uuid.Nil, "", err
+	}
+	courseUid, err = uuid.Parse(parts[2])
+	if err != nil {
+		return uuid.Nil, uuid.Nil, uuid.Nil, "", err
+	}
+	date = parts[3]
+	return enrollmentUid, userUid, courseUid, date, nil
 }

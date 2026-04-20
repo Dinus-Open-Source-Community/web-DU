@@ -9,10 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Konstanta context key yang digunakan untuk menyimpan data user (Name dan Email)
-// di dalam context Gin agar bisa diakses pada handler selanjutnya.
+// Konstanta context key untuk menyimpan uid pengguna (UUID) dari JWT.
 const (
-	IDCK = "id"
+	UIDCK = "uid"
 )
 
 // AuthMiddleware adalah middleware yang digunakan untuk memverifikasi token JWT
@@ -73,7 +72,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Simpan data Name dan Email dari claims ke context.
 		// Data ini bisa diambil di handler menggunakan c.Get(NameCK) atau c.Get(EmailCK).
-		c.Set(IDCK, userData.ID)
+		c.Set(UIDCK, userData.Uid)
 
 		// Lanjutkan ke handler berikutnya jika token valid.
 		c.Next()

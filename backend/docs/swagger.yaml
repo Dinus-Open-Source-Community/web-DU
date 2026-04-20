@@ -9,6 +9,16 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.AssignMentorsToCourseRequest:
+    properties:
+      mentor_uids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - mentor_uids
+    type: object
   dto.ChangePasswordRequest:
     properties:
       new_password:
@@ -18,6 +28,34 @@ definitions:
     required:
     - new_password
     - old_password
+    type: object
+  dto.CreateClassTypeRequest:
+    properties:
+      description:
+        example: Kelas intensif berbasis project
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Bootcamp
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateCourseCategoryRequest:
+    properties:
+      description:
+        example: Kategori course pengembangan web
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Web Development
+        type: string
+    required:
+    - name
     type: object
   dto.CreateCourseReviewRequest:
     properties:
@@ -33,9 +71,9 @@ definitions:
     type: object
   dto.CreateModuleRequest:
     properties:
-      course_id:
-        example: 1
-        type: integer
+      course_uid:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
       order_index:
         example: 1
         type: integer
@@ -43,7 +81,7 @@ definitions:
         example: Module 1
         type: string
     required:
-    - course_id
+    - course_uid
     - order_index
     - title
     type: object
@@ -53,8 +91,8 @@ definitions:
         type: integer
       callback_url:
         type: string
-      enrollment_id:
-        type: integer
+      enrollment_uid:
+        type: string
       method:
         enum:
         - PERMATAVA
@@ -137,10 +175,10 @@ definitions:
     type: object
   dto.LessonAttendanceCreateRequest:
     properties:
-      enrollment_id:
-        type: integer
-      lesson_id:
-        type: integer
+      enrollment_uid:
+        type: string
+      lesson_uid:
+        type: string
       note:
         type: string
       status:
@@ -151,8 +189,8 @@ definitions:
         - excused
         type: string
     required:
-    - enrollment_id
-    - lesson_id
+    - enrollment_uid
+    - lesson_uid
     type: object
   dto.LessonAttendanceUpdateRequest:
     properties:
@@ -173,8 +211,8 @@ definitions:
       end_time:
         description: RFC3339 format
         type: string
-      module_id:
-        type: integer
+      module_uid:
+        type: string
       order_index:
         type: integer
       start_time:
@@ -185,7 +223,7 @@ definitions:
       video_url:
         type: string
     required:
-    - module_id
+    - module_uid
     - title
     type: object
   dto.LessonUpdateRequest:
@@ -195,8 +233,8 @@ definitions:
       end_time:
         description: RFC3339 format
         type: string
-      module_id:
-        type: integer
+      module_uid:
+        type: string
       order_index:
         type: integer
       start_time:
@@ -279,6 +317,30 @@ definitions:
     - email
     - name
     - password
+    type: object
+  dto.UpdateClassTypeRequest:
+    properties:
+      description:
+        example: Kelas intensif berbasis project
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Bootcamp
+        type: string
+    type: object
+  dto.UpdateCourseCategoryRequest:
+    properties:
+      description:
+        example: Kategori course pengembangan web
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Web Development
+        type: string
     type: object
   dto.UpdateModuleRequest:
     properties:
@@ -363,6 +425,440 @@ paths:
       summary: Update user avatar (All Roles)
       tags:
       - User
+  /class-types:
+    get:
+      description: Retrieve all class types. Admin only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Class types retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve class types
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all class types (Admin Only)
+      tags:
+      - Class Type
+    post:
+      consumes:
+      - application/json
+      description: Create a new class type. Admin only.
+      parameters:
+      - description: Class type data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateClassTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Class type created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create class type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create class type (Admin Only)
+      tags:
+      - Class Type
+  /class-types/{id}:
+    delete:
+      description: Delete class type by uid. Admin only.
+      parameters:
+      - description: Class Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Class type deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid class type uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Class type not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete class type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete class type (Admin Only)
+      tags:
+      - Class Type
+    get:
+      description: Retrieve a specific class type by uid. Admin only.
+      parameters:
+      - description: Class Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Class type retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid class type uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Class type not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get class type by ID (Admin Only)
+      tags:
+      - Class Type
+    put:
+      consumes:
+      - application/json
+      description: Update existing class type by uid. Admin only.
+      parameters:
+      - description: Class Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Class type data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateClassTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Class type updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Class type not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update class type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update class type (Admin Only)
+      tags:
+      - Class Type
+  /course-categories:
+    get:
+      description: Retrieve all course categories. Admin only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course categories retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve course categories
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all course categories (Admin Only)
+      tags:
+      - Course Category
+    post:
+      consumes:
+      - application/json
+      description: Create a new course category. Admin only.
+      parameters:
+      - description: Course category data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Course category created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create course category
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create course category (Admin Only)
+      tags:
+      - Course Category
+  /course-categories/{id}:
+    delete:
+      description: Delete course category by uid. Admin only.
+      parameters:
+      - description: Course Category UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course category deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course category uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course category not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete course category
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete course category (Admin Only)
+      tags:
+      - Course Category
+    get:
+      description: Retrieve a specific course category by uid. Admin only.
+      parameters:
+      - description: Course Category UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course category retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course category uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course category not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get course category by ID (Admin Only)
+      tags:
+      - Course Category
+    put:
+      consumes:
+      - application/json
+      description: Update existing course category by uid. Admin only.
+      parameters:
+      - description: Course Category UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course category data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourseCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course category updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course category not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update course category
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update course category (Admin Only)
+      tags:
+      - Course Category
   /courses:
     get:
       consumes:
@@ -425,17 +921,57 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Create a new course with details and optional thumbnail. Admin
-        only.
+      description: Create a new course with cover, title, subtitle/header, dynamic
+        category, dynamic class type, level, pricing, and learning points. Admin only.
       parameters:
+      - description: 'Course cover image (JPG, PNG recommended). Fallback key: thumbnail'
+        in: formData
+        name: cover
+        type: file
       - description: Course title
         in: formData
         name: title
         required: true
         type: string
-      - description: Course slug (unique identifier, lowercase with hyphens)
+      - description: Course subtitle/header
+        in: formData
+        name: subtitle
+        type: string
+      - description: Alias for subtitle
+        in: formData
+        name: header
+        type: string
+      - description: Course slug (auto-generated from title when empty)
         in: formData
         name: slug
+        type: string
+      - description: Dynamic category uid
+        in: formData
+        name: category_uid
+        required: true
+        type: string
+      - description: Dynamic class type uid
+        in: formData
+        name: class_type_uid
+        required: true
+        type: string
+      - description: 'Course level: PEMULA | MENENGAH | LANJUTAN'
+        in: formData
+        name: level
+        required: true
+        type: string
+      - description: Course selling price
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: Displayed strike-through/original price
+        in: formData
+        name: price_strike
+        type: number
+      - description: JSON array of strings, e.g. [\
+        in: formData
+        name: what_you_learn
         required: true
         type: string
       - description: Course description
@@ -443,35 +979,28 @@ paths:
         name: description
         required: true
         type: string
-      - description: Course thumbnail image (JPG, PNG recommended)
-        in: formData
-        name: thumbnail
-        type: file
-      - description: Course price in cents
-        in: formData
-        name: price
-        required: true
-        type: integer
       - description: Course slot capacity (0 = unlimited)
         in: formData
         name: slot
-        required: true
         type: integer
       - description: 'Whether course is premium (default: false)'
         in: formData
         name: is_premium
-        required: true
         type: boolean
       - description: 'Whether course is published (default: false)'
         in: formData
         name: is_published
-        required: true
         type: boolean
       produces:
       - application/json
       responses:
         "201":
           description: Course created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request payload
           schema:
             additionalProperties: true
             type: object
@@ -590,6 +1119,62 @@ paths:
       summary: Join a course (Student Only)
       tags:
       - Course
+  /courses/{id}/mentors/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign one or more mentors selected by admin to a course. Course
+        can have multiple mentors.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Mentor UIDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignMentorsToCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentors assigned successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admins only
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign mentors to course (Admin Only)
+      tags:
+      - Mentor
   /courses/{id}/review:
     post:
       consumes:
@@ -645,6 +1230,50 @@ paths:
       security:
       - BearerAuth: []
       summary: Create course review (Enrolled Students Only)
+      tags:
+      - Course
+  /courses/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Set course status to ACTIVE. Admin only endpoint.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course status updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update course status
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Activate course status (Admin Only)
       tags:
       - Course
   /courses/{id}/students:
@@ -1396,6 +2025,137 @@ paths:
       summary: User login (Public)
       tags:
       - Auth
+  /mentor/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve mentor detail similar to user detail including assigned
+        courses, joined teaching courses, and related course reviews.
+      parameters:
+      - description: Mentor UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentor detail retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid mentor uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Mentor not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get mentor detail by ID
+      tags:
+      - Mentor
+  /mentor/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all mentor users with teaching summaries.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentors retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all mentors
+      tags:
+      - Mentor
+  /mentor/courses/{course_id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Mentor confirms joining a course that has been assigned by admin.
+      parameters:
+      - description: Course UID
+        in: path
+        name: course_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentor joined assigned course successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - mentor only or course not assigned
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or assignment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Join assigned course as mentor (Mentor Only)
+      tags:
+      - Mentor
   /modules:
     post:
       consumes:
@@ -1791,27 +2551,43 @@ paths:
       summary: Register new user (Public)
       tags:
       - Auth
-  /user/data:
+  /user/{id}:
     get:
       consumes:
       - application/json
-      description: Retrieve current authenticated user's complete profile including
-        personal data and enrolled courses
+      description: Retrieve detailed user data including profile, joined courses,
+        transaction history, course reviews, enrollment summary, and mentored courses.
+      parameters:
+      - description: User UID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: User data retrieved successfully
+          description: User detail retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid user uid
           schema:
             additionalProperties: true
             type: object
         "401":
-          description: Unauthorized - Invalid or missing JWT token
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - only admin or user owner
           schema:
             additionalProperties: true
             type: object
         "404":
-          description: User not found in database
+          description: User not found
           schema:
             additionalProperties: true
             type: object
@@ -1822,7 +2598,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get authenticated user profile (All Roles)
+      summary: Get user detail by ID (Admin or Self)
       tags:
       - User
   /user/manage/{id}:
@@ -1868,61 +2644,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete user account (Admin Only)
-      tags:
-      - User Management
-    patch:
-      consumes:
-      - application/json
-      description: 'Update a specific user''s role. Only administrators can perform
-        this action. Valid roles are: admin, mentor, student.'
-      parameters:
-      - description: User ID to update
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Role assignment (admin/mentor/student)
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateUserRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User role updated successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid role value
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - Invalid or missing JWT token
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden - Only admins can update roles
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update user role (Admin Only)
       tags:
       - User Management
   /user/manage/all:
@@ -2076,6 +2797,62 @@ paths:
       summary: Update user profile (All Roles)
       tags:
       - User
+  /user/role/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update a specific user's role. Admin can update mentor/student
+        role, while role changes for admin/super_admin users are restricted to super_admin.
+      parameters:
+      - description: User UID to update
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role assignment (super_admin/admin/mentor/student)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User role updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid role value
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - insufficient role update permission
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user role (Admin/Super Admin)
+      tags:
+      - User Management
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

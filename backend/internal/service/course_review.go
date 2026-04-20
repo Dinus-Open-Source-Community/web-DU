@@ -7,9 +7,9 @@ import (
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Summary      Create course review (Enrolled Students Only)
@@ -28,21 +28,19 @@ import (
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id}/review [post]
 func CreateCourseReviewFunc(c *gin.Context) {
-	// Get course ID from URL parameter
 	courseID := c.Param("id")
-	courseIDInt, err := strconv.Atoi(courseID)
+	courseUid, err := uuid.Parse(courseID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid course ID",
+			"message": "Invalid course uid",
 			"data":    nil,
-			"error":   "Course ID must be a valid number",
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	// Get user ID from JWT token
-	userID, _ := c.Get(middleware.IDCK)
+	userUid, _ := c.Get(middleware.UIDCK)
 
 	// Bind request body
 	var req dto.CreateCourseReviewRequest
@@ -58,8 +56,8 @@ func CreateCourseReviewFunc(c *gin.Context) {
 
 	// Check if user is enrolled in the course
 	var enrollment entity.Enrollment
-	if err := database.DB.Where("user_id = ? AND course_id = ? AND status = ?",
-		userID, courseIDInt, entity.EnrollmentActive).
+	if err := database.DB.Where("user_uid = ? AND course_uid = ? AND status = ?",
+		userUid, courseUid, entity.EnrollmentActive).
 		First(&enrollment).Error; err != nil {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -72,8 +70,8 @@ func CreateCourseReviewFunc(c *gin.Context) {
 
 	// Check if user already reviewed this course
 	var existingReview entity.CourseReview
-	if err := database.DB.Where("user_id = ? AND course_id = ?",
-		userID, courseIDInt).First(&existingReview).Error; err == nil {
+	if err := database.DB.Where("user_uid = ? AND course_uid = ?",
+		userUid, courseUid).First(&existingReview).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{
 			"success": false,
 			"message": "You have already reviewed this course",
@@ -95,12 +93,11 @@ func CreateCourseReviewFunc(c *gin.Context) {
 		return
 	}
 
-	// Create the review
 	review := entity.CourseReview{
-		UserID:   userID.(uint),
-		CourseID: uint(courseIDInt),
-		Rating:   req.Rating,
-		Comment:  encryptedComment,
+		UserUid:   userUid.(uuid.UUID),
+		CourseUid: courseUid,
+		Rating:    req.Rating,
+		Comment:   encryptedComment,
 	}
 
 	if err := database.DB.Create(&review).Error; err != nil {

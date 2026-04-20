@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Summary      Create new lesson (Admin Only)
@@ -37,7 +38,7 @@ import (
 //	  "order_index": 1
 //	}
 func CreateLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -92,7 +93,7 @@ func CreateLessonFunc(c *gin.Context) {
 	}
 
 	lesson := entity.Lesson{
-		ModuleID:   req.ModuleID,
+		ModuleUid:  req.ModuleUid,
 		Title:      req.Title,
 		Content:    content,
 		VideoURL:   req.VideoURL,
@@ -142,7 +143,7 @@ func CreateLessonFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve lessons"
 // @Router       /lessons [get]
 func GetAllLessonsFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -185,11 +186,9 @@ func GetAllLessonsFunc(c *gin.Context) {
 
 	db := database.DB.Model(&entity.Lesson{})
 
-	// Filter by module_id if provided
 	if moduleIDStr != "" {
-		moduleID, err := strconv.Atoi(moduleIDStr)
-		if err == nil {
-			db = db.Where("module_id = ?", moduleID)
+		if moduleUid, err := uuid.Parse(moduleIDStr); err == nil {
+			db = db.Where("module_uid = ?", moduleUid)
 		}
 	}
 
@@ -252,7 +251,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve lesson"
 // @Router       /lessons/{id} [get]
 func GetLessonByIDFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -322,7 +321,7 @@ func GetLessonByIDFunc(c *gin.Context) {
 //	  "order_index": 2
 //	}
 func UpdateLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -370,9 +369,8 @@ func UpdateLessonFunc(c *gin.Context) {
 		return
 	}
 
-	// Update fields
-	if req.ModuleID != 0 {
-		lesson.ModuleID = req.ModuleID
+	if req.ModuleUid != uuid.Nil {
+		lesson.ModuleUid = req.ModuleUid
 	}
 	if req.Title != "" {
 		lesson.Title = req.Title
@@ -430,7 +428,7 @@ func UpdateLessonFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to delete lesson"
 // @Router       /lessons/{id} [delete]
 func DeleteLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {

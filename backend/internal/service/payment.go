@@ -12,10 +12,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -35,9 +35,9 @@ func GetNextMerchantRef() (string, error) {
 }
 
 // GetPendingPaymentByEnrollment gets pending payment for a specific enrollment
-func GetPendingPaymentByEnrollment(enrollmentID uint) (*entity.Payment, error) {
+func GetPendingPaymentByEnrollment(enrollmentUid uuid.UUID) (*entity.Payment, error) {
 	var payment entity.Payment
-	if err := database.DB.Where("enrollment_id = ? AND status = ?", enrollmentID, entity.PaymentPending).
+	if err := database.DB.Where("enrollment_uid = ? AND status = ?", enrollmentUid, entity.PaymentPending).
 		First(&payment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil // No pending payment found
@@ -59,10 +59,10 @@ func GetPaymentByReference(reference string) (*entity.Payment, error) {
 	return &payment, nil
 }
 
-// GetPaymentByEnrollmentID gets payment details by enrollment ID
-func GetPaymentByEnrollmentID(enrollmentID uint) (*entity.Payment, error) {
+// GetPaymentByEnrollmentID gets payment details by enrollment uid
+func GetPaymentByEnrollmentID(enrollmentUid uuid.UUID) (*entity.Payment, error) {
 	var payment entity.Payment
-	if err := database.DB.Where("enrollment_id = ?", enrollmentID).First(&payment).Error; err != nil {
+	if err := database.DB.Where("enrollment_uid = ?", enrollmentUid).First(&payment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("payment not found")
 		}
@@ -72,7 +72,7 @@ func GetPaymentByEnrollmentID(enrollmentID uint) (*entity.Payment, error) {
 }
 
 // CreatePayment creates a new payment via Tripay API
-func CreatePayment(userID uint, req *dto.CreatePaymentRequest) (*dto.APIResponse, error) {
+func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIResponse, error) {
 	// Get credentials from env
 	merchantCode := os.Getenv("TRIPAY_MERCHANT_CODE")
 	privateKey := os.Getenv("TRIPAY_PRIVATE_KEY")
@@ -84,7 +84,7 @@ func CreatePayment(userID uint, req *dto.CreatePaymentRequest) (*dto.APIResponse
 
 	// Get user data
 	var user entity.User
-	if err := database.DB.First(&user, userID).Error; err != nil {
+	if err := database.DB.First(&user, userUid).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
@@ -102,11 +102,9 @@ func CreatePayment(userID uint, req *dto.CreatePaymentRequest) (*dto.APIResponse
 		return nil, fmt.Errorf("failed to decrypt user email: %w", err)
 	}
 
-	// Check if enrollment has pending payment
-	if req.EnrollmentID != nil {
-		// Check if enrollment is already active
+	if req.EnrollmentUid != nil {
 		var enrollment entity.Enrollment
-		if err := database.DB.First(&enrollment, *req.EnrollmentID).Error; err != nil {
+		if err := database.DB.First(&enrollment, *req.EnrollmentUid).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				return nil, fmt.Errorf("enrollment not found")
 			}
@@ -118,7 +116,7 @@ func CreatePayment(userID uint, req *dto.CreatePaymentRequest) (*dto.APIResponse
 			return nil, fmt.Errorf("enrollment is already active, no payment needed")
 		}
 
-		pendingPayment, err := GetPendingPaymentByEnrollment(*req.EnrollmentID)
+		pendingPayment, err := GetPendingPaymentByEnrollment(*req.EnrollmentUid)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check pending payment: %w", err)
 		}
@@ -242,7 +240,7 @@ func CreatePayment(userID uint, req *dto.CreatePaymentRequest) (*dto.APIResponse
 
 	// Save payment to database
 	payment := &entity.Payment{
-		EnrollmentID:  req.EnrollmentID,
+		EnrollmentUid: req.EnrollmentUid,
 		Amount:        float64(req.Amount),
 		Method:        entity.PaymentMethod(req.Method),
 		Status:        entity.PaymentPending,
@@ -305,10 +303,9 @@ func HandlePaymentCallback(callbackData *dto.PaymentCallbackRequest) error {
 			return fmt.Errorf("failed to get payment record: %w", err)
 		}
 
-		// If payment has enrollment_id, update enrollment status to active
-		if payment.EnrollmentID != nil {
+		if payment.EnrollmentUid != nil {
 			if err := database.DB.Model(&entity.Enrollment{}).
-				Where("id = ?", *payment.EnrollmentID).
+				Where("uid = ?", *payment.EnrollmentUid).
 				Update("status", entity.EnrollmentActive).Error; err != nil {
 				return fmt.Errorf("failed to update enrollment status: %w", err)
 			}
@@ -331,7 +328,7 @@ func HandlePaymentCallback(callbackData *dto.PaymentCallbackRequest) error {
 // @Failure      500      {object}  map[string]any             "Internal server error"
 // @Router       /payment/create [post]
 func CreatePaymentFunc(c *gin.Context) {
-	userID, exists := c.Get(middleware.IDCK)
+	userID, exists := c.Get(middleware.UIDCK)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -353,7 +350,7 @@ func CreatePaymentFunc(c *gin.Context) {
 		return
 	}
 
-	response, err := CreatePayment(userID.(uint), &req)
+	response, err := CreatePayment(userID.(uuid.UUID), &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -406,17 +403,17 @@ func GetPaymentFunc(c *gin.Context) {
 	if reference != "" {
 		payment, err = GetPaymentByReference(reference)
 	} else {
-		enrollmentID, err2 := strconv.ParseUint(enrollmentIDStr, 10, 32)
+		enrollmentUid, err2 := uuid.Parse(enrollmentIDStr)
 		if err2 != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
 				"message": "Invalid enrollmentId format",
 				"data":    nil,
-				"error":   "enrollmentId must be a valid number",
+				"error":   "enrollmentId must be a valid UUID",
 			})
 			return
 		}
-		payment, err = GetPaymentByEnrollmentID(uint(enrollmentID))
+		payment, err = GetPaymentByEnrollmentID(enrollmentUid)
 	}
 
 	if err != nil {

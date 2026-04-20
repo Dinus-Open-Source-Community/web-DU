@@ -2,6 +2,7 @@ package service
 
 import (
 	"backend/internal/database"
+	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"bytes"
@@ -17,7 +18,7 @@ import (
 func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	// Fetch related data
 	var user entity.User
-	if err := database.DB.First(&user, enrollment.UserID).Error; err != nil {
+	if err := database.DB.First(&user, enrollment.UserUid).Error; err != nil {
 		return nil, "", fmt.Errorf("failed to fetch user: %w", err)
 	}
 
@@ -33,25 +34,23 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	}
 
 	var course entity.Course
-	if err := database.DB.First(&course, enrollment.CourseID).Error; err != nil {
+	if err := database.DB.First(&course, enrollment.CourseUid).Error; err != nil {
 		return nil, "", fmt.Errorf("failed to fetch course: %w", err)
 	}
 
 	// Fetch payment status
 	var payment entity.Payment
 	paymentStatus := "unpaid"
-	err = database.DB.Where("enrollment_id = ?", enrollment.ID).First(&payment).Error
+	err = database.DB.Where("enrollment_uid = ?", enrollment.Uid).First(&payment).Error
 	if err == nil {
 		paymentStatus = string(payment.Status)
 	}
 
-	// Generate filename: {enrollmentID}T{userID}T{courseID}T{dateYYYYMMDD}.pdf
-	// Example: 1T4T3T20251201.pdf
-	filename := fmt.Sprintf("%dT%dT%dT%s.pdf",
-		enrollment.ID,
-		user.ID,
-		course.ID,
-		enrollment.EnrolledAt.Format("20060102"))
+	filename := dto.GenerateInvoiceFilename(
+		enrollment.Uid,
+		enrollment.UserUid,
+		enrollment.CourseUid,
+		enrollment.EnrolledAt)
 
 	// Create PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -79,7 +78,7 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	pdf.SetFont("Arial", "B", 11)
 	pdf.CellFormat(50, 8, "Invoice Number:", "", 0, "L", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 8, fmt.Sprintf("INV-%d", enrollment.ID), "", 1, "L", false, 0, "")
+	pdf.CellFormat(0, 8, fmt.Sprintf("INV-%s", enrollment.Uid.String()), "", 1, "L", false, 0, "")
 
 	pdf.SetFont("Arial", "B", 11)
 	pdf.CellFormat(50, 8, "Invoice Date:", "", 0, "L", false, 0, "")
@@ -140,7 +139,7 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	pdf.SetFont("Arial", "I", 9)
 	pdf.SetTextColor(128, 128, 128)
 	pdf.CellFormat(0, 8, "Terimakasih Sudah Mengambil Kursus Ini!", "", 1, "C", false, 0, "")
-	pdf.CellFormat(0, 8, fmt.Sprintf("Enrollment ID: %d | Course Slug: %s", enrollment.ID, course.Slug), "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 8, fmt.Sprintf("Enrollment: %s | Course Slug: %s", enrollment.Uid.String(), course.Slug), "", 1, "C", false, 0, "")
 
 	// Generate PDF bytes
 	var buf bytes.Buffer

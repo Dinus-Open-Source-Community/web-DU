@@ -7,10 +7,10 @@ import (
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -29,7 +29,7 @@ import (
 // @Failure      500  {object}  map[string]any  "Failed to record attendance"
 // @Router       /lessons/attendances [post]
 func CreateAttendanceFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -55,7 +55,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Verify lesson exists
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, req.LessonID).Error; err != nil {
+	if err := database.DB.First(&lesson, req.LessonUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",
@@ -67,7 +67,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Verify enrollment exists
 	var enrollment entity.Enrollment
-	if err := database.DB.First(&enrollment, req.EnrollmentID).Error; err != nil {
+	if err := database.DB.First(&enrollment, req.EnrollmentUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Enrollment not found",
@@ -79,7 +79,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Check if already checked in for this lesson
 	var existingAttendance entity.LessonAttendance
-	err := database.DB.Where("lesson_id = ? AND enrollment_id = ?", req.LessonID, req.EnrollmentID).
+	err := database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", req.LessonUid, req.EnrollmentUid).
 		First(&existingAttendance).Error
 
 	if err == nil {
@@ -115,10 +115,10 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Create attendance record
 	attendance := entity.LessonAttendance{
-		LessonID:     req.LessonID,
-		EnrollmentID: req.EnrollmentID,
-		Status:       attendanceStatus,
-		Note:         encryptedNote,
+		LessonUid:     req.LessonUid,
+		EnrollmentUid: req.EnrollmentUid,
+		Status:        attendanceStatus,
+		Note:          encryptedNote,
 	}
 
 	if err := database.DB.Create(&attendance).Error; err != nil {
@@ -165,7 +165,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendances"
 // @Router       /lessons/attendances/lesson/{lesson_id} [get]
 func GetLessonAttendancesFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -189,11 +189,11 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 	}
 
 	lessonID := c.Param("lesson_id")
-	lessonIDInt, err := strconv.ParseUint(lessonID, 10, 32)
+	lessonUid, err := uuid.Parse(lessonID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid lesson ID",
+			"message": "Invalid lesson uid",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -201,7 +201,7 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 	}
 
 	var attendances []entity.LessonAttendance
-	if err := database.DB.Where("lesson_id = ?", lessonIDInt).
+	if err := database.DB.Where("lesson_uid = ?", lessonUid).
 		Find(&attendances).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -238,7 +238,7 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendance"
 // @Router       /lessons/attendances/{id} [get]
 func GetAttendanceByIDFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -300,7 +300,7 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to update attendance"
 // @Router       /lessons/attendances/{id} [put]
 func UpdateAttendanceFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -399,7 +399,7 @@ func UpdateAttendanceFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to delete attendance"
 // @Router       /lessons/attendances/{id} [delete]
 func DeleteAttendanceFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -457,7 +457,7 @@ func DeleteAttendanceFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendance status"
 // @Router       /lessons/attendances/check-status [get]
 func CheckAttendanceStatusFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -483,22 +483,22 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 		return
 	}
 
-	lessonID, err := strconv.ParseUint(lessonIDStr, 10, 32)
+	lessonUid, err := uuid.Parse(lessonIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid lesson_id format",
+			"message": "Invalid lesson_id format (expected UUID)",
 			"data":    nil,
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	enrollmentID, err := strconv.ParseUint(enrollmentIDStr, 10, 32)
+	enrollmentUid, err := uuid.Parse(enrollmentIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid enrollment_id format",
+			"message": "Invalid enrollment_id format (expected UUID)",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -506,7 +506,7 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 	}
 
 	var attendance entity.LessonAttendance
-	err = database.DB.Where("lesson_id = ? AND enrollment_id = ?", lessonID, enrollmentID).
+	err = database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", lessonUid, enrollmentUid).
 		Preload("Lesson").
 		Preload("Enrollment").
 		First(&attendance).Error
@@ -543,7 +543,7 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendance history"
 // @Router       /lessons/attendances/my-history [get]
 func GetMyAttendanceHistoryFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -558,13 +558,12 @@ func GetMyAttendanceHistoryFunc(c *gin.Context) {
 
 	// Get all enrollments for this user
 	var enrollments []entity.Enrollment
-	query := database.DB.Where("user_id = ?", userID)
+	query := database.DB.Where("user_uid = ?", userID)
 
 	enrollmentIDStr := c.Query("enrollment_id")
 	if enrollmentIDStr != "" {
-		enrollmentID, err := strconv.ParseUint(enrollmentIDStr, 10, 32)
-		if err == nil {
-			query = query.Where("id = ?", enrollmentID)
+		if enrollmentUid, err := uuid.Parse(enrollmentIDStr); err == nil {
+			query = query.Where("uid = ?", enrollmentUid)
 		}
 	}
 
@@ -588,15 +587,13 @@ func GetMyAttendanceHistoryFunc(c *gin.Context) {
 		return
 	}
 
-	// Get all enrollments IDs
-	var enrollmentIDs []uint
+	var enrollmentUids []uuid.UUID
 	for _, enrollment := range enrollments {
-		enrollmentIDs = append(enrollmentIDs, enrollment.ID)
+		enrollmentUids = append(enrollmentUids, enrollment.Uid)
 	}
 
-	// Get all attendance records for these enrollments
 	var attendances []entity.LessonAttendance
-	if err := database.DB.Where("enrollment_id IN ?", enrollmentIDs).
+	if err := database.DB.Where("enrollment_uid IN ?", enrollmentUids).
 		Preload("Lesson").
 		Preload("Enrollment").
 		Order("created_at DESC").

@@ -53,7 +53,10 @@ func ConnectDB() {
 	DB.AutoMigrate(
 		&entity.User{},
 		&entity.Event{},
+		&entity.CourseCategory{},
+		&entity.ClassType{},
 		&entity.Course{},
+		&entity.CourseMentor{},
 		&entity.Module{},
 		&entity.Lesson{},
 		&entity.Enrollment{},

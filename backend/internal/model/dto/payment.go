@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/google/uuid"
+
 // OrderItem represents a single item in the order
 type OrderItem struct {
 	SKU        string `json:"sku"`
@@ -12,12 +14,12 @@ type OrderItem struct {
 
 // CreatePaymentRequest is the request body for creating a payment
 type CreatePaymentRequest struct {
-	EnrollmentID *uint       `json:"enrollment_id"`
-	Method       string      `json:"method" binding:"required,oneof=PERMATAVA BNIVA BRIVA MANDIRIVA BCAVA MUAMALATVA CIMBVA BSIVA OCBCVA DANAMONVA OVO DANA QRIS2"`
-	Amount       int         `json:"amount" binding:"required,gt=0"`
-	OrderItems   []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
-	CallbackURL  string      `json:"callback_url"`
-	ReturnURL    string      `json:"return_url"`
+	EnrollmentUid *uuid.UUID  `json:"enrollment_uid"`
+	Method        string      `json:"method" binding:"required,oneof=PERMATAVA BNIVA BRIVA MANDIRIVA BCAVA MUAMALATVA CIMBVA BSIVA OCBCVA DANAMONVA OVO DANA QRIS2"`
+	Amount        int         `json:"amount" binding:"required,gt=0"`
+	OrderItems    []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
+	CallbackURL   string      `json:"callback_url"`
+	ReturnURL     string      `json:"return_url"`
 }
 
 // OrderItemResponse represents order item in response

@@ -25,6 +25,8 @@ func CreateAllEnums(db *gorm.DB) {
 	createAttendanceStatusEnum(db)
 	createPaymentMethodEnum(db)
 	createPaymentStatusEnum(db)
+	createCourseLevelEnum(db)
+	createCourseStatusEnum(db)
 	migrateLessonAttendanceStatusEnum(db)
 
 	// 3️⃣ Log bahwa seluruh ENUM berhasil diinisialisasi
@@ -39,7 +41,7 @@ func CreateAllEnums(db *gorm.DB) {
 //   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
 func dropAllEnums(db *gorm.DB) {
 	// Urutkan drop berdasarkan dependency (payment_status dan payment_method tidak ada dependency)
-	enums := []string{"payment_status", "payment_method", "attendance_status", "enrollment_status", "user_role"}
+	enums := []string{"course_status", "course_level", "payment_status", "payment_method", "attendance_status", "enrollment_status", "user_role"}
 
 	for _, enumName := range enums {
 		query := `DROP TYPE IF EXISTS ` + enumName + ` CASCADE;`
@@ -55,6 +57,7 @@ func dropAllEnums(db *gorm.DB) {
 // di database PostgreSQL.
 //
 // ENUM ini berisi tiga nilai tetap:
+// - 'super_admin' → untuk pengguna dengan hak akses tertinggi
 // - 'admin'   → untuk pengguna dengan hak akses penuh
 // - 'mentor'  → untuk pengguna pengajar atau pembimbing
 // - 'student' → untuk pengguna pelajar
@@ -62,7 +65,7 @@ func dropAllEnums(db *gorm.DB) {
 // Parameter:
 //   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
 func createUserRoleEnum(db *gorm.DB) {
-	query := `CREATE TYPE user_role AS ENUM ('admin', 'mentor', 'student');`
+	query := `CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'mentor', 'student');`
 	db.Exec(query)
 
 	log.Println("[Success] ENUM user_role is ready for use")
@@ -170,4 +173,18 @@ func createPaymentStatusEnum(db *gorm.DB) {
 	db.Exec(query)
 
 	log.Println("[Success] ENUM payment_status is ready for use")
+}
+
+func createCourseLevelEnum(db *gorm.DB) {
+	query := `CREATE TYPE course_level AS ENUM ('PEMULA', 'MENENGAH', 'LANJUTAN');`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM course_level is ready for use")
+}
+
+func createCourseStatusEnum(db *gorm.DB) {
+	query := `CREATE TYPE course_status AS ENUM ('DRAFT', 'ACTIVE', 'TIDAK ACTIVE');`
+	db.Exec(query)
+
+	log.Println("[Success] ENUM course_status is ready for use")
 }

@@ -26,7 +26,7 @@ import (
 // @Router       /avatar [post]
 func PostAvatarFunc(c *gin.Context) {
 	// Ambil data userID dari context yang sudah diset oleh middleware
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var avatarURL string
 	file, err := c.FormFile("avatar")
@@ -74,7 +74,7 @@ func PostAvatarFunc(c *gin.Context) {
 		AvatarURL: avatarURL,
 	}
 
-	err = database.DB.Model(&entity.User{}).Where("id = ?", userID).Updates(avatar).Error
+	err = database.DB.Model(&entity.User{}).Where("uid = ?", userID).Updates(avatar).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

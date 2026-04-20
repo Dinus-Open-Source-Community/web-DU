@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Summary      User login (Public)
@@ -43,7 +44,7 @@ func PostLoginFunc(c *gin.Context) {
 	emailHash := utils.GenerateBlindIndex(req.Email)
 	database.DB.Where("email_hash = ?", emailHash).First(&userData)
 
-	if userData.ID == 0 {
+	if userData.Uid == uuid.Nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"message": "Invalid credentials",

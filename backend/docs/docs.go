@@ -88,6 +88,654 @@ const docTemplate = `{
                 }
             }
         },
+        "/class-types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all class types. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class Type"
+                ],
+                "summary": "Get all class types (Admin Only)",
+                "responses": {
+                    "200": {
+                        "description": "Class types retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve class types",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new class type. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class Type"
+                ],
+                "summary": "Create class type (Admin Only)",
+                "parameters": [
+                    {
+                        "description": "Class type data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateClassTypeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Class type created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create class type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/class-types/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a specific class type by uid. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class Type"
+                ],
+                "summary": "Get class type by ID (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Class Type UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class type retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid class type uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Class type not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update existing class type by uid. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class Type"
+                ],
+                "summary": "Update class type (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Class Type UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Class type data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateClassTypeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class type updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Class type not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update class type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete class type by uid. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class Type"
+                ],
+                "summary": "Delete class type (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Class Type UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class type deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid class type uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Class type not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete class type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/course-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all course categories. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course Category"
+                ],
+                "summary": "Get all course categories (Admin Only)",
+                "responses": {
+                    "200": {
+                        "description": "Course categories retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve course categories",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new course category. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course Category"
+                ],
+                "summary": "Create course category (Admin Only)",
+                "parameters": [
+                    {
+                        "description": "Course category data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCourseCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Course category created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create course category",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/course-categories/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a specific course category by uid. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course Category"
+                ],
+                "summary": "Get course category by ID (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Category UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course category retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid course category uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course category not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update existing course category by uid. Admin only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course Category"
+                ],
+                "summary": "Update course category (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Category UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course category data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCourseCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course category updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course category not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update course category",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete course category by uid. Admin only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course Category"
+                ],
+                "summary": "Delete course category (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Category UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course category deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid course category uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course category not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete course category",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/courses": {
             "get": {
                 "security": [
@@ -181,7 +829,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new course with details and optional thumbnail. Admin only.",
+                "description": "Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Admin only.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -194,6 +842,12 @@ const docTemplate = `{
                 "summary": "Create new course (Admin Only)",
                 "parameters": [
                     {
+                        "type": "file",
+                        "description": "Course cover image (JPG, PNG recommended). Fallback key: thumbnail",
+                        "name": "cover",
+                        "in": "formData"
+                    },
+                    {
                         "type": "string",
                         "description": "Course title",
                         "name": "title",
@@ -202,8 +856,60 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Course slug (unique identifier, lowercase with hyphens)",
+                        "description": "Course subtitle/header",
+                        "name": "subtitle",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Alias for subtitle",
+                        "name": "header",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course slug (auto-generated from title when empty)",
                         "name": "slug",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dynamic category uid",
+                        "name": "category_uid",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dynamic class type uid",
+                        "name": "class_type_uid",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course level: PEMULA | MENENGAH | LANJUTAN",
+                        "name": "level",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Course selling price",
+                        "name": "price",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Displayed strike-through/original price",
+                        "name": "price_strike",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "JSON array of strings, e.g. [\\",
+                        "name": "what_you_learn",
                         "in": "formData",
                         "required": true
                     },
@@ -215,43 +921,34 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "file",
-                        "description": "Course thumbnail image (JPG, PNG recommended)",
-                        "name": "thumbnail",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Course price in cents",
-                        "name": "price",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
                         "description": "Course slot capacity (0 = unlimited)",
                         "name": "slot",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "boolean",
                         "description": "Whether course is premium (default: false)",
                         "name": "is_premium",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "boolean",
                         "description": "Whether course is published (default: false)",
                         "name": "is_published",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Course created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -420,6 +1117,88 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/{id}/mentors/assign": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Assign one or more mentors selected by admin to a course. Course can have multiple mentors.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Assign mentors to course (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Mentor UIDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AssignMentorsToCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentors assigned successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{id}/review": {
             "post": {
                 "security": [
@@ -494,6 +1273,72 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Set course status to ACTIVE. Admin only endpoint.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Activate course status (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course status updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update course status",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1610,6 +2455,202 @@ const docTemplate = `{
                 }
             }
         },
+        "/mentor/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all mentor users with teaching summaries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Get all mentors",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentors retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/mentor/courses/{course_id}/join": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mentor confirms joining a course that has been assigned by admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Join assigned course as mentor (Mentor Only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "course_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor joined assigned course successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid course uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - mentor only or course not assigned",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or assignment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/mentor/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Get mentor detail by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mentor UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor detail retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid mentor uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Mentor not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/modules": {
             "post": {
                 "security": [
@@ -2198,56 +3239,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/data": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve current authenticated user's complete profile including personal data and enrolled courses",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get authenticated user profile (All Roles)",
-                "responses": {
-                    "200": {
-                        "description": "User data retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "User not found in database",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/user/manage/all": {
             "get": {
                 "security": [
@@ -2380,86 +3371,6 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden - Only admins can delete users",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update a specific user's role. Only administrators can perform this action. Valid roles are: admin, mentor, student.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User Management"
-                ],
-                "summary": "Update user role (Admin Only)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID to update",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Role assignment (admin/mentor/student)",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateUserRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User role updated successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid role value",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can update roles",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2617,6 +3528,161 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/role/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a specific user's role. Admin can update mentor/student role, while role changes for admin/super_admin users are restricted to super_admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Update user role (Admin/Super Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UID to update",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Role assignment (super_admin/admin/mentor/student)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User role updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid role value",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient role update permission",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user detail by ID (Admin or Self)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User detail retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - only admin or user owner",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2634,6 +3700,21 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AssignMentorsToCourseRequest": {
+            "type": "object",
+            "required": [
+                "mentor_uids"
+            ],
+            "properties": {
+                "mentor_uids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "dto.ChangePasswordRequest": {
             "type": "object",
             "required": [
@@ -2646,6 +3727,46 @@ const docTemplate = `{
                 },
                 "old_password": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.CreateClassTypeRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Kelas intensif berbasis project"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Bootcamp"
+                }
+            }
+        },
+        "dto.CreateCourseCategoryRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Kategori course pengembangan web"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Web Development"
                 }
             }
         },
@@ -2669,14 +3790,14 @@ const docTemplate = `{
         "dto.CreateModuleRequest": {
             "type": "object",
             "required": [
-                "course_id",
+                "course_uid",
                 "order_index",
                 "title"
             ],
             "properties": {
-                "course_id": {
-                    "type": "integer",
-                    "example": 1
+                "course_uid": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "order_index": {
                     "type": "integer",
@@ -2702,8 +3823,8 @@ const docTemplate = `{
                 "callback_url": {
                     "type": "string"
                 },
-                "enrollment_id": {
-                    "type": "integer"
+                "enrollment_uid": {
+                    "type": "string"
                 },
                 "method": {
                     "type": "string",
@@ -2815,15 +3936,15 @@ const docTemplate = `{
         "dto.LessonAttendanceCreateRequest": {
             "type": "object",
             "required": [
-                "enrollment_id",
-                "lesson_id"
+                "enrollment_uid",
+                "lesson_uid"
             ],
             "properties": {
-                "enrollment_id": {
-                    "type": "integer"
+                "enrollment_uid": {
+                    "type": "string"
                 },
-                "lesson_id": {
-                    "type": "integer"
+                "lesson_uid": {
+                    "type": "string"
                 },
                 "note": {
                     "type": "string"
@@ -2859,7 +3980,7 @@ const docTemplate = `{
         "dto.LessonCreateRequest": {
             "type": "object",
             "required": [
-                "module_id",
+                "module_uid",
                 "title"
             ],
             "properties": {
@@ -2870,8 +3991,8 @@ const docTemplate = `{
                     "description": "RFC3339 format",
                     "type": "string"
                 },
-                "module_id": {
-                    "type": "integer"
+                "module_uid": {
+                    "type": "string"
                 },
                 "order_index": {
                     "type": "integer"
@@ -2898,8 +4019,8 @@ const docTemplate = `{
                     "description": "RFC3339 format",
                     "type": "string"
                 },
-                "module_id": {
-                    "type": "integer"
+                "module_uid": {
+                    "type": "string"
                 },
                 "order_index": {
                     "type": "integer"
@@ -3020,6 +4141,40 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "StrongPassword123"
+                }
+            }
+        },
+        "dto.UpdateClassTypeRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Kelas intensif berbasis project"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Bootcamp"
+                }
+            }
+        },
+        "dto.UpdateCourseCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Kategori course pengembangan web"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Web Development"
                 }
             }
         },

@@ -16,12 +16,13 @@ func StartUserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	userGroup.Use(middleware.AuthMiddleware())
 	{
-		userGroup.GET("/data", service.GetUserDataService) // user profile - all roles
 		userGroup.PATCH("/profile", service.UpdateUserProfileService) // update profile - all roles
-		userGroup.PATCH("/password", service.ChangePasswordService) // change password - all roles
+		userGroup.PATCH("/password", service.ChangePasswordService)   // change password - all roles
 
 		userGroup.GET("/manage/all", service.GetAllUsersService)      // Admin only
 		userGroup.PATCH("/manage/:id", service.UpdateUserRoleService) // Admin only
+		userGroup.PATCH("/role/:id", service.UpdateUserRoleService)   // Admin/super admin with role restrictions
 		userGroup.DELETE("/manage/:id", service.DeleteUserService)    // Admin only
+		userGroup.GET("/:id", service.GetUserDetailByIDService)       // Admin or self
 	}
 }

@@ -1,8 +1,10 @@
 package dto
 
+import "github.com/google/uuid"
+
 // LessonCreateRequest represents payload for creating a lesson.
 type LessonCreateRequest struct {
-	ModuleID   uint        `json:"module_id" binding:"required"`
+	ModuleUid  uuid.UUID   `json:"module_uid" binding:"required"`
 	Title      string      `json:"title" binding:"required"`
 	Content    interface{} `json:"content"` // accepts any JSON value
 	VideoURL   string      `json:"video_url"`
@@ -13,7 +15,7 @@ type LessonCreateRequest struct {
 
 // LessonUpdateRequest represents payload for updating a lesson.
 type LessonUpdateRequest struct {
-	ModuleID   uint        `json:"module_id"`
+	ModuleUid  uuid.UUID   `json:"module_uid"`
 	Title      string      `json:"title"`
 	Content    interface{} `json:"content"` // accepts any JSON value
 	VideoURL   string      `json:"video_url"`

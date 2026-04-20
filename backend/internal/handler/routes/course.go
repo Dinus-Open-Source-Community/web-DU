@@ -19,8 +19,10 @@ func StartCourseRoutes(r *gin.Engine) {
 		courseGroup.GET("/:id", service.GetCourseByIDFunc) // users - all roles
 		courseGroup.GET("/", service.GetAllCoursesFunc)    // users - all roles
 
-		courseGroup.POST("/:id/join", service.JoinCourseFunc)           // Students only
-		courseGroup.POST("/:id/review", service.CreateCourseReviewFunc) // Enrolled students only
+		courseGroup.POST("/:id/join", service.JoinCourseFunc)                      // Students only
+		courseGroup.POST("/:id/review", service.CreateCourseReviewFunc)            // Enrolled students only
+		courseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)         // Admin only
+		courseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc) // Admin only
 
 		courseGroup.GET("/:id/students", service.GetCourseStudentsFunc) // Admin only
 		courseGroup.POST("/", service.PostAdminCourseFunc)              // Admin only

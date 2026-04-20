@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -169,7 +170,7 @@ func CallbackHandler(c *gin.Context) {
 
 	var user entity.User
 	database.DB.Where("email_hash = ?", emailHash).First(&user)
-	if user.ID == 0 {
+	if user.Uid == uuid.Nil {
 		user = entity.User{
 			Name:       encName,
 			Email:      encEmail,
@@ -214,7 +215,7 @@ func CallbackHandler(c *gin.Context) {
 		"success": true,
 		"message": "User logged in via Google successfully",
 		"data": gin.H{
-			"id":          user.ID,
+			"uid":         user.Uid,
 			"name":        nameDecrypted,
 			"email":       emailDecrypted,
 			"avatar_url":  user.AvatarURL,

@@ -36,7 +36,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	}
 
 	var modules []entity.Module
-	if err := database.DB.Where("course_id = ?", courseID).Preload("Lessons").Order("order_index ASC").Find(&modules).Error; err != nil {
+	if err := database.DB.Where("course_uid = ?", courseID).Preload("Lessons").Order("order_index ASC").Find(&modules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve modules",
@@ -103,7 +103,7 @@ func GetModuleByIDFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to create module"
 // @Router       /modules [post]
 func PostAdminModuleFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -138,7 +138,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 	}
 
 	var course entity.Course
-	if err := database.DB.First(&course, req.CourseID).Error; err != nil {
+	if err := database.DB.First(&course, req.CourseUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -149,7 +149,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 	}
 
 	module := entity.Module{
-		CourseID:   req.CourseID,
+		CourseUid:  req.CourseUid,
 		Title:      req.Title,
 		OrderIndex: req.OrderIndex,
 	}
@@ -189,7 +189,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to update module"
 // @Router       /modules/{id} [put]
 func UpdateAdminModuleFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {
@@ -277,7 +277,7 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to delete module"
 // @Router       /modules/{id} [delete]
 func DeleteAdminModuleFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.IDCK)
+	userID, _ := c.Get(middleware.UIDCK)
 
 	var userData entity.User
 	if err := database.DB.First(&userData, userID).Error; err != nil {

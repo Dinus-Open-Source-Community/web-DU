@@ -1,30 +1,62 @@
 package entity
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type CourseLevel string
+type CourseStatus string
+
+const (
+	CourseLevelPemula   CourseLevel = "PEMULA"
+	CourseLevelMenengah CourseLevel = "MENENGAH"
+	CourseLevelLanjutan CourseLevel = "LANJUTAN"
+)
+
+const (
+	CourseStatusDraft       CourseStatus = "DRAFT"
+	CourseStatusActive      CourseStatus = "ACTIVE"
+	CourseStatusTidakActive CourseStatus = "TIDAK ACTIVE"
+)
 
 // Model Course Migrations
 type Course struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	EventID      *uint     `json:"event_id"`
-	MentorID     *uint     `json:"mentor_id"`
-	Title        string    `gorm:"type:varchar(200);not null" json:"title"`
+	Uid          uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
+	EventUid     *uuid.UUID `gorm:"type:uuid;index" json:"event_uid"`
+	MentorUid    *uuid.UUID `gorm:"type:uuid;index" json:"mentor_uid"`
+	CategoryUid  *uuid.UUID `gorm:"type:uuid;index" json:"category_uid"`
+	ClassTypeUid *uuid.UUID `gorm:"type:uuid;index" json:"class_type_uid"`
+	Title        string     `gorm:"type:varchar(200);not null" json:"title"`
+	Subtitle     string     `gorm:"type:varchar(255)" json:"subtitle"`
 
-	Slot         int       `gorm:"default:0" json:"slot"`
+	Slot int `gorm:"default:0" json:"slot"`
 
-	Slug         string    `gorm:"type:varchar(255);unique;not null" json:"slug"`
-	Description  string    `gorm:"type:text" json:"description"`
-	ThumbnailURL string    `gorm:"type:varchar(255)" json:"thumbnail_url"`
-	Price        float64   `gorm:"type:decimal(10,2)" json:"price"`
-	IsPremium    bool      `gorm:"default:false" json:"is_premium"`
-	IsPublished  bool      `gorm:"default:false" json:"is_published"`
-	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Slug         string          `gorm:"type:varchar(255);unique;not null" json:"slug"`
+	Description  string          `gorm:"type:text" json:"description"`
+	CoverURL     string          `gorm:"type:varchar(255)" json:"cover_url"`
+	ThumbnailURL string          `gorm:"type:varchar(255)" json:"thumbnail_url"`
+	Level        CourseLevel     `gorm:"type:course_level;default:'PEMULA';not null" json:"level"`
+	Status       CourseStatus    `gorm:"type:course_status;default:'DRAFT';not null" json:"status"`
+	Price        float64         `gorm:"type:decimal(10,2)" json:"price"`
+	PriceStrike  float64         `gorm:"type:decimal(10,2);default:0" json:"price_strike"`
+	WhatYouLearn json.RawMessage `gorm:"type:jsonb" json:"what_you_learn"`
+	IsPremium    bool            `gorm:"default:false" json:"is_premium"`
+	IsPublished  bool            `gorm:"default:false" json:"is_published"`
+	CreatedAt    time.Time       `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt    time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Event         *Event               `json:"event"`
-	Mentor        *User                `json:"mentor"`
-	Modules       []Module             `json:"modules"`
-	Enrollments   []Enrollment         `json:"enrollments"`
-	Reviews       []CourseReview       `json:"course_reviews"`
-	Announcements []CourseAnnouncement `json:"course_announcements"`
+	Event         *Event               `gorm:"foreignKey:EventUid" json:"event"`
+	Mentor        *User                `gorm:"foreignKey:MentorUid" json:"mentor"`
+	Mentors       []User               `gorm:"many2many:course_mentors;joinForeignKey:CourseUid;joinReferences:MentorUid" json:"mentors"`
+	CourseMentors []CourseMentor       `gorm:"foreignKey:CourseUid" json:"course_mentors"`
+	Category      *CourseCategory      `gorm:"foreignKey:CategoryUid" json:"category"`
+	ClassType     *ClassType           `gorm:"foreignKey:ClassTypeUid" json:"class_type"`
+	Modules       []Module             `gorm:"foreignKey:CourseUid" json:"modules"`
+	Enrollments   []Enrollment         `gorm:"foreignKey:CourseUid" json:"enrollments"`
+	Reviews       []CourseReview       `gorm:"foreignKey:CourseUid" json:"course_reviews"`
+	Announcements []CourseAnnouncement `gorm:"foreignKey:CourseUid" json:"course_announcements"`
 }
