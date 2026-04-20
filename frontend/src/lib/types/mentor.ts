@@ -1,4 +1,4 @@
-import type { CourseCategory, CourseClassType, CourseLevel } from './course'
+import type { CourseCategory, CourseClassType, CourseLevel, IQuiz } from './course'
 
 /** Dashboard & jadwal mentor. */
 export type SubmissionStatus = 'Submitted' | 'Late' | 'Pending'
@@ -41,7 +41,7 @@ export interface IMentorCourse {
   title: string
   /** Teks header / subtitle singkat di kartu & editor */
   header: string
-  description?: string
+  description: string
   image?: string
   published: boolean
   moduleCount: number
@@ -56,11 +56,7 @@ export interface IMentorCourse {
   classType?: CourseClassType
   price?: number
   strikePrice?: number
-  duration?: string
   whatYouLearn?: string[]
-  tags?: string[]
-  prerequisites?: string[]
-  targetAudience?: string
 }
 
 /** Status peserta pada tabel mentor. */
@@ -119,6 +115,14 @@ export interface IMentorTodayClassCard {
 
 /** Tugas per kursus (mentor). */
 export type MentorAssignmentLifecycleStatus = 'draft' | 'published' | 'closed'
+export type MentorAssignmentTaskType = 'text' | 'quiz'
+
+export interface MentorAssignmentSubmissionConfig {
+  allowFile: boolean
+  allowPlainText: boolean
+  allowRichText: boolean
+  requireFileDescription: boolean
+}
 
 export interface IMentorCourseAssignment {
   uid: string
@@ -126,13 +130,16 @@ export interface IMentorCourseAssignment {
   /** Pertemuan ke-1 … ke-N (N = meetingCount kursus) */
   meetingNumber: number
   title: string
+  taskType?: MentorAssignmentTaskType
   /** HTML dari editor (atau teks polos lama) */
   description: string
+  quiz?: IQuiz
   deadlineAt: string
   status: MentorAssignmentLifecycleStatus
   autoCloseAfterDeadline: boolean
   allowResubmit: boolean
   maxAttempts?: number
+  submissionConfig?: MentorAssignmentSubmissionConfig
   /** Lampiran instruksi mentor (URL aman / signed URL dari API). */
   instructionAttachments?: { fileName: string; url: string; mime?: string }[]
 }
@@ -141,8 +148,18 @@ export type SubmissionContentBlock =
   | { type: 'text'; text: string }
   | { type: 'html'; html: string }
   | { type: 'image'; url: string; alt?: string }
-  | { type: 'file'; fileName: string; url: string; mime?: string }
+  | { type: 'file'; fileName: string; url: string; mime?: string; description?: string }
   | { type: 'videoEmbed'; provider: 'youtube' | 'vimeo' | 'other'; embedUrl: string; title?: string }
+  | {
+      type: 'quiz'
+      passingScore?: number
+      answers: {
+        questionId: string
+        prompt: string
+        selectedOptionId: string
+        selectedLabel: string
+      }[]
+    }
   | { type: 'link'; url: string; label?: string }
 
 export type MentorSubmissionReviewStatus = 'pending_review' | 'graded' | 'returned'

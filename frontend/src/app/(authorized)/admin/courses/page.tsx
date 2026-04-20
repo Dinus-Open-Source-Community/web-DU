@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
-
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
-
-import { AdminCoursesGrid } from './_components/AdminCoursesGrid'
+import MentorCoursesSection from '../../mentor/courses/_components/MentorCoursesSection'
 
 export const metadata: Metadata = {
   title: 'Kursus — Admin',
@@ -12,12 +9,8 @@ export const metadata: Metadata = {
 
 export default function AdminCoursesPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <AdminPageHeader
-        title="Manajemen Kursus"
-        subtitle="Telusuri, filter, dan kelola seluruh kursus yang tersedia di platform."
-      />
-      <AdminCoursesGrid />
-    </div>
+    <section className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <MentorCoursesSection role="admin" />
+    </section>
   )
 }

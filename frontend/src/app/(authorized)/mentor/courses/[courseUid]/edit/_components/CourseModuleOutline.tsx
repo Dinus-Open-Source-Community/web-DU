@@ -1,19 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  Film,
-  FolderOpen,
-  HelpCircle,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, HelpCircle, Pencil, Plus, Trash2, X } from 'lucide-react'
 import type { IModule, LessonContentType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -37,9 +25,7 @@ const LESSON_TYPE_COLOR: Record<LessonContentType, string> = {
   quiz: 'bg-amber-50 text-amber-600',
 }
 
-type EditingTarget =
-  | { kind: 'module'; moduleId: string }
-  | { kind: 'lesson'; moduleId: string; lessonId: string }
+type EditingTarget = { kind: 'module'; moduleId: string } | { kind: 'lesson'; moduleId: string; lessonId: string }
 
 type CourseModuleOutlineProps = {
   modules: IModule[]
@@ -48,12 +34,7 @@ type CourseModuleOutlineProps = {
   onModulesChange: (modules: IModule[]) => void
 }
 
-export function CourseModuleOutline({
-  modules,
-  activeLessonId,
-  onSelectLesson,
-  onModulesChange,
-}: CourseModuleOutlineProps) {
+export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, onModulesChange }: CourseModuleOutlineProps) {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(() => {
     const initial = new Set<string>()
     for (const m of modules) {
@@ -91,20 +72,12 @@ export function CourseModuleOutline({
     if (editing.kind === 'module') {
       const mod = modules.find((m) => m.id === editing.moduleId)
       const finalTitle = trimmed || mod?.title || `Modul`
-      onModulesChange(
-        modules.map((m) => (m.id === editing.moduleId ? { ...m, title: finalTitle } : m)),
-      )
+      onModulesChange(modules.map((m) => (m.id === editing.moduleId ? { ...m, title: finalTitle } : m)))
     } else {
       const mod = modules.find((m) => m.id === editing.moduleId)
       const lesson = mod?.lessons.find((l) => l.id === editing.lessonId)
       const finalTitle = trimmed || lesson?.title || `Lesson`
-      onModulesChange(
-        modules.map((m) =>
-          m.id === editing.moduleId
-            ? { ...m, lessons: m.lessons.map((l) => (l.id === editing.lessonId ? { ...l, title: finalTitle } : l)) }
-            : m,
-        ),
-      )
+      onModulesChange(modules.map((m) => (m.id === editing.moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === editing.lessonId ? { ...l, title: finalTitle } : l)) } : m)))
     }
     setEditing(null)
   }
@@ -121,11 +94,9 @@ export function CourseModuleOutline({
     }
   }
 
-  const isEditingModule = (moduleId: string) =>
-    editing?.kind === 'module' && editing.moduleId === moduleId
+  const isEditingModule = (moduleId: string) => editing?.kind === 'module' && editing.moduleId === moduleId
 
-  const isEditingLesson = (moduleId: string, lessonId: string) =>
-    editing?.kind === 'lesson' && editing.moduleId === moduleId && editing.lessonId === lessonId
+  const isEditingLesson = (moduleId: string, lessonId: string) => editing?.kind === 'lesson' && editing.moduleId === moduleId && editing.lessonId === lessonId
 
   const toggleExpand = (moduleId: string) => {
     setExpandedModules((prev) => {
@@ -189,7 +160,7 @@ export function CourseModuleOutline({
         ...m,
         lessons: m.lessons.map((l) => {
           if (l.id !== lessonId) return l
-          const base = { id: l.id, title: l.title, order: l.order, durationMinutes: l.durationMinutes }
+          const base = { id: l.id, title: l.title, order: l.order, durationMinutes: l.durationMinutes, hasHomework: l.hasHomework ?? false }
           switch (newType) {
             case 'tiptap':
               return { ...base, contentType: 'tiptap' as const, contentHtml: '' }
@@ -231,28 +202,17 @@ export function CourseModuleOutline({
           const hasActiveLesson = mod.lessons.some((l) => l.id === activeLessonId)
 
           return (
-            <div
-              key={mod.id}
-              className={cn(
-                'overflow-hidden rounded-xl transition-colors',
-                hasActiveLesson && !isExpanded ? 'bg-primary/3' : '',
-              )}
-            >
+            <div key={mod.id} className={cn('overflow-hidden rounded-xl transition-colors', hasActiveLesson && !isExpanded ? 'bg-primary/3' : '')}>
               {/* Module header */}
               <div className="group/mod flex items-center gap-1.5 rounded-xl px-2.5 py-2 hover:bg-slate-50">
                 <button
                   type="button"
                   onClick={() => toggleExpand(mod.id)}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-600"
-                >
-                  {isExpanded
-                    ? <ChevronDown className="size-3.5" />
-                    : <ChevronRight className="size-3.5" />}
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-600">
+                  {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                 </button>
 
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">
-                  {mi + 1}
-                </span>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">{mi + 1}</span>
 
                 {editingThisModule ? (
                   <div className="flex flex-1 items-center gap-1">
@@ -269,32 +229,22 @@ export function CourseModuleOutline({
                       type="button"
                       onClick={commitRename}
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-white transition-colors hover:bg-primary/90"
-                      title="Simpan"
-                    >
+                      title="Simpan">
                       <Check className="size-3" />
                     </button>
                     <button
                       type="button"
                       onClick={cancelRename}
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
-                      title="Batal"
-                    >
+                      title="Batal">
                       <X className="size-3" />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => toggleExpand(mod.id)}
-                      className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
-                    >
-                      <span className="truncate text-xs font-semibold text-slate-700">
-                        {mod.title}
-                      </span>
-                      <span className="shrink-0 text-[10px] text-slate-400">
-                        ({mod.lessons.length})
-                      </span>
+                    <button type="button" onClick={() => toggleExpand(mod.id)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+                      <span className="truncate text-xs font-semibold text-slate-700">{mod.title}</span>
+                      <span className="shrink-0 text-[10px] text-slate-400">({mod.lessons.length})</span>
                     </button>
 
                     <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/mod:opacity-100">
@@ -302,16 +252,14 @@ export function CourseModuleOutline({
                         type="button"
                         onClick={() => startEditModule(mod.id, mod.title)}
                         className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                        title="Rename modul"
-                      >
+                        title="Rename modul">
                         <Pencil className="size-3" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteModule(mod.id)}
                         className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                        title="Hapus modul"
-                      >
+                        title="Hapus modul">
                         <Trash2 className="size-3" />
                       </button>
                     </div>
@@ -321,7 +269,7 @@ export function CourseModuleOutline({
 
               {/* Expanded lesson list */}
               {isExpanded && (
-                <div className="ml-[18px] border-l-2 border-slate-100 pb-1 pl-3 pr-2">
+                <div className="ml-4.5 border-l-2 border-slate-100 pb-1 pl-3 pr-2">
                   <div className="space-y-0.5 pt-0.5">
                     {mod.lessons.map((lesson) => {
                       const isActive = lesson.id === activeLessonId
@@ -347,48 +295,26 @@ export function CourseModuleOutline({
                                 type="button"
                                 onClick={commitRename}
                                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary text-white transition-colors hover:bg-primary/90"
-                                title="Simpan"
-                              >
+                                title="Simpan">
                                 <Check className="size-2.5" />
                               </button>
                               <button
                                 type="button"
                                 onClick={cancelRename}
                                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300"
-                                title="Batal"
-                              >
+                                title="Batal">
                                 <X className="size-2.5" />
                               </button>
                             </div>
                           ) : (
-                            <div
-                              className={cn(
-                                'flex items-center gap-1.5 rounded-lg transition-colors',
-                                isActive
-                                  ? 'bg-primary/[0.07]'
-                                  : 'hover:bg-slate-50/80',
-                              )}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => onSelectLesson(lesson.id)}
-                                className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left"
-                              >
-                                {isActive && (
-                                  <span className="h-4 w-0.5 shrink-0 rounded-full bg-primary" />
-                                )}
-                                <span className={cn(
-                                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-md',
-                                  typeColor,
-                                )}>
+                            <div className={cn('flex items-center gap-1.5 rounded-lg transition-colors', isActive ? 'bg-primary/[0.07]' : 'hover:bg-slate-50/80')}>
+                              <button type="button" onClick={() => onSelectLesson(lesson.id)} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left">
+                                {isActive && <span className="h-4 w-0.5 shrink-0 rounded-full bg-primary" />}
+                                <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-md', typeColor)}>
                                   <Icon className="size-3" />
                                 </span>
-                                <span className={cn(
-                                  'flex-1 truncate text-xs',
-                                  isActive ? 'font-medium text-slate-900' : 'text-slate-600',
-                                )}>
-                                  {lesson.title}
-                                </span>
+                                <span className={cn('flex-1 truncate text-xs', isActive ? 'font-medium text-slate-900' : 'text-slate-600')}>{lesson.title}</span>
+                                {lesson.hasHomework && <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-700">HW</span>}
                               </button>
 
                               {/* Lesson actions */}
@@ -397,26 +323,22 @@ export function CourseModuleOutline({
                                   value={lesson.contentType}
                                   onChange={(e) => handleChangeLessonType(mod.id, lesson.id, e.target.value as LessonContentType)}
                                   className="h-5 cursor-pointer rounded-md border-0 bg-slate-100 px-1 text-[10px] font-medium text-slate-500 outline-none hover:bg-slate-200"
-                                  title="Ubah tipe konten"
-                                >
+                                  title="Ubah tipe konten">
                                   <option value="tiptap">{LESSON_TYPE_LABEL.tiptap}</option>
                                   <option value="video">{LESSON_TYPE_LABEL.video}</option>
-                                  <option value="quiz">{LESSON_TYPE_LABEL.quiz}</option>
                                 </select>
                                 <button
                                   type="button"
                                   onClick={() => startEditLesson(mod.id, lesson.id, lesson.title)}
                                   className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                                  title="Rename lesson"
-                                >
+                                  title="Rename lesson">
                                   <Pencil className="size-2.5" />
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteLesson(mod.id, lesson.id)}
                                   className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                                  title="Hapus lesson"
-                                >
+                                  title="Hapus lesson">
                                   <Trash2 className="size-2.5" />
                                 </button>
                               </div>
@@ -430,8 +352,7 @@ export function CourseModuleOutline({
                   <button
                     type="button"
                     onClick={() => handleAddLesson(mod.id)}
-                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
-                  >
+                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600">
                     <Plus className="size-3" />
                     Tambah lesson
                   </button>
@@ -449,8 +370,7 @@ export function CourseModuleOutline({
           variant="outline"
           size="sm"
           onClick={handleAddModule}
-          className="w-full rounded-xl border-dashed border-slate-300 bg-transparent text-xs font-medium text-slate-500 hover:border-primary/40 hover:text-primary"
-        >
+          className="w-full rounded-xl border-dashed border-slate-300 bg-transparent text-xs font-medium text-slate-500 hover:border-primary/40 hover:text-primary">
           <Plus className="size-3.5" />
           Tambah modul baru
         </Button>

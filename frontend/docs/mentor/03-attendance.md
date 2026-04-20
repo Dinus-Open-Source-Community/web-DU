@@ -43,7 +43,7 @@ Monitoring absensi siswa per lesson. Mock/storage: [`mentorAttendanceStorage`](.
 }
 ```
 
-*Saat ini mentor **bukan** admin di handler ini — **usulan:** izinkan `mentor` jika `course.mentor_id == user.id`.*
+_Saat ini mentor **bukan** admin di handler ini — **usulan:** izinkan `mentor` jika `course.mentor_id == user.id`._
 
 ---
 
@@ -79,8 +79,6 @@ Monitoring absensi siswa per lesson. Mock/storage: [`mentorAttendanceStorage`](.
 ---
 
 ## Siswa — referensi
-
-Create/check-in: [student/04-attendance](../student/04-attendance.md).
 
 ---
 

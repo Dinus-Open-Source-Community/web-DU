@@ -19,9 +19,9 @@ import {
   canStudentOpenAssignmentDetail,
   filterStudentFeed,
   formatAssignmentDeadlineRelative,
+  getActiveStudentAssignmentActor,
   getStudentAssignmentDetailAccessDeniedReason,
   listStudentAssignmentFeed,
-  STUDENT_DEMO_UID,
   type StudentAssignmentFeedCategory,
   type StudentAssignmentFeedRow,
 } from '@/lib/studentAssignmentsData'
@@ -59,7 +59,8 @@ export function StudentAssignmentsSection() {
 
   const load = useCallback(() => {
     setNow(new Date())
-    setRows(listStudentAssignmentFeed(STUDENT_DEMO_UID))
+    const actor = getActiveStudentAssignmentActor()
+    setRows(listStudentAssignmentFeed(actor.studentUid))
   }, [])
 
   useEffect(() => {

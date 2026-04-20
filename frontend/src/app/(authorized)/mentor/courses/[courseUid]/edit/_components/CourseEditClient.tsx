@@ -6,16 +6,18 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { IModule, ILesson, IMentorCourse } from '@/lib/types'
-import { getMergedMentorCourses, getSessionCourseModules, getSessionCourseMeta, publishMentorCourse, setSessionCourseModules, upsertExtraCourse } from '@/lib/mentorCourseStorage'
+import { getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, setSessionCourseModules, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { notifyPublished, notifySaved } from '@/lib/notify'
 import { CourseModuleOutline } from './CourseModuleOutline'
-import Image from 'next/image';
+import { CourseAssignmentDialog } from '../../assignments/_components/CourseAssignmentDialog'
+import Image from 'next/image'
 
 const CourseTipTapEditor = dynamic(() => import('./CourseTipTapEditor').then((m) => ({ default: m.CourseTipTapEditor })), {
   ssr: false,
-  loading: () => <div className="min-h-[240px] animate-pulse rounded-xl border border-slate-100 bg-slate-50" />,
+  loading: () => <div className="min-h-60 animate-pulse rounded-xl border border-slate-100 bg-slate-50" />,
 })
 
 const LessonVideoEditor = dynamic(() => import('./LessonVideoEditor').then((m) => ({ default: m.LessonVideoEditor })), { ssr: false })
@@ -25,6 +27,8 @@ const LessonQuizEditor = dynamic(() => import('./LessonQuizEditor').then((m) => 
 type CourseEditClientProps = {
   courseUid: string
   initialModuleId?: string
+  routeBasePath?: '/mentor' | '/admin'
+  role?: 'mentor' | 'admin'
 }
 
 function findLesson(modules: IModule[], lessonId: string): ILesson | null {
@@ -35,7 +39,8 @@ function findLesson(modules: IModule[], lessonId: string): ILesson | null {
   return null
 }
 
-export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClientProps) {
+export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '/mentor', role = 'mentor' }: CourseEditClientProps) {
+  const isAdmin = role === 'admin'
   const confirm = useConfirm()
   const router = useRouter()
   const [course, setCourse] = useState<IMentorCourse | null | undefined>(undefined)
@@ -49,9 +54,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
   }, [modules, activeLessonId])
 
   useEffect(() => {
-    const merged = getMergedMentorCourses()
-    const fromList = merged.find((c) => c.uid === courseUid)
-    const session = getSessionCourseMeta(courseUid)
+    const fromList = getManagedCourseByUid(courseUid, isAdmin ? 'all' : 'mentor')
     const storedModules = getSessionCourseModules(courseUid)
 
     setModules(storedModules.modules)
@@ -67,26 +70,8 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
     setActiveLessonId(firstLessonId)
     setEditorReady(true)
 
-    if (fromList) {
-      setCourse(fromList)
-    } else if (session) {
-      setCourse({
-        uid: courseUid,
-        title: session.title,
-        header: session.header,
-        description: session.header,
-        image: session.image,
-        published: session.published ?? false,
-        moduleCount: 0,
-        studentCount: 0,
-        rating: 0,
-        totalReviews: 0,
-        updatedAt: 'Baru',
-      })
-    } else {
-      setCourse(null)
-    }
-  }, [courseUid, initialModuleId])
+    setCourse(fromList)
+  }, [courseUid, initialModuleId, isAdmin])
 
   const updateLesson = (lessonId: string, updater: (l: ILesson) => ILesson) => {
     setModules((prev) =>
@@ -102,7 +87,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
     setSessionCourseModules(courseUid, { version: 2, modules })
     if (!opts?.silent) notifySaved('Perubahan berhasil disimpan.')
     if (opts?.redirect !== false) {
-      router.push(`/mentor/courses/${courseUid}`)
+      router.push(`${routeBasePath}/courses/${courseUid}`)
       router.refresh()
     }
   }
@@ -130,14 +115,14 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
     }
     publishMentorCourse(courseUid)
     notifyPublished()
-    router.push(`/mentor/courses/${courseUid}`)
+    router.push(`${routeBasePath}/courses/${courseUid}`)
     router.refresh()
   }
 
   const handlePublishClick = async () => {
     const ok = await confirm({
       title: 'Publikasikan kursus?',
-      description: 'Kursus akan ditandai aktif dan muncul di daftar kursus mentor.',
+      description: 'Kursus akan ditandai aktif dan muncul di daftar pengelolaan kursus.',
       confirmLabel: 'Publish',
     })
     if (!ok) return
@@ -157,7 +142,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
       <section className="flex flex-col gap-4 py-10">
         <p className="text-slate-600">Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah membuat kursus baru.</p>
         <Button asChild variant="outline" className="w-fit rounded-xl">
-          <Link href="/mentor/courses">Kembali ke daftar</Link>
+          <Link href={`${routeBasePath}/courses`}>Kembali ke daftar</Link>
         </Button>
       </section>
     )
@@ -174,7 +159,7 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
             }`}>
             {course.published ? 'Aktif' : 'Belum dipublikasikan'}
           </span>
-          {!course.published && (
+          {!course.published && isAdmin && (
             <Button type="button" className="rounded-xl" onClick={() => void handlePublishClick()}>
               Publish
             </Button>
@@ -184,7 +169,6 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
 
       {course.image && (
         <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
-          
           <Image src={course.image} width={384} height={256} loading="lazy" alt={course.title} className="max-h-56 w-full object-cover" />
         </div>
       )}
@@ -237,18 +221,59 @@ export function CourseEditClient({ courseUid, initialModuleId }: CourseEditClien
               )}
 
               {activeLesson.contentType === 'quiz' && (
-                <LessonQuizEditor
-                  key={activeLesson.id}
-                  quiz={activeLesson.quiz}
-                  onChange={(quiz) => {
-                    updateLesson(activeLesson.id, (l) => {
-                      if (l.contentType !== 'quiz') return l
-                      return { ...l, quiz }
-                    })
-                  }}
-                />
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  Tipe konten lesson Quiz sudah tidak digunakan. Ubah tipe lesson ke Text atau Video dari panel struktur modul.
+                </div>
               )}
             </>
+          )}
+
+          {activeLesson && (
+            <div className="rounded-xl border border-slate-200 p-3">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id={`lesson-homework-${activeLesson.id}`}
+                  className="mt-0.5 size-4 border-slate-300"
+                  checked={Boolean(activeLesson.hasHomework)}
+                  onCheckedChange={(checked) => {
+                    const enabled = checked === true
+                    updateLesson(activeLesson.id, (lesson) => ({
+                      ...lesson,
+                      hasHomework: enabled,
+                      homeworkType: lesson.homeworkType ?? 'text',
+                      homeworkDescriptionHtml: lesson.homeworkDescriptionHtml ?? '<p></p>',
+                      homeworkQuiz: lesson.homeworkQuiz ?? { questions: [], passingScore: 70 },
+                    }))
+                  }}
+                />
+                <div>
+                  <label htmlFor={`lesson-homework-${activeLesson.id}`} className="cursor-pointer text-sm font-semibold text-slate-700">
+                    Aktifkan tugas untuk lesson ini
+                  </label>
+                  <p className="mt-1 text-xs text-slate-500">Saat aktif, pilih tipe tugas lalu isi kontennya sebelum membuat assignment lesson.</p>
+                </div>
+              </div>
+
+              {activeLesson.hasHomework && (
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <CourseAssignmentDialog
+                    open={Boolean(activeLesson.hasHomework)}
+                    onOpenChange={() => undefined}
+                    variant="inline"
+                    course={course}
+                    courseUid={courseUid}
+                    mode="create"
+                    editing={null}
+                    onSaved={() => undefined}
+                    defaultMeetingNumber={activeLesson.order}
+                    defaultTitle={`Tugas: ${activeLesson.title}`}
+                    defaultTaskType={activeLesson.homeworkType ?? 'text'}
+                    defaultTaskDescription={activeLesson.homeworkDescriptionHtml ?? '<p></p>'}
+                    defaultTaskQuiz={activeLesson.homeworkQuiz}
+                  />
+                </div>
+              )}
+            </div>
           )}
 
           <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">

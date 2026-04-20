@@ -1,13 +1,15 @@
 import type { IModule, ICourseModulesState, IMentorCourse, CourseCategory, CourseLevel, CourseClassType } from '@/lib/types'
 import { isMockDataEnabled } from '@/lib/config/mock-data'
-import { listCoursesByMentor, getCourseByUid, toMentorCourseView } from '@/lib/data/repository'
+import { listCourses, listCoursesByMentor, getCourseByUid, toMentorCourseView } from '@/lib/data/repository'
 import { getActiveUser } from '@/lib/data/dummyUsers'
 
 const STORAGE_KEY = 'mentor_courses_extra'
 const PUBLISHED_OVERRIDES_KEY = 'mentor_course_published_overrides'
+const DELETED_COURSES_KEY = 'mentor_course_deleted_ids'
 const SESSION_META_PREFIX = 'mentor_course_meta_'
 const SESSION_MODULES_PREFIX = 'mentor_course_modules_v2_'
 const COURSE_MODULES_VERSION = 2 as const
+type CourseScope = 'mentor' | 'all'
 
 function createLessonId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -29,6 +31,10 @@ export function createDefaultLesson(order = 1): IModule['lessons'][number] {
     title: `Lesson ${order}`,
     order,
     durationMinutes: 10,
+    hasHomework: false,
+    homeworkType: 'text',
+    homeworkDescriptionHtml: '<p></p>',
+    homeworkQuiz: { questions: [], passingScore: 70 },
     contentType: 'tiptap',
     contentHtml: '',
   }
@@ -51,9 +57,46 @@ function normalizeModules(modules: IModule[]): IModule[] {
     title: m.title?.trim() ? m.title : `Modul ${i + 1}`,
     order: i + 1,
     lessons: m.lessons?.length
-      ? m.lessons.map((l, j) => ({ ...l, order: j + 1 }))
+      ? m.lessons.map((l, j) => ({
+          ...l,
+          order: j + 1,
+          hasHomework: l.hasHomework ?? false,
+          homeworkType: l.homeworkType ?? 'text',
+          homeworkDescriptionHtml: l.homeworkDescriptionHtml ?? '<p></p>',
+          homeworkQuiz: l.homeworkQuiz ?? { questions: [], passingScore: 70 },
+        }))
       : [createDefaultLesson(1)],
   }))
+}
+
+function getBaseCourses(scope: CourseScope): IMentorCourse[] {
+  if (scope === 'all') {
+    return listCourses().map(toMentorCourseView)
+  }
+  const user = getActiveUser()
+  return listCoursesByMentor(user.id).map(toMentorCourseView)
+}
+
+function getDeletedCourseIdsSet(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = localStorage.getItem(DELETED_COURSES_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw) as string[]
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed)
+  } catch {
+    return new Set()
+  }
+}
+
+function saveDeletedCourseIdsSet(ids: Set<string>) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(DELETED_COURSES_KEY, JSON.stringify(Array.from(ids)))
+}
+
+function isCourseDeleted(uid: string): boolean {
+  return getDeletedCourseIdsSet().has(uid)
 }
 
 export function getExtraCourses(): IMentorCourse[] {
@@ -88,6 +131,7 @@ export function getCourseMeetingCount(course: IMentorCourse): number {
 }
 
 type SessionCourseMeta = Pick<IMentorCourse, 'title' | 'header' | 'image'> & {
+  description?: string
   published?: boolean
   meetingCount?: number
   category?: CourseCategory
@@ -95,11 +139,7 @@ type SessionCourseMeta = Pick<IMentorCourse, 'title' | 'header' | 'image'> & {
   classType?: CourseClassType
   price?: number
   strikePrice?: number
-  duration?: string
   whatYouLearn?: string[]
-  tags?: string[]
-  prerequisites?: string[]
-  targetAudience?: string
 }
 
 export function setSessionCourseMeta(uid: string, data: SessionCourseMeta) {
@@ -129,7 +169,7 @@ export function setSessionCourseModules(uid: string, state: ICourseModulesState)
 
 export function getSessionCourseModules(uid: string): ICourseModulesState {
   const fallback = (): ICourseModulesState => {
-    const course = getCourseByUid(uid)
+    const course = isCourseDeleted(uid) ? undefined : getCourseByUid(uid)
     if (course && course.modules.length > 0) {
       return { version: COURSE_MODULES_VERSION, modules: course.modules }
     }
@@ -174,25 +214,39 @@ export function setPublishedOverride(uid: string, published: boolean) {
   localStorage.setItem(PUBLISHED_OVERRIDES_KEY, JSON.stringify(next))
 }
 
-export function getMergedMentorCourses(): IMentorCourse[] {
-  const user = getActiveUser()
+export function getMergedManagedCourses(scope: CourseScope = 'mentor'): IMentorCourse[] {
   if (typeof window === 'undefined') {
-    return isMockDataEnabled() ? listCoursesByMentor(user.id).map(toMentorCourseView) : []
+    return isMockDataEnabled() ? getBaseCourses(scope) : []
   }
+
   const extra = getExtraCourses()
-  if (!isMockDataEnabled()) return extra
+  const deletedIds = getDeletedCourseIdsSet()
+
+  if (!isMockDataEnabled()) {
+    return extra.filter((course) => !deletedIds.has(course.uid))
+  }
+
   const overrides = getPublishedOverrides()
-  const base = listCoursesByMentor(user.id).map(toMentorCourseView).map((c) => ({
-    ...c,
-    published: overrides[c.uid] !== undefined ? overrides[c.uid] : c.published,
-  }))
+  const base = getBaseCourses(scope)
+    .map((c) => ({
+      ...c,
+      published: overrides[c.uid] !== undefined ? overrides[c.uid] : c.published,
+    }))
+    .filter((course) => !deletedIds.has(course.uid))
+
   const baseIds = new Set(base.map((c) => c.uid))
-  const extrasOnly = extra.filter((e) => !baseIds.has(e.uid))
+  const extrasOnly = extra.filter((e) => !baseIds.has(e.uid) && !deletedIds.has(e.uid))
   return [...base, ...extrasOnly]
 }
 
-export function getMentorCourseByUid(uid: string): IMentorCourse | null {
-  const merged = getMergedMentorCourses()
+export function getMergedMentorCourses(): IMentorCourse[] {
+  return getMergedManagedCourses('mentor')
+}
+
+export function getManagedCourseByUid(uid: string, scope: CourseScope = 'mentor'): IMentorCourse | null {
+  if (isCourseDeleted(uid)) return null
+
+  const merged = getMergedManagedCourses(scope)
   const fromList = merged.find((course) => course.uid === uid)
   if (fromList) return fromList
 
@@ -203,7 +257,7 @@ export function getMentorCourseByUid(uid: string): IMentorCourse | null {
     uid,
     title: fromSession.title,
     header: fromSession.header,
-    description: fromSession.header,
+    description: fromSession.description ?? fromSession.header,
     image: fromSession.image,
     published: fromSession.published ?? false,
     moduleCount: 0,
@@ -217,15 +271,15 @@ export function getMentorCourseByUid(uid: string): IMentorCourse | null {
     classType: fromSession.classType,
     price: fromSession.price,
     strikePrice: fromSession.strikePrice,
-    duration: fromSession.duration,
     whatYouLearn: fromSession.whatYouLearn,
-    tags: fromSession.tags,
-    prerequisites: fromSession.prerequisites,
-    targetAudience: fromSession.targetAudience,
   }
 }
 
-export function setMentorCoursePublished(uid: string, published: boolean) {
+export function getMentorCourseByUid(uid: string): IMentorCourse | null {
+  return getManagedCourseByUid(uid, 'mentor')
+}
+
+export function setManagedCoursePublished(uid: string, published: boolean) {
   if (typeof window === 'undefined') return
   const extras = getExtraCourses()
   const fromExtra = extras.find((e) => e.uid === uid)
@@ -241,6 +295,30 @@ export function setMentorCoursePublished(uid: string, published: boolean) {
   setPublishedOverride(uid, published)
 }
 
+export function setMentorCoursePublished(uid: string, published: boolean) {
+  setManagedCoursePublished(uid, published)
+}
+
 export function publishMentorCourse(uid: string) {
   setMentorCoursePublished(uid, true)
+}
+
+export function deleteManagedCourse(uid: string) {
+  if (typeof window === 'undefined') return
+
+  const remainingExtraCourses = getExtraCourses().filter((course) => course.uid !== uid)
+  saveExtraCourses(remainingExtraCourses)
+
+  const deletedIds = getDeletedCourseIdsSet()
+  deletedIds.add(uid)
+  saveDeletedCourseIdsSet(deletedIds)
+
+  const overrides = getPublishedOverrides()
+  if (Object.prototype.hasOwnProperty.call(overrides, uid)) {
+    delete overrides[uid]
+    localStorage.setItem(PUBLISHED_OVERRIDES_KEY, JSON.stringify(overrides))
+  }
+
+  sessionStorage.removeItem(`${SESSION_META_PREFIX}${uid}`)
+  sessionStorage.removeItem(`${SESSION_MODULES_PREFIX}${uid}`)
 }

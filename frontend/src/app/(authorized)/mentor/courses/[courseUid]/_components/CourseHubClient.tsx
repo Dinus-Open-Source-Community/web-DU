@@ -3,21 +3,24 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BookOpen, ClipboardList, Clock, Eye, GraduationCap, Layers, Pencil, Sparkles, Tag, Users } from 'lucide-react'
+import { BookOpen, ClipboardList, Clock, Eye, GraduationCap, Layers, Pencil, Sparkles, Tag, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { IMentorCourse } from '@/lib/types'
-import { getMentorCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
+import { getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { countAssignmentsForCourse } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { notifyPublished } from '@/lib/notify'
 import { formatRupiah } from '@/lib/func'
 import Image from 'next/image'
+import { CourseParticipantsSection } from './CourseParticipantsSection'
 
 type CourseHubClientProps = {
   courseUid: string
+  role?: 'mentor' | 'admin'
 }
 
-export function CourseHubClient({ courseUid }: CourseHubClientProps) {
+export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientProps) {
+  const isAdmin = role === 'admin'
   const confirm = useConfirm()
   const router = useRouter()
   const [course, setCourse] = useState<IMentorCourse | null | undefined>(undefined)
@@ -26,7 +29,7 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
 
   useEffect(() => {
     const load = () => {
-      const found = getMentorCourseByUid(courseUid)
+      const found = getManagedCourseByUid(courseUid, isAdmin ? 'all' : 'mentor')
       setCourse(found)
       if (found) {
         const mods = getSessionCourseModules(courseUid)
@@ -41,10 +44,10 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
       window.removeEventListener('focus', load)
       window.removeEventListener('storage', load)
     }
-  }, [courseUid])
+  }, [courseUid, isAdmin])
 
   const handlePublish = async () => {
-    if (!course) return
+    if (!course || !isAdmin) return
     const ok = await confirm({
       title: 'Publikasikan kursus?',
       description: 'Kursus akan ditandai aktif dan bisa diakses peserta.',
@@ -87,14 +90,13 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
         </div>
         <p className="text-sm text-slate-600">Kursus tidak ditemukan.</p>
         <Button asChild variant="outline" className="rounded-xl shadow-none">
-          <Link href="/mentor/courses">Kembali ke daftar</Link>
+          <Link href={isAdmin ? '/admin/courses' : '/mentor/courses'}>Kembali ke daftar</Link>
         </Button>
       </section>
     )
   }
 
-  const hasDetails = course.category || course.classType || course.price != null || course.level || course.duration
-
+  const hasDetails = course.category || course.classType || course.price != null || course.level
   const priceLabel = course.price != null ? (course.price === 0 ? 'Gratis' : formatRupiah(course.price)) : null
 
   const stats = [
@@ -123,7 +125,7 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
       icon: Pencil,
       label: 'Edit Konten',
       description: 'Buka editor modul untuk mengedit materi kursus.',
-      href: `/mentor/courses/${courseUid}/edit`,
+      href: `${isAdmin ? '/admin' : '/mentor'}/courses/${courseUid}/edit`,
       accent: 'group-hover:bg-blue-50 group-hover:text-blue-600',
     },
     {
@@ -133,13 +135,21 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
       href: `/course/${courseUid}/view`,
       accent: 'group-hover:bg-violet-50 group-hover:text-violet-600',
     },
-    {
-      icon: ClipboardList,
-      label: 'Kelola Tugas',
-      description: 'Buat, sunting tugas, dan tinjau kiriman peserta.',
-      href: `/mentor/courses/${courseUid}/assignments`,
-      accent: 'group-hover:bg-amber-50 group-hover:text-amber-600',
-    },
+    isAdmin
+      ? {
+          icon: Trash2,
+          label: 'Hapus Kursus',
+          description: 'Hapus kursus dari pengelolaan platform.',
+          href: `/admin/courses/${courseUid}/delete`,
+          accent: 'group-hover:bg-rose-50 group-hover:text-rose-600',
+        }
+      : {
+          icon: ClipboardList,
+          label: 'Kelola Tugas',
+          description: 'Buat, sunting tugas, dan tinjau kiriman peserta.',
+          href: `/mentor/courses/${courseUid}/assignments`,
+          accent: 'group-hover:bg-amber-50 group-hover:text-amber-600',
+        },
   ]
 
   return (
@@ -188,15 +198,10 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
                   </span>
                 )}
                 {priceLabel && <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">{priceLabel}</span>}
-                {course.duration && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                    <Clock className="size-2.5" /> {course.duration}
-                  </span>
-                )}
               </div>
             )}
 
-            {!course.published && (
+            {!course.published && isAdmin && (
               <div className="pt-1">
                 <Button type="button" size="sm" className="h-9 gap-1.5 rounded-xl px-5 text-xs font-semibold" onClick={() => void handlePublish()}>
                   <Sparkles className="size-3.5" />
@@ -243,6 +248,8 @@ export function CourseHubClient({ courseUid }: CourseHubClientProps) {
           ))}
         </div>
       </div>
+
+      <CourseParticipantsSection courseUid={courseUid} />
     </section>
   )
 }

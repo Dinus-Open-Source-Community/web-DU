@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, BookMarked, ScrollText, Layers, Globe, Trophy, ArrowRightLeft, Calendar, LayoutGrid } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, BookMarked, Layers, Globe, Trophy, ArrowRightLeft, LayoutGrid } from 'lucide-react'
 
 import type { NavItem } from '@/components/sidebar/types'
 
@@ -60,8 +60,6 @@ export const mentorNavigation: NavItem[] = [
     icon: BookMarked,
     path: '/mentor/courses',
   },
-  { name: 'Absensi', icon: Calendar, path: '/mentor/attendance' },
-  { name: 'Tugas', icon: ScrollText, path: '/mentor/assignments' },
 ]
 
 // ─── Student Navigation ──────────────────────────────────────────────────────
@@ -74,7 +72,6 @@ export const studentNavigation: NavItem[] = [
     children: [
       { name: 'Course', path: '/student/learning' },
       { name: 'Assignment', path: '/student/assignments' },
-      { name: 'Attendance', path: '/student/attendance' },
     ],
   },
   { name: 'Browse Courses', icon: Globe, path: '/student/browse' },
