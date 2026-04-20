@@ -2,12 +2,13 @@ package database
 
 import (
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,7 @@ func RunSeeder(db *gorm.DB) {
 	seedCourses(db)
 	seedModules(db)
 	seedLessons(db)
+	seedLessonAssignments(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
 }
@@ -70,12 +72,21 @@ func seedClassTypes(db *gorm.DB) {
 func seedUsers(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Users...")
 
-	users := []entity.User{
+	type seedUser struct {
+		Name        string
+		Email       string
+		Password    string
+		Role        entity.UserRole
+		IsVerified  bool
+		AvatarURL   string
+		Description string
+	}
+
+	users := []seedUser{
 		{
 			Name:        "Admin User",
 			Email:       "admin@doscom.id",
-			EmailHash:   "admin@doscom.id",
-			Password:    hashPassword("admin123"),
+			Password:    "admin123",
 			Role:        entity.AdminRole,
 			IsVerified:  true,
 			AvatarURL:   "https://via.placeholder.com/150?text=Admin",
@@ -84,8 +95,7 @@ func seedUsers(db *gorm.DB) {
 		{
 			Name:        "Budi Santoso",
 			Email:       "budi@doscom.id",
-			EmailHash:   "budi@doscom.id",
-			Password:    hashPassword("student123"),
+			Password:    "student123",
 			Role:        entity.StudentRole,
 			IsVerified:  true,
 			AvatarURL:   "https://via.placeholder.com/150?text=Budi",
@@ -94,8 +104,7 @@ func seedUsers(db *gorm.DB) {
 		{
 			Name:        "Siti Nurhaliza",
 			Email:       "siti@doscom.id",
-			EmailHash:   "siti@doscom.id",
-			Password:    hashPassword("student123"),
+			Password:    "student123",
 			Role:        entity.StudentRole,
 			IsVerified:  true,
 			AvatarURL:   "https://via.placeholder.com/150?text=Siti",
@@ -103,14 +112,59 @@ func seedUsers(db *gorm.DB) {
 		},
 	}
 
-	for _, user := range users {
-		// Cek apakah user sudah ada
-		if err := db.Where("email = ?", user.Email).First(&entity.User{}).Error; err == gorm.ErrRecordNotFound {
-			if err := db.Create(&user).Error; err != nil {
-				log.Printf("[Error] Gagal membuat user %s: %v", user.Name, err)
-			} else {
-				log.Printf("[Success] User %s berhasil dibuat", user.Name)
+	for _, u := range users {
+		emailHash := utils.GenerateBlindIndex(u.Email)
+
+		var existing entity.User
+		err := db.Where("email_hash = ? OR email_hash = ? OR email = ?", emailHash, u.Email, u.Email).First(&existing).Error
+		if err == nil {
+			if existing.EmailHash != emailHash {
+				if err := db.Model(&existing).Update("email_hash", emailHash).Error; err != nil {
+					log.Printf("[Warning] Gagal migrasi email_hash user %s: %v", u.Name, err)
+				} else {
+					log.Printf("[Info] email_hash user %s diperbarui ke blind index", u.Name)
+				}
 			}
+			continue
+		}
+		if err != gorm.ErrRecordNotFound {
+			log.Printf("[Error] Gagal cek user %s: %v", u.Name, err)
+			continue
+		}
+
+		hashedPassword, err := utils.HashPassword(u.Password)
+		if err != nil {
+			log.Printf("[Error] Gagal hash password user %s: %v", u.Name, err)
+			continue
+		}
+
+		encryptedName, err := utils.Encrypt(u.Name)
+		if err != nil {
+			log.Printf("[Error] Gagal encrypt name user %s: %v", u.Name, err)
+			continue
+		}
+
+		encryptedEmail, err := utils.Encrypt(u.Email)
+		if err != nil {
+			log.Printf("[Error] Gagal encrypt email user %s: %v", u.Name, err)
+			continue
+		}
+
+		user := entity.User{
+			Name:        encryptedName,
+			Email:       encryptedEmail,
+			EmailHash:   emailHash,
+			Password:    hashedPassword,
+			Role:        u.Role,
+			IsVerified:  u.IsVerified,
+			AvatarURL:   u.AvatarURL,
+			Description: u.Description,
+		}
+
+		if err := db.Create(&user).Error; err != nil {
+			log.Printf("[Error] Gagal membuat user %s: %v", u.Name, err)
+		} else {
+			log.Printf("[Success] User %s berhasil dibuat", u.Name)
 		}
 	}
 }
@@ -310,22 +364,33 @@ func seedLessons(db *gorm.DB) {
 		}
 
 		for i := 1; i <= lessonCount; i++ {
+			lessonNo := strconv.Itoa(i)
+			isVideoLesson := i%2 == 0
+
 			// Buat sample content JSON
 			content := map[string]string{
 				"intro":    "Pengenalan materi " + module.Title,
-				"learning": "Konten pembelajaran untuk poin " + string(rune(i)),
+				"learning": "Konten pembelajaran untuk poin " + lessonNo,
 				"summary":  "Ringkasan materi yang telah dipelajari",
 			}
 			contentJSON, _ := json.Marshal(content)
 
+			contentType := entity.LessonContentTypeText
+			videoURL := ""
+			if isVideoLesson {
+				contentType = entity.LessonContentTypeVideo
+				videoURL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+			}
+
 			lesson := entity.Lesson{
-				ModuleUid:  module.Uid,
-				Title:      module.Title + " - Lesson " + string(rune(i)),
-				Content:    contentJSON,
-				VideoURL:   "https://via.placeholder.com/640x360?text=Lesson+Video",
-				StartTime:  now.AddDate(0, 0, i),
-				EndTime:    now.AddDate(0, 0, i).Add(2 * time.Hour),
-				OrderIndex: i,
+				ModuleUid:   module.Uid,
+				Title:       module.Title + " - Lesson " + lessonNo,
+				ContentType: contentType,
+				Content:     contentJSON,
+				VideoURL:    videoURL,
+				StartTime:   now.AddDate(0, 0, i),
+				EndTime:     now.AddDate(0, 0, i).Add(2 * time.Hour),
+				OrderIndex:  i,
 			}
 
 			// Cek apakah lesson sudah ada
@@ -340,12 +405,57 @@ func seedLessons(db *gorm.DB) {
 	}
 }
 
-// hashPassword menggunakan bcrypt untuk hash password
-func hashPassword(password string) string {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("[Error] Gagal hash password: %v", err)
-		return ""
+// seedLessonAssignments membuat assignment dasar untuk lesson pertama di setiap module.
+func seedLessonAssignments(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Lesson Assignments...")
+
+	var lessons []entity.Lesson
+	if err := db.Where("order_index = ?", 1).Order("created_at ASC").Find(&lessons).Error; err != nil {
+		log.Printf("[Error] Gagal mengambil lesson untuk assignment: %v", err)
+		return
 	}
-	return string(hashedPassword)
+
+	if len(lessons) == 0 {
+		log.Println("[Seeder] Tidak ada lesson untuk dibuatkan assignment")
+		return
+	}
+
+	maxResubmit := 3
+	for i, lesson := range lessons {
+		taskDescription, _ := json.Marshal(map[string]any{
+			"type": "doc",
+			"content": []map[string]any{
+				{"type": "paragraph", "content": []map[string]any{{"type": "text", "text": "Kerjakan tugas sesuai instruksi lesson ini."}}},
+			},
+		})
+
+		instructionAttachments, _ := json.Marshal([]map[string]string{
+			{"name": "Panduan Tugas", "url": "https://example.com/instruksi-tugas.pdf"},
+		})
+
+		assignment := entity.LessonAssignment{
+			LessonUid:                lesson.Uid,
+			Title:                    "Tugas " + lesson.Title,
+			TaskType:                 entity.LessonAssignmentTaskTypeText,
+			TaskDescription:          taskDescription,
+			AllowFileSubmission:      true,
+			AllowPlainTextSubmission: false,
+			AllowRichTextSubmission:  true,
+			RequireFileDescription:   true,
+			InstructionAttachments:   instructionAttachments,
+			DeadlineAt:               time.Now().AddDate(0, 0, 7+i),
+			Status:                   entity.LessonAssignmentStatusDraft,
+			AutoCloseAfterDeadline:   true,
+			AllowResubmit:            true,
+			MaxResubmitCount:         &maxResubmit,
+		}
+
+		if err := db.Where("lesson_uid = ?", lesson.Uid).First(&entity.LessonAssignment{}).Error; err == gorm.ErrRecordNotFound {
+			if err := db.Create(&assignment).Error; err != nil {
+				log.Printf("[Error] Gagal membuat assignment untuk lesson %s: %v", lesson.Title, err)
+			} else {
+				log.Printf("[Success] Assignment untuk lesson %s berhasil dibuat", lesson.Title)
+			}
+		}
+	}
 }

@@ -2,20 +2,22 @@ package service
 
 import (
 	"backend/internal/database"
-	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-// @Summary      Create new lesson (Admin Only)
-// @Description  Create a new lesson for a module. Admin only. Requires module_id and title. Content and video_url are optional.
+// @Summary      Create new lesson (Admin/Mentor)
+// @Description  Create a new lesson for a module. Accessible by admin or assigned mentor.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
@@ -24,7 +26,7 @@ import (
 // @Success      201  {object}  map[string]any  "Lesson created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "User or module not found"
 // @Failure      500  {object}  map[string]any  "Failed to create lesson"
 // @Router       /lessons [post]
@@ -38,26 +40,8 @@ import (
 //	  "order_index": 1
 //	}
 func CreateLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
 		return
 	}
 
@@ -70,6 +54,38 @@ func CreateLessonFunc(c *gin.Context) {
 			"data":    nil,
 			"error":   err.Error(),
 		})
+		return
+	}
+
+	var module entity.Module
+	if err := database.DB.First(&module, req.ModuleUid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Module not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	allowed, err := canManageCourseByRole(userData, module.CourseUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
+		return
+	}
+
+	contentType, err := resolveCreateLessonContentType(req.ContentType, req.VideoURL)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson content_type", "data": nil, "error": err.Error()})
+		return
+	}
+
+	if err := validateLessonPayload(contentType, req.Content, req.VideoURL); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson payload", "data": nil, "error": err.Error()})
 		return
 	}
 
@@ -93,13 +109,14 @@ func CreateLessonFunc(c *gin.Context) {
 	}
 
 	lesson := entity.Lesson{
-		ModuleUid:  req.ModuleUid,
-		Title:      req.Title,
-		Content:    content,
-		VideoURL:   req.VideoURL,
-		StartTime:  startTime,
-		EndTime:    endTime,
-		OrderIndex: req.OrderIndex,
+		ModuleUid:   req.ModuleUid,
+		Title:       req.Title,
+		ContentType: contentType,
+		Content:     content,
+		VideoURL:    req.VideoURL,
+		StartTime:   startTime,
+		EndTime:     endTime,
+		OrderIndex:  req.OrderIndex,
 	}
 
 	if err := database.DB.Create(&lesson).Error; err != nil {
@@ -127,8 +144,8 @@ func CreateLessonFunc(c *gin.Context) {
 // - per_page (int, default 10, max 100)
 // - module_id (int) -> filter by module ID
 //
-// @Summary      Get all lessons with pagination (Admin Only)
-// @Description  Retrieve paginated list of all lessons with optional module_id filter. Admin only.
+// @Summary      Get all lessons with pagination (Admin/Mentor)
+// @Description  Retrieve paginated list of all lessons with optional module_id filter.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
@@ -138,31 +155,13 @@ func CreateLessonFunc(c *gin.Context) {
 // @Param        module_id  query  int  false  "Filter by module ID"
 // @Success      200  {object}  map[string]any  "Lessons retrieved successfully with pagination metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve lessons"
 // @Router       /lessons [get]
 func GetAllLessonsFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
 		return
 	}
 
@@ -188,8 +187,35 @@ func GetAllLessonsFunc(c *gin.Context) {
 
 	if moduleIDStr != "" {
 		if moduleUid, err := uuid.Parse(moduleIDStr); err == nil {
+			if userData.Role == entity.MentorRole {
+				var module entity.Module
+				if err := database.DB.First(&module, moduleUid).Error; err != nil {
+					c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+					return
+				}
+
+				allowed, err := canManageCourseByRole(userData, module.CourseUid)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+					return
+				}
+				if !allowed {
+					c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
+					return
+				}
+			}
 			db = db.Where("module_uid = ?", moduleUid)
 		}
+	}
+
+	if userData.Role == entity.MentorRole && moduleIDStr == "" {
+		db = db.Where("module_uid IN (?)",
+			database.DB.Table("modules m").
+				Select("m.uid").
+				Joins("JOIN courses c ON c.uid = m.course_uid").
+				Joins("LEFT JOIN course_mentors cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", userData.Uid).
+				Where("c.mentor_uid = ? OR cm.status IN ?", userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}),
+		)
 	}
 
 	// Count total records
@@ -237,8 +263,8 @@ func GetAllLessonsFunc(c *gin.Context) {
 
 // GetLessonByIDFunc retrieves a single lesson by ID.
 //
-// @Summary      Get lesson by ID (Admin Only)
-// @Description  Retrieve detailed information of a specific lesson. Admin only.
+// @Summary      Get lesson by ID (Admin/Mentor)
+// @Description  Retrieve detailed information of a specific lesson.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
@@ -246,31 +272,13 @@ func GetAllLessonsFunc(c *gin.Context) {
 // @Param        id  path  int  true  "Lesson ID"
 // @Success      200  {object}  map[string]any  "Lesson retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve lesson"
 // @Router       /lessons/{id} [get]
 func GetLessonByIDFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
 		return
 	}
 
@@ -287,6 +295,24 @@ func GetLessonByIDFunc(c *gin.Context) {
 		return
 	}
 
+	if userData.Role == entity.MentorRole {
+		var module entity.Module
+		if err := database.DB.First(&module, lesson.ModuleUid).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+			return
+		}
+
+		allowed, err := canManageCourseByRole(userData, module.CourseUid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lesson retrieved successfully",
@@ -295,10 +321,10 @@ func GetLessonByIDFunc(c *gin.Context) {
 	})
 }
 
-// UpdateLessonFunc updates an existing lesson (Admin only).
+// UpdateLessonFunc updates an existing lesson (Admin/Mentor).
 //
-// @Summary      Update lesson (Admin Only)
-// @Description  Update an existing lesson by ID. Admin only. All fields are optional - only provided fields will be updated.
+// @Summary      Update lesson (Admin/Mentor)
+// @Description  Update an existing lesson by ID. All fields are optional - only provided fields will be updated.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
@@ -308,7 +334,7 @@ func GetLessonByIDFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Lesson updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to update lesson"
 // @Router       /lessons/{id} [put]
@@ -321,26 +347,8 @@ func GetLessonByIDFunc(c *gin.Context) {
 //	  "order_index": 2
 //	}
 func UpdateLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
 		return
 	}
 
@@ -354,6 +362,22 @@ func UpdateLessonFunc(c *gin.Context) {
 			"data":    nil,
 			"error":   err.Error(),
 		})
+		return
+	}
+
+	var currentModule entity.Module
+	if err := database.DB.First(&currentModule, lesson.ModuleUid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+		return
+	}
+
+	allowed, err := canManageCourseByRole(userData, currentModule.CourseUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
 		return
 	}
 
@@ -370,6 +394,21 @@ func UpdateLessonFunc(c *gin.Context) {
 	}
 
 	if req.ModuleUid != uuid.Nil {
+		var targetModule entity.Module
+		if err := database.DB.First(&targetModule, req.ModuleUid).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Target module not found", "data": nil, "error": err.Error()})
+			return
+		}
+
+		allowedTarget, err := canManageCourseByRole(userData, targetModule.CourseUid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate target module access", "data": nil, "error": err.Error()})
+			return
+		}
+		if !allowedTarget {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied to target module", "data": nil, "error": nil})
+			return
+		}
 		lesson.ModuleUid = req.ModuleUid
 	}
 	if req.Title != "" {
@@ -382,6 +421,19 @@ func UpdateLessonFunc(c *gin.Context) {
 	if req.VideoURL != "" {
 		lesson.VideoURL = req.VideoURL
 	}
+
+	contentType, err := resolveUpdateLessonContentType(lesson.ContentType, req.ContentType, lesson.VideoURL)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson content_type", "data": nil, "error": err.Error()})
+		return
+	}
+
+	if err := validateLessonPayload(contentType, json.RawMessage(lesson.Content), lesson.VideoURL); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson payload", "data": nil, "error": err.Error()})
+		return
+	}
+
+	lesson.ContentType = contentType
 	if req.StartTime != "" {
 		if parsed, err := time.Parse(time.RFC3339, req.StartTime); err == nil {
 			lesson.StartTime = parsed
@@ -412,10 +464,10 @@ func UpdateLessonFunc(c *gin.Context) {
 	})
 }
 
-// DeleteLessonFunc deletes a lesson by ID (Admin only).
+// DeleteLessonFunc deletes a lesson by ID (Admin/Mentor).
 //
-// @Summary      Delete lesson (Admin Only)
-// @Description  Delete a lesson by ID (Admin only)
+// @Summary      Delete lesson (Admin/Mentor)
+// @Description  Delete a lesson by ID
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
@@ -423,31 +475,13 @@ func UpdateLessonFunc(c *gin.Context) {
 // @Param        id  path  int  true  "Lesson ID"
 // @Success      200  {object}  map[string]any  "Lesson deleted successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete lesson"
 // @Router       /lessons/{id} [delete]
 func DeleteLessonFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
-		})
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
 		return
 	}
 
@@ -461,6 +495,32 @@ func DeleteLessonFunc(c *gin.Context) {
 			"data":    nil,
 			"error":   err.Error(),
 		})
+		return
+	}
+
+	var module entity.Module
+	if err := database.DB.First(&module, lesson.ModuleUid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+		return
+	}
+
+	allowed, err := canManageCourseByRole(userData, module.CourseUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
+		return
+	}
+
+	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAttendance{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson attendances", "data": nil, "error": err.Error()})
+		return
+	}
+
+	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAssignment{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
 
@@ -480,4 +540,56 @@ func DeleteLessonFunc(c *gin.Context) {
 		"data":    nil,
 		"error":   nil,
 	})
+}
+
+var youtubeURLRegex = regexp.MustCompile(`^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)[A-Za-z0-9_-]+`)
+
+func resolveCreateLessonContentType(rawType string, videoURL string) (entity.LessonContentType, error) {
+	normalized := strings.ToLower(strings.TrimSpace(rawType))
+	if normalized == "" {
+		if strings.TrimSpace(videoURL) != "" {
+			return entity.LessonContentTypeVideo, nil
+		}
+		return entity.LessonContentTypeText, nil
+	}
+
+	contentType := entity.LessonContentType(normalized)
+	if contentType != entity.LessonContentTypeText && contentType != entity.LessonContentTypeVideo {
+		return "", errors.New("content_type must be one of: text, video")
+	}
+	return contentType, nil
+}
+
+func resolveUpdateLessonContentType(current entity.LessonContentType, rawType string, videoURL string) (entity.LessonContentType, error) {
+	if strings.TrimSpace(rawType) == "" {
+		if current == "" {
+			return resolveCreateLessonContentType("", videoURL)
+		}
+		return current, nil
+	}
+
+	return resolveCreateLessonContentType(rawType, videoURL)
+}
+
+func validateLessonPayload(contentType entity.LessonContentType, content interface{}, videoURL string) error {
+	trimmedVideoURL := strings.TrimSpace(videoURL)
+	switch contentType {
+	case entity.LessonContentTypeText:
+		if content == nil {
+			return errors.New("content is required for text lessons")
+		}
+		if trimmedVideoURL != "" {
+			return errors.New("video_url must be empty for text lessons")
+		}
+	case entity.LessonContentTypeVideo:
+		if trimmedVideoURL == "" {
+			return errors.New("video_url is required for video lessons")
+		}
+		if !youtubeURLRegex.MatchString(trimmedVideoURL) {
+			return errors.New("video_url must be a valid YouTube URL")
+		}
+	default:
+		return errors.New("invalid content_type")
+	}
+	return nil
 }

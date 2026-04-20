@@ -59,6 +59,7 @@ func ConnectDB() {
 		&entity.CourseMentor{},
 		&entity.Module{},
 		&entity.Lesson{},
+		&entity.LessonAssignment{},
 		&entity.Enrollment{},
 		&entity.Payment{},
 		&entity.CourseReview{},

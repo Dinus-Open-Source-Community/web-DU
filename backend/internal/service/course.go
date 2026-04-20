@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -710,8 +711,18 @@ func JoinCourseFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all enrolled students in a course (Admin Only)
-// @Description  Retrieve list of all students enrolled in a specific course. Admin only endpoint.
+type CourseStudentSafeItem struct {
+	EnrollmentUid    uuid.UUID               `json:"enrollment_uid"`
+	StudentUid       uuid.UUID               `json:"student_uid"`
+	StudentName      string                  `json:"student_name"`
+	StudentAvatarURL string                  `json:"student_avatar_url,omitempty"`
+	EnrolledAt       time.Time               `json:"enrolled_at"`
+	Progress         float64                 `json:"progress"`
+	Status           entity.EnrollmentStatus `json:"status"`
+}
+
+// @Summary      Get all enrolled students in a course (All Roles)
+// @Description  Retrieve list of all students enrolled in a specific course for authenticated users. Response is sanitized and excludes sensitive user fields.
 // @Tags         Course
 // @Accept       json
 // @Produce      json
@@ -721,7 +732,6 @@ func JoinCourseFunc(c *gin.Context) {
 // @Param        per_page query int  false  "Items per page (default: 10, max: 100)"
 // @Success      200  {object}  map[string]any  "Students retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve students"
 // @Router       /courses/{id}/students [get]
@@ -736,16 +746,6 @@ func GetCourseStudentsFunc(c *gin.Context) {
 			"message": "User not found",
 			"data":    nil,
 			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.AdminRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Get Course Students Access denied: Admins only",
-			"data":    nil,
-			"error":   nil,
 		})
 		return
 	}
@@ -783,7 +783,11 @@ func GetCourseStudentsFunc(c *gin.Context) {
 
 	// Count total enrollments for this course
 	var total int64
-	if err := database.DB.Model(&entity.Enrollment{}).Where("course_uid = ?", course.Uid).Count(&total).Error; err != nil {
+	if err := database.DB.Table("enrollments e").
+		Joins("JOIN users u ON u.uid = e.user_uid").
+		Where("e.course_uid = ?", course.Uid).
+		Where("u.role = ?", entity.StudentRole).
+		Count(&total).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to count students",
@@ -795,13 +799,24 @@ func GetCourseStudentsFunc(c *gin.Context) {
 
 	// Get paginated enrollments
 	offset := (page - 1) * perPage
-	var enrollments []entity.Enrollment
-	if err := database.DB.Where("course_uid = ?", course.Uid).
-		Preload("User").
-		Order("enrolled_at DESC").
+	var students []CourseStudentSafeItem
+	if err := database.DB.Table("enrollments e").
+		Select(`
+			e.uid as enrollment_uid,
+			e.user_uid as student_uid,
+			u.name as student_name,
+			u.avatar_url as student_avatar_url,
+			e.enrolled_at,
+			e.progress,
+			e.status
+		`).
+		Joins("JOIN users u ON u.uid = e.user_uid").
+		Where("e.course_uid = ?", course.Uid).
+		Where("u.role = ?", entity.StudentRole).
+		Order("e.enrolled_at DESC").
 		Limit(perPage).
 		Offset(offset).
-		Find(&enrollments).Error; err != nil {
+		Scan(&students).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve students",
@@ -817,7 +832,7 @@ func GetCourseStudentsFunc(c *gin.Context) {
 		"success": true,
 		"message": "Students retrieved successfully",
 		"data": gin.H{
-			"enrollments": enrollments,
+			"enrollments": students,
 			"meta": gin.H{
 				"total":        total,
 				"per_page":     perPage,

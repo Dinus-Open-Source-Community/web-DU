@@ -24,7 +24,7 @@ func StartCourseRoutes(r *gin.Engine) {
 		courseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)         // Admin only
 		courseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc) // Admin only
 
-		courseGroup.GET("/:id/students", service.GetCourseStudentsFunc) // Admin only
+		courseGroup.GET("/:id/students", service.GetCourseStudentsFunc) // All authenticated roles (sanitized response)
 		courseGroup.POST("/", service.PostAdminCourseFunc)              // Admin only
 	}
 

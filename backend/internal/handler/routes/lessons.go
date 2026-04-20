@@ -16,11 +16,11 @@ func StartLessonsRoutes(r *gin.Engine) {
 	lessonsGroup := r.Group("/lessons")
 	lessonsGroup.Use(middleware.AuthMiddleware())
 	{
-		lessonsGroup.POST("/", service.CreateLessonFunc)      // Admin only - Create lesson
-		lessonsGroup.GET("/", service.GetAllLessonsFunc)      // Admin only - Get all lessons by module id
-		lessonsGroup.GET("/:id", service.GetLessonByIDFunc)   // Admin only - Get lesson by ID
-		lessonsGroup.PUT("/:id", service.UpdateLessonFunc)    // Admin only - Update lesson
-		lessonsGroup.DELETE("/:id", service.DeleteLessonFunc) // Admin only - Delete lesson
+		lessonsGroup.POST("/", service.CreateLessonFunc)      // Admin/Mentor - Create lesson
+		lessonsGroup.GET("/", service.GetAllLessonsFunc)      // Admin/Mentor - Get lessons
+		lessonsGroup.GET("/:id", service.GetLessonByIDFunc)   // Admin/Mentor - Get lesson by ID
+		lessonsGroup.PUT("/:id", service.UpdateLessonFunc)    // Admin/Mentor - Update lesson
+		lessonsGroup.DELETE("/:id", service.DeleteLessonFunc) // Admin/Mentor - Delete lesson
 
 		attendanceGroup := lessonsGroup.Group("/attendances")
 		{

@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // @Summary      Get all modules by course (All Roles)
@@ -313,7 +315,32 @@ func DeleteAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Delete(&module).Error; err != nil {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		var lessonIDs []uuid.UUID
+		if err := tx.Model(&entity.Lesson{}).
+			Where("module_uid = ?", module.Uid).
+			Pluck("uid", &lessonIDs).Error; err != nil {
+			return err
+		}
+
+		if len(lessonIDs) > 0 {
+			if err := tx.Where("lesson_uid IN ?", lessonIDs).
+				Delete(&entity.LessonAttendance{}).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Where("module_uid = ?", module.Uid).
+			Delete(&entity.Lesson{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Delete(&module).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to delete module",
