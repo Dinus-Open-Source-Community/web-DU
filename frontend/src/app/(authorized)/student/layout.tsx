@@ -1,13 +1,15 @@
 'use client'
 
+import { useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
+import { SidebarSessionProvider } from '@/components/sidebar/sidebar-session-context'
+import { useSidebarState } from '@/components/sidebar/sidebar-state-provider'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { studentNavigation } from '@/lib/navigation'
 import { buildSidebarBreadcrumbs, shouldHideSidebarForPath } from '@/lib/sidebar-route'
-import { useSidebarContext } from '../layout'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
 import { toSidebarUser } from '@/lib/data/dummyUsers'
@@ -17,28 +19,34 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const user = useUser()
   const pathname = usePathname()
   const router = useRouter()
-  const { isOpen, isMinimized, close, toggleMinimize } = useSidebarContext()
+  const { isOpen, isMinimized, close, toggleMinimize } = useSidebarState()
   const hideSidebar = shouldHideSidebarForPath(pathname, studentNavigation, 'student')
   const breadcrumbs = hideSidebar ? buildSidebarBreadcrumbs(pathname, studentNavigation, 'student') : []
+
+  const handleLogout = useCallback(() => {
+    clearGuestSession()
+    router.push('/auth/login')
+  }, [router])
+
+  const handleProfile = useCallback(() => {
+    router.push('/profile')
+  }, [router])
+
+  const sidebarSession = useMemo(
+    () => ({
+      user: toSidebarUser(user),
+      onLogout: handleLogout,
+      onProfile: handleProfile,
+    }),
+    [user, handleLogout, handleProfile],
+  )
 
   return (
     <div className="flex min-h-screen w-full bg-[#f5f5f5]">
       {!hideSidebar && (
-        <Sidebar
-          navigation={studentNavigation}
-          isOpen={isOpen}
-          onClose={close}
-          isMinimized={isMinimized}
-          onToggleMinimize={toggleMinimize}
-          user={toSidebarUser(user)}
-          onLogout={() => {
-            clearGuestSession()
-            router.push('/auth/login')
-          }}
-          onProfile={() => {
-            router.push('/profile')
-          }}
-        />
+        <SidebarSessionProvider value={sidebarSession}>
+          <Sidebar navigation={studentNavigation} isOpen={isOpen} onClose={close} isMinimized={isMinimized} onToggleMinimize={toggleMinimize} />
+        </SidebarSessionProvider>
       )}
 
       <div className={cn('flex min-w-0 flex-1 flex-col transition-[margin] duration-150 ease-out', !hideSidebar && (isMinimized ? 'lg:ml-20' : 'lg:ml-64'))}>

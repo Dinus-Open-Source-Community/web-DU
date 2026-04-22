@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
-import Hero from "@/components/home/Hero"
-import GuestLayout from "../components/layout/GuestLayout"
-import Feature from "@/components/home/Feature"
-import Benefit from "@/components/home/Benefit"
-import { listCourses, getProgramFeatures } from "@/lib/data/repository"
-import { isMockDataEnabled } from "@/lib/config/mock-data"
-import Community from "@/components/home/Community"
+import Hero from '@/components/home/Hero'
+import GuestLayout from '../components/layout/GuestLayout'
+import Feature from '@/components/home/Feature'
+import Benefit from '@/components/home/Benefit'
+import { listCourses, getProgramFeatures } from '@/lib/data/repository'
+import { isMockDataEnabled } from '@/lib/config/mock-data'
+import Community from '@/components/home/Community'
 import { BookIcons, CertificateIcons, GlobeLearningIcon, JobIcons } from '@/components/ui/icons'
 import type { IProgramFeatures } from '@/lib/types'
+
+export const revalidate = 1800
 
 const featureIconMap: Record<string, React.ReactNode> = {
   book: <BookIcons />,
@@ -19,7 +21,18 @@ const featureIconMap: Record<string, React.ReactNode> = {
 export const metadata: Metadata = {
   title: 'Beranda',
   description: 'Platform pembelajaran online dengan materi berkualitas dan komunitas terbuka.',
+  alternates: {
+    canonical: '/',
+  },
+  keywords: ['belajar coding', 'bootcamp online', 'kelas IT', 'komunitas open source'],
   openGraph: {
+    title: 'Beranda',
+    description: 'Platform pembelajaran online dengan materi berkualitas dan komunitas terbuka.',
+    type: 'website',
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: 'Beranda',
     description: 'Platform pembelajaran online dengan materi berkualitas dan komunitas terbuka.',
   },

@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { LogoDu } from '@/components/ui/icons'
+import { SafeLottie } from '@/components/ui/SafeLottie'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -25,8 +25,8 @@ export default function AuthLayout({ children, lottieUrl, heading, subheading }:
           </Link>
 
           {lottieUrl && (
-            <div className="w-72">
-              <DotLottieReact src={lottieUrl} loop autoplay className="size-full" />
+            <div className="w-72 aspect-square">
+              <SafeLottie src={lottieUrl} className="size-full" />
             </div>
           )}
 
