@@ -1,6 +1,6 @@
 'use client'
 
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { SafeLottie } from '@/components/ui/SafeLottie'
 
 const LOTTIE_SRC = '/Book-loading.lottie'
 
@@ -13,14 +13,10 @@ export function LottieOverlay({ visible, message = 'Mohon tunggu...' }: LottieOv
   if (!visible) return null
 
   return (
-    <div
-      role="status"
-      aria-busy
-      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
-    >
+    <div role="status" aria-busy className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="flex flex-col items-center gap-4">
         <div className="size-36">
-          <DotLottieReact src={LOTTIE_SRC} loop autoplay className="size-full" />
+          <SafeLottie src={LOTTIE_SRC} className="size-full" />
         </div>
         <p className="text-sm font-semibold text-white/90 tracking-wide">{message}</p>
         <span className="sr-only">{message}</span>

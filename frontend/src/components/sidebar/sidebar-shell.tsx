@@ -9,6 +9,7 @@ import { SidebarNavGroup } from './sidebar-nav-group'
 import { SidebarMinimizedItem, SidebarMinimizedGroup } from './sidebar-minimized'
 import { SidebarFlyout } from './sidebar-flyout'
 import { SidebarUser } from './sidebar-user'
+import { useSidebarSession } from './sidebar-session-context'
 
 interface SidebarProps {
   navigation: NavItem[]
@@ -16,17 +17,10 @@ interface SidebarProps {
   onClose: () => void
   isMinimized: boolean
   onToggleMinimize: () => void
-  user: {
-    name: string
-    email: string
-    role: string
-    avatar?: string
-  }
-  onLogout: () => void
-  onProfile: () => void
 }
 
-export function Sidebar({ navigation, isOpen, onClose, isMinimized, onToggleMinimize, user, onLogout, onProfile }: SidebarProps) {
+export function Sidebar({ navigation, isOpen, onClose, isMinimized, onToggleMinimize }: SidebarProps) {
+  const { user, onLogout, onProfile } = useSidebarSession()
   const [flyout, setFlyout] = useState<FlyoutState | null>(null)
   const flyoutTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -55,7 +49,7 @@ export function Sidebar({ navigation, isOpen, onClose, isMinimized, onToggleMini
         className={cn(
           'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-100 transition-all duration-300 ease-in-out',
           isMinimized ? 'w-20' : 'w-64',
-          isOpen ? 'translate-x-0 !w-64' : '-translate-x-full lg:translate-x-0',
+          isOpen ? 'translate-x-0 w-64!' : '-translate-x-full lg:translate-x-0',
         )}>
         {/* Brand */}
         <SidebarBrand isMinimized={isMinimized && !isOpen} onToggleMinimize={onToggleMinimize} />

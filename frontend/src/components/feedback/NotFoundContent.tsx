@@ -1,10 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { Button } from '@/components/ui/button'
+import { SafeLottie } from '@/components/ui/SafeLottie'
 
 const LOTTIE_404 = '/404.lottie'
 
@@ -27,8 +26,8 @@ export function NotFoundContent({
 
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-500">
-      <div className="w-full">
-        <DotLottieReact src={LOTTIE_404} loop autoplay className="size-full" />
+      <div className="w-full max-w-sm aspect-square">
+        <SafeLottie src={LOTTIE_404} className="size-full" />
       </div>
 
       <div className="flex flex-col gap-2">
