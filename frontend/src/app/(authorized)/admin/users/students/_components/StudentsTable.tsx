@@ -48,15 +48,9 @@ export function StudentsTable() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const filters = [
-    { value: 'all', label: 'Semua status' },
-    { value: 'active', label: 'Aktif' },
-    { value: 'inactive', label: 'Nonaktif' },
-    { value: 'pending', label: 'Menunggu' },
-  ] as const
 
   return (
-    <div className="flex flex-col gap-5 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="flex flex-col gap-5 p-5">
       <div className="flex flex-col gap-3">
         <SearchForm
           value={search}
@@ -75,30 +69,6 @@ export function StudentsTable() {
           submitLabel="Cari"
           className="w-full max-w-3xl"
         />
-
-        <div className="flex flex-wrap items-center gap-3">
-          <FilterSelect
-            id="student-status-filter"
-            label="Status"
-            value={statusFilter}
-            onChange={(value) => {
-              setStatusFilter(value)
-              setPage(1)
-            }}
-            options={filters.map((filter) => ({ value: filter.value, label: filter.label }))}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setSearch('')
-              setCommittedSearch('')
-              setStatusFilter('all')
-              setPage(1)
-            }}
-            className="text-xs font-semibold text-slate-500 transition-colors hover:text-slate-900">
-            Reset filter
-          </button>
-        </div>
       </div>
 
       {pagedRows.length === 0 ? (

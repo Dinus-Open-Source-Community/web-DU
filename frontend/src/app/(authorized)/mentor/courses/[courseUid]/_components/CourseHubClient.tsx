@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BookOpen, ClipboardList, Eye, GraduationCap, Layers, Pencil, Sparkles, Tag, Trash2 } from 'lucide-react'
+import { BookOpen, ClipboardList, Eye, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { IMentorCourse } from '@/lib/types'
 import { deleteManagedCourse, getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
@@ -13,7 +13,6 @@ import { notifyDeleted, notifyError, notifyPublished } from '@/lib/notify'
 import { formatRupiah } from '@/lib/func'
 import Image from 'next/image'
 import { CourseParticipantsSection } from './CourseParticipantsSection'
-import { CourseReviewsSection } from './CourseReviewsSection'
 
 type CourseHubClientProps = {
   courseUid: string
@@ -120,21 +119,6 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
   const hasDetails = course.category || course.classType || course.price != null || course.level
   const priceLabel = course.price != null ? (course.price === 0 ? 'Gratis' : formatRupiah(course.price)) : null
 
-  const stats = [
-    {
-      icon: Layers,
-      value: moduleCount,
-      label: 'Modul',
-      accent: 'bg-blue-50 text-blue-600',
-    },
-    {
-      icon: ClipboardList,
-      value: assignmentCount,
-      label: 'Tugas',
-      accent: 'bg-amber-50 text-amber-600',
-    },
-  ]
-
   const actions = [
     {
       icon: Pencil,
@@ -153,15 +137,24 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
     {
       icon: isAdmin ? ClipboardList : ClipboardList,
       label: isAdmin ? 'Reviews Peserta' : 'Kelola Tugas',
-      description: isAdmin ? 'Baca seluruh review peserta untuk kursus ini.' : 'Buat, sunting tugas, dan tinjau kiriman peserta.',
-      href: isAdmin ? '#reviews-peserta' : `/mentor/courses/${courseUid}/assignments`,
+      description: isAdmin ? 'Lihat review & Q&A peserta pada halaman terpisah.' : 'Buat, sunting tugas, dan tinjau kiriman peserta.',
+      href: isAdmin ? `/admin/courses/reviews-qa?courseUid=${courseUid}` : `/mentor/courses/${courseUid}/assignments`,
       accent: isAdmin ? 'group-hover:bg-emerald-50 group-hover:text-emerald-600' : 'group-hover:bg-amber-50 group-hover:text-amber-600',
     },
   ]
 
+  const infoRows = [
+    { label: 'Status', value: course.published ? 'Published' : 'Draft' },
+    { label: 'Kategori', value: course.category || '-' },
+    { label: 'Tipe Kelas', value: course.classType || '-' },
+    { label: 'Level', value: course.level || '-' },
+    { label: 'Harga', value: priceLabel || '-' },
+    { label: 'Total Modul', value: moduleCount.toString() },
+    { label: 'Total Tugas', value: assignmentCount.toString() },
+  ]
+
   return (
     <section className="flex w-full flex-col gap-6">
-      {/* ── Hero card ── */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white">
         {course.image && (
           <div className="absolute inset-0 opacity-[0.04]">
@@ -192,92 +185,81 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
             </div>
 
             {hasDetails && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {course.category && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-primary/8 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    <Tag className="size-2.5" /> {course.category}
-                  </span>
-                )}
-                {course.classType && <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{course.classType}</span>}
-                {course.level && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                    <GraduationCap className="size-2.5" /> {course.level}
-                  </span>
-                )}
-                {priceLabel && <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">{priceLabel}</span>}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                {course.category && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{course.category}</span>}
+                {course.classType && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{course.classType}</span>}
+                {course.level && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{course.level}</span>}
+                {priceLabel && <span className="rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700">{priceLabel}</span>}
               </div>
             )}
+          </div>
+        </div>
+      </div>
 
-            {!course.published && isAdmin && (
-              <div className="pt-1">
-                <Button type="button" size="sm" className="h-9 gap-1.5 rounded-xl px-5 text-xs font-semibold" onClick={() => void handlePublish()}>
-                  <Sparkles className="size-3.5" />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="flex flex-col gap-6 xl:col-span-8">
+          <article className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Informasi Course</h2>
+                <p className="mt-1 text-sm text-slate-500">Ringkasan detail utama course untuk kebutuhan monitoring dan pengelolaan.</p>
+              </div>
+
+              {isAdmin ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => void handleDeleteCourse()}
+                  className="size-10 rounded-xl border-rose-200 bg-white text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
+                  aria-label="Hapus kursus">
+                  <Trash2 className="size-4" aria-hidden />
+                </Button>
+              ) : null}
+            </div>
+
+            <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {infoRows.map((item) => (
+                <div key={item.label} className="rounded-xl border border-slate-200/70 bg-slate-50/40 px-4 py-3">
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{item.label}</dt>
+                  <dd className="mt-1 text-sm font-semibold text-slate-900">{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        </div>
+
+        <aside className="xl:col-span-4">
+          <article className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:sticky xl:top-6">
+            <h2 className="text-base font-semibold text-slate-900">Opsi Pengelolaan</h2>
+            <p className="mt-1 text-sm text-slate-500">Akses cepat untuk edit konten, preview materi, dan pengelolaan lanjutan.</p>
+
+            <div className="mt-4 flex flex-col gap-3">
+              {actions.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="group flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition-colors hover:border-slate-300/90">
+                  <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors ${action.accent}`}>
+                    <action.icon className="size-5" />
+                  </div>
+                  <div className="min-w-0 pt-0.5">
+                    <p className="text-sm font-semibold text-slate-900">{action.label}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{action.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {!course.published && isAdmin ? (
+              <div className="mt-5 border-t border-slate-200 pt-5">
+                <Button type="button" className="h-10 w-full gap-1.5 rounded-xl text-sm font-semibold" onClick={() => void handlePublish()}>
+                  <Sparkles className="size-4" />
                   Publish Kursus
                 </Button>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {stats.map((s) => (
-          <div key={s.label} className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5">
-            <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${s.accent}`}>
-              <s.icon className="size-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold tracking-tight text-slate-900">{s.value}</p>
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{s.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Actions grid ── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-transparent p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Kelola kursus</h2>
-            <p className="mt-1 text-sm text-slate-500">Atur konten, preview, dan akses kursus tanpa berpindah halaman.</p>
-          </div>
-
-          {isAdmin ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => void handleDeleteCourse()}
-              className="size-10 rounded-xl border-rose-200 bg-white text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
-              aria-label="Hapus kursus">
-              <Trash2 className="size-4" aria-hidden />
-            </Button>
-          ) : null}
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {actions.map((action) =>
-            action.label === 'Reviews Peserta' ? (
-              <div key={action.label} className="lg:col-span-1" id="reviews-peserta">
-                <CourseReviewsSection courseUid={courseUid} />
-              </div>
-            ) : (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="group flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-colors hover:border-slate-300/90">
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors ${action.accent}`}>
-                  <action.icon className="size-5" />
-                </div>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-sm font-semibold text-slate-900">{action.label}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{action.description}</p>
-                </div>
-              </Link>
-            ),
-          )}
-        </div>
+            ) : null}
+          </article>
+        </aside>
       </div>
 
       <CourseParticipantsSection courseUid={courseUid} />

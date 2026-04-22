@@ -3,20 +3,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { UsersRound, Star } from 'lucide-react'
-
+import { UsersRound } from 'lucide-react'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Button } from '@/components/ui/button'
-import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { Pagination } from '@/components/ui/pagination'
-import { getMentorSpecColors, listMentors } from '@/lib/data/repository'
-import type { AdminMentor, AdminStatus, MentorSpecialization } from '@/lib/types'
+import { listMentors } from '@/lib/data/repository'
 
 import { InviteMentorDialog } from './InviteMentorDialog'
-
-type StatusFilter = 'all' | AdminStatus
-type SpecFilter = 'all' | MentorSpecialization
 
 const PAGE_SIZE = 10
 
@@ -24,43 +18,22 @@ export function MentorsTable() {
   const mentors = listMentors()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [specFilter, setSpecFilter] = useState<SpecFilter>('all')
   const [page, setPage] = useState(1)
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
     return mentors.filter((m) => {
-      const matchStatus = statusFilter === 'all' || m.status === statusFilter
-      const matchSpec = specFilter === 'all' || m.specializations.includes(specFilter)
       const matchQuery = q === '' || m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || m.uid.toLowerCase().includes(q)
-      return matchStatus && matchSpec && matchQuery
+      return matchQuery
     })
-  }, [mentors, committedSearch, statusFilter, specFilter])
+  }, [mentors, committedSearch])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const statusOptions = [
-    { value: 'all', label: 'Semua status' },
-    { value: 'active', label: 'Aktif' },
-    { value: 'inactive', label: 'Nonaktif' },
-    { value: 'pending', label: 'Menunggu' },
-  ] as const
-
-  const specOptions = [
-    { value: 'all', label: 'Semua spesialisasi' },
-    { value: 'Development', label: 'Development' },
-    { value: 'Design', label: 'Design' },
-    { value: 'Data & AI', label: 'Data & AI' },
-    { value: 'Marketing', label: 'Marketing' },
-    { value: 'Business', label: 'Business' },
-    { value: 'Language', label: 'Language' },
-  ] as const
-
   return (
-    <div className="flex flex-col gap-5 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-5 p-5">
+      <div className="flex flex-row justify-between items-center gap-3">
         <SearchForm
           value={search}
           onChange={(v) => {
@@ -78,44 +51,7 @@ export function MentorsTable() {
           submitLabel="Cari"
           className="w-full max-w-3xl"
         />
-
-        <div className="flex flex-wrap items-center gap-3">
-          <FilterSelect
-            id="mentor-status-filter"
-            label="Status"
-            value={statusFilter}
-            onChange={(value) => {
-              setStatusFilter(value)
-              setPage(1)
-            }}
-            options={statusOptions.map((option) => ({ value: option.value, label: option.label }))}
-          />
-          <FilterSelect
-            id="mentor-spec-filter"
-            label="Spesialisasi"
-            value={specFilter}
-            onChange={(value) => {
-              setSpecFilter(value)
-              setPage(1)
-            }}
-            options={specOptions.map((option) => ({ value: option.value, label: option.label }))}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setSearch('')
-              setCommittedSearch('')
-              setStatusFilter('all')
-              setSpecFilter('all')
-              setPage(1)
-            }}
-            className="text-xs font-semibold text-slate-500 transition-colors hover:text-slate-900">
-            Reset filter
-          </button>
-          <div className="ml-auto">
-            <InviteMentorDialog />
-          </div>
-        </div>
+        <InviteMentorDialog />
       </div>
 
       {pagedRows.length === 0 ? (

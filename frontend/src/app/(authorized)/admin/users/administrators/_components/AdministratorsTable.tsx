@@ -2,22 +2,15 @@
 
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
-import { Shield, KeyRound } from 'lucide-react'
+import { Shield } from 'lucide-react'
 
 import { EmptyState } from '@/components/admin/EmptyState'
-import { ResetCredentialsDialog } from '@/components/admin/ResetCredentialsDialog'
-import { Button } from '@/components/ui/button'
-import { FilterSelect } from '@/components/ui/FilterSelect'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { Pagination } from '@/components/ui/pagination'
 import { listAdministrators } from '@/lib/data/repository'
-import type { AdminAdministrator, AdminStatus } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 import { InviteAdminDialog } from './InviteAdminDialog'
-
-type RoleFilter = 'all' | AdminAdministrator['role']
-type StatusFilter = 'all' | AdminStatus
 
 const PAGE_SIZE = 10
 
@@ -25,44 +18,23 @@ export function AdministratorsTable() {
   const administrators = listAdministrators()
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
-  const [resetTarget, setResetTarget] = useState<AdminAdministrator | null>(null)
 
   const filtered = useMemo(() => {
     const q = committedSearch.toLowerCase().trim()
     return administrators.filter((a) => {
-      const matchRole = roleFilter === 'all' || a.role === roleFilter
-      const matchStatus = statusFilter === 'all' || a.status === statusFilter
       const matchQuery = q === '' || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.uid.toLowerCase().includes(q)
-      return matchRole && matchStatus && matchQuery
+      return matchQuery
     })
-  }, [administrators, committedSearch, roleFilter, statusFilter])
+  }, [administrators, committedSearch])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const roleOptions = [
-    { value: 'all', label: 'Semua role' },
-    { value: 'Super Admin', label: 'Super Admin' },
-    { value: 'Admin', label: 'Admin' },
-    { value: 'Finance', label: 'Finance' },
-    { value: 'Content Moderator', label: 'Content Moderator' },
-    { value: 'Support', label: 'Support' },
-  ] as const
-
-  const statusOptions = [
-    { value: 'all', label: 'Semua status' },
-    { value: 'active', label: 'Aktif' },
-    { value: 'inactive', label: 'Nonaktif' },
-    { value: 'pending', label: 'Menunggu' },
-  ] as const
-
   return (
     <>
-      <div className="flex flex-col gap-5 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-5  p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-row justify-between items-center gap-3">
           <SearchForm
             value={search}
             onChange={(v) => {
@@ -81,43 +53,7 @@ export function AdministratorsTable() {
             className="w-full max-w-3xl"
           />
 
-          <div className="flex flex-wrap items-center gap-3">
-            <FilterSelect
-              id="admin-role-filter"
-              label="Role"
-              value={roleFilter}
-              onChange={(value) => {
-                setRoleFilter(value)
-                setPage(1)
-              }}
-              options={roleOptions.map((option) => ({ value: option.value, label: option.label }))}
-            />
-            <FilterSelect
-              id="admin-status-filter"
-              label="Status"
-              value={statusFilter}
-              onChange={(value) => {
-                setStatusFilter(value)
-                setPage(1)
-              }}
-              options={statusOptions.map((option) => ({ value: option.value, label: option.label }))}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('')
-                setCommittedSearch('')
-                setRoleFilter('all')
-                setStatusFilter('all')
-                setPage(1)
-              }}
-              className="text-xs font-semibold text-slate-500 transition-colors hover:text-slate-900">
-              Reset filter
-            </button>
-            <div className="ml-auto">
-              <InviteAdminDialog />
-            </div>
-          </div>
+          <InviteAdminDialog />
         </div>
 
         {pagedRows.length === 0 ? (
@@ -140,17 +76,6 @@ export function AdministratorsTable() {
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Bergabung</p>
                   <p className="mt-1 text-sm font-semibold text-slate-900">{admin.createdAt}</p>
                 </div>
-
-                <div className="mt-auto flex flex-wrap items-center justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 rounded-xl border-slate-200 px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
-                    onClick={() => setResetTarget(admin)}>
-                    <KeyRound className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-                    Reset kredensial
-                  </Button>
-                </div>
               </article>
             ))}
           </div>
@@ -158,15 +83,6 @@ export function AdministratorsTable() {
 
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
-
-      <ResetCredentialsDialog
-        open={resetTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setResetTarget(null)
-        }}
-        userName={resetTarget?.name}
-        initialEmail={resetTarget?.email}
-      />
     </>
   )
 }

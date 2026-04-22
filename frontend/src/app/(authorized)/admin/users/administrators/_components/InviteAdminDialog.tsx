@@ -4,23 +4,23 @@ import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
-import { listAdministrators, listStudents } from '@/lib/data/repository'
+import { listMentors, listStudents } from '@/lib/data/repository'
 
 import { PersonSelectionDialog, type PersonSelectionItem } from '@/components/admin/PersonSelectionDialog'
 
 type InvitePersonItem = PersonSelectionItem & {
-  kind: 'student' | 'admin'
+  kind: 'student' | 'mentor'
 }
 
 export function InviteAdminDialog() {
-  const adminItems: InvitePersonItem[] = listAdministrators().map((admin) => ({
-    uid: admin.uid,
-    name: admin.name,
-    email: admin.email,
-    avatar: admin.avatar,
-    kind: 'admin',
-    detail: `${admin.role} • bergabung ${admin.createdAt}`,
-    meta: <Badge variant="userRole">Admin</Badge>,
+  const adminItems: InvitePersonItem[] = listMentors().map((mentor) => ({
+    uid: mentor.uid,
+    name: mentor.name,
+    email: mentor.email,
+    avatar: mentor.avatar,
+    kind: 'mentor',
+    detail: `${mentor.status} • bergabung ${mentor.joinedAt}`,
+    meta: <Badge variant="userRole">Mentor</Badge>,
   }))
 
   const studentItems: InvitePersonItem[] = listStudents().map((student) => ({
