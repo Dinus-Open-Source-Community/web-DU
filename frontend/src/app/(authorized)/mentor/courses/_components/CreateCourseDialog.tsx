@@ -9,7 +9,7 @@ import type { IMentorCourse, CourseCategory, CourseLevel, CourseClassType } from
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { setSessionCourseMeta, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { listCategories } from '@/lib/data/repository'
-import { notifyCourseDraft, notifyError } from '@/lib/notify'
+import { toast } from 'sonner'
 import Image from 'next/image'
 
 type CreateCourseDialogProps = {
@@ -161,7 +161,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
   const onFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !file.type.startsWith('image/')) {
-      notifyError('Pilih file gambar (JPG, PNG, WebP, …).')
+      toast.error('Pilih file gambar (JPG, PNG, WebP, …).')
       return
     }
     const reader = new FileReader()
@@ -178,15 +178,15 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
       const h = header.trim()
       const d = description.trim()
       if (!t || !h || !d) {
-        notifyError('Judul, header, dan deskripsi wajib diisi.')
+        toast.error('Judul, header, dan deskripsi wajib diisi.')
         return
       }
       if (!category) {
-        notifyError('Kategori wajib dipilih.')
+        toast.error('Kategori wajib dipilih.')
         return
       }
       if (classType !== 'Free' && (price === '' || price < 0)) {
-        notifyError('Harga wajib diisi untuk kelas Premium/Event.')
+        toast.error('Harga wajib diisi untuk kelas Premium/Event.')
         return
       }
 
@@ -239,7 +239,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
           strikePrice: row.strikePrice,
           whatYouLearn: row.whatYouLearn,
         })
-        notifyCourseDraft()
+        toast.success('Kursus dibuat. Lanjut ke editor.')
         onOpenChange(false)
         reset()
         router.push(`${roleBasePath}/courses/${uid}/edit`)

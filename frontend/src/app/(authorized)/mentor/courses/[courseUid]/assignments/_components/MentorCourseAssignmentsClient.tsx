@@ -24,7 +24,7 @@ import {
   type SubmissionFilterStatus,
 } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
-import { notifyDeleted, notifyError } from '@/lib/notify'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { SubmissionReviewDialog } from './SubmissionReviewDialog'
 import { CourseAssignmentDialog } from './CourseAssignmentDialog'
@@ -159,12 +159,12 @@ export function MentorCourseAssignmentsClient({ courseUid }: MentorCourseAssignm
       })
       if (!ok) return
       if (deleteMentorAssignment(a.uid)) {
-        notifyDeleted()
+        toast.success('Tugas berhasil dihapus.')
         refreshAssignments()
         refreshSubmissions()
         if (assignmentUid === a.uid) setAssignmentUid('all')
       } else {
-        notifyError('Gagal menghapus tugas.')
+        toast.error('Gagal menghapus tugas.')
       }
     },
     [confirm, refreshAssignments, refreshSubmissions, assignmentUid],

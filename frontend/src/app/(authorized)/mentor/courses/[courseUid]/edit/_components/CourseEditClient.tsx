@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import type { IModule, ILesson, IMentorCourse } from '@/lib/types'
 import { getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, setSessionCourseModules, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
-import { notifyPublished, notifySaved } from '@/lib/notify'
+import { toast } from 'sonner'
 import { CourseModuleOutline } from './CourseModuleOutline'
 import { CourseAssignmentDialog } from '../../assignments/_components/CourseAssignmentDialog'
 import Image from 'next/image'
@@ -85,7 +85,7 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
   const handleSave = (opts?: { silent?: boolean; redirect?: boolean }) => {
     if (!modules.length) return
     setSessionCourseModules(courseUid, { version: 2, modules })
-    if (!opts?.silent) notifySaved('Perubahan berhasil disimpan.')
+    if (!opts?.silent) toast.success('Perubahan berhasil disimpan.')
     if (opts?.redirect !== false) {
       router.push(`${routeBasePath}/courses/${courseUid}`)
       router.refresh()
@@ -114,7 +114,7 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
       setCourse((prev) => (prev ? { ...prev, moduleCount } : prev))
     }
     publishMentorCourse(courseUid)
-    notifyPublished()
+    toast.success('Kursus berhasil dipublikasikan.')
     router.push(`${routeBasePath}/courses/${courseUid}`)
     router.refresh()
   }

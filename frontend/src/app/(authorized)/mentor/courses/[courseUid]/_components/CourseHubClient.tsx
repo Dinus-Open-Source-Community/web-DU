@@ -9,7 +9,7 @@ import type { IMentorCourse } from '@/lib/types'
 import { deleteManagedCourse, getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
 import { countAssignmentsForCourse } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
-import { notifyDeleted, notifyError, notifyPublished } from '@/lib/notify'
+import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/func'
 import Image from 'next/image'
 import { CourseParticipantsSection } from './CourseParticipantsSection'
@@ -64,7 +64,7 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       }),
     })
     publishMentorCourse(courseUid)
-    notifyPublished()
+    toast.success('Kursus berhasil dipublikasikan.')
     setCourse((prev) => (prev ? { ...prev, published: true } : prev))
     router.refresh()
   }
@@ -81,11 +81,11 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
 
     try {
       deleteManagedCourse(courseUid)
-      notifyDeleted()
+      toast.success('Kursus berhasil dihapus.')
       router.push('/admin/courses')
       router.refresh()
     } catch {
-      notifyError('Gagal menghapus kursus.')
+      toast.error('Gagal menghapus kursus.')
     }
   }
 

@@ -9,7 +9,7 @@ import type { IMentorAssignmentSubmission } from '@/lib/types'
 import { SubmissionContentView } from '@/components/assignments/SubmissionContentView'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { saveSubmissionReview } from '@/lib/mentorAssignmentsData'
-import { notifyError, notifyReviewSaved } from '@/lib/notify'
+import { toast } from 'sonner'
 
 type SubmissionReviewDialogProps = {
   open: boolean
@@ -44,9 +44,9 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
   const handleSave = useCallback(async () => {
     if (!submission) return
     const agreed = await confirm({
-      title: "Simpan review?",
-      description: "Nilai dan komentar akan disimpan untuk kiriman ini.",
-      confirmLabel: "Simpan",
+      title: 'Simpan review?',
+      description: 'Nilai dan komentar akan disimpan untuk kiriman ini.',
+      confirmLabel: 'Simpan',
     })
     if (!agreed) return
     setSaving(true)
@@ -60,10 +60,10 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
       }
       saveSubmissionReview(submission.uid, patch)
       onSaved({ ...submission, ...patch })
-      notifyReviewSaved("Review disimpan.")
+      toast.success('Review disimpan.')
       handleClose()
     } catch {
-      notifyError("Gagal menyimpan review.")
+      toast.error('Gagal menyimpan review.')
     } finally {
       setSaving(false)
     }
@@ -80,8 +80,7 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Review kiriman</p>
             <h2 className="truncate text-lg font-semibold tracking-tight text-slate-900">{submission.studentName}</h2>
             <p className="mt-0.5 text-sm text-slate-500">
-              {assignmentTitle} · Attempt {submission.attemptNumber} ·{' '}
-              {format(new Date(submission.submittedAt), 'd MMM yyyy HH:mm', { locale: id })}
+              {assignmentTitle} · Attempt {submission.attemptNumber} · {format(new Date(submission.submittedAt), 'd MMM yyyy HH:mm', { locale: id })}
             </p>
           </div>
           <button type="button" onClick={handleClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup">

@@ -7,7 +7,7 @@ import type { IMentorCourse, IMentorCourseAssignment, MentorAssignmentLifecycleS
 import { getCourseMeetingCount } from '@/lib/mentorCourseStorage'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { createMentorAssignment, type MentorAssignmentInput, updateMentorAssignment } from '@/lib/mentorAssignmentsData'
-import { notifyCreated, notifyError, notifyUpdated } from '@/lib/notify'
+import { toast } from 'sonner'
 import { TiptapRichTextEditor } from '@/components/rich-text/TiptapRichTextEditor'
 import { toPreviewHtmlFragment } from '@/lib/htmlEscape'
 import { LessonQuizEditor } from '../../edit/_components/LessonQuizEditor'
@@ -178,12 +178,12 @@ export function CourseAssignmentDialog({
       e.preventDefault()
       const t = title.trim()
       if (!t) {
-        notifyError('Judul wajib diisi.')
+        toast.error('Judul wajib diisi.')
         return
       }
       const iso = datetimeLocalToIso(deadlineLocal)
       if (!iso) {
-        notifyError('Tenggat wajib diisi dengan valid.')
+        toast.error('Tenggat wajib diisi dengan valid.')
         return
       }
       const agreed = await confirm({
@@ -195,7 +195,7 @@ export function CourseAssignmentDialog({
 
       const mn = Math.min(Math.max(1, meetingNumber), maxMeetings)
       if (!allowFileSubmit && !allowPlainTextSubmit && !allowRichTextSubmit) {
-        notifyError('Aktifkan minimal satu tipe submit untuk student.')
+        toast.error('Aktifkan minimal satu tipe submit untuk student.')
         return
       }
       let maxA: number | undefined
@@ -225,14 +225,14 @@ export function CourseAssignmentDialog({
 
       if (mode === 'create') {
         createMentorAssignment(courseUid, input)
-        notifyCreated('Tugas dibuat.')
+        toast.success('Tugas berhasil dibuat.')
       } else if (editing) {
         const updated = updateMentorAssignment(editing.uid, input)
         if (!updated) {
-          notifyError('Tidak dapat memperbarui tugas ini.')
+          toast.error('Tidak dapat memperbarui tugas ini.')
           return
         }
-        notifyUpdated('Tugas diperbarui.')
+        toast.success('Tugas berhasil diperbarui.')
       } else {
         return
       }
