@@ -23,7 +23,7 @@ func StartCourseMasterRoutes(r *gin.Engine) {
 		categoryGroup.DELETE("/:id", service.DeleteAdminCourseCategoryFunc)
 	}
 
-	classTypeGroup := r.Group("/class-types")
+	classTypeGroup := r.Group("/course-types")
 	classTypeGroup.Use(middleware.AuthMiddleware())
 	{
 		classTypeGroup.GET("/", service.GetAllClassTypesFunc)

@@ -324,7 +324,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Preload("Category").Preload("ClassType").First(&course, course.Uid).Error; err != nil {
+	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve created course",
@@ -337,7 +337,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "Course created successfully",
-		"data":    course,
+		"data":    courseResponse(course),
 		"error":   nil,
 	})
 }
@@ -456,7 +456,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 		return db.Order("order_index ASC")
 	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
-	}).Preload("Category").Preload("ClassType").Preload("CourseMentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
+	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CourseMentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve courses",
@@ -472,7 +472,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 		"success": true,
 		"message": "Courses retrieved successfully",
 		"data": gin.H{
-			"courses": courses,
+			"courses": courseListResponse(courses),
 			"meta": gin.H{
 				"total":        total,
 				"per_page":     perPage,
@@ -513,7 +513,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 		return db.Order("order_index ASC")
 	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
-	}).Preload("Category").Preload("ClassType").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
+	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -526,7 +526,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course retrieved successfully",
-		"data":    course,
+		"data":    courseResponse(course),
 		"error":   nil,
 	})
 }
@@ -964,9 +964,16 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 
 	// Verify user has permission to view this invoice
 	// Only allow if user is admin, mentor of the course, or the enrolled student
-	isAuthorized := hasAdminAccess(userData.Role) ||
-		userData.Uid == enrollment.UserUid ||
-		(hasMentorAccess(userData.Role) && enrollment.Course.MentorUid != nil && *enrollment.Course.MentorUid == userData.Uid)
+	isAuthorized := hasAdminAccess(userData.Role) || userData.Uid == enrollment.UserUid
+
+	if !isAuthorized && hasMentorAccess(userData.Role) {
+		var mentorAccessCount int64
+		_ = database.DB.Model(&entity.CourseMentor{}).
+			Where("course_uid = ? AND mentor_uid = ? AND status IN ?", enrollment.CourseUid, userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}).
+			Count(&mentorAccessCount).Error
+
+		isAuthorized = mentorAccessCount > 0 || (enrollment.Course.MentorUid != nil && *enrollment.Course.MentorUid == userData.Uid)
+	}
 
 	if !isAuthorized {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -1106,10 +1113,19 @@ func GetInvoiceURLFunc(c *gin.Context) {
 		userData.Uid == enrollment.UserUid
 
 	if !isAuthorized {
-		var course entity.Course
-		if err := database.DB.First(&course, courseUidParam).Error; err == nil {
-			if course.MentorUid != nil && *course.MentorUid == userData.Uid {
-				isAuthorized = true
+		var mentorAccessCount int64
+		_ = database.DB.Model(&entity.CourseMentor{}).
+			Where("course_uid = ? AND mentor_uid = ? AND status IN ?", courseUidParam, userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}).
+			Count(&mentorAccessCount).Error
+
+		if mentorAccessCount > 0 {
+			isAuthorized = true
+		} else {
+			var course entity.Course
+			if err := database.DB.First(&course, courseUidParam).Error; err == nil {
+				if course.MentorUid != nil && *course.MentorUid == userData.Uid {
+					isAuthorized = true
+				}
 			}
 		}
 	}

@@ -470,236 +470,6 @@ paths:
       summary: Update user avatar (All Roles)
       tags:
       - User
-  /class-types:
-    get:
-      description: Retrieve all course types. Admin only.
-      parameters:
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 10, max: 100)'
-        in: query
-        name: per_page
-        type: integer
-      - description: Search by course type name
-        in: query
-        name: name
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Course types retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to retrieve course types
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get all course types (Admin Only)
-      tags:
-      - Course Type
-    post:
-      consumes:
-      - application/json
-      description: Create a new course type. Admin only.
-      parameters:
-      - description: Course type data
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateClassTypeRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Course type created successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to create course type
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create course type (Admin Only)
-      tags:
-      - Course Type
-  /class-types/{id}:
-    delete:
-      description: Delete course type by uid. Admin only.
-      parameters:
-      - description: Course Type UID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Course type deleted successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid course type uid
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Course type not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to delete course type
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete course type (Admin Only)
-      tags:
-      - Course Type
-    get:
-      description: Retrieve a specific course type by uid. Admin only.
-      parameters:
-      - description: Course Type UID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Course type retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid course type uid
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Course type not found
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get course type by ID (Admin Only)
-      tags:
-      - Course Type
-    put:
-      consumes:
-      - application/json
-      description: Update existing course type by uid. Admin only.
-      parameters:
-      - description: Course Type UID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Course type data
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateClassTypeRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Course type updated successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Course type not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to update course type
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update course type (Admin Only)
-      tags:
-      - Course Type
   /course-categories:
     get:
       description: Retrieve all course categories. Admin only.
@@ -930,6 +700,236 @@ paths:
       summary: Update course category (Admin Only)
       tags:
       - Course Category
+  /course-types:
+    get:
+      description: Retrieve all course types. Admin only.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search by course type name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course types retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve course types
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all course types (Admin Only)
+      tags:
+      - Course Type
+    post:
+      consumes:
+      - application/json
+      description: Create a new course type. Admin only.
+      parameters:
+      - description: Course type data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateClassTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Course type created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create course type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create course type (Admin Only)
+      tags:
+      - Course Type
+  /course-types/{id}:
+    delete:
+      description: Delete course type by uid. Admin only.
+      parameters:
+      - description: Course Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course type deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course type uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course type not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete course type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete course type (Admin Only)
+      tags:
+      - Course Type
+    get:
+      description: Retrieve a specific course type by uid. Admin only.
+      parameters:
+      - description: Course Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course type retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course type uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course type not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get course type by ID (Admin Only)
+      tags:
+      - Course Type
+    put:
+      consumes:
+      - application/json
+      description: Update existing course type by uid. Admin only.
+      parameters:
+      - description: Course Type UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course type data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateClassTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course type updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course type not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update course type
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update course type (Admin Only)
+      tags:
+      - Course Type
   /courses:
     get:
       consumes:

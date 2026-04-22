@@ -93,7 +93,7 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 	}
 
 	offset := (page - 1) * perPage
-	if err := db.Preload("Courses").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&categories).Error; err != nil {
+	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve course categories",
@@ -112,7 +112,7 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 			"is_active":   category.IsActive,
 			"created_at":  category.CreatedAt,
 			"updated_at":  category.UpdatedAt,
-			"courses":     category.Courses,
+			"courses":     courseListResponse(category.Courses),
 		})
 	}
 
@@ -163,7 +163,7 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 	}
 
 	var category entity.CourseCategory
-	if err := database.DB.First(&category, id).Error; err != nil {
+	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course category not found",
@@ -176,7 +176,15 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course category retrieved successfully",
-		"data":    category,
+		"data": gin.H{
+			"uid":         category.Uid,
+			"name":        category.Name,
+			"description": category.Description,
+			"is_active":   category.IsActive,
+			"created_at":  category.CreatedAt,
+			"updated_at":  category.UpdatedAt,
+			"courses":     courseListResponse(category.Courses),
+		},
 		"error":   nil,
 	})
 }
@@ -409,7 +417,7 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve course types"
-// @Router       /class-types [get]
+// @Router       /course-types [get]
 func GetAllClassTypesFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
 		return
@@ -450,7 +458,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 	}
 
 	offset := (page - 1) * perPage
-	if err := db.Preload("Courses").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&classTypes).Error; err != nil {
+	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&classTypes).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve course types",
@@ -469,7 +477,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 			"is_active":   classType.IsActive,
 			"created_at":  classType.CreatedAt,
 			"updated_at":  classType.UpdatedAt,
-			"courses":     classType.Courses,
+			"courses":     courseListResponse(classType.Courses),
 		})
 	}
 
@@ -502,7 +510,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
-// @Router       /class-types/{id} [get]
+// @Router       /course-types/{id} [get]
 func GetClassTypeByIDFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
 		return
@@ -520,7 +528,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	}
 
 	var classType entity.ClassType
-	if err := database.DB.First(&classType, id).Error; err != nil {
+	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").First(&classType, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course type not found",
@@ -533,7 +541,15 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course type retrieved successfully",
-		"data":    classType,
+		"data": gin.H{
+			"uid":         classType.Uid,
+			"name":        classType.Name,
+			"description": classType.Description,
+			"is_active":   classType.IsActive,
+			"created_at":  classType.CreatedAt,
+			"updated_at":  classType.UpdatedAt,
+			"courses":     courseListResponse(classType.Courses),
+		},
 		"error":   nil,
 	})
 }
@@ -550,7 +566,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      500  {object}  map[string]any  "Failed to create course type"
-// @Router       /class-types [post]
+// @Router       /course-types [post]
 func PostAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
 		return
@@ -619,7 +635,7 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Failure      500  {object}  map[string]any  "Failed to update course type"
-// @Router       /class-types/{id} [put]
+// @Router       /course-types/{id} [put]
 func UpdateAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
 		return
@@ -708,7 +724,7 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete course type"
-// @Router       /class-types/{id} [delete]
+// @Router       /course-types/{id} [delete]
 func DeleteAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
 		return
