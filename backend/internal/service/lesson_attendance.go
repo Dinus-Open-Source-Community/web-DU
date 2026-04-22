@@ -157,7 +157,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        lesson_id  path  int  true  "Lesson ID"
+// @Param        lesson_id  path  string  true  "Lesson UID"
 // @Success      200  {object}  map[string]any  "Attendances retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
@@ -178,7 +178,7 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -230,7 +230,7 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id  path  int  true  "Attendance ID"
+// @Param        id  path  string  true  "Attendance UID"
 // @Success      200  {object}  map[string]any  "Attendance retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
@@ -251,7 +251,7 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -290,7 +290,7 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id       path  int  true  "Attendance ID"
+// @Param        id       path  string  true  "Attendance UID"
 // @Param        request  body  dto.LessonAttendanceUpdateRequest  true  "Updated attendance data"
 // @Success      200  {object}  map[string]any  "Attendance updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
@@ -313,7 +313,7 @@ func UpdateAttendanceFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -391,7 +391,7 @@ func UpdateAttendanceFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id  path  int  true  "Attendance ID"
+// @Param        id  path  string  true  "Attendance UID"
 // @Success      200  {object}  map[string]any  "Attendance deleted successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
@@ -412,7 +412,7 @@ func DeleteAttendanceFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -448,8 +448,8 @@ func DeleteAttendanceFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        lesson_id     query  int  true  "Lesson ID"
-// @Param        enrollment_id query  int  true  "Enrollment ID"
+// @Param        lesson_id     query  string  true  "Lesson UID"
+// @Param        enrollment_id query  string  true  "Enrollment UID"
 // @Success      200  {object}  map[string]any  "Attendance status retrieved"
 // @Failure      400  {object}  map[string]any  "Invalid request parameters"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -537,7 +537,7 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        enrollment_id query  int  false  "Filter by enrollment ID"
+// @Param        enrollment_id query  string  false  "Filter by enrollment UID"
 // @Success      200  {object}  map[string]any  "Attendance history retrieved"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendance history"

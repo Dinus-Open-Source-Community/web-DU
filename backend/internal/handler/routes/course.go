@@ -21,6 +21,7 @@ func StartCourseRoutes(r *gin.Engine) {
 
 		courseGroup.POST("/:id/join", service.JoinCourseFunc)                      // Students only
 		courseGroup.POST("/:id/review", service.CreateCourseReviewFunc)            // Enrolled students only
+		courseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
 		courseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)         // Admin only
 		courseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc) // Admin only
 

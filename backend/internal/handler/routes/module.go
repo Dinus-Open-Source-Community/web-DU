@@ -18,8 +18,8 @@ func StartModuleRoutes(r *gin.Engine) {
 	{
 		moduleGroup.GET("/:id", service.GetModuleByIDFunc)               // users - all roles
 		moduleGroup.GET("/course/:course_id", service.GetAllModulesFunc) // users - all roles
-		moduleGroup.POST("/", service.PostAdminModuleFunc)               // Admin only
-		moduleGroup.PUT("/:id", service.UpdateAdminModuleFunc)           // Admin only
-		moduleGroup.DELETE("/:id", service.DeleteAdminModuleFunc)        // Admin only
+		moduleGroup.POST("/", service.PostAdminModuleFunc)               // Admin/Mentor
+		moduleGroup.PUT("/:id", service.UpdateAdminModuleFunc)           // Admin/Mentor
+		moduleGroup.DELETE("/:id", service.DeleteAdminModuleFunc)        // Admin/Mentor
 	}
 }

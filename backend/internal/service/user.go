@@ -20,8 +20,35 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary      Get user detail by ID (Admin or Self)
-// @Description  Retrieve detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.
+// @Summary      Get current authenticated user detail (Self)
+// @Description  Retrieve own detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  map[string]any  "User detail retrieved successfully"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      404  {object}  map[string]any  "User not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /user/data [get]
+func GetSelfUserDetailService(c *gin.Context) {
+	requesterRaw, exists := c.Get(middleware.UIDCK)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Unauthorized",
+			"data":    nil,
+			"error":   "user_id not found in context",
+		})
+		return
+	}
+
+	requesterUID := requesterRaw.(uuid.UUID)
+	respondUserDetail(c, requesterUID)
+}
+
+// @Summary      Get user detail by ID (Admin only)
+// @Description  Retrieve detailed user data by target user UID. Accessible only by admin.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -30,7 +57,7 @@ import (
 // @Success      200  {object}  map[string]any  "User detail retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Invalid user uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Forbidden - only admin or user owner"
+// @Failure      403  {object}  map[string]any  "Forbidden - only admin"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /user/{id} [get]
@@ -69,16 +96,20 @@ func GetUserDetailByIDService(c *gin.Context) {
 		return
 	}
 
-	if requester.Role != entity.AdminRole && requesterUID != targetUID {
+	if !hasAdminAccess(requester.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: only admin or user owner",
+			"message": "Access denied: only admin",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
+	respondUserDetail(c, targetUID)
+}
+
+func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	var userData entity.User
 	if err := database.DB.Select("uid", "name", "email", "avatar_url", "role", "is_verified", "description", "created_at", "updated_at").First(&userData, targetUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -316,8 +347,37 @@ func GetUserDetailByIDService(c *gin.Context) {
 		})
 	}
 
-	var mentoredCourses []entity.Course
-	if err := database.DB.Where("mentor_uid = ?", targetUID).Order("created_at DESC").Find(&mentoredCourses).Error; err != nil {
+	type mentoredCourseRow struct {
+		CourseUID   uuid.UUID           `gorm:"column:course_uid"`
+		Title       string              `gorm:"column:title"`
+		Subtitle    string              `gorm:"column:subtitle"`
+		Slug        string              `gorm:"column:slug"`
+		Level       entity.CourseLevel  `gorm:"column:level"`
+		Status      entity.CourseStatus `gorm:"column:status"`
+		Price       float64             `gorm:"column:price"`
+		IsPremium   bool                `gorm:"column:is_premium"`
+		IsPublished bool                `gorm:"column:is_published"`
+		CreatedAt   time.Time           `gorm:"column:created_at"`
+	}
+
+	var mentoredCourseRows []mentoredCourseRow
+	if err := database.DB.Table("courses AS c").
+		Select(`
+			c.uid AS course_uid,
+			c.title,
+			c.subtitle,
+			c.slug,
+			c.level,
+			c.status,
+			c.price,
+			c.is_premium,
+			c.is_published,
+			c.created_at`).
+		Joins("LEFT JOIN course_mentors cm ON cm.course_uid = c.uid AND cm.mentor_uid = ? AND cm.status = 'joined'", targetUID).
+		Where("c.mentor_uid = ? OR cm.mentor_uid = ?", targetUID, targetUID).
+		Group("c.uid").
+		Order("c.created_at DESC").
+		Scan(&mentoredCourseRows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve mentored courses",
@@ -327,10 +387,10 @@ func GetUserDetailByIDService(c *gin.Context) {
 		return
 	}
 
-	mentoredCourseList := make([]gin.H, 0, len(mentoredCourses))
-	for _, course := range mentoredCourses {
+	mentoredCourseList := make([]gin.H, 0, len(mentoredCourseRows))
+	for _, course := range mentoredCourseRows {
 		mentoredCourseList = append(mentoredCourseList, gin.H{
-			"uid":          course.Uid,
+			"uid":          course.CourseUID,
 			"title":        course.Title,
 			"subtitle":     course.Subtitle,
 			"slug":         course.Slug,
@@ -678,7 +738,7 @@ func UpdateUserRoleService(c *gin.Context) {
 		return
 	}
 
-	if adminData.Role != entity.AdminRole && adminData.Role != entity.SuperAdminRole {
+	if !hasAdminAccess(adminData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admin or Super Admin only",
@@ -803,7 +863,7 @@ func UpdateUserRoleService(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id  path      int  true  "User ID to delete"
+// @Param        id  path      string  true  "User UID to delete"
 // @Success      200  {object}  map[string]any  "User deleted successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
 // @Failure      403  {object}  map[string]any  "Forbidden - Only admins can delete users"
@@ -825,7 +885,7 @@ func DeleteUserService(c *gin.Context) {
 		return
 	}
 
-	if adminData.Role != entity.AdminRole {
+	if !hasAdminAccess(adminData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -927,7 +987,7 @@ func GetAllUsersService(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",

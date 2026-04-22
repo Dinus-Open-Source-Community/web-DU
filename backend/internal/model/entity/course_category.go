@@ -16,5 +16,5 @@ type CourseCategory struct {
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Courses []Course `gorm:"foreignKey:CategoryUid" json:"courses"`
+	Courses []Course `gorm:"foreignKey:CategoryUid" json:"-"`
 }

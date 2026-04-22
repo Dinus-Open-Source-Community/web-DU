@@ -13,7 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -56,7 +55,7 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if admin.Role != entity.AdminRole {
+	if !hasAdminAccess(admin.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -154,19 +153,21 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 		return
 	}
 
+	now := time.Now()
 	assignments := make([]entity.CourseMentor, 0, len(uniqueMentorUIDs))
 	for _, mentorUID := range uniqueMentorUIDs {
 		assignments = append(assignments, entity.CourseMentor{
 			CourseUid:     courseUID,
 			MentorUid:     mentorUID,
 			AssignedByUid: adminUID,
-			Status:        entity.CourseMentorSelected,
+			Status:        entity.CourseMentorJoined,
+			JoinedAt:      &now,
 		})
 	}
 
 	if err := database.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "course_uid"}, {Name: "mentor_uid"}},
-		DoUpdates: clause.Assignments(map[string]any{"assigned_by_uid": adminUID, "status": entity.CourseMentorSelected, "updated_at": time.Now()}),
+		DoUpdates: clause.Assignments(map[string]any{"assigned_by_uid": adminUID, "status": entity.CourseMentorJoined, "joined_at": now, "updated_at": now}),
 	}).Create(&assignments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -175,6 +176,10 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	if course.MentorUid == nil && len(uniqueMentorUIDs) > 0 {
+		database.DB.Model(&course).Update("mentor_uid", uniqueMentorUIDs[0])
 	}
 
 	assignedMentors := make([]gin.H, 0, len(mentors))
@@ -194,133 +199,6 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 		"data": gin.H{
 			"course_uid": courseUID,
 			"mentors":    assignedMentors,
-		},
-		"error": nil,
-	})
-}
-
-// @Summary      Join assigned course as mentor (Mentor Only)
-// @Description  Mentor confirms joining a course that has been assigned by admin.
-// @Tags         Mentor
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        course_id   path      string  true  "Course UID"
-// @Success      200  {object}  map[string]any  "Mentor joined assigned course successfully"
-// @Failure      400  {object}  map[string]any  "Invalid course uid"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Forbidden - mentor only or course not assigned"
-// @Failure      404  {object}  map[string]any  "Course or assignment not found"
-// @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /mentor/courses/{course_id}/join [post]
-func MentorJoinAssignedCourseFunc(c *gin.Context) {
-	mentorRaw, exists := c.Get(middleware.UIDCK)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Unauthorized",
-			"data":    nil,
-			"error":   "user_id not found in context",
-		})
-		return
-	}
-
-	mentorUID := mentorRaw.(uuid.UUID)
-	var mentor entity.User
-	if err := database.DB.Select("uid", "role").First(&mentor, mentorUID).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Unauthorized",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if mentor.Role != entity.MentorRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: Mentors only",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
-
-	courseUID, err := uuid.Parse(c.Param("course_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	var course entity.Course
-	if err := database.DB.First(&course, courseUID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "Course not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	var assignment entity.CourseMentor
-	if err := database.DB.Where("course_uid = ? AND mentor_uid = ?", courseUID, mentorUID).First(&assignment).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusForbidden, gin.H{
-				"success": false,
-				"message": "Course is not assigned to this mentor by admin",
-				"data":    nil,
-				"error":   nil,
-			})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve assignment",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if assignment.Status != entity.CourseMentorJoined {
-		now := time.Now()
-		if err := database.DB.Model(&assignment).Updates(map[string]any{
-			"status":    entity.CourseMentorJoined,
-			"joined_at": now,
-		}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Failed to join assigned course",
-				"data":    nil,
-				"error":   err.Error(),
-			})
-			return
-		}
-
-		if course.MentorUid == nil {
-			database.DB.Model(&course).Update("mentor_uid", mentorUID)
-		}
-
-		assignment.Status = entity.CourseMentorJoined
-		assignment.JoinedAt = &now
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Mentor joined assigned course successfully",
-		"data": gin.H{
-			"course_uid":   courseUID,
-			"mentor_uid":   mentorUID,
-			"status":       assignment.Status,
-			"joined_at":    assignment.JoinedAt,
-			"course_title": course.Title,
 		},
 		"error": nil,
 	})

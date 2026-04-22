@@ -153,6 +153,7 @@ func CreateLessonFunc(c *gin.Context) {
 // @Param        page       query  int  false  "Page number (default: 1, minimum: 1)"
 // @Param        per_page   query  int  false  "Items per page (default: 10, max: 100)"
 // @Param        module_id  query  int  false  "Filter by module ID"
+// @Param        name       query  string  false  "Search lesson by title"
 // @Success      200  {object}  map[string]any  "Lessons retrieved successfully with pagination metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
@@ -169,6 +170,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
 	moduleIDStr := c.Query("module_id")
+	nameFilter := strings.TrimSpace(c.Query("name"))
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
@@ -216,6 +218,10 @@ func GetAllLessonsFunc(c *gin.Context) {
 				Joins("LEFT JOIN course_mentors cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", userData.Uid).
 				Where("c.mentor_uid = ? OR cm.status IN ?", userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}),
 		)
+	}
+
+	if nameFilter != "" {
+		db = db.Where("LOWER(title) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
 	}
 
 	// Count total records
@@ -269,8 +275,9 @@ func GetAllLessonsFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id  path  int  true  "Lesson ID"
+// @Param        id  path  string  true  "Lesson UID"
 // @Success      200  {object}  map[string]any  "Lesson retrieved successfully"
+// @Failure      400  {object}  map[string]any  "Invalid lesson uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson or user not found"
@@ -282,10 +289,19 @@ func GetLessonByIDFunc(c *gin.Context) {
 		return
 	}
 
-	lessonID := c.Param("id")
+	lessonUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid lesson uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, lessonID).Error; err != nil {
+	if err := database.DB.First(&lesson, lessonUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",
@@ -329,10 +345,10 @@ func GetLessonByIDFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id       path  int     true  "Lesson ID to update"
+// @Param        id       path  string     true  "Lesson UID to update"
 // @Param        request  body  dto.LessonUpdateRequest  true  "Updated lesson data (all fields optional)"
 // @Success      200  {object}  map[string]any  "Lesson updated successfully"
-// @Failure      400  {object}  map[string]any  "Invalid request data"
+// @Failure      400  {object}  map[string]any  "Invalid request data or lesson uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson or user not found"
@@ -352,10 +368,19 @@ func UpdateLessonFunc(c *gin.Context) {
 		return
 	}
 
-	lessonID := c.Param("id")
+	lessonUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid lesson uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, lessonID).Error; err != nil {
+	if err := database.DB.First(&lesson, lessonUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",
@@ -472,8 +497,9 @@ func UpdateLessonFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id  path  int  true  "Lesson ID"
+// @Param        id  path  string  true  "Lesson UID"
 // @Success      200  {object}  map[string]any  "Lesson deleted successfully"
+// @Failure      400  {object}  map[string]any  "Invalid lesson uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson not found"
@@ -485,10 +511,19 @@ func DeleteLessonFunc(c *gin.Context) {
 		return
 	}
 
-	lessonID := c.Param("id")
+	lessonUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid lesson uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, lessonID).Error; err != nil {
+	if err := database.DB.First(&lesson, lessonUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",

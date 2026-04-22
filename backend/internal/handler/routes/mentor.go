@@ -16,7 +16,6 @@ func StartMentorRoutes(r *gin.Engine) {
 	mentorGroup := r.Group("/mentor")
 	mentorGroup.Use(middleware.AuthMiddleware())
 	{
-		mentorGroup.POST("/courses/:course_id/join", service.MentorJoinAssignedCourseFunc) // Mentor only
 		mentorGroup.GET("/all", service.GetAllMentorsFunc)                                 // All roles
 		mentorGroup.GET("/:id", service.GetMentorDetailFunc)                               // All roles
 	}

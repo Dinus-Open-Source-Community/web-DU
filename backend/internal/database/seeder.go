@@ -68,7 +68,7 @@ func seedClassTypes(db *gorm.DB) {
 	}
 }
 
-// seedUsers membuat user data (1 admin dan 2 student)
+// seedUsers membuat user data default (admin, mentor, dan student)
 func seedUsers(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Users...")
 
@@ -83,6 +83,15 @@ func seedUsers(db *gorm.DB) {
 	}
 
 	users := []seedUser{
+		{
+			Name:        "Super Admin User",
+			Email:       "superadmin@doscom.id",
+			Password:    "superadmin123",
+			Role:        entity.SuperAdminRole,
+			IsVerified:  true,
+			AvatarURL:   "https://via.placeholder.com/150?text=SuperAdmin",
+			Description: "Super administrator dari platform DU",
+		},
 		{
 			Name:        "Admin User",
 			Email:       "admin@doscom.id",
@@ -110,27 +119,46 @@ func seedUsers(db *gorm.DB) {
 			AvatarURL:   "https://via.placeholder.com/150?text=Siti",
 			Description: "Mahasiswa berprestasi di bidang teknologi",
 		},
+		{
+			Name:        "Andi Pratama",
+			Email:       "andi.mentor@doscom.id",
+			Password:    "mentor123",
+			Role:        entity.MentorRole,
+			IsVerified:  true,
+			AvatarURL:   "https://via.placeholder.com/150?text=Andi",
+			Description: "Mentor backend dan arsitektur sistem",
+		},
+		{
+			Name:        "Rina Kurnia",
+			Email:       "rina.mentor@doscom.id",
+			Password:    "mentor123",
+			Role:        entity.MentorRole,
+			IsVerified:  true,
+			AvatarURL:   "https://via.placeholder.com/150?text=Rina",
+			Description: "Mentor frontend dan UI engineering",
+		},
+		{
+			Name:        "Dimas Saputra",
+			Email:       "dimas.mentor@doscom.id",
+			Password:    "mentor123",
+			Role:        entity.MentorRole,
+			IsVerified:  true,
+			AvatarURL:   "https://via.placeholder.com/150?text=Dimas",
+			Description: "Mentor DevOps dan cloud deployment",
+		},
+		{
+			Name:        "Nadia Putri",
+			Email:       "nadia.mentor@doscom.id",
+			Password:    "mentor123",
+			Role:        entity.MentorRole,
+			IsVerified:  true,
+			AvatarURL:   "https://via.placeholder.com/150?text=Nadia",
+			Description: "Mentor database dan data engineering",
+		},
 	}
 
 	for _, u := range users {
 		emailHash := utils.GenerateBlindIndex(u.Email)
-
-		var existing entity.User
-		err := db.Where("email_hash = ? OR email_hash = ? OR email = ?", emailHash, u.Email, u.Email).First(&existing).Error
-		if err == nil {
-			if existing.EmailHash != emailHash {
-				if err := db.Model(&existing).Update("email_hash", emailHash).Error; err != nil {
-					log.Printf("[Warning] Gagal migrasi email_hash user %s: %v", u.Name, err)
-				} else {
-					log.Printf("[Info] email_hash user %s diperbarui ke blind index", u.Name)
-				}
-			}
-			continue
-		}
-		if err != gorm.ErrRecordNotFound {
-			log.Printf("[Error] Gagal cek user %s: %v", u.Name, err)
-			continue
-		}
 
 		hashedPassword, err := utils.HashPassword(u.Password)
 		if err != nil {
@@ -150,6 +178,38 @@ func seedUsers(db *gorm.DB) {
 			continue
 		}
 
+		encryptedDescription, err := utils.Encrypt(u.Description)
+		if err != nil {
+			log.Printf("[Error] Gagal encrypt description user %s: %v", u.Name, err)
+			continue
+		}
+
+		var existing entity.User
+		err = db.Where("email_hash = ? OR email_hash = ? OR email = ?", emailHash, u.Email, u.Email).First(&existing).Error
+		if err == nil {
+			updateData := map[string]any{
+				"name":        encryptedName,
+				"email":       encryptedEmail,
+				"email_hash":   emailHash,
+				"password":    hashedPassword,
+				"role":        u.Role,
+				"is_verified": u.IsVerified,
+				"avatar_url":  u.AvatarURL,
+				"description": encryptedDescription,
+			}
+
+			if err := db.Model(&existing).Updates(updateData).Error; err != nil {
+				log.Printf("[Warning] Gagal update user seed %s: %v", u.Name, err)
+			} else {
+				log.Printf("[Info] User seed %s diperbarui (termasuk role)", u.Name)
+			}
+			continue
+		}
+		if err != gorm.ErrRecordNotFound {
+			log.Printf("[Error] Gagal cek user %s: %v", u.Name, err)
+			continue
+		}
+
 		user := entity.User{
 			Name:        encryptedName,
 			Email:       encryptedEmail,
@@ -158,7 +218,7 @@ func seedUsers(db *gorm.DB) {
 			Role:        u.Role,
 			IsVerified:  u.IsVerified,
 			AvatarURL:   u.AvatarURL,
-			Description: u.Description,
+			Description: encryptedDescription,
 		}
 
 		if err := db.Create(&user).Error; err != nil {

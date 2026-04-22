@@ -6,6 +6,7 @@ import (
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func requireAdmin(c *gin.Context) (entity.User, bool) {
 		return entity.User{}, false
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Access denied: Admins only",
@@ -44,6 +45,9 @@ func requireAdmin(c *gin.Context) (entity.User, bool) {
 // @Tags         Course Category
 // @Produce      json
 // @Security     BearerAuth
+// @Param        page      query  int     false  "Page number (default: 1)"
+// @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
+// @Param        name      query  string  false  "Search by category name"
 // @Success      200  {object}  map[string]any  "Course categories retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
@@ -55,7 +59,41 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 	}
 
 	var categories []entity.CourseCategory
-	if err := database.DB.Order("created_at DESC").Find(&categories).Error; err != nil {
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+	nameFilter := strings.TrimSpace(c.Query("name"))
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	db := database.DB.Model(&entity.CourseCategory{})
+	if nameFilter != "" {
+		db = db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count course categories",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	offset := (page - 1) * perPage
+	if err := db.Preload("Courses").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve course categories",
@@ -65,10 +103,33 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 		return
 	}
 
+	data := make([]gin.H, 0, len(categories))
+	for _, category := range categories {
+		data = append(data, gin.H{
+			"uid":         category.Uid,
+			"name":        category.Name,
+			"description": category.Description,
+			"is_active":   category.IsActive,
+			"created_at":  category.CreatedAt,
+			"updated_at":  category.UpdatedAt,
+			"courses":     category.Courses,
+		})
+	}
+
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course categories retrieved successfully",
-		"data":    categories,
+		"data": gin.H{
+			"course_categories": data,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
 		"error":   nil,
 	})
 }
@@ -336,15 +397,18 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all class types (Admin Only)
-// @Description  Retrieve all class types. Admin only.
-// @Tags         Class Type
+// @Summary      Get all course types (Admin Only)
+// @Description  Retrieve all course types. Admin only.
+// @Tags         Course Type
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  map[string]any  "Class types retrieved successfully"
+// @Param        page      query  int     false  "Page number (default: 1)"
+// @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
+// @Param        name      query  string  false  "Search by course type name"
+// @Success      200  {object}  map[string]any  "Course types retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
-// @Failure      500  {object}  map[string]any  "Failed to retrieve class types"
+// @Failure      500  {object}  map[string]any  "Failed to retrieve course types"
 // @Router       /class-types [get]
 func GetAllClassTypesFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
@@ -352,35 +416,92 @@ func GetAllClassTypesFunc(c *gin.Context) {
 	}
 
 	var classTypes []entity.ClassType
-	if err := database.DB.Order("created_at DESC").Find(&classTypes).Error; err != nil {
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+	nameFilter := strings.TrimSpace(c.Query("name"))
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	db := database.DB.Model(&entity.ClassType{})
+	if nameFilter != "" {
+		db = db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to retrieve class types",
+			"message": "Failed to count course types",
 			"data":    nil,
 			"error":   err.Error(),
 		})
 		return
 	}
 
+	offset := (page - 1) * perPage
+	if err := db.Preload("Courses").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&classTypes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve course types",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	data := make([]gin.H, 0, len(classTypes))
+	for _, classType := range classTypes {
+		data = append(data, gin.H{
+			"uid":         classType.Uid,
+			"name":        classType.Name,
+			"description": classType.Description,
+			"is_active":   classType.IsActive,
+			"created_at":  classType.CreatedAt,
+			"updated_at":  classType.UpdatedAt,
+			"courses":     classType.Courses,
+		})
+	}
+
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Class types retrieved successfully",
-		"data":    classTypes,
+		"message": "Course types retrieved successfully",
+		"data": gin.H{
+			"course_types": data,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
 		"error":   nil,
 	})
 }
 
-// @Summary      Get class type by ID (Admin Only)
-// @Description  Retrieve a specific class type by uid. Admin only.
-// @Tags         Class Type
+// @Summary      Get course type by ID (Admin Only)
+// @Description  Retrieve a specific course type by uid. Admin only.
+// @Tags         Course Type
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      string  true  "Class Type UID"
-// @Success      200  {object}  map[string]any  "Class type retrieved successfully"
-// @Failure      400  {object}  map[string]any  "Invalid class type uid"
+// @Param        id   path      string  true  "Course Type UID"
+// @Success      200  {object}  map[string]any  "Course type retrieved successfully"
+// @Failure      400  {object}  map[string]any  "Invalid course type uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
-// @Failure      404  {object}  map[string]any  "Class type not found"
+// @Failure      404  {object}  map[string]any  "Course type not found"
 // @Router       /class-types/{id} [get]
 func GetClassTypeByIDFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
@@ -391,7 +512,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid class type uid",
+			"message": "Invalid course type uid",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -402,7 +523,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	if err := database.DB.First(&classType, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
-			"message": "Class type not found",
+			"message": "Course type not found",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -411,24 +532,24 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Class type retrieved successfully",
+		"message": "Course type retrieved successfully",
 		"data":    classType,
 		"error":   nil,
 	})
 }
 
-// @Summary      Create class type (Admin Only)
-// @Description  Create a new class type. Admin only.
-// @Tags         Class Type
+// @Summary      Create course type (Admin Only)
+// @Description  Create a new course type. Admin only.
+// @Tags         Course Type
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        body  body  dto.CreateClassTypeRequest  true  "Class type data"
-// @Success      201  {object}  map[string]any  "Class type created successfully"
+// @Param        body  body  dto.CreateClassTypeRequest  true  "Course type data"
+// @Success      201  {object}  map[string]any  "Course type created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request body"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
-// @Failure      500  {object}  map[string]any  "Failed to create class type"
+// @Failure      500  {object}  map[string]any  "Failed to create course type"
 // @Router       /class-types [post]
 func PostAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
@@ -469,7 +590,7 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 	if err := database.DB.Create(&classType).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to create class type",
+			"message": "Failed to create course type",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -478,26 +599,26 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
-		"message": "Class type created successfully",
+		"message": "Course type created successfully",
 		"data":    classType,
 		"error":   nil,
 	})
 }
 
-// @Summary      Update class type (Admin Only)
-// @Description  Update existing class type by uid. Admin only.
-// @Tags         Class Type
+// @Summary      Update course type (Admin Only)
+// @Description  Update existing course type by uid. Admin only.
+// @Tags         Course Type
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id    path  string                      true  "Class Type UID"
-// @Param        body  body  dto.UpdateClassTypeRequest  true  "Class type data"
-// @Success      200  {object}  map[string]any  "Class type updated successfully"
+// @Param        id    path  string                      true  "Course Type UID"
+// @Param        body  body  dto.UpdateClassTypeRequest  true  "Course type data"
+// @Success      200  {object}  map[string]any  "Course type updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
-// @Failure      404  {object}  map[string]any  "Class type not found"
-// @Failure      500  {object}  map[string]any  "Failed to update class type"
+// @Failure      404  {object}  map[string]any  "Course type not found"
+// @Failure      500  {object}  map[string]any  "Failed to update course type"
 // @Router       /class-types/{id} [put]
 func UpdateAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
@@ -508,7 +629,7 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid class type uid",
+			"message": "Invalid course type uid",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -519,7 +640,7 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 	if err := database.DB.First(&classType, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
-			"message": "Class type not found",
+			"message": "Course type not found",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -560,7 +681,7 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 	if err := database.DB.Save(&classType).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to update class type",
+			"message": "Failed to update course type",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -569,24 +690,24 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Class type updated successfully",
+		"message": "Course type updated successfully",
 		"data":    classType,
 		"error":   nil,
 	})
 }
 
-// @Summary      Delete class type (Admin Only)
-// @Description  Delete class type by uid. Admin only.
-// @Tags         Class Type
+// @Summary      Delete course type (Admin Only)
+// @Description  Delete course type by uid. Admin only.
+// @Tags         Course Type
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      string  true  "Class Type UID"
-// @Success      200  {object}  map[string]any  "Class type deleted successfully"
-// @Failure      400  {object}  map[string]any  "Invalid class type uid"
+// @Param        id   path      string  true  "Course Type UID"
+// @Success      200  {object}  map[string]any  "Course type deleted successfully"
+// @Failure      400  {object}  map[string]any  "Invalid course type uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Admins only"
-// @Failure      404  {object}  map[string]any  "Class type not found"
-// @Failure      500  {object}  map[string]any  "Failed to delete class type"
+// @Failure      404  {object}  map[string]any  "Course type not found"
+// @Failure      500  {object}  map[string]any  "Failed to delete course type"
 // @Router       /class-types/{id} [delete]
 func DeleteAdminClassTypeFunc(c *gin.Context) {
 	if _, ok := requireAdmin(c); !ok {
@@ -597,7 +718,7 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid class type uid",
+			"message": "Invalid course type uid",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -608,7 +729,7 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 	if err := database.DB.First(&classType, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
-			"message": "Class type not found",
+			"message": "Course type not found",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -618,7 +739,7 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 	if err := database.DB.Delete(&classType).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to delete class type",
+			"message": "Failed to delete course type",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -627,7 +748,7 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Class type deleted successfully",
+		"message": "Course type deleted successfully",
 		"data":    nil,
 		"error":   nil,
 	})

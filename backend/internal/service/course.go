@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 var slugInvalidChars = regexp.MustCompile(`[^a-z0-9-]+`)
@@ -80,7 +81,7 @@ func parseWhatYouLearn(c *gin.Context) (json.RawMessage, error) {
 // @Param        header           formData  string  false  "Alias for subtitle"
 // @Param        slug             formData  string  false  "Course slug (auto-generated from title when empty)"
 // @Param        category_uid     formData  string  true   "Dynamic category uid"
-// @Param        class_type_uid   formData  string  true   "Dynamic class type uid"
+// @Param        course_type_uid  formData  string  true   "Dynamic course type uid"
 // @Param        level            formData  string  true   "Course level: PEMULA | MENENGAH | LANJUTAN"
 // @Param        price            formData  number  true   "Course selling price"
 // @Param        price_strike     formData  number  false  "Displayed strike-through/original price"
@@ -110,7 +111,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Create Course Access denied: Admins only",
@@ -216,12 +217,15 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	classTypeUIDStr := strings.TrimSpace(c.PostForm("class_type_uid"))
+	classTypeUIDStr := strings.TrimSpace(c.PostForm("course_type_uid"))
+	if classTypeUIDStr == "" {
+		classTypeUIDStr = strings.TrimSpace(c.PostForm("class_type_uid"))
+	}
 	classTypeUID, err := uuid.Parse(classTypeUIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "class_type_uid is required and must be a valid UUID",
+			"message": "course_type_uid is required and must be a valid UUID",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -232,7 +236,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 	if err := database.DB.First(&classType, classTypeUID).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "class_type_uid not found",
+			"message": "course_type_uid not found",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -356,7 +360,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 // @Security     BearerAuth
 // @Param        page        query  int     false  "Page number (default: 1)"
 // @Param        per_page    query  int     false  "Items per page (default: 10, max: 100)"
-// @Param        mentor_id   query  int     false  "Filter by mentor ID"
+// @Param        mentor_id   query  string  false  "Filter by mentor UID"
 // @Param        title       query  string  false  "Search by title (case-insensitive)"
 // @Param        price       query  number  false  "Filter by exact price"
 // @Param        is_premium  query  bool    false  "Filter by premium status"
@@ -448,7 +452,11 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// Apply pagination
 	offset := (page - 1) * perPage
 	var courses []entity.Course
-	if err := db.Preload("Modules").Preload("Category").Preload("ClassType").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
+	if err := db.Preload("Modules", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).Preload("Category").Preload("ClassType").Preload("CourseMentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve courses",
@@ -482,17 +490,30 @@ func GetAllCoursesFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      int     true  "Course ID"
+// @Param        id   path      string  true  "Course UID"
 // @Success      200  {object}  map[string]any  "Course retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id} [get]
 func GetCourseByIDFunc(c *gin.Context) {
-	courseID := c.Param("id")
+	courseID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid course uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var course entity.Course
-	if err := database.DB.Preload("Modules").Preload("Category").Preload("ClassType").First(&course, courseID).Error; err != nil {
+	if err := database.DB.Preload("Modules", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).Preload("Category").Preload("ClassType").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -537,7 +558,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Update Course Status Access denied: Admins only",
@@ -547,7 +568,16 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 		return
 	}
 
-	courseID := c.Param("id")
+	courseID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid course uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var course entity.Course
 	if err := database.DB.First(&course, courseID).Error; err != nil {
@@ -585,7 +615,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path  int  true  "Course ID to enroll in"
+// @Param        id   path  string  true  "Course UID to enroll in"
 // @Success      201  {object}  map[string]any  "Successfully enrolled in course"
 // @Failure      400  {object}  map[string]any  "Already enrolled in this course"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -617,7 +647,16 @@ func JoinCourseFunc(c *gin.Context) {
 		return
 	}
 
-	courseID := c.Param("id")
+	courseID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid course uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var course entity.Course
 	if err := database.DB.First(&course, courseID).Error; err != nil {
@@ -631,7 +670,7 @@ func JoinCourseFunc(c *gin.Context) {
 	}
 
 	var existingEnrollment entity.Enrollment
-	err := database.DB.Where("user_uid = ? AND course_uid = ?", userData.Uid, course.Uid).First(&existingEnrollment).Error
+	err = database.DB.Where("user_uid = ? AND course_uid = ?", userData.Uid, course.Uid).First(&existingEnrollment).Error
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -682,7 +721,7 @@ func JoinCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Preload("User").Preload("Course").First(&enrollment, enrollment.Uid).Error; err != nil {
+	if err := database.DB.First(&enrollment, enrollment.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve enrollment",
@@ -727,9 +766,10 @@ type CourseStudentSafeItem struct {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id       path  int  true   "Course ID"
+// @Param        id       path  string  true   "Course UID"
 // @Param        page     query int  false  "Page number (default: 1)"
 // @Param        per_page query int  false  "Items per page (default: 10, max: 100)"
+// @Param        name     query string false "Search student by name"
 // @Success      200  {object}  map[string]any  "Students retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Course not found"
@@ -750,7 +790,16 @@ func GetCourseStudentsFunc(c *gin.Context) {
 		return
 	}
 
-	courseID := c.Param("id")
+	courseID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid course uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	// Verify course exists
 	var course entity.Course
@@ -767,6 +816,7 @@ func GetCourseStudentsFunc(c *gin.Context) {
 	// Parse pagination params
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
+	nameFilter := strings.TrimSpace(c.Query("name"))
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
@@ -783,11 +833,17 @@ func GetCourseStudentsFunc(c *gin.Context) {
 
 	// Count total enrollments for this course
 	var total int64
-	if err := database.DB.Table("enrollments e").
+	countQuery := database.DB.Table("enrollments e").
 		Joins("JOIN users u ON u.uid = e.user_uid").
 		Where("e.course_uid = ?", course.Uid).
-		Where("u.role = ?", entity.StudentRole).
-		Count(&total).Error; err != nil {
+		Where("u.role = ?", entity.StudentRole)
+
+	if nameFilter != "" {
+		nameLike := "%" + strings.ToLower(nameFilter) + "%"
+		countQuery = countQuery.Where("LOWER(u.name) LIKE ?", nameLike)
+	}
+
+	if err := countQuery.Count(&total).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to count students",
@@ -800,7 +856,7 @@ func GetCourseStudentsFunc(c *gin.Context) {
 	// Get paginated enrollments
 	offset := (page - 1) * perPage
 	var students []CourseStudentSafeItem
-	if err := database.DB.Table("enrollments e").
+	studentQuery := database.DB.Table("enrollments e").
 		Select(`
 			e.uid as enrollment_uid,
 			e.user_uid as student_uid,
@@ -812,7 +868,14 @@ func GetCourseStudentsFunc(c *gin.Context) {
 		`).
 		Joins("JOIN users u ON u.uid = e.user_uid").
 		Where("e.course_uid = ?", course.Uid).
-		Where("u.role = ?", entity.StudentRole).
+		Where("u.role = ?", entity.StudentRole)
+
+	if nameFilter != "" {
+		nameLike := "%" + strings.ToLower(nameFilter) + "%"
+		studentQuery = studentQuery.Where("LOWER(u.name) LIKE ?", nameLike)
+	}
+
+	if err := studentQuery.
 		Order("e.enrolled_at DESC").
 		Limit(perPage).
 		Offset(offset).
@@ -824,6 +887,12 @@ func GetCourseStudentsFunc(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	for i := range students {
+		if decryptedName, decErr := utils.Decrypt(students[i].StudentName); decErr == nil {
+			students[i].StudentName = decryptedName
+		}
 	}
 
 	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
@@ -850,15 +919,24 @@ func GetCourseStudentsFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        enrollment_id   path      int     true  "Enrollment ID"
+// @Param        enrollment_id   path      string  true  "Enrollment UID"
 // @Success      200  {object}  map[string]any  "Invoice retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Enrollment not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve invoice"
-// @Router       /enrollments/{enrollment_id}/invoice [get]
+// @Router       /invoices/{enrollment_id} [get]
 func GetEnrollmentInvoiceFunc(c *gin.Context) {
 	userID, _ := c.Get(middleware.UIDCK)
-	enrollmentID := c.Param("enrollment_id")
+	enrollmentID, err := uuid.Parse(c.Param("enrollment_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid enrollment uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	// Verify user exists
 	var userData entity.User
@@ -886,9 +964,9 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 
 	// Verify user has permission to view this invoice
 	// Only allow if user is admin, mentor of the course, or the enrolled student
-	isAuthorized := userData.Role == entity.AdminRole ||
+	isAuthorized := hasAdminAccess(userData.Role) ||
 		userData.Uid == enrollment.UserUid ||
-		(userData.Role == entity.MentorRole && enrollment.Course.MentorUid != nil && *enrollment.Course.MentorUid == userData.Uid)
+		(hasMentorAccess(userData.Role) && enrollment.Course.MentorUid != nil && *enrollment.Course.MentorUid == userData.Uid)
 
 	if !isAuthorized {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -930,9 +1008,9 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        enrollment_id   query  int     true  "Enrollment ID"
-// @Param        user_id         query  int     true  "User ID"
-// @Param        course_id       query  int     true  "Course ID"
+// @Param        enrollment_id   query  string  true  "Enrollment UID"
+// @Param        user_id         query  string  true  "User UID"
+// @Param        course_id       query  string  true  "Course UID"
 // @Success      200  {object}  map[string]any  "Invoice URL retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Missing required parameters"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -1024,7 +1102,7 @@ func GetInvoiceURLFunc(c *gin.Context) {
 		return
 	}
 
-	isAuthorized := userData.Role == entity.AdminRole ||
+	isAuthorized := hasAdminAccess(userData.Role) ||
 		userData.Uid == enrollment.UserUid
 
 	if !isAuthorized {

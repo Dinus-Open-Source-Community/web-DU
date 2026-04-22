@@ -25,10 +25,10 @@ const (
 // Model Course Migrations
 type Course struct {
 	Uid          uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
-	EventUid     *uuid.UUID `gorm:"type:uuid;index" json:"event_uid"`
-	MentorUid    *uuid.UUID `gorm:"type:uuid;index" json:"mentor_uid"`
-	CategoryUid  *uuid.UUID `gorm:"type:uuid;index" json:"category_uid"`
-	ClassTypeUid *uuid.UUID `gorm:"type:uuid;index" json:"class_type_uid"`
+	EventUid     *uuid.UUID `gorm:"type:uuid;index" json:"event_uid,omitempty"`
+	MentorUid    *uuid.UUID `gorm:"type:uuid;index" json:"mentor_uid,omitempty"`
+	CategoryUid  *uuid.UUID `gorm:"type:uuid;index" json:"category_uid,omitempty"`
+	ClassTypeUid *uuid.UUID `gorm:"type:uuid;index" json:"course_type_uid,omitempty"`
 	Title        string     `gorm:"type:varchar(200);not null" json:"title"`
 	Subtitle     string     `gorm:"type:varchar(255)" json:"subtitle"`
 
@@ -49,14 +49,14 @@ type Course struct {
 	UpdatedAt    time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Event         *Event               `gorm:"foreignKey:EventUid" json:"event"`
-	Mentor        *User                `gorm:"foreignKey:MentorUid" json:"mentor"`
-	Mentors       []User               `gorm:"many2many:course_mentors;joinForeignKey:CourseUid;joinReferences:MentorUid" json:"mentors"`
-	CourseMentors []CourseMentor       `gorm:"foreignKey:CourseUid" json:"course_mentors"`
-	Category      *CourseCategory      `gorm:"foreignKey:CategoryUid" json:"category"`
-	ClassType     *ClassType           `gorm:"foreignKey:ClassTypeUid" json:"class_type"`
-	Modules       []Module             `gorm:"foreignKey:CourseUid" json:"modules"`
-	Enrollments   []Enrollment         `gorm:"foreignKey:CourseUid" json:"enrollments"`
-	Reviews       []CourseReview       `gorm:"foreignKey:CourseUid" json:"course_reviews"`
-	Announcements []CourseAnnouncement `gorm:"foreignKey:CourseUid" json:"course_announcements"`
+	Event         *Event               `gorm:"foreignKey:EventUid" json:"event,omitempty"`
+	Mentor        *User                `gorm:"foreignKey:MentorUid" json:"mentor,omitempty"`
+	Mentors       []User               `gorm:"many2many:course_mentors;joinForeignKey:CourseUid;joinReferences:MentorUid" json:"mentors,omitempty"`
+	CourseMentors []CourseMentor       `gorm:"foreignKey:CourseUid" json:"course_mentors,omitempty"`
+	Category      *CourseCategory      `gorm:"foreignKey:CategoryUid" json:"category,omitempty"`
+	ClassType     *ClassType           `gorm:"foreignKey:ClassTypeUid" json:"course_type,omitempty"`
+	Modules       []Module             `gorm:"foreignKey:CourseUid" json:"modules,omitempty"`
+	Enrollments   []Enrollment         `gorm:"foreignKey:CourseUid" json:"enrollments,omitempty"`
+	Reviews       []CourseReview       `gorm:"foreignKey:CourseUid" json:"course_reviews,omitempty"`
+	Announcements []CourseAnnouncement `gorm:"foreignKey:CourseUid" json:"course_announcements,omitempty"`
 }

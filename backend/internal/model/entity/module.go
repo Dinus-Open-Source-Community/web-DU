@@ -15,6 +15,6 @@ type Module struct {
 	CreatedAt  time.Time `gorm:"autoCreateTime" json:"created_at"`
 
 	// Relations
-	Course  *Course  `gorm:"foreignKey:CourseUid" json:"course"`
+	Course  *Course  `gorm:"foreignKey:CourseUid" json:"-"`
 	Lessons []Lesson `gorm:"foreignKey:ModuleUid" json:"lessons"`
 }

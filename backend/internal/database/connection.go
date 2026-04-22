@@ -63,6 +63,7 @@ func ConnectDB() {
 		&entity.Enrollment{},
 		&entity.Payment{},
 		&entity.CourseReview{},
+		&entity.CourseReviewReply{},
 		&entity.CourseAnnouncement{},
 		&entity.LessonAttendance{},
 	)

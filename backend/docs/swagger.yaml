@@ -57,6 +57,13 @@ definitions:
     required:
     - name
     type: object
+  dto.CreateCourseReviewReplyRequest:
+    properties:
+      comment:
+        type: string
+    required:
+    - comment
+    type: object
   dto.CreateCourseReviewRequest:
     properties:
       comment:
@@ -173,6 +180,40 @@ definitions:
       total_fee:
         type: integer
     type: object
+  dto.LessonAssignmentUpsertRequest:
+    properties:
+      allow_file_submission:
+        type: boolean
+      allow_plain_text_submission:
+        type: boolean
+      allow_resubmit:
+        type: boolean
+      allow_rich_text_submission:
+        type: boolean
+      auto_close_after_deadline:
+        type: boolean
+      deadline_at:
+        description: RFC3339 format
+        type: string
+      instruction_attachments: {}
+      max_resubmit_count:
+        type: integer
+      quiz: {}
+      require_file_description:
+        type: boolean
+      status:
+        type: string
+      task_description: {}
+      task_type:
+        type: string
+      title:
+        type: string
+    required:
+    - deadline_at
+    - status
+    - task_type
+    - title
+    type: object
   dto.LessonAttendanceCreateRequest:
     properties:
       enrollment_uid:
@@ -208,6 +249,8 @@ definitions:
     properties:
       content:
         description: accepts any JSON value
+      content_type:
+        type: string
       end_time:
         description: RFC3339 format
         type: string
@@ -230,6 +273,8 @@ definitions:
     properties:
       content:
         description: accepts any JSON value
+      content_type:
+        type: string
       end_time:
         description: RFC3339 format
         type: string
@@ -427,12 +472,25 @@ paths:
       - User
   /class-types:
     get:
-      description: Retrieve all class types. Admin only.
+      description: Retrieve all course types. Admin only.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search by course type name
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Class types retrieved successfully
+          description: Course types retrieved successfully
           schema:
             additionalProperties: true
             type: object
@@ -447,21 +505,21 @@ paths:
             additionalProperties: true
             type: object
         "500":
-          description: Failed to retrieve class types
+          description: Failed to retrieve course types
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Get all class types (Admin Only)
+      summary: Get all course types (Admin Only)
       tags:
-      - Class Type
+      - Course Type
     post:
       consumes:
       - application/json
-      description: Create a new class type. Admin only.
+      description: Create a new course type. Admin only.
       parameters:
-      - description: Class type data
+      - description: Course type data
         in: body
         name: body
         required: true
@@ -471,7 +529,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Class type created successfully
+          description: Course type created successfully
           schema:
             additionalProperties: true
             type: object
@@ -491,20 +549,20 @@ paths:
             additionalProperties: true
             type: object
         "500":
-          description: Failed to create class type
+          description: Failed to create course type
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Create class type (Admin Only)
+      summary: Create course type (Admin Only)
       tags:
-      - Class Type
+      - Course Type
   /class-types/{id}:
     delete:
-      description: Delete class type by uid. Admin only.
+      description: Delete course type by uid. Admin only.
       parameters:
-      - description: Class Type UID
+      - description: Course Type UID
         in: path
         name: id
         required: true
@@ -513,12 +571,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: Class type deleted successfully
+          description: Course type deleted successfully
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid class type uid
+          description: Invalid course type uid
           schema:
             additionalProperties: true
             type: object
@@ -533,24 +591,24 @@ paths:
             additionalProperties: true
             type: object
         "404":
-          description: Class type not found
+          description: Course type not found
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Failed to delete class type
+          description: Failed to delete course type
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Delete class type (Admin Only)
+      summary: Delete course type (Admin Only)
       tags:
-      - Class Type
+      - Course Type
     get:
-      description: Retrieve a specific class type by uid. Admin only.
+      description: Retrieve a specific course type by uid. Admin only.
       parameters:
-      - description: Class Type UID
+      - description: Course Type UID
         in: path
         name: id
         required: true
@@ -559,12 +617,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: Class type retrieved successfully
+          description: Course type retrieved successfully
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid class type uid
+          description: Invalid course type uid
           schema:
             additionalProperties: true
             type: object
@@ -579,26 +637,26 @@ paths:
             additionalProperties: true
             type: object
         "404":
-          description: Class type not found
+          description: Course type not found
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Get class type by ID (Admin Only)
+      summary: Get course type by ID (Admin Only)
       tags:
-      - Class Type
+      - Course Type
     put:
       consumes:
       - application/json
-      description: Update existing class type by uid. Admin only.
+      description: Update existing course type by uid. Admin only.
       parameters:
-      - description: Class Type UID
+      - description: Course Type UID
         in: path
         name: id
         required: true
         type: string
-      - description: Class type data
+      - description: Course type data
         in: body
         name: body
         required: true
@@ -608,7 +666,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Class type updated successfully
+          description: Course type updated successfully
           schema:
             additionalProperties: true
             type: object
@@ -628,23 +686,36 @@ paths:
             additionalProperties: true
             type: object
         "404":
-          description: Class type not found
+          description: Course type not found
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Failed to update class type
+          description: Failed to update course type
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Update class type (Admin Only)
+      summary: Update course type (Admin Only)
       tags:
-      - Class Type
+      - Course Type
   /course-categories:
     get:
       description: Retrieve all course categories. Admin only.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search by category name
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -874,10 +945,10 @@ paths:
         in: query
         name: per_page
         type: integer
-      - description: Filter by mentor ID
+      - description: Filter by mentor UID
         in: query
         name: mentor_id
-        type: integer
+        type: string
       - description: Search by title (case-insensitive)
         in: query
         name: title
@@ -950,9 +1021,9 @@ paths:
         name: category_uid
         required: true
         type: string
-      - description: Dynamic class type uid
+      - description: Dynamic course type uid
         in: formData
-        name: class_type_uid
+        name: course_type_uid
         required: true
         type: string
       - description: 'Course level: PEMULA | MENENGAH | LANJUTAN'
@@ -1036,11 +1107,11 @@ paths:
       description: Retrieve complete information of a specific course including all
         modules
       parameters:
-      - description: Course ID
+      - description: Course UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1076,11 +1147,11 @@ paths:
       description: Allow authenticated students to enroll in a course. Creates an
         enrollment record.
       parameters:
-      - description: Course ID to enroll in
+      - description: Course UID to enroll in
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1183,11 +1254,11 @@ paths:
         with active status. Each user can only submit one review per course. Review
         comments are encrypted before storage.
       parameters:
-      - description: Course ID
+      - description: Course UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Review data
         in: body
         name: body
@@ -1230,6 +1301,67 @@ paths:
       security:
       - BearerAuth: []
       summary: Create course review (Enrolled Students Only)
+      tags:
+      - Course
+  /courses/{id}/review/{review_id}/reply:
+    post:
+      consumes:
+      - application/json
+      description: Allow assigned mentor or higher roles (admin/super admin) to post
+        replies on a course review. Multiple replies are allowed.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course Review UID
+        in: path
+        name: review_id
+        required: true
+        type: string
+      - description: Reply data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseReviewReplyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review reply created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Review not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reply to a course review (Mentor/Admin)
       tags:
       - Course
   /courses/{id}/status:
@@ -1280,14 +1412,14 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve list of all students enrolled in a specific course. Admin
-        only endpoint.
+      description: Retrieve list of all students enrolled in a specific course for
+        authenticated users. Response is sanitized and excludes sensitive user fields.
       parameters:
-      - description: Course ID
+      - description: Course UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: 'Page number (default: 1)'
         in: query
         name: page
@@ -1296,6 +1428,10 @@ paths:
         in: query
         name: per_page
         type: integer
+      - description: Search student by name
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -1306,11 +1442,6 @@ paths:
             type: object
         "401":
           description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
           schema:
             additionalProperties: true
             type: object
@@ -1326,20 +1457,20 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all enrolled students in a course (Admin Only)
+      summary: Get all enrolled students in a course (All Roles)
       tags:
       - Course
-  /enrollments/{enrollment_id}/invoice:
+  /invoices/{enrollment_id}:
     get:
       consumes:
       - application/json
       description: Retrieve or generate invoice for a specific enrollment
       parameters:
-      - description: Enrollment ID
+      - description: Enrollment UID
         in: path
         name: enrollment_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1375,21 +1506,21 @@ paths:
       description: Retrieve invoice URL by providing enrollment_id, user_id, and course_id
         as query parameters
       parameters:
-      - description: Enrollment ID
+      - description: Enrollment UID
         in: query
         name: enrollment_id
         required: true
-        type: integer
-      - description: User ID
+        type: string
+      - description: User UID
         in: query
         name: user_id
         required: true
-        type: integer
-      - description: Course ID
+        type: string
+      - description: Course UID
         in: query
         name: course_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1428,7 +1559,7 @@ paths:
       consumes:
       - application/json
       description: Retrieve paginated list of all lessons with optional module_id
-        filter. Admin only.
+        filter.
       parameters:
       - description: 'Page number (default: 1, minimum: 1)'
         in: query
@@ -1442,6 +1573,10 @@ paths:
         in: query
         name: module_id
         type: integer
+      - description: Search lesson by title
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -1456,7 +1591,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -1472,14 +1607,14 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all lessons with pagination (Admin Only)
+      summary: Get all lessons with pagination (Admin/Mentor)
       tags:
       - Lesson
     post:
       consumes:
       - application/json
-      description: Create a new lesson for a module. Admin only. Requires module_id
-        and title. Content and video_url are optional.
+      description: Create a new lesson for a module. Accessible by admin or assigned
+        mentor.
       parameters:
       - description: Lesson data with module_id, title, content
         in: body
@@ -1506,7 +1641,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -1522,25 +1657,30 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new lesson (Admin Only)
+      summary: Create new lesson (Admin/Mentor)
       tags:
       - Lesson
   /lessons/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a lesson by ID (Admin only)
+      description: Delete a lesson by ID
       parameters:
-      - description: Lesson ID
+      - description: Lesson UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Lesson deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid lesson uid
           schema:
             additionalProperties: true
             type: object
@@ -1550,7 +1690,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -1566,24 +1706,29 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete lesson (Admin Only)
+      summary: Delete lesson (Admin/Mentor)
       tags:
       - Lesson
     get:
       consumes:
       - application/json
-      description: Retrieve detailed information of a specific lesson. Admin only.
+      description: Retrieve detailed information of a specific lesson.
       parameters:
-      - description: Lesson ID
+      - description: Lesson UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Lesson retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid lesson uid
           schema:
             additionalProperties: true
             type: object
@@ -1593,7 +1738,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -1609,20 +1754,20 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get lesson by ID (Admin Only)
+      summary: Get lesson by ID (Admin/Mentor)
       tags:
       - Lesson
     put:
       consumes:
       - application/json
-      description: Update an existing lesson by ID. Admin only. All fields are optional
-        - only provided fields will be updated.
+      description: Update an existing lesson by ID. All fields are optional - only
+        provided fields will be updated.
       parameters:
-      - description: Lesson ID to update
+      - description: Lesson UID to update
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Updated lesson data (all fields optional)
         in: body
         name: request
@@ -1638,7 +1783,7 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid request data
+          description: Invalid request data or lesson uid
           schema:
             additionalProperties: true
             type: object
@@ -1648,7 +1793,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -1664,9 +1809,205 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update lesson (Admin Only)
+      summary: Update lesson (Admin/Mentor)
       tags:
       - Lesson
+  /lessons/{id}/assignment:
+    delete:
+      description: Delete assignment configuration for a lesson.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson assignment deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson assignment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete lesson assignment
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete lesson assignment (Admin/Mentor)
+      tags:
+      - Lesson Assignment
+    get:
+      description: Retrieve assignment configuration by lesson UID.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson assignment retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson assignment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve lesson assignment
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get lesson assignment (Admin/Mentor)
+      tags:
+      - Lesson Assignment
+    post:
+      consumes:
+      - application/json
+      description: Create or update assignment configuration for a lesson.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Lesson assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonAssignmentUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson assignment updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Lesson assignment created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or module not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to upsert lesson assignment
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upsert lesson assignment (Admin/Mentor)
+      tags:
+      - Lesson Assignment
+    put:
+      consumes:
+      - application/json
+      description: Update assignment configuration for a lesson.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Lesson assignment payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonAssignmentUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson assignment updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson assignment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update lesson assignment
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update lesson assignment (Admin/Mentor)
+      tags:
+      - Lesson Assignment
   /lessons/attendances:
     post:
       consumes:
@@ -1724,11 +2065,11 @@ paths:
       - application/json
       description: Delete an attendance record by ID. Admin only.
       parameters:
-      - description: Attendance ID
+      - description: Attendance UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1767,11 +2108,11 @@ paths:
       - application/json
       description: Retrieve a specific attendance record by ID. Admin only.
       parameters:
-      - description: Attendance ID
+      - description: Attendance UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1811,11 +2152,11 @@ paths:
       description: Update attendance status and note. Admin only. Can only update
         status and note, not lesson/enrollment.
       parameters:
-      - description: Attendance ID
+      - description: Attendance UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Updated attendance data
         in: body
         name: request
@@ -1866,16 +2207,16 @@ paths:
       - application/json
       description: Check if student has already checked in for a specific lesson.
       parameters:
-      - description: Lesson ID
+      - description: Lesson UID
         in: query
         name: lesson_id
         required: true
-        type: integer
-      - description: Enrollment ID
+        type: string
+      - description: Enrollment UID
         in: query
         name: enrollment_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1915,11 +2256,11 @@ paths:
       - application/json
       description: Retrieve all attendance records for a specific lesson. Admin only.
       parameters:
-      - description: Lesson ID
+      - description: Lesson UID
         in: path
         name: lesson_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1959,10 +2300,10 @@ paths:
       - application/json
       description: Get all attendance records for a student based on their enrollments.
       parameters:
-      - description: Filter by enrollment ID
+      - description: Filter by enrollment UID
         in: query
         name: enrollment_id
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -2107,60 +2448,11 @@ paths:
       summary: Get all mentors
       tags:
       - Mentor
-  /mentor/courses/{course_id}/join:
-    post:
-      consumes:
-      - application/json
-      description: Mentor confirms joining a course that has been assigned by admin.
-      parameters:
-      - description: Course UID
-        in: path
-        name: course_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Mentor joined assigned course successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid course uid
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden - mentor only or course not assigned
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Course or assignment not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Join assigned course as mentor (Mentor Only)
-      tags:
-      - Mentor
   /modules:
     post:
       consumes:
       - application/json
-      description: Create a new module in a course (Admin only)
+      description: Create a new module in a course. Accessible by admin or mentor.
       parameters:
       - description: Module data
         in: body
@@ -2182,7 +2474,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -2198,25 +2490,31 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new module (Admin Only)
+      summary: Create new module (Admin/Mentor)
       tags:
       - Module
   /modules/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a module and all its associated lessons. Admin only.
+      description: Delete a module and all its associated lessons. Accessible by admin
+        or mentor.
       parameters:
-      - description: Module ID to delete
+      - description: Module UID to delete
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Module deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid module uid
           schema:
             additionalProperties: true
             type: object
@@ -2226,7 +2524,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -2242,22 +2540,27 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete module (Admin Only)
+      summary: Delete module (Admin/Mentor)
       tags:
       - Module
     get:
       description: Retrieve a specific module with all its lessons
       parameters:
-      - description: Module ID
+      - description: Module UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Module retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid module uid
           schema:
             additionalProperties: true
             type: object
@@ -2278,19 +2581,20 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get module by ID (All Roles)
+      summary: Get Lessons By Module ID (All Roles)
       tags:
       - Module
     put:
       consumes:
       - application/json
-      description: Update an existing module's information. Admin only.
+      description: Update an existing module's information. Accessible by admin or
+        mentor.
       parameters:
-      - description: Module ID
+      - description: Module UID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Module data to update
         in: body
         name: body
@@ -2305,13 +2609,18 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "400":
+          description: Invalid module uid
+          schema:
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -2327,18 +2636,30 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update module (Admin Only)
+      summary: Update module (Admin/Mentor)
       tags:
       - Module
   /modules/course/{course_id}:
     get:
       description: Retrieve all modules for a specific course ordered by sequence
       parameters:
-      - description: Course ID
+      - description: Course UID
         in: path
         name: course_id
         required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
         type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search module by title
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -2555,8 +2876,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve detailed user data including profile, joined courses,
-        transaction history, course reviews, enrollment summary, and mentored courses.
+      description: Retrieve detailed user data by target user UID. Accessible only
+        by admin.
       parameters:
       - description: User UID
         in: path
@@ -2582,7 +2903,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - only admin or user owner
+          description: Forbidden - only admin
           schema:
             additionalProperties: true
             type: object
@@ -2598,7 +2919,41 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get user detail by ID (Admin or Self)
+      summary: Get user detail by ID (Admin only)
+      tags:
+      - User
+  /user/data:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve own detailed user data including profile, joined courses,
+        transaction history, course reviews, enrollment summary, and mentored courses.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User detail retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current authenticated user detail (Self)
       tags:
       - User
   /user/manage/{id}:
@@ -2608,11 +2963,11 @@ paths:
       description: Delete a user account permanently. Only administrators can perform
         this action. Admins cannot delete their own account.
       parameters:
-      - description: User ID to delete
+      - description: User UID to delete
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:

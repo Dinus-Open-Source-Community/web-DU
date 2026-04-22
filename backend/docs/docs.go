@@ -95,17 +95,37 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve all class types. Admin only.",
+                "description": "Retrieve all course types. Admin only.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Class Type"
+                    "Course Type"
                 ],
-                "summary": "Get all class types (Admin Only)",
+                "summary": "Get all course types (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by course type name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Class types retrieved successfully",
+                        "description": "Course types retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -126,7 +146,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to retrieve class types",
+                        "description": "Failed to retrieve course types",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -140,7 +160,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new class type. Admin only.",
+                "description": "Create a new course type. Admin only.",
                 "consumes": [
                     "application/json"
                 ],
@@ -148,12 +168,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Class Type"
+                    "Course Type"
                 ],
-                "summary": "Create class type (Admin Only)",
+                "summary": "Create course type (Admin Only)",
                 "parameters": [
                     {
-                        "description": "Class type data",
+                        "description": "Course type data",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -164,7 +184,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Class type created successfully",
+                        "description": "Course type created successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -192,7 +212,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to create class type",
+                        "description": "Failed to create course type",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -208,18 +228,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a specific class type by uid. Admin only.",
+                "description": "Retrieve a specific course type by uid. Admin only.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Class Type"
+                    "Course Type"
                 ],
-                "summary": "Get class type by ID (Admin Only)",
+                "summary": "Get course type by ID (Admin Only)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Class Type UID",
+                        "description": "Course Type UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -227,14 +247,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class type retrieved successfully",
+                        "description": "Course type retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Invalid class type uid",
+                        "description": "Invalid course type uid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -255,7 +275,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Class type not found",
+                        "description": "Course type not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -269,7 +289,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update existing class type by uid. Admin only.",
+                "description": "Update existing course type by uid. Admin only.",
                 "consumes": [
                     "application/json"
                 ],
@@ -277,19 +297,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Class Type"
+                    "Course Type"
                 ],
-                "summary": "Update class type (Admin Only)",
+                "summary": "Update course type (Admin Only)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Class Type UID",
+                        "description": "Course Type UID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Class type data",
+                        "description": "Course type data",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -300,7 +320,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class type updated successfully",
+                        "description": "Course type updated successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -328,14 +348,14 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Class type not found",
+                        "description": "Course type not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Failed to update class type",
+                        "description": "Failed to update course type",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -349,18 +369,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete class type by uid. Admin only.",
+                "description": "Delete course type by uid. Admin only.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Class Type"
+                    "Course Type"
                 ],
-                "summary": "Delete class type (Admin Only)",
+                "summary": "Delete course type (Admin Only)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Class Type UID",
+                        "description": "Course Type UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -368,14 +388,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class type deleted successfully",
+                        "description": "Course type deleted successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Invalid class type uid",
+                        "description": "Invalid course type uid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -396,14 +416,14 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Class type not found",
+                        "description": "Course type not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Failed to delete class type",
+                        "description": "Failed to delete course type",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -427,6 +447,26 @@ const docTemplate = `{
                     "Course Category"
                 ],
                 "summary": "Get all course categories (Admin Only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by category name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Course categories retrieved successfully",
@@ -768,8 +808,8 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "Filter by mentor ID",
+                        "type": "string",
+                        "description": "Filter by mentor UID",
                         "name": "mentor_id",
                         "in": "query"
                     },
@@ -881,8 +921,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Dynamic class type uid",
-                        "name": "class_type_uid",
+                        "description": "Dynamic course type uid",
+                        "name": "course_type_uid",
                         "in": "formData",
                         "required": true
                     },
@@ -1005,8 +1045,8 @@ const docTemplate = `{
                 "summary": "Get course by ID (All Roles)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID",
+                        "type": "string",
+                        "description": "Course UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1064,8 +1104,8 @@ const docTemplate = `{
                 "summary": "Join a course (Student Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID to enroll in",
+                        "type": "string",
+                        "description": "Course UID to enroll in",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1219,8 +1259,8 @@ const docTemplate = `{
                 "summary": "Create course review (Enrolled Students Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID",
+                        "type": "string",
+                        "description": "Course UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1266,6 +1306,95 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "User already reviewed this course",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{id}/review/{review_id}/reply": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allow assigned mentor or higher roles (admin/super admin) to post replies on a course review. Multiple replies are allowed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Reply to a course review (Mentor/Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Review UID",
+                        "name": "review_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reply data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCourseReviewReplyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Review reply created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Review not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1354,7 +1483,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve list of all students enrolled in a specific course. Admin only endpoint.",
+                "description": "Retrieve list of all students enrolled in a specific course for authenticated users. Response is sanitized and excludes sensitive user fields.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1364,11 +1493,11 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all enrolled students in a course (Admin Only)",
+                "summary": "Get all enrolled students in a course (All Roles)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID",
+                        "type": "string",
+                        "description": "Course UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1383,6 +1512,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Items per page (default: 10, max: 100)",
                         "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search student by name",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
@@ -1401,13 +1536,6 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
-                    "403": {
-                        "description": "Access denied: Admins only",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
                     "404": {
                         "description": "Course not found",
                         "schema": {
@@ -1417,65 +1545,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to retrieve students",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/enrollments/{enrollment_id}/invoice": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve or generate invoice for a specific enrollment",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Course"
-                ],
-                "summary": "Get course enrollment invoice (All Roles)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Enrollment ID",
-                        "name": "enrollment_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Invoice retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Enrollment not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to retrieve invoice",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1504,22 +1573,22 @@ const docTemplate = `{
                 "summary": "Get invoice URL by enrollment details (All Roles)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Enrollment ID",
+                        "type": "string",
+                        "description": "Enrollment UID",
                         "name": "enrollment_id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "User ID",
+                        "type": "string",
+                        "description": "User UID",
                         "name": "user_id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Course ID",
+                        "type": "string",
+                        "description": "Course UID",
                         "name": "course_id",
                         "in": "query",
                         "required": true
@@ -1564,6 +1633,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/invoices/{enrollment_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve or generate invoice for a specific enrollment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Get course enrollment invoice (All Roles)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Enrollment UID",
+                        "name": "enrollment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Enrollment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve invoice",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/lessons": {
             "get": {
                 "security": [
@@ -1571,7 +1699,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve paginated list of all lessons with optional module_id filter. Admin only.",
+                "description": "Retrieve paginated list of all lessons with optional module_id filter.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1581,7 +1709,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get all lessons with pagination (Admin Only)",
+                "summary": "Get all lessons with pagination (Admin/Mentor)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1599,6 +1727,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Filter by module ID",
                         "name": "module_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search lesson by title",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
@@ -1618,7 +1752,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1646,7 +1780,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new lesson for a module. Admin only. Requires module_id and title. Content and video_url are optional.",
+                "description": "Create a new lesson for a module. Accessible by admin or assigned mentor.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1656,7 +1790,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Create new lesson (Admin Only)",
+                "summary": "Create new lesson (Admin/Mentor)",
                 "parameters": [
                     {
                         "description": "Lesson data with module_id, title, content",
@@ -1691,7 +1825,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1809,15 +1943,15 @@ const docTemplate = `{
                 "summary": "Check student attendance status for a lesson (Student Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Lesson ID",
+                        "type": "string",
+                        "description": "Lesson UID",
                         "name": "lesson_id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Enrollment ID",
+                        "type": "string",
+                        "description": "Enrollment UID",
                         "name": "enrollment_id",
                         "in": "query",
                         "required": true
@@ -1882,8 +2016,8 @@ const docTemplate = `{
                 "summary": "Get all attendances for a lesson (Admin Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Lesson ID",
+                        "type": "string",
+                        "description": "Lesson UID",
                         "name": "lesson_id",
                         "in": "path",
                         "required": true
@@ -1948,8 +2082,8 @@ const docTemplate = `{
                 "summary": "Get student attendance history (Student Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Filter by enrollment ID",
+                        "type": "string",
+                        "description": "Filter by enrollment UID",
                         "name": "enrollment_id",
                         "in": "query"
                     }
@@ -1999,8 +2133,8 @@ const docTemplate = `{
                 "summary": "Get attendance by ID (Admin Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attendance ID",
+                        "type": "string",
+                        "description": "Attendance UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2063,8 +2197,8 @@ const docTemplate = `{
                 "summary": "Update attendance status and note (Admin Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attendance ID",
+                        "type": "string",
+                        "description": "Attendance UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2143,8 +2277,8 @@ const docTemplate = `{
                 "summary": "Delete attendance record (Admin Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attendance ID",
+                        "type": "string",
+                        "description": "Attendance UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2196,7 +2330,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve detailed information of a specific lesson. Admin only.",
+                "description": "Retrieve detailed information of a specific lesson.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2206,11 +2340,11 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get lesson by ID (Admin Only)",
+                "summary": "Get lesson by ID (Admin/Mentor)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Lesson ID",
+                        "type": "string",
+                        "description": "Lesson UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2224,6 +2358,13 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "400": {
+                        "description": "Invalid lesson uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -2232,7 +2373,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2260,7 +2401,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an existing lesson by ID. Admin only. All fields are optional - only provided fields will be updated.",
+                "description": "Update an existing lesson by ID. All fields are optional - only provided fields will be updated.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2270,11 +2411,11 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Update lesson (Admin Only)",
+                "summary": "Update lesson (Admin/Mentor)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Lesson ID to update",
+                        "type": "string",
+                        "description": "Lesson UID to update",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2298,7 +2439,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request data",
+                        "description": "Invalid request data or lesson uid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2312,7 +2453,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2340,7 +2481,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete a lesson by ID (Admin only)",
+                "description": "Delete a lesson by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -2350,11 +2491,11 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Delete lesson (Admin Only)",
+                "summary": "Delete lesson (Admin/Mentor)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Lesson ID",
+                        "type": "string",
+                        "description": "Lesson UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2368,6 +2509,13 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "400": {
+                        "description": "Invalid lesson uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -2376,7 +2524,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2391,6 +2539,297 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to delete lesson",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}/assignment": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve assignment configuration by lesson UID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment"
+                ],
+                "summary": "Get lesson assignment (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lesson assignment retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson assignment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve lesson assignment",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update assignment configuration for a lesson.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment"
+                ],
+                "summary": "Update lesson assignment (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson assignment payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAssignmentUpsertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lesson assignment updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson assignment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update lesson assignment",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or update assignment configuration for a lesson.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment"
+                ],
+                "summary": "Upsert lesson assignment (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson assignment payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAssignmentUpsertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lesson assignment updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "201": {
+                        "description": "Lesson assignment created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson or module not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to upsert lesson assignment",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete assignment configuration for a lesson.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment"
+                ],
+                "summary": "Delete lesson assignment (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lesson assignment deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson assignment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete lesson assignment",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2512,79 +2951,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/mentor/courses/{course_id}/join": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Mentor confirms joining a course that has been assigned by admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Mentor"
-                ],
-                "summary": "Join assigned course as mentor (Mentor Only)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Course UID",
-                        "name": "course_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Mentor joined assigned course successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid course uid",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - mentor only or course not assigned",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Course or assignment not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/mentor/{id}": {
             "get": {
                 "security": [
@@ -2658,7 +3024,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new module in a course (Admin only)",
+                "description": "Create a new module in a course. Accessible by admin or mentor.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2668,7 +3034,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Create new module (Admin Only)",
+                "summary": "Create new module (Admin/Mentor)",
                 "parameters": [
                     {
                         "description": "Module data",
@@ -2696,7 +3062,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2736,11 +3102,29 @@ const docTemplate = `{
                 "summary": "Get all modules by course (All Roles)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Course ID",
+                        "type": "string",
+                        "description": "Course UID",
                         "name": "course_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search module by title",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2789,11 +3173,11 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Get module by ID (All Roles)",
+                "summary": "Get Lessons By Module ID (All Roles)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Module ID",
+                        "type": "string",
+                        "description": "Module UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2802,6 +3186,13 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Module retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid module uid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2836,7 +3227,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an existing module's information. Admin only.",
+                "description": "Update an existing module's information. Accessible by admin or mentor.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2846,11 +3237,11 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Update module (Admin Only)",
+                "summary": "Update module (Admin/Mentor)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Module ID",
+                        "type": "string",
+                        "description": "Module UID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2873,6 +3264,13 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "400": {
+                        "description": "Invalid module uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -2881,7 +3279,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2909,7 +3307,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete a module and all its associated lessons. Admin only.",
+                "description": "Delete a module and all its associated lessons. Accessible by admin or mentor.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2919,11 +3317,11 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Delete module (Admin Only)",
+                "summary": "Delete module (Admin/Mentor)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Module ID to delete",
+                        "type": "string",
+                        "description": "Module UID to delete",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2937,6 +3335,13 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "400": {
+                        "description": "Invalid module uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -2945,7 +3350,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3239,6 +3644,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/data": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve own detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get current authenticated user detail (Self)",
+                "responses": {
+                    "200": {
+                        "description": "User detail retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/user/manage/all": {
             "get": {
                 "security": [
@@ -3347,8 +3802,8 @@ const docTemplate = `{
                 "summary": "Delete user account (Admin Only)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID to delete",
+                        "type": "string",
+                        "description": "User UID to delete",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -3618,7 +4073,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.",
+                "description": "Retrieve detailed user data by target user UID. Accessible only by admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3628,7 +4083,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get user detail by ID (Admin or Self)",
+                "summary": "Get user detail by ID (Admin only)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3661,7 +4116,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - only admin or user owner",
+                        "description": "Forbidden - only admin",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3767,6 +4222,17 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Web Development"
+                }
+            }
+        },
+        "dto.CreateCourseReviewReplyRequest": {
+            "type": "object",
+            "required": [
+                "comment"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string"
                 }
             }
         },
@@ -3933,6 +4399,54 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.LessonAssignmentUpsertRequest": {
+            "type": "object",
+            "required": [
+                "deadline_at",
+                "status",
+                "task_type",
+                "title"
+            ],
+            "properties": {
+                "allow_file_submission": {
+                    "type": "boolean"
+                },
+                "allow_plain_text_submission": {
+                    "type": "boolean"
+                },
+                "allow_resubmit": {
+                    "type": "boolean"
+                },
+                "allow_rich_text_submission": {
+                    "type": "boolean"
+                },
+                "auto_close_after_deadline": {
+                    "type": "boolean"
+                },
+                "deadline_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "instruction_attachments": {},
+                "max_resubmit_count": {
+                    "type": "integer"
+                },
+                "quiz": {},
+                "require_file_description": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_description": {},
+                "task_type": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LessonAttendanceCreateRequest": {
             "type": "object",
             "required": [
@@ -3987,6 +4501,9 @@ const docTemplate = `{
                 "content": {
                     "description": "accepts any JSON value"
                 },
+                "content_type": {
+                    "type": "string"
+                },
                 "end_time": {
                     "description": "RFC3339 format",
                     "type": "string"
@@ -4014,6 +4531,9 @@ const docTemplate = `{
             "properties": {
                 "content": {
                     "description": "accepts any JSON value"
+                },
+                "content_type": {
+                    "type": "string"
                 },
                 "end_time": {
                     "description": "RFC3339 format",

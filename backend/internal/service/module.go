@@ -6,6 +6,8 @@ import (
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -17,17 +19,29 @@ import (
 // @Tags         Module
 // @Produce      json
 // @Security     BearerAuth
-// @Param        course_id   path      int  true  "Course ID"
+// @Param        course_id   path      string  true  "Course UID"
+// @Param        page        query     int     false "Page number (default: 1)"
+// @Param        per_page    query     int     false "Items per page (default: 10, max: 100)"
+// @Param        name        query     string  false "Search module by title"
 // @Success      200  {object}  map[string]any  "Modules retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve modules"
 // @Router       /modules/course/{course_id} [get]
 func GetAllModulesFunc(c *gin.Context) {
-	courseID := c.Param("course_id")
+	courseUID, err := uuid.Parse(c.Param("course_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid course uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var course entity.Course
-	if err := database.DB.First(&course, courseID).Error; err != nil {
+	if err := database.DB.First(&course, courseUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -37,8 +51,45 @@ func GetAllModulesFunc(c *gin.Context) {
 		return
 	}
 
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+	nameFilter := strings.TrimSpace(c.Query("name"))
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	db := database.DB.Model(&entity.Module{}).Where("course_uid = ?", courseUID)
+	if nameFilter != "" {
+		db = db.Where("LOWER(title) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count modules",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	offset := (page - 1) * perPage
+
 	var modules []entity.Module
-	if err := database.DB.Where("course_uid = ?", courseID).Preload("Lessons").Order("order_index ASC").Find(&modules).Error; err != nil {
+	if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve modules",
@@ -48,30 +99,52 @@ func GetAllModulesFunc(c *gin.Context) {
 		return
 	}
 
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Modules retrieved successfully",
-		"data":    modules,
+		"data": gin.H{
+			"modules": modules,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
 		"error":   nil,
 	})
 }
 
-// @Summary      Get module by ID (All Roles)
+// @Summary      Get Lessons By Module ID (All Roles)
 // @Description  Retrieve a specific module with all its lessons
 // @Tags         Module
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      int  true  "Module ID"
+// @Param        id   path      string  true  "Module UID"
 // @Success      200  {object}  map[string]any  "Module retrieved successfully"
+// @Failure      400  {object}  map[string]any  "Invalid module uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Module not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve module"
 // @Router       /modules/{id} [get]
 func GetModuleByIDFunc(c *gin.Context) {
-	moduleID := c.Param("id")
+	moduleUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid module uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var module entity.Module
-	if err := database.DB.Preload("Lessons").First(&module, moduleID).Error; err != nil {
+	if err := database.DB.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_index ASC")
+	}).First(&module, moduleUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Module not found",
@@ -89,10 +162,10 @@ func GetModuleByIDFunc(c *gin.Context) {
 	})
 }
 
-// PostAdminModuleFunc creates a new module (Admin only)
+// PostAdminModuleFunc creates a new module (Admin/Mentor)
 //
-// @Summary      Create new module (Admin Only)
-// @Description  Create a new module in a course (Admin only)
+// @Summary      Create new module (Admin/Mentor)
+// @Description  Create a new module in a course. Accessible by admin or mentor.
 // @Tags         Module
 // @Accept       json
 // @Produce      json
@@ -100,7 +173,7 @@ func GetModuleByIDFunc(c *gin.Context) {
 // @Param        body  body  dto.CreateModuleRequest  true  "Module data"
 // @Success      201  {object}  map[string]any  "Module created successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Course not found or User not found"
 // @Failure      500  {object}  map[string]any  "Failed to create module"
 // @Router       /modules [post]
@@ -118,10 +191,10 @@ func PostAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Create Module Access denied: Admins only",
+			"message": "Create Module Access denied",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -174,19 +247,20 @@ func PostAdminModuleFunc(c *gin.Context) {
 	})
 }
 
-// UpdateAdminModuleFunc updates a module (Admin only)
+// UpdateAdminModuleFunc updates a module (Admin/Mentor)
 //
-// @Summary      Update module (Admin Only)
-// @Description  Update an existing module's information. Admin only.
+// @Summary      Update module (Admin/Mentor)
+// @Description  Update an existing module's information. Accessible by admin or mentor.
 // @Tags         Module
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id    path  int  true  "Module ID"
+// @Param        id    path  string  true  "Module UID"
 // @Param        body  body  dto.UpdateModuleRequest  true  "Module data to update"
 // @Success      200  {object}  map[string]any  "Module updated successfully"
+// @Failure      400  {object}  map[string]any  "Invalid module uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Module or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to update module"
 // @Router       /modules/{id} [put]
@@ -204,20 +278,29 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Update Module Access denied: Admins only",
+			"message": "Update Module Access denied",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	moduleID := c.Param("id")
+	moduleUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid module uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var module entity.Module
-	if err := database.DB.First(&module, moduleID).Error; err != nil {
+	if err := database.DB.First(&module, moduleUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Module not found",
@@ -263,18 +346,19 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 	})
 }
 
-// DeleteAdminModuleFunc deletes a module (Admin only)
+// DeleteAdminModuleFunc deletes a module (Admin/Mentor)
 //
-// @Summary      Delete module (Admin Only)
-// @Description  Delete a module and all its associated lessons. Admin only.
+// @Summary      Delete module (Admin/Mentor)
+// @Description  Delete a module and all its associated lessons. Accessible by admin or mentor.
 // @Tags         Module
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      int  true  "Module ID to delete"
+// @Param        id   path      string  true  "Module UID to delete"
 // @Success      200  {object}  map[string]any  "Module deleted successfully"
+// @Failure      400  {object}  map[string]any  "Invalid module uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Module or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete module"
 // @Router       /modules/{id} [delete]
@@ -292,20 +376,29 @@ func DeleteAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role != entity.AdminRole {
+	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Delete Module Access denied: Admins only",
+			"message": "Delete Module Access denied",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	moduleID := c.Param("id")
+	moduleUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid module uid",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var module entity.Module
-	if err := database.DB.First(&module, moduleID).Error; err != nil {
+	if err := database.DB.First(&module, moduleUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Module not found",

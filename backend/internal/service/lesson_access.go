@@ -48,10 +48,10 @@ func getAuthenticatedUser(c *gin.Context) (entity.User, bool) {
 }
 
 func canManageCourseByRole(user entity.User, courseUID uuid.UUID) (bool, error) {
-	if user.Role == entity.AdminRole {
+	if hasAdminAccess(user.Role) {
 		return true, nil
 	}
-	if user.Role != entity.MentorRole {
+	if !hasMentorAccess(user.Role) {
 		return false, nil
 	}
 

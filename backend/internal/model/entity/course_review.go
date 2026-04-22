@@ -15,6 +15,7 @@ type CourseReview struct {
 	Comment   string    `gorm:"type:text" json:"comment"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
-	User   *User   `gorm:"foreignKey:UserUid" json:"user"`
-	Course *Course `gorm:"foreignKey:CourseUid" json:"course"`
+	User    *User               `gorm:"foreignKey:UserUid" json:"user"`
+	Course  *Course             `gorm:"foreignKey:CourseUid" json:"course"`
+	Replies []CourseReviewReply `gorm:"foreignKey:CourseReviewUid" json:"replies,omitempty"`
 }

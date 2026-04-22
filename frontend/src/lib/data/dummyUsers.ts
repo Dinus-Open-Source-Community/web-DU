@@ -37,7 +37,7 @@ export const dummyUsers: DummyUser[] = listUsers()
  * Ubah nilai ini untuk berganti role aktif saat development.
  * Harus cocok dengan salah satu `id` di `dummyUsers`.
  */
-export const ACTIVE_USER_ID: string = 'usr-admin-01'
+export const ACTIVE_USER_ID: string = 'usr-mentor-01'
 
 export function getActiveUser(): DummyUser {
   const found = dummyUsers.find((u) => u.id === ACTIVE_USER_ID)
