@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUser } from '@/hooks/useUser'
 import { useGuestSession } from '@/hooks/useGuestSession'
-import type { UserRole } from '@/lib/data/dummyUsers'
+import type { UserRole } from '@/lib/auth/session'
 import { adminNavigation, flattenNavItems, mentorNavigation, studentNavigation } from '@/lib/navigation'
 
 const navLinks = [
@@ -107,7 +107,7 @@ export default function Navbar() {
                     {user.avatar ? <AvatarImage src={user.avatar} alt={user.nama} /> : null}
                     <AvatarFallback className="bg-white/25 text-xs font-bold text-white">{userInitials(user.nama)}</AvatarFallback>
                   </Avatar>
-                  <span className="max-w-[140px] truncate text-left text-sm font-medium">{user.nama}</span>
+                  <span className="max-w-35 truncate text-left text-sm font-medium">{user.nama}</span>
                   <ChevronDown className="size-4 shrink-0 opacity-80" aria-hidden />
                 </button>
               </DropdownMenuTrigger>

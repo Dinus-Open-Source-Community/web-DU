@@ -1,12 +1,25 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
-import { getResumeCourses, listCourses } from '@/lib/data/repository'
-import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { SegmentedFilter } from '@/components/ui/SegmentedFilter'
+import type { BadgeVariant } from '@/lib/types'
+
+type LearningCourse = {
+  title: string
+  description?: string
+  image: string
+  variantBadge?: BadgeVariant
+  author?: { name: string; avatar: string }
+  rating?: number
+  totalReviews?: number
+  module?: string
+  courseUid?: string
+  simulatedProgress: number
+  type: 'resume' | 'course'
+}
 
 const filters = ['Semua', 'Sedang Berjalan', 'Baru', 'Selesai'] as const
 const ITEMS_PER_PAGE = 6
@@ -21,24 +34,7 @@ const Section = () => {
     setCurrentPage(1)
   }, [activeFilter, searchApplied])
 
-  const mock = isMockDataEnabled()
-  const resumed = mock
-    ? getResumeCourses().map((c) => ({
-        ...c,
-        simulatedProgress: c.progress,
-        type: 'resume' as const,
-      }))
-    : []
-
-  const newCourses = mock
-    ? listCourses().map((c) => ({
-        ...c,
-        simulatedProgress: 0,
-        type: 'course' as const,
-      }))
-    : []
-
-  const courses = [...resumed, ...newCourses]
+  const courses: LearningCourse[] = []
 
   const filteredCourses = courses.filter((course) => {
     const q = searchApplied.trim().toLowerCase()
@@ -95,16 +91,12 @@ const Section = () => {
                   description={course.description}
                   image={course.image}
                   progress={isInProgress || course.simulatedProgress === 100 ? course.simulatedProgress : undefined}
-                  module={'module' in course ? (course as { module?: string }).module : undefined}
+                  module={course.module}
                   variantBadge={course.variantBadge}
                   author={course.author}
                   rating={course.rating}
                   totalReviews={course.totalReviews}
-                  resumeDetailHref={
-                    course.type === 'resume' && 'courseUid' in course && (course as { courseUid?: string }).courseUid
-                      ? `/student/learning/${(course as { courseUid: string }).courseUid}`
-                      : undefined
-                  }
+                  resumeDetailHref={course.type === 'resume' && course.courseUid ? `/student/learning/${course.courseUid}` : undefined}
                 />
               )
             })}

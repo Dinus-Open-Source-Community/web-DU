@@ -1,15 +1,13 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Download, Share2, Check } from 'lucide-react'
-import { listCertificates } from '@/lib/data/repository'
-import { isMockDataEnabled } from '@/lib/config/mock-data'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { FilterCheckboxPanel } from '@/components/ui/FilterCheckboxPanel'
 import Image from 'next/image'
 
-const DUMMY_CATEGORIES = ['Pengembangan Web', 'Desain UI/UX', 'Data Science & AI', 'Cybersecurity']
+const CERTIFICATE_CATEGORIES: string[] = []
 
 const ITEMS_PER_PAGE = 6
 
@@ -24,7 +22,7 @@ const Section = () => {
     setCurrentPage(1)
   }, [selectedCategories, searchQuery])
 
-  const certificateRows = isMockDataEnabled() ? listCertificates() : []
+  const certificateRows: Array<{ uid: string; title: string; courseName: string; category: string; imageUrl?: string; credentialId?: string }> = []
 
   const filteredCertificates = certificateRows.filter((cert) => {
     const q = searchQuery.trim().toLowerCase()
@@ -58,33 +56,18 @@ const Section = () => {
           <p className="text-sm font-medium text-slate-500">Lihat, unduh, dan bagikan bukti penyelesaian kursus Anda secara profesional.</p>
         </div>
 
-        <SearchForm
-          value={searchInput}
-          onChange={setSearchInput}
-          onSubmit={() => setSearchQuery(searchInput)}
-          placeholder="Cari sertifikat atau nama kursus..."
-        />
+        <SearchForm value={searchInput} onChange={setSearchInput} onSubmit={() => setSearchQuery(searchInput)} placeholder="Cari sertifikat atau nama kursus..." />
       </div>
 
       <div className="flex flex-col items-start gap-10 lg:flex-row">
-        <FilterCheckboxPanel
-          title="Kategori"
-          options={DUMMY_CATEGORIES}
-          selected={selectedCategories}
-          onToggle={toggleCategory}
-          innerClassName="border-slate-200 shadow-xs"
-        />
+        <FilterCheckboxPanel title="Kategori" options={CERTIFICATE_CATEGORIES} selected={selectedCategories} onToggle={toggleCategory} innerClassName="border-slate-200 shadow-xs" />
 
         <div className="min-w-0 flex-1">
           {filteredCertificates.length > 0 ? (
             <div className="flex flex-col gap-10">
-              <div
-                key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`}
-                className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+              <div key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                 {paginatedCertificates.map((cert) => (
-                  <div
-                    key={cert.uid}
-                    className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-colors hover:border-slate-300">
+                  <div key={cert.uid} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-colors hover:border-slate-300">
                     <div className="relative flex aspect-[4/3] w-full items-center justify-center border-b border-slate-100 bg-slate-50 p-6">
                       <Image src={cert.imageUrl || 'https://picsum.photos/seed/cert/800/600'} alt={cert.title} fill className="object-cover" />
                     </div>
@@ -104,9 +87,7 @@ const Section = () => {
                         <button
                           onClick={() => handleShare(cert.uid)}
                           className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-2 px-4 text-sm font-medium transition-colors ${
-                            copiedUid === cert.uid
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            copiedUid === cert.uid ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                           }`}>
                           {copiedUid === cert.uid ? (
                             <>
@@ -132,9 +113,7 @@ const Section = () => {
             <div className="flex flex-col items-center justify-center rounded-[2rem] border border-slate-200 bg-white py-24 text-center shadow-xs">
               <EmptyCourseIcon className="mb-6 h-40 w-40" />
               <h3 className="mb-2 text-xl font-bold text-slate-900">Ups, sertifikat tidak ditemukan</h3>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-500">
-                Kami tidak menemukan sertifikat yang sesuai dengan kata kunci atau filter kategori yang Anda pilih.
-              </p>
+              <p className="max-w-sm text-sm leading-relaxed text-slate-500">Kami tidak menemukan sertifikat yang sesuai dengan kata kunci atau filter kategori yang Anda pilih.</p>
             </div>
           )}
         </div>

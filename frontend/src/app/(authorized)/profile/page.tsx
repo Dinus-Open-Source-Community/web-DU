@@ -1,12 +1,13 @@
 'use client'
 
-import  { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Section from './_components/Section'
 import { Sidebar } from '@/components/sidebar'
+import { SidebarSessionProvider } from '@/components/sidebar/sidebar-session-context'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { useUser } from '@/hooks/useUser'
-import { toSidebarUser } from '@/lib/data/dummyUsers'
+import { toSidebarUser } from '@/lib/auth/session'
 import { clearGuestSession } from '@/lib/auth/guest-session'
 import { studentNavigation, mentorNavigation, adminNavigation } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
@@ -32,23 +33,31 @@ const Page = () => {
     }
   }, [user.role])
 
+  const sidebarSession = useMemo(
+    () => ({
+      user: toSidebarUser(user),
+      onLogout: () => {
+        clearGuestSession()
+        router.push('/auth/login')
+      },
+      onProfile: () => {
+        router.push('/profile')
+      },
+    }),
+    [user, router],
+  )
+
   return (
     <div className="min-h-screen w-full bg-[#f5f5f5]">
-      <Sidebar
-        navigation={navigationModel}
-        isOpen={isOpen}
-        onClose={close}
-        isMinimized={isMinimized}
-        onToggleMinimize={toggleMinimize}
-        user={toSidebarUser(user)}
-        onLogout={() => {
-          clearGuestSession()
-          router.push('/auth/login')
-        }}
-        onProfile={() => {
-          router.push('/profile')
-        }}
-      />
+      <SidebarSessionProvider value={sidebarSession}>
+        <Sidebar
+          navigation={navigationModel}
+          isOpen={isOpen}
+          onClose={close}
+          isMinimized={isMinimized}
+          onToggleMinimize={toggleMinimize}
+        />
+      </SidebarSessionProvider>
 
       <div className={cn('flex flex-col flex-1 transition-[margin] duration-150 ease-out', isMinimized ? 'lg:ml-20' : 'lg:ml-64')}>
         <main className="flex-1 p-6">

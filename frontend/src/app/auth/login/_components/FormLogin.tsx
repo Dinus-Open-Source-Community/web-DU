@@ -3,22 +3,34 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { GitHubIcon, GoogleIcon, LogoDu } from '@/components/ui/icons'
 import { Button } from '@/components/ui/button'
 import { GlobalInput } from '@/components/ui/GlobalInput'
-import { setGuestSession } from '@/lib/auth/guest-session'
-import { getActiveUser, ROLE_DASHBOARD_PATH } from '@/lib/data/dummyUsers'
+import { useAuth } from '@/providers/auth-provider'
 
 export default function FormLogin() {
   const router = useRouter()
+  const { signIn, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setGuestSession()
-    const u = getActiveUser()
-    router.push(ROLE_DASHBOARD_PATH[u.role])
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      const { redirectPath } = await signIn(email, password)
+      router.push(redirectPath)
+      toast.success('Login berhasil')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Login gagal')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -38,11 +50,20 @@ export default function FormLogin() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
+          onClick={startGoogleOAuth}
+          disabled={isSubmitting}>
           <GoogleIcon className="mr-2 size-5" />
           Google
         </Button>
-        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
+          disabled={isSubmitting}>
           <GitHubIcon className="mr-2 size-5" />
           GitHub
         </Button>
@@ -55,14 +76,30 @@ export default function FormLogin() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <GlobalInput label="Email" placeholder="nama@email.com" type="email" />
+        <GlobalInput
+          label="Email"
+          placeholder="nama@email.com"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isSubmitting}
+          required
+        />
         <div>
           <GlobalInput
             label="Password"
             placeholder="Masukkan password"
             type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
+            required
             rightIcon={
-              <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="text-slate-400 transition-colors hover:text-slate-600"
+                disabled={isSubmitting}>
                 {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
@@ -73,8 +110,19 @@ export default function FormLogin() {
             </Link>
           </div>
         </div>
-        <Button type="submit" className="h-12 rounded-xl text-sm font-bold">
-          Masuk
+        <Button
+          type="submit"
+          className="h-12 rounded-xl text-sm font-bold"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+              Memproses...
+            </>
+          ) : (
+            'Masuk'
+          )}
         </Button>
       </form>
     </div>

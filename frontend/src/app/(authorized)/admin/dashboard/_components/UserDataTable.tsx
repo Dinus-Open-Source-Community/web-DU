@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import QuickInsight from "./QuickInsight";
 import { Badge } from "@/components/ui/badge";
-import type { User, Role, Status } from "./types";
+import type { User, Status } from "./types";
 
 function statusVariant(
   status: Status,
@@ -45,104 +45,7 @@ function statusVariant(
   }
 }
 
-const DUMMY_USER: User[] = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarahjohnson@gmail.com",
-    avatar: "",
-    role: "Mentor",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Budi Santoso",
-    email: "budisantoso@gmail.com",
-    avatar: "",
-    role: "Student",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Rina Marlina",
-    email: "rinamarlina@gmail.com",
-    avatar: "",
-    role: "Admin",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Dian Pratiwi",
-    email: "dianpratiwi@gmail.com",
-    avatar: "",
-    role: "Mentor",
-    status: "Inactive",
-  },
-  {
-    id: 5,
-    name: "Eko Cahyono",
-    email: "ekocahyono@gmail.com",
-    avatar: "",
-    role: "Staff",
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Fitri Handayani",
-    email: "fitrihandayani@gmail.com",
-    avatar: "",
-    role: "Student",
-    status: "Pending",
-  },
-  {
-    id: 7,
-    name: "Galih Permana",
-    email: "galihpermana@gmail.com",
-    avatar: "",
-    role: "Mentor",
-    status: "Active",
-  },
-  {
-    id: 8,
-    name: "Hana Kusuma",
-    email: "hanakusuma@gmail.com",
-    avatar: "",
-    role: "Student",
-    status: "Active",
-  },
-  {
-    id: 9,
-    name: "Irfan Maulana",
-    email: "irfanmaulana@gmail.com",
-    avatar: "",
-    role: "Staff",
-    status: "Inactive",
-  },
-  {
-    id: 10,
-    name: "Joko Widodo",
-    email: "jokowidodo@gmail.com",
-    avatar: "",
-    role: "Admin",
-    status: "Active",
-  },
-  {
-    id: 11,
-    name: "Kartika Dewi",
-    email: "kartikadewi@gmail.com",
-    avatar: "",
-    role: "Mentor",
-    status: "Active",
-  },
-  {
-    id: 12,
-    name: "Luthfi Rahman",
-    email: "luthfirahman@gmail.com",
-    avatar: "",
-    role: "Student",
-    status: "Pending",
-  },
-];
+const USERS: User[] = []
 
 function UserAvatarCell({ user }: { user: User }) {
   const initials = user.name
@@ -180,7 +83,7 @@ export default function UserDataTable() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = DUMMY_USER.filter((user) => {
+  const filtered = USERS.filter((user) => {
     const matchSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase());

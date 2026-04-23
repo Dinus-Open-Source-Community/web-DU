@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { Plus_Jakarta_Sans, Poppins } from 'next/font/google'
+import { DuLoader } from '@/components/feedback/DuLoader'
 import { AppProviders } from '@/components/providers/app-providers'
 import { QueryProvider } from '@/providers/query-provider'
 import '../styles/globals.css'
@@ -53,9 +55,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${jakartaPlus.variable} font-sans antialiased`}>
-        <QueryProvider>
-          <AppProviders>{children}</AppProviders>
-        </QueryProvider>
+        <Suspense
+          fallback={
+            <div className="flex min-h-dvh items-center justify-center px-4">
+              <DuLoader size={52} label="Memuat halaman" />
+            </div>
+          }>
+          <QueryProvider>
+            <AppProviders>{children}</AppProviders>
+          </QueryProvider>
+        </Suspense>
       </body>
     </html>
   )

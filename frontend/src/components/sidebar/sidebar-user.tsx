@@ -101,7 +101,8 @@ export function SidebarUser({ isMinimized, user, onLogout, onProfile }: SidebarU
         {/* Info */}
         <div className="flex-1 text-left min-w-0">
           <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
-          <p className="text-[11px] text-slate-400 truncate">{user.role || user.email}</p>
+          <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+          <p className="text-[11px] text-slate-400 capitalize truncate">{user.role}</p>
         </div>
 
         {/* Chevron */}

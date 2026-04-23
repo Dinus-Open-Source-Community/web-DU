@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 export default function AdminFinancialAnalyticsPage() {
   const monthlyRevenue = getMonthlyRevenue12m()
   const totalRevenue12m = monthlyRevenue.reduce((acc, m) => acc + m.value, 0)
-  const lastMonth = monthlyRevenue[monthlyRevenue.length - 1].value
-  const prevMonth = monthlyRevenue[monthlyRevenue.length - 2].value
-  const momPct = ((lastMonth - prevMonth) / prevMonth) * 100
+  const lastMonth = monthlyRevenue.at(-1)?.value ?? 0
+  const prevMonth = monthlyRevenue.at(-2)?.value ?? 0
+  const momPct = prevMonth > 0 ? ((lastMonth - prevMonth) / prevMonth) * 100 : 0
 
   return (
     <div className="flex flex-col gap-6">

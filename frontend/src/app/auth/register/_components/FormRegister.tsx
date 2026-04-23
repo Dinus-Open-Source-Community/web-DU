@@ -3,31 +3,42 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { GitHubIcon, GoogleIcon, LogoDu } from '@/components/ui/icons'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { GlobalInput } from '@/components/ui/GlobalInput'
-import { GlobalSelect } from '@/components/ui/GlobalSelect'
 import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator'
-import { setGuestSession } from '@/lib/auth/guest-session'
-import { getActiveUser, ROLE_DASHBOARD_PATH } from '@/lib/data/dummyUsers'
+import { useAuth } from '@/providers/auth-provider'
 
 export default function FormRegister() {
   const router = useRouter()
+  const { signUp, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (passwordMismatch) return
-    setGuestSession()
-    const u = getActiveUser()
-    router.push(ROLE_DASHBOARD_PATH[u.role])
+    if (passwordMismatch || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      const { redirectPath } = await signUp(name, email, password)
+      router.replace(redirectPath)
+      router.refresh()
+      toast.success('Registrasi berhasil')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Registrasi gagal')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -47,11 +58,20 @@ export default function FormRegister() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
+          onClick={startGoogleOAuth}
+          disabled={isSubmitting}>
           <GoogleIcon className="mr-2 size-5" />
           Google
         </Button>
-        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
+          disabled={isSubmitting}>
           <GitHubIcon className="mr-2 size-5" />
           GitHub
         </Button>
@@ -65,20 +85,24 @@ export default function FormRegister() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <GlobalInput label="Nama Lengkap" placeholder="Nama lengkap" type="text" />
-          <GlobalSelect
-            label="Jenis Kelamin"
-            placeholder="Pilih"
-            options={[
-              { label: 'Laki-laki', value: 'male' },
-              { label: 'Perempuan', value: 'female' },
-            ]}
+          <GlobalInput
+            label="Nama Lengkap"
+            placeholder="Nama lengkap"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={isSubmitting}
+            required
           />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <GlobalInput label="Email" placeholder="nama@email.com" type="email" />
-          <GlobalInput label="Tanggal Lahir" placeholder="DD/MM/YYYY" type="date" />
+          <GlobalInput
+            label="Email"
+            placeholder="nama@email.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
+            required
+          />
         </div>
 
         <div>
@@ -88,8 +112,13 @@ export default function FormRegister() {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
             rightIcon={
-              <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="text-slate-400 transition-colors hover:text-slate-600"
+                disabled={isSubmitting}>
                 {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
@@ -104,29 +133,47 @@ export default function FormRegister() {
             type={showConfirm ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={isSubmitting}
             rightIcon={
-              <button type="button" onClick={() => setShowConfirm((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
+              <button
+                type="button"
+                onClick={() => setShowConfirm((p) => !p)}
+                className="text-slate-400 transition-colors hover:text-slate-600"
+                disabled={isSubmitting}>
                 {showConfirm ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
           />
-          {passwordMismatch && (
-            <p className="mt-1.5 text-xs font-medium text-rose-500">Password tidak cocok</p>
-          )}
+          {passwordMismatch && <p className="mt-1.5 text-xs font-medium text-rose-500">Password tidak cocok</p>}
         </div>
 
         <div className="flex items-start gap-2">
-          <Checkbox id="terms" className="mt-0.5 size-4 border-slate-300" />
+          <Checkbox id="terms" className="mt-0.5 size-4 border-slate-300" disabled={isSubmitting} />
           <label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-slate-600">
             Saya menyetujui{' '}
-            <Link href="#" className="font-semibold text-primary hover:underline">Syarat & Ketentuan</Link>
-            {' '}dan{' '}
-            <Link href="#" className="font-semibold text-primary hover:underline">Kebijakan Privasi</Link>
+            <Link href="#" className="font-semibold text-primary hover:underline">
+              Syarat & Ketentuan
+            </Link>{' '}
+            dan{' '}
+            <Link href="#" className="font-semibold text-primary hover:underline">
+              Kebijakan Privasi
+            </Link>
           </label>
         </div>
 
-        <Button type="submit" className="h-12 rounded-xl text-sm font-bold" disabled={passwordMismatch}>
-          Buat Akun
+        <Button
+          type="submit"
+          className="h-12 rounded-xl text-sm font-bold"
+          disabled={passwordMismatch || isSubmitting}
+          aria-busy={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+              Memproses...
+            </>
+          ) : (
+            'Buat Akun'
+          )}
         </Button>
       </form>
     </div>

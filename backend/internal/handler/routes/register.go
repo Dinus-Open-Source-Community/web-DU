@@ -12,8 +12,9 @@ func init() {
 }
 
 func StartRegisterRoutes(r *gin.Engine) {
-	registerGroup := r.Group("/register")
-	{
-		registerGroup.POST("/", service.PostRegisterFunc) // user registration
-	}
+	// Didaftarkan di "/register" (tanpa slash) + varian dengan slash biar
+	// aman dari 307 redirect yang memblokir preflight CORS.
+	// Lihat catatan lebih lengkap di login.go.
+	r.POST("/register", service.PostRegisterFunc)
+	r.POST("/register/", service.PostRegisterFunc)
 }

@@ -3,8 +3,6 @@ import Hero from '@/components/home/Hero'
 import GuestLayout from '../components/layout/GuestLayout'
 import Feature from '@/components/home/Feature'
 import Benefit from '@/components/home/Benefit'
-import { listCourses, getProgramFeatures } from '@/lib/data/repository'
-import { isMockDataEnabled } from '@/lib/config/mock-data'
 import Community from '@/components/home/Community'
 import { BookIcons, CertificateIcons, GlobeLearningIcon, JobIcons } from '@/components/ui/icons'
 import type { IProgramFeatures } from '@/lib/types'
@@ -39,17 +37,13 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
-  const showFixtures = isMockDataEnabled()
-  const programFeatures: IProgramFeatures[] = getProgramFeatures().map((f) => ({
-    ...f,
-    icon: featureIconMap[f.iconName] ?? null,
-  }))
+  const programFeatures: IProgramFeatures[] = []
   return (
     <section id="home" className="bg-muted w-full pt-24">
       <GuestLayout>
         <Hero />
-        <Feature Data={showFixtures ? listCourses() : []} />
-        <Benefit DataFeatures={showFixtures ? programFeatures : []} />
+        <Feature Data={[]} />
+        <Benefit DataFeatures={programFeatures} />
         <Community />
       </GuestLayout>
     </section>

@@ -12,6 +12,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
+		"http://localhost:3001",
 	}
 
 	if rawOrigins := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS")); rawOrigins != "" {

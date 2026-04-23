@@ -12,7 +12,7 @@ import { studentNavigation } from '@/lib/navigation'
 import { buildSidebarBreadcrumbs, shouldHideSidebarForPath } from '@/lib/sidebar-route'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
-import { toSidebarUser } from '@/lib/data/dummyUsers'
+import { toSidebarUser } from '@/lib/auth/session'
 import { clearGuestSession } from '@/lib/auth/guest-session'
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {

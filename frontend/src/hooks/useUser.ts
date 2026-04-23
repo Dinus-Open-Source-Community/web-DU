@@ -1,10 +1,23 @@
 'use client'
 
 import { useMemo } from 'react'
-import { getActiveUser, type DummyUser, type UserRole } from '@/lib/data/dummyUsers'
+import { useAuth } from '@/providers/auth-provider'
+import type { AuthUser, UserRole } from '@/lib/auth/session'
 
-export function useUser(): DummyUser {
-  return useMemo(() => getActiveUser(), [])
+export type { UserRole } from '@/lib/auth/session'
+
+const EMPTY_USER: AuthUser = {
+  uid: '',
+  nama: '',
+  role: 'student',
+  email: '',
+  avatar: undefined,
+}
+
+export function useUser(): AuthUser {
+  const { user } = useAuth()
+
+  return useMemo(() => user ?? EMPTY_USER, [user])
 }
 
 export function useRole(): UserRole {

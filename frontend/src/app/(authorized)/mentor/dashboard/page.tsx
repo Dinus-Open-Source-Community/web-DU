@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SuspenseLoader } from '@/components/feedback/SuspenseLoader'
 import MentorDashboardContent from './_components/MentorDashboardContent'
 
 export const metadata: Metadata = {
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function MentorDashboardPage() {
   return (
     <main>
-      <MentorDashboardContent />
+      <SuspenseLoader label="Memuat dashboard mentor">
+        <MentorDashboardContent />
+      </SuspenseLoader>
     </main>
   )
 }

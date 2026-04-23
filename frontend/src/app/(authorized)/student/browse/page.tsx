@@ -1,12 +1,12 @@
-import React from 'react'
+import { SuspenseLoader } from '@/components/feedback/SuspenseLoader'
 import Section from './_components/section'
 
-const page = () => {
+export default function StudentBrowsePage() {
   return (
     <main>
-      <Section />
+      <SuspenseLoader label="Memuat katalog kursus">
+        <Section />
+      </SuspenseLoader>
     </main>
   )
 }
-
-export default page

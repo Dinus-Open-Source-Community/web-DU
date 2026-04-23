@@ -51,6 +51,15 @@ func init() {
 
 func main() {
 	r := gin.Default()
+
+	// Matikan auto-redirect trailing slash. Default Gin = true yang bikin
+	// request `POST /login` dijawab 307 ke `/login/`. Browser menolak
+	// redirect pada preflight CORS, jadi request dari FE selalu gagal
+	// dengan error CORS walau middleware CORS-nya benar.
+	r.RedirectTrailingSlash = false
+
+	// CORS harus didaftarkan paling awal supaya ikut jalan pada semua
+	// request, termasuk preflight OPTIONS sebelum handler mana pun.
 	r.Use(middleware.CORSMiddleware())
 	r.Use(gin.Recovery())
 
