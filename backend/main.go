@@ -13,6 +13,7 @@ package main
 
 import (
 	"backend/internal/database"
+	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
@@ -50,6 +51,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	r.Use(middleware.CORSMiddleware())
 	r.Use(gin.Recovery())
 
 	// Connect to the database
