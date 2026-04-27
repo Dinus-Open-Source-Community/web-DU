@@ -1,17 +1,19 @@
 package service
 
 import (
+	"bytes"
+	"net/http"
+
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 // @Summary      Update user avatar (All Roles)
-// @Description  Upload and update authenticated user's avatar image. Only authenticated users can access this endpoint.
+// @Description  Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file is verified and re-encoded to ensure a clean image.
 // @Tags         User
 // @Accept       multipart/form-data
 // @Produce      json
@@ -42,7 +44,7 @@ func PostAvatarFunc(c *gin.Context) {
 	}
 
 	if file != nil {
-		const maxSize = 5 * 1024 * 1024 // 5MB
+		const maxSize = int64(5 * 1024 * 1024) // 5MB
 		if file.Size > maxSize {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
 				"success": false,
@@ -52,12 +54,20 @@ func PostAvatarFunc(c *gin.Context) {
 			})
 			return
 		}
-	}
-
-	if file != nil {
-		// Upload to MinIO
+		data, ext, contentType, errVal := utils.ValidateAndReencodeAvatar(file)
+		if errVal != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": errVal.Error(),
+				"data":    nil,
+				"error":   errVal.Error(),
+			})
+			return
+		}
 		bucket := utils.GetBucketAvatars()
-		url, err := utils.UploadFile(file, bucket)
+		filename := "avatar" + ext
+		var err error
+		avatarURL, err = utils.UploadFileFromReader(bytes.NewReader(data), int64(len(data)), bucket, filename, contentType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
@@ -67,7 +77,6 @@ func PostAvatarFunc(c *gin.Context) {
 			})
 			return
 		}
-		avatarURL = url
 	}
 
 	avatar := entity.User{

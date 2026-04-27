@@ -3,6 +3,7 @@ package service
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"backend/internal/database"
@@ -18,7 +19,7 @@ import (
 
 // @Summary      Assign mentors to course (Admin Only)
 // @Description  Assign one or more mentors selected by admin to a course. Course can have multiple mentors.
-// @Tags         Mentor
+// @Tags         Course
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -77,7 +78,7 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	}
 
 	var course entity.Course
-	if err := database.DB.Select("uid", "title").First(&course, courseUID).Error; err != nil {
+	if err := database.DB.Select("uid", "title", "mentor_uid").First(&course, courseUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -119,10 +120,10 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	}
 
 	var mentors []entity.User
-	if err := database.DB.Where("uid IN ? AND role = ?", uniqueMentorUIDs, entity.MentorRole).Find(&mentors).Error; err != nil {
+	if err := database.DB.Where("uid IN ? AND role IN ?", uniqueMentorUIDs, []entity.UserRole{entity.MentorRole, entity.AdminRole}).Find(&mentors).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to validate mentors",
+			"message": "Failed to validate assignees",
 			"data":    nil,
 			"error":   err.Error(),
 		})
@@ -130,23 +131,23 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	}
 
 	if len(mentors) != len(uniqueMentorUIDs) {
-		validMentorMap := make(map[uuid.UUID]struct{}, len(mentors))
+		validAssigneeMap := make(map[uuid.UUID]struct{}, len(mentors))
 		for _, mentor := range mentors {
-			validMentorMap[mentor.Uid] = struct{}{}
+			validAssigneeMap[mentor.Uid] = struct{}{}
 		}
 
-		missingMentors := make([]uuid.UUID, 0)
+		missingAssignees := make([]uuid.UUID, 0)
 		for _, mentorUID := range uniqueMentorUIDs {
-			if _, ok := validMentorMap[mentorUID]; !ok {
-				missingMentors = append(missingMentors, mentorUID)
+			if _, ok := validAssigneeMap[mentorUID]; !ok {
+				missingAssignees = append(missingAssignees, mentorUID)
 			}
 		}
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Some mentors are invalid or not mentor role",
+			"message": "Some assignees are invalid. Only mentor/admin roles are allowed",
 			"data": gin.H{
-				"invalid_mentor_uids": missingMentors,
+				"invalid_mentor_uids": missingAssignees,
 			},
 			"error": nil,
 		})
@@ -190,6 +191,7 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 			"uid":   mentor.Uid,
 			"name":  name,
 			"email": email,
+			"role":  mentor.Role,
 		})
 	}
 
@@ -204,32 +206,53 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all mentors
-// @Description  Retrieve all mentor users with teaching summaries.
-// @Tags         Mentor
+// @Summary      Get mentors by course ID (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve mentors assigned to a specific course.
+// @Tags         Course
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
-// @Param        page      query  int  false  "Page number (default: 1)"
-// @Param        per_page  query  int  false  "Items per page (default: 10, max: 100)"
+// @Param        id   path      string  true  "Course UID"
+// @Param        page      query  int     false  "Page number (default: 1)"
+// @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
+// @Param        name      query  string  false  "Search mentor/admin by name"
 // @Success      200  {object}  map[string]any  "Mentors retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      400  {object}  map[string]any  "Invalid course uid"
+// @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /mentor/all [get]
-func GetAllMentorsFunc(c *gin.Context) {
-	_, exists := c.Get(middleware.UIDCK)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
+// @Router       /courses/{id}/mentor [get]
+func GetCourseMentorsByCourseIDFunc(c *gin.Context) {
+	courseUID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Unauthorized",
+			"message": "Invalid course uid",
 			"data":    nil,
-			"error":   "user_id not found in context",
+			"error":   err.Error(),
 		})
 		return
 	}
 
+	var course entity.Course
+	if err := database.DB.Select("uid", "title", "mentor_uid").First(&course, courseUID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	type mentorAssignmentRow struct {
+		MentorUID  uuid.UUID                 `gorm:"column:mentor_uid"`
+		Status     entity.CourseMentorStatus `gorm:"column:status"`
+		JoinedAt   *time.Time                `gorm:"column:joined_at"`
+		AssignedAt time.Time                 `gorm:"column:assigned_at"`
+	}
+
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
+	nameFilter := strings.ToLower(strings.TrimSpace(c.Query("name")))
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
@@ -246,52 +269,36 @@ func GetAllMentorsFunc(c *gin.Context) {
 		perPage = maxPerPage
 	}
 
-	db := database.DB.Model(&entity.User{}).Where("role = ?", entity.MentorRole)
-
-	var total int64
-	if err := db.Count(&total).Error; err != nil {
+	var assignmentRows []mentorAssignmentRow
+	if err := database.DB.Table("course_mentors AS cm").
+		Select("cm.mentor_uid, cm.status, cm.joined_at, cm.created_at as assigned_at").
+		Where("cm.course_uid = ?", courseUID).
+		Order("cm.created_at ASC").
+		Scan(&assignmentRows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to count mentors",
+			"message": "Failed to retrieve course mentors",
 			"data":    nil,
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	offset := (page - 1) * perPage
+	mentorUIDs := make([]uuid.UUID, 0, len(assignmentRows))
+	for _, row := range assignmentRows {
+		mentorUIDs = append(mentorUIDs, row.MentorUID)
+	}
+
+	if course.MentorUid != nil {
+		mentorUIDs = append(mentorUIDs, *course.MentorUid)
+	}
+
 	var mentors []entity.User
-	if err := db.Order("created_at DESC").Limit(perPage).Offset(offset).Find(&mentors).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve mentors",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	type mentorSummaryRow struct {
-		MentorUID uuid.UUID `gorm:"column:mentor_uid"`
-		Assigned  int       `gorm:"column:assigned_courses"`
-		Joined    int       `gorm:"column:joined_courses"`
-	}
-
-	mentorUIDs := make([]uuid.UUID, 0, len(mentors))
-	for _, mentor := range mentors {
-		mentorUIDs = append(mentorUIDs, mentor.Uid)
-	}
-
-	summaryRows := make([]mentorSummaryRow, 0)
 	if len(mentorUIDs) > 0 {
-		if err := database.DB.Table("course_mentors").
-			Select("mentor_uid, COUNT(*) as assigned_courses, SUM(CASE WHEN status = 'joined' THEN 1 ELSE 0 END) as joined_courses").
-			Where("mentor_uid IN ?", mentorUIDs).
-			Group("mentor_uid").
-			Scan(&summaryRows).Error; err != nil {
+		if err := database.DB.Where("uid IN ? AND role IN ?", mentorUIDs, []entity.UserRole{entity.MentorRole, entity.AdminRole}).Find(&mentors).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
-				"message": "Failed to retrieve mentor summaries",
+				"message": "Failed to retrieve mentor details",
 				"data":    nil,
 				"error":   err.Error(),
 			})
@@ -299,18 +306,120 @@ func GetAllMentorsFunc(c *gin.Context) {
 		}
 	}
 
-	summaryMap := make(map[uuid.UUID]mentorSummaryRow, len(summaryRows))
+	mentorResponseByUID := make(map[uuid.UUID]gin.H, len(mentors))
+	for _, mentor := range mentors {
+		mentorResponseByUID[mentor.Uid] = userToMentorResponse(mentor)
+	}
+
+	results := make([]gin.H, 0, len(assignmentRows)+1)
+	seenMentor := make(map[uuid.UUID]struct{}, len(assignmentRows))
+	for _, row := range assignmentRows {
+		mentorData, ok := mentorResponseByUID[row.MentorUID]
+		if !ok {
+			continue
+		}
+		seenMentor[row.MentorUID] = struct{}{}
+
+		mentorData["assignment"] = gin.H{
+			"status":      row.Status,
+			"assigned_at": row.AssignedAt,
+			"joined_at":   row.JoinedAt,
+		}
+		results = append(results, mentorData)
+	}
+
+	// Backward compatibility: include legacy mentor from courses.mentor_uid when
+	// there is no assignment row in course_mentors for that mentor yet.
+	if course.MentorUid != nil {
+		if _, exists := seenMentor[*course.MentorUid]; !exists {
+			var legacyMentor entity.User
+			if err := database.DB.Where("uid = ? AND role IN ?", *course.MentorUid, []entity.UserRole{entity.MentorRole, entity.AdminRole}).First(&legacyMentor).Error; err == nil {
+				mentorData := userToMentorResponse(legacyMentor)
+				mentorData["assignment"] = gin.H{
+					"status":      nil,
+					"assigned_at": nil,
+					"joined_at":   nil,
+				}
+				results = append(results, mentorData)
+			}
+		}
+	}
+
+	if nameFilter != "" {
+		filtered := make([]gin.H, 0, len(results))
+		for _, mentor := range results {
+			name, _ := mentor["name"].(string)
+			if strings.Contains(strings.ToLower(name), nameFilter) {
+				filtered = append(filtered, mentor)
+			}
+		}
+		results = filtered
+	}
+
+	total := len(results)
+	offset := (page - 1) * perPage
+	if offset > total {
+		offset = total
+	}
+	end := offset + perPage
+	if end > total {
+		end = total
+	}
+	pagedResults := results[offset:end]
+	totalPages := 0
+	if total > 0 {
+		totalPages = (total + perPage - 1) / perPage
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Course mentors retrieved successfully",
+		"data": gin.H{
+			"course_uid":   course.Uid,
+			"course_title": course.Title,
+			"mentors":      pagedResults,
+			"meta": gin.H{
+				"total":        total,
+				"per_page":     perPage,
+				"current_page": page,
+				"total_pages":  totalPages,
+			},
+		},
+		"error": nil,
+	})
+}
+
+type mentorCourseSummaryRow struct {
+	MentorUID uuid.UUID `gorm:"column:mentor_uid"`
+	Assigned  int       `gorm:"column:assigned_courses"`
+	Joined    int       `gorm:"column:joined_courses"`
+}
+
+func mentorListToGinH(mentors []entity.User) ([]gin.H, error) {
+	mentorUIDs := make([]uuid.UUID, 0, len(mentors))
+	for _, m := range mentors {
+		mentorUIDs = append(mentorUIDs, m.Uid)
+	}
+	summaryRows := make([]mentorCourseSummaryRow, 0)
+	if len(mentorUIDs) > 0 {
+		if err := database.DB.Table("course_mentors").
+			Select("mentor_uid, COUNT(*) as assigned_courses, SUM(CASE WHEN status = 'joined' THEN 1 ELSE 0 END) as joined_courses").
+			Where("mentor_uid IN ?", mentorUIDs).
+			Group("mentor_uid").
+			Scan(&summaryRows).Error; err != nil {
+			return nil, err
+		}
+	}
+	summaryMap := make(map[uuid.UUID]mentorCourseSummaryRow, len(summaryRows))
 	for _, row := range summaryRows {
 		summaryMap[row.MentorUID] = row
 	}
-
 	result := make([]gin.H, 0, len(mentors))
 	for _, mentor := range mentors {
 		name, _ := utils.Decrypt(mentor.Name)
 		email, _ := utils.Decrypt(mentor.Email)
 		description, _ := utils.Decrypt(mentor.Description)
 		summary := summaryMap[mentor.Uid]
-
 		result = append(result, gin.H{
 			"uid":                  mentor.Uid,
 			"name":                 name,
@@ -324,8 +433,110 @@ func GetAllMentorsFunc(c *gin.Context) {
 			"joined_teach_courses": summary.Joined,
 		})
 	}
+	return result, nil
+}
 
-	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+// @Summary      Get all mentors (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve all mentor users with teaching summaries. Optional `name` filters by mentor display name (decrypted, case-insensitive, in-memory).
+// @Tags         Mentor
+// @Accept       json
+// @Produce      json
+// @Param        page      query  int     false  "Page number (default: 1)"
+// @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
+// @Param        name      query  string  false  "Filter mentors whose name contains this substring (case-insensitive)"
+// @Success      200  {object}  map[string]any  "Mentors retrieved successfully"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /mentor/all [get]
+func GetAllMentorsFunc(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("per_page", "10")
+	nameQuery := strings.TrimSpace(c.Query("name"))
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		perPage = 10
+	}
+
+	const maxPerPage = 100
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	var (
+		mentors []entity.User
+		total   int64
+	)
+	if nameQuery == "" {
+		db := database.DB.Model(&entity.User{}).Where("role = ?", entity.MentorRole)
+		if err := db.Count(&total).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to count mentors",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		offset := (page - 1) * perPage
+		if err := db.Order("created_at DESC").Limit(perPage).Offset(offset).Find(&mentors).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve mentors",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+	} else {
+		var allMentors []entity.User
+		if err := database.DB.Model(&entity.User{}).Where("role = ?", entity.MentorRole).Order("created_at DESC").Find(&allMentors).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve mentors",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		needle := strings.ToLower(nameQuery)
+		filtered := make([]entity.User, 0, len(allMentors))
+		for _, m := range allMentors {
+			n, _ := utils.Decrypt(m.Name)
+			if strings.Contains(strings.ToLower(n), needle) {
+				filtered = append(filtered, m)
+			}
+		}
+		n := int64(len(filtered))
+		total = n
+		start := (page - 1) * perPage
+		if int64(start) < n {
+			end := start + perPage
+			if end > len(filtered) {
+				end = len(filtered)
+			}
+			mentors = filtered[start:end]
+		}
+	}
+
+	result, err := mentorListToGinH(mentors)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve mentor summaries",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	var totalPages int
+	if total > 0 {
+		totalPages = int((total + int64(perPage) - 1) / int64(perPage))
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -343,31 +554,18 @@ func GetAllMentorsFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get mentor detail by ID
-// @Description  Retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.
+// @Summary      Get mentor detail by ID (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.
 // @Tags         Mentor
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
 // @Param        id   path      string  true  "Mentor UID"
 // @Success      200  {object}  map[string]any  "Mentor detail retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Invalid mentor uid"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Mentor not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /mentor/{id} [get]
 func GetMentorDetailFunc(c *gin.Context) {
-	_, exists := c.Get(middleware.UIDCK)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Unauthorized",
-			"data":    nil,
-			"error":   "user_id not found in context",
-		})
-		return
-	}
-
 	mentorUID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

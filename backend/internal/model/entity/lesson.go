@@ -30,7 +30,7 @@ type Lesson struct {
 	UpdatedAt   time.Time         `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relations
-	Module     *Module           `gorm:"foreignKey:ModuleUid" json:"module"`
+	Module     *Module           `gorm:"foreignKey:ModuleUid" json:"-"`
 	Assignment *LessonAssignment `gorm:"foreignKey:LessonUid" json:"assignment,omitempty"`
 }
 

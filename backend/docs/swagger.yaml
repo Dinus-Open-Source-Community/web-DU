@@ -255,6 +255,7 @@ definitions:
         description: RFC3339 format
         type: string
       module_uid:
+        format: uuid
         type: string
       order_index:
         type: integer
@@ -279,6 +280,7 @@ definitions:
         description: RFC3339 format
         type: string
       module_uid:
+        format: uuid
         type: string
       order_index:
         type: integer
@@ -424,8 +426,8 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Upload and update authenticated user's avatar image. Only authenticated
-        users can access this endpoint.
+      description: Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file
+        is verified and re-encoded to ensure a clean image.
       parameters:
       - description: 'Avatar image file (max 5MB, supported: JPG, PNG, GIF)'
         in: formData
@@ -472,7 +474,7 @@ paths:
       - User
   /course-categories:
     get:
-      description: Retrieve all course categories. Admin only.
+      description: Public endpoint to retrieve all course categories.
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -494,24 +496,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
         "500":
           description: Failed to retrieve course categories
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get all course categories (Admin Only)
+      summary: Get all course categories (All Roles - Anonymous User)
       tags:
       - Course Category
     post:
@@ -606,7 +596,7 @@ paths:
       tags:
       - Course Category
     get:
-      description: Retrieve a specific course category by uid. Admin only.
+      description: Public endpoint to retrieve a specific course category by uid.
       parameters:
       - description: Course Category UID
         in: path
@@ -626,24 +616,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
         "404":
           description: Course category not found
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get course category by ID (Admin Only)
+      summary: Get course category by ID (All Roles - Anonymous User)
       tags:
       - Course Category
     put:
@@ -702,7 +680,7 @@ paths:
       - Course Category
   /course-types:
     get:
-      description: Retrieve all course types. Admin only.
+      description: Public endpoint to retrieve all course types.
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -724,24 +702,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
         "500":
           description: Failed to retrieve course types
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get all course types (Admin Only)
+      summary: Get all course types (All Roles - Anonymous User)
       tags:
       - Course Type
     post:
@@ -836,7 +802,7 @@ paths:
       tags:
       - Course Type
     get:
-      description: Retrieve a specific course type by uid. Admin only.
+      description: Public endpoint to retrieve a specific course type by uid.
       parameters:
       - description: Course Type UID
         in: path
@@ -856,24 +822,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 'Access denied: Admins only'
-          schema:
-            additionalProperties: true
-            type: object
         "404":
           description: Course type not found
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get course type by ID (Admin Only)
+      summary: Get course type by ID (All Roles - Anonymous User)
       tags:
       - Course Type
     put:
@@ -969,24 +923,13 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties: true
-            type: object
         "500":
           description: Failed to retrieve courses
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get all courses with pagination and filters (All Roles)
+      summary: Get all courses with pagination and filters (All Roles - Anonymous
+        User)
       tags:
       - Course
     post:
@@ -1120,11 +1063,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
         "404":
           description: Course not found
           schema:
@@ -1135,9 +1073,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get course by ID (All Roles)
+      summary: Get course by ID (All Roles - Anonymous User)
       tags:
       - Course
   /courses/{id}/join:
@@ -1188,6 +1124,55 @@ paths:
       security:
       - BearerAuth: []
       summary: Join a course (Student Only)
+      tags:
+      - Course
+  /courses/{id}/mentor:
+    get:
+      consumes:
+      - application/json
+      description: Public endpoint to retrieve mentors assigned to a specific course.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search mentor/admin by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentors retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course uid
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get mentors by course ID (All Roles - Anonymous User)
       tags:
       - Course
   /courses/{id}/mentors/assign:
@@ -1245,7 +1230,7 @@ paths:
       - BearerAuth: []
       summary: Assign mentors to course (Admin Only)
       tags:
-      - Mentor
+      - Course
   /courses/{id}/review:
     post:
       consumes:
@@ -1412,8 +1397,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve list of all students enrolled in a specific course for
-        authenticated users. Response is sanitized and excludes sensitive user fields.
+      description: Retrieve list of all students enrolled in a specific course. Response
+        is sanitized and excludes sensitive user fields.
       parameters:
       - description: Course UID
         in: path
@@ -1440,11 +1425,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
         "404":
           description: Course not found
           schema:
@@ -1455,9 +1435,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get all enrolled students in a course (All Roles)
+      summary: Get all enrolled students in a course (All Roles - Anonymous User)
       tags:
       - Course
   /invoices/{enrollment_id}:
@@ -1504,7 +1482,8 @@ paths:
       consumes:
       - application/json
       description: Retrieve invoice URL by providing enrollment_id, user_id, and course_id
-        as query parameters
+        as query parameters. Accessible by super admin, admin, mentor, or the owner
+        (self) only.
       parameters:
       - description: Enrollment UID
         in: query
@@ -1539,6 +1518,11 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
         "404":
           description: Enrollment not found
           schema:
@@ -1551,15 +1535,15 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get invoice URL by enrollment details (All Roles)
+      summary: Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)
       tags:
       - Invoice
   /lessons:
     get:
       consumes:
       - application/json
-      description: Retrieve paginated list of all lessons with optional module_id
-        filter.
+      description: Retrieve paginated list of lessons with optional module_id filter
+        for authorized users.
       parameters:
       - description: 'Page number (default: 1, minimum: 1)'
         in: query
@@ -1569,10 +1553,10 @@ paths:
         in: query
         name: per_page
         type: integer
-      - description: Filter by module ID
+      - description: Filter by module UID
         in: query
-        name: module_id
-        type: integer
+        name: module_uid
+        type: string
       - description: Search lesson by title
         in: query
         name: name
@@ -1607,7 +1591,8 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all lessons with pagination (Admin/Mentor)
+      summary: Get all lessons with pagination (Super Admin/Admin/Mentor/Enrollment
+        User)
       tags:
       - Lesson
     post:
@@ -1616,7 +1601,7 @@ paths:
       description: Create a new lesson for a module. Accessible by admin or assigned
         mentor.
       parameters:
-      - description: Lesson data with module_id, title, content
+      - description: Lesson data with module_uid, title, content
         in: body
         name: request
         required: true
@@ -1754,7 +1739,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get lesson by ID (Admin/Mentor)
+      summary: Get lesson by ID (Super Admin/Admin/Mentor/Enrollment User)
       tags:
       - Lesson
     put:
@@ -2370,8 +2355,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve mentor detail similar to user detail including assigned
-        courses, joined teaching courses, and related course reviews.
+      description: Public endpoint to retrieve mentor detail similar to user detail
+        including assigned courses, joined teaching courses, and related course reviews.
       parameters:
       - description: Mentor UID
         in: path
@@ -2391,11 +2376,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
         "404":
           description: Mentor not found
           schema:
@@ -2406,16 +2386,16 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get mentor detail by ID
+      summary: Get mentor detail by ID (All Roles - Anonymous User)
       tags:
       - Mentor
   /mentor/all:
     get:
       consumes:
       - application/json
-      description: Retrieve all mentor users with teaching summaries.
+      description: Public endpoint to retrieve all mentor users with teaching summaries.
+        Optional `name` filters by mentor display name (decrypted, case-insensitive,
+        in-memory).
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -2425,6 +2405,10 @@ paths:
         in: query
         name: per_page
         type: integer
+      - description: Filter mentors whose name contains this substring (case-insensitive)
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -2433,19 +2417,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
         "500":
           description: Internal server error
           schema:
             additionalProperties: true
             type: object
-      security:
-      - BearerAuth: []
-      summary: Get all mentors
+      summary: Get all mentors (All Roles - Anonymous User)
       tags:
       - Mentor
   /modules:
@@ -2581,7 +2558,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get Lessons By Module ID (All Roles)
+      summary: Get module by ID (Super Admin/Admin/Mentor/Enrollment User)
       tags:
       - Module
     put:
@@ -2685,7 +2662,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all modules by course (All Roles)
+      summary: Get all modules by course (Super Admin/Admin/Mentor/Enrollment User)
       tags:
       - Module
   /oauth/google:

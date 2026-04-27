@@ -16,9 +16,9 @@ func StartUserRoutes(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	userGroup.Use(middleware.AuthMiddleware())
 	{
-		userGroup.PATCH("/profile", service.UpdateUserProfileService) // update profile - all roles
-		userGroup.PATCH("/password", service.ChangePasswordService)   // change password - all roles
-		userGroup.GET("/data", service.GetSelfUserDetailService)      // self detail - all roles
+		userGroup.PATCH("/profile", service.UpdateUserProfileService) // all roles - butuh sign in
+		userGroup.PATCH("/password", service.ChangePasswordService)   // all roles - butuh sign in
+		userGroup.GET("/data", service.GetSelfUserDetailService)      // all roles - butuh sign in
 
 		userGroup.GET("/manage/all", service.GetAllUsersService)      // Admin only
 		userGroup.PATCH("/manage/:id", service.UpdateUserRoleService) // Admin only

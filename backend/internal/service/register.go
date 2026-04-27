@@ -77,7 +77,7 @@ func PostRegisterFunc(c *gin.Context) {
 		return
 	}
 	// Generate token JWT untuk user yang berhasil login
-	// Token akan berlaku selama 24 jam sejak waktu login
+	// Token akan berlaku selama 24 jam sejak waktu register
 	expiration := time.Now().Add(24 * time.Hour)
 	token, err := middleware.GenerateJWT(newUser.EmailHash, expiration)
 	if err != nil {

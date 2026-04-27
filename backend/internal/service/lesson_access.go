@@ -74,3 +74,23 @@ func canManageCourseByRole(user entity.User, courseUID uuid.UUID) (bool, error) 
 
 	return assignmentCount > 0, nil
 }
+
+func canReadCourseByRole(user entity.User, courseUID uuid.UUID) (bool, error) {
+	if hasAdminAccess(user.Role) || user.Role == entity.MentorRole {
+		return true, nil
+	}
+
+	var enrollmentCount int64
+	err := database.DB.Model(&entity.Enrollment{}).
+		Where("user_uid = ? AND course_uid = ? AND status IN ?",
+			user.Uid,
+			courseUID,
+			[]entity.EnrollmentStatus{entity.EnrollmentPending, entity.EnrollmentActive, entity.EnrollmentCompleted},
+		).
+		Count(&enrollmentCount).Error
+	if err != nil {
+		return false, err
+	}
+
+	return enrollmentCount > 0, nil
+}

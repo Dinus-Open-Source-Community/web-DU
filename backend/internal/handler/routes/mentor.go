@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/service"
 
@@ -13,10 +12,9 @@ func init() {
 }
 
 func StartMentorRoutes(r *gin.Engine) {
-	mentorGroup := r.Group("/mentor")
-	mentorGroup.Use(middleware.AuthMiddleware())
+	publicMentorGroup := r.Group("/mentor")
 	{
-		mentorGroup.GET("/all", service.GetAllMentorsFunc)                                 // All roles
-		mentorGroup.GET("/:id", service.GetMentorDetailFunc)                               // All roles
+		publicMentorGroup.GET("/all", service.GetAllMentorsFunc)   // all roles - anonymous user
+		publicMentorGroup.GET("/:id", service.GetMentorDetailFunc) // all roles - anonymous user
 	}
 }
