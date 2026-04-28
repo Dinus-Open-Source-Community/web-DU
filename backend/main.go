@@ -17,6 +17,7 @@ import (
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -51,19 +52,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
-
-	// Middleware custom: Hilangkan trailing slash tanpa redirect
-	r.Use(func(c *gin.Context) {
-		path := c.Request.URL.Path
-		if strings.HasSuffix(path, "/") && len(path) > 1 {
-			c.Request.URL.Path = strings.TrimRight(path, "/")
-		}
-	})
-
-	// Matikan auto-redirect trailing slash. Default Gin = true yang bikin
-	// request `POST /login` dijawab 307 ke `/login/`. Browser menolak
-	// redirect pada preflight CORS, jadi request dari FE selalu gagal
-	// dengan error CORS walau middleware CORS-nya benar.
+	
 	r.RedirectTrailingSlash = false
 
 	// CORS harus didaftarkan paling awal supaya ikut jalan pada semua
@@ -103,6 +92,37 @@ func main() {
 		ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
 	})
 
+	// Karena RedirectTrailingSlash dimatikan, kita lakukan normalisasi path
+	// tanpa redirect agar frontend (CORS) tidak terganggu.
+	// Kumpulkan semua route terdaftar untuk cek cepat (hanya path yang terdaftar)
+	routeSet := make(map[string]struct{})
+	for _, ri := range r.Routes() {
+		routeSet[ri.Path] = struct{}{}
+	}
+
+	// Wrapper handler yang menormalisasi trailing slash tanpa mengembalikan 301/302
+	handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if _, ok := routeSet[req.URL.Path]; ok {
+			r.ServeHTTP(w, req)
+			return
+		}
+		alt := req.URL.Path
+		if strings.HasSuffix(alt, "/") {
+			alt = strings.TrimSuffix(alt, "/")
+		} else {
+			alt = alt + "/"
+		}
+		if _, ok := routeSet[alt]; ok {
+			req2 := req.Clone(req.Context())
+			req2.URL.Path = alt
+			r.ServeHTTP(w, req2)
+			return
+		}
+		r.ServeHTTP(w, req)
+	})
+
 	log.Println("Server running on http://localhost:8080")
-	r.Run(":8080")
+	if err := http.ListenAndServe(":8080", handler); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
 }
