@@ -52,6 +52,14 @@ func init() {
 func main() {
 	r := gin.Default()
 
+	// Middleware custom: Hilangkan trailing slash tanpa redirect
+	r.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if strings.HasSuffix(path, "/") && len(path) > 1 {
+			c.Request.URL.Path = strings.TrimRight(path, "/")
+		}
+	})
+
 	// Matikan auto-redirect trailing slash. Default Gin = true yang bikin
 	// request `POST /login` dijawab 307 ke `/login/`. Browser menolak
 	// redirect pada preflight CORS, jadi request dari FE selalu gagal
