@@ -352,12 +352,11 @@ func PostAdminCourseFunc(c *gin.Context) {
 // - price (float)         -> filter by exact price
 // - is_premium (bool)     -> filter by premium status (true/false)
 //
-// @Summary      Get all courses with pagination and filters (All Roles)
+// @Summary      Get all courses with pagination and filters (All Roles - Anonymous User)
 // @Description  Retrieve paginated list of courses with optional filters (mentor_id, title, price, is_premium)
 // @Tags         Course
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
 // @Param        page        query  int     false  "Page number (default: 1)"
 // @Param        per_page    query  int     false  "Items per page (default: 10, max: 100)"
 // @Param        mentor_id   query  string  false  "Filter by mentor UID"
@@ -365,24 +364,9 @@ func PostAdminCourseFunc(c *gin.Context) {
 // @Param        price       query  number  false  "Filter by exact price"
 // @Param        is_premium  query  bool    false  "Filter by premium status"
 // @Success      200  {object}  map[string]any  "Courses retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve courses"
 // @Router       /courses [get]
 func GetAllCoursesFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
 	// Parse query params
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
@@ -452,11 +436,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// Apply pagination
 	offset := (page - 1) * perPage
 	var courses []entity.Course
-	if err := db.Preload("Modules", func(db *gorm.DB) *gorm.DB {
-		return db.Order("order_index ASC")
-	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Order("order_index ASC")
-	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CourseMentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
+	if err := db.Preload("Mentor").Preload("Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve courses",
@@ -484,15 +464,13 @@ func GetAllCoursesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get course by ID (All Roles)
+// @Summary      Get course by ID (All Roles - Anonymous User)
 // @Description  Retrieve complete information of a specific course including all modules
 // @Tags         Course
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
 // @Param        id   path      string  true  "Course UID"
 // @Success      200  {object}  map[string]any  "Course retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id} [get]
@@ -526,7 +504,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course retrieved successfully",
-		"data":    courseResponse(course),
+		"data":    courseDetailResponse(course),
 		"error":   nil,
 	})
 }
@@ -760,36 +738,20 @@ type CourseStudentSafeItem struct {
 	Status           entity.EnrollmentStatus `json:"status"`
 }
 
-// @Summary      Get all enrolled students in a course (All Roles)
-// @Description  Retrieve list of all students enrolled in a specific course for authenticated users. Response is sanitized and excludes sensitive user fields.
+// @Summary      Get all enrolled students in a course (All Roles - Anonymous User)
+// @Description  Retrieve list of all students enrolled in a specific course. Response is sanitized and excludes sensitive user fields.
 // @Tags         Course
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
 // @Param        id       path  string  true   "Course UID"
 // @Param        page     query int  false  "Page number (default: 1)"
 // @Param        per_page query int  false  "Items per page (default: 10, max: 100)"
 // @Param        name     query string false "Search student by name"
 // @Success      200  {object}  map[string]any  "Students retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve students"
 // @Router       /courses/{id}/students [get]
 func GetCourseStudentsFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	// Verify user is admin
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
 	courseID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -1009,8 +971,8 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get invoice URL by enrollment details (All Roles)
-// @Description  Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters
+// @Summary      Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)
+// @Description  Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, mentor, or the owner (self) only.
 // @Tags         Invoice
 // @Accept       json
 // @Produce      json
@@ -1021,6 +983,7 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Invoice URL retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Missing required parameters"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Enrollment not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /invoices/url [get]
@@ -1110,25 +1073,8 @@ func GetInvoiceURLFunc(c *gin.Context) {
 	}
 
 	isAuthorized := hasAdminAccess(userData.Role) ||
+		userData.Role == entity.MentorRole ||
 		userData.Uid == enrollment.UserUid
-
-	if !isAuthorized {
-		var mentorAccessCount int64
-		_ = database.DB.Model(&entity.CourseMentor{}).
-			Where("course_uid = ? AND mentor_uid = ? AND status IN ?", courseUidParam, userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}).
-			Count(&mentorAccessCount).Error
-
-		if mentorAccessCount > 0 {
-			isAuthorized = true
-		} else {
-			var course entity.Course
-			if err := database.DB.First(&course, courseUidParam).Error; err == nil {
-				if course.MentorUid != nil && *course.MentorUid == userData.Uid {
-					isAuthorized = true
-				}
-			}
-		}
-	}
 
 	if !isAuthorized {
 		c.JSON(http.StatusForbidden, gin.H{

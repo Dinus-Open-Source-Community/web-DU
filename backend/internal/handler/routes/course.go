@@ -13,20 +13,24 @@ func init() {
 }
 
 func StartCourseRoutes(r *gin.Engine) {
-	courseGroup := r.Group("/courses")
-	courseGroup.Use(middleware.AuthMiddleware())
+	publicCourseGroup := r.Group("/courses")
 	{
-		courseGroup.GET("/:id", service.GetCourseByIDFunc) // users - all roles
-		courseGroup.GET("/", service.GetAllCoursesFunc)    // users - all roles
+		publicCourseGroup.GET("/", service.GetAllCoursesFunc)                        // all roles - anonymous user
+		publicCourseGroup.GET("/:id", service.GetCourseByIDFunc)                     // all roles - anonymous user
+		publicCourseGroup.GET("/:id/mentor", service.GetCourseMentorsByCourseIDFunc) // all roles - anonymous user
+		publicCourseGroup.GET("/:id/students", service.GetCourseStudentsFunc)        // all roles - anonymous user
+	}
 
-		courseGroup.POST("/:id/join", service.JoinCourseFunc)                      // Students only
-		courseGroup.POST("/:id/review", service.CreateCourseReviewFunc)            // Enrolled students only
-		courseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
-		courseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)         // Admin only
-		courseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc) // Admin only
+	authCourseGroup := r.Group("/courses")
+	authCourseGroup.Use(middleware.AuthMiddleware())
+	{
+		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                 // Students only
+		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                       // Enrolled students only
+		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
+		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Admin only
+		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Admin only
 
-		courseGroup.GET("/:id/students", service.GetCourseStudentsFunc) // All authenticated roles (sanitized response)
-		courseGroup.POST("/", service.PostAdminCourseFunc)              // Admin only
+		authCourseGroup.POST("/", service.PostAdminCourseFunc) // Admin only
 	}
 
 	// Invoice routes

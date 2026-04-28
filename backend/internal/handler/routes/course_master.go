@@ -13,23 +13,31 @@ func init() {
 }
 
 func StartCourseMasterRoutes(r *gin.Engine) {
-	categoryGroup := r.Group("/course-categories")
-	categoryGroup.Use(middleware.AuthMiddleware())
+	publicCategoryGroup := r.Group("/course-categories")
 	{
-		categoryGroup.GET("/", service.GetAllCourseCategoriesFunc)
-		categoryGroup.GET("/:id", service.GetCourseCategoryByIDFunc)
-		categoryGroup.POST("/", service.PostAdminCourseCategoryFunc)
-		categoryGroup.PUT("/:id", service.UpdateAdminCourseCategoryFunc)
-		categoryGroup.DELETE("/:id", service.DeleteAdminCourseCategoryFunc)
+		publicCategoryGroup.GET("/", service.GetAllCourseCategoriesFunc)   // all roles - anonymous user
+		publicCategoryGroup.GET("/:id", service.GetCourseCategoryByIDFunc) // all roles - anonymous user
 	}
 
-	classTypeGroup := r.Group("/course-types")
-	classTypeGroup.Use(middleware.AuthMiddleware())
+	authCategoryGroup := r.Group("/course-categories")
+	authCategoryGroup.Use(middleware.AuthMiddleware())
 	{
-		classTypeGroup.GET("/", service.GetAllClassTypesFunc)
-		classTypeGroup.GET("/:id", service.GetClassTypeByIDFunc)
-		classTypeGroup.POST("/", service.PostAdminClassTypeFunc)
-		classTypeGroup.PUT("/:id", service.UpdateAdminClassTypeFunc)
-		classTypeGroup.DELETE("/:id", service.DeleteAdminClassTypeFunc)
+		authCategoryGroup.POST("/", service.PostAdminCourseCategoryFunc)
+		authCategoryGroup.PUT("/:id", service.UpdateAdminCourseCategoryFunc)
+		authCategoryGroup.DELETE("/:id", service.DeleteAdminCourseCategoryFunc)
+	}
+
+	publicClassTypeGroup := r.Group("/course-types")
+	{
+		publicClassTypeGroup.GET("/", service.GetAllClassTypesFunc)    // all roles - anonymous user
+		publicClassTypeGroup.GET("/:id", service.GetClassTypeByIDFunc) // all roles - anonymous user
+	}
+
+	authClassTypeGroup := r.Group("/course-types")
+	authClassTypeGroup.Use(middleware.AuthMiddleware())
+	{
+		authClassTypeGroup.POST("/", service.PostAdminClassTypeFunc)
+		authClassTypeGroup.PUT("/:id", service.UpdateAdminClassTypeFunc)
+		authClassTypeGroup.DELETE("/:id", service.DeleteAdminClassTypeFunc)
 	}
 }

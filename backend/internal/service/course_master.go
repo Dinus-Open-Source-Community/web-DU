@@ -40,24 +40,17 @@ func requireAdmin(c *gin.Context) (entity.User, bool) {
 	return userData, true
 }
 
-// @Summary      Get all course categories (Admin Only)
-// @Description  Retrieve all course categories. Admin only.
+// @Summary      Get all course categories (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve all course categories.
 // @Tags         Course Category
 // @Produce      json
-// @Security     BearerAuth
 // @Param        page      query  int     false  "Page number (default: 1)"
 // @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
 // @Param        name      query  string  false  "Search by category name"
 // @Success      200  {object}  map[string]any  "Course categories retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve course categories"
 // @Router       /course-categories [get]
 func GetAllCourseCategoriesFunc(c *gin.Context) {
-	if _, ok := requireAdmin(c); !ok {
-		return
-	}
-
 	var categories []entity.CourseCategory
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
@@ -130,27 +123,20 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 				"total_pages":  totalPages,
 			},
 		},
-		"error":   nil,
+		"error": nil,
 	})
 }
 
-// @Summary      Get course category by ID (Admin Only)
-// @Description  Retrieve a specific course category by uid. Admin only.
+// @Summary      Get course category by ID (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve a specific course category by uid.
 // @Tags         Course Category
 // @Produce      json
-// @Security     BearerAuth
 // @Param        id   path      string  true  "Course Category UID"
 // @Success      200  {object}  map[string]any  "Course category retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Invalid course category uid"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course category not found"
 // @Router       /course-categories/{id} [get]
 func GetCourseCategoryByIDFunc(c *gin.Context) {
-	if _, ok := requireAdmin(c); !ok {
-		return
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -185,7 +171,7 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 			"updated_at":  category.UpdatedAt,
 			"courses":     courseListResponse(category.Courses),
 		},
-		"error":   nil,
+		"error": nil,
 	})
 }
 
@@ -405,24 +391,17 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all course types (Admin Only)
-// @Description  Retrieve all course types. Admin only.
+// @Summary      Get all course types (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve all course types.
 // @Tags         Course Type
 // @Produce      json
-// @Security     BearerAuth
 // @Param        page      query  int     false  "Page number (default: 1)"
 // @Param        per_page  query  int     false  "Items per page (default: 10, max: 100)"
 // @Param        name      query  string  false  "Search by course type name"
 // @Success      200  {object}  map[string]any  "Course types retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve course types"
 // @Router       /course-types [get]
 func GetAllClassTypesFunc(c *gin.Context) {
-	if _, ok := requireAdmin(c); !ok {
-		return
-	}
-
 	var classTypes []entity.ClassType
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
@@ -495,27 +474,20 @@ func GetAllClassTypesFunc(c *gin.Context) {
 				"total_pages":  totalPages,
 			},
 		},
-		"error":   nil,
+		"error": nil,
 	})
 }
 
-// @Summary      Get course type by ID (Admin Only)
-// @Description  Retrieve a specific course type by uid. Admin only.
+// @Summary      Get course type by ID (All Roles - Anonymous User)
+// @Description  Public endpoint to retrieve a specific course type by uid.
 // @Tags         Course Type
 // @Produce      json
-// @Security     BearerAuth
 // @Param        id   path      string  true  "Course Type UID"
 // @Success      200  {object}  map[string]any  "Course type retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Invalid course type uid"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Router       /course-types/{id} [get]
 func GetClassTypeByIDFunc(c *gin.Context) {
-	if _, ok := requireAdmin(c); !ok {
-		return
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -550,7 +522,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 			"updated_at":  classType.UpdatedAt,
 			"courses":     courseListResponse(classType.Courses),
 		},
-		"error":   nil,
+		"error": nil,
 	})
 }
 

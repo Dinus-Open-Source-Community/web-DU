@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary      Get all modules by course (All Roles)
+// @Summary      Get all modules by course (Super Admin/Admin/Mentor/Enrollment User)
 // @Description  Retrieve all modules for a specific course ordered by sequence
 // @Tags         Module
 // @Produce      json
@@ -29,6 +29,11 @@ import (
 // @Failure      500  {object}  map[string]any  "Failed to retrieve modules"
 // @Router       /modules/course/{course_id} [get]
 func GetAllModulesFunc(c *gin.Context) {
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+
 	courseUID, err := uuid.Parse(c.Param("course_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -36,6 +41,26 @@ func GetAllModulesFunc(c *gin.Context) {
 			"message": "Invalid course uid",
 			"data":    nil,
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	allowed, err := canReadCourseByRole(userData, courseUID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to validate access",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: super admin, admin, mentor, or enrolled user only",
+			"data":    nil,
+			"error":   nil,
 		})
 		return
 	}
@@ -113,11 +138,11 @@ func GetAllModulesFunc(c *gin.Context) {
 				"total_pages":  totalPages,
 			},
 		},
-		"error":   nil,
+		"error": nil,
 	})
 }
 
-// @Summary      Get Lessons By Module ID (All Roles)
+// @Summary      Get module by ID (Super Admin/Admin/Mentor/Enrollment User)
 // @Description  Retrieve a specific module with all its lessons
 // @Tags         Module
 // @Produce      json
@@ -130,6 +155,11 @@ func GetAllModulesFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve module"
 // @Router       /modules/{id} [get]
 func GetModuleByIDFunc(c *gin.Context) {
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+
 	moduleUID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -150,6 +180,26 @@ func GetModuleByIDFunc(c *gin.Context) {
 			"message": "Module not found",
 			"data":    nil,
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	allowed, err := canReadCourseByRole(userData, module.CourseUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to validate access",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: super admin, admin, mentor, or enrolled user only",
+			"data":    nil,
+			"error":   nil,
 		})
 		return
 	}

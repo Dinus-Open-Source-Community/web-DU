@@ -22,7 +22,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Upload and update authenticated user's avatar image. Only authenticated users can access this endpoint.",
+                "description": "Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file is verified and re-encoded to ensure a clean image.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -90,19 +90,14 @@ const docTemplate = `{
         },
         "/course-categories": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve all course categories. Admin only.",
+                "description": "Public endpoint to retrieve all course categories.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Get all course categories (Admin Only)",
+                "summary": "Get all course categories (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -126,20 +121,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Course categories retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Access denied: Admins only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -223,19 +204,14 @@ const docTemplate = `{
         },
         "/course-categories/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve a specific course category by uid. Admin only.",
+                "description": "Public endpoint to retrieve a specific course category by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Get course category by ID (Admin Only)",
+                "summary": "Get course category by ID (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -255,20 +231,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid course category uid",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Access denied: Admins only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -434,19 +396,14 @@ const docTemplate = `{
         },
         "/course-types": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve all course types. Admin only.",
+                "description": "Public endpoint to retrieve all course types.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Get all course types (Admin Only)",
+                "summary": "Get all course types (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -470,20 +427,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Course types retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Access denied: Admins only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -567,19 +510,14 @@ const docTemplate = `{
         },
         "/course-types/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve a specific course type by uid. Admin only.",
+                "description": "Public endpoint to retrieve a specific course type by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Get course type by ID (Admin Only)",
+                "summary": "Get course type by ID (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -599,20 +537,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid course type uid",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Access denied: Admins only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -778,11 +702,6 @@ const docTemplate = `{
         },
         "/courses": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Retrieve paginated list of courses with optional filters (mentor_id, title, price, is_premium)",
                 "consumes": [
                     "application/json"
@@ -793,7 +712,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all courses with pagination and filters (All Roles)",
+                "summary": "Get all courses with pagination and filters (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -835,20 +754,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Courses retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1027,11 +932,6 @@ const docTemplate = `{
         },
         "/courses/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Retrieve complete information of a specific course including all modules",
                 "consumes": [
                     "application/json"
@@ -1042,7 +942,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get course by ID (All Roles)",
+                "summary": "Get course by ID (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1055,13 +955,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Course retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1157,6 +1050,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/{id}/mentor": {
+            "get": {
+                "description": "Public endpoint to retrieve mentors assigned to a specific course.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Get mentors by course ID (All Roles - Anonymous User)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search mentor/admin by name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentors retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid course uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{id}/mentors/assign": {
             "post": {
                 "security": [
@@ -1172,7 +1137,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Mentor"
+                    "Course"
                 ],
                 "summary": "Assign mentors to course (Admin Only)",
                 "parameters": [
@@ -1478,12 +1443,7 @@ const docTemplate = `{
         },
         "/courses/{id}/students": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve list of all students enrolled in a specific course for authenticated users. Response is sanitized and excludes sensitive user fields.",
+                "description": "Retrieve list of all students enrolled in a specific course. Response is sanitized and excludes sensitive user fields.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1493,7 +1453,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all enrolled students in a course (All Roles)",
+                "summary": "Get all enrolled students in a course (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1529,13 +1489,6 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
                     "404": {
                         "description": "Course not found",
                         "schema": {
@@ -1560,7 +1513,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters",
+                "description": "Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, mentor, or the owner (self) only.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1570,7 +1523,7 @@ const docTemplate = `{
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Get invoice URL by enrollment details (All Roles)",
+                "summary": "Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1611,6 +1564,13 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1699,7 +1659,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve paginated list of all lessons with optional module_id filter.",
+                "description": "Retrieve paginated list of lessons with optional module_id filter for authorized users.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1709,7 +1669,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get all lessons with pagination (Admin/Mentor)",
+                "summary": "Get all lessons with pagination (Super Admin/Admin/Mentor/Enrollment User)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1724,9 +1684,9 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "Filter by module ID",
-                        "name": "module_id",
+                        "type": "string",
+                        "description": "Filter by module UID",
+                        "name": "module_uid",
                         "in": "query"
                     },
                     {
@@ -1793,7 +1753,7 @@ const docTemplate = `{
                 "summary": "Create new lesson (Admin/Mentor)",
                 "parameters": [
                     {
-                        "description": "Lesson data with module_id, title, content",
+                        "description": "Lesson data with module_uid, title, content",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2340,7 +2300,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson"
                 ],
-                "summary": "Get lesson by ID (Admin/Mentor)",
+                "summary": "Get lesson by ID (Super Admin/Admin/Mentor/Enrollment User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2896,12 +2856,7 @@ const docTemplate = `{
         },
         "/mentor/all": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve all mentor users with teaching summaries.",
+                "description": "Public endpoint to retrieve all mentor users with teaching summaries. Optional ` + "`" + `name` + "`" + ` filters by mentor display name (decrypted, case-insensitive, in-memory).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2911,7 +2866,7 @@ const docTemplate = `{
                 "tags": [
                     "Mentor"
                 ],
-                "summary": "Get all mentors",
+                "summary": "Get all mentors (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2924,18 +2879,17 @@ const docTemplate = `{
                         "description": "Items per page (default: 10, max: 100)",
                         "name": "per_page",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter mentors whose name contains this substring (case-insensitive)",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Mentors retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2953,12 +2907,7 @@ const docTemplate = `{
         },
         "/mentor/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.",
+                "description": "Public endpoint to retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2968,7 +2917,7 @@ const docTemplate = `{
                 "tags": [
                     "Mentor"
                 ],
-                "summary": "Get mentor detail by ID",
+                "summary": "Get mentor detail by ID (All Roles - Anonymous User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2988,13 +2937,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid mentor uid",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3099,7 +3041,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Get all modules by course (All Roles)",
+                "summary": "Get all modules by course (Super Admin/Admin/Mentor/Enrollment User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3173,7 +3115,7 @@ const docTemplate = `{
                 "tags": [
                     "Module"
                 ],
-                "summary": "Get Lessons By Module ID (All Roles)",
+                "summary": "Get module by ID (Super Admin/Admin/Mentor/Enrollment User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -4509,7 +4451,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "module_uid": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "order_index": {
                     "type": "integer"
@@ -4540,7 +4483,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "module_uid": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "order_index": {
                     "type": "integer"

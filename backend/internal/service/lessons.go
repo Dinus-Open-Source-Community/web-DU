@@ -22,7 +22,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        request  body  dto.LessonCreateRequest  true  "Lesson data with module_id, title, content"
+// @Param        request  body  dto.LessonCreateRequest  true  "Lesson data with module_uid, title, content"
 // @Success      201  {object}  map[string]any  "Lesson created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -33,7 +33,7 @@ import (
 // Example:
 //
 //	{
-//	  "module_id": 1,
+//	  "module_uid": "e5f07027-2284-4094-ad5e-ad77f25970ab",
 //	  "title": "Introduction to Go Programming",
 //	  "content": "Learn the basics of Go programming language including syntax, variables, and control flow.",
 //	  "video_url": "https://example.com/videos/go-intro.mp4",
@@ -142,17 +142,17 @@ func CreateLessonFunc(c *gin.Context) {
 // Query parameters (all optional):
 // - page (int, default 1)
 // - per_page (int, default 10, max 100)
-// - module_id (int) -> filter by module ID
+// - module_uid (string UUID) -> filter by module UID
 //
-// @Summary      Get all lessons with pagination (Admin/Mentor)
-// @Description  Retrieve paginated list of all lessons with optional module_id filter.
+// @Summary      Get all lessons with pagination (Super Admin/Admin/Mentor/Enrollment User)
+// @Description  Retrieve paginated list of lessons with optional module_id filter for authorized users.
 // @Tags         Lesson
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        page       query  int  false  "Page number (default: 1, minimum: 1)"
 // @Param        per_page   query  int  false  "Items per page (default: 10, max: 100)"
-// @Param        module_id  query  int  false  "Filter by module ID"
+// @Param        module_uid  query  string  false  "Filter by module UID"
 // @Param        name       query  string  false  "Search lesson by title"
 // @Success      200  {object}  map[string]any  "Lessons retrieved successfully with pagination metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -169,7 +169,10 @@ func GetAllLessonsFunc(c *gin.Context) {
 	// Parse query params
 	pageStr := c.DefaultQuery("page", "1")
 	perPageStr := c.DefaultQuery("per_page", "10")
-	moduleIDStr := c.Query("module_id")
+	moduleIDStr := strings.TrimSpace(c.Query("module_uid"))
+	if moduleIDStr == "" {
+		moduleIDStr = strings.TrimSpace(c.Query("module_id"))
+	}
 	nameFilter := strings.TrimSpace(c.Query("name"))
 
 	page, err := strconv.Atoi(pageStr)
@@ -188,35 +191,40 @@ func GetAllLessonsFunc(c *gin.Context) {
 	db := database.DB.Model(&entity.Lesson{})
 
 	if moduleIDStr != "" {
-		if moduleUid, err := uuid.Parse(moduleIDStr); err == nil {
-			if userData.Role == entity.MentorRole {
-				var module entity.Module
-				if err := database.DB.First(&module, moduleUid).Error; err != nil {
-					c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
-					return
-				}
-
-				allowed, err := canManageCourseByRole(userData, module.CourseUid)
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
-					return
-				}
-				if !allowed {
-					c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
-					return
-				}
-			}
-			db = db.Where("module_uid = ?", moduleUid)
+		moduleUid, err := uuid.Parse(moduleIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid module uid", "data": nil, "error": err.Error()})
+			return
 		}
+
+		var module entity.Module
+		if err := database.DB.First(&module, moduleUid).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+			return
+		}
+
+		allowed, err := canReadCourseByRole(userData, module.CourseUid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: super admin, admin, mentor, or enrolled user only", "data": nil, "error": nil})
+			return
+		}
+
+		db = db.Where("module_uid = ?", moduleUid)
 	}
 
-	if userData.Role == entity.MentorRole && moduleIDStr == "" {
+	if !hasAdminAccess(userData.Role) && userData.Role != entity.MentorRole && moduleIDStr == "" {
 		db = db.Where("module_uid IN (?)",
 			database.DB.Table("modules m").
 				Select("m.uid").
-				Joins("JOIN courses c ON c.uid = m.course_uid").
-				Joins("LEFT JOIN course_mentors cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", userData.Uid).
-				Where("c.mentor_uid = ? OR cm.status IN ?", userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}),
+				Joins("JOIN enrollments e ON e.course_uid = m.course_uid").
+				Where("e.user_uid = ? AND e.status IN ?",
+					userData.Uid,
+					[]entity.EnrollmentStatus{entity.EnrollmentPending, entity.EnrollmentActive, entity.EnrollmentCompleted},
+				),
 		)
 	}
 
@@ -269,7 +277,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 
 // GetLessonByIDFunc retrieves a single lesson by ID.
 //
-// @Summary      Get lesson by ID (Admin/Mentor)
+// @Summary      Get lesson by ID (Super Admin/Admin/Mentor/Enrollment User)
 // @Description  Retrieve detailed information of a specific lesson.
 // @Tags         Lesson
 // @Accept       json
@@ -311,22 +319,20 @@ func GetLessonByIDFunc(c *gin.Context) {
 		return
 	}
 
-	if userData.Role == entity.MentorRole {
-		var module entity.Module
-		if err := database.DB.First(&module, lesson.ModuleUid).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
-			return
-		}
+	var module entity.Module
+	if err := database.DB.First(&module, lesson.ModuleUid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Module not found", "data": nil, "error": err.Error()})
+		return
+	}
 
-		allowed, err := canManageCourseByRole(userData, module.CourseUid)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
-			return
-		}
-		if !allowed {
-			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: Admin or assigned mentor only", "data": nil, "error": nil})
-			return
-		}
+	allowed, err := canReadCourseByRole(userData, module.CourseUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to validate access", "data": nil, "error": err.Error()})
+		return
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied: super admin, admin, mentor, or enrolled user only", "data": nil, "error": nil})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

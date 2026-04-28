@@ -17,8 +17,8 @@ func StartLessonsRoutes(r *gin.Engine) {
 	lessonsGroup.Use(middleware.AuthMiddleware())
 	{
 		lessonsGroup.POST("/", service.CreateLessonFunc)      // Admin/Mentor - Create lesson
-		lessonsGroup.GET("/", service.GetAllLessonsFunc)      // Admin/Mentor - Get lessons
-		lessonsGroup.GET("/:id", service.GetLessonByIDFunc)   // Admin/Mentor - Get lesson by ID
+		lessonsGroup.GET("/", service.GetAllLessonsFunc)      // super admin/admin/mentor/enrollment user
+		lessonsGroup.GET("/:id", service.GetLessonByIDFunc)   // super admin/admin/mentor/enrollment user
 		lessonsGroup.PUT("/:id", service.UpdateLessonFunc)    // Admin/Mentor - Update lesson
 		lessonsGroup.DELETE("/:id", service.DeleteLessonFunc) // Admin/Mentor - Delete lesson
 
