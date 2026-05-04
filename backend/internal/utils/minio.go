@@ -17,9 +17,44 @@ import (
 
 var MinioClient *minio.Client
 
+func setBucketPublicReadPolicy(client *minio.Client, bucket string) error {
+	policy := fmt.Sprintf(`{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Principal": {"AWS": ["*"]},
+				"Action": ["s3:GetObject"],
+				"Resource": ["arn:aws:s3:::%s/*"]
+			}
+		]
+	}`, bucket)
+	return client.SetBucketPolicy(context.Background(), bucket, policy)
+}
+
+func getMinioInternalEndpoint() string {
+	if endpoint := strings.TrimSpace(os.Getenv("MINIO_INTERNAL_ENDPOINT")); endpoint != "" {
+		return endpoint
+	}
+	if endpoint := strings.TrimSpace(os.Getenv("MINIO_ENDPOINT")); endpoint != "" {
+		return endpoint
+	}
+	return "minio:9000"
+}
+
+func getMinioPublicEndpoint() string {
+	if endpoint := strings.TrimSpace(os.Getenv("MINIO_PUBLIC_ENDPOINT")); endpoint != "" {
+		return endpoint
+	}
+	if endpoint := strings.TrimSpace(os.Getenv("MINIO_ENDPOINT")); endpoint != "" {
+		return endpoint
+	}
+	return getMinioInternalEndpoint()
+}
+
 // InitMinio initializes the MinIO client and creates required buckets
 func InitMinio() error {
-	endpoint := os.Getenv("MINIO_ENDPOINT")
+	endpoint := getMinioInternalEndpoint()
 	accessKey := os.Getenv("MINIO_ACCESS_KEY")
 	secretKey := os.Getenv("MINIO_SECRET_KEY")
 	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
@@ -60,23 +95,10 @@ func InitMinio() error {
 				return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
 			}
 			log.Printf("Bucket %s created successfully", bucket)
+		}
 
-			// Set bucket policy to public read
-			policy := fmt.Sprintf(`{
-				"Version": "2012-10-17",
-				"Statement": [
-					{
-						"Effect": "Allow",
-						"Principal": {"AWS": ["*"]},
-						"Action": ["s3:GetObject"],
-						"Resource": ["arn:aws:s3:::%s/*"]
-					}
-				]
-			}`, bucket)
-			err = client.SetBucketPolicy(ctx, bucket, policy)
-			if err != nil {
-				log.Printf("Warning: failed to set public policy for bucket %s: %v", bucket, err)
-			}
+		if err := setBucketPublicReadPolicy(client, bucket); err != nil {
+			log.Printf("Warning: failed to set public policy for bucket %s: %v", bucket, err)
 		}
 	}
 
@@ -117,7 +139,7 @@ func UploadFile(file *multipart.FileHeader, bucket string) (string, error) {
 	}
 
 	// Return the object URL
-	endpoint := os.Getenv("MINIO_ENDPOINT")
+	endpoint := getMinioPublicEndpoint()
 	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
 	protocol := "http"
 	if useSSL {
@@ -152,7 +174,7 @@ func UploadFileFromReader(reader io.Reader, size int64, bucket, filename, conten
 	}
 
 	// Return the object URL
-	endpoint := os.Getenv("MINIO_ENDPOINT")
+	endpoint := getMinioPublicEndpoint()
 	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
 	protocol := "http"
 	if useSSL {
@@ -180,7 +202,7 @@ func DeleteFile(bucket, objectName string) error {
 
 // GetPublicURL returns the public URL for an object
 func GetPublicURL(bucket, objectName string) string {
-	endpoint := os.Getenv("MINIO_ENDPOINT")
+	endpoint := getMinioPublicEndpoint()
 	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
 	protocol := "http"
 	if useSSL {

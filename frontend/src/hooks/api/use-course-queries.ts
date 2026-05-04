@@ -1,6 +1,4 @@
-'use client'
-
-import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { get, post, patch, postFormData, type Envelope } from '@/lib/api/fetcher'
 import { queryKeys } from '@/lib/api/query-keys'
 
@@ -8,7 +6,7 @@ import { queryKeys } from '@/lib/api/query-keys'
 
 type CourseItem = Record<string, unknown>
 
-type CourseListResponse = {
+export type CourseListResponse = {
   courses: CourseItem[]
   meta: { page: number; per_page: number; total: number; total_pages: number }
 }
@@ -41,10 +39,14 @@ type CourseListFilters = {
 export function useCourses(filters: CourseListFilters = {}) {
   return useSuspenseQuery({
     queryKey: queryKeys.courses.list(filters),
-    queryFn: () =>
-      get<Envelope<CourseListResponse>>('/courses', filters as Record<string, string | number | boolean>).then(
-        (r) => r.data,
-      ),
+    queryFn: () => get<Envelope<CourseListResponse>>('/courses', filters as Record<string, string | number | boolean>).then((r) => r.data),
+  })
+}
+
+export function useCoursesQuery(filters: CourseListFilters = {}) {
+  return useQuery({
+    queryKey: queryKeys.courses.list(filters),
+    queryFn: () => get<Envelope<CourseListResponse>>('/courses', filters as Record<string, string | number | boolean>).then((r) => r.data),
   })
 }
 
@@ -55,13 +57,17 @@ export function useCourseByUid(uid: string) {
   })
 }
 
+export function useCourseByUidQuery(uid: string) {
+  return useSuspenseQuery({
+    queryKey: queryKeys.courses.byUid(uid),
+    queryFn: () => get<Envelope<CourseItem>>(`/courses/${uid}`).then((r) => r.data),
+  })
+}
+
 export function useCourseStudents(courseUid: string, filters: { page?: number; per_page?: number; name?: string } = {}) {
   return useSuspenseQuery({
     queryKey: queryKeys.courses.students(courseUid, filters),
-    queryFn: () =>
-      get<Envelope<CourseStudentsResponse>>(`/courses/${courseUid}/students`, filters as Record<string, string | number>).then(
-        (r) => r.data,
-      ),
+    queryFn: () => get<Envelope<CourseStudentsResponse>>(`/courses/${courseUid}/students`, filters as Record<string, string | number>).then((r) => r.data),
   })
 }
 
@@ -101,8 +107,7 @@ export function useCreateCourseReview(courseUid: string) {
 export function useReplyReview(courseUid: string, reviewUid: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: CreateReviewReplyInput) =>
-      post<Envelope<unknown>>(`/courses/${courseUid}/review/${reviewUid}/reply`, input),
+    mutationFn: (input: CreateReviewReplyInput) => post<Envelope<unknown>>(`/courses/${courseUid}/review/${reviewUid}/reply`, input),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.courses.byUid(courseUid) })
     },
@@ -122,8 +127,7 @@ export function useUpdateCourseStatus(courseUid: string) {
 export function useAssignMentors(courseUid: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: AssignMentorsInput) =>
-      post<Envelope<unknown>>(`/courses/${courseUid}/mentors/assign`, input),
+    mutationFn: (input: AssignMentorsInput) => post<Envelope<unknown>>(`/courses/${courseUid}/mentors/assign`, input),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.courses.byUid(courseUid) })
     },

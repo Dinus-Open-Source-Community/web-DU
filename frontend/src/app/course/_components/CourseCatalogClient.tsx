@@ -9,7 +9,7 @@ export default function CourseCatalogClient() {
 
   const courses: ICardData[] = (data?.courses ?? []).map((c) => ({
     uid: (c.uid as string) ?? '',
-    variantBadge: ((c.is_premium ? 'premium' : 'free') as ICardData['variantBadge']),
+    variantBadge: (c.is_premium ? 'premium' : 'free') as ICardData['variantBadge'],
     title: (c.title as string) ?? '',
     description: (c.description as string) ?? '',
     category: (c.category as string) ?? undefined,

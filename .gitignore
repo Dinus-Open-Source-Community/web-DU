@@ -1,7 +1,7 @@
 # Node.js
 /frontend/node_modules
 /frontend/.next
-
+/frontend-react
 # Golang
 /backend/vendor/
 /backend/*.exe

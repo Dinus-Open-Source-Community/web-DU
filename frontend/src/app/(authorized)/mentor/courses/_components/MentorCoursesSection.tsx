@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -9,8 +9,7 @@ import { SearchForm } from '@/components/ui/SearchForm'
 import { SegmentedFilter } from '@/components/ui/SegmentedFilter'
 import { EmptyCourseIcon } from '@/components/ui/icons'
 import { Pagination } from '@/components/ui/pagination'
-import { getMergedManagedCourses, setManagedCoursePublished } from '@/lib/mentorCourseStorage'
-import type { IMentorCourse } from '@/lib/types'
+import { useCoursesQuery } from '@/hooks/api/use-course-queries'
 import { CreateCourseDialog } from './CreateCourseDialog'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
@@ -20,21 +19,34 @@ type CourseManagementSectionProps = {
   role?: 'mentor' | 'admin'
 }
 
+type CourseListItem = {
+  uid: string
+  title: string
+  subtitle?: string
+  description?: string
+  cover_url?: string
+  thumbnail_url?: string
+  status?: string
+  is_published?: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+function toPublished(status?: string, isPublished?: boolean): boolean {
+  if (typeof isPublished === 'boolean') return isPublished
+  return typeof status === 'string' ? status.toUpperCase() === 'ACTIVE' : false
+}
+
 export default function MentorCoursesSection({ role = 'mentor' }: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
-  const [courses, setCourses] = useState<IMentorCourse[]>([])
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]>('Semua')
   const [search, setSearch] = useState('')
   const [searchApplied, setSearchApplied] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
 
-  useEffect(() => {
-    const refresh = () => setCourses(getMergedManagedCourses(isAdmin ? 'all' : 'mentor'))
-    refresh()
-    window.addEventListener('focus', refresh)
-    return () => window.removeEventListener('focus', refresh)
-  }, [isAdmin])
+  const { data, isLoading } = useCoursesQuery()
+  const courses = useMemo(() => (data?.courses ?? []) as CourseListItem[], [data])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -43,20 +55,16 @@ export default function MentorCoursesSection({ role = 'mentor' }: CourseManageme
   const filteredCourses = useMemo(() => {
     const q = searchApplied.trim().toLowerCase()
     return courses.filter((c) => {
-      if (activeFilter === 'Aktif' && !c.published) return false
-      if (activeFilter === 'Draf' && c.published) return false
+      const published = toPublished(c.status, c.is_published)
+      if (activeFilter === 'Aktif' && !published) return false
+      if (activeFilter === 'Draf' && published) return false
       if (!q) return true
-      return c.title.toLowerCase().includes(q) || (c.description?.toLowerCase().includes(q) ?? false) || c.header.toLowerCase().includes(q)
+      return c.title.toLowerCase().includes(q) || (c.description?.toLowerCase().includes(q) ?? false) || (c.subtitle?.toLowerCase().includes(q) ?? false)
     })
   }, [courses, activeFilter, searchApplied])
 
   const totalPages = Math.max(1, Math.ceil(filteredCourses.length / ITEMS_PER_PAGE))
   const paginatedCourses = filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
-
-  const handleTogglePublish = (uid: string, currentlyPublished: boolean) => {
-    setManagedCoursePublished(uid, !currentlyPublished)
-    setCourses(getMergedManagedCourses(isAdmin ? 'all' : 'mentor'))
-  }
 
   return (
     <>
@@ -85,7 +93,13 @@ export default function MentorCoursesSection({ role = 'mentor' }: CourseManageme
 
         <SegmentedFilter items={filters.map((f) => ({ value: f, label: f }))} value={activeFilter} onChange={setActiveFilter} variant="scroll" />
 
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-80 animate-pulse rounded-2xl bg-slate-100" />
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-10">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {paginatedCourses.map((c) => (
@@ -93,16 +107,15 @@ export default function MentorCoursesSection({ role = 'mentor' }: CourseManageme
                   key={c.uid}
                   variant="mentorCourse"
                   title={c.title}
-                  description={c.description ?? c.header}
-                  image={c.image}
-                  mentorHeader={c.header}
-                  mentorPublished={c.published}
-                  mentorModuleCount={c.moduleCount}
-                  mentorStudentCount={c.studentCount}
-                  rating={c.rating}
-                  totalReviews={c.totalReviews}
+                  description={c.description ?? c.subtitle}
+                  image={c.cover_url ?? c.thumbnail_url}
+                  mentorHeader={c.subtitle}
+                  mentorPublished={toPublished(c.status, c.is_published)}
+                  mentorModuleCount={0}
+                  mentorStudentCount={0}
+                  rating={0}
+                  totalReviews={0}
                   detailHref={`${isAdmin ? '/admin' : '/mentor'}/courses/${c.uid}`}
-                  mentorOnStatusClick={isAdmin ? () => handleTogglePublish(c.uid, c.published) : undefined}
                 />
               ))}
             </div>

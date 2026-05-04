@@ -2,18 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { beginGoogleOAuth, fetchSelfProfile, loginWithPassword, registerWithPassword } from '@/lib/auth/api'
-import {
-  AUTH_COOKIE_ROLE,
-  AUTH_COOKIE_TOKEN,
-  ROLE_DASHBOARD_PATH,
-  clearAuthSession,
-  getAuthToken,
-  getAuthUser,
-  setAuthToken,
-  setAuthUser,
-  type AuthUser,
-  type UserRole,
-} from '@/lib/auth/session'
+import { AUTH_COOKIE_ROLE, AUTH_COOKIE_TOKEN, ROLE_DASHBOARD_PATH, clearAuthSession, getAuthToken, getAuthUser, setAuthToken, setAuthUser, type AuthUser, type UserRole } from '@/lib/auth/session'
 
 type SignInResult = { user: AuthUser; redirectPath: string }
 
@@ -32,8 +21,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const dashboardPathFor = (role: UserRole | undefined | null) =>
-  (role && ROLE_DASHBOARD_PATH[role]) || '/auth/login'
+const dashboardPathFor = (role: UserRole | undefined | null) => (role && ROLE_DASHBOARD_PATH[role]) || '/auth/login'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
@@ -95,19 +83,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string) => {
       const auth = await loginWithPassword(email, password)
-      setAuthToken(auth.token, auth.expires_at)
-      return applyUser(auth.user)
+      return signInWithToken(auth.token, auth.expires_at)
     },
-    [applyUser],
+    [signInWithToken],
   )
 
   const signUp = useCallback(
     async (name: string, email: string, password: string) => {
       const auth = await registerWithPassword(name, email, password)
-      setAuthToken(auth.token, auth.expires_at)
-      return applyUser(auth.user)
+      return signInWithToken(auth.token, auth.expires_at)
     },
-    [applyUser],
+    [signInWithToken],
   )
 
   const value = useMemo<AuthContextValue>(

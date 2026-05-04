@@ -7,27 +7,42 @@ import { Button } from '@/components/ui/button'
 import { slugify } from '@/lib/func/slug'
 import { formatRupiah } from '@/lib/func/format'
 
+function pickString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback
+}
+
+function pickNumber(value: unknown, fallback = 0): number {
+  return typeof value === 'number' ? value : fallback
+}
+
+function pickCategoryLabel(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object' && 'name' in value) {
+    return pickString((value as { name?: unknown }).name)
+  }
+  return ''
+}
+
 export default function CourseDetailClient({ uid }: { uid: string }) {
   const { data: course } = useCourseByUid(uid)
 
   if (!course) return null
 
-  const title = (course.title as string) ?? ''
-  const description = (course.description as string) ?? ''
-  const price = (course.price as number) ?? 0
-  const priceStrike = (course.price_strike as number) ?? undefined
-  const coverUrl = (course.cover_url as string) ?? (course.thumbnail_url as string) ?? ''
-  const category = (course.category as string) ?? ''
-  const rating = (course.rating as number) ?? 0
-  const enrolled = (course.enrolled_count as number) ?? 0
-  const totalReviews = (course.total_reviews as number) ?? 0
-  const duration = (course.duration as string) ?? ''
-  const mentors = (course.mentors as { uid: string; name: string; avatar_url: string }[]) ?? []
+  const title = pickString(course.title)
+  const description = pickString(course.description)
+  const price = pickNumber(course.price)
+  const priceStrike = typeof course.price_strike === 'number' ? course.price_strike : undefined
+  const coverUrl = pickString(course.cover_url) || pickString(course.thumbnail_url)
+  const category = pickCategoryLabel(course.category)
+  const rating = pickNumber(course.rating)
+  const enrolled = pickNumber(course.enrolled_count)
+  const totalReviews = pickNumber(course.total_reviews)
+  const duration = pickString(course.duration)
+  const mentors = Array.isArray(course.mentors) ? (course.mentors as { uid?: string; name?: string; avatar_url?: string }[]) : []
   const mentor = mentors[0]
-  const whatYouLearn = (course.what_you_learn as string[]) ?? []
+  const whatYouLearn = Array.isArray(course.what_you_learn) ? (course.what_you_learn as unknown[]).filter((item): item is string => typeof item === 'string') : []
 
-  const discountLabel =
-    priceStrike ? `Hemat ${Math.round(((priceStrike - price) / priceStrike) * 100)}%` : undefined
+  const discountLabel = priceStrike ? `Hemat ${Math.round(((priceStrike - price) / priceStrike) * 100)}%` : undefined
   const courseSlug = slugify(title)
 
   return (

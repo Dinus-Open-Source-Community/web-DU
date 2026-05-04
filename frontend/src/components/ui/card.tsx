@@ -328,7 +328,7 @@ function Card({
       {/* Image Content*/}
       <div className={`relative aspect-video w-full shrink-0 rounded-[10px] ${sizes.imageWrapper[size]}`}>
         {image ? (
-          <Image src={image} alt={title} loading="lazy" fill className="rounded-[10px] object-cover" sizes="(max-width: 768px) 100vw, 384px" />
+          <Image src={image} alt={title} loading="lazy" fill className="rounded-[10px] object-cover" sizes="(max-width: 768px) 100vw, 384px" unoptimized />
         ) : (
           <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#D2E1ED] text-[#00D8FF]">
             <ReactIcon />

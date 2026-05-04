@@ -12,7 +12,7 @@ type Envelope<T> = {
 type LoginPayload = {
   token: string
   expires_at?: string
-  user: AuthUser
+  user?: AuthUser
 }
 
 const parseErrorMessage = (payload: unknown, fallback: string) => {
@@ -50,15 +50,16 @@ function extractToken(payload: Envelope<LoginPayload>): LoginPayload {
   }
 
   const user = normalizeAuthUser(payload.data?.user)
-  if (!user) {
-    throw new Error('Data user tidak ditemukan pada response autentikasi')
-  }
-
-  return {
+  const result: LoginPayload = {
     token,
     expires_at: payload.data?.expires_at,
-    user,
   }
+
+  if (user) {
+    result.user = user
+  }
+
+  return result
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<LoginPayload> {
