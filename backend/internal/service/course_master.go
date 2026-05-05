@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func requireAdmin(c *gin.Context) (entity.User, bool) {
@@ -30,7 +29,7 @@ func requireAdmin(c *gin.Context) (entity.User, bool) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -40,7 +39,7 @@ func requireAdmin(c *gin.Context) (entity.User, bool) {
 	return userData, true
 }
 
-// @Summary      Get all course categories (All Roles - Anonymous User)
+// @Summary      Get all course categories (Public)
 // @Description  Public endpoint to retrieve all course categories.
 // @Tags         Course Category
 // @Produce      json
@@ -127,7 +126,7 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get course category by ID (All Roles - Anonymous User)
+// @Summary      Get course category by ID (Public)
 // @Description  Public endpoint to retrieve a specific course category by uid.
 // @Tags         Course Category
 // @Produce      json
@@ -137,14 +136,8 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 // @Failure      404  {object}  map[string]any  "Course category not found"
 // @Router       /course-categories/{id} [get]
 func GetCourseCategoryByIDFunc(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course category uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "course_categories", "id", "course category")
+	if !ok {
 		return
 	}
 
@@ -175,8 +168,8 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Create course category (Admin Only)
-// @Description  Create a new course category. Admin only.
+// @Summary      Create course category (Super Admin / Admin)
+// @Description  Create a new course category. Requires Super Admin or Admin.
 // @Tags         Course Category
 // @Accept       json
 // @Produce      json
@@ -185,7 +178,7 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 // @Success      201  {object}  map[string]any  "Course category created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request body"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      500  {object}  map[string]any  "Failed to create course category"
 // @Router       /course-categories [post]
 func PostAdminCourseCategoryFunc(c *gin.Context) {
@@ -242,8 +235,8 @@ func PostAdminCourseCategoryFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Update course category (Admin Only)
-// @Description  Update existing course category by uid. Admin only.
+// @Summary      Update course category (Super Admin / Admin)
+// @Description  Update existing course category by uid. Requires Super Admin or Admin.
 // @Tags         Course Category
 // @Accept       json
 // @Produce      json
@@ -253,7 +246,7 @@ func PostAdminCourseCategoryFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Course category updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course category not found"
 // @Failure      500  {object}  map[string]any  "Failed to update course category"
 // @Router       /course-categories/{id} [put]
@@ -262,14 +255,8 @@ func UpdateAdminCourseCategoryFunc(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course category uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "course_categories", "id", "course category")
+	if !ok {
 		return
 	}
 
@@ -333,8 +320,8 @@ func UpdateAdminCourseCategoryFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Delete course category (Admin Only)
-// @Description  Delete course category by uid. Admin only.
+// @Summary      Delete course category (Super Admin / Admin)
+// @Description  Delete course category by uid. Requires Super Admin or Admin.
 // @Tags         Course Category
 // @Produce      json
 // @Security     BearerAuth
@@ -342,7 +329,7 @@ func UpdateAdminCourseCategoryFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Course category deleted successfully"
 // @Failure      400  {object}  map[string]any  "Invalid course category uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course category not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete course category"
 // @Router       /course-categories/{id} [delete]
@@ -351,14 +338,8 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course category uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "course_categories", "id", "course category")
+	if !ok {
 		return
 	}
 
@@ -391,7 +372,7 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all course types (All Roles - Anonymous User)
+// @Summary      Get all course types (Public)
 // @Description  Public endpoint to retrieve all course types.
 // @Tags         Course Type
 // @Produce      json
@@ -478,7 +459,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get course type by ID (All Roles - Anonymous User)
+// @Summary      Get course type by ID (Public)
 // @Description  Public endpoint to retrieve a specific course type by uid.
 // @Tags         Course Type
 // @Produce      json
@@ -488,14 +469,8 @@ func GetAllClassTypesFunc(c *gin.Context) {
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Router       /course-types/{id} [get]
 func GetClassTypeByIDFunc(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course type uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "class_types", "id", "course type")
+	if !ok {
 		return
 	}
 
@@ -526,8 +501,8 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Create course type (Admin Only)
-// @Description  Create a new course type. Admin only.
+// @Summary      Create course type (Super Admin / Admin)
+// @Description  Create a new course type. Requires Super Admin or Admin.
 // @Tags         Course Type
 // @Accept       json
 // @Produce      json
@@ -536,7 +511,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 // @Success      201  {object}  map[string]any  "Course type created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request body"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      500  {object}  map[string]any  "Failed to create course type"
 // @Router       /course-types [post]
 func PostAdminClassTypeFunc(c *gin.Context) {
@@ -593,8 +568,8 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Update course type (Admin Only)
-// @Description  Update existing course type by uid. Admin only.
+// @Summary      Update course type (Super Admin / Admin)
+// @Description  Update existing course type by uid. Requires Super Admin or Admin.
 // @Tags         Course Type
 // @Accept       json
 // @Produce      json
@@ -604,7 +579,7 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Course type updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Failure      500  {object}  map[string]any  "Failed to update course type"
 // @Router       /course-types/{id} [put]
@@ -613,14 +588,8 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course type uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "class_types", "id", "course type")
+	if !ok {
 		return
 	}
 
@@ -684,8 +653,8 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Delete course type (Admin Only)
-// @Description  Delete course type by uid. Admin only.
+// @Summary      Delete course type (Super Admin / Admin)
+// @Description  Delete course type by uid. Requires Super Admin or Admin.
 // @Tags         Course Type
 // @Produce      json
 // @Security     BearerAuth
@@ -693,7 +662,7 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Course type deleted successfully"
 // @Failure      400  {object}  map[string]any  "Invalid course type uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course type not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete course type"
 // @Router       /course-types/{id} [delete]
@@ -702,14 +671,8 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course type uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	id, ok := resolveUIDParam(c, "class_types", "id", "course type")
+	if !ok {
 		return
 	}
 

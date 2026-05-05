@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type LessonAssignmentTaskType string
@@ -23,6 +26,7 @@ const (
 )
 
 // LessonAssignment stores assignment configuration for a lesson.
+// Each lesson may have at most one assignment (text or quiz); LessonUid is unique.
 type LessonAssignment struct {
 	Uid                      uuid.UUID                `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
 	LessonUid                uuid.UUID                `gorm:"type:uuid;not null;uniqueIndex" json:"lesson_uid"`
@@ -48,4 +52,23 @@ type LessonAssignment struct {
 
 func (LessonAssignment) TableName() string {
 	return "lesson_assignments"
+}
+
+// AfterFind otomatis mendekripsi judul tugas. Field jsonb (task_description,
+// quiz_payload, instruction_attachments), boolean flag, status, deadline_at,
+// uid, lesson_uid, dan timestamps tidak dienkripsi.
+func (la *LessonAssignment) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&la.Title)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi judul tugas (idempotent).
+func (la *LessonAssignment) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&la.Title)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (la *LessonAssignment) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&la.Title)
+	return nil
 }

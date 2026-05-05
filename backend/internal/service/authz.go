@@ -17,6 +17,7 @@ func roleLevel(role entity.UserRole) int {
 	}
 }
 
+// hasAdminAccess is true for super_admin and admin (same gate for "admin-only" HTTP routes).
 func hasAdminAccess(role entity.UserRole) bool {
 	return roleLevel(role) >= roleLevel(entity.AdminRole)
 }

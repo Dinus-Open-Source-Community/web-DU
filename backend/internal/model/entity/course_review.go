@@ -3,7 +3,10 @@ package entity
 import (
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Model CourseReview Migrations
@@ -18,4 +21,22 @@ type CourseReview struct {
 	User    *User               `gorm:"foreignKey:UserUid" json:"user"`
 	Course  *Course             `gorm:"foreignKey:CourseUid" json:"course"`
 	Replies []CourseReviewReply `gorm:"foreignKey:CourseReviewUid" json:"replies,omitempty"`
+}
+
+// AfterFind otomatis mendekripsi komentar review. Rating, uid, foreign keys,
+// dan timestamps tidak dienkripsi karena numerik atau identifier.
+func (r *CourseReview) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&r.Comment)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi komentar review (idempotent).
+func (r *CourseReview) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&r.Comment)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (r *CourseReview) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&r.Comment)
+	return nil
 }

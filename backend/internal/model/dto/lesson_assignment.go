@@ -1,6 +1,7 @@
 package dto
 
-// LessonAssignmentUpsertRequest represents payload to create/update lesson assignment.
+// LessonAssignmentUpsertRequest is the body for POST (create first assignment only) and PUT (update).
+// Each lesson has at most one assignment row; task_type is either "text" or "quiz".
 type LessonAssignmentUpsertRequest struct {
 	Title                    string      `json:"title" binding:"required"`
 	TaskType                 string      `json:"task_type" binding:"required"`

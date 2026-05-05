@@ -3,7 +3,10 @@ package entity
 import (
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type AttendanceStatus string
@@ -31,4 +34,22 @@ type LessonAttendance struct {
 
 func (LessonAttendance) TableName() string {
 	return "lesson_attendances"
+}
+
+// AfterFind otomatis mendekripsi catatan kehadiran. Field uid, lesson_uid,
+// enrollment_uid, status, checked_in_at, dan timestamps tidak dienkripsi.
+func (la *LessonAttendance) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&la.Note)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi catatan kehadiran (idempotent).
+func (la *LessonAttendance) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&la.Note)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (la *LessonAttendance) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&la.Note)
+	return nil
 }

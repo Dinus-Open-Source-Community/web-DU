@@ -5,6 +5,7 @@ import (
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -34,14 +35,8 @@ func GetAllModulesFunc(c *gin.Context) {
 		return
 	}
 
-	courseUID, err := uuid.Parse(c.Param("course_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseUID, ok := resolveUIDParam(c, "courses", "course_id", "course")
+	if !ok {
 		return
 	}
 
@@ -94,8 +89,58 @@ func GetAllModulesFunc(c *gin.Context) {
 	}
 
 	db := database.DB.Model(&entity.Module{}).Where("course_uid = ?", courseUID)
+
+	// Karena title disimpan terenkripsi, filter dilakukan in-memory setelah hook
+	// AfterFind mendekripsi judul modul.
 	if nameFilter != "" {
-		db = db.Where("LOWER(title) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
+		var allModules []entity.Module
+		if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_index ASC")
+		}).Order("order_index ASC").Find(&allModules).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve modules for search",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		needle := strings.ToLower(nameFilter)
+		filtered := make([]entity.Module, 0, len(allModules))
+		for _, module := range allModules {
+			if strings.Contains(strings.ToLower(module.Title), needle) {
+				filtered = append(filtered, module)
+			}
+		}
+
+		total := int64(len(filtered))
+		start := (page - 1) * perPage
+		if start > len(filtered) {
+			start = len(filtered)
+		}
+		end := start + perPage
+		if end > len(filtered) {
+			end = len(filtered)
+		}
+		paginated := filtered[start:end]
+		totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Modules retrieved successfully",
+			"data": gin.H{
+				"modules": paginated,
+				"meta": gin.H{
+					"total":        total,
+					"per_page":     perPage,
+					"current_page": page,
+					"total_pages":  totalPages,
+				},
+			},
+			"error": nil,
+		})
+		return
 	}
 
 	var total int64
@@ -160,14 +205,8 @@ func GetModuleByIDFunc(c *gin.Context) {
 		return
 	}
 
-	moduleUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid module uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	moduleUID, ok := resolveUIDParam(c, "modules", "id", "module")
+	if !ok {
 		return
 	}
 
@@ -244,7 +283,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Create Module Access denied",
+			"message": "Access denied: cannot create module for this course",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -262,8 +301,13 @@ func PostAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
+	courseUid, ok := resolveUIDValue(c, "courses", req.CourseUid, "course")
+	if !ok {
+		return
+	}
+
 	var course entity.Course
-	if err := database.DB.First(&course, req.CourseUid).Error; err != nil {
+	if err := database.DB.First(&course, courseUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -273,9 +317,15 @@ func PostAdminModuleFunc(c *gin.Context) {
 		return
 	}
 
+	titleEnc, err := utils.Encrypt(req.Title)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt module title", "data": nil, "error": err.Error()})
+		return
+	}
+
 	module := entity.Module{
-		CourseUid:  req.CourseUid,
-		Title:      req.Title,
+		CourseUid:  courseUid,
+		Title:      titleEnc,
 		OrderIndex: req.OrderIndex,
 	}
 
@@ -288,6 +338,8 @@ func PostAdminModuleFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	module.Title = utils.DecryptOrSelf(module.Title)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -331,21 +383,15 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Update Module Access denied",
+			"message": "Access denied: cannot update this module",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	moduleUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid module uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	moduleUID, ok := resolveUIDParam(c, "modules", "id", "module")
+	if !ok {
 		return
 	}
 
@@ -372,7 +418,12 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 	}
 
 	if req.Title != "" {
-		module.Title = req.Title
+		titleEnc, err := utils.Encrypt(req.Title)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt module title", "data": nil, "error": err.Error()})
+			return
+		}
+		module.Title = titleEnc
 	}
 	if req.OrderIndex != 0 {
 		module.OrderIndex = req.OrderIndex
@@ -387,6 +438,8 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	module.Title = utils.DecryptOrSelf(module.Title)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -429,21 +482,15 @@ func DeleteAdminModuleFunc(c *gin.Context) {
 	if !hasMentorAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Delete Module Access denied",
+			"message": "Access denied: cannot delete this module",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	moduleUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid module uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	moduleUID, ok := resolveUIDParam(c, "modules", "id", "module")
+	if !ok {
 		return
 	}
 

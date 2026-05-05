@@ -54,6 +54,11 @@ func main() {
 	r.Use(middleware.CORSMiddleware())
 	r.Use(gin.Recovery())
 
+	// ShortenUIDs harus dipasang sebelum handler manapun agar bisa
+	// menangkap & memodifikasi seluruh response JSON (memotong UID
+	// jadi 8 karakter pertama).
+	r.Use(middleware.ShortenUIDsMiddleware())
+
 	// Connect to the database
 	database.ConnectDB()
 

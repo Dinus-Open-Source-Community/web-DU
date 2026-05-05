@@ -4,6 +4,7 @@ import (
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -12,26 +13,32 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
-// @Summary      Upsert lesson assignment (Admin/Mentor)
-// @Description  Create or update assignment configuration for a lesson.
+func isPostgresUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
+// @Summary      Create lesson assignment (Admin/Mentor)
+// @Description  Create assignment for a lesson. Each lesson allows at most one assignment (text or quiz); use PUT to update.
 // @Tags         Lesson Assignment
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id       path      string                            true  "Lesson UID"
 // @Param        request  body      dto.LessonAssignmentUpsertRequest true  "Lesson assignment payload"
-// @Success      200  {object}  map[string]any  "Lesson assignment updated successfully"
 // @Success      201  {object}  map[string]any  "Lesson assignment created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
 // @Failure      404  {object}  map[string]any  "Lesson or module not found"
-// @Failure      500  {object}  map[string]any  "Failed to upsert lesson assignment"
+// @Failure      409  {object}  map[string]any  "Lesson already has an assignment"
+// @Failure      500  {object}  map[string]any  "Failed to create lesson assignment"
 // @Router       /lessons/{id}/assignment [post]
-func UpsertLessonAssignmentFunc(c *gin.Context) {
+func CreateLessonAssignmentFunc(c *gin.Context) {
 	user, ok := getAuthenticatedUser(c)
 	if !ok {
 		return
@@ -66,41 +73,36 @@ func UpsertLessonAssignmentFunc(c *gin.Context) {
 
 	var existing entity.LessonAssignment
 	err = database.DB.Where("lesson_uid = ?", lesson.Uid).First(&existing).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to find lesson assignment", "data": nil, "error": err.Error()})
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "This lesson already has an assignment; use PUT /lessons/{id}/assignment to update it",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to check lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := database.DB.Create(&assignment).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to create lesson assignment", "data": nil, "error": err.Error()})
+	if err := database.DB.Create(&assignment).Error; err != nil {
+		if isPostgresUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"message": "This lesson already has an assignment; use PUT /lessons/{id}/assignment to update it",
+				"data":    nil,
+				"error":   nil,
+			})
 			return
 		}
-		c.JSON(http.StatusCreated, gin.H{"success": true, "message": "Lesson assignment created successfully", "data": assignment, "error": nil})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to create lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
 
-	existing.Title = assignment.Title
-	existing.TaskType = assignment.TaskType
-	existing.TaskDescription = assignment.TaskDescription
-	existing.QuizPayload = assignment.QuizPayload
-	existing.AllowFileSubmission = assignment.AllowFileSubmission
-	existing.AllowPlainTextSubmission = assignment.AllowPlainTextSubmission
-	existing.AllowRichTextSubmission = assignment.AllowRichTextSubmission
-	existing.RequireFileDescription = assignment.RequireFileDescription
-	existing.InstructionAttachments = assignment.InstructionAttachments
-	existing.DeadlineAt = assignment.DeadlineAt
-	existing.Status = assignment.Status
-	existing.AutoCloseAfterDeadline = assignment.AutoCloseAfterDeadline
-	existing.AllowResubmit = assignment.AllowResubmit
-	existing.MaxResubmitCount = assignment.MaxResubmitCount
-
-	if err := database.DB.Save(&existing).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to update lesson assignment", "data": nil, "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment updated successfully", "data": existing, "error": nil})
+	assignment.Title = utils.DecryptOrSelf(assignment.Title)
+	c.JSON(http.StatusCreated, gin.H{"success": true, "message": "Lesson assignment created successfully", "data": assignment, "error": nil})
 }
 
 // @Summary      Get lesson assignment (Admin/Mentor)
@@ -227,6 +229,7 @@ func UpdateLessonAssignmentFunc(c *gin.Context) {
 		return
 	}
 
+	existing.Title = utils.DecryptOrSelf(existing.Title)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment updated successfully", "data": existing, "error": nil})
 }
 
@@ -272,9 +275,8 @@ func DeleteLessonAssignmentFunc(c *gin.Context) {
 }
 
 func loadLessonAndModuleForAssignment(c *gin.Context) (entity.Lesson, entity.Module, bool) {
-	lessonID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson uid", "data": nil, "error": err.Error()})
+	lessonID, ok := resolveUIDParam(c, "lessons", "id", "lesson")
+	if !ok {
 		return entity.Lesson{}, entity.Module{}, false
 	}
 
@@ -306,7 +308,7 @@ func buildLessonAssignmentModel(lessonUID uuid.UUID, req dto.LessonAssignmentUps
 
 	status := entity.LessonAssignmentStatus(strings.ToUpper(strings.TrimSpace(req.Status)))
 	if status != entity.LessonAssignmentStatusDraft && status != entity.LessonAssignmentStatusTerbit && status != entity.LessonAssignmentStatusDitutup {
-		return entity.LessonAssignment{}, errors.New("status must be one of: DRAFT, TERBIT, DITUTUP")
+		return entity.LessonAssignment{}, errors.New("status must be one of: DRAFT, TERBIT (published), DITUTUP (closed)")
 	}
 
 	if !req.AllowFileSubmission && !req.AllowPlainTextSubmission && !req.AllowRichTextSubmission {
@@ -352,9 +354,14 @@ func buildLessonAssignmentModel(lessonUID uuid.UUID, req dto.LessonAssignmentUps
 		return entity.LessonAssignment{}, errors.New("invalid instruction_attachments JSON")
 	}
 
+	titleEnc, err := utils.Encrypt(title)
+	if err != nil {
+		return entity.LessonAssignment{}, errors.New("failed to encrypt assignment title")
+	}
+
 	return entity.LessonAssignment{
 		LessonUid:                lessonUID,
-		Title:                    title,
+		Title:                    titleEnc,
 		TaskType:                 taskType,
 		TaskDescription:          taskDescription,
 		QuizPayload:              quizPayload,

@@ -3,7 +3,10 @@ package entity
 import (
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type UserRole string
@@ -36,4 +39,28 @@ type User struct {
 	AssignedCourseLinks []CourseMentor `gorm:"foreignKey:AssignedByUid" json:"assigned_course_links"`
 	Enrollments         []Enrollment   `gorm:"foreignKey:UserUid" json:"enrollments"`
 	Reviews             []CourseReview `gorm:"foreignKey:UserUid" json:"course_reviews"`
+}
+
+// AfterFind otomatis mendekripsi kolom sensitif setelah data dimuat dari database.
+// Field uid, email_hash, password, role, is_verified, avatar_url, dan timestamps
+// tidak dienkripsi karena bukan data informatif personal atau dibutuhkan apa adanya
+// untuk operasi (lookup blind index, hashing password, URL gambar, dsb).
+func (u *User) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&u.Name, &u.Email, &u.Description)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi kolom sensitif sebelum disimpan. Bersifat
+// idempotent: jika field sudah berupa ciphertext (kasus service yang sudah
+// melakukan Encrypt secara eksplisit), enkripsi ulang dilewati.
+func (u *User) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&u.Name, &u.Email, &u.Description)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah operasi simpan agar
+// pemanggil service dapat langsung mengembalikan entitas ke client tanpa perlu
+// dekripsi manual. Database tetap menyimpan ciphertext.
+func (u *User) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&u.Name, &u.Email, &u.Description)
+	return nil
 }
