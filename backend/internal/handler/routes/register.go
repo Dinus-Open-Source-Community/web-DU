@@ -14,6 +14,10 @@ func init() {
 func StartRegisterRoutes(r *gin.Engine) {
 	registerGroup := r.Group("/register")
 	{
-		registerGroup.POST("", service.PostRegisterFunc) // all roles - anonymous user
+<<<<<<< Updated upstream
+		registerGroup.POST("/", service.PostRegisterFunc) // user registration
+=======
+		registerGroup.POST("", service.PostRegisterFunc) // Public
+>>>>>>> Stashed changes
 	}
 }

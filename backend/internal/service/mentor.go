@@ -17,8 +17,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// @Summary      Assign mentors to course (Admin Only)
-// @Description  Assign one or more mentors selected by admin to a course. Course can have multiple mentors.
+// @Summary      Assign mentors to course (Super Admin / Admin)
+// @Description  Assign one or more mentors selected by Super Admin or Admin to a course. Course can have multiple mentors.
 // @Tags         Course
 // @Accept       json
 // @Produce      json
@@ -28,7 +28,7 @@ import (
 // @Success      200  {object}  map[string]any  "Mentors assigned successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Forbidden - admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id}/mentors/assign [post]
@@ -59,21 +59,15 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	if !hasAdminAccess(admin.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	courseUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -99,9 +93,20 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 		return
 	}
 
-	uniqueMentorUIDs := make([]uuid.UUID, 0, len(req.MentorUids))
-	seen := make(map[uuid.UUID]struct{}, len(req.MentorUids))
-	for _, mentorUID := range req.MentorUids {
+	resolvedMentorUIDs, err := database.ResolveUIDs("users", req.MentorUids)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Failed to resolve mentor uids",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	uniqueMentorUIDs := make([]uuid.UUID, 0, len(resolvedMentorUIDs))
+	seen := make(map[uuid.UUID]struct{}, len(resolvedMentorUIDs))
+	for _, mentorUID := range resolvedMentorUIDs {
 		if _, ok := seen[mentorUID]; ok {
 			continue
 		}
@@ -206,7 +211,7 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get mentors by course ID (All Roles - Anonymous User)
+// @Summary      Get mentors by course ID (Public)
 // @Description  Public endpoint to retrieve mentors assigned to a specific course.
 // @Tags         Course
 // @Accept       json
@@ -221,14 +226,8 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id}/mentor [get]
 func GetCourseMentorsByCourseIDFunc(c *gin.Context) {
-	courseUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -436,7 +435,7 @@ func mentorListToGinH(mentors []entity.User) ([]gin.H, error) {
 	return result, nil
 }
 
-// @Summary      Get all mentors (All Roles - Anonymous User)
+// @Summary      Get all mentors (Public)
 // @Description  Public endpoint to retrieve all mentor users with teaching summaries. Optional `name` filters by mentor display name (decrypted, case-insensitive, in-memory).
 // @Tags         Mentor
 // @Accept       json
@@ -554,7 +553,7 @@ func GetAllMentorsFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get mentor detail by ID (All Roles - Anonymous User)
+// @Summary      Get mentor detail by ID (Public)
 // @Description  Public endpoint to retrieve mentor detail similar to user detail including assigned courses, joined teaching courses, and related course reviews.
 // @Tags         Mentor
 // @Accept       json
@@ -566,14 +565,8 @@ func GetAllMentorsFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /mentor/{id} [get]
 func GetMentorDetailFunc(c *gin.Context) {
-	mentorUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid mentor uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	mentorUID, ok := resolveUIDParam(c, "users", "id", "mentor")
+	if !ok {
 		return
 	}
 
@@ -622,7 +615,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 		}
 		assignedCourses = append(assignedCourses, gin.H{
 			"course_uid":    row.CourseUID,
-			"course_title":  row.CourseTitle,
+			"course_title":  utils.DecryptOrSelf(row.CourseTitle),
 			"course_slug":   row.CourseSlug,
 			"course_status": row.CourseStatus,
 			"status":        row.Status,
@@ -679,7 +672,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 				"comment":      commentDecrypted,
 				"created_at":   review.CreatedAt,
 				"course_uid":   review.CourseUID,
-				"course_title": review.CourseTitle,
+				"course_title": utils.DecryptOrSelf(review.CourseTitle),
 				"student": gin.H{
 					"uid":  review.StudentUID,
 					"name": studentName,

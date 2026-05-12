@@ -53,9 +53,18 @@ func CreateAttendanceFunc(c *gin.Context) {
 		return
 	}
 
+	lessonUid, ok := resolveUIDValue(c, "lessons", req.LessonUid, "lesson")
+	if !ok {
+		return
+	}
+	enrollmentUid, ok := resolveUIDValue(c, "enrollments", req.EnrollmentUid, "enrollment")
+	if !ok {
+		return
+	}
+
 	// Verify lesson exists
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, req.LessonUid).Error; err != nil {
+	if err := database.DB.First(&lesson, lessonUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",
@@ -67,7 +76,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Verify enrollment exists
 	var enrollment entity.Enrollment
-	if err := database.DB.First(&enrollment, req.EnrollmentUid).Error; err != nil {
+	if err := database.DB.First(&enrollment, enrollmentUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Enrollment not found",
@@ -79,7 +88,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Check if already checked in for this lesson
 	var existingAttendance entity.LessonAttendance
-	err := database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", req.LessonUid, req.EnrollmentUid).
+	err := database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", lessonUid, enrollmentUid).
 		First(&existingAttendance).Error
 
 	if err == nil {
@@ -115,8 +124,8 @@ func CreateAttendanceFunc(c *gin.Context) {
 
 	// Create attendance record
 	attendance := entity.LessonAttendance{
-		LessonUid:     req.LessonUid,
-		EnrollmentUid: req.EnrollmentUid,
+		LessonUid:     lessonUid,
+		EnrollmentUid: enrollmentUid,
 		Status:        attendanceStatus,
 		Note:          encryptedNote,
 	}
@@ -151,8 +160,8 @@ func CreateAttendanceFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get all attendances for a lesson (Admin Only)
-// @Description  Retrieve all attendance records for a specific lesson. Admin only.
+// @Summary      Get all attendances for a lesson (Super Admin / Admin)
+// @Description  Retrieve all attendance records for a specific lesson. Requires Super Admin or Admin.
 // @Tags         Lesson Attendance
 // @Accept       json
 // @Produce      json
@@ -160,7 +169,7 @@ func CreateAttendanceFunc(c *gin.Context) {
 // @Param        lesson_id  path  string  true  "Lesson UID"
 // @Success      200  {object}  map[string]any  "Attendances retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendances"
 // @Router       /lessons/attendances/lesson/{lesson_id} [get]
@@ -181,22 +190,15 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	lessonID := c.Param("lesson_id")
-	lessonUid, err := uuid.Parse(lessonID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid lesson uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	lessonUid, ok := resolveUIDParam(c, "lessons", "lesson_id", "lesson")
+	if !ok {
 		return
 	}
 
@@ -224,8 +226,8 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get attendance by ID (Admin Only)
-// @Description  Retrieve a specific attendance record by ID. Admin only.
+// @Summary      Get attendance by ID (Super Admin / Admin)
+// @Description  Retrieve a specific attendance record by ID. Requires Super Admin or Admin.
 // @Tags         Lesson Attendance
 // @Accept       json
 // @Produce      json
@@ -233,7 +235,7 @@ func GetLessonAttendancesFunc(c *gin.Context) {
 // @Param        id  path  string  true  "Attendance UID"
 // @Success      200  {object}  map[string]any  "Attendance retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "User or attendance not found"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve attendance"
 // @Router       /lessons/attendances/{id} [get]
@@ -254,14 +256,17 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	attendanceID := c.Param("id")
+	attendanceID, ok := resolveUIDParam(c, "lesson_attendances", "id", "attendance")
+	if !ok {
+		return
+	}
 
 	var attendance entity.LessonAttendance
 	if err := database.DB.Preload("Lesson").Preload("Enrollment").First(&attendance, attendanceID).Error; err != nil {
@@ -284,8 +289,8 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Update attendance status and note (Admin Only)
-// @Description  Update attendance status and note. Admin only. Can only update status and note, not lesson/enrollment.
+// @Summary      Update attendance status and note (Super Admin / Admin)
+// @Description  Update attendance status and note. Requires Super Admin or Admin. Can only update status and note, not lesson/enrollment.
 // @Tags         Lesson Attendance
 // @Accept       json
 // @Produce      json
@@ -295,7 +300,7 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Attendance updated successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Attendance or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to update attendance"
 // @Router       /lessons/attendances/{id} [put]
@@ -316,14 +321,17 @@ func UpdateAttendanceFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	attendanceID := c.Param("id")
+	attendanceID, ok := resolveUIDParam(c, "lesson_attendances", "id", "attendance")
+	if !ok {
+		return
+	}
 
 	var attendance entity.LessonAttendance
 	if err := database.DB.First(&attendance, attendanceID).Error; err != nil {
@@ -385,8 +393,8 @@ func UpdateAttendanceFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Delete attendance record (Admin Only)
-// @Description  Delete an attendance record by ID. Admin only.
+// @Summary      Delete attendance record (Super Admin / Admin)
+// @Description  Delete an attendance record by ID. Requires Super Admin or Admin.
 // @Tags         Lesson Attendance
 // @Accept       json
 // @Produce      json
@@ -394,7 +402,7 @@ func UpdateAttendanceFunc(c *gin.Context) {
 // @Param        id  path  string  true  "Attendance UID"
 // @Success      200  {object}  map[string]any  "Attendance deleted successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Attendance not found"
 // @Failure      500  {object}  map[string]any  "Failed to delete attendance"
 // @Router       /lessons/attendances/{id} [delete]
@@ -415,14 +423,17 @@ func DeleteAttendanceFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	attendanceID := c.Param("id")
+	attendanceID, ok := resolveUIDParam(c, "lesson_attendances", "id", "attendance")
+	if !ok {
+		return
+	}
 
 	if err := database.DB.Delete(&entity.LessonAttendance{}, attendanceID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -483,30 +494,18 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 		return
 	}
 
-	lessonUid, err := uuid.Parse(lessonIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid lesson_id format (expected UUID)",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	lessonUid, ok := resolveUIDValue(c, "lessons", lessonIDStr, "lesson")
+	if !ok {
 		return
 	}
 
-	enrollmentUid, err := uuid.Parse(enrollmentIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid enrollment_id format (expected UUID)",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	enrollmentUid, ok := resolveUIDValue(c, "enrollments", enrollmentIDStr, "enrollment")
+	if !ok {
 		return
 	}
 
 	var attendance entity.LessonAttendance
-	err = database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", lessonUid, enrollmentUid).
+	err := database.DB.Where("lesson_uid = ? AND enrollment_uid = ?", lessonUid, enrollmentUid).
 		Preload("Lesson").
 		Preload("Enrollment").
 		First(&attendance).Error
@@ -562,7 +561,7 @@ func GetMyAttendanceHistoryFunc(c *gin.Context) {
 
 	enrollmentIDStr := c.Query("enrollment_id")
 	if enrollmentIDStr != "" {
-		if enrollmentUid, err := uuid.Parse(enrollmentIDStr); err == nil {
+		if enrollmentUid, err := database.ResolveUID("enrollments", enrollmentIDStr); err == nil {
 			query = query.Where("uid = ?", enrollmentUid)
 		}
 	}

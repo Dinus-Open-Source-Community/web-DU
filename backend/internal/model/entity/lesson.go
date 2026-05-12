@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type LessonContentType string
@@ -43,4 +46,23 @@ func (l *Lesson) Scan(value interface{}) error {
 // Value implements the driver.Valuer interface for JSONB
 func (l Lesson) Value() (driver.Value, error) {
 	return l.Content, nil
+}
+
+// AfterFind otomatis mendekripsi judul lesson. Field content (jsonb), video_url,
+// content_type, order_index, start_time/end_time, uid, dan timestamps tidak
+// dienkripsi karena dibutuhkan apa adanya atau bukan data informatif sensitif.
+func (l *Lesson) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&l.Title)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi judul lesson (idempotent).
+func (l *Lesson) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&l.Title)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (l *Lesson) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&l.Title)
+	return nil
 }

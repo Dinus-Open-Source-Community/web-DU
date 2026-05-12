@@ -30,15 +30,8 @@ import (
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id}/review [post]
 func CreateCourseReviewFunc(c *gin.Context) {
-	courseID := c.Param("id")
-	courseUid, err := uuid.Parse(courseID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseUid, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -113,7 +106,6 @@ func CreateCourseReviewFunc(c *gin.Context) {
 		return
 	}
 
-	// Encrypt the comment
 	encryptedComment, err := utils.Encrypt(req.Comment)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -153,7 +145,7 @@ func CreateCourseReviewFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Reply to a course review (Mentor/Admin)
+// @Summary      Reply to a course review (Mentor / Super Admin / Admin)
 // @Description  Allow assigned mentor or higher roles (admin/super admin) to post replies on a course review. Multiple replies are allowed.
 // @Tags         Course
 // @Accept       json
@@ -170,15 +162,13 @@ func CreateCourseReviewFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id}/review/{review_id}/reply [post]
 func CreateCourseReviewReplyFunc(c *gin.Context) {
-	courseUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid course uid", "data": nil, "error": err.Error()})
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
-	reviewUID, err := uuid.Parse(c.Param("review_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid review uid", "data": nil, "error": err.Error()})
+	reviewUID, ok := resolveUIDParam(c, "course_reviews", "review_id", "review")
+	if !ok {
 		return
 	}
 

@@ -138,7 +138,7 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	// Footer
 	pdf.SetFont("Arial", "I", 9)
 	pdf.SetTextColor(128, 128, 128)
-	pdf.CellFormat(0, 8, "Terimakasih Sudah Mengambil Kursus Ini!", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 8, "Thank you for enrolling in this course!", "", 1, "C", false, 0, "")
 	pdf.CellFormat(0, 8, fmt.Sprintf("Enrollment: %s | Course Slug: %s", enrollment.Uid.String(), course.Slug), "", 1, "C", false, 0, "")
 
 	// Generate PDF bytes
@@ -191,18 +191,23 @@ func CreateAndUploadInvoice(enrollment *entity.Enrollment) (string, string, erro
 	return url, filename, nil
 }
 
-// uploadInvoiceWithCustomFilename uploads invoice with a specific filename (not random UUID)
-func uploadInvoiceWithCustomFilename(reader io.Reader, size int64, bucket, filename string) (string, error) {
+// uploadInvoiceWithCustomFilename mengunggah invoice dengan nama file spesifik
+// (bukan UUID acak). Dipakai supaya invoice dari enrollment yang sama selalu
+// menulis ke object key yang deterministik. Konten di-enkripsi sama seperti
+// upload file lainnya melalui PutEncryptedObject sebelum disimpan ke MinIO.
+func uploadInvoiceWithCustomFilename(reader io.Reader, _ int64, bucket, filename string) (string, error) {
 	if utils.MinioClient == nil {
 		return "", fmt.Errorf("MinIO client is not initialized")
 	}
 
-	ctx := context.Background()
-	_, err := utils.MinioClient.PutObject(ctx, bucket, filename, reader, size, utils.NewPutObjectOptions("application/pdf"))
+	plaintext, err := io.ReadAll(reader)
 	if err != nil {
-		return "", fmt.Errorf("failed to upload file to MinIO: %w", err)
+		return "", fmt.Errorf("failed to read invoice bytes: %w", err)
 	}
 
-	// Return the object URL
+	if err := utils.PutEncryptedObject(context.Background(), bucket, filename, plaintext, "application/pdf", filename); err != nil {
+		return "", err
+	}
+
 	return utils.GetPublicURL(bucket, filename), nil
 }

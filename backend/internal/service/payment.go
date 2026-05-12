@@ -71,7 +71,8 @@ func GetPaymentByEnrollmentID(enrollmentUid uuid.UUID) (*entity.Payment, error) 
 	return &payment, nil
 }
 
-// CreatePayment creates a new payment via Tripay API
+// CreatePayment creates a new payment via Tripay API.
+// req.EnrollmentUid menerima full UUID maupun 8-char prefix.
 func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIResponse, error) {
 	// Get credentials from env
 	merchantCode := os.Getenv("TRIPAY_MERCHANT_CODE")
@@ -102,9 +103,16 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		return nil, fmt.Errorf("failed to decrypt user email: %w", err)
 	}
 
-	if req.EnrollmentUid != nil {
+	var enrollmentUidPtr *uuid.UUID
+	if req.EnrollmentUid != "" {
+		resolved, err := database.ResolveUID("enrollments", req.EnrollmentUid)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve enrollment_uid: %w", err)
+		}
+		enrollmentUidPtr = &resolved
+
 		var enrollment entity.Enrollment
-		if err := database.DB.First(&enrollment, *req.EnrollmentUid).Error; err != nil {
+		if err := database.DB.First(&enrollment, resolved).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				return nil, fmt.Errorf("enrollment not found")
 			}
@@ -116,7 +124,7 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 			return nil, fmt.Errorf("enrollment is already active, no payment needed")
 		}
 
-		pendingPayment, err := GetPendingPaymentByEnrollment(*req.EnrollmentUid)
+		pendingPayment, err := GetPendingPaymentByEnrollment(resolved)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check pending payment: %w", err)
 		}
@@ -240,7 +248,7 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 
 	// Save payment to database
 	payment := &entity.Payment{
-		EnrollmentUid: req.EnrollmentUid,
+		EnrollmentUid: enrollmentUidPtr,
 		Amount:        float64(req.Amount),
 		Method:        entity.PaymentMethod(req.Method),
 		Status:        entity.PaymentPending,
@@ -403,13 +411,13 @@ func GetPaymentFunc(c *gin.Context) {
 	if reference != "" {
 		payment, err = GetPaymentByReference(reference)
 	} else {
-		enrollmentUid, err2 := uuid.Parse(enrollmentIDStr)
+		enrollmentUid, err2 := database.ResolveUID("enrollments", enrollmentIDStr)
 		if err2 != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
-				"message": "Invalid enrollmentId format",
+				"message": "Invalid enrollmentId",
 				"data":    nil,
-				"error":   "enrollmentId must be a valid UUID",
+				"error":   err2.Error(),
 			})
 			return
 		}

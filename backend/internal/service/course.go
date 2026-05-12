@@ -69,8 +69,8 @@ func parseWhatYouLearn(c *gin.Context) (json.RawMessage, error) {
 	return json.Marshal(arr)
 }
 
-// @Summary      Create new course (Admin Only)
-// @Description  Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Admin only.
+// @Summary      Create new course (Super Admin / Admin)
+// @Description  Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Requires Super Admin or Admin.
 // @Tags         Course
 // @Accept       multipart/form-data
 // @Produce      json
@@ -93,7 +93,7 @@ func parseWhatYouLearn(c *gin.Context) (json.RawMessage, error) {
 // @Success      201  {object}  map[string]any  "Course created successfully"
 // @Failure      400  {object}  map[string]any  "Invalid request payload"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Failed to create course"
 // @Router       /courses [post]
@@ -114,7 +114,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Create Course Access denied: Admins only",
+			"message": "Create course access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -195,14 +195,8 @@ func PostAdminCourseFunc(c *gin.Context) {
 	}
 
 	categoryUIDStr := strings.TrimSpace(c.PostForm("category_uid"))
-	categoryUID, err := uuid.Parse(categoryUIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "category_uid is required and must be a valid UUID",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	categoryUID, ok := resolveUIDValue(c, "course_categories", categoryUIDStr, "category")
+	if !ok {
 		return
 	}
 
@@ -221,14 +215,8 @@ func PostAdminCourseFunc(c *gin.Context) {
 	if classTypeUIDStr == "" {
 		classTypeUIDStr = strings.TrimSpace(c.PostForm("class_type_uid"))
 	}
-	classTypeUID, err := uuid.Parse(classTypeUIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "course_type_uid is required and must be a valid UUID",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	classTypeUID, ok := resolveUIDValue(c, "class_types", classTypeUIDStr, "course type")
+	if !ok {
 		return
 	}
 
@@ -251,7 +239,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "level harus salah satu dari: PEMULA, MENENGAH, LANJUTAN",
+			"message": "level must be one of: PEMULA, MENENGAH, LANJUTAN (beginner, intermediate, advanced)",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -295,15 +283,31 @@ func PostAdminCourseFunc(c *gin.Context) {
 		coverURL = url
 	}
 
+	titleEnc, err := utils.Encrypt(title)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt title", "data": nil, "error": err.Error()})
+		return
+	}
+	subtitleEnc, err := utils.Encrypt(subtitle)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt subtitle", "data": nil, "error": err.Error()})
+		return
+	}
+	descriptionEnc, err := utils.Encrypt(description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt description", "data": nil, "error": err.Error()})
+		return
+	}
+
 	course := entity.Course{
-		Title:        title,
-		Subtitle:     subtitle,
+		Title:        titleEnc,
+		Subtitle:     subtitleEnc,
 		Slug:         slug,
 		CategoryUid:  &categoryUID,
 		ClassTypeUid: &classTypeUID,
 		Level:        level,
 		Status:       entity.CourseStatusDraft,
-		Description:  description,
+		Description:  descriptionEnc,
 		CoverURL:     coverURL,
 		ThumbnailURL: coverURL,
 		WhatYouLearn: learningPointsRaw,
@@ -352,7 +356,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 // - price (float)         -> filter by exact price
 // - is_premium (bool)     -> filter by premium status (true/false)
 //
-// @Summary      Get all courses with pagination and filters (All Roles - Anonymous User)
+// @Summary      Get all courses with pagination and filters (Public)
 // @Description  Retrieve paginated list of courses with optional filters (mentor_id, title, price, is_premium)
 // @Tags         Course
 // @Accept       json
@@ -391,20 +395,15 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// Build query with filters
 	db := database.DB.Model(&entity.Course{})
 
-	// Filter by mentor_uid (UUID) across legacy primary mentor and new course_mentors assignments.
+	// Filter by mentor_uid (UUID atau 8-char prefix) across legacy primary mentor and new course_mentors assignments.
 	if mentorIDStr != "" {
-		if mentorUid, err := uuid.Parse(mentorIDStr); err == nil {
+		if mentorUid, err := database.ResolveUID("users", mentorIDStr); err == nil {
 			db = db.Where(
 				"mentor_uid = ? OR EXISTS (SELECT 1 FROM course_mentors cm WHERE cm.course_uid = courses.uid AND cm.mentor_uid = ?)",
 				mentorUid,
 				mentorUid,
 			)
 		}
-	}
-
-	// Filter by title (case-insensitive search)
-	if titleFilter != "" {
-		db = db.Where("LOWER(title) LIKE ?", "%"+titleFilter+"%")
 	}
 
 	// Filter by price
@@ -419,6 +418,58 @@ func GetAllCoursesFunc(c *gin.Context) {
 	if isPremiumStr != "" {
 		isPremium := isPremiumStr == "true" || isPremiumStr == "1"
 		db = db.Where("is_premium = ?", isPremium)
+	}
+
+	// Karena title disimpan dalam bentuk terenkripsi, filter berbasis title harus
+	// dilakukan secara in-memory setelah dekripsi (sama seperti pola search user
+	// pada GetAllUsersService) agar fungsionalitas pencarian tetap berjalan.
+	if strings.TrimSpace(titleFilter) != "" {
+		var allCourses []entity.Course
+		if err := db.Preload("Mentor").Preload("Mentors").Order("created_at DESC").Find(&allCourses).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve courses for search",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		needle := strings.ToLower(strings.TrimSpace(titleFilter))
+		filtered := make([]entity.Course, 0, len(allCourses))
+		for _, course := range allCourses {
+			if strings.Contains(strings.ToLower(course.Title), needle) {
+				filtered = append(filtered, course)
+			}
+		}
+
+		total := int64(len(filtered))
+		start := (page - 1) * perPage
+		if start > len(filtered) {
+			start = len(filtered)
+		}
+		end := start + perPage
+		if end > len(filtered) {
+			end = len(filtered)
+		}
+		paginated := filtered[start:end]
+		totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Courses retrieved successfully",
+			"data": gin.H{
+				"courses": courseListResponse(paginated),
+				"meta": gin.H{
+					"total":        total,
+					"per_page":     perPage,
+					"current_page": page,
+					"total_pages":  totalPages,
+				},
+			},
+			"error": nil,
+		})
+		return
 	}
 
 	// Count total records
@@ -464,7 +515,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get course by ID (All Roles - Anonymous User)
+// @Summary      Get course by ID (Public)
 // @Description  Retrieve complete information of a specific course including all modules
 // @Tags         Course
 // @Accept       json
@@ -475,14 +526,8 @@ func GetAllCoursesFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /courses/{id} [get]
 func GetCourseByIDFunc(c *gin.Context) {
-	courseID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -509,8 +554,8 @@ func GetCourseByIDFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Activate course status (Admin Only)
-// @Description  Set course status to ACTIVE. Admin only endpoint.
+// @Summary      Activate course status (Super Admin / Admin)
+// @Description  Set course status to ACTIVE. Requires Super Admin or Admin.
 // @Tags         Course
 // @Accept       json
 // @Produce      json
@@ -518,7 +563,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 // @Param        id   path      string  true  "Course UID"
 // @Success      200  {object}  map[string]any  "Course status updated successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Admins only"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "Course or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to update course status"
 // @Router       /courses/{id}/status [patch]
@@ -539,21 +584,15 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Update Course Status Access denied: Admins only",
+			"message": "Update course status access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	courseID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -618,21 +657,15 @@ func JoinCourseFunc(c *gin.Context) {
 	if userData.Role != entity.StudentRole {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Join Course Access denied: Students only. Admins and Mentors cannot join courses",
+			"message": "Access denied: only students may join courses; admins and mentors cannot enroll",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	courseID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -648,7 +681,7 @@ func JoinCourseFunc(c *gin.Context) {
 	}
 
 	var existingEnrollment entity.Enrollment
-	err = database.DB.Where("user_uid = ? AND course_uid = ?", userData.Uid, course.Uid).First(&existingEnrollment).Error
+	err := database.DB.Where("user_uid = ? AND course_uid = ?", userData.Uid, course.Uid).First(&existingEnrollment).Error
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -738,7 +771,7 @@ type CourseStudentSafeItem struct {
 	Status           entity.EnrollmentStatus `json:"status"`
 }
 
-// @Summary      Get all enrolled students in a course (All Roles - Anonymous User)
+// @Summary      Get all enrolled students in a course (Public)
 // @Description  Retrieve list of all students enrolled in a specific course. Response is sanitized and excludes sensitive user fields.
 // @Tags         Course
 // @Accept       json
@@ -752,14 +785,8 @@ type CourseStudentSafeItem struct {
 // @Failure      500  {object}  map[string]any  "Failed to retrieve students"
 // @Router       /courses/{id}/students [get]
 func GetCourseStudentsFunc(c *gin.Context) {
-	courseID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
 		return
 	}
 
@@ -889,14 +916,8 @@ func GetCourseStudentsFunc(c *gin.Context) {
 // @Router       /invoices/{enrollment_id} [get]
 func GetEnrollmentInvoiceFunc(c *gin.Context) {
 	userID, _ := c.Get(middleware.UIDCK)
-	enrollmentID, err := uuid.Parse(c.Param("enrollment_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid enrollment uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	enrollmentID, ok := resolveUIDParam(c, "enrollments", "enrollment_id", "enrollment")
+	if !ok {
 		return
 	}
 
@@ -972,7 +993,7 @@ func GetEnrollmentInvoiceFunc(c *gin.Context) {
 }
 
 // @Summary      Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)
-// @Description  Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, mentor, or the owner (self) only.
+// @Description  Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, assigned/joined mentor for the course, or the enrolled student (self).
 // @Tags         Invoice
 // @Accept       json
 // @Produce      json
@@ -1018,41 +1039,23 @@ func GetInvoiceURLFunc(c *gin.Context) {
 		return
 	}
 
-	enrollUid, err := uuid.Parse(enrollmentIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid enrollment_id parameter (expected UUID)",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	enrollUid, ok := resolveUIDValue(c, "enrollments", enrollmentIDStr, "enrollment")
+	if !ok {
 		return
 	}
 
-	parsedUserUid, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid user_id parameter (expected UUID)",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	parsedUserUid, ok := resolveUIDValue(c, "users", userIDStr, "user")
+	if !ok {
 		return
 	}
 
-	courseUidParam, err := uuid.Parse(courseIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid course_id parameter (expected UUID)",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	courseUidParam, ok := resolveUIDValue(c, "courses", courseIDStr, "course")
+	if !ok {
 		return
 	}
 
 	var enrollment entity.Enrollment
-	if err := database.DB.First(&enrollment, enrollUid).Error; err != nil {
+	if err := database.DB.Preload("Course").First(&enrollment, enrollUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Enrollment not found",
@@ -1072,9 +1075,16 @@ func GetInvoiceURLFunc(c *gin.Context) {
 		return
 	}
 
-	isAuthorized := hasAdminAccess(userData.Role) ||
-		userData.Role == entity.MentorRole ||
-		userData.Uid == enrollment.UserUid
+	isAuthorized := hasAdminAccess(userData.Role) || userData.Uid == enrollment.UserUid
+
+	if !isAuthorized && hasMentorAccess(userData.Role) && enrollment.Course != nil {
+		var mentorAccessCount int64
+		_ = database.DB.Model(&entity.CourseMentor{}).
+			Where("course_uid = ? AND mentor_uid = ? AND status IN ?", enrollment.CourseUid, userData.Uid, []entity.CourseMentorStatus{entity.CourseMentorSelected, entity.CourseMentorJoined}).
+			Count(&mentorAccessCount).Error
+
+		isAuthorized = mentorAccessCount > 0 || (enrollment.Course.MentorUid != nil && *enrollment.Course.MentorUid == userData.Uid)
+	}
 
 	if !isAuthorized {
 		c.JSON(http.StatusForbidden, gin.H{
