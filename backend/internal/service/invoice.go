@@ -22,16 +22,9 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("failed to fetch user: %w", err)
 	}
 
-	// Decrypt user data
-	decryptedName, err := utils.Decrypt(user.Name)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to decrypt user name: %w", err)
-	}
-
-	decryptedEmail, err := utils.Decrypt(user.Email)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to decrypt user email: %w", err)
-	}
+	// Name/Email sudah plaintext via hook User.AfterFind; jangan Decrypt ulang.
+	customerName := user.Name
+	customerEmail := user.Email
 
 	var course entity.Course
 	if err := database.DB.First(&course, enrollment.CourseUid).Error; err != nil {
@@ -41,8 +34,7 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	// Fetch payment status
 	var payment entity.Payment
 	paymentStatus := "unpaid"
-	err = database.DB.Where("enrollment_uid = ?", enrollment.Uid).First(&payment).Error
-	if err == nil {
+	if err := database.DB.Where("enrollment_uid = ?", enrollment.Uid).First(&payment).Error; err == nil {
 		paymentStatus = string(payment.Status)
 	}
 
@@ -106,8 +98,8 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 	pdf.SetFont("Arial", "B", 11)
 	pdf.CellFormat(0, 8, "BILL TO:", "", 1, "L", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 8, fmt.Sprintf("Name: %s", decryptedName), "", 1, "L", false, 0, "")
-	pdf.CellFormat(0, 8, fmt.Sprintf("Email: %s", decryptedEmail), "", 1, "L", false, 0, "")
+	pdf.CellFormat(0, 8, fmt.Sprintf("Name: %s", customerName), "", 1, "L", false, 0, "")
+	pdf.CellFormat(0, 8, fmt.Sprintf("Email: %s", customerEmail), "", 1, "L", false, 0, "")
 
 	pdf.Ln(8)
 
@@ -143,8 +135,7 @@ func GenerateInvoicePDF(enrollment *entity.Enrollment) ([]byte, string, error) {
 
 	// Generate PDF bytes
 	var buf bytes.Buffer
-	err = pdf.Output(&buf)
-	if err != nil {
+	if err := pdf.Output(&buf); err != nil {
 		return nil, "", fmt.Errorf("failed to generate PDF: %w", err)
 	}
 
