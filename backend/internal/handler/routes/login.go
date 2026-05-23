@@ -14,10 +14,6 @@ func init() {
 func StartLoginRoutes(r *gin.Engine) {
 	loginGroup := r.Group("/login")
 	{
-<<<<<<< Updated upstream
 		loginGroup.POST("/", service.PostLoginFunc) // user login
-=======
-		loginGroup.POST("", service.PostLoginFunc) // Public
->>>>>>> Stashed changes
 	}
 }

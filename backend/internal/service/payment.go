@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -92,16 +93,9 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		return nil, err
 	}
 
-	// Decrypt user data
-	decryptedName, err := utils.Decrypt(user.Name)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt user name: %w", err)
-	}
-
-	decryptedEmail, err := utils.Decrypt(user.Email)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt user email: %w", err)
-	}
+	// Name/Email sudah plaintext via hook User.AfterFind; jangan Decrypt ulang.
+	customerName := user.Name
+	customerEmail := user.Email
 
 	var enrollmentUidPtr *uuid.UUID
 	if req.EnrollmentUid != "" {
@@ -144,8 +138,8 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 					Reference:     paymentData.TransactionID,
 					Status:        string(paymentData.Status),
 					Amount:        int(paymentData.Amount),
-					CustomerName:  decryptedName,
-					CustomerEmail: decryptedEmail,
+					CustomerName:  customerName,
+					CustomerEmail: customerEmail,
 				},
 			}, nil
 		}
@@ -178,22 +172,15 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		req.Amount,
 	)
 
-	// Set default callback and return URLs if not provided
-	callbackURL := req.CallbackURL
-	returnURL := req.ReturnURL
-	baseURL := os.Getenv("BASE_URL")
-
-	if callbackURL == "" {
-		if baseURL == "" {
-			return nil, fmt.Errorf("BASE_URL not configured and callback_url not provided")
-		}
-		callbackURL = baseURL + "/payment/callback"
+	// Callback URL selalu dari BASE_URL + route webhook Tripay (/payment/callback).
+	baseURL := strings.TrimRight(os.Getenv("BASE_URL"), "/")
+	if baseURL == "" {
+		return nil, fmt.Errorf("BASE_URL not configured")
 	}
+	callbackURL := baseURL + "/payment/callback"
 
+	returnURL := req.ReturnURL
 	if returnURL == "" {
-		if baseURL == "" {
-			return nil, fmt.Errorf("BASE_URL not configured and return_url not provided")
-		}
 		returnURL = baseURL + "/payment/success"
 	}
 
@@ -202,8 +189,8 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		"method":         req.Method,
 		"merchant_ref":   merchantRef,
 		"amount":         req.Amount,
-		"customer_name":  decryptedName,
-		"customer_email": decryptedEmail,
+		"customer_name":  customerName,
+		"customer_email": customerEmail,
 		"order_items":    orderItems,
 		"callback_url":   callbackURL,
 		"return_url":     returnURL,
@@ -384,7 +371,7 @@ func CreatePaymentFunc(c *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        reference  query     string          false  "Payment Reference"
-// @Param        enrollmentId  query     uint        false  "Enrollment ID"
+// @Param        enrollmentId  query     string      false  "Enrollment UID (full UUID atau 8-char prefix)"
 // @Success      200        {object}  map[string]any  "Payment details retrieved successfully"
 // @Failure      400        {object}  map[string]any  "Reference parameter is missing"
 // @Failure      401        {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"

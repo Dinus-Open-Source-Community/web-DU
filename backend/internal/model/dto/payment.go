@@ -17,9 +17,8 @@ type CreatePaymentRequest struct {
 	EnrollmentUid string      `json:"enrollment_uid"`
 	Method        string      `json:"method" binding:"required,oneof=PERMATAVA BNIVA BRIVA MANDIRIVA BCAVA MUAMALATVA CIMBVA BSIVA OCBCVA DANAMONVA OVO DANA QRIS2"`
 	Amount        int         `json:"amount" binding:"required,gt=0"`
-	OrderItems    []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
-	CallbackURL   string      `json:"callback_url"`
-	ReturnURL     string      `json:"return_url"`
+	OrderItems []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
+	ReturnURL  string      `json:"return_url"`
 }
 
 // OrderItemResponse represents order item in response
