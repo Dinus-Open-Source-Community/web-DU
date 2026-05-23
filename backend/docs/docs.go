@@ -3933,8 +3933,8 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "Enrollment ID",
+                        "type": "string",
+                        "description": "Enrollment UID (full UUID atau 8-char prefix)",
                         "name": "enrollmentId",
                         "in": "query"
                     }
@@ -4735,9 +4735,6 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "integer"
-                },
-                "callback_url": {
-                    "type": "string"
                 },
                 "enrollment_uid": {
                     "type": "string"

@@ -122,7 +122,8 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	var enrollments []entity.Enrollment
 	if err := database.DB.
 		Where("user_uid = ?", targetUID).
-		Preload("Course").
+		Preload("Course.Mentor").
+		Preload("Course.Mentors").
 		Order("enrolled_at DESC").
 		Find(&enrollments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -194,22 +195,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		}
 
 		seenCourses[enrollment.Course.Uid] = struct{}{}
-		courses = append(courses, gin.H{
-			"uid":               enrollment.Course.Uid,
-			"title":             enrollment.Course.Title,
-			"subtitle":          enrollment.Course.Subtitle,
-			"slug":              enrollment.Course.Slug,
-			"cover_url":         enrollment.Course.CoverURL,
-			"thumbnail_url":     enrollment.Course.ThumbnailURL,
-			"level":             enrollment.Course.Level,
-			"status":            enrollment.Course.Status,
-			"price":             enrollment.Course.Price,
-			"is_premium":        enrollment.Course.IsPremium,
-			"is_published":      enrollment.Course.IsPublished,
-			"enrolled_at":       enrollment.EnrolledAt,
-			"progress":          enrollment.Progress,
-			"enrollment_status": enrollment.Status,
-		})
+		courses = append(courses, joinedCourseListItemResponse(*enrollment.Course, enrollment))
 	}
 
 	type reviewRow struct {

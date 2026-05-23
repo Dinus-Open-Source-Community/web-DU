@@ -212,3 +212,11 @@ func courseListResponse(courses []entity.Course) []gin.H {
 	}
 	return items
 }
+
+func joinedCourseListItemResponse(course entity.Course, enrollment entity.Enrollment) gin.H {
+	item := courseListItemResponse(course)
+	item["enrolled_at"] = enrollment.EnrolledAt
+	item["progress"] = enrollment.Progress
+	item["enrollment_status"] = enrollment.Status
+	return item
+}

@@ -14,10 +14,6 @@ func init() {
 func StartRegisterRoutes(r *gin.Engine) {
 	registerGroup := r.Group("/register")
 	{
-<<<<<<< Updated upstream
 		registerGroup.POST("/", service.PostRegisterFunc) // user registration
-=======
-		registerGroup.POST("", service.PostRegisterFunc) // Public
->>>>>>> Stashed changes
 	}
 }
