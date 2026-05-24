@@ -9,7 +9,6 @@ import { BadgeVariant, PaymentStatus } from '@/lib/types'
 import { Profile } from './profile'
 import { Button } from './button'
 import { cn } from '@/lib/utils'
-import { router } from 'next/client'
 
 interface CardProps {
   variant?: 'course' | 'resume' | 'resumeAdmin' | 'transaction' | 'mentorCourse'

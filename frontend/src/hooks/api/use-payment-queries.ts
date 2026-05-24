@@ -1,6 +1,6 @@
 'use client'
 
-import { useSuspenseQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { get, post, type Envelope } from '@/lib/api/fetcher'
 import { queryKeys } from '@/lib/api/query-keys'
 
@@ -18,7 +18,7 @@ type CreatePaymentInput = {
 type CreatePaymentResponse = Record<string, unknown>
 
 export function usePaymentByReference(reference: string) {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: queryKeys.payment.byRef(reference),
     queryFn: () => get<Envelope<PaymentRecord>>('/payment', { reference }).then((r) => r.data),
     enabled: reference.length > 0,
@@ -26,7 +26,7 @@ export function usePaymentByReference(reference: string) {
 }
 
 export function usePaymentByEnrollment(enrollmentId: string) {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: queryKeys.payment.byEnrollment(enrollmentId),
     queryFn: () => get<Envelope<PaymentRecord>>('/payment', { enrollmentId }).then((r) => r.data),
     enabled: enrollmentId.length > 0,

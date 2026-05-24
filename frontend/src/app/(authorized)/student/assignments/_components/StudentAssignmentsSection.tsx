@@ -103,10 +103,7 @@ export function StudentAssignmentsSection() {
   return (
     <section className="flex w-full flex-col gap-8 px-5 py-8 md:px-8 md:py-10">
       <div className="flex flex-col gap-5">
-        <PageHeader
-          title="Tugas"
-          subtitle="Kelola dan kumpulkan tugas dari kursus Anda. Buka detail hanya saat tugas dapat dikerjakan atau sudah dinilai."
-        />
+        <PageHeader title="Tugas" subtitle="Kelola dan kumpulkan tugas dari kursus Anda. Buka detail hanya saat tugas dapat dikerjakan atau sudah dinilai." />
 
         {courseUidFilter && (
           <p className="text-sm text-slate-600">
@@ -117,12 +114,7 @@ export function StudentAssignmentsSection() {
           </p>
         )}
 
-        <SearchForm
-          value={searchInput}
-          onChange={setSearchInput}
-          onSubmit={() => setSearchQuery(searchInput)}
-          placeholder="Cari judul atau nama kursus…"
-        />
+        <SearchForm value={searchInput} onChange={setSearchInput} onSubmit={() => setSearchQuery(searchInput)} placeholder="Cari judul atau nama kursus…" />
       </div>
 
       <SegmentedFilter items={TABS.map((t) => ({ value: t.id, label: t.label }))} value={category} onChange={setCategory} variant="wrap" />
@@ -136,21 +128,14 @@ export function StudentAssignmentsSection() {
               const href = `/student/assignments/${row.assignment.uid}`
 
               return (
-                <article
-                  key={row.assignment.uid}
-                  className={cn(
-                    CARD_PANEL_CLASS,
-                    'flex flex-col overflow-hidden transition-colors hover:border-slate-300/90'
-                  )}>
+                <article key={row.assignment.uid} className={cn(CARD_PANEL_CLASS, 'flex flex-col overflow-hidden transition-colors hover:border-slate-300/90')}>
                   <div className="flex flex-1 flex-col gap-4 p-5">
                     <TaskBadges row={row} />
 
                     <div className="min-h-0 space-y-1">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Kursus</p>
                       <p className="text-sm font-medium leading-snug text-slate-600">{row.courseTitle}</p>
-                      <h3 className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-slate-900 md:text-lg">
-                        {row.assignment.title}
-                      </h3>
+                      <h3 className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-slate-900 md:text-lg">{row.assignment.title}</h3>
                     </div>
 
                     <div className="border-t border-slate-100 pt-4">
@@ -158,12 +143,8 @@ export function StudentAssignmentsSection() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Tenggat</p>
                         <DeadlineUrgencyBadges urgency={row.deadlineUrgency} />
                       </div>
-                      <p className="mt-1 text-sm font-medium text-slate-800">
-                        {formatAssignmentDeadlineRelative(row.assignment.deadlineAt, now, row.deadlineUrgency)}
-                      </p>
-                      <p className="mt-0.5 text-xs tabular-nums text-slate-500">
-                        {format(new Date(row.assignment.deadlineAt), 'd MMM yyyy · HH:mm', { locale: id })}
-                      </p>
+                      <p className="mt-1 text-sm font-medium text-slate-800">{formatAssignmentDeadlineRelative(row.assignment.deadlineAt, now, row.deadlineUrgency)}</p>
+                      <p className="mt-0.5 text-xs tabular-nums text-slate-500">{format(new Date(row.assignment.deadlineAt), 'd MMM yyyy · HH:mm', { locale: id })}</p>
                     </div>
 
                     {canOpen ? (
@@ -194,9 +175,7 @@ export function StudentAssignmentsSection() {
           <Pagination currentPage={Math.min(currentPage, totalPages)} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       ) : (
-        <p className="rounded-2xl border border-dashed border-slate-200/90 bg-slate-50/40 py-12 text-center text-sm text-slate-500">
-          Tidak ada tugas untuk filter atau pencarian ini.
-        </p>
+        <p className="rounded-2xl border border-dashed border-slate-200/90 bg-slate-50/40 py-12 text-center text-sm text-slate-500">Tidak ada tugas untuk filter atau pencarian ini.</p>
       )}
     </section>
   )

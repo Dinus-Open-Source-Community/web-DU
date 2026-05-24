@@ -9,7 +9,7 @@ export type { UserRole } from '@/lib/auth/session'
 const EMPTY_USER: AuthUser = {
   uid: '',
   nama: '',
-  role: 'student',
+  role: 'admin',
   email: '',
   avatar: undefined,
 }

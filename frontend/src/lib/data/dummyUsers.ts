@@ -1,14 +1,12 @@
 /**
- * Stub kompatibilitas tipe pengguna.
- *
- * Berkas ini sengaja kosong dari data dummy. Ia hanya menyediakan tipe dan fungsi
- * adapter agar kode lama yang masih mengimpor `DummyUser`, `UserRole`, `getActiveUser`,
- * atau `toSidebarUser` tetap dapat dikompilasi. Jangan tambahkan data mock di sini.
+ * Adapter pengguna dummy — selaraskan dengan sesi auth cookie jika sudah login,
+ * agar `mentorCourseStorage` & modul lain mendapat `id` konsisten (`mnt-arya`, `stu-001`, …).
  */
 
-import type { AuthUser, UserRole as AuthUserRole } from '@/lib/auth/session'
+import { getAuthUser } from '@/lib/auth/session'
+import type { AuthUser, UserRole } from '@/lib/auth/session'
 
-export type UserRole = AuthUserRole
+export type { UserRole }
 
 export interface DummyUser {
   id: string
@@ -22,19 +20,26 @@ const EMPTY_USER: DummyUser = {
   id: '',
   nama: '',
   email: '',
-  role: 'student',
+  role: 'admin',
   avatar: undefined,
 }
 
 export function getActiveUser(): DummyUser {
-  return EMPTY_USER
+  const u = getAuthUser()
+  if (!u) return EMPTY_USER
+
+  return {
+    id: u.uid,
+    nama: u.nama,
+    email: u.email,
+    role: u.role,
+    avatar: u.avatar,
+  }
 }
 
-export function toSidebarUser(
-  user: DummyUser | AuthUser | null | undefined,
-): { name: string; email: string; role: string; avatar?: string } {
+export function toSidebarUser(user: DummyUser | AuthUser | null | undefined): { name: string; email: string; role: string; avatar?: string } {
   if (!user) {
-    return { name: '', email: '', role: 'student', avatar: undefined }
+    return { name: '', email: '', role: 'admin', avatar: undefined }
   }
 
   return {
