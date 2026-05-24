@@ -430,13 +430,24 @@ func GetPaymentFunc(c *gin.Context) {
 }
 
 func PaymentCallbackFunc(c *gin.Context) {
-	var callbackData dto.PaymentCallbackRequest
-	if err := c.ShouldBindJSON(&callbackData); err != nil {
+	rawBody, err := io.ReadAll(c.Request.Body)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid callback format",
+			"message": "Failed to read callback body",
 			"data":    nil,
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	callbackSignature := c.GetHeader("X-Callback-Signature")
+	if callbackSignature == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Missing callback signature",
+			"data":    nil,
+			"error":   "X-Callback-Signature header is required",
 		})
 		return
 	}
@@ -452,14 +463,33 @@ func PaymentCallbackFunc(c *gin.Context) {
 		return
 	}
 
-	dataToSign := callbackData.Reference + callbackData.Status + fmt.Sprintf("%v", callbackData.TotalAmount)
-	h := utils.HMACSHA256(privateKey, dataToSign)
-	if callbackData.Signature != h {
+	if !utils.ValidateTripayCallbackSignature(privateKey, rawBody, callbackSignature) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Invalid callback signature",
 			"data":    nil,
 			"error":   "signature verification failed",
+		})
+		return
+	}
+
+	if event := c.GetHeader("X-Callback-Event"); event != "" && event != "payment_status" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Unrecognized callback event",
+			"data":    nil,
+			"error":   event,
+		})
+		return
+	}
+
+	var callbackData dto.PaymentCallbackRequest
+	if err := json.Unmarshal(rawBody, &callbackData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid callback format",
+			"data":    nil,
+			"error":   err.Error(),
 		})
 		return
 	}
