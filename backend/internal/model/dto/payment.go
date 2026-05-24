@@ -88,5 +88,4 @@ type PaymentCallbackRequest struct {
 	Status            string `json:"status" binding:"required"`
 	PaidAt            int64  `json:"paid_at"`
 	Note              string `json:"note"`
-	Signature         string `json:"signature"`
 }
