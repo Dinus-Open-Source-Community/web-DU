@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ROUTES } from './lib/routes.ts'
 import { ForgotPasswordPages } from './pages/auth/ForgotPass.tsx'
 import { FormResetPassword } from './pages/auth/ResetPass.tsx'
+import { NotFoundContent } from './components/shared/Error.tsx'
 
-const RoutePage = React.lazy(() => import('./components/shared/route-page.tsx'))
 const LoginPage = React.lazy(() => import('./pages/auth/Login.tsx'))
 const RegisterPage = React.lazy(() => import('./pages/auth/Register.tsx'))
 const Home = React.lazy(() => import('./pages/landing/Home.tsx'))
@@ -31,8 +31,8 @@ const StudentLearning = React.lazy(() => import('./pages/student/Learning.tsx'))
 const StudentLearningCourse = React.lazy(() => import('./pages/courses/view.tsx'))
 const StudentAssignments = React.lazy(() => import('./pages/student/Assignments.tsx'))
 const StudentBrowse = React.lazy(() => import('./pages/student/BrowseCourse.tsx'))
-// const StudentCertificates = React.lazy(() => import('./components/pages/student/Certificates.tsx'))
-// const StudentTransactions = React.lazy(() => import('./components/pages/student/Transactions.tsx'))
+const StudentCertificates = React.lazy(() => import('./pages/student/Certificates.tsx'))
+const StudentTransactions = React.lazy(() => import('./pages/student/Transactions.tsx'))
 
 const routeConfig = [
   {
@@ -199,19 +199,19 @@ const routeConfig = [
   },
   {
     path: ROUTES.student.certificates,
-    element: <RoutePage title="Student - Certificates" description="Halaman sertifikat student." path={ROUTES.student.certificates} />,
+    element: <StudentCertificates />,
     public: false,
     lazy: true,
   },
   {
     path: ROUTES.student.transactions,
-    element: <RoutePage title="Student - Transactions" description="Riwayat transaksi student." path={ROUTES.student.transactions} />,
+    element: <StudentTransactions />,
     public: false,
     lazy: true,
   },
   {
     path: '*',
-    element: <RoutePage title="Halaman tidak ditemukan" description="Route yang kamu tuju belum terdaftar." path="*" badge="404" ctaLabel="Kembali ke beranda" ctaTo={ROUTES.home} />,
+    element: <NotFoundContent />,
     public: true,
     lazy: true,
   },

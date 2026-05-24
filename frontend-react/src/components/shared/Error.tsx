@@ -23,7 +23,7 @@ export function NotFoundContent({
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-500">
+    <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-500 w-full h-screen justify-center">
       <div className="w-full max-w-sm aspect-square">
         <SafeLottie src={LOTTIE_404} className="size-full" />
       </div>

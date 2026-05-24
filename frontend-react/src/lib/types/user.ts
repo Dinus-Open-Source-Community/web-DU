@@ -1,3 +1,5 @@
+import type { TransactionHistory } from './transaction'
+
 export type AdminStatus = 'active' | 'inactive' | 'pending'
 export type UserRole = 'student' | 'mentor' | 'admin'
 export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'cancelled'
@@ -107,5 +109,5 @@ export interface IUserData {
   joined_courses: JoinedCourse[]
   mentored_courses: CourseDetail[]
   course_reviews: unknown[]
-  transaction_history: unknown[]
+  transaction_history: TransactionHistory[]
 }

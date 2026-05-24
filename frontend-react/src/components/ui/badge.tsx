@@ -78,7 +78,7 @@ export function CourseBadge({ variant, className }: { variant: BadgeVariant; cla
 
 /** Status pembayaran dengan gaya badge aplikasi. */
 export function PaymentBadge({ status, className }: { status: PaymentStatus; className?: string }) {
-  const v = status === 'PAID' ? 'paymentPaid' : status === 'PENDING' ? 'paymentPending' : 'paymentFailed'
+  const v = status === 'success' ? 'paymentPaid' : status === 'pending' ? 'paymentPending' : 'paymentFailed'
   return (
     <Badge variant={v} className={className}>
       {paymentStatusLabels[status]}
