@@ -242,7 +242,7 @@ export function StudentAssignmentsSection({ items, now: nowProp, className }: St
   const paginated = searchFiltered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE)
 
   return (
-    <section className={cn('flex w-full flex-col gap-7 px-5 py-8 md:px-8 md:py-10', className)}>
+    <section className={cn('flex w-full flex-col gap-7 ', className)}>
       <div className="flex flex-col gap-5">
         <PageHeader title="Tugas" subtitle="Kelola dan kumpulkan tugas dari kursus Anda. Buka detail hanya saat tugas dapat dikerjakan atau sudah dinilai." />
 
@@ -301,8 +301,7 @@ export function StudentAssignmentsSection({ items, now: nowProp, className }: St
               return (
                 <article
                   key={row.assignment.uid}
-                  className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]"
-                >
+                  className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
                   <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
                     <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
                       <div className="flex flex-col gap-4">

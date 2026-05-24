@@ -30,7 +30,7 @@ const StudentDashboard = React.lazy(() => import('./pages/student/Dashboard.tsx'
 const StudentLearning = React.lazy(() => import('./pages/student/Learning.tsx'))
 const StudentLearningCourse = React.lazy(() => import('./pages/courses/view.tsx'))
 const StudentAssignments = React.lazy(() => import('./pages/student/Assignments.tsx'))
-// const StudentBrowse = React.lazy(() => import('./components/pages/student/Browse.tsx'))
+const StudentBrowse = React.lazy(() => import('./pages/student/BrowseCourse.tsx'))
 // const StudentCertificates = React.lazy(() => import('./components/pages/student/Certificates.tsx'))
 // const StudentTransactions = React.lazy(() => import('./components/pages/student/Transactions.tsx'))
 
@@ -193,7 +193,7 @@ const routeConfig = [
   },
   {
     path: ROUTES.student.browse,
-    element: <RoutePage title="Student - Browse Courses" description="Jelajah course student." path={ROUTES.student.browse} />,
+    element: <StudentBrowse />,
     public: false,
     lazy: true,
   },

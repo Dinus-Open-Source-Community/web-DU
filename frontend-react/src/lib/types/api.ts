@@ -90,7 +90,6 @@ export interface AdminAdministrator {
 // =====================
 // interface untuk data course
 export interface ICourseItem {
-  uid: string
   category_uid: string
   course_type_uid: string
   cover_url: string
@@ -110,6 +109,7 @@ export interface ICourseItem {
   subtitle: string
   thumbnail_url: string
   title: string
+  uid: string
   updated_at: string
   what_you_learn: string[]
 }
@@ -123,7 +123,7 @@ export type CategoryItem = {
   name: string
   description: string
   is_active: boolean
-  courses?: CategoryItem[]
+  courses?: ICourseItem[]
   created_at: string
   updated_at: string
 }
@@ -134,7 +134,7 @@ export type CourseTypeItem = {
   name: string
   description: string
   is_active: boolean
-  courses?: unknown[]
+  courses?: ICourseItem[]
   created_at: string
   updated_at: string
 }
@@ -145,19 +145,34 @@ export type CourseTypeItem = {
 // type untuk response course
 export type CourseListResponse = {
   courses: ICourseItem[]
-  meta: { page: number; per_page: number; total: number; total_pages: number }
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
 }
 
 // type untuk response category
 export type CategoryListResponse = {
   course_categories: CategoryItem[]
-  meta: { page: number; per_page: number; total: number; total_pages: number }
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
 }
 
 // type untuk response course type
 export type CourseTypeListResponse = {
   course_types: CourseTypeItem[]
-  meta: { page: number; per_page: number; total: number; total_pages: number }
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
 }
 
 // =====================

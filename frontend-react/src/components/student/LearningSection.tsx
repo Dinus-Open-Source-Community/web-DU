@@ -36,7 +36,7 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
   const paginatedCourses = filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   return (
-    <section className="flex w-full flex-col gap-8 px-8 py-10">
+    <section className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-5">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">Kursus Saya</h1>
