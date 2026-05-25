@@ -1,16 +1,17 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import type { IMentorCourse, CourseCategory, CourseLevel, CourseClassType } from '@/lib/types'
+import type { CourseLevel } from '@/lib/types'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
-import { setSessionCourseMeta, upsertExtraCourse } from '@/lib/mentorCourseStorage'
-import { listCategories } from '@/lib/data/repository'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { useCourseCategoriesQuery } from '@/hooks/api/use-category-queries'
+import { useCourseTypesQuery } from '@/hooks/api/use-course-type-queries'
+import { useCreateCourse } from '@/hooks/api/use-course-queries'
 
 type CreateCourseDialogProps = {
   open: boolean
@@ -19,8 +20,6 @@ type CreateCourseDialogProps = {
 }
 
 const LEVELS: CourseLevel[] = ['Pemula', 'Menengah', 'Lanjutan']
-const CLASS_TYPES: CourseClassType[] = ['Free', 'Premium', 'Event']
-
 const inputClass =
   'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary'
 const labelClass = 'text-xs font-semibold uppercase tracking-wide text-slate-500'
@@ -121,14 +120,18 @@ function DynamicListField({ label, items, onChange, placeholder }: { label: stri
 export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor' }: CreateCourseDialogProps) {
   const confirm = useConfirm()
   const router = useRouter()
+  const createCourse = useCreateCourse()
+  const { data: categoryResponse, isLoading: categoryLoading } = useCourseCategoriesQuery()
+  const { data: courseTypeResponse, isLoading: courseTypeLoading } = useCourseTypesQuery()
 
   const [title, setTitle] = useState('')
   const [header, setHeader] = useState('')
   const [description, setDescription] = useState('')
-  const [imageDataUrl, setImageDataUrl] = useState<string | undefined>(undefined)
-  const [category, setCategory] = useState<CourseCategory | ''>('')
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | undefined>(undefined)
+  const [categoryUid, setCategoryUid] = useState('')
+  const [courseTypeUid, setCourseTypeUid] = useState('')
   const [level, setLevel] = useState<CourseLevel>('Pemula')
-  const [classType, setClassType] = useState<CourseClassType>('Premium')
 
   const [price, setPrice] = useState<number | ''>('')
   const [strikePrice, setStrikePrice] = useState<number | ''>('')
@@ -137,15 +140,40 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
 
   const [submitting, setSubmitting] = useState(false)
 
-  const categories = listCategories()
+  const categories = useMemo(() => categoryResponse?.course_categories ?? [], [categoryResponse])
+  const courseTypes = useMemo(() => courseTypeResponse?.course_types ?? [], [courseTypeResponse])
+
+  const activeCategories = useMemo(() => categories.filter((item) => item.is_active), [categories])
+  const activeCourseTypes = useMemo(() => courseTypes.filter((item) => item.is_active), [courseTypes])
+
+  useEffect(() => {
+    if (!categoryUid && activeCategories.length > 0) {
+      setCategoryUid(activeCategories[0].uid)
+    }
+  }, [activeCategories, categoryUid])
+
+  useEffect(() => {
+    if (!courseTypeUid && activeCourseTypes.length > 0) {
+      setCourseTypeUid(activeCourseTypes[0].uid)
+    }
+  }, [activeCourseTypes, courseTypeUid])
+
+  useEffect(() => {
+    return () => {
+      if (coverPreviewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(coverPreviewUrl)
+      }
+    }
+  }, [coverPreviewUrl])
 
   const reset = useCallback(() => {
     setTitle('')
     setHeader('')
-    setImageDataUrl(undefined)
-    setCategory('')
+    setCoverFile(null)
+    setCoverPreviewUrl(undefined)
+    setCategoryUid('')
+    setCourseTypeUid('')
     setLevel('Pemula')
-    setClassType('Premium')
     setPrice('')
     setStrikePrice('')
     setWhatYouLearn([])
@@ -164,11 +192,13 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
       toast.error('Pilih file gambar (JPG, PNG, WebP, …).')
       return
     }
-    const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result === 'string') setImageDataUrl(reader.result)
-    }
-    reader.readAsDataURL(file)
+    setCoverFile(file)
+    setCoverPreviewUrl((current) => {
+      if (current?.startsWith('blob:')) {
+        URL.revokeObjectURL(current)
+      }
+      return URL.createObjectURL(file)
+    })
   }, [])
 
   const handleSubmit = useCallback(
@@ -181,12 +211,16 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
         toast.error('Judul, header, dan deskripsi wajib diisi.')
         return
       }
-      if (!category) {
+      if (!categoryUid) {
         toast.error('Kategori wajib dipilih.')
         return
       }
-      if (classType !== 'Free' && (price === '' || price < 0)) {
-        toast.error('Harga wajib diisi untuk kelas Premium/Event.')
+      if (!courseTypeUid) {
+        toast.error('Tipe kursus wajib dipilih.')
+        return
+      }
+      if (price === '' || price < 0) {
+        toast.error('Harga wajib diisi.')
         return
       }
 
@@ -200,45 +234,38 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
       const defaultMeetings = 8
       setSubmitting(true)
       try {
-        const uid = crypto.randomUUID()
-        const finalPrice = classType === 'Free' ? 0 : typeof price === 'number' ? price : 0
-        const finalStrikePrice = classType === 'Free' ? undefined : typeof strikePrice === 'number' && strikePrice > 0 ? strikePrice : undefined
-
-        const row: IMentorCourse = {
-          uid,
-          title: t,
-          header: h,
-          description: d,
-          image: imageDataUrl,
-          published: false,
-          moduleCount: 0,
-          meetingCount: defaultMeetings,
-          studentCount: 0,
-          rating: 0,
-          totalReviews: 0,
-          updatedAt: 'Baru',
-          category: category as CourseCategory,
-          level,
-          classType,
-          price: finalPrice,
-          strikePrice: finalStrikePrice,
-          whatYouLearn: whatYouLearn.length > 0 ? whatYouLearn : undefined,
+        const formData = new FormData()
+        if (coverFile) {
+          formData.append('cover', coverFile)
         }
-        upsertExtraCourse(row)
-        setSessionCourseMeta(uid, {
-          title: t,
-          header: h,
-          image: imageDataUrl,
-          published: false,
-          meetingCount: defaultMeetings,
-          category: row.category,
-          level: row.level,
-          classType: row.classType,
-          price: row.price,
-          description: row.description,
-          strikePrice: row.strikePrice,
-          whatYouLearn: row.whatYouLearn,
-        })
+        formData.append('title', t)
+        formData.append('subtitle', h)
+        formData.append('description', d)
+        formData.append(
+          'slug',
+          t
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, ''),
+        )
+        formData.append('category_uid', categoryUid)
+        formData.append('course_type_uid', courseTypeUid)
+        formData.append('level', level.toUpperCase())
+        formData.append('price', String(typeof price === 'number' ? price : 0))
+        if (typeof strikePrice === 'number' && strikePrice > 0) {
+          formData.append('price_strike', String(strikePrice))
+        }
+        formData.append('what_you_learn', JSON.stringify(whatYouLearn))
+        formData.append('slot', String(defaultMeetings))
+        formData.append('is_premium', String((typeof price === 'number' ? price : 0) > 0))
+        formData.append('is_published', 'false')
+
+        const response = await createCourse.mutateAsync(formData)
+        const uid = (response.data as { uid?: string } | undefined)?.uid
+        if (!uid) {
+          throw new Error('Backend tidak mengembalikan uid kursus')
+        }
+
         toast.success('Kursus dibuat. Lanjut ke editor.')
         onOpenChange(false)
         reset()
@@ -247,7 +274,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
         setSubmitting(false)
       }
     },
-    [confirm, title, header, category, classType, price, strikePrice, imageDataUrl, level, whatYouLearn, onOpenChange, reset, router, description, roleBasePath],
+    [confirm, title, header, categoryUid, courseTypeUid, price, strikePrice, coverFile, level, whatYouLearn, onOpenChange, reset, router, description, createCourse, roleBasePath],
   )
 
   return (
@@ -269,10 +296,10 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <label className="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm font-medium text-slate-600 transition hover:border-primary/40 hover:bg-primary/5">
                     <input type="file" accept="image/*" className="sr-only" onChange={onFile} />
-                    {imageDataUrl ? 'Ganti gambar' : 'Unggah gambar'}
+                    {coverPreviewUrl ? 'Ganti gambar' : 'Unggah gambar'}
                   </label>
-                  {imageDataUrl && (
-                    <Image src={imageDataUrl} width={320} height={200} loading="lazy" alt="Pratinjau cover" className="h-20 max-w-full rounded-lg border border-slate-200 object-cover" />
+                  {coverPreviewUrl && (
+                    <Image src={coverPreviewUrl} width={320} height={200} loading="lazy" alt="Pratinjau cover" className="h-20 max-w-full rounded-lg border border-slate-200 object-cover" />
                   )}
                 </div>
               </div>
@@ -309,13 +336,36 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
                   <label htmlFor="cc-category" className={labelClass}>
                     Kategori
                   </label>
-                  <select id="cc-category" value={category} onChange={(e) => setCategory(e.target.value as CourseCategory)} required className={inputClass}>
+                  <select id="cc-category" value={categoryUid} onChange={(e) => setCategoryUid(e.target.value)} required className={inputClass} disabled={categoryLoading && categories.length === 0}>
                     <option value="" disabled>
-                      Pilih kategori
+                      {categoryLoading && categories.length === 0 ? 'Memuat kategori...' : 'Pilih kategori'}
                     </option>
-                    {categories.map((c) => (
-                      <option key={c.uid} value={c.name}>
+                    {activeCategories.map((c) => (
+                      <option key={c.uid} value={c.uid}>
                         {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  {!categoryLoading && categories.length === 0 && <p className="text-xs text-slate-500">Kategori belum tersedia di backend.</p>}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="cc-type" className={labelClass}>
+                    Tipe Kursus
+                  </label>
+                  <select
+                    id="cc-type"
+                    value={courseTypeUid}
+                    onChange={(e) => setCourseTypeUid(e.target.value)}
+                    className={inputClass}
+                    disabled={courseTypeLoading && courseTypes.length === 0}
+                    required>
+                    <option value="" disabled>
+                      {courseTypeLoading && courseTypes.length === 0 ? 'Memuat tipe kursus...' : 'Pilih tipe kursus'}
+                    </option>
+                    {activeCourseTypes.map((item) => (
+                      <option key={item.uid} value={item.uid}>
+                        {item.name}
                       </option>
                     ))}
                   </select>
@@ -333,30 +383,6 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
                     ))}
                   </select>
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="cc-classtype" className={labelClass}>
-                    Tipe Kelas
-                  </label>
-                  <select
-                    id="cc-classtype"
-                    value={classType}
-                    onChange={(e) => {
-                      const ct = e.target.value as CourseClassType
-                      setClassType(ct)
-                      if (ct === 'Free') {
-                        setPrice(0)
-                        setStrikePrice('')
-                      }
-                    }}
-                    className={inputClass}>
-                    {CLASS_TYPES.map((ct) => (
-                      <option key={ct} value={ct}>
-                        {ct}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </section>
 
@@ -369,13 +395,13 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
                   <label htmlFor="cc-price" className={labelClass}>
                     Harga
                   </label>
-                  <RupiahInput id="cc-price" value={price} onChange={setPrice} disabled={classType === 'Free'} placeholder={classType === 'Free' ? 'Gratis' : 'Contoh: 150000'} />
+                  <RupiahInput id="cc-price" value={price} onChange={setPrice} placeholder="Contoh: 150000" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label htmlFor="cc-strike" className={labelClass}>
                     Harga Coret (Opsional)
                   </label>
-                  <RupiahInput id="cc-strike" value={strikePrice} onChange={setStrikePrice} disabled={classType === 'Free'} placeholder="Harga sebelum diskon" />
+                  <RupiahInput id="cc-strike" value={strikePrice} onChange={setStrikePrice} placeholder="Harga sebelum diskon" />
                 </div>
               </div>
             </section>

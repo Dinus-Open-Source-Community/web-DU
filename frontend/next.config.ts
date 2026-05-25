@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'via.placeholder.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
@@ -28,7 +33,13 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '8080',
+        port: '9000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'minio',
+        port: '9000',
         pathname: '/**',
       },
     ],

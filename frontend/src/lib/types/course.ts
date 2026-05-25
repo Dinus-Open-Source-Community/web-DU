@@ -68,7 +68,11 @@ export interface ICardData {
   uid: string
   variantBadge: BadgeVariant
   title: string
+  /** Baris pembuka untuk kartu/dashboard mentor (fallback ke cuplikan `description` di API dummy). */
+  subtitle?: string
   description: string
+  /** Untuk halaman detail publik (`what_you_learn` dari API). */
+  whatYouLearn?: string[]
   /** FK ke `categories[].id` di seed/API; optional untuk kompatibilitas. */
   categoryId?: string
   category?: string

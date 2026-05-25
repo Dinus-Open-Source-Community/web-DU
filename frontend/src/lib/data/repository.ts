@@ -1,10 +1,6 @@
 /**
- * Stub data layer.
- *
- * Berkas ini hanya berisi stub kosong agar kontrak tipe lama tetap dapat dikompilasi
- * setelah seluruh mock & dummy data dihapus. Setiap fungsi mengembalikan nilai kosong
- * (array kosong / null / objek default) tanpa menyimpan data dummy apapun. Ganti
- * dengan integrasi backend nyata bila tersedia.
+ * Lapisan data aplikasi — saat ini sepenuhnya memakai dummy di `dummy-seed.ts`
+ * (tanpa request HTTP; lihat juga `lib/config/mock-data.ts` & `lib/api/fetcher.ts`).
  */
 
 import type {
@@ -17,62 +13,101 @@ import type {
   AdminTicket,
   AdminTransaction,
   AdminCategoryItem,
+} from '@/lib/types'
+import type {
   ChartDataPoint,
   ChartRatioPoint,
+  TransactionTimelinePoint,
+} from '@/lib/types/analytics'
+import type {
   ICardData,
   ICertificate,
   IDashboardStat,
   IDeadlineItem,
   IFeedbackItem,
-  IMentorAssignmentSubmission,
   IMentorCourse,
-  IMentorCourseAssignment,
   IMentorStats,
+  IMentorAssignmentSubmission,
+  IMentorCourseAssignment,
   IResumeCourse,
   IScheduleItem,
   StudentEnrolledCourse,
   TransactionHistoryItem,
-  TransactionTimelinePoint,
 } from '@/lib/types'
+import type { CourseCategory } from '@/lib/types/course'
 
-export interface SeedUser {
-  id: string
-  nama: string
-  email: string
-  avatar?: string
-  role: 'student' | 'mentor' | 'admin'
-}
+import type { SeedUser } from './dummy-seed'
+import {
+  buildCertificates,
+  buildChartRatio,
+  buildDashboardKpis,
+  buildDashboardStats,
+  buildDeadlines,
+  buildFeedbacks,
+  buildMonthlyRevenue12m,
+  buildNewUsersWeek,
+  buildQaThreads,
+  buildResumeCourses,
+  buildRevenueByCategory,
+  buildRevenueLine30d,
+  buildRevenueSourceRatio,
+  buildReviews,
+  buildSchedules,
+  buildTopCoursesEnrollment,
+  buildTransactionHistory,
+  buildTransactionTimeline30d,
+  buildAdminTransactions,
+  getMentorDashboardStatsDummy,
+  getMentorSpecColorsDummy,
+  listCategoriesDummy,
+  SEED_ASSIGNMENTS,
+  SEED_ICARD_COURSES,
+  SEED_ADMIN_MENTORS,
+  SEED_ADMIN_STUDENTS,
+  SEED_ADMINISTRATORS,
+  SEED_STUDENT_ENROLLED,
+  SEED_SUBMISSIONS,
+  SEED_TICKETS,
+  SEED_USERS,
+  slugToCourseUid,
+} from './dummy-seed'
+
+export type { SeedUser } from './dummy-seed'
+
+const txCache = buildTransactionHistory()
+const adminTxCache = buildAdminTransactions()
 
 export function listCourses(): ICardData[] {
-  return []
+  return [...SEED_ICARD_COURSES]
 }
 
-export function listCoursesByMentor(_mentorId: string): ICardData[] {
-  return []
+export function listCoursesByMentor(mentorId: string): ICardData[] {
+  return SEED_ICARD_COURSES.filter((c) => c.mentorUid === mentorId)
 }
 
-export function getCourseByUid(_uid: string): ICardData | null {
-  return null
+export function getCourseByUid(uid: string): ICardData | null {
+  return SEED_ICARD_COURSES.find((c) => c.uid === uid) ?? null
 }
 
-export function getCourseBySlug(_slug: string): ICardData | null {
-  return null
+export function getCourseBySlug(slug: string): ICardData | null {
+  const uid = slugToCourseUid(slug)
+  return uid ? getCourseByUid(uid) : null
 }
 
 export function listCategories(): AdminCategoryItem[] {
-  return []
+  return listCategoriesDummy()
 }
 
 export function listAllReviews(): AdminReview[] {
-  return []
+  return buildReviews()
 }
 
-export function listReviewsForCourse(_courseUid: string): AdminReview[] {
-  return []
+export function listReviewsForCourse(courseUid: string): AdminReview[] {
+  return buildReviews().filter((r) => r.courseUid === courseUid)
 }
 
 export function listAllQaThreads(): AdminQaThread[] {
-  return []
+  return buildQaThreads()
 }
 
 export function toMentorCourseView(course: ICardData): IMentorCourse {
@@ -90,122 +125,118 @@ export function toMentorCourseView(course: ICardData): IMentorCourse {
     updatedAt: course.updatedAt,
     price: course.price,
     strikePrice: course.strikePrice,
+    category: course.category as CourseCategory | undefined,
   }
 }
 
 export function listMentors(): AdminMentor[] {
-  return []
+  return [...SEED_ADMIN_MENTORS]
 }
 
 export function listStudents(): AdminStudent[] {
-  return []
+  return [...SEED_ADMIN_STUDENTS]
 }
 
 export function listAdministrators(): AdminAdministrator[] {
-  return []
+  return [...SEED_ADMINISTRATORS]
 }
 
 export function getMentorSpecColors(): Record<string, string> {
-  return {}
+  return getMentorSpecColorsDummy()
 }
 
-export function getUserById(_uid: string): SeedUser | null {
-  return null
+export function getUserById(uid: string): SeedUser | null {
+  return SEED_USERS.find((u) => u.id === uid) ?? null
 }
 
 export function listStudentEnrolledCourses(): StudentEnrolledCourse[] {
-  return []
+  return [...SEED_STUDENT_ENROLLED]
 }
 
 export function listTickets(): AdminTicket[] {
-  return []
+  return [...SEED_TICKETS]
 }
 
 export function listAdminTransactions(): AdminTransaction[] {
-  return []
+  return [...adminTxCache]
 }
 
 export function listRecentTransactions(): TransactionHistoryItem[] {
-  return []
+  return txCache.slice(0, 5)
 }
 
 export function getTransactionsSource(): TransactionHistoryItem[] {
-  return []
+  return [...txCache]
 }
 
 export function getTransactionRatio(): ChartRatioPoint[] {
-  return []
+  return buildChartRatio()
 }
 
 export function getTransactionTimeline30d(): TransactionTimelinePoint[] {
-  return []
+  return buildTransactionTimeline30d()
 }
 
 export function getMonthlyRevenue12m(): ChartDataPoint[] {
-  return []
+  return buildMonthlyRevenue12m()
 }
 
 export function getRevenueByCategory(): ChartDataPoint[] {
-  return []
+  return buildRevenueByCategory()
 }
 
 export function getRevenueSourceRatio(): ChartRatioPoint[] {
-  return []
+  return buildRevenueSourceRatio()
 }
 
 export function getRevenueLine30d(): ChartDataPoint[] {
-  return []
+  return buildRevenueLine30d()
 }
 
 export function getNewUsersWeek(): ChartDataPoint[] {
-  return []
+  return buildNewUsersWeek()
 }
 
 export function getTopCoursesByEnrolment(): ChartDataPoint[] {
-  return []
+  return buildTopCoursesEnrollment()
 }
 
 export function getDashboardStats(): IDashboardStat[] {
-  return []
+  return buildDashboardStats()
 }
 
 export function getDeadlines(): IDeadlineItem[] {
-  return []
+  return buildDeadlines()
 }
 
 export function getFeedbacks(): IFeedbackItem[] {
-  return []
+  return buildFeedbacks()
 }
 
 export function getResumeCourses(): IResumeCourse[] {
-  return []
+  return buildResumeCourses()
 }
 
 export function listCertificates(): ICertificate[] {
-  return []
+  return buildCertificates()
 }
 
 export function getDashboardKpis(): AdminKpi[] {
-  return []
+  return buildDashboardKpis()
 }
 
 export function getMentorDashboardStats(): IMentorStats {
-  return {
-    pendingGrading: 0,
-    unansweredQA: 0,
-    activeStudents: 0,
-    totalCourses: 0,
-  }
+  return getMentorDashboardStatsDummy()
 }
 
 export function listSchedules(): IScheduleItem[] {
-  return []
+  return buildSchedules()
 }
 
 export function listMentorAssignmentSeeds(): IMentorCourseAssignment[] {
-  return []
+  return [...SEED_ASSIGNMENTS]
 }
 
 export function listMentorSubmissionSeeds(): IMentorAssignmentSubmission[] {
-  return []
+  return [...SEED_SUBMISSIONS]
 }

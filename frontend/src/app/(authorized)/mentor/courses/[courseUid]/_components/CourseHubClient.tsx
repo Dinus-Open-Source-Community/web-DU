@@ -3,16 +3,15 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BookOpen, ClipboardList, Eye, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { ClipboardList, Eye, Pencil, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { IMentorCourse } from '@/lib/types'
-import { deleteManagedCourse, getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, upsertExtraCourse } from '@/lib/mentorCourseStorage'
-import { countAssignmentsForCourse } from '@/lib/mentorAssignmentsData'
 import { useConfirm } from '@/components/feedback/ConfirmProvider'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/func'
 import Image from 'next/image'
 import { CourseParticipantsSection } from './CourseParticipantsSection'
+import { useCourseByUidQuery, useUpdateCourseStatus } from '@/hooks/api/use-course-queries'
 
 type CourseHubClientProps = {
   courseUid: string
@@ -23,28 +22,39 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
   const isAdmin = role === 'admin'
   const confirm = useConfirm()
   const router = useRouter()
-  const [course, setCourse] = useState<IMentorCourse | null | undefined>(undefined)
-  const [moduleCount, setModuleCount] = useState(0)
-  const [assignmentCount, setAssignmentCount] = useState(0)
+  const { data: courseData } = useCourseByUidQuery(courseUid)
+  const updateStatus = useUpdateCourseStatus(courseUid)
+  const [course, setCourse] = useState<IMentorCourse | null>(null)
+
+  const mapCourse = (data: Record<string, unknown>): IMentorCourse => {
+    return {
+      uid: (data.uid as string) ?? '',
+      title: (data.title as string) ?? '',
+      header: (data.subtitle as string) ?? '',
+      description: (data.description as string) ?? '',
+      image: (data.cover_url as string) ?? (data.thumbnail_url as string) ?? '',
+      published: Boolean(data.is_published),
+      moduleCount: Array.isArray(data.modules) ? data.modules.length : 0,
+      studentCount: 0,
+      rating: 0,
+      totalReviews: 0,
+      updatedAt: (data.updated_at as string) ?? '',
+      category: undefined,
+      level: (data.level as IMentorCourse['level']) ?? undefined,
+      classType: undefined,
+      price: typeof data.price === 'number' ? data.price : undefined,
+      strikePrice: typeof data.price_strike === 'number' ? data.price_strike : undefined,
+    }
+  }
 
   useEffect(() => {
-    const load = () => {
-      const found = getManagedCourseByUid(courseUid, isAdmin ? 'all' : 'mentor')
-      setCourse(found)
-      if (found) {
-        const mods = getSessionCourseModules(courseUid)
-        setModuleCount(mods.modules.length || found.moduleCount)
-        setAssignmentCount(countAssignmentsForCourse(courseUid))
-      }
+    if (courseData && typeof courseData === 'object') {
+      setCourse(mapCourse(courseData as Record<string, unknown>))
+      return
     }
-    load()
-    window.addEventListener('focus', load)
-    window.addEventListener('storage', load)
-    return () => {
-      window.removeEventListener('focus', load)
-      window.removeEventListener('storage', load)
-    }
-  }, [courseUid, isAdmin])
+
+    setCourse(null)
+  }, [courseData])
 
   const handlePublish = async () => {
     if (!course || !isAdmin) return
@@ -54,60 +64,21 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
       confirmLabel: 'Publish',
     })
     if (!ok) return
-    upsertExtraCourse({
-      ...course,
-      moduleCount: Math.max(1, moduleCount),
-      updatedAt: new Date().toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-    })
-    publishMentorCourse(courseUid)
-    toast.success('Kursus berhasil dipublikasikan.')
-    setCourse((prev) => (prev ? { ...prev, published: true } : prev))
-    router.refresh()
+    void updateStatus
+      .mutateAsync()
+      .then(() => {
+        toast.success('Kursus berhasil dipublikasikan.')
+        setCourse((prev) => (prev ? { ...prev, published: true } : prev))
+        router.refresh()
+      })
+      .catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : 'Gagal mempublikasikan kursus.')
+      })
   }
 
-  const handleDeleteCourse = async () => {
-    if (!course || !isAdmin) return
-    const ok = await confirm({
-      title: 'Hapus kursus?',
-      description: 'Aksi ini akan menghapus kursus dari pengelolaan frontend dan tidak membuka page baru.',
-      confirmLabel: 'Hapus',
-      variant: 'destructive',
-    })
-    if (!ok) return
-
-    try {
-      deleteManagedCourse(courseUid)
-      toast.success('Kursus berhasil dihapus.')
-      router.push('/admin/courses')
-      router.refresh()
-    } catch {
-      toast.error('Gagal menghapus kursus.')
-    }
-  }
-
-  if (course === undefined) {
-    return (
-      <section className="space-y-6 py-10">
-        <div className="h-48 animate-pulse rounded-2xl bg-slate-100" />
-        <div className="grid grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (course === null) {
+  if (!course) {
     return (
       <section className="flex flex-col items-center gap-4 py-20 text-center">
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100">
-          <BookOpen className="size-7 text-slate-400" />
-        </div>
         <p className="text-sm text-slate-600">Kursus tidak ditemukan.</p>
         <Button asChild variant="outline" className="rounded-xl shadow-none">
           <Link href={isAdmin ? '/admin/courses' : '/mentor/courses'}>Kembali ke daftar</Link>
@@ -118,6 +89,7 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
 
   const hasDetails = course.category || course.classType || course.price != null || course.level
   const priceLabel = course.price != null ? (course.price === 0 ? 'Gratis' : formatRupiah(course.price)) : null
+  const moduleCount = course.moduleCount
 
   const actions = [
     {
@@ -150,7 +122,6 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
     { label: 'Level', value: course.level || '-' },
     { label: 'Harga', value: priceLabel || '-' },
     { label: 'Total Modul', value: moduleCount.toString() },
-    { label: 'Total Tugas', value: assignmentCount.toString() },
   ]
 
   return (
@@ -205,17 +176,6 @@ export function CourseHubClient({ courseUid, role = 'mentor' }: CourseHubClientP
                 <p className="mt-1 text-sm text-slate-500">Ringkasan detail utama course untuk kebutuhan monitoring dan pengelolaan.</p>
               </div>
 
-              {isAdmin ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => void handleDeleteCourse()}
-                  className="size-10 rounded-xl border-rose-200 bg-white text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
-                  aria-label="Hapus kursus">
-                  <Trash2 className="size-4" aria-hidden />
-                </Button>
-              ) : null}
             </div>
 
             <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">

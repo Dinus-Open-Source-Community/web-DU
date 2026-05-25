@@ -1,11 +1,9 @@
 # Node.js
 /frontend/node_modules
 /frontend/.next
-
 # Golang
 /backend/vendor/
 /backend/*.exe
 !/backend/public/uploads/avatars/*.txt
-/frontend-react/*
 # Environment variables
 .env

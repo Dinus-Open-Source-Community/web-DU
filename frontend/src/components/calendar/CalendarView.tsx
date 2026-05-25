@@ -57,40 +57,33 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
 
   return (
     <section className="space-y-6">
-      <CalendarToolbar
-        classFilter={classFilter}
-        setClassFilter={setClassFilter}
-      />
+      <CalendarToolbar classFilter={classFilter} setClassFilter={setClassFilter} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-4">
           {/* Calendar Controls (Unified Navigation & View Options) - Moved here to be in the same section as the calendar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm">
-            
             {/* Date Selection Dropdowns and Navigation */}
             <div className="flex flex-wrap items-center gap-3 pl-1">
               <div className="flex items-center gap-0.5 rounded-lg bg-slate-50 border border-slate-100 p-0.5">
-                <button 
-                  type="button" 
-                  onClick={() => moveCursor(-1)} 
+                <button
+                  type="button"
+                  onClick={() => moveCursor(-1)}
                   className="rounded-md p-1.5 text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all active:scale-95"
-                  aria-label="Previous"
-                >
+                  aria-label="Previous">
                   <ChevronLeft size={16} />
                 </button>
-                <button 
-                  type="button" 
-                  onClick={onToday} 
-                  className="rounded-md px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all active:scale-95"
-                >
+                <button
+                  type="button"
+                  onClick={onToday}
+                  className="rounded-md px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all active:scale-95">
                   Today
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => moveCursor(1)} 
+                <button
+                  type="button"
+                  onClick={() => moveCursor(1)}
                   className="rounded-md p-1.5 text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm transition-all active:scale-95"
-                  aria-label="Next"
-                >
+                  aria-label="Next">
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -107,10 +100,11 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
                       d.setDate(Number(e.target.value))
                       setCursorDate(d)
                     }}
-                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[56px]"
-                  >
+                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[56px]">
                     {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
-                      <option key={d} value={d}>{d}</option>
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 pointer-events-none transition-colors" />
@@ -124,10 +118,11 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
                       d.setMonth(Number(e.target.value))
                       setCursorDate(d)
                     }}
-                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[70px]"
-                  >
+                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[70px]">
                     {MONTH_LABELS.map((m, i) => (
-                      <option key={m} value={i}>{m}</option>
+                      <option key={m} value={i}>
+                        {m}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 pointer-events-none transition-colors" />
@@ -141,10 +136,11 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
                       d.setFullYear(Number(e.target.value))
                       setCursorDate(d)
                     }}
-                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[76px]"
-                  >
+                    className="appearance-none bg-white/50 hover:bg-white border border-slate-200/60 rounded-lg pl-2.5 pr-7 py-1.5 text-[13px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer shadow-xs min-w-[76px]">
                     {years.map((y) => (
-                      <option key={y} value={y}>{y}</option>
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 pointer-events-none transition-colors" />
@@ -161,9 +157,7 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
                   onClick={() => setViewMode(option.value)}
                   className={cn(
                     'rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-200',
-                    viewMode === option.value 
-                      ? 'bg-white text-primary shadow-sm border border-slate-200/50' 
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                    viewMode === option.value ? 'bg-white text-primary shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50',
                   )}>
                   {option.label}
                 </button>

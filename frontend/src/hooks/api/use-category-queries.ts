@@ -1,6 +1,6 @@
 'use client'
 
-import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { get, post, put, del, type Envelope } from '@/lib/api/fetcher'
 import { queryKeys } from '@/lib/api/query-keys'
 
@@ -25,10 +25,14 @@ type UpdateCategoryInput = { name?: string; description?: string; is_active?: bo
 export function useCourseCategories(filters: { page?: number; per_page?: number; name?: string } = {}) {
   return useSuspenseQuery({
     queryKey: queryKeys.courseCategories.list(filters),
-    queryFn: () =>
-      get<Envelope<CategoryListResponse>>('/course-categories', filters as Record<string, string | number>).then(
-        (r) => r.data,
-      ),
+    queryFn: () => get<Envelope<CategoryListResponse>>('/course-categories', filters as Record<string, string | number>).then((r) => r.data),
+  })
+}
+
+export function useCourseCategoriesQuery(filters: { page?: number; per_page?: number; name?: string } = {}) {
+  return useQuery({
+    queryKey: queryKeys.courseCategories.list(filters),
+    queryFn: () => get<Envelope<CategoryListResponse>>('/course-categories', filters as Record<string, string | number>).then((r) => r.data),
   })
 }
 

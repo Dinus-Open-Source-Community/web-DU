@@ -36,7 +36,10 @@ export const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
 
 const parseRole = (input: unknown): UserRole => {
   if (typeof input !== 'string') return 'student'
-  const cleaned = input.toLowerCase().replace(/_role$/, '').trim()
+  const cleaned = input
+    .toLowerCase()
+    .replace(/_role$/, '')
+    .trim()
   return roleAlias[cleaned] ?? 'student'
 }
 

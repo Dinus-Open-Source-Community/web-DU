@@ -50,20 +50,11 @@ export default function FormLogin() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
-          onClick={startGoogleOAuth}
-          disabled={isSubmitting}>
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50" onClick={startGoogleOAuth} disabled={isSubmitting}>
           <GoogleIcon className="mr-2 size-5" />
           Google
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
-          disabled={isSubmitting}>
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50" disabled={isSubmitting}>
           <GitHubIcon className="mr-2 size-5" />
           GitHub
         </Button>
@@ -76,15 +67,7 @@ export default function FormLogin() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <GlobalInput
-          label="Email"
-          placeholder="nama@email.com"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isSubmitting}
-          required
-        />
+        <GlobalInput label="Email" placeholder="nama@email.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} required />
         <div>
           <GlobalInput
             label="Password"
@@ -95,11 +78,7 @@ export default function FormLogin() {
             disabled={isSubmitting}
             required
             rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword((p) => !p)}
-                className="text-slate-400 transition-colors hover:text-slate-600"
-                disabled={isSubmitting}>
+              <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600" disabled={isSubmitting}>
                 {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
@@ -110,11 +89,7 @@ export default function FormLogin() {
             </Link>
           </div>
         </div>
-        <Button
-          type="submit"
-          className="h-12 rounded-xl text-sm font-bold"
-          disabled={isSubmitting}
-          aria-busy={isSubmitting}>
+        <Button type="submit" className="h-12 rounded-xl text-sm font-bold" disabled={isSubmitting} aria-busy={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />

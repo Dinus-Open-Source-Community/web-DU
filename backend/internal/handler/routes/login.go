@@ -14,6 +14,6 @@ func init() {
 func StartLoginRoutes(r *gin.Engine) {
 	loginGroup := r.Group("/login")
 	{
-		loginGroup.POST("", service.PostLoginFunc) // all roles - anonymous user
+		loginGroup.POST("/", service.PostLoginFunc) // user login
 	}
 }

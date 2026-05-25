@@ -1,104 +1,72 @@
-import { API_ROUTES } from '@/lib/api/api'
 import type { AuthUser } from '@/lib/auth/session'
-import { normalizeAuthUser } from '@/lib/auth/session'
-
-type Envelope<T> = {
-  success?: boolean
-  message?: string
-  data?: T
-  error?: unknown
-}
+import { getAuthRole, getAuthUser, normalizeAuthUser, setAuthUser } from '@/lib/auth/session'
+import type { UserRole } from '@/lib/auth/session'
+import { dummyUidForRole } from '@/lib/auth/dummy-identity'
 
 type LoginPayload = {
   token: string
   expires_at?: string
-  user: AuthUser
+  user?: AuthUser
 }
 
-const parseErrorMessage = (payload: unknown, fallback: string) => {
-  if (typeof payload !== 'object' || payload === null) return fallback
-  const candidate = payload as { message?: unknown; error?: unknown }
-  if (typeof candidate.message === 'string' && candidate.message.length > 0) return candidate.message
-  if (typeof candidate.error === 'string' && candidate.error.length > 0) return candidate.error
-  return fallback
-}
-
-async function requestJson<T>(url: string, init: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...(init.headers ?? {}),
-    },
-    cache: 'no-store',
-  })
-
-  const payload = (await response.json().catch(() => null)) as unknown
-
-  if (!response.ok) {
-    throw new Error(parseErrorMessage(payload, `Request failed (${response.status})`))
-  }
-
-  return payload as T
-}
-
-function extractToken(payload: Envelope<LoginPayload>): LoginPayload {
-  const token = payload.data?.token
-  if (!token) {
-    throw new Error('Token tidak ditemukan pada response autentikasi')
-  }
-
-  const user = normalizeAuthUser(payload.data?.user)
-  if (!user) {
-    throw new Error('Data user tidak ditemukan pada response autentikasi')
-  }
-
+function buildDummyUser(email: string, displayName?: string): AuthUser {
+  const role = (getAuthRole() ?? 'admin') as UserRole
   return {
-    token,
-    expires_at: payload.data?.expires_at,
+    uid: dummyUidForRole(role),
+    nama: displayName ?? email.split('@')[0] ?? 'Pengguna',
+    email,
+    role,
+    avatar: undefined,
+  }
+}
+
+/** Login lokal tanpa backend — penyimpanan via cookie (`setAuthUser` / token dummy). */
+export async function loginWithPassword(email: string, _password: string): Promise<LoginPayload> {
+  const user = buildDummyUser(email)
+  setAuthUser(user)
+  return {
+    token: 'dummy-access-token',
+    expires_at: undefined,
     user,
   }
 }
 
-export async function loginWithPassword(email: string, password: string): Promise<LoginPayload> {
-  const payload = await requestJson<Envelope<LoginPayload>>(API_ROUTES.auth.login, {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  })
-
-  return extractToken(payload)
+/** Register lokal tanpa backend. */
+export async function registerWithPassword(name: string, email: string, _password: string): Promise<LoginPayload> {
+  const role = (getAuthRole() ?? 'admin') as UserRole
+  const user: AuthUser = { uid: dummyUidForRole(role), nama: name, email, role }
+  setAuthUser(user)
+  return {
+    token: 'dummy-access-token',
+    expires_at: undefined,
+    user,
+  }
 }
 
-export async function registerWithPassword(name: string, email: string, password: string): Promise<LoginPayload> {
-  const payload = await requestJson<Envelope<LoginPayload>>(API_ROUTES.auth.register, {
-    method: 'POST',
-    body: JSON.stringify({ name, email, password }),
-  })
+/** Profil dari sesi cookie — tidak memanggil jaringan. */
+export async function fetchSelfProfile(_token: string): Promise<AuthUser> {
+  const existing = getAuthUser()
+  if (existing) return existing
 
-  return extractToken(payload)
-}
-
-export async function fetchSelfProfile(token: string): Promise<AuthUser> {
-  const payload = await requestJson<Envelope<Record<string, unknown>>>(API_ROUTES.user.getSelfData, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-
-  const user = normalizeAuthUser(payload.data)
-  if (!user) {
-    throw new Error('Format profil user dari backend tidak valid')
+  const role = (getAuthRole() ?? 'admin') as UserRole
+  const synthetic: Record<string, unknown> = {
+    uid: dummyUidForRole(role),
+    name: 'Pengguna',
+    email: 'user@dummy.local',
+    role,
+    avatar_url: '',
   }
 
-  return user
+  const parsed = normalizeAuthUser(synthetic)
+  if (!parsed) {
+    throw new Error('Sesi dummy tidak valid')
+  }
+  setAuthUser(parsed)
+  return parsed
 }
 
 export function beginGoogleOAuth() {
   if (typeof window === 'undefined') return
-  const callbackUrl = `${window.location.origin}/auth/oauth/callback`
-  const oauthUrl = new URL(API_ROUTES.auth.oauth.googleLogin)
-  oauthUrl.searchParams.set('frontend_callback', callbackUrl)
-  window.location.assign(oauthUrl.toString())
+  // eslint-disable-next-line no-alert
+  window.alert('OAuth dinonaktifkan pada mode dummy (tanpa API).')
 }

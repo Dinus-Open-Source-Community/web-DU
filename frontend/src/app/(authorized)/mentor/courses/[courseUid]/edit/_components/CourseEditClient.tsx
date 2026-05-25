@@ -1,28 +1,31 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import type { IModule, ILesson, IMentorCourse } from '@/lib/types'
-import { getManagedCourseByUid, getSessionCourseModules, publishMentorCourse, setSessionCourseModules, upsertExtraCourse } from '@/lib/mentorCourseStorage'
-import { useConfirm } from '@/components/feedback/ConfirmProvider'
+import { useQueries } from '@tanstack/react-query'
+import { Button } from '../../../../../../../components/ui/button'
+import { Checkbox } from '../../../../../../../components/ui/checkbox'
+import { PageHeader } from '../../../../../../../components/layout/PageHeader'
+import { useConfirm } from '../../../../../../../components/feedback/ConfirmProvider'
+import type { IModule, ILesson, IMentorCourse, IQuiz } from '../../../../../../../lib/types'
+import { get, post, put, type Envelope } from '../../../../../../../lib/api/fetcher'
+import { queryKeys } from '../../../../../../../lib/api/query-keys'
+import { useCourseByUidQuery } from '../../../../../../../hooks/api/use-course-queries'
+import { usePublishCourse } from '../../../../../../../hooks/api/use-course-edit-mutations'
+import type { TiptapRichTextEditorProps } from '../../../../../../../components/rich-text/TiptapRichTextEditor'
 import { toast } from 'sonner'
 import { CourseModuleOutline } from './CourseModuleOutline'
 import { CourseAssignmentDialog } from '../../assignments/_components/CourseAssignmentDialog'
 import Image from 'next/image'
 
-const CourseTipTapEditor = dynamic(() => import('./CourseTipTapEditor').then((m) => ({ default: m.CourseTipTapEditor })), {
+const CourseTipTapEditor = dynamic<TiptapRichTextEditorProps>(() => import('./CourseTipTapEditor').then((m) => ({ default: m.CourseTipTapEditor })), {
   ssr: false,
   loading: () => <div className="min-h-60 animate-pulse rounded-xl border border-slate-100 bg-slate-50" />,
 })
 
 const LessonVideoEditor = dynamic(() => import('./LessonVideoEditor').then((m) => ({ default: m.LessonVideoEditor })), { ssr: false })
-
-const LessonQuizEditor = dynamic(() => import('./LessonQuizEditor').then((m) => ({ default: m.LessonQuizEditor })), { ssr: false })
 
 type CourseEditClientProps = {
   courseUid: string
@@ -31,93 +34,375 @@ type CourseEditClientProps = {
   role?: 'mentor' | 'admin'
 }
 
-function findLesson(modules: IModule[], lessonId: string): ILesson | null {
-  for (const m of modules) {
-    const l = m.lessons.find((l) => l.id === lessonId)
-    if (l) return l
+type CourseModuleApiItem = Record<string, unknown>
+type LessonApiItem = Record<string, unknown>
+type EditableLesson = ILesson & { uid?: string }
+type EditableModule = Omit<IModule, 'lessons'> & { uid?: string; lessons: EditableLesson[] }
+type LessonListResponse = {
+  lessons: LessonApiItem[]
+  meta: { page: number; per_page: number; total: number; total_pages: number }
+}
+
+function isUuid(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+function createLocalId(prefix: string): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`
+  }
+
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function getPersistedUid(item: { uid?: unknown; id?: unknown }): string | undefined {
+  if (isUuid(item.uid)) return item.uid
+  if (isUuid(item.id)) return item.id
+  return undefined
+}
+
+function findLesson(modules: EditableModule[], lessonId: string): EditableLesson | null {
+  for (const courseModule of modules) {
+    const lesson = courseModule.lessons.find((item: EditableLesson) => item.id === lessonId)
+    if (lesson) return lesson
   }
   return null
+}
+
+function toMentorCourse(course: Record<string, unknown>): IMentorCourse {
+  const category = course.category as { name?: unknown } | undefined
+  const courseType = course.course_type as { name?: unknown } | undefined
+
+  return {
+    uid: (course.uid as string) ?? '',
+    title: (course.title as string) ?? '',
+    header: (course.subtitle as string) ?? '',
+    description: (course.description as string) ?? '',
+    image: (course.cover_url as string) ?? (course.thumbnail_url as string) ?? '',
+    published: Boolean(course.is_published),
+    moduleCount: Array.isArray(course.modules) ? course.modules.length : 0,
+    studentCount: 0,
+    rating: 0,
+    totalReviews: 0,
+    updatedAt: (course.updated_at as string) ?? '',
+    category: typeof category?.name === 'string' ? (category.name as IMentorCourse['category']) : undefined,
+    level: (course.level as IMentorCourse['level']) ?? undefined,
+    classType: typeof courseType?.name === 'string' ? (courseType.name as IMentorCourse['classType']) : undefined,
+    price: typeof course.price === 'number' ? course.price : undefined,
+    strikePrice: typeof course.price_strike === 'number' ? course.price_strike : undefined,
+    whatYouLearn: Array.isArray(course.what_you_learn) ? (course.what_you_learn as unknown[]).filter((item): item is string => typeof item === 'string') : undefined,
+  }
+}
+
+function createDefaultQuiz(): IQuiz {
+  return { questions: [], passingScore: 70 }
+}
+
+function createFallbackLesson(order = 1): EditableLesson {
+  return {
+    id: createLocalId('lesson'),
+    title: `Lesson ${order}`,
+    order,
+    durationMinutes: 10,
+    hasHomework: false,
+    homeworkType: 'text',
+    homeworkDescriptionHtml: '<p></p>',
+    homeworkQuiz: createDefaultQuiz(),
+    contentType: 'tiptap',
+    contentHtml: '',
+  }
+}
+
+function createFallbackModule(order = 1): EditableModule {
+  return {
+    id: createLocalId('module'),
+    title: `Modul ${order}`,
+    order,
+    lessons: [createFallbackLesson(1)],
+  }
+}
+
+function toLesson(item: LessonApiItem, fallbackOrder: number): EditableLesson {
+  const rawContent = item.content
+  const contentObject = rawContent && typeof rawContent === 'object' ? (rawContent as Record<string, unknown>) : undefined
+  const contentType =
+    (item.content_type as string | undefined) === 'video' || Boolean(item.video_url)
+      ? 'video'
+      : (item.content_type as string | undefined) === 'quiz' || Boolean(contentObject?.quiz)
+        ? 'quiz'
+        : 'tiptap'
+
+  const base = {
+    id: (item.uid as string) ?? (item.id as string) ?? `lesson-${fallbackOrder}`,
+    uid: isUuid(item.uid) ? item.uid : isUuid(item.id) ? item.id : undefined,
+    title: (item.title as string) ?? `Lesson ${fallbackOrder}`,
+    order: Number(item.order_index ?? fallbackOrder) || fallbackOrder,
+    durationMinutes: 10,
+    hasHomework: false,
+    homeworkType: 'text' as const,
+    homeworkDescriptionHtml: '<p></p>',
+    homeworkQuiz: createDefaultQuiz(),
+  }
+
+  const contentHtml =
+    typeof contentObject?.contentHtml === 'string' ? contentObject.contentHtml : typeof contentObject?.html === 'string' ? contentObject.html : typeof rawContent === 'string' ? rawContent : ''
+
+  if (contentType === 'video') {
+    return {
+      ...base,
+      contentType: 'video',
+      videoUrl: (item.video_url as string) ?? '',
+      contentHtml,
+    }
+  }
+
+  if (contentType === 'quiz') {
+    const quiz = (contentObject?.quiz as IQuiz | undefined) ?? createDefaultQuiz()
+    return {
+      ...base,
+      contentType: 'quiz',
+      quiz,
+    }
+  }
+
+  return {
+    ...base,
+    contentType: 'tiptap',
+    contentHtml,
+  }
+}
+
+function toModule(item: CourseModuleApiItem, lessons: EditableLesson[], fallbackOrder: number): EditableModule {
+  return {
+    id: ((item.uid as string) ?? createLocalId('module')) as string,
+    uid: getPersistedUid(item),
+    title: (item.title as string) ?? `Modul ${fallbackOrder}`,
+    order: Number(item.order_index ?? fallbackOrder) || fallbackOrder,
+    lessons: lessons.length > 0 ? lessons : [createFallbackLesson(1)],
+  }
 }
 
 export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '/mentor', role = 'mentor' }: CourseEditClientProps) {
   const isAdmin = role === 'admin'
   const confirm = useConfirm()
   const router = useRouter()
-  const [course, setCourse] = useState<IMentorCourse | null | undefined>(undefined)
-  const [modules, setModules] = useState<IModule[]>([])
+  const { data: courseData } = useCourseByUidQuery(courseUid)
+  const publishCourse = usePublishCourse(courseUid)
+
+  const [course, setCourse] = useState<IMentorCourse | null>(null)
+  const [modules, setModules] = useState<EditableModule[]>([])
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const [editorReady, setEditorReady] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [modifiedLessons, setModifiedLessons] = useState<Set<string>>(new Set())
+
+  console.log('CourseEditClient render', { courseData, modules, activeLessonId, modifiedLessons })
+
+  const courseModules = useMemo<CourseModuleApiItem[]>(() => {
+    if (!courseData || typeof courseData !== 'object') return []
+    const modulesData = (courseData as Record<string, unknown>).modules
+    return Array.isArray(modulesData) ? (modulesData as CourseModuleApiItem[]) : []
+  }, [courseData])
+
+  const lessonQueries = useQueries({
+    queries: courseModules.map((module) => ({
+      queryKey: queryKeys.lessons.list({ module_uid: (module.uid as string) ?? '', per_page: 1000 }),
+      queryFn: () =>
+        get<Envelope<LessonListResponse>>('/lessons', {
+          module_uid: (module.uid as string) ?? '',
+          per_page: 1000,
+        }).then((response: Envelope<LessonListResponse>) => response.data),
+      enabled: Boolean(module.uid),
+    })),
+  })
+
+  const modulesLoading = lessonQueries.some((query) => query.isPending)
+
+  const fetchedModules = useMemo(() => {
+    return courseModules.map((module, index) => {
+      const lessonItems = lessonQueries[index]?.data?.lessons ?? []
+      const lessons = lessonItems.length > 0 ? lessonItems.map((item: LessonApiItem, lessonIndex: number) => toLesson(item, lessonIndex + 1)) : [createFallbackLesson(1)]
+      return toModule(module, lessons, index + 1)
+    })
+  }, [courseModules, lessonQueries])
+
+  const hasCourseModules = courseModules.length > 0
 
   const activeLesson = useMemo(() => {
     if (!activeLessonId) return null
     return findLesson(modules, activeLessonId)
   }, [modules, activeLessonId])
 
+  // Initialize course data from API response
   useEffect(() => {
-    const fromList = getManagedCourseByUid(courseUid, isAdmin ? 'all' : 'mentor')
-    const storedModules = getSessionCourseModules(courseUid)
+    if (courseData && typeof courseData === 'object') {
+      setCourse(toMentorCourse(courseData as Record<string, unknown>))
+      return
+    }
+    setCourse(null)
+  }, [courseData])
 
-    setModules(storedModules.modules)
+  // Initialize modules only once when data is loaded
+  useEffect(() => {
+    if (isInitialized || modulesLoading || !courseData || typeof courseData !== 'object') return
+
+    if (!hasCourseModules) {
+      const fallbackModule = createFallbackModule(1)
+      setModules([fallbackModule])
+
+      const fallbackLessonId = fallbackModule.lessons[0]?.id ?? null
+      setActiveLessonId(fallbackLessonId)
+      setEditorReady(true)
+      setIsInitialized(true)
+      return
+    }
+
+    const nextModules = fetchedModules.length > 0 ? fetchedModules : [createFallbackModule(1)]
+    setModules(nextModules)
 
     const firstLessonId = (() => {
       if (initialModuleId) {
-        const targetModule = storedModules.modules.find((m) => m.id === initialModuleId)
+        const targetModule = nextModules.find((module) => module.id === initialModuleId)
         if (targetModule?.lessons[0]) return targetModule.lessons[0].id
       }
-      return storedModules.modules[0]?.lessons[0]?.id ?? null
+      return nextModules[0]?.lessons[0]?.id ?? null
     })()
 
     setActiveLessonId(firstLessonId)
     setEditorReady(true)
+    setIsInitialized(true)
+  }, [modulesLoading, isInitialized, fetchedModules, initialModuleId, courseData, hasCourseModules])
 
-    setCourse(fromList)
-  }, [courseUid, initialModuleId, isAdmin])
-
-  const updateLesson = (lessonId: string, updater: (l: ILesson) => ILesson) => {
-    setModules((prev) =>
-      prev.map((m) => ({
-        ...m,
-        lessons: m.lessons.map((l) => (l.id === lessonId ? updater(l) : l)),
+  // Update lesson and mark as modified
+  const updateLesson = useCallback((lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
+    setModules((previous: IModule[]) =>
+      previous.map((module: EditableModule) => ({
+        ...module,
+        lessons: module.lessons.map((lesson: EditableLesson) => {
+          if (lesson.id === lessonId) {
+            setModifiedLessons((prev) => new Set([...prev, lessonId]))
+            return updater(lesson)
+          }
+          return lesson
+        }),
       })),
     )
-  }
+  }, [])
 
-  const handleSave = (opts?: { silent?: boolean; redirect?: boolean }) => {
-    if (!modules.length) return
-    setSessionCourseModules(courseUid, { version: 2, modules })
-    if (!opts?.silent) toast.success('Perubahan berhasil disimpan.')
-    if (opts?.redirect !== false) {
-      router.push(`${routeBasePath}/courses/${courseUid}`)
-      router.refresh()
-    }
-  }
+  const handleSave = useCallback(
+    async (opts?: { silent?: boolean; redirect?: boolean }) => {
+      try {
+        const nextModules = modules.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson) => ({ ...lesson })),
+        }))
+
+        const buildLessonPayload = (lesson: EditableLesson) => {
+          const payload: Record<string, unknown> = {
+            title: lesson.title,
+            order_index: lesson.order,
+          }
+
+          if (lesson.contentType === 'video') {
+            payload.content_type = 'video'
+            payload.video_url = (lesson as any).videoUrl || ''
+            payload.content = (lesson as any).contentHtml || ''
+          } else if (lesson.contentType === 'quiz') {
+            payload.content_type = 'quiz'
+            payload.content = { quiz: (lesson as any).quiz || {} }
+          } else {
+            payload.content_type = 'text'
+            payload.content = (lesson as any).contentHtml || ''
+          }
+
+          return payload
+        }
+
+        for (const courseModule of nextModules) {
+          const persistedModuleUid = courseModule.uid
+          let moduleUid = persistedModuleUid
+
+          if (moduleUid) {
+            await put<Envelope<Record<string, unknown>>>(`/modules/${moduleUid}`, {
+              title: courseModule.title,
+              order_index: courseModule.order,
+            })
+          } else {
+            const createdModuleResponse = await post<Envelope<Record<string, unknown>>>('/modules', {
+              course_uid: courseUid,
+              title: courseModule.title,
+              order_index: courseModule.order,
+            })
+
+            moduleUid = getPersistedUid(createdModuleResponse.data)
+            if (!moduleUid) {
+              throw new Error('Backend tidak mengembalikan uid untuk module baru.')
+            }
+
+            courseModule.uid = moduleUid
+          }
+
+          for (const lesson of courseModule.lessons) {
+            if (lesson.uid) {
+              await put<Envelope<Record<string, unknown>>>(`/lessons/${lesson.uid}`, buildLessonPayload(lesson))
+              continue
+            }
+
+            const createdLessonResponse = await post<Envelope<Record<string, unknown>>>('/lessons', {
+              module_uid: moduleUid,
+              ...buildLessonPayload(lesson),
+            })
+
+            const createdLessonUid = getPersistedUid(createdLessonResponse.data)
+            if (!createdLessonUid) {
+              throw new Error('Backend tidak mengembalikan uid untuk lesson baru.')
+            }
+
+            lesson.uid = createdLessonUid
+          }
+        }
+
+        setModules(nextModules)
+        setModifiedLessons(new Set())
+
+        if (modules.length === 0) {
+          toast.info('Module dan lesson baru berhasil dibuat di backend.')
+        }
+
+        if (!opts?.silent) toast.success('Perubahan diterapkan.')
+        if (opts?.redirect !== false) {
+          router.push(`${routeBasePath}/courses/${courseUid}`)
+          router.refresh()
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Gagal menyimpan perubahan.')
+      }
+    },
+    [modules, courseUid, routeBasePath, router],
+  )
 
   const handleSaveClick = async () => {
     const ok = await confirm({
       title: 'Simpan perubahan?',
-      description: 'Semua konten modul dan lesson akan disimpan ke sesi lokal.',
+      description: 'Semua perubahan di form ini akan diterapkan pada tampilan editor saat ini.',
       confirmLabel: 'Simpan',
     })
     if (!ok) return
-    handleSave({ redirect: true })
+    await handleSave({ redirect: true })
   }
 
-  const handlePublish = () => {
-    handleSave({ silent: true, redirect: false })
-    const moduleCount = Math.max(1, modules.length)
-    if (course) {
-      upsertExtraCourse({
-        ...course,
-        moduleCount,
-        updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-      })
-      setCourse((prev) => (prev ? { ...prev, moduleCount } : prev))
+  const handlePublish = useCallback(async () => {
+    try {
+      await handleSave({ silent: true, redirect: false })
+      await publishCourse.mutateAsync()
+      setCourse((previous: IMentorCourse | null) => (previous ? { ...previous, published: true } : previous))
+      toast.success('Kursus berhasil dipublikasikan.')
+      router.push(`${routeBasePath}/courses/${courseUid}`)
+      router.refresh()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal mempublikasikan kursus.')
     }
-    publishMentorCourse(courseUid)
-    toast.success('Kursus berhasil dipublikasikan.')
-    router.push(`${routeBasePath}/courses/${courseUid}`)
-    router.refresh()
-  }
+  }, [handleSave, publishCourse, courseUid, routeBasePath, router])
 
   const handlePublishClick = async () => {
     const ok = await confirm({
@@ -126,18 +411,18 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
       confirmLabel: 'Publish',
     })
     if (!ok) return
-    handlePublish()
+    await handlePublish()
   }
 
-  if (course === undefined) {
+  if (modulesLoading) {
     return (
       <section className="flex flex-col gap-4 py-10">
-        <p className="text-sm text-slate-500">Memuat…</p>
+        <p className="text-sm text-slate-500">Memuat lesson…</p>
       </section>
     )
   }
 
-  if (course === null) {
+  if (!course) {
     return (
       <section className="flex flex-col gap-4 py-10">
         <p className="text-slate-600">Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah membuat kursus baru.</p>
@@ -191,10 +476,10 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
                 <CourseTipTapEditor
                   key={activeLesson.id}
                   initialContent={activeLesson.contentHtml}
-                  onChange={(html) => {
-                    updateLesson(activeLesson.id, (l) => {
-                      if (l.contentType !== 'tiptap') return l
-                      return { ...l, contentHtml: html }
+                  onChange={(html: string) => {
+                    updateLesson(activeLesson.id, (lesson: EditableLesson) => {
+                      if (lesson.contentType !== 'tiptap') return lesson
+                      return { ...lesson, contentHtml: html }
                     })
                   }}
                 />
@@ -205,16 +490,16 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
                   key={activeLesson.id}
                   videoUrl={activeLesson.videoUrl}
                   description={activeLesson.contentHtml ?? ''}
-                  onVideoUrlChange={(url) => {
-                    updateLesson(activeLesson.id, (l) => {
-                      if (l.contentType !== 'video') return l
-                      return { ...l, videoUrl: url }
+                  onVideoUrlChange={(url: string) => {
+                    updateLesson(activeLesson.id, (lesson: EditableLesson) => {
+                      if (lesson.contentType !== 'video') return lesson
+                      return { ...lesson, videoUrl: url }
                     })
                   }}
-                  onDescriptionChange={(html) => {
-                    updateLesson(activeLesson.id, (l) => {
-                      if (l.contentType !== 'video') return l
-                      return { ...l, contentHtml: html }
+                  onDescriptionChange={(html: string) => {
+                    updateLesson(activeLesson.id, (lesson: EditableLesson) => {
+                      if (lesson.contentType !== 'video') return lesson
+                      return { ...lesson, contentHtml: html }
                     })
                   }}
                 />
@@ -235,15 +520,24 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
                   id={`lesson-homework-${activeLesson.id}`}
                   className="mt-0.5 size-4 border-slate-300"
                   checked={Boolean(activeLesson.hasHomework)}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={(checked: boolean | 'indeterminate') => {
                     const enabled = checked === true
-                    updateLesson(activeLesson.id, (lesson) => ({
-                      ...lesson,
-                      hasHomework: enabled,
-                      homeworkType: lesson.homeworkType ?? 'text',
-                      homeworkDescriptionHtml: lesson.homeworkDescriptionHtml ?? '<p></p>',
-                      homeworkQuiz: lesson.homeworkQuiz ?? { questions: [], passingScore: 70 },
-                    }))
+                    updateLesson(activeLesson.id, (lesson: EditableLesson) => {
+                      if (enabled) {
+                        return {
+                          ...lesson,
+                          hasHomework: true,
+                          homeworkType: lesson.homeworkType ?? 'text',
+                          homeworkDescriptionHtml: lesson.homeworkDescriptionHtml ?? '<p></p>',
+                          homeworkQuiz: lesson.homeworkQuiz ?? createDefaultQuiz(),
+                        }
+                      }
+
+                      return {
+                        ...lesson,
+                        hasHomework: false,
+                      }
+                    })
                   }}
                 />
                 <div>
@@ -277,7 +571,7 @@ export function CourseEditClient({ courseUid, initialModuleId, routeBasePath = '
           )}
 
           <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">Semua perubahan disimpan ke sesi lokal setelah menekan tombol Simpan.</p>
+            <p className="text-xs text-slate-500">Semua perubahan disimpan di state editor ini sampai backend update tersedia.</p>
             <Button type="button" className="rounded-xl px-5" onClick={() => void handleSaveClick()}>
               Save
             </Button>

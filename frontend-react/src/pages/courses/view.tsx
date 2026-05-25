@@ -1,0 +1,298 @@
+import { CourseModulePreview } from '@/components/courses/(authorized)/viewModuleAndLessons'
+import type { CourseDetailItem, IModulesDetail } from '@/lib/types/api'
+import { useParams } from 'react-router-dom'
+import { NotFoundContent } from '../../components/shared/Error'
+
+export default function CourseViewPage() {
+  const { courseUid } = useParams()
+  const role = 'student' // Change this to 'mentor' or 'student' to test different views
+  const modulesData: IModulesDetail[] = [
+    {
+      uid: '38ae27a2',
+      course_uid: '6f43bd95',
+      title: 'Docker Fundamentals',
+      order_index: 1,
+      created_at: '2026-05-12T19:06:39.108838Z',
+      lessons: [
+        {
+          uid: 'd23601da',
+          module_uid: '38ae27a2',
+          title: 'Docker Fundamentals - Lesson 1',
+          content_type: 'text',
+          content: {
+            intro: 'Pengenalan materi Docker Fundamentals',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 1',
+          },
+          video_url: '',
+          start_time: '2026-05-13T19:06:39.116075Z',
+          end_time: '2026-05-13T21:06:39.116075Z',
+          order_index: 1,
+          created_at: '2026-05-12T19:06:39.200634Z',
+          updated_at: '2026-05-12T19:06:39.200634Z',
+        },
+        {
+          uid: '8ca72ea1',
+          module_uid: '38ae27a2',
+          title: 'Docker Fundamentals - Lesson 2',
+          content_type: 'video',
+          content: {
+            intro: 'Pengenalan materi Docker Fundamentals',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 2',
+          },
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          start_time: '2026-05-14T19:06:39.116075Z',
+          end_time: '2026-05-14T21:06:39.116075Z',
+          order_index: 2,
+          created_at: '2026-05-12T19:06:39.203752Z',
+          updated_at: '2026-05-12T19:06:39.203752Z',
+        },
+        {
+          uid: '6ed755d4',
+          module_uid: '38ae27a2',
+          title: 'Docker Fundamentals - Lesson 3',
+          content_type: 'text',
+          content: {
+            intro: 'Pengenalan materi Docker Fundamentals',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 3',
+          },
+          video_url: '',
+          start_time: '2026-05-15T19:06:39.116075Z',
+          end_time: '2026-05-15T21:06:39.116075Z',
+          order_index: 3,
+          created_at: '2026-05-12T19:06:39.207852Z',
+          updated_at: '2026-05-12T19:06:39.207852Z',
+        },
+      ],
+    },
+    {
+      uid: '129f691c',
+      course_uid: '6f43bd95',
+      title: 'CI/CD Pipeline',
+      order_index: 2,
+      created_at: '2026-05-12T19:06:39.111355Z',
+      lessons: [
+        {
+          uid: 'ca91192d',
+          module_uid: '129f691c',
+          title: 'CI/CD Pipeline - Lesson 1',
+          content_type: 'text',
+          content: {
+            intro: 'Pengenalan materi CI/CD Pipeline',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 1',
+          },
+          video_url: '',
+          start_time: '2026-05-13T19:06:39.116075Z',
+          end_time: '2026-05-13T21:06:39.116075Z',
+          order_index: 1,
+          created_at: '2026-05-12T19:06:39.211129Z',
+          updated_at: '2026-05-12T19:06:39.211129Z',
+        },
+        {
+          uid: 'ae1fdd9b',
+          module_uid: '129f691c',
+          title: 'CI/CD Pipeline - Lesson 2',
+          content_type: 'video',
+          content: {
+            intro: 'Pengenalan materi CI/CD Pipeline',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 2',
+          },
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          start_time: '2026-05-14T19:06:39.116075Z',
+          end_time: '2026-05-14T21:06:39.116075Z',
+          order_index: 2,
+          created_at: '2026-05-12T19:06:39.213454Z',
+          updated_at: '2026-05-12T19:06:39.213454Z',
+        },
+      ],
+    },
+    {
+      uid: 'a7759a81',
+      course_uid: '6f43bd95',
+      title: 'Kubernetes Basics',
+      order_index: 3,
+      created_at: '2026-05-12T19:06:39.113729Z',
+      lessons: [
+        {
+          uid: 'f41d335b',
+          module_uid: 'a7759a81',
+          title: 'Kubernetes Basics - Lesson 1',
+          content_type: 'text',
+          content: {
+            intro: 'Pengenalan materi Kubernetes Basics',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 1',
+          },
+          video_url: '',
+          start_time: '2026-05-13T19:06:39.116075Z',
+          end_time: '2026-05-13T21:06:39.116075Z',
+          order_index: 1,
+          created_at: '2026-05-12T19:06:39.215637Z',
+          updated_at: '2026-05-12T19:06:39.215637Z',
+        },
+        {
+          uid: '6720d9bb',
+          module_uid: 'a7759a81',
+          title: 'Kubernetes Basics - Lesson 2',
+          content_type: 'video',
+          content: {
+            intro: 'Pengenalan materi Kubernetes Basics',
+            summary: 'Ringkasan materi yang telah dipelajari',
+            learning: 'Konten pembelajaran untuk poin 2',
+          },
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          start_time: '2026-05-14T19:06:39.116075Z',
+          end_time: '2026-05-14T21:06:39.116075Z',
+          order_index: 2,
+          created_at: '2026-05-12T19:06:39.218225Z',
+          updated_at: '2026-05-12T19:06:39.218225Z',
+        },
+      ],
+    },
+  ]
+
+  const mentorCourseData: CourseDetailItem = {
+    category: {
+      created_at: '2026-05-12T19:06:39.048745Z',
+      description: 'Kategori untuk course pengembangan web',
+      is_active: true,
+      name: 'Web Development',
+      uid: '83676583',
+      updated_at: '2026-05-12T19:06:39.048745Z',
+    },
+    course_type: {
+      created_at: '2026-05-12T19:06:39.056161Z',
+      description: 'Kelas intensif dengan project',
+      is_active: true,
+      name: 'Bootcamp',
+      uid: '949923d1',
+      updated_at: '2026-05-12T19:06:39.056161Z',
+    },
+    cover_url: 'https://via.placeholder.com/400x300?text=DevOps',
+    created_at: '2026-05-12T19:06:39.074659Z',
+    description: 'Pelajari deployment, Docker, dan CI/CD pipeline untuk production',
+    event_uid: null,
+    is_premium: true,
+    is_published: true,
+    level: 'LANJUTAN',
+    mentors: [
+      {
+        avatar_url: 'https://via.placeholder.com/150?text=Dimas',
+        created_at: '2026-05-12T19:06:38.996285Z',
+        description: 'Mentor DevOps dan cloud deployment',
+        email: 'dimas.mentor@doscom.id',
+        is_verified: true,
+        name: 'Dimas Saputra',
+        role: 'mentor',
+        uid: '2f49d823',
+        updated_at: '2026-05-12T19:36:49.442267Z',
+      },
+    ],
+    modules: [
+      {
+        course_uid: '6f43bd95',
+        created_at: '2026-05-12T19:06:39.108838Z',
+        lessons: [
+          {
+            created_at: '2026-05-12T19:06:39.200634Z',
+            module_uid: '38ae27a2',
+            order_index: 1,
+            title: 'Intro to Docker',
+            uid: 'd23601da',
+            updated_at: '2026-05-12T19:06:39.200634Z',
+          },
+          {
+            created_at: '2026-05-12T19:06:39.203752Z',
+            module_uid: '38ae27a2',
+            order_index: 2,
+            title: 'Docker Images and Containers',
+            uid: '8ca72ea1',
+            updated_at: '2026-05-12T19:06:39.203752Z',
+          },
+          {
+            created_at: '2026-05-12T19:06:39.207852Z',
+            module_uid: '38ae27a2',
+            order_index: 3,
+            title: 'Docker Compose Basics',
+            uid: '6ed755d4',
+            updated_at: '2026-05-12T19:06:39.207852Z',
+          },
+        ],
+        order_index: 1,
+        title: 'Docker Fundamentals',
+        uid: '38ae27a2',
+      },
+      {
+        course_uid: '6f43bd95',
+        created_at: '2026-05-12T19:06:39.111355Z',
+        lessons: [
+          {
+            created_at: '2026-05-12T19:06:39.211129Z',
+            module_uid: '129f691c',
+            order_index: 1,
+            title: 'Intro to CI/CD',
+            uid: 'ca91192d',
+            updated_at: '2026-05-12T19:06:39.211129Z',
+          },
+          {
+            created_at: '2026-05-12T19:06:39.213454Z',
+            module_uid: '129f691c',
+            order_index: 2,
+            title: 'Pipeline Stages',
+            uid: 'ae1fdd9b',
+            updated_at: '2026-05-12T19:06:39.213454Z',
+          },
+        ],
+        order_index: 2,
+        title: 'CI/CD Pipeline',
+        uid: '129f691c',
+      },
+      {
+        course_uid: '6f43bd95',
+        created_at: '2026-05-12T19:06:39.113729Z',
+        lessons: [
+          {
+            created_at: '2026-05-12T19:06:39.215637Z',
+            module_uid: 'a7759a81',
+            order_index: 1,
+            title: 'Kubernetes Overview',
+            uid: 'f41d335b',
+            updated_at: '2026-05-12T19:06:39.215637Z',
+          },
+          {
+            created_at: '2026-05-12T19:06:39.218225Z',
+            module_uid: 'a7759a81',
+            order_index: 2,
+            title: 'Pods and Deployments',
+            uid: '6720d9bb',
+            updated_at: '2026-05-12T19:06:39.218225Z',
+          },
+        ],
+        order_index: 3,
+        title: 'Kubernetes Basics',
+        uid: 'a7759a81',
+      },
+    ],
+    price: 329000,
+    price_strike: 429000,
+    slot: 20,
+    slug: 'devops-essentials',
+    status: 'DRAFT',
+    subtitle: 'Deploy aplikasi dengan pipeline modern',
+    thumbnail_url: 'https://via.placeholder.com/400x300?text=DevOps',
+    title: 'DevOps Essentials',
+    uid: '6f43bd95',
+    updated_at: '2026-05-12T19:06:39.074659Z',
+    what_you_learn: ['Pengenalan konsep utama', 'Studi kasus dunia nyata'],
+  }
+
+  if (!courseUid) {
+    return <NotFoundContent />
+  }
+
+  return <CourseModulePreview courseUid={courseUid} variant={role} storedModules={modulesData} mentorCourse={mentorCourseData} />
+}

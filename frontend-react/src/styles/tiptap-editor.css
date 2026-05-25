@@ -1,0 +1,10 @@
+/* TipTap / ProseMirror — imported by TipTapEditor.tsx */
+.tiptap-editor-root .ProseMirror {
+  outline: none;
+  min-height: 240px;
+  padding: 0.75rem 1rem;
+}
+
+.tiptap-editor-root .ProseMirror-focused {
+  outline: none;
+}

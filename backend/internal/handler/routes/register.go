@@ -14,6 +14,6 @@ func init() {
 func StartRegisterRoutes(r *gin.Engine) {
 	registerGroup := r.Group("/register")
 	{
-		registerGroup.POST("", service.PostRegisterFunc) // all roles - anonymous user
+		registerGroup.POST("/", service.PostRegisterFunc) // user registration
 	}
 }

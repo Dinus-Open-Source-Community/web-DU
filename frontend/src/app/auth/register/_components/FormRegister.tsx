@@ -58,20 +58,11 @@ export default function FormRegister() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
-          onClick={startGoogleOAuth}
-          disabled={isSubmitting}>
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50" onClick={startGoogleOAuth} disabled={isSubmitting}>
           <GoogleIcon className="mr-2 size-5" />
           Google
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50"
-          disabled={isSubmitting}>
+        <Button type="button" variant="outline" className="h-11 rounded-xl border-slate-200 text-sm font-medium shadow-none hover:bg-slate-50" disabled={isSubmitting}>
           <GitHubIcon className="mr-2 size-5" />
           GitHub
         </Button>
@@ -85,24 +76,8 @@ export default function FormRegister() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <GlobalInput
-            label="Nama Lengkap"
-            placeholder="Nama lengkap"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={isSubmitting}
-            required
-          />
-          <GlobalInput
-            label="Email"
-            placeholder="nama@email.com"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isSubmitting}
-            required
-          />
+          <GlobalInput label="Nama Lengkap" placeholder="Nama lengkap" type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={isSubmitting} required />
+          <GlobalInput label="Email" placeholder="nama@email.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} required />
         </div>
 
         <div>
@@ -114,11 +89,7 @@ export default function FormRegister() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
             rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword((p) => !p)}
-                className="text-slate-400 transition-colors hover:text-slate-600"
-                disabled={isSubmitting}>
+              <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600" disabled={isSubmitting}>
                 {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
@@ -135,11 +106,7 @@ export default function FormRegister() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isSubmitting}
             rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowConfirm((p) => !p)}
-                className="text-slate-400 transition-colors hover:text-slate-600"
-                disabled={isSubmitting}>
+              <button type="button" onClick={() => setShowConfirm((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600" disabled={isSubmitting}>
                 {showConfirm ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
               </button>
             }
@@ -161,11 +128,7 @@ export default function FormRegister() {
           </label>
         </div>
 
-        <Button
-          type="submit"
-          className="h-12 rounded-xl text-sm font-bold"
-          disabled={passwordMismatch || isSubmitting}
-          aria-busy={isSubmitting}>
+        <Button type="submit" className="h-12 rounded-xl text-sm font-bold" disabled={passwordMismatch || isSubmitting} aria-busy={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
