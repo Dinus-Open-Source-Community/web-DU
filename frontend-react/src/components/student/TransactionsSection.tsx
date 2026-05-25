@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SearchForm } from '../shared/SearchForm'
-import { FilterSelect } from '../shared/FilterSelect'
 import { type PaymentStatus, type TransactionHistory } from '@/lib/types/transaction'
 import { Pagination } from '../shared/Pagination'
 import TransactionsCard from '../shared/TransactionsCard'
