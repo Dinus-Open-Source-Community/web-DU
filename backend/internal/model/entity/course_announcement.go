@@ -3,7 +3,10 @@ package entity
 import (
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Model CourseAnnouncement Migrations
@@ -15,4 +18,21 @@ type CourseAnnouncement struct {
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
 	Course *Course `gorm:"foreignKey:CourseUid" json:"course"`
+}
+
+// AfterFind otomatis mendekripsi judul dan pesan pengumuman.
+func (a *CourseAnnouncement) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&a.Title, &a.Message)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi judul dan pesan pengumuman (idempotent).
+func (a *CourseAnnouncement) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&a.Title, &a.Message)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (a *CourseAnnouncement) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&a.Title, &a.Message)
+	return nil
 }

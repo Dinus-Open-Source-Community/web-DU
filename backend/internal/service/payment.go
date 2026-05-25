@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -71,7 +72,8 @@ func GetPaymentByEnrollmentID(enrollmentUid uuid.UUID) (*entity.Payment, error) 
 	return &payment, nil
 }
 
-// CreatePayment creates a new payment via Tripay API
+// CreatePayment creates a new payment via Tripay API.
+// req.EnrollmentUid menerima full UUID maupun 8-char prefix.
 func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIResponse, error) {
 	// Get credentials from env
 	merchantCode := os.Getenv("TRIPAY_MERCHANT_CODE")
@@ -91,20 +93,20 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		return nil, err
 	}
 
-	// Decrypt user data
-	decryptedName, err := utils.Decrypt(user.Name)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt user name: %w", err)
-	}
+	// Name/Email sudah plaintext via hook User.AfterFind; jangan Decrypt ulang.
+	customerName := user.Name
+	customerEmail := user.Email
 
-	decryptedEmail, err := utils.Decrypt(user.Email)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt user email: %w", err)
-	}
+	var enrollmentUidPtr *uuid.UUID
+	if req.EnrollmentUid != "" {
+		resolved, err := database.ResolveUID("enrollments", req.EnrollmentUid)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve enrollment_uid: %w", err)
+		}
+		enrollmentUidPtr = &resolved
 
-	if req.EnrollmentUid != nil {
 		var enrollment entity.Enrollment
-		if err := database.DB.First(&enrollment, *req.EnrollmentUid).Error; err != nil {
+		if err := database.DB.First(&enrollment, resolved).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				return nil, fmt.Errorf("enrollment not found")
 			}
@@ -116,7 +118,7 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 			return nil, fmt.Errorf("enrollment is already active, no payment needed")
 		}
 
-		pendingPayment, err := GetPendingPaymentByEnrollment(*req.EnrollmentUid)
+		pendingPayment, err := GetPendingPaymentByEnrollment(resolved)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check pending payment: %w", err)
 		}
@@ -136,8 +138,8 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 					Reference:     paymentData.TransactionID,
 					Status:        string(paymentData.Status),
 					Amount:        int(paymentData.Amount),
-					CustomerName:  decryptedName,
-					CustomerEmail: decryptedEmail,
+					CustomerName:  customerName,
+					CustomerEmail: customerEmail,
 				},
 			}, nil
 		}
@@ -170,22 +172,15 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		req.Amount,
 	)
 
-	// Set default callback and return URLs if not provided
-	callbackURL := req.CallbackURL
-	returnURL := req.ReturnURL
-	baseURL := os.Getenv("BASE_URL")
-
-	if callbackURL == "" {
-		if baseURL == "" {
-			return nil, fmt.Errorf("BASE_URL not configured and callback_url not provided")
-		}
-		callbackURL = baseURL + "/payment/callback"
+	// Callback URL selalu dari BASE_URL + route webhook Tripay (/payment/callback).
+	baseURL := strings.TrimRight(os.Getenv("BASE_URL"), "/")
+	if baseURL == "" {
+		return nil, fmt.Errorf("BASE_URL not configured")
 	}
+	callbackURL := baseURL + "/payment/callback"
 
+	returnURL := req.ReturnURL
 	if returnURL == "" {
-		if baseURL == "" {
-			return nil, fmt.Errorf("BASE_URL not configured and return_url not provided")
-		}
 		returnURL = baseURL + "/payment/success"
 	}
 
@@ -194,8 +189,8 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		"method":         req.Method,
 		"merchant_ref":   merchantRef,
 		"amount":         req.Amount,
-		"customer_name":  decryptedName,
-		"customer_email": decryptedEmail,
+		"customer_name":  customerName,
+		"customer_email": customerEmail,
 		"order_items":    orderItems,
 		"callback_url":   callbackURL,
 		"return_url":     returnURL,
@@ -240,7 +235,7 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 
 	// Save payment to database
 	payment := &entity.Payment{
-		EnrollmentUid: req.EnrollmentUid,
+		EnrollmentUid: enrollmentUidPtr,
 		Amount:        float64(req.Amount),
 		Method:        entity.PaymentMethod(req.Method),
 		Status:        entity.PaymentPending,
@@ -376,7 +371,7 @@ func CreatePaymentFunc(c *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        reference  query     string          false  "Payment Reference"
-// @Param        enrollmentId  query     uint        false  "Enrollment ID"
+// @Param        enrollmentId  query     string      false  "Enrollment UID (full UUID atau 8-char prefix)"
 // @Success      200        {object}  map[string]any  "Payment details retrieved successfully"
 // @Failure      400        {object}  map[string]any  "Reference parameter is missing"
 // @Failure      401        {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
@@ -403,13 +398,13 @@ func GetPaymentFunc(c *gin.Context) {
 	if reference != "" {
 		payment, err = GetPaymentByReference(reference)
 	} else {
-		enrollmentUid, err2 := uuid.Parse(enrollmentIDStr)
+		enrollmentUid, err2 := database.ResolveUID("enrollments", enrollmentIDStr)
 		if err2 != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
-				"message": "Invalid enrollmentId format",
+				"message": "Invalid enrollmentId",
 				"data":    nil,
-				"error":   "enrollmentId must be a valid UUID",
+				"error":   err2.Error(),
 			})
 			return
 		}
@@ -435,13 +430,24 @@ func GetPaymentFunc(c *gin.Context) {
 }
 
 func PaymentCallbackFunc(c *gin.Context) {
-	var callbackData dto.PaymentCallbackRequest
-	if err := c.ShouldBindJSON(&callbackData); err != nil {
+	rawBody, err := io.ReadAll(c.Request.Body)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid callback format",
+			"message": "Failed to read callback body",
 			"data":    nil,
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	callbackSignature := c.GetHeader("X-Callback-Signature")
+	if callbackSignature == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Missing callback signature",
+			"data":    nil,
+			"error":   "X-Callback-Signature header is required",
 		})
 		return
 	}
@@ -457,14 +463,33 @@ func PaymentCallbackFunc(c *gin.Context) {
 		return
 	}
 
-	dataToSign := callbackData.Reference + callbackData.Status + fmt.Sprintf("%v", callbackData.TotalAmount)
-	h := utils.HMACSHA256(privateKey, dataToSign)
-	if callbackData.Signature != h {
+	if !utils.ValidateTripayCallbackSignature(privateKey, rawBody, callbackSignature) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Invalid callback signature",
 			"data":    nil,
 			"error":   "signature verification failed",
+		})
+		return
+	}
+
+	if event := c.GetHeader("X-Callback-Event"); event != "" && event != "payment_status" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Unrecognized callback event",
+			"data":    nil,
+			"error":   event,
+		})
+		return
+	}
+
+	var callbackData dto.PaymentCallbackRequest
+	if err := json.Unmarshal(rawBody, &callbackData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid callback format",
+			"data":    nil,
+			"error":   err.Error(),
 		})
 		return
 	}

@@ -1,8 +1,8 @@
 package dto
 
-// UpdateUserRoleRequest merepresentasikan request untuk update role user
+// UpdateUserRoleRequest is the body for PATCH /user/role/{id}. Allowed JSON role values: admin (callers must be super_admin), mentor, student. super_admin cannot be assigned via this route.
 type UpdateUserRoleRequest struct {
-	Role string `json:"role" binding:"required" example:"admin"`
+	Role string `json:"role" binding:"required" example:"mentor"`
 }
 
 // UpdateUserProfileRequest represents profile update payload

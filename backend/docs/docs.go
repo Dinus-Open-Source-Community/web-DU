@@ -22,7 +22,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file is verified and re-encoded to ensure a clean image.",
+                "description": "Upload and update avatar. Allowed types: JPEG, PNG, GIF (animated GIFs are normalized to the first frame). Max size 5MiB enforced before processing and again after decode/re-encode.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -97,7 +97,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Get all course categories (All Roles - Anonymous User)",
+                "summary": "Get all course categories (Public)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -141,7 +141,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new course category. Admin only.",
+                "description": "Create a new course category. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -151,7 +151,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Create course category (Admin Only)",
+                "summary": "Create course category (Super Admin / Admin)",
                 "parameters": [
                     {
                         "description": "Course category data",
@@ -186,7 +186,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -211,7 +211,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Get course category by ID (All Roles - Anonymous User)",
+                "summary": "Get course category by ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -251,7 +251,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update existing course category by uid. Admin only.",
+                "description": "Update existing course category by uid. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -261,7 +261,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Update course category (Admin Only)",
+                "summary": "Update course category (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -303,7 +303,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -331,14 +331,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete course category by uid. Admin only.",
+                "description": "Delete course category by uid. Requires Super Admin or Admin.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Category"
                 ],
-                "summary": "Delete course category (Admin Only)",
+                "summary": "Delete course category (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -371,7 +371,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -403,7 +403,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Get all course types (All Roles - Anonymous User)",
+                "summary": "Get all course types (Public)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -447,7 +447,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new course type. Admin only.",
+                "description": "Create a new course type. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -457,7 +457,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Create course type (Admin Only)",
+                "summary": "Create course type (Super Admin / Admin)",
                 "parameters": [
                     {
                         "description": "Course type data",
@@ -492,7 +492,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -517,7 +517,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Get course type by ID (All Roles - Anonymous User)",
+                "summary": "Get course type by ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -557,7 +557,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update existing course type by uid. Admin only.",
+                "description": "Update existing course type by uid. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -567,7 +567,7 @@ const docTemplate = `{
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Update course type (Admin Only)",
+                "summary": "Update course type (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -609,7 +609,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -637,14 +637,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete course type by uid. Admin only.",
+                "description": "Delete course type by uid. Requires Super Admin or Admin.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Course Type"
                 ],
-                "summary": "Delete course type (Admin Only)",
+                "summary": "Delete course type (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -677,7 +677,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -712,7 +712,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all courses with pagination and filters (All Roles - Anonymous User)",
+                "summary": "Get all courses with pagination and filters (Public)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -774,7 +774,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Admin only.",
+                "description": "Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Requires Super Admin or Admin.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -784,7 +784,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Create new course (Admin Only)",
+                "summary": "Create new course (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "file",
@@ -907,7 +907,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -942,7 +942,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get course by ID (All Roles - Anonymous User)",
+                "summary": "Get course by ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1062,7 +1062,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get mentors by course ID (All Roles - Anonymous User)",
+                "summary": "Get mentors by course ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1129,7 +1129,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Assign one or more mentors selected by admin to a course. Course can have multiple mentors.",
+                "description": "Assign one or more mentors selected by Super Admin or Admin to a course. Course can have multiple mentors.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1139,7 +1139,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Assign mentors to course (Admin Only)",
+                "summary": "Assign mentors to course (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1181,7 +1181,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1303,7 +1303,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Reply to a course review (Mentor/Admin)",
+                "summary": "Reply to a course review (Mentor / Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1382,7 +1382,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Set course status to ACTIVE. Admin only endpoint.",
+                "description": "Set course status to ACTIVE. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1392,7 +1392,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Activate course status (Admin Only)",
+                "summary": "Activate course status (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1418,7 +1418,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1453,7 +1453,7 @@ const docTemplate = `{
                 "tags": [
                     "Course"
                 ],
-                "summary": "Get all enrolled students in a course (All Roles - Anonymous User)",
+                "summary": "Get all enrolled students in a course (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1506,6 +1506,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/files/{bucket}/{object}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Decrypts objects stored as ciphertext in MinIO and streams plaintext bytes to the client with the original content type. Replaces direct MinIO access for file URLs (avatars, course covers, lesson assignment attachments, invoice PDFs, etc.). Requires Bearer JWT; all authenticated roles are allowed. Backward compatible with legacy plaintext objects.",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Serve encrypted MinIO file (All Roles)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MinIO bucket name",
+                        "name": "bucket",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Object key (may contain slashes)",
+                        "name": "object",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File bytes (decrypted when stored encrypted)",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — missing or invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Object not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to decrypt or read object",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/invoices/url": {
             "get": {
                 "security": [
@@ -1513,7 +1582,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, mentor, or the owner (self) only.",
+                "description": "Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, assigned/joined mentor for the course, or the enrolled student (self).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1963,7 +2032,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve all attendance records for a specific lesson. Admin only.",
+                "description": "Retrieve all attendance records for a specific lesson. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1973,7 +2042,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson Attendance"
                 ],
-                "summary": "Get all attendances for a lesson (Admin Only)",
+                "summary": "Get all attendances for a lesson (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1999,7 +2068,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2080,7 +2149,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a specific attendance record by ID. Admin only.",
+                "description": "Retrieve a specific attendance record by ID. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2090,7 +2159,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson Attendance"
                 ],
-                "summary": "Get attendance by ID (Admin Only)",
+                "summary": "Get attendance by ID (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2116,7 +2185,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2144,7 +2213,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update attendance status and note. Admin only. Can only update status and note, not lesson/enrollment.",
+                "description": "Update attendance status and note. Requires Super Admin or Admin. Can only update status and note, not lesson/enrollment.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2154,7 +2223,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson Attendance"
                 ],
-                "summary": "Update attendance status and note (Admin Only)",
+                "summary": "Update attendance status and note (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2196,7 +2265,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2224,7 +2293,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete an attendance record by ID. Admin only.",
+                "description": "Delete an attendance record by ID. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2234,7 +2303,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson Attendance"
                 ],
-                "summary": "Delete attendance record (Admin Only)",
+                "summary": "Delete attendance record (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2260,7 +2329,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Admins only",
+                        "description": "Access denied: Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2655,7 +2724,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create or update assignment configuration for a lesson.",
+                "description": "Create assignment for a lesson. Each lesson allows at most one assignment (text or quiz); use PUT to update.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2665,7 +2734,7 @@ const docTemplate = `{
                 "tags": [
                     "Lesson Assignment"
                 ],
-                "summary": "Upsert lesson assignment (Admin/Mentor)",
+                "summary": "Create lesson assignment (Admin/Mentor)",
                 "parameters": [
                     {
                         "type": "string",
@@ -2685,13 +2754,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Lesson assignment updated successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
                     "201": {
                         "description": "Lesson assignment created successfully",
                         "schema": {
@@ -2727,8 +2789,15 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "409": {
+                        "description": "Lesson already has an assignment",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "500": {
-                        "description": "Failed to upsert lesson assignment",
+                        "description": "Failed to create lesson assignment",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2790,6 +2859,445 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to delete lesson assignment",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}/assignment/submission": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns submission content plus a grading object: score_percent, passed, feedback, has_feedback, is_graded, quiz counts (quiz assignments).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "Get my lesson assignment submission (Enrollment User)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "submission + grading",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Edit your submission when resubmit rules allow. Quiz submissions are re-scored automatically after update.",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "Update lesson assignment submission (Enrollment User)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden or resubmit not allowed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Submission not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create your submission. Text assignments: multipart with optional file (max 10MB per file if allow_file_submission). Quiz assignments: JSON or multipart field quiz_answers — scored automatically vs quiz_payload (correctOptionId, passingScore).",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "Submit lesson assignment (Enrollment User)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Plain text (when allowed)",
+                        "name": "plain_text",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Rich text JSON (when allowed)",
+                        "name": "rich_text",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Required when assignment requires file description",
+                        "name": "file_description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "JSON object of questionId -\u003e chosenOptionId (quiz assignments)",
+                        "name": "quiz_answers",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Attachment when allow_file_submission is true",
+                        "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "description": "JSON body when not using multipart",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAssignmentSubmissionUpsertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Submission created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden or submission closed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Already submitted — use PUT to update",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "413": {
+                        "description": "File too large",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}/assignment/submissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all participant submissions for this lesson's assignment. Requires admin or mentor assigned to the course.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "List lesson assignment submissions (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of submissions",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson assignment not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}/assignment/submissions/{submissionUid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a single submission by UID for this lesson's assignment. Requires admin or mentor assigned to the course.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "Get one lesson assignment submission (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Submission UID",
+                        "name": "submissionUid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}/assignment/submissions/{submissionUid}/grade": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Set score and optional feedback for a text-type assignment submission. Quiz submissions are auto-graded and cannot be graded with this route.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment Submission"
+                ],
+                "summary": "Grade text lesson assignment submission (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Submission UID",
+                        "name": "submissionUid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Grade payload (score_percent 0–100)",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LessonAssignmentSubmissionGradeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated submission",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or wrong assignment type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2866,7 +3374,7 @@ const docTemplate = `{
                 "tags": [
                     "Mentor"
                 ],
-                "summary": "Get all mentors (All Roles - Anonymous User)",
+                "summary": "Get all mentors (Public)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2917,7 +3425,7 @@ const docTemplate = `{
                 "tags": [
                     "Mentor"
                 ],
-                "summary": "Get mentor detail by ID (All Roles - Anonymous User)",
+                "summary": "Get mentor detail by ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3425,8 +3933,8 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "Enrollment ID",
+                        "type": "string",
+                        "description": "Enrollment UID (full UUID atau 8-char prefix)",
                         "name": "enrollmentId",
                         "in": "query"
                     }
@@ -3593,7 +4101,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve own detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.",
+                "description": "Retrieve own detailed user data including profile, joined courses, enrollment invoices (course detail per enrollment, without URLs — use GET /invoices/url), transaction history, course reviews, enrollment summary, and mentored courses.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3643,7 +4151,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve paginated list of all users with optional filtering by role and search. Supports sorting by created_at or name. Admin only.",
+                "description": "Retrieve paginated list of all users with optional filtering by role and search. Supports sorting by created_at or name. Requires Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3653,7 +4161,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Get all users with pagination (Admin Only)",
+                "summary": "Get all users with pagination (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -3708,7 +4216,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Only admins can access this endpoint",
+                        "description": "Forbidden — Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3731,7 +4239,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete a user account permanently. Only administrators can perform this action. Admins cannot delete their own account.",
+                "description": "Delete a user account permanently. Requires Super Admin or Admin. You cannot delete your own account.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3741,7 +4249,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Delete user account (Admin Only)",
+                "summary": "Delete user account (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3767,7 +4275,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Only admins can delete users",
+                        "description": "Forbidden — Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3933,7 +4441,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update a specific user's role. Admin can update mentor/student role, while role changes for admin/super_admin users are restricted to super_admin.",
+                "description": "Assign target roles admin, mentor, or student only (super_admin cannot be set via this endpoint). Only super_admin may assign the admin role; admin may assign mentor or student only. Changing roles for users who are already admin or super_admin requires the caller to be super_admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3943,7 +4451,7 @@ const docTemplate = `{
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Update user role (Admin/Super Admin)",
+                "summary": "Update user role (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3953,7 +4461,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Role assignment (super_admin/admin/mentor/student)",
+                        "description": "Target role: admin (super_admin only), mentor, or student",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -3971,7 +4479,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid role value",
+                        "description": "Invalid role value (must be admin, mentor, or student)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3985,7 +4493,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - insufficient role update permission",
+                        "description": "Forbidden - only super_admin may assign admin role, or insufficient permission for target user",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -4015,7 +4523,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve detailed user data by target user UID. Accessible only by admin.",
+                "description": "Retrieve detailed user data by target user UID. Accessible by Super Admin or Admin.",
                 "consumes": [
                     "application/json"
                 ],
@@ -4025,7 +4533,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get user detail by ID (Admin only)",
+                "summary": "Get user detail by ID (Super Admin / Admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -4058,7 +4566,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden - only admin",
+                        "description": "Forbidden — Super Admin or Admin only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -4205,7 +4713,7 @@ const docTemplate = `{
             "properties": {
                 "course_uid": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "example": "550e8400"
                 },
                 "order_index": {
                     "type": "integer",
@@ -4227,9 +4735,6 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "integer"
-                },
-                "callback_url": {
-                    "type": "string"
                 },
                 "enrollment_uid": {
                     "type": "string"
@@ -4339,6 +4844,39 @@ const docTemplate = `{
                 "total_fee": {
                     "type": "integer"
                 }
+            }
+        },
+        "dto.LessonAssignmentSubmissionGradeRequest": {
+            "type": "object",
+            "required": [
+                "score_percent"
+            ],
+            "properties": {
+                "feedback": {
+                    "type": "string"
+                },
+                "passed": {
+                    "type": "boolean"
+                },
+                "score_percent": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.LessonAssignmentSubmissionUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "file_description": {
+                    "type": "string"
+                },
+                "plain_text": {
+                    "type": "string"
+                },
+                "quiz_answers": {},
+                "remove_file": {
+                    "type": "boolean"
+                },
+                "rich_text": {}
             }
         },
         "dto.LessonAssignmentUpsertRequest": {
@@ -4451,8 +4989,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "module_uid": {
-                    "type": "string",
-                    "format": "uuid"
+                    "type": "string"
                 },
                 "order_index": {
                     "type": "integer"
@@ -4483,8 +5020,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "module_uid": {
-                    "type": "string",
-                    "format": "uuid"
+                    "type": "string"
                 },
                 "order_index": {
                     "type": "integer"
@@ -4677,7 +5213,7 @@ const docTemplate = `{
             "properties": {
                 "role": {
                     "type": "string",
-                    "example": "admin"
+                    "example": "mentor"
                 }
             }
         }

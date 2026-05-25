@@ -4,6 +4,7 @@ import (
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // @Summary      Create new lesson (Admin/Mentor)
@@ -57,8 +57,13 @@ func CreateLessonFunc(c *gin.Context) {
 		return
 	}
 
+	moduleUid, ok := resolveUIDValue(c, "modules", req.ModuleUid, "module")
+	if !ok {
+		return
+	}
+
 	var module entity.Module
-	if err := database.DB.First(&module, req.ModuleUid).Error; err != nil {
+	if err := database.DB.First(&module, moduleUid).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Module not found",
@@ -108,9 +113,15 @@ func CreateLessonFunc(c *gin.Context) {
 		}
 	}
 
+	titleEnc, err := utils.Encrypt(req.Title)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt lesson title", "data": nil, "error": err.Error()})
+		return
+	}
+
 	lesson := entity.Lesson{
-		ModuleUid:   req.ModuleUid,
-		Title:       req.Title,
+		ModuleUid:   moduleUid,
+		Title:       titleEnc,
 		ContentType: contentType,
 		Content:     content,
 		VideoURL:    req.VideoURL,
@@ -128,6 +139,8 @@ func CreateLessonFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	lesson.Title = utils.DecryptOrSelf(lesson.Title)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -191,9 +204,8 @@ func GetAllLessonsFunc(c *gin.Context) {
 	db := database.DB.Model(&entity.Lesson{})
 
 	if moduleIDStr != "" {
-		moduleUid, err := uuid.Parse(moduleIDStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid module uid", "data": nil, "error": err.Error()})
+		moduleUid, ok := resolveUIDValue(c, "modules", moduleIDStr, "module")
+		if !ok {
 			return
 		}
 
@@ -228,8 +240,55 @@ func GetAllLessonsFunc(c *gin.Context) {
 		)
 	}
 
+	// Filter judul lesson dilakukan in-memory karena title disimpan terenkripsi
 	if nameFilter != "" {
-		db = db.Where("LOWER(title) LIKE ?", "%"+strings.ToLower(nameFilter)+"%")
+		var allLessons []entity.Lesson
+		if err := db.Order("order_index ASC").Find(&allLessons).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve lessons for search",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		needle := strings.ToLower(nameFilter)
+		filtered := make([]entity.Lesson, 0, len(allLessons))
+		for _, l := range allLessons {
+			if strings.Contains(strings.ToLower(l.Title), needle) {
+				l.Assignment = nil
+				filtered = append(filtered, l)
+			}
+		}
+
+		total := int64(len(filtered))
+		start := (page - 1) * perPage
+		if start > len(filtered) {
+			start = len(filtered)
+		}
+		end := start + perPage
+		if end > len(filtered) {
+			end = len(filtered)
+		}
+		paginated := filtered[start:end]
+		totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Lessons retrieved successfully",
+			"data": gin.H{
+				"lessons": paginated,
+				"meta": gin.H{
+					"total":        total,
+					"per_page":     perPage,
+					"current_page": page,
+					"total_pages":  totalPages,
+				},
+			},
+			"error": nil,
+		})
+		return
 	}
 
 	// Count total records
@@ -255,6 +314,10 @@ func GetAllLessonsFunc(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	for i := range lessons {
+		lessons[i].Assignment = nil
 	}
 
 	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
@@ -297,19 +360,13 @@ func GetLessonByIDFunc(c *gin.Context) {
 		return
 	}
 
-	lessonUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid lesson uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	lessonUID, ok := resolveUIDParam(c, "lessons", "id", "lesson")
+	if !ok {
 		return
 	}
 
 	var lesson entity.Lesson
-	if err := database.DB.First(&lesson, lessonUID).Error; err != nil {
+	if err := database.DB.Preload("Assignment").First(&lesson, lessonUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Lesson not found",
@@ -374,14 +431,8 @@ func UpdateLessonFunc(c *gin.Context) {
 		return
 	}
 
-	lessonUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid lesson uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	lessonUID, ok := resolveUIDParam(c, "lessons", "id", "lesson")
+	if !ok {
 		return
 	}
 
@@ -424,9 +475,14 @@ func UpdateLessonFunc(c *gin.Context) {
 		return
 	}
 
-	if req.ModuleUid != uuid.Nil {
+	if strings.TrimSpace(req.ModuleUid) != "" {
+		targetModuleUid, okTarget := resolveUIDValue(c, "modules", req.ModuleUid, "module")
+		if !okTarget {
+			return
+		}
+
 		var targetModule entity.Module
-		if err := database.DB.First(&targetModule, req.ModuleUid).Error; err != nil {
+		if err := database.DB.First(&targetModule, targetModuleUid).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Target module not found", "data": nil, "error": err.Error()})
 			return
 		}
@@ -440,10 +496,15 @@ func UpdateLessonFunc(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Access denied to target module", "data": nil, "error": nil})
 			return
 		}
-		lesson.ModuleUid = req.ModuleUid
+		lesson.ModuleUid = targetModuleUid
 	}
 	if req.Title != "" {
-		lesson.Title = req.Title
+		titleEnc, err := utils.Encrypt(req.Title)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt lesson title", "data": nil, "error": err.Error()})
+			return
+		}
+		lesson.Title = titleEnc
 	}
 	if req.Content != nil {
 		contentBytes, _ := json.Marshal(req.Content)
@@ -487,6 +548,8 @@ func UpdateLessonFunc(c *gin.Context) {
 		return
 	}
 
+	lesson.Title = utils.DecryptOrSelf(lesson.Title)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lesson updated successfully",
@@ -517,14 +580,8 @@ func DeleteLessonFunc(c *gin.Context) {
 		return
 	}
 
-	lessonUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid lesson uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	lessonUID, ok := resolveUIDParam(c, "lessons", "id", "lesson")
+	if !ok {
 		return
 	}
 

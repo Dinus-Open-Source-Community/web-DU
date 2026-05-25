@@ -6,12 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// LessonAttendanceCreateRequest represents payload for creating lesson attendance
+// LessonAttendanceCreateRequest represents payload for creating lesson attendance.
+// LessonUid & EnrollmentUid menerima full UUID maupun 8-char prefix; service akan
+// menyelesaikan nilai tersebut ke full uuid via database.ResolveUID.
 type LessonAttendanceCreateRequest struct {
-	LessonUid     uuid.UUID `json:"lesson_uid" binding:"required"`
-	EnrollmentUid uuid.UUID `json:"enrollment_uid" binding:"required"`
-	Status        string    `json:"status" binding:"oneof=present late absent excused"`
-	Note          string    `json:"note"`
+	LessonUid     string `json:"lesson_uid" binding:"required"`
+	EnrollmentUid string `json:"enrollment_uid" binding:"required"`
+	Status        string `json:"status" binding:"oneof=present late absent excused"`
+	Note          string `json:"note"`
 }
 
 // LessonAttendanceUpdateRequest represents payload for updating lesson attendance

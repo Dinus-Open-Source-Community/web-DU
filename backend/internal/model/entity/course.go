@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type CourseLevel string
@@ -59,4 +62,27 @@ type Course struct {
 	Enrollments   []Enrollment         `gorm:"foreignKey:CourseUid" json:"enrollments,omitempty"`
 	Reviews       []CourseReview       `gorm:"foreignKey:CourseUid" json:"course_reviews,omitempty"`
 	Announcements []CourseAnnouncement `gorm:"foreignKey:CourseUid" json:"course_announcements,omitempty"`
+}
+
+// AfterFind otomatis mendekripsi kolom teks sensitif setelah data dimuat.
+// Slug, cover_url, thumbnail_url, level, status, harga, jsonb what_you_learn,
+// dan timestamps tidak dienkripsi karena bukan data sensitif atau dibutuhkan
+// apa adanya untuk routing/listing.
+func (c *Course) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&c.Title, &c.Subtitle, &c.Description)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi kolom teks sensitif sebelum disimpan.
+// Bersifat idempotent terhadap field yang sudah berupa ciphertext.
+func (c *Course) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&c.Title, &c.Subtitle, &c.Description)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah operasi simpan agar
+// pemanggil service dapat langsung mengembalikan entitas ke client tanpa perlu
+// dekripsi manual.
+func (c *Course) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&c.Title, &c.Subtitle, &c.Description)
+	return nil
 }

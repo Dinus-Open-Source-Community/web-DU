@@ -1,7 +1,5 @@
 package dto
 
-import "github.com/google/uuid"
-
 // OrderItem represents a single item in the order
 type OrderItem struct {
 	SKU        string `json:"sku"`
@@ -12,14 +10,15 @@ type OrderItem struct {
 	ImageURL   string `json:"image_url"`
 }
 
-// CreatePaymentRequest is the request body for creating a payment
+// CreatePaymentRequest is the request body for creating a payment.
+// EnrollmentUid menerima full UUID maupun 8-char prefix; service akan
+// menyelesaikan nilai tersebut ke full uuid via database.ResolveUID.
 type CreatePaymentRequest struct {
-	EnrollmentUid *uuid.UUID  `json:"enrollment_uid"`
+	EnrollmentUid string      `json:"enrollment_uid"`
 	Method        string      `json:"method" binding:"required,oneof=PERMATAVA BNIVA BRIVA MANDIRIVA BCAVA MUAMALATVA CIMBVA BSIVA OCBCVA DANAMONVA OVO DANA QRIS2"`
 	Amount        int         `json:"amount" binding:"required,gt=0"`
-	OrderItems    []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
-	CallbackURL   string      `json:"callback_url"`
-	ReturnURL     string      `json:"return_url"`
+	OrderItems []OrderItem `json:"order_items" binding:"required,min=1,dive,required"`
+	ReturnURL  string      `json:"return_url"`
 }
 
 // OrderItemResponse represents order item in response
@@ -89,5 +88,4 @@ type PaymentCallbackRequest struct {
 	Status            string `json:"status" binding:"required"`
 	PaidAt            int64  `json:"paid_at"`
 	Note              string `json:"note"`
-	Signature         string `json:"signature"`
 }

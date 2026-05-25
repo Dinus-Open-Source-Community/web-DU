@@ -79,7 +79,7 @@ definitions:
   dto.CreateModuleRequest:
     properties:
       course_uid:
-        example: 550e8400-e29b-41d4-a716-446655440000
+        example: 550e8400
         type: string
       order_index:
         example: 1
@@ -96,8 +96,6 @@ definitions:
     properties:
       amount:
         type: integer
-      callback_url:
-        type: string
       enrollment_uid:
         type: string
       method:
@@ -180,6 +178,28 @@ definitions:
       total_fee:
         type: integer
     type: object
+  dto.LessonAssignmentSubmissionGradeRequest:
+    properties:
+      feedback:
+        type: string
+      passed:
+        type: boolean
+      score_percent:
+        type: number
+    required:
+    - score_percent
+    type: object
+  dto.LessonAssignmentSubmissionUpsertRequest:
+    properties:
+      file_description:
+        type: string
+      plain_text:
+        type: string
+      quiz_answers: {}
+      remove_file:
+        type: boolean
+      rich_text: {}
+    type: object
   dto.LessonAssignmentUpsertRequest:
     properties:
       allow_file_submission:
@@ -255,7 +275,6 @@ definitions:
         description: RFC3339 format
         type: string
       module_uid:
-        format: uuid
         type: string
       order_index:
         type: integer
@@ -280,7 +299,6 @@ definitions:
         description: RFC3339 format
         type: string
       module_uid:
-        format: uuid
         type: string
       order_index:
         type: integer
@@ -410,7 +428,7 @@ definitions:
   dto.UpdateUserRoleRequest:
     properties:
       role:
-        example: admin
+        example: mentor
         type: string
     required:
     - role
@@ -426,8 +444,9 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file
-        is verified and re-encoded to ensure a clean image.
+      description: 'Upload and update avatar. Allowed types: JPEG, PNG, GIF (animated
+        GIFs are normalized to the first frame). Max size 5MiB enforced before processing
+        and again after decode/re-encode.'
       parameters:
       - description: 'Avatar image file (max 5MB, supported: JPG, PNG, GIF)'
         in: formData
@@ -501,13 +520,13 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all course categories (All Roles - Anonymous User)
+      summary: Get all course categories (Public)
       tags:
       - Course Category
     post:
       consumes:
       - application/json
-      description: Create a new course category. Admin only.
+      description: Create a new course category. Requires Super Admin or Admin.
       parameters:
       - description: Course category data
         in: body
@@ -534,7 +553,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -545,12 +564,12 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create course category (Admin Only)
+      summary: Create course category (Super Admin / Admin)
       tags:
       - Course Category
   /course-categories/{id}:
     delete:
-      description: Delete course category by uid. Admin only.
+      description: Delete course category by uid. Requires Super Admin or Admin.
       parameters:
       - description: Course Category UID
         in: path
@@ -576,7 +595,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -592,7 +611,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete course category (Admin Only)
+      summary: Delete course category (Super Admin / Admin)
       tags:
       - Course Category
     get:
@@ -621,13 +640,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get course category by ID (All Roles - Anonymous User)
+      summary: Get course category by ID (Public)
       tags:
       - Course Category
     put:
       consumes:
       - application/json
-      description: Update existing course category by uid. Admin only.
+      description: Update existing course category by uid. Requires Super Admin or
+        Admin.
       parameters:
       - description: Course Category UID
         in: path
@@ -659,7 +679,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -675,7 +695,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update course category (Admin Only)
+      summary: Update course category (Super Admin / Admin)
       tags:
       - Course Category
   /course-types:
@@ -707,13 +727,13 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all course types (All Roles - Anonymous User)
+      summary: Get all course types (Public)
       tags:
       - Course Type
     post:
       consumes:
       - application/json
-      description: Create a new course type. Admin only.
+      description: Create a new course type. Requires Super Admin or Admin.
       parameters:
       - description: Course type data
         in: body
@@ -740,7 +760,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -751,12 +771,12 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create course type (Admin Only)
+      summary: Create course type (Super Admin / Admin)
       tags:
       - Course Type
   /course-types/{id}:
     delete:
-      description: Delete course type by uid. Admin only.
+      description: Delete course type by uid. Requires Super Admin or Admin.
       parameters:
       - description: Course Type UID
         in: path
@@ -782,7 +802,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -798,7 +818,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete course type (Admin Only)
+      summary: Delete course type (Super Admin / Admin)
       tags:
       - Course Type
     get:
@@ -827,13 +847,13 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get course type by ID (All Roles - Anonymous User)
+      summary: Get course type by ID (Public)
       tags:
       - Course Type
     put:
       consumes:
       - application/json
-      description: Update existing course type by uid. Admin only.
+      description: Update existing course type by uid. Requires Super Admin or Admin.
       parameters:
       - description: Course Type UID
         in: path
@@ -865,7 +885,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -881,7 +901,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update course type (Admin Only)
+      summary: Update course type (Super Admin / Admin)
       tags:
       - Course Type
   /courses:
@@ -928,15 +948,15 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all courses with pagination and filters (All Roles - Anonymous
-        User)
+      summary: Get all courses with pagination and filters (Public)
       tags:
       - Course
     post:
       consumes:
       - multipart/form-data
       description: Create a new course with cover, title, subtitle/header, dynamic
-        category, dynamic class type, level, pricing, and learning points. Admin only.
+        category, dynamic class type, level, pricing, and learning points. Requires
+        Super Admin or Admin.
       parameters:
       - description: 'Course cover image (JPG, PNG recommended). Fallback key: thumbnail'
         in: formData
@@ -1024,7 +1044,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -1040,7 +1060,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Create new course (Admin Only)
+      summary: Create new course (Super Admin / Admin)
       tags:
       - Course
   /courses/{id}:
@@ -1073,7 +1093,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get course by ID (All Roles - Anonymous User)
+      summary: Get course by ID (Public)
       tags:
       - Course
   /courses/{id}/join:
@@ -1172,15 +1192,15 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get mentors by course ID (All Roles - Anonymous User)
+      summary: Get mentors by course ID (Public)
       tags:
       - Course
   /courses/{id}/mentors/assign:
     post:
       consumes:
       - application/json
-      description: Assign one or more mentors selected by admin to a course. Course
-        can have multiple mentors.
+      description: Assign one or more mentors selected by Super Admin or Admin to
+        a course. Course can have multiple mentors.
       parameters:
       - description: Course UID
         in: path
@@ -1212,7 +1232,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - admins only
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -1228,7 +1248,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Assign mentors to course (Admin Only)
+      summary: Assign mentors to course (Super Admin / Admin)
       tags:
       - Course
   /courses/{id}/review:
@@ -1346,14 +1366,14 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Reply to a course review (Mentor/Admin)
+      summary: Reply to a course review (Mentor / Super Admin / Admin)
       tags:
       - Course
   /courses/{id}/status:
     patch:
       consumes:
       - application/json
-      description: Set course status to ACTIVE. Admin only endpoint.
+      description: Set course status to ACTIVE. Requires Super Admin or Admin.
       parameters:
       - description: Course UID
         in: path
@@ -1374,7 +1394,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -1390,7 +1410,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Activate course status (Admin Only)
+      summary: Activate course status (Super Admin / Admin)
       tags:
       - Course
   /courses/{id}/students:
@@ -1435,9 +1455,59 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all enrolled students in a course (All Roles - Anonymous User)
+      summary: Get all enrolled students in a course (Public)
       tags:
       - Course
+  /files/{bucket}/{object}:
+    get:
+      description: Decrypts objects stored as ciphertext in MinIO and streams plaintext
+        bytes to the client with the original content type. Replaces direct MinIO
+        access for file URLs (avatars, course covers, lesson assignment attachments,
+        invoice PDFs, etc.). Requires Bearer JWT; all authenticated roles are allowed.
+        Backward compatible with legacy plaintext objects.
+      parameters:
+      - description: MinIO bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      - description: Object key (may contain slashes)
+        in: path
+        name: object
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File bytes (decrypted when stored encrypted)
+          schema:
+            type: file
+        "400":
+          description: Invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized — missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to decrypt or read object
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Serve encrypted MinIO file (All Roles)
+      tags:
+      - File
   /invoices/{enrollment_id}:
     get:
       consumes:
@@ -1482,8 +1552,8 @@ paths:
       consumes:
       - application/json
       description: Retrieve invoice URL by providing enrollment_id, user_id, and course_id
-        as query parameters. Accessible by super admin, admin, mentor, or the owner
-        (self) only.
+        as query parameters. Accessible by super admin, admin, assigned/joined mentor
+        for the course, or the enrolled student (self).
       parameters:
       - description: Enrollment UID
         in: query
@@ -1883,7 +1953,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create or update assignment configuration for a lesson.
+      description: Create assignment for a lesson. Each lesson allows at most one
+        assignment (text or quiz); use PUT to update.
       parameters:
       - description: Lesson UID
         in: path
@@ -1899,11 +1970,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Lesson assignment updated successfully
-          schema:
-            additionalProperties: true
-            type: object
         "201":
           description: Lesson assignment created successfully
           schema:
@@ -1929,14 +1995,19 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "409":
+          description: Lesson already has an assignment
+          schema:
+            additionalProperties: true
+            type: object
         "500":
-          description: Failed to upsert lesson assignment
+          description: Failed to create lesson assignment
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Upsert lesson assignment (Admin/Mentor)
+      summary: Create lesson assignment (Admin/Mentor)
       tags:
       - Lesson Assignment
     put:
@@ -1993,6 +2064,308 @@ paths:
       summary: Update lesson assignment (Admin/Mentor)
       tags:
       - Lesson Assignment
+  /lessons/{id}/assignment/submission:
+    get:
+      description: 'Returns submission content plus a grading object: score_percent,
+        passed, feedback, has_feedback, is_graded, quiz counts (quiz assignments).'
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: submission + grading
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my lesson assignment submission (Enrollment User)
+      tags:
+      - Lesson Assignment Submission
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: 'Create your submission. Text assignments: multipart with optional
+        file (max 10MB per file if allow_file_submission). Quiz assignments: JSON
+        or multipart field quiz_answers — scored automatically vs quiz_payload (correctOptionId,
+        passingScore).'
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Plain text (when allowed)
+        in: formData
+        name: plain_text
+        type: string
+      - description: Rich text JSON (when allowed)
+        in: formData
+        name: rich_text
+        type: string
+      - description: Required when assignment requires file description
+        in: formData
+        name: file_description
+        type: string
+      - description: JSON object of questionId -> chosenOptionId (quiz assignments)
+        in: formData
+        name: quiz_answers
+        type: string
+      - description: Attachment when allow_file_submission is true
+        in: formData
+        name: file
+        type: file
+      - description: JSON body when not using multipart
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/dto.LessonAssignmentSubmissionUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Submission created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden or submission closed
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Already submitted — use PUT to update
+          schema:
+            additionalProperties: true
+            type: object
+        "413":
+          description: File too large
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit lesson assignment (Enrollment User)
+      tags:
+      - Lesson Assignment Submission
+    put:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: Edit your submission when resubmit rules allow. Quiz submissions
+        are re-scored automatically after update.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden or resubmit not allowed
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Submission not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update lesson assignment submission (Enrollment User)
+      tags:
+      - Lesson Assignment Submission
+  /lessons/{id}/assignment/submissions:
+    get:
+      description: Returns all participant submissions for this lesson's assignment.
+        Requires admin or mentor assigned to the course.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of submissions
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson assignment not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List lesson assignment submissions (Admin / Mentor)
+      tags:
+      - Lesson Assignment Submission
+  /lessons/{id}/assignment/submissions/{submissionUid}:
+    get:
+      description: Returns a single submission by UID for this lesson's assignment.
+        Requires admin or mentor assigned to the course.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Submission UID
+        in: path
+        name: submissionUid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get one lesson assignment submission (Admin / Mentor)
+      tags:
+      - Lesson Assignment Submission
+  /lessons/{id}/assignment/submissions/{submissionUid}/grade:
+    put:
+      consumes:
+      - application/json
+      description: Set score and optional feedback for a text-type assignment submission.
+        Quiz submissions are auto-graded and cannot be graded with this route.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Submission UID
+        in: path
+        name: submissionUid
+        required: true
+        type: string
+      - description: Grade payload (score_percent 0–100)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LessonAssignmentSubmissionGradeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated submission
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request or wrong assignment type
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Grade text lesson assignment submission (Admin / Mentor)
+      tags:
+      - Lesson Assignment Submission
   /lessons/attendances:
     post:
       consumes:
@@ -2048,7 +2421,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete an attendance record by ID. Admin only.
+      description: Delete an attendance record by ID. Requires Super Admin or Admin.
       parameters:
       - description: Attendance UID
         in: path
@@ -2069,7 +2442,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -2085,13 +2458,14 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete attendance record (Admin Only)
+      summary: Delete attendance record (Super Admin / Admin)
       tags:
       - Lesson Attendance
     get:
       consumes:
       - application/json
-      description: Retrieve a specific attendance record by ID. Admin only.
+      description: Retrieve a specific attendance record by ID. Requires Super Admin
+        or Admin.
       parameters:
       - description: Attendance UID
         in: path
@@ -2112,7 +2486,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -2128,14 +2502,14 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get attendance by ID (Admin Only)
+      summary: Get attendance by ID (Super Admin / Admin)
       tags:
       - Lesson Attendance
     put:
       consumes:
       - application/json
-      description: Update attendance status and note. Admin only. Can only update
-        status and note, not lesson/enrollment.
+      description: Update attendance status and note. Requires Super Admin or Admin.
+        Can only update status and note, not lesson/enrollment.
       parameters:
       - description: Attendance UID
         in: path
@@ -2167,7 +2541,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -2183,7 +2557,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update attendance status and note (Admin Only)
+      summary: Update attendance status and note (Super Admin / Admin)
       tags:
       - Lesson Attendance
   /lessons/attendances/check-status:
@@ -2239,7 +2613,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve all attendance records for a specific lesson. Admin only.
+      description: Retrieve all attendance records for a specific lesson. Requires
+        Super Admin or Admin.
       parameters:
       - description: Lesson UID
         in: path
@@ -2260,7 +2635,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Admins only'
+          description: 'Access denied: Super Admin or Admin only'
           schema:
             additionalProperties: true
             type: object
@@ -2276,7 +2651,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all attendances for a lesson (Admin Only)
+      summary: Get all attendances for a lesson (Super Admin / Admin)
       tags:
       - Lesson Attendance
   /lessons/attendances/my-history:
@@ -2386,7 +2761,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get mentor detail by ID (All Roles - Anonymous User)
+      summary: Get mentor detail by ID (Public)
       tags:
       - Mentor
   /mentor/all:
@@ -2422,7 +2797,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get all mentors (All Roles - Anonymous User)
+      summary: Get all mentors (Public)
       tags:
       - Mentor
   /modules:
@@ -2734,10 +3109,10 @@ paths:
         in: query
         name: reference
         type: string
-      - description: Enrollment ID
+      - description: Enrollment UID (full UUID atau 8-char prefix)
         in: query
         name: enrollmentId
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -2853,8 +3228,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve detailed user data by target user UID. Accessible only
-        by admin.
+      description: Retrieve detailed user data by target user UID. Accessible by Super
+        Admin or Admin.
       parameters:
       - description: User UID
         in: path
@@ -2880,7 +3255,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - only admin
+          description: Forbidden — Super Admin or Admin only
           schema:
             additionalProperties: true
             type: object
@@ -2896,7 +3271,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get user detail by ID (Admin only)
+      summary: Get user detail by ID (Super Admin / Admin)
       tags:
       - User
   /user/data:
@@ -2904,7 +3279,9 @@ paths:
       consumes:
       - application/json
       description: Retrieve own detailed user data including profile, joined courses,
-        transaction history, course reviews, enrollment summary, and mentored courses.
+        enrollment invoices (course detail per enrollment, without URLs — use GET
+        /invoices/url), transaction history, course reviews, enrollment summary, and
+        mentored courses.
       produces:
       - application/json
       responses:
@@ -2937,8 +3314,8 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a user account permanently. Only administrators can perform
-        this action. Admins cannot delete their own account.
+      description: Delete a user account permanently. Requires Super Admin or Admin.
+        You cannot delete your own account.
       parameters:
       - description: User UID to delete
         in: path
@@ -2959,7 +3336,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - Only admins can delete users
+          description: Forbidden — Super Admin or Admin only
           schema:
             additionalProperties: true
             type: object
@@ -2975,7 +3352,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Delete user account (Admin Only)
+      summary: Delete user account (Super Admin / Admin)
       tags:
       - User Management
   /user/manage/all:
@@ -2983,7 +3360,8 @@ paths:
       consumes:
       - application/json
       description: Retrieve paginated list of all users with optional filtering by
-        role and search. Supports sorting by created_at or name. Admin only.
+        role and search. Supports sorting by created_at or name. Requires Super Admin
+        or Admin.
       parameters:
       - description: 'Page number (default: 1, minimum: 1)'
         in: query
@@ -3023,7 +3401,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - Only admins can access this endpoint
+          description: Forbidden — Super Admin or Admin only
           schema:
             additionalProperties: true
             type: object
@@ -3034,7 +3412,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all users with pagination (Admin Only)
+      summary: Get all users with pagination (Super Admin / Admin)
       tags:
       - User Management
   /user/password:
@@ -3133,15 +3511,17 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update a specific user's role. Admin can update mentor/student
-        role, while role changes for admin/super_admin users are restricted to super_admin.
+      description: Assign target roles admin, mentor, or student only (super_admin
+        cannot be set via this endpoint). Only super_admin may assign the admin role;
+        admin may assign mentor or student only. Changing roles for users who are
+        already admin or super_admin requires the caller to be super_admin.
       parameters:
       - description: User UID to update
         in: path
         name: id
         required: true
         type: string
-      - description: Role assignment (super_admin/admin/mentor/student)
+      - description: 'Target role: admin (super_admin only), mentor, or student'
         in: body
         name: body
         required: true
@@ -3156,7 +3536,7 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid role value
+          description: Invalid role value (must be admin, mentor, or student)
           schema:
             additionalProperties: true
             type: object
@@ -3166,7 +3546,8 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: Forbidden - insufficient role update permission
+          description: Forbidden - only super_admin may assign admin role, or insufficient
+            permission for target user
           schema:
             additionalProperties: true
             type: object
@@ -3182,7 +3563,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Update user role (Admin/Super Admin)
+      summary: Update user role (Super Admin / Admin)
       tags:
       - User Management
 securityDefinitions:

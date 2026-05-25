@@ -4,6 +4,7 @@ import (
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"encoding/json"
+	"errors"
 	"log"
 	"strconv"
 	"time"
@@ -12,11 +13,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// RunSeeder menjalankan semua seeder untuk database
+// RunSeeder menjalankan semua seeder untuk database secara berurutan.
+//
+// Catatan terkait sistem enkripsi:
+//   - Field sensitif (User.Name/Email/Description, Course.Title/Subtitle/Description,
+//     Module/Lesson/LessonAssignment.Title, dst.) tidak perlu di-Encrypt manual karena
+//     hook BeforeSave pada masing-masing entity akan mengenkripsi ciphertext sebelum
+//     ditulis ke DB. Seeder cukup mengirim plaintext.
+//   - Lookup idempotent menggunakan kolom yang TIDAK dienkripsi (uid, email_hash,
+//     slug, name untuk CourseCategory/ClassType, atau order_index). Mencari berdasar
+//     kolom terenkripsi seperti title atau email tidak akan pernah cocok karena
+//     AES-GCM bersifat non-deterministik (ciphertext berbeda tiap enkripsi).
 func RunSeeder(db *gorm.DB) {
 	log.Println("[Seeder] Memulai proses seeding database...")
 
-	// Jalankan seeder secara berurutan
 	seedUsers(db)
 	seedCourseCategories(db)
 	seedClassTypes(db)
@@ -38,12 +48,16 @@ func seedCourseCategories(db *gorm.DB) {
 	}
 
 	for _, category := range categories {
-		if err := db.Where("name = ?", category.Name).First(&entity.CourseCategory{}).Error; err == gorm.ErrRecordNotFound {
+		var existing entity.CourseCategory
+		err := db.Where("name = ?", category.Name).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := db.Create(&category).Error; err != nil {
 				log.Printf("[Error] Gagal membuat category %s: %v", category.Name, err)
-			} else {
-				log.Printf("[Success] Category %s berhasil dibuat", category.Name)
+				continue
 			}
+			log.Printf("[Success] Category %s berhasil dibuat", category.Name)
+		} else if err != nil {
+			log.Printf("[Error] Gagal cek category %s: %v", category.Name, err)
 		}
 	}
 }
@@ -58,17 +72,23 @@ func seedClassTypes(db *gorm.DB) {
 	}
 
 	for _, classType := range classTypes {
-		if err := db.Where("name = ?", classType.Name).First(&entity.ClassType{}).Error; err == gorm.ErrRecordNotFound {
+		var existing entity.ClassType
+		err := db.Where("name = ?", classType.Name).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := db.Create(&classType).Error; err != nil {
 				log.Printf("[Error] Gagal membuat class type %s: %v", classType.Name, err)
-			} else {
-				log.Printf("[Success] Class type %s berhasil dibuat", classType.Name)
+				continue
 			}
+			log.Printf("[Success] Class type %s berhasil dibuat", classType.Name)
+		} else if err != nil {
+			log.Printf("[Error] Gagal cek class type %s: %v", classType.Name, err)
 		}
 	}
 }
 
-// seedUsers membuat user data default (admin, mentor, dan student)
+// seedUsers membuat user data default (super admin, admin, mentor, dan student).
+// Idempoten: lookup memakai email_hash (HMAC deterministik) sehingga tetap berfungsi
+// meskipun kolom email pada DB sudah berisi ciphertext AES-GCM yang non-deterministik.
 func seedUsers(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Users...")
 
@@ -166,59 +186,47 @@ func seedUsers(db *gorm.DB) {
 			continue
 		}
 
-		encryptedName, err := utils.Encrypt(u.Name)
-		if err != nil {
-			log.Printf("[Error] Gagal encrypt name user %s: %v", u.Name, err)
-			continue
-		}
-
-		encryptedEmail, err := utils.Encrypt(u.Email)
-		if err != nil {
-			log.Printf("[Error] Gagal encrypt email user %s: %v", u.Name, err)
-			continue
-		}
-
-		encryptedDescription, err := utils.Encrypt(u.Description)
-		if err != nil {
-			log.Printf("[Error] Gagal encrypt description user %s: %v", u.Name, err)
-			continue
-		}
-
 		var existing entity.User
-		err = db.Where("email_hash = ? OR email_hash = ? OR email = ?", emailHash, u.Email, u.Email).First(&existing).Error
+		err = db.Where("email_hash = ?", emailHash).First(&existing).Error
 		if err == nil {
-			updateData := map[string]any{
-				"name":        encryptedName,
-				"email":       encryptedEmail,
-				"email_hash":   emailHash,
-				"password":    hashedPassword,
-				"role":        u.Role,
-				"is_verified": u.IsVerified,
-				"avatar_url":  u.AvatarURL,
-				"description": encryptedDescription,
-			}
+			// User sudah ada — sinkronkan field penting menggunakan db.Save agar
+			// hook BeforeSave pada User mengenkripsi ulang Name/Email/Description
+			// secara konsisten. AfterFind sudah men-dekripsi field saat First()
+			// di atas sehingga existing.Name/Email/Description berbentuk plaintext;
+			// kita timpa langsung dengan plaintext baru lalu Save.
+			existing.Name = u.Name
+			existing.Email = u.Email
+			existing.EmailHash = emailHash
+			existing.Password = hashedPassword
+			existing.Role = u.Role
+			existing.IsVerified = u.IsVerified
+			existing.AvatarURL = u.AvatarURL
+			existing.Description = u.Description
 
-			if err := db.Model(&existing).Updates(updateData).Error; err != nil {
+			if err := db.Save(&existing).Error; err != nil {
 				log.Printf("[Warning] Gagal update user seed %s: %v", u.Name, err)
-			} else {
-				log.Printf("[Info] User seed %s diperbarui (termasuk role)", u.Name)
+				continue
 			}
+			log.Printf("[Info] User seed %s diperbarui (termasuk role)", u.Name)
 			continue
 		}
-		if err != gorm.ErrRecordNotFound {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("[Error] Gagal cek user %s: %v", u.Name, err)
 			continue
 		}
 
+		// User belum ada — buat baru. Hook BeforeSave akan mengenkripsi
+		// Name/Email/Description sebelum data ditulis ke DB; kita cukup
+		// mengirim plaintext.
 		user := entity.User{
-			Name:        encryptedName,
-			Email:       encryptedEmail,
+			Name:        u.Name,
+			Email:       u.Email,
 			EmailHash:   emailHash,
 			Password:    hashedPassword,
 			Role:        u.Role,
 			IsVerified:  u.IsVerified,
 			AvatarURL:   u.AvatarURL,
-			Description: encryptedDescription,
+			Description: u.Description,
 		}
 
 		if err := db.Create(&user).Error; err != nil {
@@ -229,11 +237,11 @@ func seedUsers(db *gorm.DB) {
 	}
 }
 
-// seedCourses membuat 5 course
+// seedCourses membuat 5 course awal. Lookup idempotent menggunakan slug yang
+// disimpan plaintext (slug dipakai untuk routing dan tidak dienkripsi).
 func seedCourses(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Courses...")
 
-	// Ambil mentor dari database (yang bukan student)
 	var mentor entity.User
 	if err := db.Where("role != ?", entity.StudentRole).First(&mentor).Error; err != nil {
 		log.Printf("[Error] Mentor tidak ditemukan: %v", err)
@@ -348,18 +356,24 @@ func seedCourses(db *gorm.DB) {
 	}
 
 	for _, course := range courses {
-		// Cek apakah course sudah ada
-		if err := db.Where("slug = ?", course.Slug).First(&entity.Course{}).Error; err == gorm.ErrRecordNotFound {
+		var existing entity.Course
+		err := db.Where("slug = ?", course.Slug).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := db.Create(&course).Error; err != nil {
 				log.Printf("[Error] Gagal membuat course %s: %v", course.Title, err)
-			} else {
-				log.Printf("[Success] Course %s berhasil dibuat", course.Title)
+				continue
 			}
+			log.Printf("[Success] Course %s berhasil dibuat", course.Title)
+		} else if err != nil {
+			log.Printf("[Error] Gagal cek course %s: %v", course.Slug, err)
 		}
 	}
 }
 
-// seedModules membuat modules untuk setiap course (2-3 modules per course)
+// seedModules membuat modules untuk setiap course (2-3 modules per course).
+// Lookup idempotent menggunakan kombinasi (course_uid, order_index) karena
+// title sudah dienkripsi non-deterministik dan tidak bisa dipakai sebagai
+// kunci pencarian.
 func seedModules(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Modules...")
 
@@ -373,7 +387,6 @@ func seedModules(db *gorm.DB) {
 		return
 	}
 
-	// Data modules untuk masing-masing course (urutan sama dengan seedCourses)
 	moduleData := map[uuid.UUID][]string{
 		courses[0].Uid: {"Pengenalan Go", "Syntax dan Tipe Data", "Control Flow dan Functions"},
 		courses[1].Uid: {"React Basics", "Next.js Introduction", "Server Side Rendering"},
@@ -384,25 +397,31 @@ func seedModules(db *gorm.DB) {
 
 	for courseUid, moduleNames := range moduleData {
 		for idx, name := range moduleNames {
+			orderIndex := idx + 1
 			module := entity.Module{
 				CourseUid:  courseUid,
 				Title:      name,
-				OrderIndex: idx + 1,
+				OrderIndex: orderIndex,
 			}
 
-			// Cek apakah module sudah ada
-			if err := db.Where("course_uid = ? AND title = ?", courseUid, name).First(&entity.Module{}).Error; err == gorm.ErrRecordNotFound {
+			var existing entity.Module
+			err := db.Where("course_uid = ? AND order_index = ?", courseUid, orderIndex).First(&existing).Error
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				if err := db.Create(&module).Error; err != nil {
 					log.Printf("[Error] Gagal membuat module %s: %v", name, err)
-				} else {
-					log.Printf("[Success] Module %s berhasil dibuat", name)
+					continue
 				}
+				log.Printf("[Success] Module %s berhasil dibuat", name)
+			} else if err != nil {
+				log.Printf("[Error] Gagal cek module course=%s order=%d: %v", courseUid, orderIndex, err)
 			}
 		}
 	}
 }
 
-// seedLessons membuat lessons untuk setiap module (2-3 lessons per module)
+// seedLessons membuat lessons untuk setiap module (2-3 lessons per module).
+// Lookup idempotent menggunakan kombinasi (module_uid, order_index) untuk
+// alasan yang sama dengan seedModules.
 func seedLessons(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Lessons...")
 
@@ -414,20 +433,18 @@ func seedLessons(db *gorm.DB) {
 
 	now := time.Now()
 
-	// Data lessons untuk masing-masing module
 	for _, module := range modules {
 		var lessonCount int
 		if module.OrderIndex == 1 {
-			lessonCount = 3 // 3 lessons untuk module pertama
+			lessonCount = 3
 		} else {
-			lessonCount = 2 // 2 lessons untuk module lainnya
+			lessonCount = 2
 		}
 
 		for i := 1; i <= lessonCount; i++ {
 			lessonNo := strconv.Itoa(i)
 			isVideoLesson := i%2 == 0
 
-			// Buat sample content JSON
 			content := map[string]string{
 				"intro":    "Pengenalan materi " + module.Title,
 				"learning": "Konten pembelajaran untuk poin " + lessonNo,
@@ -453,19 +470,24 @@ func seedLessons(db *gorm.DB) {
 				OrderIndex:  i,
 			}
 
-			// Cek apakah lesson sudah ada
-			if err := db.Where("module_uid = ? AND title = ?", module.Uid, lesson.Title).First(&entity.Lesson{}).Error; err == gorm.ErrRecordNotFound {
+			var existing entity.Lesson
+			err := db.Where("module_uid = ? AND order_index = ?", module.Uid, i).First(&existing).Error
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				if err := db.Create(&lesson).Error; err != nil {
 					log.Printf("[Error] Gagal membuat lesson %s: %v", lesson.Title, err)
-				} else {
-					log.Printf("[Success] Lesson %s berhasil dibuat", lesson.Title)
+					continue
 				}
+				log.Printf("[Success] Lesson %s berhasil dibuat", lesson.Title)
+			} else if err != nil {
+				log.Printf("[Error] Gagal cek lesson module=%s order=%d: %v", module.Uid, i, err)
 			}
 		}
 	}
 }
 
-// seedLessonAssignments membuat assignment dasar untuk lesson pertama di setiap module.
+// seedLessonAssignments membuat assignment dasar untuk lesson pertama di
+// setiap module. Lookup idempotent memakai lesson_uid (unique constraint
+// pada tabel lesson_assignments).
 func seedLessonAssignments(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Lesson Assignments...")
 
@@ -510,12 +532,16 @@ func seedLessonAssignments(db *gorm.DB) {
 			MaxResubmitCount:         &maxResubmit,
 		}
 
-		if err := db.Where("lesson_uid = ?", lesson.Uid).First(&entity.LessonAssignment{}).Error; err == gorm.ErrRecordNotFound {
+		var existing entity.LessonAssignment
+		err := db.Where("lesson_uid = ?", lesson.Uid).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := db.Create(&assignment).Error; err != nil {
 				log.Printf("[Error] Gagal membuat assignment untuk lesson %s: %v", lesson.Title, err)
-			} else {
-				log.Printf("[Success] Assignment untuk lesson %s berhasil dibuat", lesson.Title)
+				continue
 			}
+			log.Printf("[Success] Assignment untuk lesson %s berhasil dibuat", lesson.Title)
+		} else if err != nil {
+			log.Printf("[Error] Gagal cek assignment lesson=%s: %v", lesson.Uid, err)
 		}
 	}
 }

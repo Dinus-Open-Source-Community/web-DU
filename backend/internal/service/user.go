@@ -21,7 +21,7 @@ import (
 )
 
 // @Summary      Get current authenticated user detail (Self)
-// @Description  Retrieve own detailed user data including profile, joined courses, transaction history, course reviews, enrollment summary, and mentored courses.
+// @Description  Retrieve own detailed user data including profile, joined courses, enrollment invoices (course detail per enrollment, without URLs — use GET /invoices/url), transaction history, course reviews, enrollment summary, and mentored courses.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -47,8 +47,8 @@ func GetSelfUserDetailService(c *gin.Context) {
 	respondUserDetail(c, requesterUID)
 }
 
-// @Summary      Get user detail by ID (Admin only)
-// @Description  Retrieve detailed user data by target user UID. Accessible only by admin.
+// @Summary      Get user detail by ID (Super Admin / Admin)
+// @Description  Retrieve detailed user data by target user UID. Accessible by Super Admin or Admin.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -57,7 +57,7 @@ func GetSelfUserDetailService(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "User detail retrieved successfully"
 // @Failure      400  {object}  map[string]any  "Invalid user uid"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Forbidden - only admin"
+// @Failure      403  {object}  map[string]any  "Forbidden — Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /user/{id} [get]
@@ -74,14 +74,8 @@ func GetUserDetailByIDService(c *gin.Context) {
 	}
 
 	requesterUID := requesterRaw.(uuid.UUID)
-	targetUID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid user uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	targetUID, ok := resolveUIDParam(c, "users", "id", "user")
+	if !ok {
 		return
 	}
 
@@ -99,7 +93,7 @@ func GetUserDetailByIDService(c *gin.Context) {
 	if !hasAdminAccess(requester.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: only admin",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -128,7 +122,8 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	var enrollments []entity.Enrollment
 	if err := database.DB.
 		Where("user_uid = ?", targetUID).
-		Preload("Course").
+		Preload("Course.Mentor").
+		Preload("Course.Mentors").
 		Order("enrolled_at DESC").
 		Find(&enrollments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -138,6 +133,35 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			"error":   err.Error(),
 		})
 		return
+	}
+
+	enrollmentInvoices := make([]gin.H, 0, len(enrollments))
+	for _, en := range enrollments {
+		if en.Course == nil {
+			continue
+		}
+		enrollmentInvoices = append(enrollmentInvoices, gin.H{
+			"enrollment_uid":    en.Uid,
+			"user_uid":          en.UserUid,
+			"course_uid":        en.CourseUid,
+			"enrolled_at":       en.EnrolledAt,
+			"enrollment_status": en.Status,
+			"progress":          en.Progress,
+			"course": gin.H{
+				"uid":            en.Course.Uid,
+				"title":          en.Course.Title,
+				"subtitle":       en.Course.Subtitle,
+				"slug":           en.Course.Slug,
+				"cover_url":      en.Course.CoverURL,
+				"thumbnail_url":  en.Course.ThumbnailURL,
+				"level":          en.Course.Level,
+				"status":         en.Course.Status,
+				"price":          en.Course.Price,
+				"price_strike":   en.Course.PriceStrike,
+				"is_premium":     en.Course.IsPremium,
+				"is_published":   en.Course.IsPublished,
+			},
+		})
 	}
 
 	courses := make([]gin.H, 0, len(enrollments))
@@ -171,22 +195,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		}
 
 		seenCourses[enrollment.Course.Uid] = struct{}{}
-		courses = append(courses, gin.H{
-			"uid":               enrollment.Course.Uid,
-			"title":             enrollment.Course.Title,
-			"subtitle":          enrollment.Course.Subtitle,
-			"slug":              enrollment.Course.Slug,
-			"cover_url":         enrollment.Course.CoverURL,
-			"thumbnail_url":     enrollment.Course.ThumbnailURL,
-			"level":             enrollment.Course.Level,
-			"status":            enrollment.Course.Status,
-			"price":             enrollment.Course.Price,
-			"is_premium":        enrollment.Course.IsPremium,
-			"is_published":      enrollment.Course.IsPublished,
-			"enrolled_at":       enrollment.EnrolledAt,
-			"progress":          enrollment.Progress,
-			"enrollment_status": enrollment.Status,
-		})
+		courses = append(courses, joinedCourseListItemResponse(*enrollment.Course, enrollment))
 	}
 
 	type reviewRow struct {
@@ -317,7 +326,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		if trx.CourseUID != nil {
 			courseTitle := ""
 			if trx.CourseTitle != nil {
-				courseTitle = *trx.CourseTitle
+				courseTitle = utils.DecryptOrSelf(*trx.CourseTitle)
 			}
 
 			courseSlug := ""
@@ -391,8 +400,8 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	for _, course := range mentoredCourseRows {
 		mentoredCourseList = append(mentoredCourseList, gin.H{
 			"uid":          course.CourseUID,
-			"title":        course.Title,
-			"subtitle":     course.Subtitle,
+			"title":        utils.DecryptOrSelf(course.Title),
+			"subtitle":     utils.DecryptOrSelf(course.Subtitle),
 			"slug":         course.Slug,
 			"level":        course.Level,
 			"status":       course.Status,
@@ -422,9 +431,10 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 				"total_reviews":  len(reviewRows),
 				"average_rating": averageRating,
 			},
-			"enrollment_summary":  enrollmentSummary,
-			"mentored_courses":    mentoredCourseList,
-			"transaction_history": transactions,
+			"enrollment_summary":   enrollmentSummary,
+			"enrollment_invoices":  enrollmentInvoices,
+			"mentored_courses":     mentoredCourseList,
+			"transaction_history":  transactions,
 		},
 		"error": nil,
 	})
@@ -708,18 +718,18 @@ func ChangePasswordService(c *gin.Context) {
 	})
 }
 
-// @Summary      Update user role (Admin/Super Admin)
-// @Description  Update a specific user's role. Admin can update mentor/student role, while role changes for admin/super_admin users are restricted to super_admin.
+// @Summary      Update user role (Super Admin / Admin)
+// @Description  Assign target roles admin, mentor, or student only (super_admin cannot be set via this endpoint). Only super_admin may assign the admin role; admin may assign mentor or student only. Changing roles for users who are already admin or super_admin requires the caller to be super_admin.
 // @Tags         User Management
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id    path      string                           true  "User UID to update"
-// @Param        body  body      dto.UpdateUserRoleRequest        true  "Role assignment (super_admin/admin/mentor/student)"
+// @Param        body  body      dto.UpdateUserRoleRequest        true  "Target role: admin (super_admin only), mentor, or student"
 // @Success      200   {object}  map[string]any                   "User role updated successfully"
-// @Failure      400   {object}  map[string]any                   "Invalid role value"
+// @Failure      400   {object}  map[string]any                   "Invalid role value (must be admin, mentor, or student)"
 // @Failure      401   {object}  map[string]any                   "Unauthorized - Invalid or missing JWT token"
-// @Failure      403   {object}  map[string]any                   "Forbidden - insufficient role update permission"
+// @Failure      403   {object}  map[string]any                   "Forbidden - only super_admin may assign admin role, or insufficient permission for target user"
 // @Failure      404   {object}  map[string]any                   "User not found"
 // @Failure      500   {object}  map[string]any                   "Internal server error"
 // @Router       /user/role/{id} [patch]
@@ -741,22 +751,15 @@ func UpdateUserRoleService(c *gin.Context) {
 	if !hasAdminAccess(adminData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admin or Super Admin only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	userIDStr := c.Param("id")
-	targetUserUid, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid user uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	targetUserUid, ok := resolveUIDParam(c, "users", "id", "user")
+	if !ok {
 		return
 	}
 
@@ -771,19 +774,28 @@ func UpdateUserRoleService(c *gin.Context) {
 		return
 	}
 
-	// Validate role
+	// Assignable roles via this endpoint (super_admin is not assignable here).
 	validRoles := map[string]entity.UserRole{
-		"super_admin": entity.SuperAdminRole,
-		"admin":       entity.AdminRole,
-		"mentor":      entity.MentorRole,
-		"student":     entity.StudentRole,
+		"admin":   entity.AdminRole,
+		"mentor":  entity.MentorRole,
+		"student": entity.StudentRole,
 	}
 
 	newRole, exists := validRoles[strings.ToLower(req.Role)]
 	if !exists {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid role. Must be one of: super_admin, admin, mentor, student",
+			"message": "Invalid role. Must be one of: admin, mentor, student",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	if newRole == entity.AdminRole && adminData.Role != entity.SuperAdminRole {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Only super_admin can assign the admin role",
 			"data":    nil,
 			"error":   nil,
 		})
@@ -855,10 +867,10 @@ func UpdateUserRoleService(c *gin.Context) {
 	})
 }
 
-// DeleteUserService deletes a user. Only admin can use this endpoint.
+// DeleteUserService deletes a user. Super Admin or Admin may use this endpoint.
 //
-// @Summary      Delete user account (Admin Only)
-// @Description  Delete a user account permanently. Only administrators can perform this action. Admins cannot delete their own account.
+// @Summary      Delete user account (Super Admin / Admin)
+// @Description  Delete a user account permanently. Requires Super Admin or Admin. You cannot delete your own account.
 // @Tags         User Management
 // @Accept       json
 // @Produce      json
@@ -866,7 +878,7 @@ func UpdateUserRoleService(c *gin.Context) {
 // @Param        id  path      string  true  "User UID to delete"
 // @Success      200  {object}  map[string]any  "User deleted successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
-// @Failure      403  {object}  map[string]any  "Forbidden - Only admins can delete users"
+// @Failure      403  {object}  map[string]any  "Forbidden — Super Admin or Admin only"
 // @Failure      404  {object}  map[string]any  "User not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /user/manage/{id} [delete]
@@ -888,22 +900,15 @@ func DeleteUserService(c *gin.Context) {
 	if !hasAdminAccess(adminData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})
 		return
 	}
 
-	userIDStr := c.Param("id")
-	targetUserUid, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid user uid",
-			"data":    nil,
-			"error":   err.Error(),
-		})
+	targetUserUid, ok := resolveUIDParam(c, "users", "id", "user")
+	if !ok {
 		return
 	}
 
@@ -956,8 +961,8 @@ func DeleteUserService(c *gin.Context) {
 // - sort (string)         -> "created_at" (default) or "name"
 // - order (string)        -> "asc" or "desc" (default "desc")
 //
-// @Summary      Get all users with pagination (Admin Only)
-// @Description  Retrieve paginated list of all users with optional filtering by role and search. Supports sorting by created_at or name. Admin only.
+// @Summary      Get all users with pagination (Super Admin / Admin)
+// @Description  Retrieve paginated list of all users with optional filtering by role and search. Supports sorting by created_at or name. Requires Super Admin or Admin.
 // @Tags         User Management
 // @Accept       json
 // @Produce      json
@@ -970,7 +975,7 @@ func DeleteUserService(c *gin.Context) {
 // @Param        order     query  string  false  "Sort order: asc or desc (default: desc)"
 // @Success      200  {object}  map[string]any  "Users retrieved successfully with pagination metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
-// @Failure      403  {object}  map[string]any  "Forbidden - Only admins can access this endpoint"
+// @Failure      403  {object}  map[string]any  "Forbidden — Super Admin or Admin only"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /user/manage/all [get]
 func GetAllUsersService(c *gin.Context) {
@@ -990,7 +995,7 @@ func GetAllUsersService(c *gin.Context) {
 	if !hasAdminAccess(userData.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admins only",
+			"message": "Access denied: Super Admin or Admin only",
 			"data":    nil,
 			"error":   nil,
 		})

@@ -13,7 +13,7 @@ import (
 )
 
 // @Summary      Update user avatar (All Roles)
-// @Description  Upload and update avatar. Only JPG/JPEG/PNG/GIF, max 5MB; file is verified and re-encoded to ensure a clean image.
+// @Description  Upload and update avatar. Allowed types: JPEG, PNG, GIF (animated GIFs are normalized to the first frame). Max size 5MiB enforced before processing and again after decode/re-encode.
 // @Tags         User
 // @Accept       multipart/form-data
 // @Produce      json
@@ -44,8 +44,7 @@ func PostAvatarFunc(c *gin.Context) {
 	}
 
 	if file != nil {
-		const maxSize = int64(5 * 1024 * 1024) // 5MB
-		if file.Size > maxSize {
+		if file.Size > utils.MaxAvatarSizeBytes {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
 				"success": false,
 				"message": "Avatar file size exceeds 5MB limit",
@@ -58,7 +57,7 @@ func PostAvatarFunc(c *gin.Context) {
 		if errVal != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
-				"message": errVal.Error(),
+				"message": "Invalid or unsupported avatar image",
 				"data":    nil,
 				"error":   errVal.Error(),
 			})

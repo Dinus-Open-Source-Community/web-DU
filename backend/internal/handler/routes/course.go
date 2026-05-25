@@ -15,10 +15,10 @@ func init() {
 func StartCourseRoutes(r *gin.Engine) {
 	publicCourseGroup := r.Group("/courses")
 	{
-		publicCourseGroup.GET("/", service.GetAllCoursesFunc)                        // all roles - anonymous user
-		publicCourseGroup.GET("/:id", service.GetCourseByIDFunc)                     // all roles - anonymous user
-		publicCourseGroup.GET("/:id/mentor", service.GetCourseMentorsByCourseIDFunc) // all roles - anonymous user
-		publicCourseGroup.GET("/:id/students", service.GetCourseStudentsFunc)        // all roles - anonymous user
+		publicCourseGroup.GET("/", service.GetAllCoursesFunc)                        // Public
+		publicCourseGroup.GET("/:id", service.GetCourseByIDFunc)                     // Public
+		publicCourseGroup.GET("/:id/mentor", service.GetCourseMentorsByCourseIDFunc) // Public
+		publicCourseGroup.GET("/:id/students", service.GetCourseStudentsFunc)        // Public
 	}
 
 	authCourseGroup := r.Group("/courses")
@@ -27,10 +27,10 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                 // Students only
 		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                       // Enrolled students only
 		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
-		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Admin only
-		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Admin only
+		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Super Admin / Admin
 
-		authCourseGroup.POST("/", service.PostAdminCourseFunc) // Admin only
+		authCourseGroup.POST("/", service.PostAdminCourseFunc) // Super Admin / Admin
 	}
 
 	// Invoice routes

@@ -3,7 +3,10 @@ package entity
 import (
 	"time"
 
+	"backend/internal/utils"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Model Event Migrations
@@ -21,4 +24,22 @@ type Event struct {
 
 	// Relations
 	Courses []Course `gorm:"foreignKey:EventUid" json:"courses"`
+}
+
+// AfterFind otomatis mendekripsi nama, deskripsi, dan lokasi event. Tanggal,
+// boolean, uid, dan timestamps tidak dienkripsi.
+func (e *Event) AfterFind(_ *gorm.DB) error {
+	utils.DecryptFields(&e.Name, &e.Description, &e.Location)
+	return nil
+}
+
+// BeforeSave otomatis mengenkripsi nama, deskripsi, dan lokasi event (idempotent).
+func (e *Event) BeforeSave(_ *gorm.DB) error {
+	return utils.EncryptFieldsIfNeeded(&e.Name, &e.Description, &e.Location)
+}
+
+// AfterSave mengembalikan field model ke plaintext setelah simpan.
+func (e *Event) AfterSave(_ *gorm.DB) error {
+	utils.DecryptFields(&e.Name, &e.Description, &e.Location)
+	return nil
 }

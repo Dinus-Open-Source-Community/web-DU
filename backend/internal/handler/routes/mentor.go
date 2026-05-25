@@ -14,7 +14,7 @@ func init() {
 func StartMentorRoutes(r *gin.Engine) {
 	publicMentorGroup := r.Group("/mentor")
 	{
-		publicMentorGroup.GET("/all", service.GetAllMentorsFunc)   // all roles - anonymous user
-		publicMentorGroup.GET("/:id", service.GetMentorDetailFunc) // all roles - anonymous user
+		publicMentorGroup.GET("/all", service.GetAllMentorsFunc)   // Public
+		publicMentorGroup.GET("/:id", service.GetMentorDetailFunc) // Public
 	}
 }
