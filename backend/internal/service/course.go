@@ -299,7 +299,9 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
+	creatorUID := userID.(uuid.UUID)
 	course := entity.Course{
+		CreatedByUid: &creatorUID,
 		Title:        titleEnc,
 		Subtitle:     subtitleEnc,
 		Slug:         slug,
@@ -328,7 +330,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").First(&course, course.Uid).Error; err != nil {
+	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve created course",
@@ -425,7 +427,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// pada GetAllUsersService) agar fungsionalitas pencarian tetap berjalan.
 	if strings.TrimSpace(titleFilter) != "" {
 		var allCourses []entity.Course
-		if err := db.Preload("Mentor").Preload("Mentors").Order("created_at DESC").Find(&allCourses).Error; err != nil {
+		if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order("created_at DESC").Find(&allCourses).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
 				"message": "Failed to retrieve courses for search",
@@ -454,12 +456,13 @@ func GetAllCoursesFunc(c *gin.Context) {
 		}
 		paginated := filtered[start:end]
 		totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+		reviewSummaries := fetchCourseReviewSummaries(courseUIDsFromCourses(paginated))
 
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
 			"message": "Courses retrieved successfully",
 			"data": gin.H{
-				"courses": courseListResponse(paginated),
+				"courses": courseListResponse(paginated, reviewSummaries),
 				"meta": gin.H{
 					"total":        total,
 					"per_page":     perPage,
@@ -487,7 +490,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// Apply pagination
 	offset := (page - 1) * perPage
 	var courses []entity.Course
-	if err := db.Preload("Mentor").Preload("Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
+	if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve courses",
@@ -498,12 +501,13 @@ func GetAllCoursesFunc(c *gin.Context) {
 	}
 
 	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+	reviewSummaries := fetchCourseReviewSummaries(courseUIDsFromCourses(courses))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Courses retrieved successfully",
 		"data": gin.H{
-			"courses": courseListResponse(courses),
+			"courses": courseListResponse(courses, reviewSummaries),
 			"meta": gin.H{
 				"total":        total,
 				"per_page":     perPage,
@@ -536,7 +540,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 		return db.Order("order_index ASC")
 	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
-	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
+	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -546,10 +550,21 @@ func GetCourseByIDFunc(c *gin.Context) {
 		return
 	}
 
+	reviews, err := fetchCourseReviewsByCourseUID(course.Uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve course reviews",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course retrieved successfully",
-		"data":    courseDetailResponse(course),
+		"data":    courseDetailResponse(course, reviews),
 		"error":   nil,
 	})
 }

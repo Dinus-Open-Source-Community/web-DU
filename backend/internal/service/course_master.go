@@ -85,7 +85,7 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 	}
 
 	offset := (page - 1) * perPage
-	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&categories).Error; err != nil {
+	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Preload("Courses.CreatedBy").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve course categories",
@@ -104,7 +104,7 @@ func GetAllCourseCategoriesFunc(c *gin.Context) {
 			"is_active":   category.IsActive,
 			"created_at":  category.CreatedAt,
 			"updated_at":  category.UpdatedAt,
-			"courses":     courseListResponse(category.Courses),
+			"courses":     courseListResponse(category.Courses, nil),
 		})
 	}
 
@@ -142,7 +142,7 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 	}
 
 	var category entity.CourseCategory
-	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").First(&category, id).Error; err != nil {
+	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Preload("Courses.CreatedBy").First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course category not found",
@@ -162,7 +162,7 @@ func GetCourseCategoryByIDFunc(c *gin.Context) {
 			"is_active":   category.IsActive,
 			"created_at":  category.CreatedAt,
 			"updated_at":  category.UpdatedAt,
-			"courses":     courseListResponse(category.Courses),
+			"courses":     courseListResponse(category.Courses, nil),
 		},
 		"error": nil,
 	})
@@ -418,7 +418,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 	}
 
 	offset := (page - 1) * perPage
-	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&classTypes).Error; err != nil {
+	if err := db.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Preload("Courses.CreatedBy").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&classTypes).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve course types",
@@ -437,7 +437,7 @@ func GetAllClassTypesFunc(c *gin.Context) {
 			"is_active":   classType.IsActive,
 			"created_at":  classType.CreatedAt,
 			"updated_at":  classType.UpdatedAt,
-			"courses":     courseListResponse(classType.Courses),
+			"courses":     courseListResponse(classType.Courses, nil),
 		})
 	}
 
@@ -475,7 +475,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 	}
 
 	var classType entity.ClassType
-	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").First(&classType, id).Error; err != nil {
+	if err := database.DB.Preload("Courses").Preload("Courses.Category").Preload("Courses.ClassType").Preload("Courses.Mentor").Preload("Courses.Mentors").Preload("Courses.CreatedBy").First(&classType, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course type not found",
@@ -495,7 +495,7 @@ func GetClassTypeByIDFunc(c *gin.Context) {
 			"is_active":   classType.IsActive,
 			"created_at":  classType.CreatedAt,
 			"updated_at":  classType.UpdatedAt,
-			"courses":     courseListResponse(classType.Courses),
+			"courses":     courseListResponse(classType.Courses, nil),
 		},
 		"error": nil,
 	})

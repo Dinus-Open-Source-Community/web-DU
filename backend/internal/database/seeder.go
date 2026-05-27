@@ -31,6 +31,7 @@ func RunSeeder(db *gorm.DB) {
 	seedCourseCategories(db)
 	seedClassTypes(db)
 	seedCourses(db)
+	seedCourseReviews(db)
 	seedModules(db)
 	seedLessons(db)
 	seedLessonAssignments(db)
@@ -248,6 +249,13 @@ func seedCourses(db *gorm.DB) {
 		return
 	}
 
+	admin, err := findSeedUserByEmail(db, "admin@doscom.id")
+	if err != nil {
+		log.Printf("[Error] Admin seed tidak ditemukan untuk created_by_uid: %v", err)
+		return
+	}
+	createdByUID := admin.Uid
+
 	var categories []entity.CourseCategory
 	if err := db.Order("name ASC").Find(&categories).Error; err != nil || len(categories) == 0 {
 		log.Printf("[Error] Category tidak ditemukan: %v", err)
@@ -264,8 +272,9 @@ func seedCourses(db *gorm.DB) {
 
 	courses := []entity.Course{
 		{
-			MentorUid:    &mentor.Uid,
-			CategoryUid:  &categories[0].Uid,
+			MentorUid:     &mentor.Uid,
+			CreatedByUid:  &createdByUID,
+			CategoryUid:   &categories[0].Uid,
 			ClassTypeUid: &classTypes[0].Uid,
 			Title:        "Golang Fundamentals",
 			Subtitle:     "Belajar Go dari dasar hingga siap produksi",
@@ -282,10 +291,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         30,
 		},
 		{
-			MentorUid:    &mentor.Uid,
-			CategoryUid:  &categories[0].Uid,
-			ClassTypeUid: &classTypes[1].Uid,
-			Title:        "Web Development dengan Next.js",
+			MentorUid:     &mentor.Uid,
+			CreatedByUid:  &createdByUID,
+			CategoryUid:   &categories[0].Uid,
+			ClassTypeUid:  &classTypes[1].Uid,
+			Title:         "Web Development dengan Next.js",
 			Subtitle:     "Bangun aplikasi modern dengan Next.js",
 			Slug:         "web-development-nextjs",
 			Description:  "Buat aplikasi web modern menggunakan Next.js dan React",
@@ -300,10 +310,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         25,
 		},
 		{
-			MentorUid:    &mentor.Uid,
-			CategoryUid:  &categories[1].Uid,
-			ClassTypeUid: &classTypes[1].Uid,
-			Title:        "Database Design dan SQL",
+			MentorUid:     &mentor.Uid,
+			CreatedByUid:  &createdByUID,
+			CategoryUid:   &categories[1].Uid,
+			ClassTypeUid:  &classTypes[1].Uid,
+			Title:         "Database Design dan SQL",
 			Subtitle:     "Rancang skema DB yang scalable",
 			Slug:         "database-design-sql",
 			Description:  "Desain database yang efisien dan kuasai SQL untuk berbagai kebutuhan",
@@ -318,10 +329,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         40,
 		},
 		{
-			MentorUid:    &mentor.Uid,
-			CategoryUid:  &categories[1].Uid,
-			ClassTypeUid: &classTypes[2].Uid,
-			Title:        "REST API Development",
+			MentorUid:     &mentor.Uid,
+			CreatedByUid:  &createdByUID,
+			CategoryUid:   &categories[1].Uid,
+			ClassTypeUid:  &classTypes[2].Uid,
+			Title:         "REST API Development",
 			Subtitle:     "Bangun API robust dan aman",
 			Slug:         "rest-api-development",
 			Description:  "Buat REST API yang robust dan scalable menggunakan best practices",
@@ -336,10 +348,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         35,
 		},
 		{
-			MentorUid:    &mentor.Uid,
-			CategoryUid:  &categories[2].Uid,
-			ClassTypeUid: &classTypes[0].Uid,
-			Title:        "DevOps Essentials",
+			MentorUid:     &mentor.Uid,
+			CreatedByUid:  &createdByUID,
+			CategoryUid:   &categories[2].Uid,
+			ClassTypeUid:  &classTypes[0].Uid,
+			Title:         "DevOps Essentials",
 			Subtitle:     "Deploy aplikasi dengan pipeline modern",
 			Slug:         "devops-essentials",
 			Description:  "Pelajari deployment, Docker, dan CI/CD pipeline untuk production",
@@ -366,8 +379,212 @@ func seedCourses(db *gorm.DB) {
 			log.Printf("[Success] Course %s berhasil dibuat", course.Title)
 		} else if err != nil {
 			log.Printf("[Error] Gagal cek course %s: %v", course.Slug, err)
+		} else if existing.CreatedByUid == nil {
+			if err := db.Model(&existing).Update("created_by_uid", createdByUID).Error; err != nil {
+				log.Printf("[Warning] Gagal set created_by_uid course %s: %v", course.Slug, err)
+			} else {
+				log.Printf("[Info] created_by_uid course %s diperbarui", course.Slug)
+			}
 		}
 	}
+}
+
+// seedCourseReviews membuat ulasan kursus dari siswa seed agar rating & total_reviews
+// terisi di API publik. Idempoten: lookup (user_uid, course_uid) — tidak menimpa
+// review yang sudah ada.
+func seedCourseReviews(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Course Reviews...")
+
+	type seedReview struct {
+		StudentEmail string
+		CourseSlug   string
+		Rating       int
+		Comment      string
+	}
+
+	reviews := []seedReview{
+		{
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "golang-fundamentals",
+			Rating:       5,
+			Comment:      "Materi Golang dijelaskan bertahap dan sangat mudah diikuti.",
+		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "golang-fundamentals",
+			Rating:       4,
+			Comment:      "Contoh kodenya membantu, tinggal ditambah latihan mandiri lagi.",
+		},
+		{
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "web-development-nextjs",
+			Rating:       5,
+			Comment:      "Struktur modul Next.js-nya rapi, cocok untuk yang sudah kenal React.",
+		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "web-development-nextjs",
+			Rating:       5,
+			Comment:      "Penjelasan SSR dan routing App Router sangat jelas.",
+		},
+		{
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "database-design-sql",
+			Rating:       4,
+			Comment:      "Konsep normalisasi dan query SQL-nya praktis untuk proyek nyata.",
+		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "rest-api-development",
+			Rating:       3,
+			Comment:      "Bagian autentikasi agak cepat, perlu dipelajari ulang beberapa kali.",
+		},
+		{
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "rest-api-development",
+			Rating:       4,
+			Comment:      "Studi kasus REST API-nya relevan dengan kebutuhan backend sehari-hari.",
+		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "devops-essentials",
+			Rating:       5,
+			Comment:      "Pipeline CI/CD dan Docker dijelaskan dengan contoh yang bisa langsung dicoba.",
+		},
+	}
+
+	for _, item := range reviews {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk review: %v", item.StudentEmail, err)
+			continue
+		}
+		if student.Role != entity.StudentRole {
+			log.Printf("[Error] User %s bukan student, review dilewati", item.StudentEmail)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course slug %s tidak ditemukan untuk review: %v", item.CourseSlug, err)
+			continue
+		}
+
+		var existing entity.CourseReview
+		err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&existing).Error
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek review %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
+			continue
+		}
+
+		review := entity.CourseReview{
+			UserUid:   student.Uid,
+			CourseUid: course.Uid,
+			Rating:    item.Rating,
+			Comment:   item.Comment,
+		}
+		if err := db.Create(&review).Error; err != nil {
+			log.Printf("[Error] Gagal membuat review %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
+			continue
+		}
+		log.Printf("[Success] Review %s untuk course %s berhasil dibuat", item.StudentEmail, item.CourseSlug)
+	}
+
+	seedCourseReviewReplies(db)
+}
+
+// seedCourseReviewReplies menambah balasan mentor pada review seed yang sudah ada.
+// Idempoten: lookup (course_review_uid, replier_uid).
+func seedCourseReviewReplies(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Course Review Replies...")
+
+	type seedReply struct {
+		StudentEmail string
+		CourseSlug   string
+		MentorEmail  string
+		Comment      string
+	}
+
+	replies := []seedReply{
+		{
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "golang-fundamentals",
+			MentorEmail:  "andi.mentor@doscom.id",
+			Comment:      "Terima kasih Budi! Senang materinya membantu perjalanan belajarmu.",
+		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "golang-fundamentals",
+			MentorEmail:  "andi.mentor@doscom.id",
+			Comment:      "Terima kasih Siti, saran latihan mandirinya akan kami pertimbangkan di update berikutnya.",
+		},
+	}
+
+	for _, item := range replies {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk balasan review: %v", item.StudentEmail, err)
+			continue
+		}
+
+		mentor, err := findSeedUserByEmail(db, item.MentorEmail)
+		if err != nil {
+			log.Printf("[Error] Mentor seed %s tidak ditemukan untuk balasan review: %v", item.MentorEmail, err)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course slug %s tidak ditemukan untuk balasan review: %v", item.CourseSlug, err)
+			continue
+		}
+
+		var review entity.CourseReview
+		if err := db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&review).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("[Seeder] Review %s / %s belum ada, balasan dilewati", item.StudentEmail, item.CourseSlug)
+			} else {
+				log.Printf("[Error] Gagal mengambil review untuk balasan: %v", err)
+			}
+			continue
+		}
+
+		var existing entity.CourseReviewReply
+		err = db.Where("course_review_uid = ? AND replier_uid = ?", review.Uid, mentor.Uid).First(&existing).Error
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek balasan review: %v", err)
+			continue
+		}
+
+		reply := entity.CourseReviewReply{
+			CourseReviewUid: review.Uid,
+			ReplierUid:      mentor.Uid,
+			Comment:         item.Comment,
+		}
+		if err := db.Create(&reply).Error; err != nil {
+			log.Printf("[Error] Gagal membuat balasan review: %v", err)
+			continue
+		}
+		log.Printf("[Success] Balasan mentor %s pada review %s / %s berhasil dibuat", item.MentorEmail, item.StudentEmail, item.CourseSlug)
+	}
+}
+
+func findSeedUserByEmail(db *gorm.DB, email string) (entity.User, error) {
+	var user entity.User
+	err := db.Where("email_hash = ?", utils.GenerateBlindIndex(email)).First(&user).Error
+	return user, err
+}
+
+func findSeedCourseBySlug(db *gorm.DB, slug string) (entity.Course, error) {
+	var course entity.Course
+	err := db.Where("slug = ?", slug).First(&course).Error
+	return course, err
 }
 
 // seedModules membuat modules untuk setiap course (2-3 modules per course).

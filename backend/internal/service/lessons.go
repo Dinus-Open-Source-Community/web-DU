@@ -89,15 +89,19 @@ func CreateLessonFunc(c *gin.Context) {
 		return
 	}
 
-	if err := validateLessonPayload(contentType, req.Content, req.VideoURL); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson payload", "data": nil, "error": err.Error()})
-		return
+	var content json.RawMessage
+	if contentType == entity.LessonContentTypeText {
+		normalized, err := normalizeRichTextPayload(req.Content)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson content", "data": nil, "error": err.Error()})
+			return
+		}
+		content = normalized
 	}
 
-	var content json.RawMessage
-	if req.Content != nil {
-		contentBytes, _ := json.Marshal(req.Content)
-		content = contentBytes
+	if err := validateLessonPayload(contentType, content, req.VideoURL); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson payload", "data": nil, "error": err.Error()})
+		return
 	}
 
 	// Parse StartTime and EndTime
@@ -507,8 +511,12 @@ func UpdateLessonFunc(c *gin.Context) {
 		lesson.Title = titleEnc
 	}
 	if req.Content != nil {
-		contentBytes, _ := json.Marshal(req.Content)
-		lesson.Content = contentBytes
+		normalized, err := normalizeRichTextPayload(req.Content)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson content", "data": nil, "error": err.Error()})
+			return
+		}
+		lesson.Content = normalized
 	}
 	if req.VideoURL != "" {
 		lesson.VideoURL = req.VideoURL
@@ -518,6 +526,10 @@ func UpdateLessonFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid lesson content_type", "data": nil, "error": err.Error()})
 		return
+	}
+
+	if contentType == entity.LessonContentTypeVideo {
+		lesson.Content = nil
 	}
 
 	if err := validateLessonPayload(contentType, json.RawMessage(lesson.Content), lesson.VideoURL); err != nil {
@@ -669,11 +681,11 @@ func resolveUpdateLessonContentType(current entity.LessonContentType, rawType st
 	return resolveCreateLessonContentType(rawType, videoURL)
 }
 
-func validateLessonPayload(contentType entity.LessonContentType, content interface{}, videoURL string) error {
+func validateLessonPayload(contentType entity.LessonContentType, content json.RawMessage, videoURL string) error {
 	trimmedVideoURL := strings.TrimSpace(videoURL)
 	switch contentType {
 	case entity.LessonContentTypeText:
-		if content == nil {
+		if len(content) == 0 {
 			return errors.New("content is required for text lessons")
 		}
 		if trimmedVideoURL != "" {

@@ -9,6 +9,25 @@ import (
 	"github.com/google/uuid"
 )
 
+func userToCreatorResponse(user *entity.User) gin.H {
+	if user == nil {
+		return nil
+	}
+
+	name, _ := utils.Decrypt(user.Name)
+	return gin.H{
+		"uid":         user.Uid,
+		"name":        name,
+		"role":        user.Role,
+		"is_verified": user.IsVerified,
+		"avatar_url":  user.AvatarURL,
+	}
+}
+
+func applyCreatorFields(item gin.H, course entity.Course) {
+	item["created_by"] = userToCreatorResponse(course.CreatedBy)
+}
+
 func userToMentorResponse(user entity.User) gin.H {
 	name, _ := utils.Decrypt(user.Name)
 	email, _ := utils.Decrypt(user.Email)
@@ -80,7 +99,7 @@ func mentorsResponse(course entity.Course) []gin.H {
 }
 
 func courseResponse(course entity.Course) gin.H {
-	return gin.H{
+	item := gin.H{
 		"uid":             course.Uid,
 		"mentor_uid":      course.MentorUid,
 		"event_uid":       course.EventUid,
@@ -107,13 +126,14 @@ func courseResponse(course entity.Course) gin.H {
 		"mentors":         mentorsResponse(course),
 		"modules":         course.Modules,
 	}
+	applyCreatorFields(item, course)
+	return item
 }
 
-func courseListItemResponse(course entity.Course) gin.H {
-	return gin.H{
+func courseListItemResponse(course entity.Course, summary courseReviewSummary) gin.H {
+	item := gin.H{
 		"uid":             course.Uid,
 		"event_uid":       course.EventUid,
-		"mentor_uid":      course.MentorUid,
 		"category_uid":    course.CategoryUid,
 		"course_type_uid": course.ClassTypeUid,
 		"title":           course.Title,
@@ -134,6 +154,9 @@ func courseListItemResponse(course entity.Course) gin.H {
 		"updated_at":      course.UpdatedAt,
 		"mentors":         mentorsResponse(course),
 	}
+	applyCreatorFields(item, course)
+	applyReviewSummaryFields(item, summary)
+	return item
 }
 
 func lessonSummaryResponse(lessons []entity.Lesson) []gin.H {
@@ -178,8 +201,9 @@ func parseWhatYouLearnResponse(raw json.RawMessage) any {
 	return raw
 }
 
-func courseDetailResponse(course entity.Course) gin.H {
-	return gin.H{
+func courseDetailResponse(course entity.Course, reviews []entity.CourseReview) gin.H {
+	summary := computeCourseReviewSummary(reviews)
+	item := gin.H{
 		"uid":            course.Uid,
 		"event_uid":      course.EventUid,
 		"title":          course.Title,
@@ -202,19 +226,24 @@ func courseDetailResponse(course entity.Course) gin.H {
 		"course_type":    courseTypeResponse(course.ClassType),
 		"mentors":        mentorsResponse(course),
 		"modules":        moduleDetailResponse(course.Modules),
+		"reviews":        courseReviewsResponse(reviews),
 	}
+	applyCreatorFields(item, course)
+	applyReviewSummaryFields(item, summary)
+	return item
 }
 
-func courseListResponse(courses []entity.Course) []gin.H {
+func courseListResponse(courses []entity.Course, summaries map[uuid.UUID]courseReviewSummary) []gin.H {
 	items := make([]gin.H, 0, len(courses))
 	for _, course := range courses {
-		items = append(items, courseListItemResponse(course))
+		summary := courseReviewSummaryFromMap(summaries, course.Uid)
+		items = append(items, courseListItemResponse(course, summary))
 	}
 	return items
 }
 
 func joinedCourseListItemResponse(course entity.Course, enrollment entity.Enrollment) gin.H {
-	item := courseListItemResponse(course)
+	item := courseListItemResponse(course, emptyCourseReviewSummary())
 	item["enrolled_at"] = enrollment.EnrolledAt
 	item["progress"] = enrollment.Progress
 	item["enrollment_status"] = enrollment.Status

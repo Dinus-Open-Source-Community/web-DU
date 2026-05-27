@@ -124,6 +124,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		Where("user_uid = ?", targetUID).
 		Preload("Course.Mentor").
 		Preload("Course.Mentors").
+		Preload("Course.CreatedBy").
 		Order("enrolled_at DESC").
 		Find(&enrollments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
