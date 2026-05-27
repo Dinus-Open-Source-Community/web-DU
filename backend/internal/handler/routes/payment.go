@@ -17,7 +17,8 @@ func StartPaymentRoutes(r *gin.Engine) {
 	paymentGroup.Use(middleware.AuthMiddleware())
 	{
 		paymentGroup.POST("/create", service.CreatePaymentFunc) // user
-		paymentGroup.GET("", service.GetPaymentFunc)            // user
+		paymentGroup.GET("", service.GetPaymentFunc)                  // user
+		paymentGroup.GET("/tripay", service.GetPaymentTripayFunc)      // user
 	}
 
 	// Tidak masuk dalam grup payment karena tidak perlu autentikasi

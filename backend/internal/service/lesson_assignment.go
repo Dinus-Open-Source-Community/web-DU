@@ -332,9 +332,9 @@ func buildLessonAssignmentModel(lessonUID uuid.UUID, req dto.LessonAssignmentUps
 		return entity.LessonAssignment{}, errors.New("deadline_at must use RFC3339 format")
 	}
 
-	taskDescription, err := toRawMessage(req.TaskDescription)
+	taskDescription, err := normalizeRichTextPayload(req.TaskDescription)
 	if err != nil {
-		return entity.LessonAssignment{}, errors.New("invalid task_description JSON")
+		return entity.LessonAssignment{}, errors.New("invalid task_description rich text")
 	}
 
 	quizPayload, err := toRawMessage(req.Quiz)

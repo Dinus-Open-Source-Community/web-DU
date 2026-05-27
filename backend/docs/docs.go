@@ -3914,7 +3914,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get payment details by payment reference",
+                "description": "Get payment details from database by reference or enrollmentId",
                 "consumes": [
                     "application/json"
                 ],
@@ -3924,7 +3924,7 @@ const docTemplate = `{
                 "tags": [
                     "Payment"
                 ],
-                "summary": "Get Payment (All Roles)",
+                "summary": "Get Payment (DB)",
                 "parameters": [
                     {
                         "type": "string",
@@ -4023,6 +4023,77 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized - Invalid or missing JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/tripay": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get payment details directly from Tripay by reference or merchant_ref",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Get Payment (Tripay)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tripay Reference",
+                        "name": "reference",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tripay Merchant Reference",
+                        "name": "merchant_ref",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tripay payment details",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Reference parameter is missing",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

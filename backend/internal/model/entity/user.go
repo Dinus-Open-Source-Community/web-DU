@@ -34,6 +34,7 @@ type User struct {
 
 	// Relations
 	Courses             []Course       `gorm:"foreignKey:MentorUid" json:"courses"`
+	CreatedCourses      []Course       `gorm:"foreignKey:CreatedByUid" json:"created_courses,omitempty"`
 	TeachingCourses     []Course       `gorm:"many2many:course_mentors;joinForeignKey:MentorUid;joinReferences:CourseUid" json:"teaching_courses"`
 	CourseMentorLinks   []CourseMentor `gorm:"foreignKey:MentorUid" json:"course_mentor_links"`
 	AssignedCourseLinks []CourseMentor `gorm:"foreignKey:AssignedByUid" json:"assigned_course_links"`

@@ -579,7 +579,11 @@ func parseSubmissionUpsert(c *gin.Context) (*submissionPayload, error) {
 			p.QuizAnswers = json.RawMessage(qs)
 		}
 		if rt := strings.TrimSpace(c.PostForm("rich_text")); rt != "" {
-			p.RichText = json.RawMessage(rt)
+			normalized, err := normalizeRichTextPayload(rt)
+			if err != nil {
+				return nil, fmt.Errorf("invalid rich_text: %w", err)
+			}
+			p.RichText = normalized
 		}
 		fh, err := c.FormFile("file")
 		if err == nil {
@@ -600,12 +604,12 @@ func parseSubmissionUpsert(c *gin.Context) (*submissionPayload, error) {
 		RemoveFile:      body.RemoveFile,
 	}
 	if body.RichText != nil {
-		b, err := json.Marshal(body.RichText)
+		normalized, err := normalizeRichTextPayload(body.RichText)
 		if err != nil {
-			return nil, fmt.Errorf("rich_text must be JSON-serializable: %w", err)
+			return nil, fmt.Errorf("invalid rich_text: %w", err)
 		}
-		if string(b) != "null" {
-			p.RichText = json.RawMessage(b)
+		if len(normalized) > 0 {
+			p.RichText = normalized
 		}
 	}
 	if body.QuizAnswers != nil {

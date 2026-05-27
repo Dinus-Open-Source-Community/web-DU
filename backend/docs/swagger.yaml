@@ -3103,7 +3103,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get payment details by payment reference
+      description: Get payment details from database by reference or enrollmentId
       parameters:
       - description: Payment Reference
         in: query
@@ -3143,7 +3143,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get Payment (All Roles)
+      summary: Get Payment (DB)
       tags:
       - Payment
   /payment/create:
@@ -3183,6 +3183,53 @@ paths:
       security:
       - BearerAuth: []
       summary: Create Payment (All Roles)
+      tags:
+      - Payment
+  /payment/tripay:
+    get:
+      consumes:
+      - application/json
+      description: Get payment details directly from Tripay by reference or merchant_ref
+      parameters:
+      - description: Tripay Reference
+        in: query
+        name: reference
+        type: string
+      - description: Tripay Merchant Reference
+        in: query
+        name: merchant_ref
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tripay payment details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Reference parameter is missing
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Payment not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Payment (Tripay)
       tags:
       - Payment
   /register:

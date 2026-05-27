@@ -10,8 +10,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
+	pathpkg "path"
 	"strings"
 	"time"
 
@@ -21,8 +24,65 @@ import (
 )
 
 const (
-	TripayAPIURL = "https://tripay.co.id/api-sandbox/transaction/create"
+	TripayCreatePath = "/transaction/create"
+	TripayDetailPath = "/transaction/detail"
 )
+
+func getTripayBaseURL() string {
+	if baseURL := strings.TrimSpace(os.Getenv("TRIPAY_BASE_URL")); baseURL != "" {
+		return baseURL
+	}
+
+	return "https://tripay.co.id"
+}
+
+func buildTripayURL(baseURL, path string) (string, error) {
+	if baseURL == "" {
+		return "", fmt.Errorf("tripay base URL is required")
+	}
+	if path == "" {
+		return "", fmt.Errorf("tripay path is required")
+	}
+	parsedURL, err := url.Parse(baseURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid Tripay base URL: %w", err)
+	}
+
+	basePath := strings.TrimRight(parsedURL.Path, "/")
+	joinPath := strings.TrimLeft(path, "/")
+	parsedURL.Path = pathpkg.Join(basePath, joinPath)
+	if !strings.HasPrefix(parsedURL.Path, "/") {
+		parsedURL.Path = "/" + parsedURL.Path
+	}
+	return parsedURL.String(), nil
+}
+
+func buildTripayDetailURL(baseURL, path, reference, merchantRef string) (string, error) {
+	if reference == "" && merchantRef == "" {
+		return "", fmt.Errorf("reference or merchant_ref is required")
+	}
+
+	detailURL, err := buildTripayURL(baseURL, path)
+	if err != nil {
+		return "", err
+	}
+
+	parsedURL, err := url.Parse(detailURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid Tripay detail URL: %w", err)
+	}
+
+	query := parsedURL.Query()
+	if reference != "" {
+		query.Set("reference", reference)
+	}
+	if merchantRef != "" {
+		query.Set("merchant_ref", merchantRef)
+	}
+	parsedURL.RawQuery = query.Encode()
+
+	return parsedURL.String(), nil
+}
 
 // GetNextMerchantRef generates the next merchant reference based on payment count
 func GetNextMerchantRef() (string, error) {
@@ -203,8 +263,13 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
+	tripayCreateURL, err := buildTripayURL(getTripayBaseURL(), TripayCreatePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build Tripay create URL: %w", err)
+	}
+
 	// Make request to Tripay
-	httpReq, err := http.NewRequest("POST", TripayAPIURL, bytes.NewBuffer(jsonData))
+	httpReq, err := http.NewRequest("POST", tripayCreateURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
@@ -364,8 +429,8 @@ func CreatePaymentFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get Payment (All Roles)
-// @Description  Get payment details by payment reference
+// @Summary      Get Payment (DB)
+// @Description  Get payment details from database by reference or enrollmentId
 // @Tags         Payment
 // @Accept       json
 // @Produce      json
@@ -427,6 +492,103 @@ func GetPaymentFunc(c *gin.Context) {
 		"data":    payment,
 		"error":   nil,
 	})
+}
+
+// @Summary      Get Payment (Tripay)
+// @Description  Get payment details directly from Tripay by reference or merchant_ref
+// @Tags         Payment
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        reference  query     string          false  "Tripay Reference"
+// @Param        merchant_ref  query     string      false  "Tripay Merchant Reference"
+// @Success      200        {object}  map[string]any  "Tripay payment details"
+// @Failure      400        {object}  map[string]any  "Reference parameter is missing"
+// @Failure      401        {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
+// @Failure      404        {object}  map[string]any  "Payment not found"
+// @Failure      500        {object}  map[string]any  "Internal server error"
+// @Router       /payment/tripay [get]
+func GetPaymentTripayFunc(c *gin.Context) {
+	reference := c.Query("reference")
+	merchantRef := c.Query("merchant_ref")
+
+	log.Printf("Tripay Base URL: %s", getTripayBaseURL())
+
+	if reference == "" && merchantRef == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Either reference or merchant_ref parameter is required",
+			"data":    nil,
+			"error":   "missing query parameters",
+		})
+		return
+	}
+
+	apiKey := strings.TrimSpace(os.Getenv("TRIPAY_API_KEY"))
+	if apiKey == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Server misconfiguration: TRIPAY_API_KEY not set",
+			"data":    nil,
+			"error":   "missing TRIPAY_API_KEY",
+		})
+		return
+	}
+
+	detailURL, err := buildTripayDetailURL(getTripayBaseURL(), TripayDetailPath, reference, merchantRef)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to build Tripay detail URL",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	httpReq, err := http.NewRequest("GET", detailURL, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to create Tripay request",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	client := &http.Client{Timeout: time.Second * 10}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"success": false,
+			"message": "Failed to fetch Tripay payment details",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"success": false,
+			"message": "Failed to read Tripay response",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	contentType := strings.TrimSpace(resp.Header.Get("Content-Type"))
+	if contentType == "" {
+		contentType = "application/json"
+	}
+
+	c.Data(resp.StatusCode, contentType, body)
 }
 
 func PaymentCallbackFunc(c *gin.Context) {

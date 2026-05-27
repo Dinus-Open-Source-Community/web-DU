@@ -29,8 +29,9 @@ const (
 type Course struct {
 	Uid          uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
 	EventUid     *uuid.UUID `gorm:"type:uuid;index" json:"event_uid,omitempty"`
-	MentorUid    *uuid.UUID `gorm:"type:uuid;index" json:"mentor_uid,omitempty"`
-	CategoryUid  *uuid.UUID `gorm:"type:uuid;index" json:"category_uid,omitempty"`
+	MentorUid     *uuid.UUID `gorm:"type:uuid;index" json:"mentor_uid,omitempty"`
+	CreatedByUid  *uuid.UUID `gorm:"type:uuid;index" json:"-"`
+	CategoryUid   *uuid.UUID `gorm:"type:uuid;index" json:"category_uid,omitempty"`
 	ClassTypeUid *uuid.UUID `gorm:"type:uuid;index" json:"course_type_uid,omitempty"`
 	Title        string     `gorm:"type:varchar(200);not null" json:"title"`
 	Subtitle     string     `gorm:"type:varchar(255)" json:"subtitle"`
@@ -54,6 +55,7 @@ type Course struct {
 	// Relations
 	Event         *Event               `gorm:"foreignKey:EventUid" json:"event,omitempty"`
 	Mentor        *User                `gorm:"foreignKey:MentorUid" json:"mentor,omitempty"`
+	CreatedBy     *User                `gorm:"foreignKey:CreatedByUid" json:"created_by,omitempty"`
 	Mentors       []User               `gorm:"many2many:course_mentors;joinForeignKey:CourseUid;joinReferences:MentorUid" json:"mentors,omitempty"`
 	CourseMentors []CourseMentor       `gorm:"foreignKey:CourseUid" json:"course_mentors,omitempty"`
 	Category      *CourseCategory      `gorm:"foreignKey:CategoryUid" json:"category,omitempty"`
