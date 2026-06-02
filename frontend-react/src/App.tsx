@@ -36,6 +36,7 @@ const StudentAssignments = React.lazy(() => import('./pages/student/Assignments.
 const StudentBrowse = React.lazy(() => import('./pages/student/BrowseCourse.tsx'))
 const StudentCertificates = React.lazy(() => import('./pages/student/Certificates.tsx'))
 const StudentTransactions = React.lazy(() => import('./pages/student/Transactions.tsx'))
+const ProfilePage = React.lazy(() => import('./pages/profile/Profile.tsx'))
 
 type RouteConfig = {
   path: string
@@ -93,6 +94,13 @@ const routeConfig: RouteConfig[] = [
     element: <FormResetPassword />,
     public: true,
     lazy: true,
+  },
+  {
+    path: ROUTES.profile,
+    element: <ProfilePage />,
+    public: false,
+    lazy: true,
+    roles: ['student', 'mentor', 'admin'],
   },
   {
     path: ROUTES.admin.dashboard,

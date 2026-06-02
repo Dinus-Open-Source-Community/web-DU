@@ -1,12 +1,11 @@
 import Cookies from 'js-cookie'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth } from '../services/auth'
-import { api } from '../services/axios'
+import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services/axios'
 import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
 import { ROUTES } from '@/lib/routes'
 
-export const AUTH_COOKIE_TOKEN = 'du_access_token'
 export const AUTH_COOKIE_USER = 'du_auth_user'
 export const AUTH_COOKIE_ROLE = 'du_auth_role'
 export const AUTH_COOKIE_EXPIRES_AT = 'du_auth_expires_at'
@@ -59,7 +58,7 @@ const toSessionUser = (user: IUserData): IAuthSessionUser => ({
   name: user.name,
   email: user.email,
   role: normalizeRole(user.role),
-  avatarUrl: user.avatar_url,
+  avatar_url: user.avatar_url,
 })
 
 const getDashboardPath = (role?: UserRole | null) => (role ? ROLE_DASHBOARD_PATH[role] : '/auth/login')
@@ -90,15 +89,6 @@ export function isAuthTokenExpired(token: string | null = getAuthToken()) {
   return false
 }
 
-function setAuthorizationHeader(token: string | null) {
-  if (token) {
-    api.defaults.headers.common.Authorization = `Bearer ${token}`
-    return
-  }
-
-  delete api.defaults.headers.common.Authorization
-}
-
 function setAuthToken(token: string, expiresAt?: string) {
   const cookieExpires = getTokenExpires(expiresAt)
   Cookies.set(AUTH_COOKIE_TOKEN, token, {
@@ -111,12 +101,12 @@ function setAuthToken(token: string, expiresAt?: string) {
       sameSite: 'lax',
     })
   }
-  setAuthorizationHeader(token)
+  setApiAuthToken(token)
   emitAuthChange()
 }
 
 function getAuthToken() {
-  return Cookies.get(AUTH_COOKIE_TOKEN) ?? null
+  return getApiAuthToken()
 }
 
 function setAuthUser(user: IAuthSessionUser) {
@@ -151,7 +141,7 @@ function clearAuthSession() {
   Cookies.remove(AUTH_COOKIE_USER)
   Cookies.remove(AUTH_COOKIE_ROLE)
   Cookies.remove(AUTH_COOKIE_EXPIRES_AT)
-  setAuthorizationHeader(null)
+  setApiAuthToken(null)
   emitAuthChange()
 }
 
@@ -190,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const nextProfile = await getAuthenticatedUser(currentToken)
+      const nextProfile = await getAuthenticatedUser()
       const sessionUser = toSessionUser(nextProfile)
       applySession(sessionUser, nextProfile)
       return nextProfile
@@ -210,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthToken(accessToken, expiresAt)
       setToken(accessToken)
 
-      const nextProfile = await getAuthenticatedUser(accessToken)
+      const nextProfile = await getAuthenticatedUser()
       return applySession(toSessionUser(nextProfile), nextProfile)
     },
     [applySession],
@@ -234,12 +224,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   useEffect(() => {
-    setAuthorizationHeader(getAuthToken())
+    setApiAuthToken(getAuthToken())
     void refreshUser().finally(() => setIsLoading(false))
 
     const syncAuthState = () => {
       const currentToken = getAuthToken()
-      setAuthorizationHeader(currentToken)
+      setApiAuthToken(currentToken)
       setUser(getAuthUser())
       if (!currentToken) setProfile(null)
       setToken(currentToken)

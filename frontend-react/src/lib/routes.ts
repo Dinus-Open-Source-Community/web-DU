@@ -11,6 +11,7 @@ export interface RouteItem {
 
 export const ROUTES = {
   home: '/',
+  profile: '/profile',
   courses: '/course',
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',

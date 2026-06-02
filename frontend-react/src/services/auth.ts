@@ -24,6 +24,54 @@ const unwrapResponse = <T>(response: IResponse<T>, fallbackMessage: string): T =
   return response.data
 }
 
+const encodeObjectPath = (objectPath: string) => objectPath.split('/').map(encodeURIComponent).join('/')
+
+function getFileProxyPath(fileReference: string, fallbackBucket = 'avatars') {
+  const trimmedReference = fileReference.trim()
+  if (!trimmedReference || trimmedReference.startsWith('blob:') || trimmedReference.startsWith('data:')) return null
+  const isAbsoluteHttpUrl = /^https?:\/\//i.test(trimmedReference)
+
+  try {
+    const parsedUrl = new URL(trimmedReference, API_BASE_URL)
+    const apiOrigin = new URL(API_BASE_URL).origin
+    if (parsedUrl.pathname.startsWith('/files/') && (!isAbsoluteHttpUrl || parsedUrl.origin === apiOrigin)) {
+      return `${parsedUrl.pathname}${parsedUrl.search}`
+    }
+  } catch {
+    // Fall through to object-key parsing below.
+  }
+
+  if (isAbsoluteHttpUrl) return null
+
+  const normalizedObject = trimmedReference.replace(/^\/+/, '')
+  if (!normalizedObject) return null
+
+  if (normalizedObject.startsWith('files/')) {
+    return `/${encodeObjectPath(normalizedObject)}`
+  }
+
+  if (normalizedObject.startsWith(`${fallbackBucket}/`)) {
+    return `/files/${encodeObjectPath(normalizedObject)}`
+  }
+
+  return `/files/${fallbackBucket}/${encodeObjectPath(normalizedObject)}`
+}
+
+async function resolveAuthenticatedAvatarUrl(avatarObject: string) {
+  if (!avatarObject) return avatarObject
+
+  const fileProxyPath = getFileProxyPath(avatarObject, 'avatars')
+  if (!fileProxyPath) {
+    return avatarObject
+  }
+
+  const response = await api.get<Blob>(fileProxyPath, {
+    responseType: 'blob',
+  })
+
+  return URL.createObjectURL(response.data)
+}
+
 export async function loginWithEmail(payload: ILoginPayload): Promise<IAuthTokenResponse> {
   try {
     const response = await api.post<IResponse<IAuthTokenResponse>>(API_ROUTES.auth.login, payload)
@@ -42,15 +90,22 @@ export async function registerWithEmail(payload: Omit<IRegisterPayload, 'confirm
   }
 }
 
-export async function getAuthenticatedUser(token: string): Promise<IUserData> {
+export async function getAuthenticatedUser(): Promise<IUserData> {
   try {
-    const response = await api.get<IResponse<IUserData>>(API_ROUTES.user.getSelfData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await api.get<IResponse<IUserData>>(API_ROUTES.user.getSelfData)
 
-    return unwrapResponse(response.data, 'Data pengguna tidak ditemukan')
+    const user = unwrapResponse(response.data, 'Data pengguna tidak ditemukan')
+
+    if (!user.avatar_url) return user
+
+    try {
+      return {
+        ...user,
+        avatar_url: await resolveAuthenticatedAvatarUrl(user.avatar_url),
+      }
+    } catch {
+      return user
+    }
   } catch (error) {
     throw new Error(getMessageFromError(error, 'Gagal mengambil data pengguna'), { cause: error })
   }

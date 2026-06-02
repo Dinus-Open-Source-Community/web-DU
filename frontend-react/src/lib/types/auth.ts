@@ -34,7 +34,7 @@ export interface IAuthSessionUser {
   name: string
   email: string
   role: UserRole
-  avatarUrl?: string
+  avatar_url?: string
 }
 
 export interface IAuthResult {

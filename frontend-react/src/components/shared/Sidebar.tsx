@@ -1,8 +1,20 @@
 import { ChevronDown, ChevronsLeft, ChevronsRight, LogOut, Menu, User, X } from 'lucide-react'
 import { useCallback, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent, type ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from '../../components/ui/sidebar'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from '../../components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import type { NavChildItem, NavItem } from '../../lib/types/utils'
 import { Navigation } from '../../lib/navigation'
@@ -274,6 +286,7 @@ function SidebarFooterUser({ role, user }: { role: UserRole; user: SidebarUser }
   const { state } = useSidebar()
   const isMinimized = state === 'collapsed'
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const navigate = useNavigate()
   const roleLabel = sidebarRoleConfig[role].roleLabel
   const fallbackInitial = roleLabel.charAt(0).toUpperCase()
   const userInitial = user.name.trim().charAt(0).toUpperCase() || fallbackInitial
@@ -282,6 +295,11 @@ function SidebarFooterUser({ role, user }: { role: UserRole; user: SidebarUser }
     if (!event.currentTarget.contains(event.relatedTarget)) {
       setIsDropdownOpen(false)
     }
+  }
+
+  const handleClickProfile = () => {
+    setIsDropdownOpen(false)
+    navigate('/profile')
   }
 
   if (isMinimized) {
@@ -301,10 +319,7 @@ function SidebarFooterUser({ role, user }: { role: UserRole; user: SidebarUser }
     <SidebarFooter className="relative flex-shrink-0 border-t border-slate-100 p-0" onBlur={handleBlur}>
       {isDropdownOpen && (
         <div className="absolute right-3 bottom-full left-3 z-10 mb-1 rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg duration-150 animate-in fade-in slide-in-from-bottom-2">
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900">
+          <button type="button" onClick={handleClickProfile} className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900">
             <User className="size-4 text-slate-400" />
             <span>Profile</span>
           </button>
