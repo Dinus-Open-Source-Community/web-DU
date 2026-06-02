@@ -3,6 +3,7 @@ import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { ReactIcon } from './icon'
 import type { JoinedCourse } from '@/lib/types/user'
+import { Profile } from '../ui/profile'
 import { Check } from 'lucide-react'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
@@ -47,6 +48,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
   const image = data.cover_url || data.thumbnail_url
   const actionHref = `/student/learning/course/${data.uid}`
   const actionLabel = isResume ? 'Lanjut' : 'Mulai'
+  const mentor = data.mentors?.[0] ?? data.created_by
 
   return (
     <div className="group flex h-full w-full flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md">
@@ -71,7 +73,10 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
         <div className="mb-5 flex flex-col">
           <div className="mb-3 flex items-center justify-between gap-3">
             <CourseLevelSignal level={data.level} />
-            <span className="line-clamp-1 text-xs font-semibold text-slate-400">{data.subtitle}</span>
+            <div className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              <Check className="h-3.5 w-3.5" aria-hidden />
+              <span className="line-clamp-1">Dapat diakses</span>
+            </div>
           </div>
           <h3 className="mb-2 line-clamp-2 text-lg font-bold leading-snug text-slate-900">{data.title}</h3>
           <p className="line-clamp-2 text-sm font-normal leading-[1.55] text-slate-500">{data.description || data.subtitle}</p>
@@ -89,19 +94,18 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-          <span className="inline-flex min-w-0 items-center gap-1.5 text-sm font-semibold text-emerald-700">
-            <Check className="h-3.5 w-3.5" aria-hidden />
-            <span className="line-clamp-1">Dapat diakses</span>
-          </span>
+        <div className="mt-auto border-t border-slate-100 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">{mentor ? <Profile image={mentor.avatar_url ?? '/pinguin.png'} name={mentor.name ?? ''} /> : null}</div>
 
-          {progress === 100 ? (
-            <Badge variant="progressComplete" />
-          ) : (
-            <Button asChild className="rounded-lg px-5 py-2 text-sm font-semibold shadow-none" variant="default" size="sm">
-              <Link to={actionHref}>{actionLabel}</Link>
-            </Button>
-          )}
+            {progress === 100 ? (
+              <Badge variant="progressComplete" />
+            ) : (
+              <Button asChild className="rounded-lg px-5 py-2 text-sm font-semibold shadow-none" variant="default" size="sm">
+                <Link to={actionHref}>{actionLabel}</Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

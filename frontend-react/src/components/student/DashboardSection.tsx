@@ -4,6 +4,12 @@ import ResumeCard from '@/components/shared/ResumeCard'
 import FeedbackCard from '@/components/shared/Feedback'
 import type { IUserData } from '@/lib/types/user'
 
+const feedbackDateFormatter = new Intl.DateTimeFormat('id-ID', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
+
 const DashboardSection = ({ Data }: { Data: IUserData }) => {
   const iconMap: Record<string, typeof PlayCircle | typeof MessageSquare | typeof Calendar> = {
     Aktif: PlayCircle,
@@ -12,6 +18,16 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
   }
   const joinedCourses = (Data?.joined_courses as { uid: string; title: string; progress?: number; image?: string; module?: string }[]) ?? []
   const resumeCourses = joinedCourses.filter((course) => course.progress !== undefined && course.progress < 100 && course.progress > 0)
+  const recentFeedback = Data.course_reviews.slice(0, 3).map((review) => ({
+    status: (review.rating >= 4 ? 'Lulus' : 'Perlu Revisi') as 'Lulus' | 'Perlu Revisi',
+    time: feedbackDateFormatter.format(new Date(review.created_at)),
+    title: review.course.title,
+    comment: review.comment,
+    instructor: {
+      name: Data.name,
+      avatar: Data.avatar_url || '/pinguin.png',
+    },
+  }))
 
   console.log('Data di DashboardSection:', Data)
 
@@ -66,10 +82,8 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
             Umpan Balik
           </h2>
           <div className="space-y-4">
-            {((Data?.course_reviews as { status?: string; time?: string; title?: string; comment?: string; instructor?: { name: string; avatar: string } }[]) ?? []).length > 0 ? (
-              (Data?.course_reviews as { status: 'Lulus' | 'Perlu Revisi'; time: string; title: string; comment: string; instructor: { name: string; avatar: string } }[])
-                .slice(0, 3)
-                .map((fb, i) => <FeedbackCard key={i} status={fb.status} time={fb.time} title={fb.title} comment={fb.comment} instructor={fb.instructor} />)
+            {recentFeedback.length > 0 ? (
+              recentFeedback.map((fb, i) => <FeedbackCard key={i} status={fb.status} time={fb.time} title={fb.title} comment={fb.comment} instructor={fb.instructor} />)
             ) : (
               <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Belum ada umpan balik terbaru.</div>
             )}

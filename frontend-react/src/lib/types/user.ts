@@ -57,11 +57,14 @@ export interface CourseDetail {
   course_type_uid?: string
   created_at?: string
   updated_at?: string
+  created_by?: CourseCreator
   event_uid?: string | null
   mentor_uid?: string
   mentors?: IMentor[]
   slot?: number
   what_you_learn?: string[]
+  rating?: number
+  total_reviews?: number
 }
 
 export interface EnrollmentInvoice {
@@ -93,6 +96,28 @@ export interface ReviewSummary {
   average_rating: number
 }
 
+export interface CourseCreator {
+  uid: string
+  name: string
+  avatar_url: string
+  role: UserRole
+  is_verified: boolean
+}
+
+export interface CourseSummary {
+  uid: string
+  title: string
+  slug: string
+}
+
+export interface CourseReview {
+  uid: string
+  rating: number
+  comment: string
+  created_at: string
+  course: CourseSummary
+}
+
 export interface IUserData {
   uid: string
   name: string
@@ -108,7 +133,7 @@ export interface IUserData {
   enrollment_invoices: EnrollmentInvoice[]
   joined_courses: JoinedCourse[]
   mentored_courses: CourseDetail[]
-  course_reviews: unknown[]
+  course_reviews: CourseReview[]
   transaction_history: TransactionHistory[]
 }
 

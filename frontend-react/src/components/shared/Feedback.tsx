@@ -13,18 +13,18 @@ interface IFeedbackCardProps {
 
 export default function FeedbackCard({ status, time, title, comment, instructor }: IFeedbackCardProps) {
   return (
-    <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-3">
-        <div className={cn('text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full', status === 'Lulus' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700')}>
+    <div className="max-w-full overflow-hidden rounded-[10px] border border-slate-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className={cn('shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest', status === 'Lulus' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700')}>
           {status}
         </div>
-        <span className="text-xs text-slate-400 font-medium">{time}</span>
+        <span className="shrink-0 text-xs font-medium text-slate-400">{time}</span>
       </div>
-      <h4 className="font-bold text-slate-800 mb-1 leading-tight">{title}</h4>
-      <p className="text-sm text-slate-600 mb-4">{comment}</p>
-      <div className="flex items-center gap-2">
-        <img src={instructor?.avatar ?? null} alt={instructor?.name ?? 'Instructor'} width={24} height={24} loading="lazy" className="w-6 h-6 rounded-full object-cover" />
-        <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">{instructor?.name ?? 'Instructor'}</span>
+      <h4 className="mb-1 line-clamp-2 max-w-full break-all text-sm font-bold leading-snug text-slate-800">{title}</h4>
+      <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-slate-600">{comment}</p>
+      <div className="flex min-w-0 items-center gap-2">
+        <img src={instructor?.avatar || '/pinguin.png'} alt={instructor?.name ?? 'Instructor'} width={24} height={24} loading="lazy" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+        <span className="truncate text-[11px] font-bold uppercase tracking-wider text-slate-500">{instructor?.name ?? 'Instructor'}</span>
       </div>
     </div>
   )

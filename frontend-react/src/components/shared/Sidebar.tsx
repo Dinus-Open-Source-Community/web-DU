@@ -1,5 +1,5 @@
 import { ChevronDown, X } from 'lucide-react'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarProvider, useSidebar } from '../../components/ui/sidebar'
@@ -97,8 +97,13 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 function SidebarNavGroup({ item }: { item: NavItem }) {
   const { pathname } = useLocation()
   const isChildActive = item.children?.some((child) => isActivePath(pathname, child.path)) ?? false
+  const isParentActive = item.path ? pathname === item.path : false
   const [isOpen, setIsOpen] = useState(isChildActive)
   const Icon = item.icon
+
+  useEffect(() => {
+    if (isChildActive) setIsOpen(true)
+  }, [isChildActive])
 
   return (
     <SidebarMenuItem className="flex flex-col">
@@ -108,13 +113,13 @@ function SidebarNavGroup({ item }: { item: NavItem }) {
             type="button"
             className={cn(
               'group relative flex min-h-12 w-full items-center justify-between rounded-[10px] border-r-4 border-transparent px-4 text-sm font-medium transition-all duration-150',
-              isChildActive ? 'border-primary bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+              isParentActive ? 'border-primary bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
             )}>
             <div className="flex items-center gap-3">
-              {Icon && <Icon className={cn('size-[18px] flex-shrink-0 transition-colors', isChildActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600')} />}
+              {Icon && <Icon className={cn('size-[18px] flex-shrink-0 transition-colors', isParentActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600')} />}
               <span>{item.name}</span>
             </div>
-            <ChevronDown className={cn('size-4 flex-shrink-0 transition-transform duration-300', isOpen ? 'rotate-180' : '', isChildActive ? 'text-primary' : 'text-slate-400')} />
+            <ChevronDown className={cn('size-4 flex-shrink-0 text-slate-400 transition-transform duration-300', isOpen ? 'rotate-180' : '')} />
           </button>
         </CollapsibleTrigger>
 
