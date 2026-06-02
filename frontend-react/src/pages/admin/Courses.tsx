@@ -1,4 +1,4 @@
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import ManageCourseSection from '../../components/shared/ManageCourse'
 import type { CourseListResponse } from '../../lib/types/api'
 
@@ -42,12 +42,12 @@ const Courses = () => {
         what_you_learn: ['Pengenalan konsep utama', 'Studi kasus dunia nyata'],
       },
     ],
-    meta: { page: 1, per_page: 6, total: 0, total_pages: 0 },
+    meta: { current_page: 1, per_page: 6, total: 0, total_pages: 0 },
   }
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <ManageCourseSection role="admin" data={data} />
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

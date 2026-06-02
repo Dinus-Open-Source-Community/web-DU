@@ -15,6 +15,7 @@ export const ROUTES = {
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',
   register: '/auth/register',
+  oauthCallback: '/auth/oauth/callback',
   forgotPassword: '/auth/forgot-password',
   resetPassword: '/auth/reset-password',
   admin: {

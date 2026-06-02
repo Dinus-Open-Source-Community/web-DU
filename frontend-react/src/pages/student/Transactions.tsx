@@ -1,4 +1,4 @@
-import { StudentSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import TransactionsList from '@/components/student/TransactionsSection'
 import type { TransactionHistory } from '@/lib/types/transaction'
 
@@ -40,9 +40,9 @@ const Transactions = () => {
     },
   ]
   return (
-    <StudentSidebarProvider>
+    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
       <TransactionsList Data={Data} />
-    </StudentSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

@@ -31,7 +31,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
         { uid: 'cat-1', name: 'Programming', description: '', is_active: true, courses: [], created_at: '', updated_at: '' },
         { uid: 'cat-2', name: 'Design', description: '', is_active: true, courses: [], created_at: '', updated_at: '' },
       ],
-      meta: { page: 1, per_page: 10, total: 0, total_pages: 0 },
+      meta: { current_page: 1, per_page: 10, total: 0, total_pages: 0 },
     }),
     [],
   )
@@ -41,7 +41,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
         { uid: 'type-1', name: 'Online', description: '', is_active: true, courses: [], created_at: '', updated_at: '' },
         { uid: 'type-2', name: 'Offline', description: '', is_active: true, courses: [], created_at: '', updated_at: '' },
       ],
-      meta: { page: 1, per_page: 10, total: 0, total_pages: 0 },
+      meta: { current_page: 1, per_page: 10, total: 0, total_pages: 0 },
     }),
     [],
   )

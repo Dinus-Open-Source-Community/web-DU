@@ -18,7 +18,6 @@ type CourseEditClientProps = {
   routeBasePath?: '/mentor' | '/admin'
   role?: 'mentor' | 'admin'
   courseData: CourseDetailItem
-  publishCourse?: Record<string, unknown>
 }
 
 type LessonApiItem = LessonDetailItem
@@ -99,9 +98,7 @@ function toLesson(item: LessonApiItem, fallbackOrder: number): EditableLesson {
   const contentType =
     (item.content_type as string | undefined) === 'video' || Boolean(item.video_url)
       ? 'video'
-      : (item.content_type as string | undefined) === 'quiz' || Boolean(contentObject?.quiz)
-        ? 'quiz'
-        : 'tiptap'
+      : 'text'
 
   const base = {
     id: (item.uid as string) ?? `lesson-${fallbackOrder}`,
@@ -145,7 +142,7 @@ function toModule(item: IModulesData, lessons: EditableLesson[], fallbackOrder: 
   }
 }
 
-export function CourseEditClient({ initialModuleId, routeBasePath = '/mentor', role = 'mentor', courseData, publishCourse }: CourseEditClientProps) {
+export function CourseEditClient({ initialModuleId, routeBasePath = '/mentor', role = 'mentor', courseData }: CourseEditClientProps) {
   const isAdmin = role === 'admin'
   const navigate = useNavigate()
 
@@ -281,24 +278,6 @@ export function CourseEditClient({ initialModuleId, routeBasePath = '/mentor', r
           lessons: module.lessons.map((lesson) => ({ ...lesson })),
         }))
 
-        const buildLessonPayload = (lesson: EditableLesson) => {
-          const payload: Record<string, unknown> = {
-            title: lesson.title,
-            order_index: lesson.order,
-          }
-
-          if (lesson.contentType === 'video') {
-            payload.content_type = 'video'
-            payload.video_url = lesson.videoUrl || ''
-            payload.content = lesson.contentHtml || ''
-          } else {
-            payload.content_type = 'text'
-            payload.content = lesson.contentHtml || ''
-          }
-
-          return payload
-        }
-
         for (const courseModule of nextModules) {
           const persistedModuleUid = courseModule.uid
           const moduleUid = persistedModuleUid
@@ -321,21 +300,7 @@ export function CourseEditClient({ initialModuleId, routeBasePath = '/mentor', r
             // courseModule.uid = moduleUid
           }
 
-          for (const lesson of courseModule.lessons) {
-            // if (lesson.uid) {
-            //   await put<Envelope<Record<string, unknown>>>(`/lessons/${lesson.uid}`, buildLessonPayload(lesson))
-            //   continue
-            // }
-            // const createdLessonResponse = await post<Envelope<Record<string, unknown>>>('/lessons', {
-            //   module_uid: moduleUid,
-            //   ...buildLessonPayload(lesson),
-            // })
-            // const createdLessonUid = createdLessonResponse.data.uid
-            // if (!createdLessonUid) {
-            //   throw new Error('Backend tidak mengembalikan uid untuk lesson baru.')
-            // }
-            // lesson.uid = createdLessonUid
-          }
+          // Lesson persistence can be re-enabled here once the API mutation layer is connected.
         }
 
         setModules(nextModules)

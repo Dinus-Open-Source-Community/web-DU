@@ -1,4 +1,4 @@
-import { StudentSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import Section from '@/components/student/BrowseCourseSection'
 import type { CategoryItem } from '@/lib/types/api'
 
@@ -217,9 +217,9 @@ const BrowseCourse = () => {
   ]
 
   return (
-    <StudentSidebarProvider>
+    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
       <Section data={data} />
-    </StudentSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

@@ -1,4 +1,4 @@
-import { StudentSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import LearningSection from '@/components/student/LearningSection'
 import type { IUserData } from '@/lib/types/user'
 
@@ -252,9 +252,9 @@ const Learning = () => {
   }
 
   return (
-    <StudentSidebarProvider>
+    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
       <LearningSection Data={Data} />
-    </StudentSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

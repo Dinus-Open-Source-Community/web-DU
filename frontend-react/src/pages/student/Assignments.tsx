@@ -1,4 +1,4 @@
-import { StudentSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { StudentAssignmentsSection, type StudentAssignmentSectionItem } from '@/components/student/AssignmentSection'
 
 const buildDeadline = (daysFromNow: number, hour = 17) => {
@@ -109,9 +109,9 @@ const assignmentItems: StudentAssignmentSectionItem[] = [
 
 const Assignments = () => {
   return (
-    <StudentSidebarProvider>
+    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
       <StudentAssignmentsSection items={assignmentItems} />
-    </StudentSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

@@ -13,6 +13,8 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
   const joinedCourses = (Data?.joined_courses as { uid: string; title: string; progress?: number; image?: string; module?: string }[]) ?? []
   const resumeCourses = joinedCourses.filter((course) => course.progress !== undefined && course.progress < 100 && course.progress > 0)
 
+  console.log('Data di DashboardSection:', Data)
+
   return (
     <section className="w-full flex-col gap-10 ">
       <div className="mb-10">

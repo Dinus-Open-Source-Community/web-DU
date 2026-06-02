@@ -1,19 +1,50 @@
-import { ChevronDown, ChevronsLeft, ChevronsRight, LogOut, User } from 'lucide-react'
+import { ChevronDown, ChevronsLeft, ChevronsRight, LogOut, Menu, User, X } from 'lucide-react'
 import { useCallback, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarProvider, useSidebar } from '../../components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from '../../components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import type { NavChildItem, NavItem } from '../../lib/types/utils'
 import { Navigation } from '../../lib/navigation'
 import { ROUTES } from '../../lib/routes'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { cn } from '../../lib/utils'
+import type { UserRole } from '../../lib/types/user'
 
 interface FlyoutState {
   name: string
   items: NavChildItem[]
   top: number
+}
+
+export type SidebarUser = {
+  name: string
+  email: string
+  avatar?: string
+}
+
+type AppSidebarProviderProps = {
+  children: ReactNode
+  role: UserRole
+  user: SidebarUser
+}
+
+const sidebarRoleConfig: Record<UserRole, { navigationKey: keyof typeof Navigation; title: string; roleLabel: string }> = {
+  admin: {
+    navigationKey: 'Admin',
+    title: 'Admin Dashboard',
+    roleLabel: 'Administrator',
+  },
+  mentor: {
+    navigationKey: 'Mentor',
+    title: 'Mentor Dashboard',
+    roleLabel: 'Mentor',
+  },
+  student: {
+    navigationKey: 'Student',
+    title: 'Student Dashboard',
+    roleLabel: 'Student',
+  },
 }
 
 function isActivePath(pathname: string, path?: string) {
@@ -23,10 +54,11 @@ function isActivePath(pathname: string, path?: string) {
 
 function SidebarSubItem({ child }: { child: NavChildItem }) {
   const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
   const isActive = isActivePath(pathname, child.path)
 
   return (
-    <Link to={child.path} className="block">
+    <Link to={child.path} onClick={() => setOpenMobile(false)} className="block">
       <div
         className={cn(
           'relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-[7px] text-sm transition-all duration-150',
@@ -41,6 +73,7 @@ function SidebarSubItem({ child }: { child: NavChildItem }) {
 
 function SidebarNavItem({ item }: { item: NavItem }) {
   const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
   const isActive = pathname === item.path
   const Icon = item.icon
 
@@ -48,7 +81,7 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 
   return (
     <SidebarMenuItem>
-      <Link to={item.path} className="block">
+      <Link to={item.path} onClick={() => setOpenMobile(false)} className="block">
         <div
           className={cn(
             'group flex items-center gap-3 rounded-xl px-3.5 py-[9px] text-sm font-medium transition-all duration-150',
@@ -188,12 +221,12 @@ function SidebarFlyout({ flyout, onMouseEnter, onMouseLeave, onNavigate }: { fly
 }
 
 function SidebarBrand() {
-  const { state, toggleSidebar } = useSidebar()
+  const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar()
   const isMinimized = state === 'collapsed'
 
   return (
-    <div className={cn('relative flex h-16 flex-shrink-0 items-center border-b border-slate-100', isMinimized ? 'justify-center px-0' : 'gap-3 px-5')}>
-      <Link to={ROUTES.home} className="flex flex-shrink-0 items-center gap-3">
+    <div className={cn('relative flex h-16 flex-shrink-0 items-center border-b border-slate-100', isMobile ? 'justify-center px-12' : isMinimized ? 'justify-center px-0' : 'gap-3 px-5')}>
+      <Link to={ROUTES.home} className={cn('flex flex-shrink-0 items-center gap-3', isMobile && 'mx-auto justify-center')}>
         {!isMinimized && (
           <div className="overflow-hidden leading-none text-center">
             <span className="whitespace-nowrap pr-2 text-xl font-bold text-primary">Doscom</span>
@@ -209,19 +242,41 @@ function SidebarBrand() {
         aria-label={isMinimized ? 'Expand sidebar' : 'Collapse sidebar'}>
         {isMinimized ? <ChevronsRight className="size-3" /> : <ChevronsLeft className="size-3" />}
       </button>
+
+      {isMobile && (
+        <button
+          type="button"
+          onClick={() => setOpenMobile(false)}
+          className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
+          aria-label="Close sidebar">
+          <X className="size-4" />
+        </button>
+      )}
     </div>
   )
 }
 
-function AdminSidebarFooter() {
+function MobileSidebarTopbar({ title }: { title: string }) {
+  return (
+    <div className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-100 bg-white/95 px-4 backdrop-blur transition-shadow duration-300 lg:hidden">
+      <SidebarTrigger className="size-10 rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95">
+        <Menu className="size-5" />
+      </SidebarTrigger>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-slate-900">{title}</p>
+        <p className="truncate text-xs text-slate-400">Doscom University</p>
+      </div>
+    </div>
+  )
+}
+
+function SidebarFooterUser({ role, user }: { role: UserRole; user: SidebarUser }) {
   const { state } = useSidebar()
   const isMinimized = state === 'collapsed'
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const user = {
-    name: 'Admin',
-    email: 'admin@doscom.id',
-    role: 'Administrator',
-  }
+  const roleLabel = sidebarRoleConfig[role].roleLabel
+  const fallbackInitial = roleLabel.charAt(0).toUpperCase()
+  const userInitial = user.name.trim().charAt(0).toUpperCase() || fallbackInitial
 
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -236,7 +291,7 @@ function AdminSidebarFooter() {
           type="button"
           className="mx-auto flex size-9 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm transition-all hover:shadow-blue-200"
           aria-label={user.name}>
-          A
+          {user.avatar ? <img src={user.avatar} alt={user.name} className="size-full object-cover" /> : userInitial}
         </button>
       </SidebarFooter>
     )
@@ -262,11 +317,13 @@ function AdminSidebarFooter() {
       )}
 
       <button type="button" onClick={() => setIsDropdownOpen((value) => !value)} className="flex w-full items-center gap-3 p-4 transition-colors hover:bg-slate-50">
-        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm">A</div>
+        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm">
+          {user.avatar ? <img src={user.avatar} alt={user.name} className="size-full object-cover" /> : userInitial}
+        </div>
         <div className="min-w-0 flex-1 text-left">
           <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
           <p className="truncate text-[11px] text-slate-400">{user.email}</p>
-          <p className="truncate text-[11px] text-slate-400 capitalize">{user.role}</p>
+          <p className="truncate text-[11px] text-slate-400 capitalize">{roleLabel}</p>
         </div>
         <ChevronDown className={cn('size-4 flex-shrink-0 text-slate-400 transition-transform duration-200', isDropdownOpen ? 'rotate-180' : '')} />
       </button>
@@ -274,70 +331,9 @@ function AdminSidebarFooter() {
   )
 }
 
-function MentorSidebarFooter() {
+function AppSidebar({ role, user }: { role: UserRole; user: SidebarUser }) {
   const { state } = useSidebar()
-  const isMinimized = state === 'collapsed'
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const user = {
-    name: 'Mentor',
-    email: 'mentor@doscom.id',
-    role: 'Mentor',
-  }
-
-  const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      setIsDropdownOpen(false)
-    }
-  }
-
-  if (isMinimized) {
-    return (
-      <SidebarFooter className="flex-shrink-0 border-t border-slate-100 p-3">
-        <button
-          type="button"
-          className="mx-auto flex size-9 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm transition-all hover:shadow-blue-200"
-          aria-label={user.name}>
-          M
-        </button>
-      </SidebarFooter>
-    )
-  }
-
-  return (
-    <SidebarFooter className="relative flex-shrink-0 border-t border-slate-100 p-0" onBlur={handleBlur}>
-      {isDropdownOpen && (
-        <div className="absolute right-3 bottom-full left-3 z-10 mb-1 rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg duration-150 animate-in fade-in slide-in-from-bottom-2">
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900">
-            <User className="size-4 text-slate-400" />
-            <span>Profile</span>
-          </button>
-          <div className="mx-3 my-1 border-t border-slate-100" />
-          <button type="button" onClick={() => setIsDropdownOpen(false)} className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-red-500 transition-colors hover:bg-red-50">
-            <LogOut className="size-4" />
-            <span>Log out</span>
-          </button>
-        </div>
-      )}
-
-      <button type="button" onClick={() => setIsDropdownOpen((value) => !value)} className="flex w-full items-center gap-3 p-4 transition-colors hover:bg-slate-50">
-        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm">M</div>
-        <div className="min-w-0 flex-1 text-left">
-          <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
-          <p className="truncate text-[11px] text-slate-400">{user.email}</p>
-          <p className="truncate text-[11px] text-slate-400 capitalize">{user.role}</p>
-        </div>
-        <ChevronDown className={cn('size-4 flex-shrink-0 text-slate-400 transition-transform duration-200', isDropdownOpen ? 'rotate-180' : '')} />
-      </button>
-    </SidebarFooter>
-  )
-}
-
-function AdminSidebar() {
-  const { state } = useSidebar()
-  const adminNavigation = Navigation.Admin
+  const navigation = Navigation[sidebarRoleConfig[role].navigationKey]
   const isMinimized = state === 'collapsed'
   const [flyout, setFlyout] = useState<FlyoutState | null>(null)
   const flyoutTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -364,11 +360,11 @@ function AdminSidebar() {
           <SidebarBrand />
         </SidebarHeader>
 
-        <SidebarContent className="flex-1 gap-0 overflow-y-auto py-4 group-data-[collapsible=icon]:px-2 group-data-[state=expanded]:px-3">
+        <SidebarContent className="flex-1 gap-0 overflow-y-auto px-4 py-5 md:py-4 group-data-[collapsible=icon]:px-2 group-data-[state=expanded]:md:px-3">
           <SidebarGroup className="p-0">
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0 space-y-2">
-                {adminNavigation.map((item) => {
+              <SidebarMenu className="gap-0 space-y-2.5">
+                {navigation.map((item) => {
                   if (isMinimized && item.children) {
                     return <SidebarMinimizedGroup key={item.name} item={item} onMouseEnter={(event) => openFlyout(event, item)} onMouseLeave={closeFlyout} />
                   }
@@ -388,7 +384,7 @@ function AdminSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <AdminSidebarFooter />
+        <SidebarFooterUser role={role} user={user} />
       </Sidebar>
 
       {flyout && isMinimized && <SidebarFlyout flyout={flyout} onMouseEnter={keepFlyout} onMouseLeave={closeFlyout} onNavigate={() => setFlyout(null)} />}
@@ -396,190 +392,7 @@ function AdminSidebar() {
   )
 }
 
-function MentorSidebar() {
-  const { state } = useSidebar()
-  const mentorNavigation = Navigation.Mentor
-  const isMinimized = state === 'collapsed'
-  const [flyout, setFlyout] = useState<FlyoutState | null>(null)
-  const flyoutTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  const openFlyout = useCallback((event: MouseEvent<HTMLButtonElement>, item: NavItem) => {
-    if (!item.children) return
-    clearTimeout(flyoutTimer.current)
-    const rect = event.currentTarget.getBoundingClientRect()
-    setFlyout({ name: item.name, items: item.children, top: rect.top })
-  }, [])
-
-  const closeFlyout = useCallback(() => {
-    flyoutTimer.current = setTimeout(() => setFlyout(null), 120)
-  }, [])
-
-  const keepFlyout = useCallback(() => {
-    clearTimeout(flyoutTimer.current)
-  }, [])
-
-  return (
-    <>
-      <Sidebar collapsible="icon" className="border-r border-slate-100 bg-white transition-all duration-300 ease-in-out [&_[data-slot=sidebar-inner]]:bg-white">
-        <SidebarHeader className="p-0">
-          <SidebarBrand />
-        </SidebarHeader>
-
-        <SidebarContent className="flex-1 gap-0 overflow-y-auto py-4 group-data-[collapsible=icon]:px-2 group-data-[state=expanded]:px-3">
-          <SidebarGroup className="p-0">
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0 space-y-2">
-                {mentorNavigation.map((item) => {
-                  if (isMinimized && item.children) {
-                    return <SidebarMinimizedGroup key={item.name} item={item} onMouseEnter={(event) => openFlyout(event, item)} onMouseLeave={closeFlyout} />
-                  }
-
-                  if (isMinimized) {
-                    return <SidebarMinimizedItem key={item.name} item={item} />
-                  }
-
-                  if (item.children) {
-                    return <SidebarNavGroup key={item.name} item={item} />
-                  }
-
-                  return <SidebarNavItem key={item.path ?? item.name} item={item} />
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        <MentorSidebarFooter />
-      </Sidebar>
-
-      {flyout && isMinimized && <SidebarFlyout flyout={flyout} onMouseEnter={keepFlyout} onMouseLeave={closeFlyout} onNavigate={() => setFlyout(null)} />}
-    </>
-  )
-}
-
-function StudentSidebarFooter() {
-  const { state } = useSidebar()
-  const isMinimized = state === 'collapsed'
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const user = {
-    name: 'Student',
-    email: 'student@doscom.id',
-    role: 'Student',
-  }
-
-  const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      setIsDropdownOpen(false)
-    }
-  }
-
-  if (isMinimized) {
-    return (
-      <SidebarFooter className="flex-shrink-0 border-t border-slate-100 p-3">
-        <button
-          type="button"
-          className="mx-auto flex size-9 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm transition-all hover:shadow-blue-200"
-          aria-label={user.name}>
-          S
-        </button>
-      </SidebarFooter>
-    )
-  }
-
-  return (
-    <SidebarFooter className="relative flex-shrink-0 border-t border-slate-100 p-0" onBlur={handleBlur}>
-      {isDropdownOpen && (
-        <div className="absolute right-3 bottom-full left-3 z-10 mb-1 rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg duration-150 animate-in fade-in slide-in-from-bottom-2">
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(false)}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900">
-            <User className="size-4 text-slate-400" />
-            <span>Profile</span>
-          </button>
-          <div className="mx-3 my-1 border-t border-slate-100" />
-          <button type="button" onClick={() => setIsDropdownOpen(false)} className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-red-500 transition-colors hover:bg-red-50">
-            <LogOut className="size-4" />
-            <span>Log out</span>
-          </button>
-        </div>
-      )}
-
-      <button type="button" onClick={() => setIsDropdownOpen((value) => !value)} className="flex w-full items-center gap-3 p-4 transition-colors hover:bg-slate-50">
-        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0a84dc] text-xs font-bold text-white shadow-sm">S</div>
-        <div className="min-w-0 flex-1 text-left">
-          <p className="truncate text-sm font-semibold text-slate-900">{user.name}</p>
-          <p className="truncate text-[11px] text-slate-400">{user.email}</p>
-          <p className="truncate text-[11px] text-slate-400 capitalize">{user.role}</p>
-        </div>
-        <ChevronDown className={cn('size-4 flex-shrink-0 text-slate-400 transition-transform duration-200', isDropdownOpen ? 'rotate-180' : '')} />
-      </button>
-    </SidebarFooter>
-  )
-}
-
-function StudentSidebar() {
-  const { state } = useSidebar()
-  const studentNavigation = Navigation.Student
-  const isMinimized = state === 'collapsed'
-  const [flyout, setFlyout] = useState<FlyoutState | null>(null)
-  const flyoutTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  const openFlyout = useCallback((event: MouseEvent<HTMLButtonElement>, item: NavItem) => {
-    if (!item.children) return
-    clearTimeout(flyoutTimer.current)
-    const rect = event.currentTarget.getBoundingClientRect()
-    setFlyout({ name: item.name, items: item.children, top: rect.top })
-  }, [])
-
-  const closeFlyout = useCallback(() => {
-    flyoutTimer.current = setTimeout(() => setFlyout(null), 120)
-  }, [])
-
-  const keepFlyout = useCallback(() => {
-    clearTimeout(flyoutTimer.current)
-  }, [])
-
-  return (
-    <>
-      <Sidebar collapsible="icon" className="border-r border-slate-100 bg-white transition-all duration-300 ease-in-out [&_[data-slot=sidebar-inner]]:bg-white">
-        <SidebarHeader className="p-0">
-          <SidebarBrand />
-        </SidebarHeader>
-
-        <SidebarContent className="flex-1 gap-0 overflow-y-auto py-4 group-data-[collapsible=icon]:px-2 group-data-[state=expanded]:px-3">
-          <SidebarGroup className="p-0">
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0 space-y-2">
-                {studentNavigation.map((item) => {
-                  if (isMinimized && item.children) {
-                    return <SidebarMinimizedGroup key={item.name} item={item} onMouseEnter={(event) => openFlyout(event, item)} onMouseLeave={closeFlyout} />
-                  }
-
-                  if (isMinimized) {
-                    return <SidebarMinimizedItem key={item.name} item={item} />
-                  }
-
-                  if (item.children) {
-                    return <SidebarNavGroup key={item.name} item={item} />
-                  }
-
-                  return <SidebarNavItem key={item.path ?? item.name} item={item} />
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        <StudentSidebarFooter />
-      </Sidebar>
-
-      {flyout && isMinimized && <SidebarFlyout flyout={flyout} onMouseEnter={keepFlyout} onMouseLeave={closeFlyout} onNavigate={() => setFlyout(null)} />}
-    </>
-  )
-}
-
-export function AdminSidebarProvider({ children }: { children: ReactNode }) {
+export function AppSidebarProvider({ children, role, user }: AppSidebarProviderProps) {
   return (
     <SidebarProvider
       style={
@@ -588,42 +401,13 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
           '--sidebar-width-icon': '5rem',
         } as CSSProperties
       }>
-      <AdminSidebar />
+      <AppSidebar role={role} user={user} />
 
-      <main className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</main>
+      <main className="flex w-full flex-col">
+        <MobileSidebarTopbar title={sidebarRoleConfig[role].title} />
+        <div className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</div>
+      </main>
     </SidebarProvider>
   )
 }
-
-export function MentorSidebarProvider({ children }: { children: ReactNode }) {
-  return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': '16rem',
-          '--sidebar-width-icon': '5rem',
-        } as CSSProperties
-      }>
-      <MentorSidebar />
-
-      <main className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</main>
-    </SidebarProvider>
-  )
-}
-
-export function StudentSidebarProvider({ children }: { children: ReactNode }) {
-  return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': '16rem',
-          '--sidebar-width-icon': '5rem',
-        } as CSSProperties
-      }>
-      <StudentSidebar />
-
-      <main className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</main>
-    </SidebarProvider>
-  )
-}
-export { AdminSidebar, MentorSidebar, StudentSidebar }
+export { AppSidebar }

@@ -79,9 +79,12 @@ export default function CourseSection1({ Data }: { Data: ICardData[] }) {
                     variantBadge: data.is_premium ? 'premium' : 'free',
                     title: data.title,
                     description: data.description,
-                    author: data.mentors,
-                    rating: data.rating,
-                    totalReviews: data.totalReviews,
+                    author: data.mentors[0]
+                      ? {
+                          name: data.mentors[0].name,
+                          avatar: data.mentors[0].avatar_url,
+                        }
+                      : undefined,
                     image: data.thumbnail_url,
                     detailHref: `/course/${data.uid}`,
                   }}

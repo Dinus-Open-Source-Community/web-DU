@@ -18,13 +18,19 @@ export default function Feature({ Data }: { Data: ICardData[] }) {
           {Data.map((data, idx) => (
             <CardCourse
               key={data.uid ?? `${data.title}-${idx}`}
-              variantBadge={data.variantBadge}
-              title={data.title}
-              description={data.description}
-              author={data.author}
-              rating={data.rating}
-              totalReviews={data.totalReviews}
-              image={data.image}
+              data={{
+                variantBadge: data.is_premium ? 'premium' : 'free',
+                title: data.title,
+                description: data.description,
+                author: data.mentors[0]
+                  ? {
+                      name: data.mentors[0].name,
+                      avatar: data.mentors[0].avatar_url,
+                    }
+                  : undefined,
+                image: data.thumbnail_url,
+                detailHref: `/course/${data.uid}`,
+              }}
             />
           ))}
         </div>

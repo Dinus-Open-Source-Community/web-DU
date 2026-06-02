@@ -1,4 +1,4 @@
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { CourseEditClient } from '../../components/courses/(authorized)/editCourse'
 import { useParams } from 'react-router-dom'
 import type { CourseDetailItem } from '@/lib/types/api'
@@ -143,9 +143,9 @@ const CourseEdit = () => {
   }
 
   return (
-    <AdminSidebarProvider>
-      <CourseEditClient courseData={courseData} publishCourse={{}} role="admin" />
-    </AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
+      <CourseEditClient courseData={courseData} role="admin" />
+    </AppSidebarProvider>
   )
 }
 

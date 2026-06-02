@@ -7,8 +7,8 @@ import type { AdminStatus } from './user'
 export interface IResponse<T> {
   success?: boolean
   message?: string
-  data?: T
-  error?: string
+  data?: T | null
+  error?: string | null
 }
 
 // =====================

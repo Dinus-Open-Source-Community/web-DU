@@ -5,7 +5,7 @@ import { ChartCard } from '../../components/shared/ChartCard'
 import { CategoryBarChart } from '../../components/shared/BarChart'
 import { TransactionRatioChart } from '../../components/shared/RatioChart'
 import type { ChartDataPoint, ChartRatioPoint } from '../../lib/types/utils'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { CurrencyCompact, FormatRupiah } from '../../lib/func/func'
 
 export default function AdminFinancialAnalyticsPage() {
@@ -42,7 +42,7 @@ export default function AdminFinancialAnalyticsPage() {
   const momPct = prevMonth > 0 ? ((lastMonth - prevMonth) / prevMonth) * 100 : 0
 
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Financial Reports" subtitle="Ringkasan pendapatan, distribusi kategori, dan sumber penjualan." />
 
@@ -73,6 +73,6 @@ export default function AdminFinancialAnalyticsPage() {
           </ChartCard>
         </section>
       </div>
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

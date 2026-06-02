@@ -2,7 +2,7 @@ import type { AdminTransaction } from '../../lib/types/transaction'
 import type { ChartRatioPoint, TransactionTimelinePoint } from '../../lib/types/utils'
 import { TransactionsDashboard } from '../../components/Admin/Transactions/TransDashboard'
 import { PageHeader } from '../../components/shared/Header'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 
 export default function AdminTransactionsPage() {
   const dataTransactions: AdminTransaction[] = [
@@ -15,7 +15,7 @@ export default function AdminTransactionsPage() {
       courseName: 'UI/UX Design Fundamentals',
       classType: 'Premium',
       price: 350000,
-      paymentStatus: 'PAID',
+      paymentStatus: 'success',
       purchasedAt: '2024-05-08T10:30:00.000Z',
       paymentMethod: 'Bank Transfer',
       studentName: 'Alya Putri',
@@ -56,11 +56,11 @@ export default function AdminTransactionsPage() {
   ]
 
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Transaksi" subtitle="Pantau pendapatan, rasio status pembayaran, dan semua transaksi platform." />
         <TransactionsDashboard dataTransactions={dataTransactions} dataRatio={dataRatio} dataTimeline={dataTimeline} />
       </div>
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

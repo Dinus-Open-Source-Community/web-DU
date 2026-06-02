@@ -18,13 +18,13 @@ const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'failed', label: 'Failed' },
 ]
 
+const normalizeText = (value: string) => value.toLowerCase().trim()
+
 export default function TransactionsList({ Data }: { Data: TransactionHistory[] }) {
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const [currentPage, setCurrentPage] = useState(1)
-
-  const normalizeText = (value: string) => value.toLowerCase().trim()
 
   const filterTransactions = useCallback(
     (transactions: TransactionHistory[], searchQuery: string) => {
@@ -35,7 +35,7 @@ export default function TransactionsList({ Data }: { Data: TransactionHistory[] 
         return [transaction.uid, transaction.course.title, transaction.payment_status, transaction.payment_method].join(' ').toLowerCase().includes(keyword)
       })
     },
-    [normalizeText],
+    [],
   )
 
   const paginateTransactions = (transactions: TransactionHistory[], currentPage: number, rowsPerPage: number) => {

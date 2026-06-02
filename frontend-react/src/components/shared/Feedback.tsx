@@ -23,8 +23,8 @@ export default function FeedbackCard({ status, time, title, comment, instructor 
       <h4 className="font-bold text-slate-800 mb-1 leading-tight">{title}</h4>
       <p className="text-sm text-slate-600 mb-4">{comment}</p>
       <div className="flex items-center gap-2">
-        <img src={instructor.avatar} alt={instructor.name} width={24} height={24} loading="lazy" className="w-6 h-6 rounded-full object-cover" />
-        <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">{instructor.name}</span>
+        <img src={instructor?.avatar ?? null} alt={instructor?.name ?? 'Instructor'} width={24} height={24} loading="lazy" className="w-6 h-6 rounded-full object-cover" />
+        <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">{instructor?.name ?? 'Instructor'}</span>
       </div>
     </div>
   )

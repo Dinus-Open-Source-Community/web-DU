@@ -1,5 +1,5 @@
 import { CourseEditClient } from '@/components/courses/(authorized)/editCourse'
-import { MentorSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { CourseDetailItem } from '@/lib/types/api'
 import { useParams, useSearchParams } from 'react-router-dom'
 
@@ -145,8 +145,8 @@ export default function MentorCourseEditPage() {
   }
 
   return (
-    <MentorSidebarProvider>
+    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
       <CourseEditClient courseData={courseData} initialModuleId={moduleId} role="mentor" />
-    </MentorSidebarProvider>
+    </AppSidebarProvider>
   )
 }

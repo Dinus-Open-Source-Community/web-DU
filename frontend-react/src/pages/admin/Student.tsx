@@ -1,7 +1,7 @@
 import type { AdminStudent } from '../../lib/types/user'
 import { TableManagementUsers } from '../../components/Admin/Student/Table'
 import { PageHeader } from '../../components/shared/Header'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 
 export default function AdminStudentsPage() {
   const studentData: AdminStudent[] = [
@@ -20,9 +20,9 @@ export default function AdminStudentsPage() {
     },
   ]
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <PageHeader title="Manajemen Siswa" subtitle="Daftar siswa terdaftar, progres belajar, dan kredensial akun." />
       <TableManagementUsers studentData={studentData} />
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

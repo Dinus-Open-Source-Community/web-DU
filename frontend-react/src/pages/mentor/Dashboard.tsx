@@ -1,7 +1,7 @@
 import CalendarView from '@/components/shared/Calendar/View'
 import { PageHeader } from '@/components/shared/Header'
 import QuickStats from '@/components/shared/QuickStats'
-import { MentorSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { IMentorStats, IScheduleItem } from '@/lib/types/utils'
 
 export default function MentorDashboardPage() {
@@ -49,7 +49,7 @@ export default function MentorDashboardPage() {
   ] // Replace with actual schedule data
 
   return (
-    <MentorSidebarProvider>
+    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
       <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <PageHeader title="Halo Mentor Budi!" subtitle="Selamat datang di dashboard Anda." />
         <div className="mb-10">
@@ -57,6 +57,6 @@ export default function MentorDashboardPage() {
         </div>
         <CalendarView schedules={schedules} />
       </section>
-    </MentorSidebarProvider>
+    </AppSidebarProvider>
   )
 }

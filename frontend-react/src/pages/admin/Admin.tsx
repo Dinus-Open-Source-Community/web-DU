@@ -2,7 +2,7 @@ import type { AdminAdministrator, AdminMentor } from '../../lib/types/api'
 import type { AdminStudent } from '../../lib/types/user'
 import { AdministratorsTable } from '../../components/Admin/Administrators/table'
 import { PageHeader } from '../../components/shared/Header'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 
 export default function AdminAdministratorsPage() {
   const dataAdmin: AdminAdministrator[] = [
@@ -49,11 +49,11 @@ export default function AdminAdministratorsPage() {
   ]
 
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Administrator Platform" subtitle="Daftar staf internal dengan akses panel admin. Kelola role dan kredensial mereka." />
         <AdministratorsTable dataAdmin={dataAdmin} dataMentors={dataMentors} dataStudents={studentData} />
       </div>
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

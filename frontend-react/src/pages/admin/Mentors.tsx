@@ -2,7 +2,7 @@ import type { AdminMentor } from '../../lib/types/api'
 import type { AdminStudent } from '../../lib/types/user'
 import { MentorsTable } from '../../components/Admin/Mentors/Table'
 import { PageHeader } from '../../components/shared/Header'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 
 export default function AdminMentorsPage() {
   const dataMentors: AdminMentor[] = [
@@ -36,11 +36,11 @@ export default function AdminMentorsPage() {
   ]
 
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Manajemen Mentor" subtitle="Daftar mentor beserta spesialisasi, performa kelas, dan rating siswa." />
         <MentorsTable dataMentors={dataMentors} dataStudents={studentData} />
       </div>
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

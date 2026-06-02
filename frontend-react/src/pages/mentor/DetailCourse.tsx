@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { DetailCourse } from '../../components/shared/DetailCourseComponents'
-import { MentorSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import type { CourseDetailItem } from '../../lib/types/api'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 
@@ -104,8 +104,8 @@ export default function MentorCourseDetailPage() {
     },
   ]
   return (
-    <MentorSidebarProvider>
+    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
       <DetailCourse courseUid={uid as string} role="mentor" dataCourse={dataCourse} dataStudents={dataStudents} />
-    </MentorSidebarProvider>
+    </AppSidebarProvider>
   )
 }

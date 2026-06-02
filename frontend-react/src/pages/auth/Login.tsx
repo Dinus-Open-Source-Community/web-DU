@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
 import { GlobalInput } from '../../components/shared/Input'
 import AuthLayout from '../../components/layouts/AuthLayouts'
 import OauthButton from '../../components/shared/OauthButton'
+import { useAuth } from '../../providers/auth-provider'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { signIn } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,11 +22,12 @@ export default function LoginPage() {
 
     setIsSubmitting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      navigate('/')
+      const { redirectPath } = await signIn({ email, password })
+      navigate(redirectPath)
       toast.success('Login berhasil')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Login gagal')
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -34,10 +37,6 @@ export default function LoginPage() {
       <div className="flex flex-col space-y-8">
         {/* Mobile Header & Local Heading */}
         <div className="flex flex-col space-y-2">
-          <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-primary lg:hidden">
-            <ArrowLeft className="size-4" />
-            Kembali ke Beranda
-          </Link>
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">Masuk</h1>
           </div>

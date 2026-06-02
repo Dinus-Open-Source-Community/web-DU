@@ -1,5 +1,5 @@
 // import { BookOpen, CreditCard, DollarSign, Users } from 'lucide-react'
-import { AdminSidebarProvider } from '../../components/shared/Sidebar'
+import { AppSidebarProvider } from '../../components/shared/Sidebar'
 
 import { PageHeader } from '../../components/shared/Header'
 import { KpiGrid, type AdminKpi } from '../../components/Admin/Dashboard/Kpi'
@@ -13,13 +13,13 @@ export default function Dashboard() {
   const dataTransactions: TransactionHistoryItem[] = []
 
   return (
-    <AdminSidebarProvider>
+    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Dashboard" subtitle="Selamat datang di dashboard admin" />
         <KpiGrid adminKpis={dataKpi} />
         <UnresolvedTickets tickets={dataTickets} />
         <RecentTransactions transactions={dataTransactions} />
       </div>
-    </AdminSidebarProvider>
+    </AppSidebarProvider>
   )
 }

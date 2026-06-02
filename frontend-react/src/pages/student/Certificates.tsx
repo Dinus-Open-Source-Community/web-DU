@@ -1,11 +1,11 @@
-import { StudentSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import CertificatesSection from '@/components/student/CertificatesSection'
 
 const Certificates = () => {
   return (
-    <StudentSidebarProvider>
+    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
       <CertificatesSection />
-    </StudentSidebarProvider>
+    </AppSidebarProvider>
   )
 }
 

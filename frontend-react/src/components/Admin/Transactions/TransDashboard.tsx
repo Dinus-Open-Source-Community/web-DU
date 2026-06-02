@@ -20,9 +20,9 @@ const PAGE_SIZE = 10
 
 const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'Semua' },
-  { value: 'PAID', label: 'Paid' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'FAILED', label: 'Failed' },
+  { value: 'success', label: 'Paid' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'failed', label: 'Failed' },
 ]
 
 const methodOptions: { value: MethodFilter; label: string }[] = [
@@ -53,10 +53,10 @@ export function TransactionsDashboard({ dataTransactions, dataTimeline, dataRati
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const totalGross = dataTransactions.filter((t) => t.paymentStatus === 'PAID').reduce((acc, t) => acc + t.price, 0)
-  const totalFailed = dataTransactions.filter((t) => t.paymentStatus === 'FAILED').length
-  const totalPending = dataTransactions.filter((t) => t.paymentStatus === 'PENDING').length
-  const totalPaid = dataTransactions.filter((t) => t.paymentStatus === 'PAID').length
+  const totalGross = dataTransactions.filter((t) => t.paymentStatus === 'success').reduce((acc, t) => acc + t.price, 0)
+  const totalFailed = dataTransactions.filter((t) => t.paymentStatus === 'failed').length
+  const totalPending = dataTransactions.filter((t) => t.paymentStatus === 'pending').length
+  const totalPaid = dataTransactions.filter((t) => t.paymentStatus === 'success').length
 
   const columns: AdminDataTableColumn<AdminTransaction>[] = [
     {

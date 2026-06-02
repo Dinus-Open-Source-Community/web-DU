@@ -1,4 +1,4 @@
-import { MentorSidebarProvider } from '@/components/shared/Sidebar'
+import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { ICourseItem } from '@/lib/types/api'
 import ManageCourseSection from '../../components/shared/ManageCourse'
 
@@ -54,8 +54,8 @@ export default function MentorCoursesPage() {
     },
   ]
   return (
-    <MentorSidebarProvider>
-      <ManageCourseSection role="mentor" data={{ courses: dataCourses, meta: { page: 1, per_page: 10, total: 2, total_pages: 1 } }} />
-    </MentorSidebarProvider>
+    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
+      <ManageCourseSection role="mentor" data={{ courses: dataCourses, meta: { current_page: 1, per_page: 10, total: 2, total_pages: 1 } }} />
+    </AppSidebarProvider>
   )
 }

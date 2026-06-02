@@ -1,28 +1,25 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, HelpCircle, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react'
 import type { LessonContentType } from '../../lib/types/course'
 import type { IModulesData } from '../../lib/types/api'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
 
 const LESSON_TYPE_ICON: Record<LessonContentType, typeof FileText> = {
-  tiptap: FileText,
+  text: FileText,
   video: Film,
-  quiz: HelpCircle,
 }
 
 const LESSON_TYPE_LABEL: Record<LessonContentType, string> = {
-  tiptap: 'Teks',
+  text: 'Teks',
   video: 'Video',
-  quiz: 'Quiz',
 }
 
 const LESSON_TYPE_COLOR: Record<LessonContentType, string> = {
-  tiptap: 'bg-sky-50 text-sky-600',
+  text: 'bg-sky-50 text-sky-600',
   video: 'bg-violet-50 text-violet-600',
-  quiz: 'bg-amber-50 text-amber-600',
 }
 
 function createLessonId() {
@@ -206,12 +203,10 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
           const content_type: IModulesData['lessons'][number]['content_type'] = newType === 'video' ? 'video' : 'text'
           const base = { ...l, contentType: newType, content_type }
           switch (newType) {
-            case 'tiptap':
+            case 'text':
               return { ...base, contentHtml: '' }
             case 'video':
               return { ...base, videoUrl: '', contentHtml: '' }
-            case 'quiz':
-              return { ...base, quiz: { questions: [], passingScore: 70 } }
           }
         }),
       }
@@ -317,8 +312,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                   <div className="space-y-0.5 pt-0.5">
                     {mod.lessons.map((lesson) => {
                       const isActive = lesson.uid === activeLessonId
-                      const lessonType: LessonContentType =
-                        lesson.content_type === 'text' ? 'video' : lesson.content_type === 'video' || lesson.content_type === 'quiz' ? lesson.content_type : 'tiptap'
+                      const lessonType: LessonContentType = lesson.content_type === 'video' ? 'video' : 'text'
                       const Icon = LESSON_TYPE_ICON[lessonType]
                       const editingThisLesson = isEditingLesson(mod.uid, lesson.uid)
                       const typeColor = LESSON_TYPE_COLOR[lessonType]
@@ -369,7 +363,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                                   onChange={(e) => handleChangeLessonType(mod.uid, lesson.uid, e.target.value as LessonContentType)}
                                   className="h-5 cursor-pointer rounded-md border-0 bg-slate-100 px-1 text-[10px] font-medium text-slate-500 outline-none hover:bg-slate-200"
                                   title="Ubah tipe konten">
-                                  <option value="tiptap">{LESSON_TYPE_LABEL.tiptap}</option>
+                                  <option value="text">{LESSON_TYPE_LABEL.text}</option>
                                   <option value="video">{LESSON_TYPE_LABEL.video}</option>
                                 </select>
                                 <button
