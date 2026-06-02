@@ -662,12 +662,33 @@ func seedLessons(db *gorm.DB) {
 			lessonNo := strconv.Itoa(i)
 			isVideoLesson := i%2 == 0
 
-			content := map[string]string{
-				"intro":    "Pengenalan materi " + module.Title,
-				"learning": "Konten pembelajaran untuk poin " + lessonNo,
-				"summary":  "Ringkasan materi yang telah dipelajari",
+			// Konten lesson menggunakan format richTextEnvelope yang sama
+			// dengan output normalizeRichTextPayload di service/rich_text.go.
+			// Frontend TiptapRichTextEditor membaca field contentHtml.
+			contentHTML := "<h2>" + module.Title + " — Lesson " + lessonNo + "</h2>" +
+				"<p>Selamat datang di lesson <strong>" + lessonNo + "</strong> dari modul <em>" + module.Title + "</em>. " +
+				"Di sesi ini kita akan membahas konsep-konsep penting yang menjadi fondasi materi selanjutnya.</p>" +
+				"<h3>Tujuan Pembelajaran</h3>" +
+				"<ul>" +
+				"<li>Memahami konsep dasar dari topik " + module.Title + "</li>" +
+				"<li>Mampu menerapkan teknik yang dipelajari dalam studi kasus nyata</li>" +
+				"<li>Mengidentifikasi best practices dan anti-pattern umum</li>" +
+				"</ul>" +
+				"<h3>Materi Inti</h3>" +
+				"<p>Materi pada lesson ini mencakup teori dasar serta contoh kode yang bisa langsung dicoba. " +
+				"Pastikan Anda mengikuti setiap langkah dan mencoba variasi latihan di akhir bagian.</p>" +
+				"<blockquote><p><strong>Tips:</strong> Gunakan playground yang disediakan untuk bereksperimen " +
+				"dengan kode tanpa perlu setup lingkungan lokal.</p></blockquote>" +
+				"<h3>Ringkasan</h3>" +
+				"<p>Setelah menyelesaikan lesson ini, Anda diharapkan mampu menjelaskan ulang konsep utama " +
+				"dan siap melanjutkan ke lesson berikutnya.</p>"
+
+			contentEnvelope := map[string]interface{}{
+				"version":     2,
+				"contentType": "tiptap",
+				"contentHtml": contentHTML,
 			}
-			contentJSON, _ := json.Marshal(content)
+			contentJSON, _ := json.Marshal(contentEnvelope)
 
 			contentType := entity.LessonContentTypeText
 			videoURL := ""
@@ -697,6 +718,19 @@ func seedLessons(db *gorm.DB) {
 				log.Printf("[Success] Lesson %s berhasil dibuat", lesson.Title)
 			} else if err != nil {
 				log.Printf("[Error] Gagal cek lesson module=%s order=%d: %v", module.Uid, i, err)
+			} else {
+				// Lesson sudah ada — update content ke format richTextEnvelope
+				// agar data lama (format {"intro":...}) diganti dengan format tiptap.
+				updates := map[string]interface{}{"content": lesson.Content}
+				if contentType == entity.LessonContentTypeVideo {
+					updates["video_url"] = videoURL
+					updates["content"] = nil
+				}
+				if err := db.Model(&existing).Updates(updates).Error; err != nil {
+					log.Printf("[Warning] Gagal update content lesson %s: %v", existing.Uid, err)
+				} else {
+					log.Printf("[Info] Content lesson %s diperbarui ke format tiptap", existing.Uid)
+				}
 			}
 		}
 	}
@@ -721,11 +755,97 @@ func seedLessonAssignments(db *gorm.DB) {
 
 	maxResubmit := 3
 	for i, lesson := range lessons {
-		taskDescription, _ := json.Marshal(map[string]any{
-			"type": "doc",
-			"content": []map[string]any{
-				{"type": "paragraph", "content": []map[string]any{{"type": "text", "text": "Kerjakan tugas sesuai instruksi lesson ini."}}},
-			},
+		taskType := entity.LessonAssignmentTaskTypeText
+		var quizPayload json.RawMessage
+
+		if i%2 == 1 {
+			taskType = entity.LessonAssignmentTaskTypeQuiz
+			qp := map[string]interface{}{
+				"passingScore": 70,
+				"questions": []map[string]interface{}{
+					{
+						"id": "q1",
+						// prompt menggunakan format richTextEnvelope agar frontend dapat
+						// merender soal via TiptapRichTextEditor (mendukung bold, code, dst.)
+						// options.label dan explanation tetap plain text (tidak perlu WYSIWYG).
+						"prompt": map[string]interface{}{
+							"version":     2,
+							"contentType": "tiptap",
+							"contentHtml": "<p>Apakah <strong>Go (Golang)</strong> merupakan bahasa pemrograman yang <em>dikompilasi</em> (compiled)?</p>",
+						},
+						"correctOptionId": "a",
+						"explanation":     "Ya, Go dikompilasi langsung ke bahasa mesin (machine code).",
+						"options": []map[string]interface{}{
+							{"id": "a", "label": "Ya, benar"},
+							{"id": "b", "label": "Tidak, Go adalah interpreted language"},
+						},
+					},
+					{
+						"id": "q2",
+						"prompt": map[string]interface{}{
+							"version":     2,
+							"contentType": "tiptap",
+							"contentHtml": "<p>Keyword apa yang digunakan untuk menjalankan <strong>goroutine</strong>?</p>",
+						},
+						"correctOptionId": "b",
+						"explanation":     "Keyword 'go' digunakan sebelum memanggil fungsi untuk mengeksekusinya secara concurrent di goroutine.",
+						"options": []map[string]interface{}{
+							{"id": "a", "label": "goroutine"},
+							{"id": "b", "label": "go"},
+							{"id": "c", "label": "async"},
+							{"id": "d", "label": "defer"},
+						},
+					},
+					{
+						"id": "q3",
+						"prompt": map[string]interface{}{
+							"version":     2,
+							"contentType": "tiptap",
+							"contentHtml": "<p>Apa output dari kode berikut?</p><pre><code>fmt.Println(10 / 3)</code></pre>",
+						},
+						"correctOptionId": "b",
+						"explanation":     "Dalam Go, pembagian dua integer menghasilkan integer (bukan float), sehingga 10/3 = 3.",
+						"options": []map[string]interface{}{
+							{"id": "a", "label": "3.333"},
+							{"id": "b", "label": "3"},
+							{"id": "c", "label": "4"},
+							{"id": "d", "label": "Error"},
+						},
+					},
+				},
+			}
+			quizPayload, _ = json.Marshal(qp)
+		}
+
+		// task_description menggunakan format richTextEnvelope yang sama
+		// dengan konten lesson agar frontend bisa membaca via TiptapRichTextEditor.
+		var taskDescriptionHTML string
+		if taskType == entity.LessonAssignmentTaskTypeQuiz {
+			taskDescriptionHTML = "<h3>Kuis Pemahaman: " + lesson.Title + "</h3>" +
+				"<p>Selesaikan kuis pilihan ganda berikut untuk menguji pemahaman Anda setelah mempelajari materi lesson.</p>" +
+				"<blockquote><p><strong>Ketentuan:</strong> Kuis ini memiliki skor kelulusan minimal sebesar 70%.</p></blockquote>"
+		} else {
+			taskDescriptionHTML = "<h3>Tugas Praktik: " + lesson.Title + "</h3>" +
+				"<p>Kerjakan tugas berikut sesuai dengan materi yang telah dipelajari pada lesson ini.</p>" +
+				"<h4>Instruksi</h4>" +
+				"<ol>" +
+				"<li>Baca ulang materi lesson dengan seksama</li>" +
+				"<li>Buat implementasi sederhana berdasarkan konsep yang dijelaskan</li>" +
+				"<li>Sertakan penjelasan singkat tentang pendekatan yang Anda gunakan</li>" +
+				"</ol>" +
+				"<h4>Kriteria Penilaian</h4>" +
+				"<ul>" +
+				"<li><strong>Ketepatan:</strong> Solusi sesuai dengan instruksi</li>" +
+				"<li><strong>Pemahaman:</strong> Penjelasan menunjukkan pemahaman konsep</li>" +
+				"<li><strong>Kerapian:</strong> Kode bersih dan terstruktur</li>" +
+				"</ul>" +
+				"<blockquote><p>Deadline pengumpulan tertera di atas. Gunakan fitur WYSIWYG atau unggah file sesuai kebutuhan.</p></blockquote>"
+		}
+
+		taskDescription, _ := json.Marshal(map[string]interface{}{
+			"version":     2,
+			"contentType": "tiptap",
+			"contentHtml": taskDescriptionHTML,
 		})
 
 		instructionAttachments, _ := json.Marshal([]map[string]string{
@@ -735,12 +855,13 @@ func seedLessonAssignments(db *gorm.DB) {
 		assignment := entity.LessonAssignment{
 			LessonUid:                lesson.Uid,
 			Title:                    "Tugas " + lesson.Title,
-			TaskType:                 entity.LessonAssignmentTaskTypeText,
+			TaskType:                 taskType,
 			TaskDescription:          taskDescription,
-			AllowFileSubmission:      true,
+			QuizPayload:              quizPayload,
+			AllowFileSubmission:      taskType == entity.LessonAssignmentTaskTypeText,
 			AllowPlainTextSubmission: false,
-			AllowRichTextSubmission:  true,
-			RequireFileDescription:   true,
+			AllowRichTextSubmission:  taskType == entity.LessonAssignmentTaskTypeText,
+			RequireFileDescription:   taskType == entity.LessonAssignmentTaskTypeText,
 			InstructionAttachments:   instructionAttachments,
 			DeadlineAt:               time.Now().AddDate(0, 0, 7+i),
 			Status:                   entity.LessonAssignmentStatusDraft,
@@ -759,6 +880,21 @@ func seedLessonAssignments(db *gorm.DB) {
 			log.Printf("[Success] Assignment untuk lesson %s berhasil dibuat", lesson.Title)
 		} else if err != nil {
 			log.Printf("[Error] Gagal cek assignment lesson=%s: %v", lesson.Uid, err)
+		} else {
+			// Assignment sudah ada — update fields ke format/data terbaru
+			updates := map[string]interface{}{
+				"task_type":                  assignment.TaskType,
+				"task_description":           assignment.TaskDescription,
+				"quiz_payload":               assignment.QuizPayload,
+				"allow_file_submission":      assignment.AllowFileSubmission,
+				"allow_rich_text_submission": assignment.AllowRichTextSubmission,
+				"require_file_description":   assignment.RequireFileDescription,
+			}
+			if err := db.Model(&existing).Updates(updates).Error; err != nil {
+				log.Printf("[Warning] Gagal update assignment lesson=%s: %v", lesson.Uid, err)
+			} else {
+				log.Printf("[Info] assignment lesson=%s diperbarui ke format tiptap (task_type=%s)", lesson.Uid, assignment.TaskType)
+			}
 		}
 	}
 }
