@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
@@ -10,7 +10,7 @@ export default function Footer() {
 
   const isFooterHidden = (pathname?.startsWith('/course/') && pathname !== '/course') || pathname.startsWith('/checkout/')
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     console.log('Subscribing email:', email)
     setEmail('')

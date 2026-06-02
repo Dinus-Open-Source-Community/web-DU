@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, type KeyboardEvent } from 'react'
 import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react'
 import type { LessonContentType } from '../../lib/types/course'
 import type { IModulesData } from '../../lib/types/api'
@@ -124,7 +124,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
 
   const cancelRename = () => setEditing(null)
 
-  const handleRenameKeyDown = (e: React.KeyboardEvent) => {
+  const handleRenameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
       commitRename()

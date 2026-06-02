@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ImageIcon, Loader2 } from 'lucide-react'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 import { toast } from 'sonner'
-import { useUpdateProfilePhoto } from '@/services/user'
+import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/services/user'
 import { Input } from '../ui/input'
+import { avatarFileSchema, changePasswordFormSchema, getValidationMessage, updateProfileSchema } from '@/lib/validator'
 
 function initialsFromName(name: string) {
   const parts = name.trim().split(/\s+/)
@@ -18,33 +19,72 @@ interface ProfileSectionProps {
 }
 
 export default function ProfileSection({ user, onAvatarUpdated }: ProfileSectionProps) {
+  const [displayName, setDisplayName] = useState(user.name)
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState('')
 
-  const { mutateAsync, isPending } = useUpdateProfilePhoto()
+  const { mutateAsync: updatePhoto, isPending: isPhotoPending } = useUpdateProfilePhoto()
+  const { mutateAsync: updateProfile, isPending: isProfilePending } = useUpdateProfile()
+  const { mutateAsync: updatePassword, isPending: isPasswordPending } = useUpdatePassword()
 
-  const handleSubmitChangePhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubmitChangePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0] || null
-
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif']
-    if (file && !validImageTypes.includes(file.type)) {
-      toast.error('Tipe file tidak valid. Silakan pilih file gambar (jpg, png, gif).')
+    const validation = avatarFileSchema.safeParse(file)
+    if (!validation.success) {
+      toast.error(getValidationMessage(validation.error, 'Foto profil tidak valid'))
       return
     }
 
-    if (!file) {
-      toast.error('Silakan pilih file foto terlebih dahulu')
-      return
-    }
-    await mutateAsync(file)
+    await updatePhoto(validation.data)
     await onAvatarUpdated?.()
     event.currentTarget.value = ''
+  }
+
+  const handleSubmitProfile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isProfilePending) return
+
+    const validation = updateProfileSchema.safeParse({ name: displayName })
+    if (!validation.success) {
+      toast.error(getValidationMessage(validation.error, 'Data profil tidak valid'))
+      return
+    }
+
+    await updateProfile(validation.data)
+  }
+
+  const handleSubmitPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isPasswordPending) return
+
+    const validation = changePasswordFormSchema.safeParse({
+      old_password: currentPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    })
+    if (!validation.success) {
+      toast.error(getValidationMessage(validation.error, 'Data password tidak valid'))
+      return
+    }
+
+    await updatePassword({
+      old_password: validation.data.old_password,
+      new_password: validation.data.new_password,
+    })
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
   }
 
   useEffect(() => {
     setLastUpdatedLabel(new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date()))
   }, [])
+
+  useEffect(() => {
+    setDisplayName(user.name)
+  }, [user.name])
 
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-8">
@@ -76,9 +116,9 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
           <Input type="file" accept="image/jpeg,image/png,image/gif" onChange={handleSubmitChangePhoto} className="hidden" id="avatar-upload" />
           <label
             htmlFor="avatar-upload"
-            aria-disabled={isPending}
+            aria-disabled={isPhotoPending}
             className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:ring-2 focus:ring-primary focus:ring-offset-2 aria-disabled:pointer-events-none aria-disabled:opacity-60">
-            {isPending ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+            {isPhotoPending ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
             Ubah Foto
           </label>
         </div>
@@ -86,13 +126,14 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
         <h2 className="mb-6 text-lg font-bold text-slate-800">Informasi User</h2>
-        <form className="flex flex-col gap-6">
+        <form onSubmit={handleSubmitProfile} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-2">
               <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-500">Nama Tampilan</label>
               <Input
                 type="text"
-                defaultValue={user.name}
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -103,8 +144,10 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
           </div>
           <div className="mt-2 flex justify-end pt-2">
             <button
-              type="button"
-              className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/95 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
+              type="submit"
+              disabled={isProfilePending}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/95 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
+              {isProfilePending ? <Loader2 className="size-4 animate-spin" /> : null}
               Simpan Perubahan
             </button>
           </div>
@@ -116,12 +159,14 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
 
         <div className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8">
           <h3 className="ml-1 text-xs font-bold uppercase tracking-wider text-primary/80">Ubah Password Akun</h3>
-          <form className="flex flex-col gap-6">
+          <form onSubmit={handleSubmitPassword} className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <label className="ml-1 text-sm font-medium text-slate-700">Password Saat Ini</label>
               <Input
                 type="password"
                 placeholder="*********"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-lg tracking-[0.2em] text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -150,7 +195,8 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
               </div>
             </div>
             <div className="flex justify-start">
-              <button type="button" className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/95 disabled:opacity-60">
+              <button type="submit" disabled={isPasswordPending} className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/95 disabled:opacity-60">
+                {isPasswordPending ? <Loader2 className="size-4 animate-spin" /> : null}
                 Perbarui Password
               </button>
             </div>

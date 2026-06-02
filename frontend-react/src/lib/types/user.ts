@@ -111,3 +111,14 @@ export interface IUserData {
   course_reviews: unknown[]
   transaction_history: TransactionHistory[]
 }
+
+export interface IUpdatePasswordPayload {
+  old_password: string
+  new_password: string
+}
+
+export interface IUpdateProfilePayload {
+  name?: string
+  email?: string
+  description?: string
+}

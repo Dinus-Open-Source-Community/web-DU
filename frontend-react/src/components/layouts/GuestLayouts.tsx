@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import Footer from '../shared/Footer';
 import Navbar from '../shared/Navbar';
 
-const GuestLayout = ({ children }: { children: React.ReactNode }) => {
+const GuestLayout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <Navbar />

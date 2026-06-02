@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
@@ -8,10 +8,12 @@ import OauthButton from '../../components/shared/OauthButton'
 import { GlobalInput } from '../../components/shared/Input'
 import { PasswordStrengthIndicator } from '../../components/auth/PasswordStrength'
 import AuthLayout from '../../components/layouts/AuthLayouts'
+import { useAuth } from '../../providers/auth-provider'
+import { parseWithValidationMessage, registerFormSchema } from '../../lib/validator'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  // const { signUp, startGoogleOAuth } = useAuth()
+  const { signUp } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [name, setName] = useState('')
@@ -22,17 +24,19 @@ export default function RegisterPage() {
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (passwordMismatch || isSubmitting) return
 
     setIsSubmitting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      navigate('/')
+      const payload = parseWithValidationMessage(registerFormSchema, { name, email, password, confirmPassword }, 'Data registrasi tidak valid')
+      const { redirectPath } = await signUp(payload)
+      navigate(redirectPath)
       toast.success('Registrasi berhasil')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Registrasi gagal')
+    } finally {
       setIsSubmitting(false)
     }
   }

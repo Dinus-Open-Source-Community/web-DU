@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
@@ -21,7 +21,7 @@ export function FormResetPassword() {
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (passwordMismatch || !password) return
     setSubmitted(true)

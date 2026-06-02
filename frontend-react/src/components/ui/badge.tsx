@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { type VariantProps } from 'class-variance-authority'
 import { BadgeVariants } from '../../lib/variant'
 import { paymentStatusLabels, type PaymentStatus } from '../../lib/types/transaction'
@@ -59,8 +59,8 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
 export type BadgeProps = {
   variant: AppBadgeVariant
   className?: string
-  children?: React.ReactNode
-} & React.ComponentProps<'span'>
+  children?: ReactNode
+} & ComponentProps<'span'>
 
 export function Badge({ variant, className, children, ...props }: BadgeProps) {
   const text = children ?? defaultLabel[variant]

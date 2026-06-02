@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Paperclip, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { CourseDetailItem } from '../../lib/types/api'
@@ -168,7 +168,7 @@ export function CourseAssignmentDialog({
     onOpenChange(false)
   }, [onOpenChange])
 
-  const onPickInstructionFiles = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPickInstructionFiles = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files?.length) return
     for (const file of Array.from(files)) {
@@ -188,7 +188,7 @@ export function CourseAssignmentDialog({
   }, [])
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       const t = title.trim()
       if (!t) {

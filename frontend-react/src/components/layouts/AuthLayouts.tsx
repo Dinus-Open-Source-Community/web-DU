@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import { Lottie } from '../shared/Lottie'
 
 interface AuthLayoutProps {
-  children: React.ReactNode
+  children: ReactNode
   lottieUrl?: string
   heading?: string
   subheading?: string

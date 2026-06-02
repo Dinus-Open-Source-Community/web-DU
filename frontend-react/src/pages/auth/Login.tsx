@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
@@ -7,6 +7,7 @@ import { GlobalInput } from '../../components/shared/Input'
 import AuthLayout from '../../components/layouts/AuthLayouts'
 import OauthButton from '../../components/shared/OauthButton'
 import { useAuth } from '../../providers/auth-provider'
+import { loginSchema, parseWithValidationMessage } from '../../lib/validator'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -16,13 +17,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (isSubmitting) return
 
     setIsSubmitting(true)
     try {
-      const { redirectPath } = await signIn({ email, password })
+      const payload = parseWithValidationMessage(loginSchema, { email, password }, 'Data login tidak valid')
+      const { redirectPath } = await signIn(payload)
       navigate(redirectPath)
       toast.success('Login berhasil')
     } catch (err) {

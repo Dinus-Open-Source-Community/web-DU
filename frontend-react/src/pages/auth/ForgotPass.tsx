@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Link } from 'react-router-dom'
@@ -10,7 +10,7 @@ export function ForgotPasswordPages() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (email.trim()) setSubmitted(true)
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import type { CourseLevel } from '../../lib/types/course'
 import { Button } from '../ui/button'
@@ -116,7 +116,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
   }, [onOpenChange, reset])
 
   // fungsi untuk handle perubahan file cover dan membuat preview URL
-  const onFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFile = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !file.type.startsWith('image/')) {
       toast.error('Pilih file gambar (JPG, PNG, WebP).')
@@ -133,7 +133,7 @@ export function CreateCourseDialog({ open, onOpenChange, roleBasePath = '/mentor
 
   // fungsi untuk submit form, membuat kursus baru, dan navigasi ke editor
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       const trimmedTitle = title.trim()
       const trimmedHeader = header.trim()

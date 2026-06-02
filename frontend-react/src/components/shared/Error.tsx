@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { SafeLottie } from '../ui/lottie'
@@ -11,7 +12,7 @@ interface NotFoundContentProps {
   backHref?: string
   backLabel?: string
   showBackButton?: boolean
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
 export function NotFoundContent({
