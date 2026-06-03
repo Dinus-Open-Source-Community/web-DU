@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { AdminStatus } from './user'
+import type { ICategoryItem, ICourseTypeItem } from './course'
 
 // =====================
 // Base Responses
@@ -15,17 +16,6 @@ export interface IResponse<T> {
 // Courses
 // =====================
 // type untuk course
-export interface CourseMentorItem {
-  avatar_url: string
-  created_at: string
-  description: string
-  email: string
-  is_verified: boolean
-  name: string
-  role: string
-  uid: string
-  updated_at: string
-}
 
 // =====================
 // Admin - Mentor
@@ -83,96 +73,6 @@ export interface AdminAdministrator {
   lastActive: string
   status: AdminStatus
   createdAt: string
-}
-
-// =====================
-// Course Items
-// =====================
-// interface untuk data course
-export interface ICourseItem {
-  category_uid: string
-  course_type_uid: string
-  cover_url: string
-  created_at: string
-  description: string
-  event_uid: string | null
-  is_premium: boolean
-  is_published: boolean
-  level: string
-  mentor_uid: string
-  mentors: CourseMentorItem[]
-  price: number
-  price_strike: number
-  slot: number
-  slug: string
-  status: string
-  subtitle: string
-  thumbnail_url: string
-  title: string
-  uid: string
-  updated_at: string
-  what_you_learn: string[]
-}
-
-// =====================
-// Categories & Course Types
-// =====================
-// type untuk category
-export type CategoryItem = {
-  uid: string
-  name: string
-  description: string
-  is_active: boolean
-  courses?: ICourseItem[]
-  created_at: string
-  updated_at: string
-}
-
-// type untuk course type
-export type CourseTypeItem = {
-  uid: string
-  name: string
-  description: string
-  is_active: boolean
-  courses?: ICourseItem[]
-  created_at: string
-  updated_at: string
-}
-
-// =====================
-// List Responses
-// =====================
-// type untuk response course
-export type CourseListResponse = {
-  courses: ICourseItem[]
-  meta: {
-    current_page: number
-    per_page: number
-    total: number
-    total_pages: number
-  }
-}
-
-// type untuk response category
-export type CategoryListResponse = {
-  course_categories: CategoryItem[]
-  meta: {
-    current_page: number
-    per_page: number
-    total: number
-    total_pages: number
-  }
-}
-
-// type untuk response course type
-export type CourseTypeListResponse = {
-  course_types: CourseTypeItem[]
-  meta: {
-    current_page: number
-    per_page: number
-    total: number
-    total_pages: number
-  }
 }
 
 // =====================
@@ -281,8 +181,8 @@ export interface IModulesData {
 // Course Detail Item
 // =====================
 export interface CourseDetailItem {
-  category: CategoryItem
-  course_type: CourseTypeItem
+  category: ICategoryItem
+  course_type: ICourseTypeItem
   cover_url: string
   created_at: string
   description: string

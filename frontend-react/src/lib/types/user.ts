@@ -6,6 +6,32 @@ export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'cancelled'
 export type CourseLevel = 'PEMULA' | 'MENENGAH' | 'LANJUTAN'
 export type CourseStatus = 'DRAFT' | 'PUBLISHED'
 
+// interface untuk response API Course Mentor
+export interface ICourseMentorItem {
+  avatar_url: string
+  created_at: string
+  description: string
+  email: string
+  is_verified: boolean
+  name: string
+  role: string
+  uid: string
+  updated_at: string
+}
+
+// interface untuk payload update password
+export interface IUpdatePasswordPayload {
+  old_password: string
+  new_password: string
+}
+
+// interface untuk payload update profile
+export interface IUpdateProfilePayload {
+  name?: string
+  email?: string
+  description?: string
+}
+
 export interface IUser {
   nama: string
   email: string
@@ -135,15 +161,4 @@ export interface IUserData {
   mentored_courses: CourseDetail[]
   course_reviews: CourseReview[]
   transaction_history: TransactionHistory[]
-}
-
-export interface IUpdatePasswordPayload {
-  old_password: string
-  new_password: string
-}
-
-export interface IUpdateProfilePayload {
-  name?: string
-  email?: string
-  description?: string
 }

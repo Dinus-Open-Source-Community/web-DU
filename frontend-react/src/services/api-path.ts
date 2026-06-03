@@ -1,5 +1,39 @@
 type Uid = string
 
+export interface IQueryParamsPayload {
+  page?: number
+  per_page?: number
+  mentor_id?: string
+  title?: string
+  price?: string | number
+  is_premium?: boolean
+  course_category_id?: string
+  course_type_id?: string
+  class_type_id?: string
+  status?: string
+  sort_by?: string
+  sort_order?: 'asc' | 'desc' | string
+  [key: string]: string | number | boolean | undefined
+}
+
+const compactCourseQueryParams = (params: IQueryParamsPayload) =>
+  Object.entries(params).filter(([, value]) => value !== undefined && value !== null && (typeof value !== 'string' || value.trim() !== ''))
+
+export const normalizeCourseQueryParams = (params?: IQueryParamsPayload) => {
+  if (!params) return {}
+
+  return Object.fromEntries(compactCourseQueryParams(params)) as Partial<IQueryParamsPayload>
+}
+
+const withQuery = (path: string, params?: IQueryParamsPayload) => {
+  if (!params) return path
+
+  const query = new URLSearchParams(Object.entries(normalizeCourseQueryParams(params)).map(([key, value]) => [key, String(value)]))
+  const qs = query.toString()
+
+  return qs ? `${path}?${qs}` : path
+}
+
 export const API_ROUTES = {
   auth: {
     login: `/login`,
@@ -19,17 +53,17 @@ export const API_ROUTES = {
     updateProfile: `/user/profile`,
     changePassword: `/user/password`,
     getSelfData: `/user/data`,
-    getAllManagedUsers: `/user/manage/all`,
+    getAllManagedUsers: (params?: IQueryParamsPayload) => withQuery(`/user/manage/all`, params),
     deleteManagedUserByUid: (uid: Uid) => `/user/manage/${uid}`,
     updateUserRoleByUid: (uid: Uid) => `/user/role/${uid}`,
     getUserByUid: (uid: Uid) => `/user/${uid}`,
   },
   mentor: {
-    getAll: `/mentor/all`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/mentor/all`, params),
     getByUid: (uid: Uid) => `/mentor/${uid}`,
   },
   courses: {
-    getAll: `/courses`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/courses`, params),
     create: `/courses`,
     getByUid: (uid: Uid) => `/courses/${uid}`,
     joinByUid: (uid: Uid) => `/courses/${uid}/join`,
@@ -38,17 +72,17 @@ export const API_ROUTES = {
     replyReviewByUid: (courseUid: Uid, reviewUid: Uid) => `/courses/${courseUid}/review/${reviewUid}/reply`,
     updateStatusByUid: (uid: Uid) => `/courses/${uid}/status`,
     assignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/assign`,
-    getStudentsByUid: (uid: Uid) => `/courses/${uid}/students`,
+    getStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) => withQuery(`/courses/${uid}/students`, params),
   },
   courseCategories: {
-    getAll: `/course-categories`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/course-categories`, params),
     create: `/course-categories`,
     getByUid: (uid: Uid) => `/course-categories/${uid}`,
     updateByUid: (uid: Uid) => `/course-categories/${uid}`,
     deleteByUid: (uid: Uid) => `/course-categories/${uid}`,
   },
   courseTypes: {
-    getAll: `/course-types`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/course-types`, params),
     create: `/course-types`,
     getByUid: (uid: Uid) => `/course-types/${uid}`,
     updateByUid: (uid: Uid) => `/course-types/${uid}`,
@@ -59,10 +93,10 @@ export const API_ROUTES = {
     getByUid: (uid: Uid) => `/modules/${uid}`,
     updateByUid: (uid: Uid) => `/modules/${uid}`,
     deleteByUid: (uid: Uid) => `/modules/${uid}`,
-    getByCourseUid: (courseUid: Uid) => `/modules/course/${courseUid}`,
+    getByCourseUid: (courseUid: Uid, params?: IQueryParamsPayload) => withQuery(`/modules/course/${courseUid}`, params),
   },
   lessons: {
-    getAll: `/lessons`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/lessons`, params),
     create: `/lessons`,
     getByUid: (uid: Uid) => `/lessons/${uid}`,
     updateByUid: (uid: Uid) => `/lessons/${uid}`,
@@ -78,28 +112,28 @@ export const API_ROUTES = {
         updateByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment/submission`,
       },
       submissions: {
-        getAllByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment/submissions`,
+        getAllByLessonUid: (lessonUid: Uid, params?: IQueryParamsPayload) => withQuery(`/lessons/${lessonUid}/assignment/submissions`, params),
         getByUid: (lessonUid: Uid, submissionUid: Uid) => `/lessons/${lessonUid}/assignment/submissions/${submissionUid}`,
         gradeByUid: (lessonUid: Uid, submissionUid: Uid) => `/lessons/${lessonUid}/assignment/submissions/${submissionUid}/grade`,
       },
     },
     attendances: {
       create: `/lessons/attendances`,
-      checkStatus: `/lessons/attendances/check-status`,
-      getMyHistory: `/lessons/attendances/my-history`,
+      checkStatus: (params?: IQueryParamsPayload) => withQuery(`/lessons/attendances/check-status`, params),
+      getMyHistory: (params?: IQueryParamsPayload) => withQuery(`/lessons/attendances/my-history`, params),
       getByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
       updateByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
       deleteByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
-      getByLessonUid: (lessonUid: Uid) => `/lessons/attendances/lesson/${lessonUid}`,
+      getByLessonUid: (lessonUid: Uid, params?: IQueryParamsPayload) => withQuery(`/lessons/attendances/lesson/${lessonUid}`, params),
     },
   },
   invoices: {
-    getInvoiceUrl: `/invoices/url`,
+    getInvoiceUrl: (params?: IQueryParamsPayload) => withQuery(`/invoices/url`, params),
     getByEnrollmentUid: (enrollmentUid: Uid) => `/invoices/${enrollmentUid}`,
   },
   payment: {
     create: `/payment/create`,
-    getAll: `/payment`,
+    getAll: (params?: IQueryParamsPayload) => withQuery(`/payment`, params),
     tripay: `/payment/tripay`,
   },
   swagger: {

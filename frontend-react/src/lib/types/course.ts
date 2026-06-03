@@ -1,3 +1,5 @@
+import type { ICourseMentorItem } from './user'
+
 export type BadgeVariant = 'free' | 'premium' | 'event' | 'draft'
 
 export type CourseStatus = 'published' | 'draft' | 'pending' | 'rejected'
@@ -22,6 +24,104 @@ export type ClassType = 'online' | 'offline'
 //   created_at?: string
 //   updated_at?: string
 // }
+
+// =====================
+// Course Items
+// =====================
+// interface untuk data course
+export interface ICourseItem {
+  category_uid: string
+  course_type_uid: string
+  cover_url: string
+  created_at: string
+  created_by: {
+    avatar_url: string
+    is_verified: boolean
+    name: string
+    role: string
+    uid: string
+  }
+  description: string
+  event_uid: string | null
+  is_premium: boolean
+  is_published: boolean
+  level: string
+  mentors: ICourseMentorItem[]
+  price: number
+  price_strike: number
+  rating: number
+  slot: number
+  slug: string
+  status: string
+  subtitle: string
+  thumbnail_url: string
+  title: string
+  total_reviews: number
+  uid: string
+  updated_at: string
+  what_you_learn: string[]
+}
+
+// =====================
+// Categories & Course Types
+// =====================
+// type untuk category
+export interface ICategoryItem {
+  uid: string
+  name: string
+  description: string
+  is_active: boolean
+  courses?: ICourseItem[]
+  created_at: string
+  updated_at: string
+}
+
+// type untuk course type
+export interface ICourseTypeItem {
+  uid: string
+  name: string
+  description: string
+  is_active: boolean
+  courses?: ICourseItem[]
+  created_at: string
+  updated_at: string
+}
+
+// =====================
+// List Responses
+// =====================
+// type untuk response course
+export interface ICourseListResponse {
+  courses: ICourseItem[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
+
+// type untuk response category
+export interface ICategoryListResponse {
+  course_categories: ICategoryItem[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
+
+// type untuk response course type
+export interface ICourseTypeListResponse {
+  course_types: ICourseTypeItem[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
 
 export interface IMentorCourse {
   uid: string

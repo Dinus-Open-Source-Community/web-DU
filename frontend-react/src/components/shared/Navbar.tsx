@@ -1,44 +1,42 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, LogOut, Menu, UserCircle } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, UserCircle } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { navLinks } from '../../lib/navigation'
-import type { IUser, UserRole } from '../../lib/types/user'
+import type { UserRole } from '../../lib/types/user'
+import { useAuth } from '../../providers/auth-provider'
+import { ROUTES } from '../../lib/routes'
 
-// const roleNav: Record<UserRole, ReturnType<typeof flattenNavItems>> = {
-//   student: flattenNavItems(Navigation.student),
-//   mentor: flattenNavItems(Navigation.mentor),
-//   admin: flattenNavItems(Navigation.admin),
-// }
-
-function userInitials(nama: string): string {
-  const parts = nama.trim().split(/\s+/).filter(Boolean)
+function userInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '?'
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const roleLabel: Record<UserRole, string> = {
+  student: 'Siswa',
+  mentor: 'Mentor',
+  admin: 'Admin',
+}
+
+const dashboardPath: Record<UserRole, string> = {
+  student: ROUTES.student.dashboard,
+  mentor: ROUTES.mentor.dashboard,
+  admin: ROUTES.admin.dashboard,
 }
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
-
-  // Mock state - user to implement real auth later
-  const isLoggedIn = false
-  const user: IUser = {
-    nama: 'User Name',
-    email: 'user@example.com',
-    avatar: '',
-    role: 'student',
-  }
-  const roleLabel: Record<UserRole, string> = {
-    student: 'Siswa',
-    mentor: 'Mentor',
-    admin: 'Admin',
-  }
-  // const flatNav = useMemo(() => roleNav[user.role], [user.role])
+  const { isAuthenticated, profile, signOut, user } = useAuth()
+  const sessionUser = profile ?? user
+  const userName = sessionUser?.name ?? 'User'
+  const userEmail = sessionUser?.email ?? ''
+  const userRole = sessionUser?.role ?? 'student'
+  const userAvatar = sessionUser?.avatar_url ?? ''
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -53,12 +51,18 @@ export default function Navbar() {
 
   const handleLogout = () => {
     setIsMenuOpen(false)
-    navigate('/auth/login')
+    signOut()
+    navigate(ROUTES.login)
   }
 
   const handleProfile = () => {
     setIsMenuOpen(false)
-    navigate('/profile')
+    navigate(ROUTES.profile)
+  }
+
+  const handleDashboard = () => {
+    setIsMenuOpen(false)
+    navigate(dashboardPath[userRole])
   }
 
   return (
@@ -84,53 +88,47 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-4 lg:flex">
-          {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+          {isAuthenticated && sessionUser ? (
+            <div className="group relative">
+              <div className="pb-2">
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-2xl border border-white/30 bg-white/10 py-1.5 pr-3 pl-1.5 text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60">
+                  className="flex min-h-11 items-center gap-2 rounded-[10px] border border-white/30 bg-white/10 py-1.5 pr-3 pl-1.5 text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60"
+                  aria-haspopup="menu">
                   <Avatar className="size-9 ring-2 ring-white/35">
-                    {user.avatar ? <AvatarImage src={user.avatar} alt={user.nama} /> : null}
-                    <AvatarFallback className="bg-white/25 text-xs font-bold text-white">{userInitials(user.nama)}</AvatarFallback>
+                    {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
+                    <AvatarFallback className="bg-white/25 text-xs font-bold text-white">{userInitials(userName)}</AvatarFallback>
                   </Avatar>
-                  <span className="max-w-[140px] truncate text-left text-sm font-medium">{user.nama}</span>
-                  <ChevronDown className="size-4 shrink-0 opacity-80" aria-hidden />
+                  <span className="max-w-[140px] truncate text-left text-sm font-semibold">{userName}</span>
+                  <ChevronDown className="size-4 shrink-0 opacity-80 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden />
                 </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="truncate text-sm font-semibold">{user.nama}</span>
-                    <span className="text-muted-foreground text-xs">{user.email}</span>
-                    <span className="text-muted-foreground text-xs">{roleLabel[user.role]}</span>
+              </div>
+
+              <div
+                role="menu"
+                className="pointer-events-none absolute right-0 top-full z-50 w-64 translate-y-1 opacity-0 transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <div className="rounded-[10px] border border-slate-200 bg-white p-2 text-slate-700 shadow-xl shadow-slate-900/10">
+                  <div className="px-3 py-2.5">
+                    <p className="truncate text-sm font-semibold text-slate-900">{userName}</p>
+                    {userEmail ? <p className="truncate text-xs text-slate-500">{userEmail}</p> : null}
+                    <p className="mt-1 text-xs font-medium text-primary">{roleLabel[userRole]}</p>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {/* {flatNav.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <DropdownMenuItem key={`${item.path}-${item.name}`} asChild>
-                      <Link to={item.path} className="flex cursor-pointer items-center gap-2">
-                        {Icon ? <Icon className="size-4 opacity-70" /> : null}
-                        {item.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  )
-                })} */}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex cursor-pointer items-center gap-2">
-                    <UserCircle className="size-4 opacity-70" />
-                    Profil
+                  <div className="my-1 h-px bg-slate-100" />
+                  <Link to={dashboardPath[userRole]} className="flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary">
+                    <LayoutDashboard className="size-4 opacity-70" />
+                    Dashboard
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" className="cursor-pointer" onClick={handleLogout}>
-                  <LogOut className="size-4" />
-                  Keluar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <Link to={ROUTES.profile} className="flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary">
+                    <UserCircle className="size-4 opacity-70" />
+                    Profile
+                  </Link>
+                  <button type="button" className="flex min-h-10 w-full items-center gap-2 rounded-[10px] px-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50" onClick={handleLogout}>
+                    <LogOut className="size-4" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex gap-3">
               <Link to="/auth/register">
@@ -159,15 +157,15 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div className={`overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="flex flex-col gap-3 px-6 pb-8 bg-primary">
-          {isLoggedIn && (
+          {isAuthenticated && sessionUser && (
             <div className="flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-3 py-2">
               <Avatar className="size-10 ring-2 ring-white/35">
-                {user.avatar ? <AvatarImage src={user.avatar} alt={user.nama} /> : null}
-                <AvatarFallback className="bg-white/25 text-xs font-bold text-white">{userInitials(user.nama)}</AvatarFallback>
+                {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
+                <AvatarFallback className="bg-white/25 text-xs font-bold text-white">{userInitials(userName)}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">{user.nama}</p>
-                <p className="text-xs text-white/75">{roleLabel[user.role]}</p>
+                <p className="truncate text-sm font-semibold text-white">{userName}</p>
+                <p className="text-xs text-white/75">{roleLabel[userRole]}</p>
               </div>
             </div>
           )}
@@ -182,25 +180,20 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          {isLoggedIn ? (
+          {isAuthenticated && sessionUser ? (
             <div className="flex flex-col gap-1 border-t border-white/20 pt-3">
               <p className="px-4 text-xs font-semibold tracking-wide text-white/60 uppercase">Menu akun</p>
-              {/* {flatNav.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link key={`m-${item.path}-${item.name}`} to={item.path} className="flex items-center gap-2 px-4 py-2 text-base text-white hover:text-white/85" onClick={() => setIsMenuOpen(false)}>
-                    {Icon ? <Icon className="size-4 shrink-0 opacity-80" /> : null}
-                    {item.name}
-                  </Link>
-                )
-              })} */}
+              <button type="button" className="flex items-center gap-2 px-4 py-2 text-left text-base text-white hover:text-white/85" onClick={handleDashboard}>
+                <LayoutDashboard className="size-4 shrink-0 opacity-80" />
+                Dashboard
+              </button>
               <button type="button" className="flex items-center gap-2 px-4 py-2 text-left text-base text-white hover:text-white/85" onClick={handleProfile}>
                 <UserCircle className="size-4 shrink-0 opacity-80" />
-                Profil
+                Profile
               </button>
               <button type="button" className="flex items-center gap-2 px-4 py-2 text-left text-base text-red-200 hover:text-red-100" onClick={handleLogout}>
                 <LogOut className="size-4 shrink-0" />
-                Keluar
+                Logout
               </button>
             </div>
           ) : (
