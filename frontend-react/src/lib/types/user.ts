@@ -138,7 +138,6 @@ export interface IUserData {
 }
 
 export interface IUpdatePasswordPayload {
-  old_password: string
   new_password: string
 }
 

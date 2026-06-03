@@ -20,7 +20,6 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({ user, onAvatarUpdated }: ProfileSectionProps) {
   const [displayName, setDisplayName] = useState(user.name)
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState('')
@@ -60,7 +59,6 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
     if (isPasswordPending) return
 
     const validation = changePasswordFormSchema.safeParse({
-      old_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword,
     })
@@ -70,10 +68,8 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
     }
 
     await updatePassword({
-      old_password: validation.data.old_password,
       new_password: validation.data.new_password,
     })
-    setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
   }
@@ -160,16 +156,6 @@ export default function ProfileSection({ user, onAvatarUpdated }: ProfileSection
         <div className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8">
           <h3 className="ml-1 text-xs font-bold uppercase tracking-wider text-primary/80">Ubah Password Akun</h3>
           <form onSubmit={handleSubmitPassword} className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="ml-1 text-sm font-medium text-slate-700">Password Saat Ini</label>
-              <Input
-                type="password"
-                placeholder="*********"
-                value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-lg tracking-[0.2em] text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
-              />
-            </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-sm font-medium text-slate-700">Password Baru</label>

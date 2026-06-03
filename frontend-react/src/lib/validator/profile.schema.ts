@@ -22,7 +22,6 @@ export const updateProfileSchema = z
   })
 
 export const changePasswordPayloadSchema = z.object({
-  old_password: currentPasswordSchema,
   new_password: passwordSchema,
 })
 
