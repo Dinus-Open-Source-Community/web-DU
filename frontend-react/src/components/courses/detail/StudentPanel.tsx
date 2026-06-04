@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react'
 
 import { Progress } from '@/components/ui/progress'
+import type { ICourseDetailItem } from '@/lib/types/course'
 import { cn } from '@/lib/utils'
 
 export interface FeedbackBreakdown {
@@ -9,12 +10,25 @@ export interface FeedbackBreakdown {
 }
 
 interface StudentFeedbackPanelProps {
-  rating: number
-  totalReviews: number
-  breakdown?: FeedbackBreakdown[]
+  course: ICourseDetailItem
 }
 
-export function StudentFeedbackPanel({ rating, totalReviews, breakdown }: StudentFeedbackPanelProps) {
+function getFeedbackBreakdown(course: ICourseDetailItem): FeedbackBreakdown[] {
+  const totalReviews = course.total_reviews || course.reviews.length
+
+  return [5, 4, 3, 2, 1].map((stars) => {
+    const reviewCount = course.reviews.filter((review) => Math.round(review.rating) === stars).length
+    const percent = totalReviews > 0 ? Math.round((reviewCount / totalReviews) * 100) : 0
+
+    return { stars, percent }
+  })
+}
+
+export function StudentFeedbackPanel({ course }: StudentFeedbackPanelProps) {
+  const rating = course.rating
+  const totalReviews = course.total_reviews || course.reviews.length
+  const breakdown = getFeedbackBreakdown(course)
+
   return (
     <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <h2 className="mb-4 text-lg font-semibold tracking-tight text-slate-900">Student Feedback</h2>
@@ -31,7 +45,7 @@ export function StudentFeedbackPanel({ rating, totalReviews, breakdown }: Studen
         </div>
 
         <div className="flex flex-col gap-2.5">
-          {breakdown?.map((row) => (
+          {breakdown.map((row) => (
             <div key={row.stars} className="flex items-center gap-3 text-sm">
               <span className="inline-flex w-14 shrink-0 items-center gap-1 text-slate-600">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />

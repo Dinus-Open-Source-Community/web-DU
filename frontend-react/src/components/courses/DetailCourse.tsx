@@ -34,7 +34,7 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
 
   return (
     <div className="flex flex-col">
-      <CourseDetailHero title={data.title} description={data.description} category={data.category.name} rating={data.rating} backHref={data.backHref} backLabel={data.backLabel} />
+      <CourseDetailHero title={data.title} description={data.description} category={data.category.name} backHref={data.backHref} backLabel={data.backLabel} />
 
       <div className="mx-auto w-full max-w-6xl px-5 py-8 md:px-8 md:py-10">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
@@ -46,11 +46,9 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
               <div className="space-y-3 text-sm leading-relaxed text-slate-600 md:text-[15px]">{data.descriptionContent ?? <p>{data.description}</p>}</div>
             </section>
 
-            {/* <CourseSyllabusList sections={data.syllabus} /> */}
+            <CourseInstructorCard name={data.mentors[0].name} role={data.mentors[0].role} avatar={data.mentors[0].avatar_url} desc={data.mentors[0].description} />
 
-            <CourseInstructorCard name={data.mentors[0].name} role={data.mentors[0].role} avatar={data.mentors[0].avatar_url} />
-
-            <StudentFeedbackPanel rating={data.rating} totalReviews={data.totalReviews} />
+            <StudentFeedbackPanel course={data} />
           </div>
 
           <div className="lg:sticky lg:top-20 lg:self-start">

@@ -39,12 +39,6 @@ export function CourseDetailSidebar({ previewImage, price, strikePrice, discount
             <Play className="h-12 w-12" />
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <button type="button" className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-primary shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors hover:bg-white">
-            <Play className="ml-1 h-5 w-5 fill-primary" />
-            <span className="sr-only">Mulai preview</span>
-          </button>
-        </div>
       </div>
 
       <div className="flex flex-col gap-4 p-5">

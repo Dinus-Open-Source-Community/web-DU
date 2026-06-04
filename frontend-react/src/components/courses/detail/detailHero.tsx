@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Star, ChevronLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Link } from 'react-router-dom'
@@ -8,13 +8,12 @@ interface CourseDetailHeroProps {
   title: string
   description?: string
   category: string
-  rating: number
   backHref?: string
   backLabel?: string
   actions?: ReactNode
 }
 
-export function CourseDetailHero({ title, description, category, rating, backHref = '/admin/courses', backLabel = 'Back to Courses', actions }: CourseDetailHeroProps) {
+export function CourseDetailHero({ title, description, category, backHref = '/admin/courses', backLabel = 'Back to Courses', actions }: CourseDetailHeroProps) {
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(135deg,#0a84dc_0%,#075e9c_100%)] text-white">
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" aria-hidden />
@@ -41,13 +40,6 @@ export function CourseDetailHero({ title, description, category, rating, backHre
           <span className="w-fit rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">{category}</span>
           <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-[40px]">{title}</h1>
           {description && <p className="max-w-3xl text-sm leading-relaxed text-white/85 md:text-base">{description}</p>}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/90">
-          <span className="inline-flex items-center gap-1.5">
-            <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
-            <span className="font-semibold">{rating.toFixed(1)}</span>
-          </span>
         </div>
 
         {actions && <div className="mt-1 flex flex-wrap items-center gap-2">{actions}</div>}

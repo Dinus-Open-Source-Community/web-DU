@@ -2,9 +2,10 @@ interface CourseInstructorCardProps {
   name: string
   role: string
   avatar?: string
+  desc: string
 }
 
-export function CourseInstructorCard({ name, role, avatar }: CourseInstructorCardProps) {
+export function CourseInstructorCard({ name, role, avatar, desc }: CourseInstructorCardProps) {
   return (
     <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <h2 className="mb-4 text-lg font-semibold tracking-tight text-slate-900">Your Instructor</h2>
@@ -27,6 +28,7 @@ export function CourseInstructorCard({ name, role, avatar }: CourseInstructorCar
             <h3 className="text-base font-semibold text-slate-900">{name}</h3>
             <p className="text-sm text-slate-500">{role}</p>
           </div>
+          <p className="text-sm text-slate-600">{desc}</p>
         </div>
       </div>
     </section>
