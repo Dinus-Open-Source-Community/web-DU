@@ -1,8 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
 import type { InputHTMLAttributes, ReactNode } from 'react'
-import type { BadgeVariant, ClassType, CourseStatus } from './course'
+import type { ClassType, CourseStatus, ICourseItem } from './course'
 import type { PaymentStatus } from './transaction'
-import type { IMentor } from './user'
+import type { EnrollmentStatus, IMentor } from './user'
 
 export type FilterSelectOption<T extends string = string> = { value: T; label: string }
 
@@ -53,25 +53,16 @@ export interface ICardData {
   updated_at: string
 }
 
-export interface ICardProps {
+export interface ICardProps extends ICourseItem {
   variant?: 'course' | 'resume' | 'resumeAdmin' | 'transaction' | 'mentorCourse'
-  image?: string
-  title: string
-  description?: string
-  variantBadge?: BadgeVariant
-  author?: {
-    name: string
-    avatar: string
-  }
-  rating?: number
-  totalReviews?: number
   size?: 'sm' | 'md' | 'lg'
   module?: string
   progress?: number
+  isEnrolled?: boolean
+  enrollment_status?: EnrollmentStatus
   // Transaction-specific props
   transactionId?: string
   classType?: string
-  price?: string
   paymentStatus?: PaymentStatus
   paymentMethod?: string
   purchasedAt?: string

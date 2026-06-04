@@ -1,11 +1,10 @@
-import type { BadgeVariant, ICategoryItem, ICourseItem } from '@/lib/types/course'
+import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 import { useEffect, useState } from 'react'
 import { SearchForm } from '../shared/SearchForm'
 import { FilterCheckboxPanel } from '../shared/FilterCheckbox'
 import CardCourse from '../shared/CardCourse'
 import { Pagination } from '../shared/Pagination'
 import { EmptyCourseIcon } from '../shared/icon'
-import { FormatRupiah } from '@/lib/func/func'
 
 const ITEMS_PER_PAGE = 6
 
@@ -14,8 +13,6 @@ export default function Section({ dataCategories, dataCourses }: { dataCategorie
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-
-  console.log(selectedCategories, searchQuery)
 
   useEffect(() => {
     setCurrentPage(1)
@@ -54,19 +51,34 @@ export default function Section({ dataCategories, dataCourses }: { dataCategorie
           {filteredCourses.length > 0 ? (
             <div className="flex flex-col gap-10">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {paginatedCourses.map((course, idx) => (
+                {paginatedCourses.map((course) => (
                   <CardCourse
-                    key={`${course.uid}-${idx}`}
+                    key={course.uid}
+                    size="lg"
                     data={{
                       title: course.title,
                       description: course.description,
-                      image: course.cover_url,
-                      variantBadge: course.is_premium ? ('premium' as BadgeVariant) : ('free' as BadgeVariant),
-                      author: { name: course.created_by?.name, avatar: course.created_by?.avatar_url },
+                      thumbnail_url: course.thumbnail_url,
+                      is_premium: course.is_premium,
+                      mentors: course.mentors,
                       rating: course.rating,
-                      totalReviews: course.total_reviews,
-                      price: course.price === 0 ? 'Gratis' : String(FormatRupiah(course.price)),
+                      total_reviews: course.total_reviews,
+                      price: course.price,
                       detailHref: `/course/${course.uid}`,
+                      category_uid: course.category_uid,
+                      uid: course.uid,
+                      course_type_uid: course.course_type_uid,
+                      cover_url: course.cover_url,
+                      level: course.level,
+                      what_you_learn: course.what_you_learn,
+                      created_at: course.created_at,
+                      updated_at: course.updated_at,
+                      created_by: course.created_by,
+                      event_uid: course.event_uid,
+                      is_published: course.is_published,
+                      slot: course.slot,
+                      slug: course.slug,
+                      status: course.status,
                     }}
                   />
                 ))}

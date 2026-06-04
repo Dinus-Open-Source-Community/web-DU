@@ -3,8 +3,7 @@ import { ArrowLeft, ChevronDown, ChevronRight, FileText, Film } from 'lucide-rea
 import { Button } from '@/components/ui/button'
 import '@/styles/tiptap-editor.css'
 import { EmptyState } from '@/components/shared/EmptyState'
-import type { LessonContentType } from '@/lib/types/course'
-import type { CourseDetailItem, IModulesDetail } from '@/lib/types/api'
+import type { ICourseDetailItem, IModulesDetail, LessonContentType } from '@/lib/types/course'
 import type { ICardData } from '@/lib/types/utils'
 import { Link } from 'react-router-dom'
 
@@ -13,7 +12,7 @@ export type CourseModulePreviewVariant = 'mentor' | 'student' | 'admin'
 type CourseModulePreviewProps = {
   courseUid: string
   variant: CourseModulePreviewVariant
-  mentorCourse: CourseDetailItem
+  mentorCourse: ICourseDetailItem
   repoCourse?: ICardData
   storedModules: IModulesDetail[]
 }

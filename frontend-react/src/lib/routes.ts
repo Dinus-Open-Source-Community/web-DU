@@ -13,6 +13,7 @@ export const ROUTES = {
   home: '/',
   profile: '/profile',
   courses: '/course',
+  courseDetail: (courseUid: string) => `/course/${courseUid}`,
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',
   register: '/auth/register',
@@ -27,8 +28,8 @@ export const ROUTES = {
       administrators: '/admin/users/administrators',
     },
     courses: '/admin/courses',
-    detailCourse: (courseId: string) => `/admin/courses/${courseId}`,
-    courseEdit: (courseId: string) => `/admin/courses/${courseId}/edit`,
+    detailCourseAdmin: (courseId: string) => `/admin/courses/${courseId}`,
+    courseEditAdmin: (courseId: string) => `/admin/courses/${courseId}/edit`,
     transactions: '/admin/transactions',
     financial: '/admin/financial',
     /** Pathname untuk <Route>; query `courseUid` opsional di-set lewat navigasi/link. */
@@ -38,8 +39,8 @@ export const ROUTES = {
   mentor: {
     dashboard: '/mentor/dashboard',
     courses: '/mentor/courses',
-    detailCourse: (courseId: string) => `/mentor/courses/${courseId}`,
-    courseEdit: (courseId: string) => `/mentor/courses/${courseId}/edit`,
+    detailCourseMentor: (courseId: string) => `/mentor/courses/${courseId}`,
+    courseEditMentor: (courseId: string) => `/mentor/courses/${courseId}/edit`,
     assignments: (courseId: string) => `/mentor/courses/${courseId}/assignments`,
   },
   student: {

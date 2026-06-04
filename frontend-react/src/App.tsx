@@ -18,6 +18,7 @@ const AdminStudentsPage = React.lazy(() => import('./pages/admin/Student.tsx'))
 const AdminMentorsPage = React.lazy(() => import('./pages/admin/Mentors.tsx'))
 const AdminAdministratorsPage = React.lazy(() => import('./pages/admin/Admin.tsx'))
 const Courses = React.lazy(() => import('./pages/admin/Courses.tsx'))
+const CourseDetail = React.lazy(() => import('./pages/courses/detail.tsx'))
 const AdminDetailCourse = React.lazy(() => import('./pages/admin/DetailCourse.tsx'))
 const MentorDetailCourse = React.lazy(() => import('./pages/mentor/DetailCourse.tsx'))
 const Transactions = React.lazy(() => import('./pages/admin/Transactions.tsx'))
@@ -56,6 +57,12 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.courses,
     element: <CoursePage />,
+    public: true,
+    lazy: true,
+  },
+  {
+    path: ROUTES.courseDetail(':courseUid'),
+    element: <CourseDetail />,
     public: true,
     lazy: true,
   },
@@ -138,14 +145,14 @@ const routeConfig: RouteConfig[] = [
     roles: ['admin'],
   },
   {
-    path: ROUTES.admin.detailCourse(':courseUid'),
+    path: ROUTES.admin.detailCourseAdmin(':courseUid'),
     element: <AdminDetailCourse />,
     public: false,
     lazy: true,
     roles: ['admin'],
   },
   {
-    path: ROUTES.admin.courseEdit(':courseUid'),
+    path: ROUTES.admin.courseEditAdmin(':courseUid'),
     element: <CourseEditAdmin />,
     public: false,
     lazy: true,
@@ -187,14 +194,14 @@ const routeConfig: RouteConfig[] = [
     roles: ['mentor', 'admin'],
   },
   {
-    path: ROUTES.mentor.detailCourse(':courseUid'),
+    path: ROUTES.mentor.detailCourseMentor(':courseUid'),
     element: <MentorDetailCourse />,
     public: false,
     lazy: true,
     roles: ['mentor', 'admin'],
   },
   {
-    path: ROUTES.mentor.courseEdit(':courseUid'),
+    path: ROUTES.mentor.courseEditMentor(':courseUid'),
     element: <CourseEditMentor />,
     public: false,
     lazy: true,

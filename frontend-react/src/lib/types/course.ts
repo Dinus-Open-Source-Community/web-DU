@@ -1,4 +1,4 @@
-import type { ICourseMentorItem } from './user'
+import type { IAuthorCourseItem, ICourseMentorItem } from './user'
 
 export type BadgeVariant = 'free' | 'premium' | 'event' | 'draft'
 
@@ -12,19 +12,6 @@ export type CourseCategory = 'Pengembangan Web' | 'Desain UI/UX' | 'Data Science
 
 export type ClassType = 'online' | 'offline'
 
-// export interface CourseListItem {
-//   uid: string
-//   title: string
-//   subtitle?: string
-//   description?: string
-//   cover_url?: string
-//   thumbnail_url?: string
-//   status?: string
-//   is_published?: boolean
-//   created_at?: string
-//   updated_at?: string
-// }
-
 // =====================
 // Course Items
 // =====================
@@ -34,32 +21,26 @@ export interface ICourseItem {
   course_type_uid: string
   cover_url: string
   created_at: string
-  created_by: {
-    avatar_url: string
-    is_verified: boolean
-    name: string
-    role: string
-    uid: string
-  }
+  created_by: IAuthorCourseItem
   description: string
   event_uid: string | null
-  is_premium: boolean
-  is_published: boolean
-  level: string
-  mentors: ICourseMentorItem[]
+  is_premium?: boolean
+  is_published?: boolean
+  level?: string
+  mentors?: ICourseMentorItem[]
   price: number
-  price_strike: number
-  rating: number
-  slot: number
+  price_strike?: number
+  rating?: number
+  slot?: number
   slug: string
   status: string
-  subtitle: string
+  subtitle?: string
   thumbnail_url: string
   title: string
-  total_reviews: number
+  total_reviews?: number
   uid: string
-  updated_at: string
-  what_you_learn: string[]
+  updated_at?: string
+  what_you_learn?: string[]
 }
 
 // =====================
@@ -101,6 +82,9 @@ export interface ICourseListResponse {
   }
 }
 
+// type untuk response detail course
+export type IDetailCourseResponse = ICourseDetailItem
+
 // type untuk response category
 export interface ICategoryListResponse {
   course_categories: ICategoryItem[]
@@ -123,25 +107,155 @@ export interface ICourseTypeListResponse {
   }
 }
 
-export interface IMentorCourse {
+export interface IModulesByCourseUidResponse {
+  data: CourseDetailModule[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
+
+// =====================
+// Course Detail
+// =====================
+// type untuk course detail
+export interface CourseDetailReviewUser {
+  avatar_url: string
+  name: string
   uid: string
-  title: string
-  header: string
-  description: string
-  image?: string
-  published: boolean
-  moduleCount: number
-  meetingCount?: number
-  studentCount: number
+}
+
+export interface CourseDetailReviewReply {
+  comment: string
+  created_at: string
   rating: number
-  totalReviews: number
-  updatedAt?: string
-  category?: CourseCategory
-  level?: CourseLevel
-  classType?: CourseClassType
-  price?: number
-  strikePrice?: number
-  whatYouLearn?: string[]
+  uid: string
+  user: CourseDetailReviewUser
+}
+
+export interface CourseDetailReview {
+  comment: string
+  created_at: string
+  rating: number
+  replies: CourseDetailReviewReply[]
+  uid: string
+  user: CourseDetailReviewUser
+}
+
+export interface CourseDetailLesson {
+  created_at: string
+  module_uid: string
+  title: string
+  content_type: 'text' | 'video'
+  content: LessonDetailContent | null
+  video_url: string
+  start_time: string
+  end_time: string
+  order_index: number
+  uid: string
+  updated_at: string
+}
+
+// =====================
+// Lesson Detail
+// =====================
+// type untuk lesson detail
+export interface LessonDetailContent {
+  version: number
+  contentHtml: string
+  contentType: 'tiptap'
+}
+
+export interface LessonDetailItem {
+  uid: string
+  module_uid: string
+  title: string
+  content_type: 'text' | 'video'
+  content: LessonDetailContent | null
+  video_url: string
+  start_time: string
+  end_time: string
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
+export type LessonDetailListResponse = {
+  lessons: LessonDetailItem[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
+
+// =====================
+// Modules Detail
+// =====================
+export interface IModulesDetail {
+  uid: string
+  course_uid: string
+  title: string
+  order_index: number
+  created_at: string
+  lessons: LessonDetailItem[]
+}
+
+// =====================
+// Modules Summary
+// =====================
+export interface CourseDetailModule {
+  course_uid: string
+  created_at: string
+  lessons: CourseDetailLesson[]
+  order_index: number
+  title: string
+  uid: string
+  updated_at?: string
+}
+
+export interface IModulesData {
+  uid: string
+  course_uid: string
+  title: string
+  order_index: number
+  created_at: string
+  lessons: CourseDetailLesson[]
+}
+
+// =====================
+// Course Detail Item
+// =====================
+export interface ICourseDetailItem {
+  category: ICategoryItem
+  course_type: ICourseTypeItem
+  cover_url: string
+  created_at: string
+  created_by: IAuthorCourseItem
+  description: string
+  event_uid: string | null
+  is_premium: boolean
+  is_published: boolean
+  level: string
+  mentors: ICourseMentorItem[]
+  modules: CourseDetailModule[]
+  price: number
+  price_strike: number
+  rating: number
+  reviews: CourseDetailReview[]
+  slot: number
+  slug: string
+  status: string
+  subtitle: string
+  thumbnail_url: string
+  title: string
+  total_reviews: number
+  uid: string
+  updated_at: string
+  what_you_learn: string[]
 }
 
 export type ILesson = (ILessonBase & { contentType: 'video'; videoUrl: string; contentHtml?: string }) | (ILessonBase & { contentType: 'text'; contentHtml: string })

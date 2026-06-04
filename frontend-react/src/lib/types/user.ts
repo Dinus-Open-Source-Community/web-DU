@@ -19,6 +19,14 @@ export interface ICourseMentorItem {
   updated_at: string
 }
 
+export interface IAuthorCourseItem {
+  avatar_url: string
+  is_verified: boolean
+  name: string
+  role: string
+  uid: string
+}
+
 // interface untuk payload update password
 export interface IUpdatePasswordPayload {
   old_password: string

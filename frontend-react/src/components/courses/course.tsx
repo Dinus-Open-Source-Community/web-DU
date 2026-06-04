@@ -5,8 +5,7 @@ import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
 import { LogoDuBig } from '../shared/icon'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import type { BadgeVariant, ICategoryItem, ICourseItem } from '@/lib/types/course'
-import { FormatRupiah } from '@/lib/func/func'
+import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 
 const filter = [{ name: 'All' }, { name: 'Free' }, { name: 'Premium' }, { name: 'Ongoing Event' }]
 
@@ -23,7 +22,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
     return Data.filter((course) => {
       const matchSearch =
         !keyword ||
-        [course.title, course.subtitle, course.description, course.created_by?.name, ...course.mentors.map((mentor) => mentor.name)].filter(Boolean).join(' ').toLowerCase().includes(keyword)
+        [course.title, course.subtitle, course.description, course.created_by?.name, ...(course.mentors?.map((mentor) => mentor.name) || [])].filter(Boolean).join(' ').toLowerCase().includes(keyword)
 
       const matchTopFilter =
         isActiveFilter === 'All' ||
@@ -136,13 +135,27 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
                     data={{
                       title: data.title,
                       description: data.description,
-                      image: data.cover_url,
-                      variantBadge: data.is_premium ? ('premium' as BadgeVariant) : ('free' as BadgeVariant),
-                      author: { name: data.created_by?.name, avatar: data.created_by?.avatar_url },
+                      thumbnail_url: data.thumbnail_url,
+                      is_premium: data.is_premium,
+                      mentors: data.mentors,
                       rating: data.rating,
-                      totalReviews: data.total_reviews,
-                      price: data.price === 0 ? 'Gratis' : String(FormatRupiah(data.price)),
+                      total_reviews: data.total_reviews,
+                      price: data.price,
                       detailHref: `/course/${data.uid}`,
+                      category_uid: data.category_uid,
+                      uid: data.uid,
+                      course_type_uid: data.course_type_uid,
+                      cover_url: data.cover_url,
+                      level: data.level,
+                      what_you_learn: data.what_you_learn,
+                      created_at: data.created_at,
+                      updated_at: data.updated_at,
+                      created_by: data.created_by,
+                      event_uid: data.event_uid,
+                      is_published: data.is_published,
+                      slot: data.slot,
+                      slug: data.slug,
+                      status: data.status,
                     }}
                   />
                 ))
