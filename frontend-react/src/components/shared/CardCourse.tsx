@@ -62,8 +62,8 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
           <h3 className={`mb-1 line-clamp-2 font-bold leading-tight text-slate-900 ${sizes.title[size]}`}>{data.title}</h3>
           {data.module && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{data.module}</p>}
           <div className="flex flex-col grow">
-            {data.description && <p className={`line-clamp-2 text-xs font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{data.description}</p>}
-            {data.price && <span className="mt-2 text-base font-semibold text-primary ">{data.price}</span>}
+            {data.description && <p className={`line-clamp-2 text-sm font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{data.description}</p>}
+            {data.price && <span className="mt-5 text-base font-semibold text-primary ">{data.price}</span>}
           </div>
         </div>
 

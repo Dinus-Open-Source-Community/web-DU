@@ -1,4 +1,4 @@
-import type { BadgeVariant } from '@/lib/types/course'
+import type { BadgeVariant, ICategoryItem, ICourseItem } from '@/lib/types/course'
 import { useEffect, useState } from 'react'
 import { SearchForm } from '../shared/SearchForm'
 import { FilterCheckboxPanel } from '../shared/FilterCheckbox'
@@ -6,61 +6,27 @@ import CardCourse from '../shared/CardCourse'
 import { Pagination } from '../shared/Pagination'
 import { EmptyCourseIcon } from '../shared/icon'
 import { FormatRupiah } from '@/lib/func/func'
-import type { CategoryItem, ICourseItem } from '@/lib/types/api'
 
 const ITEMS_PER_PAGE = 6
 
-type CatalogCourse = {
-  uid: string
-  title: string
-  description: string
-  category?: string
-  image: string
-  variantBadge?: BadgeVariant
-  author?: { name: string; avatar: string }
-  rating?: number
-  totalReviews?: number
-  price: number
-}
-
-export default function Section({ data }: { data: CategoryItem[] }) {
+export default function Section({ dataCategories, dataCourses }: { dataCategories: ICategoryItem[]; dataCourses: ICourseItem[] }) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
+  console.log(selectedCategories, searchQuery)
+
   useEffect(() => {
     setCurrentPage(1)
   }, [selectedCategories, searchQuery])
 
-  const catalog: CatalogCourse[] = data.flatMap(
-    (c) =>
-      (c.courses as ICourseItem[] | undefined)?.map((course) => {
-        const item = course
-        return {
-          uid: (item.uid as string) ?? '',
-          title: (item.title as string) ?? '',
-          description: (item.description as string) ?? '',
-          category: (item.category_uid as string) ?? undefined,
-          image: (item.cover_url as string) ?? (item.thumbnail_url as string) ?? '',
-          variantBadge: ((item.is_premium as boolean) ? 'premium' : 'free') as BadgeVariant,
-          author: {
-            name: ((item.mentors as { name: string }[])?.[0]?.name as string) ?? 'Mentor',
-            avatar: ((item.mentors as { avatar_url: string }[])?.[0]?.avatar_url as string) ?? '',
-          },
-          // rating: (item.rating as number) ?? 0,
-          // totalReviews: (item.total_reviews as number) ?? 0,
-          price: (item.price as number) ?? 0,
-        }
-      }) ?? [],
-  )
+  const categories = [...new Set(dataCategories.map((c) => c.name).filter(Boolean))] as string[]
 
-  const categories = [...new Set(data.map((c) => c.name).filter(Boolean))] as string[]
-
-  const filteredCourses = catalog.filter((course) => {
+  const filteredCourses = dataCourses.filter((course) => {
     const q = searchQuery.trim().toLowerCase()
     const matchesSearch = !q || course.title.toLowerCase().includes(q) || course.description.toLowerCase().includes(q)
-    const categoryHit = selectedCategories.length === 0 || (course.category && selectedCategories.includes(course.category))
+    const categoryHit = selectedCategories.length === 0 || (course.category_uid && selectedCategories.includes(dataCategories.find((c) => c.uid === course.category_uid)?.name || ''))
     return matchesSearch && categoryHit
   })
 
@@ -94,11 +60,11 @@ export default function Section({ data }: { data: CategoryItem[] }) {
                     data={{
                       title: course.title,
                       description: course.description,
-                      image: course.image,
-                      variantBadge: course.variantBadge,
-                      author: course.author,
+                      image: course.cover_url,
+                      variantBadge: course.is_premium ? ('premium' as BadgeVariant) : ('free' as BadgeVariant),
+                      author: { name: course.created_by?.name, avatar: course.created_by?.avatar_url },
                       rating: course.rating,
-                      totalReviews: course.totalReviews,
+                      totalReviews: course.total_reviews,
                       price: course.price === 0 ? 'Gratis' : String(FormatRupiah(course.price)),
                       detailHref: `/course/${course.uid}`,
                     }}

@@ -5,7 +5,8 @@ import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
 import { LogoDuBig } from '../shared/icon'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
+import type { BadgeVariant, ICategoryItem, ICourseItem } from '@/lib/types/course'
+import { FormatRupiah } from '@/lib/func/func'
 
 const filter = [{ name: 'All' }, { name: 'Free' }, { name: 'Premium' }, { name: 'Ongoing Event' }]
 
@@ -131,18 +132,16 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
                 filteredCourses.map((data) => (
                   <CardCourse
                     key={data.uid}
-                    size="sm"
+                    size="lg"
                     data={{
-                      variantBadge: data.is_premium ? 'premium' : 'free',
                       title: data.title,
                       description: data.description,
-                      author: data.mentors[0]
-                        ? {
-                            name: data.mentors[0].name,
-                            avatar: data.mentors[0].avatar_url,
-                          }
-                        : undefined,
-                      image: data.thumbnail_url,
+                      image: data.cover_url,
+                      variantBadge: data.is_premium ? ('premium' as BadgeVariant) : ('free' as BadgeVariant),
+                      author: { name: data.created_by?.name, avatar: data.created_by?.avatar_url },
+                      rating: data.rating,
+                      totalReviews: data.total_reviews,
+                      price: data.price === 0 ? 'Gratis' : String(FormatRupiah(data.price)),
                       detailHref: `/course/${data.uid}`,
                     }}
                   />
