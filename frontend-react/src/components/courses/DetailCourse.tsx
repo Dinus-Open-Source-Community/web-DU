@@ -8,6 +8,7 @@ import { StudentFeedbackPanel } from './detail/StudentPanel'
 import { CourseDetailSidebar } from './detail/CourseDetailSidebar'
 import { PopularCoursesStrip } from './detail/PopularCourse'
 import { FormatRupiah } from '@/lib/func/func'
+import CourseUserReviews from './detail/ReviewSection'
 
 interface CourseDetailLayoutProps extends ICourseDetailItem {
   backHref?: string
@@ -49,6 +50,8 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
             <CourseInstructorCard name={data.mentors[0].name} role={data.mentors[0].role} avatar={data.mentors[0].avatar_url} desc={data.mentors[0].description} />
 
             <StudentFeedbackPanel course={data} />
+
+            <CourseUserReviews reviews={data.reviews ?? []} />
           </div>
 
           <div className="lg:sticky lg:top-20 lg:self-start">
