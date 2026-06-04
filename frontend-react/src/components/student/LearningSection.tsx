@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { SearchForm } from '../shared/SearchForm'
 import { SegmentedFilter } from '../shared/SegemntedFilter'
 import { Pagination } from '../shared/Pagination'
-import { EmptyCourseIcon } from '../shared/icon'
 import type { IUserData } from '@/lib/types/user'
 import JoinedCourseCard from '../shared/JoinedCourseCard'
+import { SafeLottie } from '../ui/lottie'
 
 const filters = ['Semua', 'Sedang Berjalan', 'Baru', 'Selesai'] as const
 const ITEMS_PER_PAGE = 6
@@ -66,21 +66,25 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
 
       {filteredCourses.length > 0 ? (
         <div className="flex flex-col gap-10">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {paginatedCourses.map((course) => {
               const isInProgress = course.progress > 0 && course.progress < 100
 
-              return <JoinedCourseCard key={course.uid} data={course} variant={isInProgress ? 'resume' : 'non-resume'} />
+              return <JoinedCourseCard key={course.uid} data={course} variant={isInProgress ? 'resume' : 'non-resume'} size="lg" />
             })}
           </div>
 
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <EmptyCourseIcon className="mb-6 h-48 w-48" />
-          <h3 className="mb-2 text-xl font-bold text-slate-900">Ups, belum ada kursus</h3>
-          <p className="max-w-sm text-sm leading-relaxed text-slate-500">Sepertinya list yang Anda cari kosong. Coba ubah filter kategori pencarian Anda.</p>
+        <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            <SafeLottie src="/transaction-not-found.lottie" />
+            <div className="space-y-1">
+              <p className="text-base font-semibold text-slate-900">Kursus tidak ditemukan</p>
+              <p className="text-sm text-slate-500">Coba ubah kata kunci pencarian atau filter status.</p>
+            </div>
+          </div>
         </div>
       )}
     </section>

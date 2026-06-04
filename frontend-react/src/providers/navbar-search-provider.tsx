@@ -55,3 +55,7 @@ export function useNavbarSearch() {
 
   return context
 }
+
+export function useOptionalNavbarSearch() {
+  return useContext(NavbarSearchContext)
+}

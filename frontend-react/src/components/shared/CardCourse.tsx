@@ -7,6 +7,20 @@ import { Rating } from '../ui/rating'
 import { Profile } from '../ui/profile'
 import { FormatRupiah } from '@/lib/func/func'
 
+type CourseLevelKey = 'PEMULA' | 'MENENGAH' | 'LANJUTAN'
+
+const levelLabel: Record<CourseLevelKey, string> = {
+  PEMULA: 'Pemula',
+  MENENGAH: 'Menengah',
+  LANJUTAN: 'Lanjutan',
+}
+
+const levelSignal: Record<CourseLevelKey, { activeBars: number; color: string }> = {
+  PEMULA: { activeBars: 1, color: 'bg-emerald-500' },
+  MENENGAH: { activeBars: 2, color: 'bg-sky-500' },
+  LANJUTAN: { activeBars: 3, color: 'bg-violet-500' },
+}
+
 const sizes = {
   container: {
     sm: 'w-full',
@@ -35,6 +49,31 @@ const sizes = {
   },
 }
 
+function normalizeLevel(level?: string): CourseLevelKey | null {
+  const normalized = level?.trim().toUpperCase()
+
+  if (normalized === 'PEMULA' || normalized === 'MENENGAH' || normalized === 'LANJUTAN') return normalized
+  return null
+}
+
+function CourseLevelSignal({ level }: { level?: string }) {
+  const normalizedLevel = normalizeLevel(level)
+  if (!normalizedLevel) return null
+
+  const signal = levelSignal[normalizedLevel]
+
+  return (
+    <span className="inline-flex items-end gap-2 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500">
+      <span className="flex h-4 items-end gap-0.5" aria-hidden>
+        {[1, 2, 3].map((bar) => (
+          <span key={bar} className={`w-1.5 rounded-full ${bar <= signal.activeBars ? signal.color : 'bg-slate-200'}`} style={{ height: `${bar * 4 + 4}px` }} />
+        ))}
+      </span>
+      {levelLabel[normalizedLevel]}
+    </span>
+  )
+}
+
 const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: ICardProps }) => {
   const isEnrolled =
     data.isEnrolled ?? (data.enrollment_status ? data.enrollment_status === 'active' || data.enrollment_status === 'completed' : data.progress !== undefined)
@@ -55,11 +94,11 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
 
       {/* Content description */}
       <div className={`relative z-10 flex grow flex-col rounded-xl bg-white border border-slate-100/50 ${sizes.contentWrapper[size]}`}>
-        {/* Top Info (Badge & Rating) */}
-        {(data.is_premium || data.rating !== undefined) && (
+        {/* Top Info */}
+        {(data.is_premium || data.level) && (
           <div className="mb-3 flex items-center justify-between">
             {data.is_premium ? <Badge variant="premium" /> : <Badge variant="free" />}
-            {data.rating !== undefined && data.total_reviews !== undefined && <Rating rating={data.rating} totalReviews={data.total_reviews} />}
+            <CourseLevelSignal level={data.level} />
           </div>
         )}
 
@@ -68,7 +107,12 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
           {data.module && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{data.module}</p>}
           <div className="flex flex-col grow">
             {data.description && <p className={`line-clamp-2 text-sm font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{data.description}</p>}
-            {data.price && <span className="mt-5 text-base font-semibold text-primary ">{FormatRupiah(data.price)}</span>}
+            {(data.price !== undefined || (data.rating !== undefined && data.total_reviews !== undefined)) && (
+              <div className="mt-5 flex items-center justify-between gap-3">
+                {data.price !== undefined ? <span className="text-base font-semibold text-primary">{FormatRupiah(data.price)}</span> : <span />}
+                {data.rating !== undefined && data.total_reviews !== undefined && <Rating rating={data.rating} totalReviews={data.total_reviews} />}
+              </div>
+            )}
           </div>
         </div>
 

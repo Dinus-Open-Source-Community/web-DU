@@ -96,6 +96,21 @@ const useCombinedCourseCategoriesAndTypes = (params?: IQueryParamsPayload) => {
   }
 }
 
+const useGetCourseWithModules = (uid: string) => {
+  const courseDetail = useGetCourseDetail(uid)
+  const modules = useGetModules(uid)
+
+  const isLoading = courseDetail.isLoading || modules.isLoading
+  const error = courseDetail.error || modules.error
+
+  return {
+    courseDetail,
+    modules,
+    isLoading,
+    error,
+  }
+}
+
 const useGetCourseDetailWithCategories = (uid: string) => {
   const courseDetail = useGetCourseDetail(uid)
   const courseCategories = useGetCategoryById(courseDetail.data?.category.uid ?? '')
@@ -124,4 +139,5 @@ export {
   useGetAllModulesByCourseUid,
   useGetCategoryById,
   useGetCourseDetailWithCategories,
+  useGetCourseWithModules,
 }

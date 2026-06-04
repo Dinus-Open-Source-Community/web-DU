@@ -5,12 +5,15 @@ import { ReactIcon } from './icon'
 import type { JoinedCourse } from '@/lib/types/user'
 import { Profile } from '../ui/profile'
 import { Check } from 'lucide-react'
+import { ROUTES } from '@/lib/routes'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
+export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
 
 interface JoinedCourseCardProps {
   data: JoinedCourse
   variant?: JoinedCourseCardVariant
+  size?: JoinedCourseCardSize
 }
 
 const levelLabel: Record<JoinedCourse['level'], string> = {
@@ -27,6 +30,39 @@ const levelSignal: Record<JoinedCourse['level'], { activeBars: number; color: st
 
 const clampProgress = (progress: number) => Math.min(100, Math.max(0, Math.round(progress)))
 
+const sizes = {
+  container: {
+    sm: 'w-[280px] max-w-full',
+    md: 'w-[340px] max-w-full',
+    lg: 'w-[420px] max-w-full',
+  },
+  imageWrapper: {
+    sm: 'min-h-[160px]',
+    md: 'min-h-[203px]',
+    lg: 'min-h-[250px]',
+  },
+  contentWrapper: {
+    sm: 'min-h-[160px] p-4 -mt-5',
+    md: 'min-h-[208px] p-5 -mt-5',
+    lg: 'min-h-[250px] p-6 -mt-6',
+  },
+  title: {
+    sm: 'text-base',
+    md: 'text-lg',
+    lg: 'text-xl',
+  },
+  description: {
+    sm: 'text-sm',
+    md: 'text-sm',
+    lg: 'text-base',
+  },
+  progress: {
+    sm: 'px-3 py-2.5',
+    md: 'px-4 py-3',
+    lg: 'px-4 py-3',
+  },
+}
+
 const CourseLevelSignal = ({ level }: { level: JoinedCourse['level'] }) => {
   const signal = levelSignal[level]
 
@@ -42,17 +78,16 @@ const CourseLevelSignal = ({ level }: { level: JoinedCourse['level'] }) => {
   )
 }
 
-const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProps) => {
+const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedCourseCardProps) => {
   const progress = clampProgress(data.progress)
   const isResume = variant === 'resume'
   const image = data.cover_url || data.thumbnail_url
-  const actionHref = `/student/learning/course/${data.uid}`
   const actionLabel = isResume ? 'Lanjut' : 'Mulai'
   const mentor = data.mentors?.[0] ?? data.created_by
 
   return (
-    <div className="group flex h-full w-full flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md">
-      <div className="relative aspect-video  w-full shrink-0 overflow-hidden rounded-[10px]">
+    <div className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md`}>
+      <div className={`relative aspect-video w-full shrink-0 overflow-hidden rounded-[10px] ${sizes.imageWrapper[size]}`}>
         {image ? (
           <img
             src={image}
@@ -69,7 +104,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-slate-950/45 to-transparent" />
       </div>
 
-      <div className="relative z-10 -mt-5 flex grow flex-col rounded-xl border border-slate-100/70 bg-white p-5 shadow-[0_-8px_24px_rgba(15,23,42,0.04)]">
+      <div className={`relative z-10 flex grow flex-col rounded-xl border border-slate-100/70 bg-white shadow-[0_-8px_24px_rgba(15,23,42,0.04)] ${sizes.contentWrapper[size]}`}>
         <div className="mb-5 flex flex-col">
           <div className="mb-3 flex items-center justify-between gap-3">
             <CourseLevelSignal level={data.level} />
@@ -78,12 +113,12 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
               <span className="line-clamp-1">Dapat diakses</span>
             </div>
           </div>
-          <h3 className="mb-2 line-clamp-2 text-lg font-bold leading-snug text-slate-900">{data.title}</h3>
-          <p className="line-clamp-2 text-sm font-normal leading-[1.55] text-slate-500">{data.description || data.subtitle}</p>
+          <h3 className={`mb-2 line-clamp-2 font-bold leading-snug text-slate-900 ${sizes.title[size]}`}>{data.title}</h3>
+          <p className={`line-clamp-2 font-normal leading-[1.55] text-slate-500 ${sizes.description[size]}`}>{data.description || data.subtitle}</p>
         </div>
 
         {isResume && (
-          <div className="mt-auto mb-5 w-full rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+          <div className={`mt-auto mb-5 w-full rounded-xl border border-slate-100 bg-slate-50/70 ${sizes.progress[size]}`}>
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Progres Belajar</span>
               <span className="text-xs font-bold text-primary">{progress}%</span>
@@ -102,7 +137,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume' }: JoinedCourseCardProp
               <Badge variant="progressComplete" />
             ) : (
               <Button asChild className="rounded-lg px-5 py-2 text-sm font-semibold shadow-none" variant="default" size="sm">
-                <Link to={actionHref}>{actionLabel}</Link>
+                <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
               </Button>
             )}
           </div>

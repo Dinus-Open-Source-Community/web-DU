@@ -108,7 +108,7 @@ export interface ICourseTypeListResponse {
 }
 
 export interface IModulesByCourseUidResponse {
-  data: CourseDetailModule[]
+  modules: CourseDetailModule[]
   meta: {
     current_page: number
     per_page: number

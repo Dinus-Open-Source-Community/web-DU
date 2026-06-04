@@ -15,8 +15,6 @@ interface CourseDetailLayoutProps extends ICourseDetailItem {
   backLabel?: string
   totalReviews: number
   sidebarCta: ReactNode
-  // syllabus: SyllabusSection[]
-  // feedbackBreakdown: FeedbackBreakdown[]
   popularBaseHref?: string
   descriptionContent?: ReactNode
   PopularCourse: ICourseItem[]
