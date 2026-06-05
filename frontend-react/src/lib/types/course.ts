@@ -12,6 +12,8 @@ export type CourseCategory = 'Pengembangan Web' | 'Desain UI/UX' | 'Data Science
 
 export type ClassType = 'online' | 'offline'
 
+export type MentorCourseStudentStatus = 'Aktif' | 'Selesai' | 'Terlambat' | 'Belum mulai'
+
 // =====================
 // Course Items
 // =====================
@@ -99,6 +101,16 @@ export interface ICategoryListResponse {
 // type untuk response course type
 export interface ICourseTypeListResponse {
   course_types: ICourseTypeItem[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    total_pages: number
+  }
+}
+
+export interface ICourseStudentListResponse {
+  enrollments: IMentorCourseStudent[]
   meta: {
     current_page: number
     per_page: number
@@ -258,6 +270,17 @@ export interface ICourseDetailItem {
   what_you_learn: string[]
 }
 
+// interface untuk data student di course detail (mentor view)
+export interface IMentorCourseStudent {
+  enrollment_uid: string
+  student_uid: string
+  student_name: string
+  student_avatar_url: string
+  enrolled_at: string
+  progress: number
+  status: MentorCourseStudentStatus
+}
+
 export type ILesson = (ILessonBase & { contentType: 'video'; videoUrl: string; contentHtml?: string }) | (ILessonBase & { contentType: 'text'; contentHtml: string })
 
 interface ILessonBase {
@@ -291,21 +314,6 @@ export interface IQuiz {
 
 export type LessonContentType = 'video' | 'text'
 export type HomeworkTaskType = 'text' | 'quiz'
-
-export type MentorCourseStudentStatus = 'Aktif' | 'Selesai' | 'Terlambat' | 'Belum mulai'
-
-/** Baris peserta per kursus — progress & absensi untuk tabel mentor */
-export interface IMentorCourseStudent {
-  uid: string
-  name: string
-  email?: string
-  avatar?: string
-  progressPercent: number
-  attendancePresent: number
-  attendanceTotal: number
-  status: MentorCourseStudentStatus
-  lastActiveLabel: string
-}
 
 export type MentorAssignmentLifecycleStatus = 'draft' | 'published' | 'closed'
 export type MentorAssignmentTaskType = 'text' | 'quiz'

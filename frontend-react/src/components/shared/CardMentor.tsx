@@ -1,87 +1,89 @@
-import { BookOpen, Users } from 'lucide-react'
+import { BookOpen, Users, Star } from 'lucide-react'
 import { Badge } from '../ui/badge'
-import { ReactIcon } from './icon'
-import { Rating } from '../ui/rating'
-import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
+import type { ICourseItem } from '@/lib/types/course'
+import { Profile } from '../ui/profile'
+import { CourseLevelSignal } from './CourseLevel'
+import type { CourseLevel } from '@/lib/types/user'
+import { ReactIcon } from './icon'
 
-interface ICardMentor {
-  image?: string
-  title: string
-  description?: string
-  mentorModuleCount?: number
-  mentorStudentCount?: number
-  rating?: number
-  totalReviews?: number
-  mentorOnStatusClick?: () => void
-  mentorPublished?: boolean
+interface CardMentorProps {
+  data: ICourseItem
+  onStatusClick?: (uid: string) => void
   detailHref?: string
 }
 
-const CardMentor = ({ image, title, description, mentorModuleCount, mentorStudentCount, rating, totalReviews, mentorOnStatusClick, mentorPublished, detailHref }: ICardMentor) => {
-  const isLive = mentorPublished === true
+const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
+  const isPublished = data.status === 'published' || data.is_published
+  const image = data.thumbnail_url || data.cover_url
+
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-slate-300/90">
-      <div className="relative aspect-16/10 w-full shrink-0">
-        {image?.startsWith('data:') ? (
-          <img src={image} width={384} height={256} loading="lazy" alt={title} className="h-full w-full object-cover" />
-        ) : image ? (
-          <img src={image} width={384} height={256} loading="lazy" alt={title} className="h-full w-full object-cover" />
+    <div className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm">
+      {/* 1. Course Image */}
+      <div className="relative aspect-auto w-full shrink-0 overflow-hidden bg-slate-50">
+        {image ? (
+          <img src={image} alt={data.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
         ) : (
-          <div className="flex h-full min-h-[140px] w-full items-center justify-center bg-slate-100 text-slate-300">
+          <div className="flex h-full w-full items-center justify-center text-slate-200">
             <ReactIcon />
           </div>
         )}
-        <div className="absolute left-3 top-3">
-          <Badge variant={isLive ? 'mentorLive' : 'mentorDraft'} />
+
+        {/* Status Badge Overlay */}
+        <div className="absolute top-3 right-3">
+          <Badge
+            variant={isPublished ? 'coursePublished' : 'courseDraft'}
+            className="rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest shadow-xs border-none bg-white/95 backdrop-blur-sm">
+            {isPublished ? 'Published' : 'Draft'}
+          </Badge>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className="line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-slate-900">{title}</h3>
-
-          {description && <p className="line-clamp-2 text-sm leading-relaxed text-slate-500">{description}</p>}
-        </div>
-
-        <div className="flex flex-wrap gap-x-4 gap-y-2 text-[13px] text-slate-600">
-          <span className="inline-flex items-center gap-1.5">
-            <BookOpen className="h-4 w-4 text-slate-400" aria-hidden />
-            <span className="font-medium tabular-nums">{mentorModuleCount ?? 0}</span>
-            <span className="text-slate-400">modul</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Users className="h-4 w-4 text-slate-400" aria-hidden />
-            <span className="font-medium tabular-nums">{mentorStudentCount ?? 0}</span>
-            <span className="text-slate-400">siswa</span>
-          </span>
-          <div className="ml-auto shrink-0">
-            <Rating rating={rating ?? 0} totalReviews={totalReviews ?? 0} />
+      {/* 2. Content Body */}
+      <div className="flex flex-1 flex-col p-5 ">
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2 ">
+            <CourseLevelSignal level={data.level as CourseLevel} />
+            <div className="flex items-center gap-1">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+              <span className="text-xs font-bold text-slate-900">{data.rating || '0.0'}</span>
+            </div>
           </div>
+          <h3 className="line-clamp-2 text-base font-bold leading-snug text-slate-900">{data.title}</h3>
+          <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">{data.description || data.subtitle}</p>
         </div>
 
-        <div className={cn('mt-auto flex flex-wrap items-stretch gap-2 border-t border-slate-100 pt-4 sm:items-center sm:justify-end', mentorOnStatusClick && 'sm:justify-between')}>
-          {mentorOnStatusClick ? (
-            <Button
-              type="button"
-              variant={isLive ? 'outline' : 'default'}
-              size="sm"
-              className={cn('h-9 rounded-xl px-4 text-xs font-semibold shadow-none', isLive && 'border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100/90')}
-              onClick={mentorOnStatusClick}>
-              {isLive ? 'Jadikan draf' : 'Terbitkan'}
-            </Button>
-          ) : null}
-          <div className="flex flex-wrap gap-2 sm:ml-auto sm:justify-end">
-            {detailHref ? (
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="h-9 rounded-xl border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50 hover:text-slate-900">
-                <Link to={detailHref}>Kelola kursus</Link>
+        {/* 3. Stats and Actions */}
+        <div className="mt-auto space-y-4 pt-4 border-t border-slate-50">
+          <div className="flex items-center gap-4 text-[11px] font-medium text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <Users className="size-3.5 text-slate-400" />
+              <span className="tabular-nums">{data.slot ?? 0} Slot</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <BookOpen className="size-3.5 text-slate-400" />
+              <span className="tabular-nums">{data.total_reviews ?? 0} Review</span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center gap-2 pt-1">
+            {data.mentors && <Profile image={data.mentors[0]?.avatar_url || '/default-avatar.png'} name={data.mentors[0]?.name || 'Unknown Mentor'} key={data.mentors[0]?.uid} />}
+            {detailHref && (
+              <Button variant="default" size="sm" className="rounded-xl px-3 py-2">
+                <Link to={detailHref}>Kelola Kursus</Link>
               </Button>
-            ) : null}
+            )}
+            {onStatusClick && (
+              <Button
+                onClick={() => onStatusClick(data.uid)}
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-lg border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-900"
+                title="Update Status">
+                <Star className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>

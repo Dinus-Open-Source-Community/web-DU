@@ -25,7 +25,7 @@ const Transactions = React.lazy(() => import('./pages/admin/Transactions.tsx'))
 const Financial = React.lazy(() => import('./pages/admin/Financial.tsx'))
 const CourseEditAdmin = React.lazy(() => import('./pages/admin/CourseEdit.tsx'))
 const CourseEditMentor = React.lazy(() => import('./pages/mentor/CourseEdit.tsx'))
-const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
+// const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
 const MentorDashboard = React.lazy(() => import('./pages/mentor/Dashboard.tsx'))
 const MentorCourses = React.lazy(() => import('./pages/mentor/Courses.tsx'))
@@ -168,13 +168,6 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.admin.financial,
     element: <Financial />,
-    public: false,
-    lazy: true,
-    roles: ['admin'],
-  },
-  {
-    path: ROUTES.admin.reviewsAndQaPath,
-    element: <ReviewsQa />,
     public: false,
     lazy: true,
     roles: ['admin'],

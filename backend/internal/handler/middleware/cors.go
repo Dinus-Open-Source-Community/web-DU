@@ -15,6 +15,8 @@ func CORSMiddleware() gin.HandlerFunc {
 		"http://localhost:3001",
 		"http://localhost:5173",
 		"http://127.0.0.1:5173",
+		"http://localhost:5174",
+		"http://127.0.0.1:5174",
 	}
 
 	if rawOrigins := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS")); rawOrigins != "" {

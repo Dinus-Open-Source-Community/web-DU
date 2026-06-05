@@ -1,228 +1,211 @@
-import { useEffect, useState } from 'react'
-import { ClipboardList, Eye, Pencil, Sparkles } from 'lucide-react'
-// import { toast } from 'sonner'
+import { useState } from 'react'
+import { Layers3, UsersRound, LayoutDashboard, Star, Pencil, Eye, Sparkles, FileText, Tag, Banknote, Layout } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import type { IMentorCourseStudent } from '../../lib/types/course'
+import type { ICourseDetailItem, IMentorCourseStudent, IModulesData } from '../../lib/types/course'
+import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
 import { FormatRupiah } from '../../lib/func/func'
 import { CourseParticipantsSection } from './CourseParticipation'
-import type { CourseDetailItem } from '../../lib/types/api'
 import { ROUTES } from '../../lib/routes.ts'
+import { cn } from '../../lib/utils'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
+import { CourseLevelSignal } from './CourseLevel.tsx'
+import type { JoinedCourse } from '@/lib/types/user.ts'
 
-type CourseHubClientProps = {
+import { CourseMentorTable } from './CourseMentorTable'
+import { CourseReviewSection } from './CourseReviewSection'
+import { CourseCurriculumTab } from './CourseCurriculumTab'
+
+type CourseDetailProps = {
   courseUid: string
-  dataCourse: CourseDetailItem[]
+  dataCourse: ICourseDetailItem | ICourseDetailItem[] | null
   dataStudents: IMentorCourseStudent[]
-  // dataUpdateStatus: Record<string, unknown>
+  dataModules?: IModulesData[]
   role?: 'mentor' | 'admin'
 }
 
-export function DetailCourse({ courseUid, role = 'mentor', dataCourse, dataStudents }: CourseHubClientProps) {
+export function DetailCourse({ courseUid, role = 'mentor', dataCourse, dataStudents, dataModules }: CourseDetailProps) {
   const isAdmin = role === 'admin'
-  const [course, setCourse] = useState<CourseDetailItem | null>(null)
   const [isConfirm, setIsConfirm] = useState(false)
+  const course = Array.isArray(dataCourse) ? dataCourse[0] : dataCourse
+  const isPublished = Boolean(course?.is_published)
 
-  const mapCourse = (data: CourseDetailItem): Partial<CourseDetailItem> => {
-    return {
-      uid: (data.uid as string) ?? '',
-      title: (data.title as string) ?? '',
-      subtitle: (data.subtitle as string) ?? '',
-      description: (data.description as string) ?? '',
-      cover_url: data.cover_url as string,
-      thumbnail_url: (data.thumbnail_url as string) ?? '',
-      is_published: Boolean(data.is_published),
-      updated_at: (data.updated_at as string) ?? '',
-      category: data.category,
-      level: (data.level as CourseDetailItem['level']) ?? undefined,
-      price: data.price,
-      price_strike: data.price_strike,
-      what_you_learn: Array.isArray(data.what_you_learn) ? data.what_you_learn.map(String) : [],
-    }
-  }
+  const editHref = isAdmin ? ROUTES.admin.courseEditAdmin(courseUid) : ROUTES.mentor.courseEditMentor(courseUid)
+  const previewHref = ROUTES.viewModuleAndLessons(courseUid)
 
-  useEffect(() => {
-    if (Array.isArray(dataCourse) && dataCourse.length > 0) {
-      setCourse(mapCourse(dataCourse[0]) as CourseDetailItem)
-      return
-    }
-
-    setCourse(null)
-  }, [dataCourse])
-
-  const handlePublish = async () => {
-    if (!course || !isAdmin) return
-    setIsConfirm(true)
-
-    // void dataUpdateStatus.mutateAsync()
-    //   .then(() => {
-    //     toast.success('Kursus berhasil dipublikasikan.')
-    //     setCourse((prev) => (prev ? { ...prev, published: true } : prev))
-    //   })
-    //   .catch((error: unknown) => {
-    //     toast.error(error instanceof Error ? error.message : 'Gagal mempublikasikan kursus.')
-    //   })
-  }
-
-  if (!course) {
-    return (
-      <section className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-sm text-slate-600">Kursus tidak ditemukan.</p>
-        <Button asChild variant="outline" className="rounded-xl shadow-none">
-          <Link to={isAdmin ? '/admin/courses' : '/mentor/courses'}>Kembali ke daftar</Link>
-        </Button>
-      </section>
-    )
-  }
-
-  const categoryLabel = typeof course.category === 'string' ? course.category : (course.category?.name ?? '')
-  const hasDetails = categoryLabel || /*course.classType ||*/ course.price != null || course.level
-  const priceLabel = course.price != null ? (course.price === 0 ? 'Gratis' : FormatRupiah(course.price)) : null
-  // const moduleCount = course.moduleCount
-
-  const actions = [
-    {
-      icon: Pencil,
-      label: 'Edit Konten',
-      description: 'Buka editor modul untuk mengedit materi kursus.',
-      href: `${isAdmin ? '/admin' : '/mentor'}/courses/${courseUid}/edit`,
-      accent: 'group-hover:bg-blue-50 group-hover:text-blue-600',
-    },
-    {
-      icon: Eye,
-      label: 'Preview Materi',
-      description: 'Lihat tampilan materi seperti yang dilihat peserta.',
-      href: `/course/${courseUid}/view`,
-      accent: 'group-hover:bg-violet-50 group-hover:text-violet-600',
-    },
-    {
-      icon: isAdmin ? ClipboardList : ClipboardList,
-      label: isAdmin ? 'Reviews Peserta' : 'Kelola Tugas',
-      description: isAdmin ? 'Lihat review & Q&A peserta pada halaman terpisah.' : 'Buat, sunting tugas, dan tinjau kiriman peserta.',
-      href: isAdmin ? ROUTES.admin.reviewsAndQa(courseUid) : `/mentor/courses/${courseUid}/assignments`,
-      accent: isAdmin ? 'group-hover:bg-emerald-50 group-hover:text-emerald-600' : 'group-hover:bg-amber-50 group-hover:text-amber-600',
-    },
+  const TABS = [
+    { label: 'Overview', icon: LayoutDashboard },
+    { label: 'Kurikulum', icon: Layers3 },
+    { label: 'Peserta', icon: UsersRound },
+    { label: 'Review', icon: Star },
+    { label: 'Mentor', icon: UsersRound },
   ]
 
-  const infoRows = [
-    { label: 'Status', value: course.is_published ? 'Published' : 'Draft' },
-    { label: 'Kategori', value: categoryLabel || '-' },
-    // { label: 'Tipe Kelas', value: course.classType || '-' },
-    { label: 'Level', value: course.level || '-' },
-    { label: 'Harga', value: priceLabel || '-' },
-    // { label: 'Total Modul', value: moduleCount.toString() },
-  ]
+  const handleReplyReview = (reviewUid: string, comment: string) => {
+    console.log(`Replying to review ${reviewUid}: ${comment}`)
+    // API logic for reply would go here
+  }
+
+  const modules = dataModules ?? course?.modules ?? []
 
   return (
-    <section className="flex w-full flex-col gap-6">
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white">
-        {course.cover_url && (
-          <div className="absolute inset-0 opacity-[0.04]">
-            <img src={course.cover_url} width={384} height={256} loading="lazy" alt={course.title} className="h-full w-full object-cover blur-2xl" />
+    <div className="flex w-full flex-col gap-12 py-6 animate-in fade-in duration-500">
+      {/* 1. Optimized Header */}
+      <section className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-3xl space-y-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant={isPublished ? 'coursePublished' : 'courseDraft'} className="rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-widest shadow-xs">
+              {isPublished ? 'Published' : 'Draft'}
+            </Badge>
+            <CourseLevelSignal level={course?.level as JoinedCourse['level']} />
           </div>
-        )}
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{course?.title}</h1>
+            <p className="text-base text-slate-500 sm:text-lg leading-relaxed">{course?.subtitle}</p>
+          </div>
+        </div>
 
-        <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-start sm:gap-6">
-          {course.thumbnail_url && (
-            <div className="shrink-0 overflow-hidden rounded-xl border border-slate-200/60 shadow-xs">
-              <img src={course.thumbnail_url} width={384} height={256} loading="lazy" alt={course.title} className="h-32 w-48 object-cover sm:h-36 sm:w-52" />
-            </div>
+        <div className="flex flex-wrap items-center gap-3 pt-4 lg:pt-2">
+          <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[11px] font-black uppercase tracking-widest border-slate-200 transition-all hover:bg-slate-50 active:scale-95">
+            <Link to={editHref}>
+              <Pencil className="mr-2 size-3.5 opacity-60" />
+              Edit
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[11px] font-black uppercase tracking-widest border-slate-200 transition-all hover:bg-slate-50 active:scale-95">
+            <Link to={previewHref} target="_blank">
+              <Eye className="mr-2 size-3.5 opacity-60" />
+              Pratinjau
+            </Link>
+          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => setIsConfirm(true)}
+              className={cn(
+                'h-11 rounded-xl px-8 text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm',
+                isPublished ? 'bg-primary text-white hover:bg-primary/90' : 'bg-slate-900 text-white hover:bg-slate-800',
+              )}>
+              {isPublished ? <Sparkles className="mr-2 size-3.5" /> : <Sparkles className="mr-2 size-3.5" />}
+              {isPublished ? 'Update Status' : 'Terbitkan'}
+            </Button>
           )}
-
-          <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="flex flex-wrap items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{course.title}</h1>
-                <p className="mt-1 text-sm leading-relaxed text-slate-500">{course.subtitle}</p>
-              </div>
-
-              <span
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${
-                  course.is_published ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-100 text-slate-500'
-                }`}>
-                {course.is_published ? 'Published' : 'Draft'}
-              </span>
-            </div>
-
-            {hasDetails && (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                {categoryLabel && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{categoryLabel}</span>}
-                {/* {course.classType && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{course.classType}</span>} */}
-                {course.level && <span className="rounded-md bg-slate-100 px-2 py-1 font-medium text-slate-600">{course.level}</span>}
-                {priceLabel && <span className="rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700">{priceLabel}</span>}
-              </div>
-            )}
-          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="flex flex-col gap-6 xl:col-span-8">
-          <article className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Informasi Course</h2>
-                <p className="mt-1 text-sm text-slate-500">Ringkasan detail utama course untuk kebutuhan monitoring dan pengelolaan.</p>
-              </div>
-            </div>
+      {/* 2. Content Tabs */}
+      <Tabs defaultValue="overview" className="w-full space-y-12">
+        <div className="flex items-center border-b border-slate-100 overflow-x-auto no-scrollbar">
+          <TabsList variant="line" className="h-12 gap-10 flex-nowrap">
+            {TABS.map((t) => (
+              <TabsTrigger key={t.label} value={t.label.toLowerCase()} className="h-12 gap-2 text-[10px] font-black uppercase tracking-widest transition-all">
+                <t.icon className="size-3.5 opacity-60" />
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
-            <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {infoRows.map((item) => (
-                <div key={item.label} className="rounded-xl border border-slate-200/70 bg-slate-50/40 px-4 py-3">
-                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{item.label}</dt>
-                  <dd className="mt-1 text-sm font-semibold text-slate-900">{item.value}</dd>
+        <div className="min-h-[400px]">
+          <TabsContent value="overview" className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_340px]">
+              <div className="space-y-12">
+                <div className="flex flex-wrap items-center gap-10 border-b border-slate-100 pb-10">
+                  <div className="flex items-center gap-3 text-sm font-bold text-slate-600">
+                    <UsersRound className="size-4 text-primary opacity-70" /> {dataStudents.length} Peserta
+                  </div>
+                  <div className="flex items-center gap-3 text-sm font-bold text-slate-600">
+                    <Layers3 className="size-4 text-primary opacity-70" /> {course?.modules?.length || 0} Modul
+                  </div>
                 </div>
-              ))}
-            </dl>
-          </article>
-        </div>
-
-        <aside className="xl:col-span-4">
-          <article className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:sticky xl:top-6">
-            <h2 className="text-base font-semibold text-slate-900">Opsi Pengelolaan</h2>
-            <p className="mt-1 text-sm text-slate-500">Akses cepat untuk edit konten, preview materi, dan pengelolaan lanjutan.</p>
-
-            <div className="mt-4 flex flex-col gap-3">
-              {actions.map((action) => (
-                <Link
-                  key={action.href}
-                  to={action.href}
-                  className="group flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition-colors hover:border-slate-300/90">
-                  <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors ${action.accent}`}>
-                    <action.icon className="size-5" />
-                  </div>
-                  <div className="min-w-0 pt-0.5">
-                    <p className="text-sm font-semibold text-slate-900">{action.label}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{action.description}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            {!course.is_published && isAdmin ? (
-              <div className="mt-5 border-t border-slate-200 pt-5">
-                <Button type="button" className="h-10 w-full gap-1.5 rounded-xl text-sm font-semibold" onClick={() => void handlePublish()}>
-                  <Sparkles className="size-4" />
-                  Publish Kursus
-                </Button>
+                <article className="space-y-8">
+                  <h3 className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                    <FileText className="size-4" />
+                    Tentang Kursus
+                  </h3>
+                  <div
+                    className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-base"
+                    dangerouslySetInnerHTML={{ __html: course?.description || '<p className="italic text-slate-400">Belum ada deskripsi.</p>' }}
+                  />
+                </article>
               </div>
-            ) : null}
-          </article>
-        </aside>
-      </div>
 
-      <CourseParticipantsSection courseUid={courseUid} studentsData={dataStudents} />
+              <aside className="space-y-8">
+                <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xs space-y-10">
+                  <h3 className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                    <Layout className="size-4" />
+                    Informasi Kursus
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="group flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2.5">
+                        <Banknote className="size-3.5 text-slate-300" />
+                        <span className="text-xs font-medium text-slate-400">Harga</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm font-bold text-primary">{course?.price === 0 ? 'Gratis' : FormatRupiah(course?.price as number)}</span>
+                        {course?.price_strike ? <span className="text-[10px] text-slate-400 line-through">{FormatRupiah(course?.price_strike)}</span> : null}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2.5">
+                        <Tag className="size-3.5 text-slate-300" />
+                        <span className="text-xs font-medium text-slate-400">Tipe</span>
+                      </div>
+                      <span className="text-sm font-bold text-slate-900">{course?.course_type?.name || 'Reguler'}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2.5">
+                        <Layers3 className="size-3.5 text-slate-300" />
+                        <span className="text-xs font-medium text-slate-400">Kategori</span>
+                      </div>
+                      <span className="text-sm font-bold text-slate-900">{typeof course?.category === 'string' ? course?.category : course?.category?.name || '-'}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2.5">
+                        <Star className="size-3.5 text-amber-400" />
+                        <span className="text-xs font-medium text-slate-400">Rating</span>
+                      </div>
+                      <span className="text-sm font-bold text-slate-900">{course?.rating || '4.8'}</span>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="kurikulum" className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <CourseCurriculumTab modules={modules} editHref={editHref} />
+          </TabsContent>
+
+          <TabsContent value="peserta" className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <CourseParticipantsSection courseUid={courseUid} studentsData={dataStudents} />
+          </TabsContent>
+
+          <TabsContent value="review" className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <CourseReviewSection reviews={course?.reviews || []} isAdmin={isAdmin} onReply={handleReplyReview} />
+          </TabsContent>
+
+          <TabsContent value="mentor" className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <CourseMentorTable mentors={course?.mentors || []} isAdmin={isAdmin} onAssign={() => console.log('Assign Mentor')} />
+          </TabsContent>
+        </div>
+      </Tabs>
 
       {isConfirm && (
         <ConfirmDialog
-          title="Publikasikan kursus?"
-          description="Kursus akan ditandai aktif dan bisa diakses peserta."
-          confirmLabel="Publish"
+          title={isPublished ? 'Pembaruan Status' : 'Publikasikan Kursus'}
+          description={isPublished ? 'Sinkronkan ulang metadata kursus agar informasi terbaru dapat dilihat oleh publik.' : 'Kursus akan diterbitkan dan dapat segera diakses oleh seluruh peserta.'}
+          confirmLabel={isPublished ? 'Update' : 'Terbitkan'}
           onOpenChange={setIsConfirm}
           open={isConfirm}
-          onConfirm={handlePublish}
+          onConfirm={() => setIsConfirm(false)}
           onCancel={() => setIsConfirm(false)}
         />
       )}
-    </section>
+    </div>
   )
 }

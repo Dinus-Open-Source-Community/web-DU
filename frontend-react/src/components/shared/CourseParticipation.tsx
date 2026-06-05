@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, ClipboardList, Users } from 'lucide-react'
+import { BarChart3, CheckCircle, ClipboardList, Users } from 'lucide-react'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 import { Initials } from '../../lib/func/func'
 import { Pagination } from './Pagination'
 import { AttendanceBar, ProgressBar } from '../ui/bar'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { CourseParticipantStatusBadge } from '../ui/badge'
 
 type CourseParticipantsSectionProps = {
   courseUid: string
@@ -45,70 +47,81 @@ export function CourseParticipantsSection({ courseUid, studentsData }: CoursePar
         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center text-sm text-slate-500">Belum ada peserta terdaftar untuk kursus ini.</div>
       ) : (
         <>
-          <div className="hidden overflow-x-auto rounded-2xl border border-slate-200/70 md:block">
-            <table className="min-w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Siswa</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          <div className="hidden overflow-hidden rounded-2xl border border-slate-200/70 md:block">
+            <Table className="min-w-[760px] text-left text-sm">
+              <TableHeader className="bg-slate-50/70">
+                <TableRow className="border-slate-100 hover:bg-slate-50/70">
+                  <TableHead className="w-[38%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Siswa</TableHead>
+                  <TableHead className="w-[18%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <CheckCircle className="size-3.5" />
+                      Status
+                    </span>
+                  </TableHead>
+                  <TableHead className="w-[22%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     <span className="inline-flex items-center gap-1.5">
                       <BarChart3 className="size-3.5" />
                       Progress
                     </span>
-                  </th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  </TableHead>
+                  <TableHead className="w-[22%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     <span className="inline-flex items-center gap-1.5">
                       <ClipboardList className="size-3.5" />
                       Kehadiran
                     </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {paginatedStudents.map((student) => (
-                  <tr key={student.uid} className="border-b border-slate-100 last:border-b-0">
-                    <td className="px-5 py-4">
+                  <TableRow key={student.student_uid} className="border-slate-100 hover:bg-slate-50/60">
+                    <TableCell className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        {student.avatar ? (
-                          <img src={student.avatar} width={36} height={36} loading="lazy" alt={student.name} className="size-9 rounded-full object-cover ring-1 ring-slate-100" />
+                        {student.student_avatar_url ? (
+                          <img src={student.student_avatar_url} width={36} height={36} loading="lazy" alt={student.student_name} className="size-9 rounded-full object-cover ring-1 ring-slate-100" />
                         ) : (
-                          <span className="flex size-9 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.name)}</span>
+                          <span className="flex size-9 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.student_name)}</span>
                         )}
                         <div className="min-w-0">
-                          <p className="font-medium text-slate-900">{student.name}</p>
-                          {student.email && <p className="truncate text-xs text-slate-500">{student.email}</p>}
+                          <p className="font-medium text-slate-900">{student.student_name}</p>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <ProgressBar value={student.progressPercent} />
-                    </td>
-                    <td className="px-5 py-4">
+                    </TableCell>
+                    <TableCell className="px-5 py-4 text-sm font-medium text-slate-700">
+                      <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                    </TableCell>
+                    <TableCell className="min-w-44 px-5 py-4">
+                      <ProgressBar value={student.progress} />
+                    </TableCell>
+                    <TableCell className="min-w-44 px-5 py-4">
                       <AttendanceBar student={student} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           <ul className="flex flex-col gap-3 md:hidden">
             {paginatedStudents.map((student) => (
-              <li key={student.uid} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+              <li key={student.student_uid} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
                 <div className="flex items-start gap-3">
-                  {student.avatar ? (
-                    <img src={student.avatar} width={40} height={40} loading="lazy" alt={student.name} className="size-10 rounded-full object-cover ring-1 ring-slate-100" />
+                  {student.student_avatar_url ? (
+                    <img src={student.student_avatar_url} width={40} height={40} loading="lazy" alt={student.student_name} className="size-10 rounded-full object-cover ring-1 ring-slate-100" />
                   ) : (
-                    <span className="flex size-10 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.name)}</span>
+                    <span className="flex size-10 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.student_name)}</span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-900">{student.name}</p>
-                    {student.email && <p className="truncate text-xs text-slate-500">{student.email}</p>}
-                    <div className="mt-3 space-y-1">
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Progress</p>
-                      <ProgressBar value={student.progressPercent} />
+                    <p className="font-semibold text-slate-900">{student.student_name}</p>
+                    <div className="mt-3 flex flex-col gap-1">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Status</p>
+                      <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
                     </div>
-                    <div className="mt-3 space-y-1">
+                    <div className="mt-3 flex flex-col gap-1">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Progress</p>
+                      <ProgressBar value={student.progress} />
+                    </div>
+                    <div className="mt-3 flex flex-col gap-1">
                       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Kehadiran</p>
                       <AttendanceBar student={student} />
                     </div>

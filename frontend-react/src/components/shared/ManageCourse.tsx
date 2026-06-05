@@ -1,51 +1,41 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader } from './Header'
-import { SearchForm } from './SearchForm'
 import { Button } from '../ui/button'
 import { SegmentedFilter } from './SegemntedFilter'
 import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
 import { EmptyCourseIcon } from './icon'
-import type { ICourseItem, CourseListResponse } from '../../lib/types/api'
 import { CreateCourseDialog } from './CreateCourse'
+import type { ICourseItem } from '@/lib/types/course'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
 const ITEMS_PER_PAGE = 6
 
 type CourseManagementSectionProps = {
   role: 'mentor' | 'admin'
-  data: CourseListResponse
-}
-
-function toPublished(status?: string, isPublished?: boolean): boolean {
-  if (typeof isPublished === 'boolean') return isPublished
-  return typeof status === 'string' ? status.toUpperCase() === 'ACTIVE' : false
+  data: ICourseItem[] | null
 }
 
 export default function ManageCourseSection({ role = 'mentor', data }: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]>('Semua')
-  const [search, setSearch] = useState('')
-  const [searchApplied, setSearchApplied] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
-  const courses = useMemo(() => (data?.courses ?? []) as ICourseItem[], [data])
+  const courses = useMemo(() => data ?? ([] as ICourseItem[]), [data])
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [activeFilter, searchApplied])
+  }, [activeFilter])
 
   const filteredCourses = useMemo(() => {
-    const q = searchApplied.trim().toLowerCase()
     return courses.filter((c) => {
-      const published = toPublished(c.status, c.is_published)
+      const published = c.status === 'published' || c.is_published
       if (activeFilter === 'Aktif' && !published) return false
       if (activeFilter === 'Draf' && published) return false
-      if (!q) return true
-      return c.title.toLowerCase().includes(q) || (c.description?.toLowerCase().includes(q) ?? false) || (c.subtitle?.toLowerCase().includes(q) ?? false)
+      return true
     })
-  }, [courses, activeFilter, searchApplied])
+  }, [courses, activeFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredCourses.length / ITEMS_PER_PAGE))
   const paginatedCourses = filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
@@ -57,15 +47,7 @@ export default function ManageCourseSection({ role = 'mentor', data }: CourseMan
           <PageHeader title="Courses" subtitle={isAdmin ? 'Kelola kursus platform: buat, atur, dan hapus kursus.' : 'Kelola konten modul, lesson, dan peserta kursus.'} />
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <SearchForm
-              value={search}
-              onChange={setSearch}
-              onSubmit={() => setSearchApplied(search)}
-              placeholder="Cari kursus..."
-              className="w-full lg:max-w-3xl lg:flex-1"
-              submitButtonClassName="h-[46px]"
-            />
-
+            <SegmentedFilter items={filters.map((f) => ({ value: f, label: f }))} value={activeFilter} onChange={setActiveFilter} variant="scroll" />
             {isAdmin && (
               <Button className="h-11.5 shrink-0 gap-2 rounded-xl px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
                 <Plus className="h-5 w-5" />
@@ -75,22 +57,13 @@ export default function ManageCourseSection({ role = 'mentor', data }: CourseMan
           </div>
         </div>
 
-        <SegmentedFilter items={filters.map((f) => ({ value: f, label: f }))} value={activeFilter} onChange={setActiveFilter} variant="scroll" />
-
         {filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-10">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
               {paginatedCourses.map((c) => (
                 <CardMentor
                   key={c.uid}
-                  title={c.title}
-                  description={c.description ?? c.subtitle}
-                  image={c.thumbnail_url}
-                  mentorPublished={toPublished(c.status, c.is_published)}
-                  mentorModuleCount={0}
-                  mentorStudentCount={0}
-                  rating={0}
-                  totalReviews={0}
+                  data={c}
                   detailHref={`${isAdmin ? '/admin' : '/mentor'}/courses/${c.uid}`}
                 />
               ))}

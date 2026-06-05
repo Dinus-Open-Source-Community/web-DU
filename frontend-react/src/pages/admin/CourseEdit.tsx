@@ -1,11 +1,13 @@
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { CourseEditClient } from '../../components/courses/(authorized)/editCourse'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import type { CourseDetailItem } from '@/lib/types/api'
 
 const CourseEdit = () => {
   const { uid } = useParams()
   console.log('Course UID from URL:', uid) // Debugging line to check if UID is captured correctly
+  const [searchParams] = useSearchParams()
+  const moduleId = searchParams.get('moduleId') ?? undefined
 
   const courseData: CourseDetailItem = {
     category: {
@@ -144,7 +146,7 @@ const CourseEdit = () => {
 
   return (
     <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
-      <CourseEditClient courseData={courseData} role="admin" />
+      <CourseEditClient courseData={courseData} initialModuleId={moduleId} role="admin" />
     </AppSidebarProvider>
   )
 }

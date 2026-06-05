@@ -10,7 +10,7 @@ const statCardShellVariants = cva('rounded-2xl border border-slate-100 bg-white 
       default: 'w-72 h-32 p-6 mt-5',
       compact: 'p-6 shadow-2xs',
       legacy: 'w-72 h-32 p-6 mt-5 border-gray-400',
-      kpi: 'w-full p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] border-slate-200/80 flex-col items-start gap-3',
+      kpi: 'w-full p-4 shadow-xs border-slate-200 bg-gradient-to-br from-white to-slate-50/70 flex-col items-start gap-3',
     },
     size: {
       sm: 'p-4',
@@ -58,22 +58,22 @@ export function StatCard({ title, label, value, icon, themeIcon, variant, size, 
     return (
       <div className={cn(statCardShellVariants({ variant, size: undefined }), className)}>
         <div className="flex w-full items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{displayLabel}</span>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">{value}</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="truncate text-[11px] font-black uppercase tracking-widest text-slate-500">{displayLabel}</span>
+            <span className="text-2xl font-black tracking-tight text-slate-950">{value}</span>
           </div>
-          {icon && <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">{icon}</div>}
+          {icon && <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-primary/10 text-primary shadow-xs">{icon}</div>}
         </div>
 
         {(trendText || trendLabel) && (
-          <div className="flex w-full items-center gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
             {trendText && (
-              <span className={cn('inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-semibold', trendColor)}>
+              <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-bold', trendColor)}>
                 <TrendIcon className="h-3.5 w-3.5" aria-hidden />
                 {trendText}
               </span>
             )}
-            {trendLabel && <span className="text-xs text-slate-500">{trendLabel}</span>}
+            {trendLabel && <span className="truncate text-xs font-medium text-slate-500">{trendLabel}</span>}
           </div>
         )}
       </div>

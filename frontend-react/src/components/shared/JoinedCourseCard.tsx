@@ -6,6 +6,7 @@ import type { JoinedCourse } from '@/lib/types/user'
 import { Profile } from '../ui/profile'
 import { Check } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
+import { CourseLevelSignal } from './CourseLevel'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
 export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
@@ -14,18 +15,6 @@ interface JoinedCourseCardProps {
   data: JoinedCourse
   variant?: JoinedCourseCardVariant
   size?: JoinedCourseCardSize
-}
-
-const levelLabel: Record<JoinedCourse['level'], string> = {
-  PEMULA: 'Pemula',
-  MENENGAH: 'Menengah',
-  LANJUTAN: 'Lanjutan',
-}
-
-const levelSignal: Record<JoinedCourse['level'], { activeBars: number; color: string }> = {
-  PEMULA: { activeBars: 1, color: 'bg-emerald-500' },
-  MENENGAH: { activeBars: 2, color: 'bg-sky-500' },
-  LANJUTAN: { activeBars: 3, color: 'bg-violet-500' },
 }
 
 const clampProgress = (progress: number) => Math.min(100, Math.max(0, Math.round(progress)))
@@ -63,21 +52,6 @@ const sizes = {
   },
 }
 
-const CourseLevelSignal = ({ level }: { level: JoinedCourse['level'] }) => {
-  const signal = levelSignal[level]
-
-  return (
-    <span className="inline-flex items-end gap-2 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500">
-      <span className="flex h-4 items-end gap-0.5" aria-hidden>
-        {[1, 2, 3].map((bar) => (
-          <span key={bar} className={`w-1.5 rounded-full ${bar <= signal.activeBars ? signal.color : 'bg-slate-200'}`} style={{ height: `${bar * 4 + 4}px` }} />
-        ))}
-      </span>
-      {levelLabel[level]}
-    </span>
-  )
-}
-
 const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedCourseCardProps) => {
   const progress = clampProgress(data.progress)
   const isResume = variant === 'resume'
@@ -86,7 +60,8 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
   const mentor = data.mentors?.[0] ?? data.created_by
 
   return (
-    <div className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md`}>
+    <div
+      className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md`}>
       <div className={`relative aspect-video w-full shrink-0 overflow-hidden rounded-[10px] ${sizes.imageWrapper[size]}`}>
         {image ? (
           <img

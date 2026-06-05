@@ -2,12 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from './axios'
 import { API_ROUTES, type IQueryParamsPayload } from './api-path'
 import type { IResponse } from '@/lib/types/api'
-import type { ICategoryItem, ICategoryListResponse, ICourseListResponse, ICourseTypeListResponse, IDetailCourseResponse, IModulesByCourseUidResponse } from '@/lib/types/course'
+import type {
+  ICategoryItem,
+  ICategoryListResponse,
+  ICourseListResponse,
+  ICourseStudentListResponse,
+  ICourseTypeListResponse,
+  IDetailCourseResponse,
+  IModulesByCourseUidResponse,
+} from '@/lib/types/course'
 
-const useGetAllCourses = (params?: IQueryParamsPayload, enabled = true) => {
+const useGetAllCourses = (params?: IQueryParamsPayload) => {
   return useQuery({
     queryKey: ['courses', params],
-    enabled,
     queryFn: async () => {
       const response = await api.get<IResponse<ICourseListResponse>>(API_ROUTES.courses.getAll(params))
       return response.data.data
@@ -18,7 +25,7 @@ const useGetAllCourses = (params?: IQueryParamsPayload, enabled = true) => {
 const useGetCourseDetail = (uid: string) => {
   return useQuery({
     queryKey: ['courses', uid],
-    enabled: Boolean(uid),
+    enabled: !!uid,
     queryFn: async () => {
       const response = await api.get<IResponse<IDetailCourseResponse>>(API_ROUTES.courses.getByUid(uid))
       return response.data.data
@@ -60,7 +67,7 @@ const useGetCourseTypes = (params?: IQueryParamsPayload) => {
 const useGetModules = (uid: string) => {
   return useQuery({
     queryKey: ['modules', uid],
-    enabled: Boolean(uid),
+    enabled: !!uid,
     queryFn: async () => {
       const response = await api.get<IResponse<IModulesByCourseUidResponse>>(API_ROUTES.modules.getByCourseUid(uid))
       return response.data.data
@@ -71,12 +78,42 @@ const useGetModules = (uid: string) => {
 const useGetAllModulesByCourseUid = (courseUid: string) => {
   return useQuery({
     queryKey: ['modules', courseUid],
-    enabled: Boolean(courseUid),
+    enabled: !!courseUid,
     queryFn: async () => {
       const response = await api.get<IResponse<IModulesByCourseUidResponse>>(API_ROUTES.modules.getByCourseUid(courseUid))
       return response.data.data
     },
   })
+}
+
+// custom hook untuk mengambil data peserta pada course detail (mentor view)
+const useGetCourseStudents = (courseUid: string) => {
+  return useQuery({
+    queryKey: ['course-students', courseUid],
+    enabled: !!courseUid,
+    queryFn: async () => {
+      const response = await api.get<IResponse<ICourseStudentListResponse>>(API_ROUTES.courses.getStudentsByUid(courseUid))
+      return response.data.data
+    },
+  })
+}
+
+// custom hook untuk mengambil data course detail dan juga data user (admin view)
+const useGetCourseDetailAdminAndMentor = (uid: string) => {
+  const courseDetail = useGetCourseDetail(uid)
+  const userCourse = useGetCourseStudents(uid)
+  const moduleCourse = useGetModules(uid)
+
+  const isLoading = courseDetail.isLoading || userCourse.isLoading || moduleCourse.isLoading
+  const error = courseDetail.error || userCourse.error || moduleCourse.error
+
+  return {
+    courseDetail,
+    userCourse,
+    moduleCourse,
+    isLoading,
+    error,
+  }
 }
 
 const useCombinedCourseCategoriesAndTypes = (params?: IQueryParamsPayload) => {
@@ -115,7 +152,7 @@ const useGetCourseDetailWithCategories = (uid: string) => {
   const courseDetail = useGetCourseDetail(uid)
   const courseCategories = useGetCategoryById(courseDetail.data?.category.uid ?? '')
   const categoryUid = courseDetail.data?.category.uid
-  const popularCourses = useGetAllCourses({ course_category_id: categoryUid, per_page: 5 }, Boolean(categoryUid))
+  const popularCourses = useGetAllCourses({ course_category_id: categoryUid, per_page: 5 })
 
   const isLoading = courseDetail.isLoading || courseCategories.isLoading || popularCourses.isLoading
   const error = courseDetail.error || courseCategories.error || popularCourses.error
@@ -137,7 +174,9 @@ export {
   useGetCourseDetail,
   useGetModules,
   useGetAllModulesByCourseUid,
+  useGetCourseStudents,
   useGetCategoryById,
   useGetCourseDetailWithCategories,
   useGetCourseWithModules,
+  useGetCourseDetailAdminAndMentor,
 }

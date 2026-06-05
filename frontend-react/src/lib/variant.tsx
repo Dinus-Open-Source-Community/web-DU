@@ -47,6 +47,11 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       attendanceStudentComplete: 'rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-800',
       attendanceStudentLate: 'rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-900',
       attendanceStudentNotStarted: 'rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600',
+      // Mentor — status peserta kursus
+      courseParticipantActive: 'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700',
+      courseParticipantComplete: 'rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700',
+      courseParticipantLate: 'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800',
+      courseParticipantNotStarted: 'rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600',
       // Ajuan absensi menunggu review
       attendanceAjuanPending: 'rounded-md border border-amber-200/90 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-950',
       // Admin — severity (support tickets)

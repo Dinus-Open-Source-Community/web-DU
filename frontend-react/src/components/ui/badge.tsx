@@ -3,7 +3,7 @@ import { type VariantProps } from 'class-variance-authority'
 import { BadgeVariants } from '../../lib/variant'
 import { paymentStatusLabels, type PaymentStatus } from '../../lib/types/transaction'
 import { cn } from '../../lib/utils'
-import type { BadgeVariant, ClassType } from '../../lib/types/course'
+import type { BadgeVariant, ClassType, MentorCourseStudentStatus } from '../../lib/types/course'
 
 export type AppBadgeVariant = NonNullable<VariantProps<typeof BadgeVariants>['variant']>
 
@@ -33,6 +33,10 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   attendanceStudentComplete: 'Selesai',
   attendanceStudentLate: 'Terlambat',
   attendanceStudentNotStarted: 'Belum mulai',
+  courseParticipantActive: 'Aktif',
+  courseParticipantComplete: 'Selesai',
+  courseParticipantLate: 'Terlambat',
+  courseParticipantNotStarted: 'Belum mulai',
   attendanceAjuanPending: 'Menunggu',
   severityHigh: 'High',
   severityMedium: 'Medium',
@@ -92,6 +96,28 @@ export function ClassTypeBadge({ classType, className }: { classType: ClassType;
   return (
     <Badge variant={v} className={className}>
       {classType}
+    </Badge>
+  )
+}
+
+function courseParticipantStatusVariant(status?: string): Extract<AppBadgeVariant, `courseParticipant${string}`> {
+  const normalized = (status || '').trim().toLowerCase()
+
+  if (normalized === 'selesai' || normalized === 'completed' || normalized === 'complete') return 'courseParticipantComplete'
+  if (normalized === 'terlambat' || normalized === 'late') return 'courseParticipantLate'
+  if (normalized === 'belum mulai' || normalized === 'not_started' || normalized === 'not started' || normalized === 'registered' || normalized === 'terdaftar') {
+    return 'courseParticipantNotStarted'
+  }
+
+  return 'courseParticipantActive'
+}
+
+export function CourseParticipantStatusBadge({ status, className }: { status?: MentorCourseStudentStatus | string; className?: string }) {
+  const label = status || 'Terdaftar'
+
+  return (
+    <Badge variant={courseParticipantStatusVariant(status)} className={cn('max-w-full', className)}>
+      <span className="truncate">{label}</span>
     </Badge>
   )
 }
