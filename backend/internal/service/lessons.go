@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Summary      Create new lesson (Admin/Mentor)
@@ -278,11 +279,18 @@ func GetAllLessonsFunc(c *gin.Context) {
 		paginated := filtered[start:end]
 		totalPages := int((total + int64(perPage) - 1) / int64(perPage))
 
+		// Inject is_reading per lesson
+		lessonUIDs := make([]uuid.UUID, len(paginated))
+		for i, l := range paginated {
+			lessonUIDs[i] = l.Uid
+		}
+		readSet := buildReadingSet(userData.Uid, lessonUIDs)
+
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
 			"message": "Lessons retrieved successfully",
 			"data": gin.H{
-				"lessons": paginated,
+				"lessons": toLessonResponseList(paginated, readSet),
 				"meta": gin.H{
 					"total":        total,
 					"per_page":     perPage,
@@ -326,11 +334,18 @@ func GetAllLessonsFunc(c *gin.Context) {
 
 	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
 
+	// Inject is_reading per lesson (satu query batch)
+	lessonUIDs := make([]uuid.UUID, len(lessons))
+	for i, l := range lessons {
+		lessonUIDs[i] = l.Uid
+	}
+	readSet := buildReadingSet(userData.Uid, lessonUIDs)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lessons retrieved successfully",
 		"data": gin.H{
-			"lessons": lessons,
+			"lessons": toLessonResponseList(lessons, readSet),
 			"meta": gin.H{
 				"total":        total,
 				"per_page":     perPage,
@@ -396,10 +411,13 @@ func GetLessonByIDFunc(c *gin.Context) {
 		return
 	}
 
+	// Inject is_reading untuk lesson tunggal
+	readSet := buildReadingSet(userData.Uid, []uuid.UUID{lesson.Uid})
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lesson retrieved successfully",
-		"data":    lesson,
+		"data":    dto.NewLessonResponse(lesson, readSet[lesson.Uid]),
 		"error":   nil,
 	})
 }

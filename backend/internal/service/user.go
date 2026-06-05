@@ -21,7 +21,7 @@ import (
 )
 
 // @Summary      Get current authenticated user detail (Self)
-// @Description  Retrieve own detailed user data including profile, joined courses, enrollment invoices (course detail per enrollment, without URLs — use GET /invoices/url), transaction history, course reviews, enrollment summary, and mentored courses.
+// @Description  Retrieve own detailed user data including profile, joined courses, enrollment invoices (same structure as GET /invoices/{enrollment_id}, with invoice_url and filename per enrollment), transaction history, course reviews, enrollment summary, and mentored courses.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -138,30 +138,21 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 
 	enrollmentInvoices := make([]gin.H, 0, len(enrollments))
 	for _, en := range enrollments {
-		if en.Course == nil {
-			continue
-		}
+		filename := dto.GenerateInvoiceFilename(
+			en.Uid,
+			en.UserUid,
+			en.CourseUid,
+			en.EnrolledAt,
+		)
+		invoiceURL := utils.GetPublicURL(utils.GetBucketInvoices(), filename)
+
 		enrollmentInvoices = append(enrollmentInvoices, gin.H{
-			"enrollment_uid":    en.Uid,
-			"user_uid":          en.UserUid,
-			"course_uid":        en.CourseUid,
-			"enrolled_at":       en.EnrolledAt,
-			"enrollment_status": en.Status,
-			"progress":          en.Progress,
-			"course": gin.H{
-				"uid":            en.Course.Uid,
-				"title":          en.Course.Title,
-				"subtitle":       en.Course.Subtitle,
-				"slug":           en.Course.Slug,
-				"cover_url":      en.Course.CoverURL,
-				"thumbnail_url":  en.Course.ThumbnailURL,
-				"level":          en.Course.Level,
-				"status":         en.Course.Status,
-				"price":          en.Course.Price,
-				"price_strike":   en.Course.PriceStrike,
-				"is_premium":     en.Course.IsPremium,
-				"is_published":   en.Course.IsPublished,
-			},
+			"enrollment_uid": en.Uid,
+			"user_uid":       en.UserUid,
+			"course_uid":     en.CourseUid,
+			"filename":       filename,
+			"invoice_url":    invoiceURL,
+			"enrolled_at":    en.EnrolledAt,
 		})
 	}
 
@@ -174,6 +165,165 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		"completed": 0,
 		"cancelled": 0,
 	}
+
+	// --- kalkulasi progress lesson per enrollment (satu query batch) ---
+	// Kumpulkan enrollment_uid dan course_uid terlebih dahulu.
+	type enrollmentProgressKey struct {
+		EnrollmentUID uuid.UUID
+		CourseUID     uuid.UUID
+	}
+	var enrollmentKeys []enrollmentProgressKey
+	var courseUIDs []uuid.UUID
+	var enrollmentUIDs []uuid.UUID
+	seenForProgress := make(map[uuid.UUID]struct{})
+	for _, en := range enrollments {
+		if en.Course == nil {
+			continue
+		}
+		if _, already := seenForProgress[en.Uid]; already {
+			continue
+		}
+		seenForProgress[en.Uid] = struct{}{}
+		enrollmentKeys = append(enrollmentKeys, enrollmentProgressKey{EnrollmentUID: en.Uid, CourseUID: en.Course.Uid})
+		courseUIDs = append(courseUIDs, en.Course.Uid)
+		enrollmentUIDs = append(enrollmentUIDs, en.Uid)
+	}
+
+	// Total lesson per course (satu query)
+	type lessonCountRow struct {
+		CourseUID    uuid.UUID `gorm:"column:course_uid"`
+		TotalLessons int64     `gorm:"column:total_lessons"`
+	}
+	var lessonCountRows []lessonCountRow
+	if len(courseUIDs) > 0 {
+		database.DB.Table("lessons l").
+			Select("m.course_uid AS course_uid, COUNT(l.uid) AS total_lessons").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("m.course_uid IN ?", courseUIDs).
+			Group("m.course_uid").
+			Scan(&lessonCountRows)
+	}
+	totalLessonByCourse := make(map[uuid.UUID]int64, len(lessonCountRows))
+	for _, row := range lessonCountRows {
+		totalLessonByCourse[row.CourseUID] = row.TotalLessons
+	}
+
+	// Lesson yang sudah dibaca per enrollment (satu query)
+	type readCountRow struct {
+		EnrollmentUID uuid.UUID `gorm:"column:enrollment_uid"`
+		ReadCount     int64     `gorm:"column:read_count"`
+	}
+	var readCountRows []readCountRow
+	if len(enrollmentUIDs) > 0 {
+		database.DB.Table("lesson_readings").
+			Select("enrollment_uid, COUNT(uid) AS read_count").
+			Where("enrollment_uid IN ?", enrollmentUIDs).
+			Group("enrollment_uid").
+			Scan(&readCountRows)
+	}
+	readCountByEnrollment := make(map[uuid.UUID]int64, len(readCountRows))
+	for _, row := range readCountRows {
+		readCountByEnrollment[row.EnrollmentUID] = row.ReadCount
+	}
+
+	// Hitung progress (0.0 – 1.0) per enrollment
+	progressByEnrollment := make(map[uuid.UUID]float64, len(enrollmentKeys))
+	for _, key := range enrollmentKeys {
+		total := totalLessonByCourse[key.CourseUID]
+		read := readCountByEnrollment[key.EnrollmentUID]
+		if total > 0 {
+			progressByEnrollment[key.EnrollmentUID] = float64(read) / float64(total)
+		} else {
+			progressByEnrollment[key.EnrollmentUID] = 0.0
+		}
+	}
+	// --- akhir kalkulasi progress ---
+
+	// --- batch query: assignment submission per course ---
+	// Ambil semua submission assignment milik user di course-course yang diikuti,
+	// beserta info module dan lesson tempat assignment itu berada.
+	type assignmentSubmissionRow struct {
+		SubmissionUID        uuid.UUID  `gorm:"column:submission_uid"`
+		AttemptCount        int        `gorm:"column:attempt_count"`
+		ScorePercent        *float64   `gorm:"column:score_percent"`
+		Passed              *bool      `gorm:"column:passed"`
+		IsAutoGraded        bool       `gorm:"column:is_auto_graded"`
+		SubmittedAt         time.Time  `gorm:"column:submitted_at"`
+		GradedAt            *time.Time `gorm:"column:graded_at"`
+		AssignmentUID       uuid.UUID  `gorm:"column:assignment_uid"`
+		AssignmentTitle     string     `gorm:"column:assignment_title"`
+		AssignmentStatus    string     `gorm:"column:assignment_status"`
+		AssignmentTaskType  string     `gorm:"column:assignment_task_type"`
+		AssignmentDeadline  time.Time  `gorm:"column:assignment_deadline"`
+		LessonUID           uuid.UUID  `gorm:"column:lesson_uid"`
+		LessonTitle         string     `gorm:"column:lesson_title"`
+		LessonOrderIndex    int        `gorm:"column:lesson_order_index"`
+		ModuleUID           uuid.UUID  `gorm:"column:module_uid"`
+		ModuleTitle         string     `gorm:"column:module_title"`
+		ModuleOrderIndex    int        `gorm:"column:module_order_index"`
+		CourseUID           uuid.UUID  `gorm:"column:course_uid"`
+	}
+	var assignmentSubmissionRows []assignmentSubmissionRow
+	if len(courseUIDs) > 0 {
+		database.DB.Table("lesson_assignment_submissions AS sub").
+			Select(`
+				sub.uid AS submission_uid,
+				sub.attempt_count AS attempt_count,
+				sub.score_percent AS score_percent,
+				sub.passed AS passed,
+				sub.is_auto_graded AS is_auto_graded,
+				sub.created_at AS submitted_at,
+				sub.graded_at AS graded_at,
+				la.uid AS assignment_uid,
+				la.title AS assignment_title,
+				la.status AS assignment_status,
+				la.task_type AS assignment_task_type,
+				la.deadline_at AS assignment_deadline,
+				l.uid AS lesson_uid,
+				l.title AS lesson_title,
+				l.order_index AS lesson_order_index,
+				m.uid AS module_uid,
+				m.title AS module_title,
+				m.order_index AS module_order_index,
+				m.course_uid AS course_uid`).
+			Joins("JOIN lesson_assignments la ON la.uid = sub.lesson_assignment_uid").
+			Joins("JOIN lessons l ON l.uid = la.lesson_uid").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("sub.user_uid = ? AND m.course_uid IN ?", targetUID, courseUIDs).
+			Order("sub.created_at DESC").
+			Scan(&assignmentSubmissionRows)
+	}
+	// Group submission per course_uid
+	assignmentsByCourse := make(map[uuid.UUID][]gin.H)
+	for _, row := range assignmentSubmissionRows {
+		assignmentsByCourse[row.CourseUID] = append(assignmentsByCourse[row.CourseUID], gin.H{
+			"submission_uid":  row.SubmissionUID,
+			"attempt_count":   row.AttemptCount,
+			"score_percent":   row.ScorePercent,
+			"passed":          row.Passed,
+			"is_auto_graded":  row.IsAutoGraded,
+			"submitted_at":    row.SubmittedAt,
+			"graded_at":       row.GradedAt,
+			"assignment": gin.H{
+				"uid":        row.AssignmentUID,
+				"title":      utils.DecryptOrSelf(row.AssignmentTitle),
+				"status":     row.AssignmentStatus,
+				"task_type":  row.AssignmentTaskType,
+				"deadline_at": row.AssignmentDeadline,
+			},
+			"lesson": gin.H{
+				"uid":         row.LessonUID,
+				"title":       utils.DecryptOrSelf(row.LessonTitle),
+				"order_index": row.LessonOrderIndex,
+			},
+			"module": gin.H{
+				"uid":         row.ModuleUID,
+				"title":       utils.DecryptOrSelf(row.ModuleTitle),
+				"order_index": row.ModuleOrderIndex,
+			},
+		})
+	}
+	// --- akhir batch query assignment ---
 
 	for _, enrollment := range enrollments {
 		switch enrollment.Status {
@@ -196,7 +346,14 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		}
 
 		seenCourses[enrollment.Course.Uid] = struct{}{}
-		courses = append(courses, joinedCourseListItemResponse(*enrollment.Course, enrollment))
+		calculatedProgress := progressByEnrollment[enrollment.Uid]
+		courseItem := joinedCourseListItemResponse(*enrollment.Course, enrollment, calculatedProgress)
+		assignments := assignmentsByCourse[enrollment.Course.Uid]
+		if assignments == nil {
+			assignments = []gin.H{}
+		}
+		courseItem["assignments"] = assignments
+		courses = append(courses, courseItem)
 	}
 
 	type reviewRow struct {
@@ -246,7 +403,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		if review.CourseUID != nil {
 			courseTitle := ""
 			if review.CourseTitle != nil {
-				courseTitle = *review.CourseTitle
+				courseTitle = utils.DecryptOrSelf(*review.CourseTitle)
 			}
 
 			courseSlug := ""

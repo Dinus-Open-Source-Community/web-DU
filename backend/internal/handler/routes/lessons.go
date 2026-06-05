@@ -22,6 +22,16 @@ func StartLessonsRoutes(r *gin.Engine) {
 		lessonsGroup.PUT("/:id", service.UpdateLessonFunc)    // Admin/Mentor - Update lesson
 		lessonsGroup.DELETE("/:id", service.DeleteLessonFunc) // Admin/Mentor - Delete lesson
 
+		// Reading — tandai lesson sudah dibaca oleh user yang enroll
+		lessonsGroup.POST("/:id/read", service.MarkLessonAsReadFunc)         // Student - Mark lesson as read
+		lessonsGroup.GET("/:id/read", service.GetLessonReadingStatusFunc)    // Student - Check if lesson has been read
+
+		readingGroup := lessonsGroup.Group("/readings")
+		{
+			readingGroup.GET("/my-history", service.GetMyLessonReadingHistoryFunc)           // Student - Get own reading history
+			readingGroup.GET("/lesson/:lesson_id", service.GetLessonReadingsByLessonFunc)    // Admin/Mentor - Get all readers for a lesson
+		}
+
 		attendanceGroup := lessonsGroup.Group("/attendances")
 		{
 			attendanceGroup.POST("/", service.CreateAttendanceFunc)                     // Student - Check in for lesson

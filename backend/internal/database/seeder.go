@@ -31,10 +31,13 @@ func RunSeeder(db *gorm.DB) {
 	seedCourseCategories(db)
 	seedClassTypes(db)
 	seedCourses(db)
+	seedEnrollments(db)
 	seedCourseReviews(db)
 	seedModules(db)
 	seedLessons(db)
 	seedLessonAssignments(db)
+	seedLessonReadings(db)
+	seedLessonAssignmentSubmissions(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
 }
@@ -389,7 +392,66 @@ func seedCourses(db *gorm.DB) {
 	}
 }
 
-// seedCourseReviews membuat ulasan kursus dari siswa seed agar rating & total_reviews
+// seedEnrollments membuat enrollment awal untuk student seed.
+// Idempoten: lookup (user_uid, course_uid) — tidak menimpa enrollment yang sudah ada.
+// Hanya student yang sudah punya enrollment active/completed yang boleh memberikan
+// review (seedCourseReviews memvalidasi hal ini).
+func seedEnrollments(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Enrollments...")
+
+	type seedEnrollment struct {
+		StudentEmail string
+		CourseSlug   string
+	}
+
+	// Budi di-enroll ke 3 course, Siti ke semua 5 course — semua dengan status active.
+	enrollments := []seedEnrollment{
+		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals"},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs"},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql"},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals"},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs"},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development"},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials"},
+	}
+
+	for _, item := range enrollments {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk enrollment: %v", item.StudentEmail, err)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course slug %s tidak ditemukan untuk enrollment: %v", item.CourseSlug, err)
+			continue
+		}
+
+		var existing entity.Enrollment
+		err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&existing).Error
+		if err == nil {
+			continue // sudah ada
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
+			continue
+		}
+
+		enrollment := entity.Enrollment{
+			UserUid:   student.Uid,
+			CourseUid: course.Uid,
+			Status:    entity.EnrollmentActive,
+			Progress:  0,
+		}
+		if err := db.Create(&enrollment).Error; err != nil {
+			log.Printf("[Error] Gagal membuat enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
+		} else {
+			log.Printf("[Success] Enrollment %s untuk course %s berhasil dibuat", item.StudentEmail, item.CourseSlug)
+		}
+	}
+}
+
 // terisi di API publik. Idempoten: lookup (user_uid, course_uid) — tidak menimpa
 // review yang sudah ada.
 func seedCourseReviews(db *gorm.DB) {
@@ -440,18 +502,13 @@ func seedCourseReviews(db *gorm.DB) {
 			Comment:      "Bagian autentikasi agak cepat, perlu dipelajari ulang beberapa kali.",
 		},
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "rest-api-development",
-			Rating:       4,
-			Comment:      "Studi kasus REST API-nya relevan dengan kebutuhan backend sehari-hari.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "devops-essentials",
 			Rating:       5,
 			Comment:      "Pipeline CI/CD dan Docker dijelaskan dengan contoh yang bisa langsung dicoba.",
 		},
 	}
+
 
 	for _, item := range reviews {
 		student, err := findSeedUserByEmail(db, item.StudentEmail)
@@ -467,6 +524,22 @@ func seedCourseReviews(db *gorm.DB) {
 		course, err := findSeedCourseBySlug(db, item.CourseSlug)
 		if err != nil {
 			log.Printf("[Error] Course slug %s tidak ditemukan untuk review: %v", item.CourseSlug, err)
+			continue
+		}
+
+		// Validasi: user harus memiliki enrollment yang bukan pending untuk course ini.
+		// Hanya user dengan enrollment active/completed/cancelled yang boleh memberikan review
+		// (status pending berarti pembayaran belum selesai diverifikasi).
+		var activeEnrollment entity.Enrollment
+		enrollErr := db.Where("user_uid = ? AND course_uid = ? AND status != ?",
+			student.Uid, course.Uid, entity.EnrollmentPending).
+			First(&activeEnrollment).Error
+		if errors.Is(enrollErr, gorm.ErrRecordNotFound) {
+			log.Printf("[Seeder] User %s tidak memiliki enrollment aktif untuk course %s, review dilewati", item.StudentEmail, item.CourseSlug)
+			continue
+		}
+		if enrollErr != nil {
+			log.Printf("[Error] Gagal cek enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, enrollErr)
 			continue
 		}
 
@@ -864,7 +937,7 @@ func seedLessonAssignments(db *gorm.DB) {
 			RequireFileDescription:   taskType == entity.LessonAssignmentTaskTypeText,
 			InstructionAttachments:   instructionAttachments,
 			DeadlineAt:               time.Now().AddDate(0, 0, 7+i),
-			Status:                   entity.LessonAssignmentStatusDraft,
+			Status:                   entity.LessonAssignmentStatusTerbit,
 			AutoCloseAfterDeadline:   true,
 			AllowResubmit:            true,
 			MaxResubmitCount:         &maxResubmit,
@@ -896,5 +969,394 @@ func seedLessonAssignments(db *gorm.DB) {
 				log.Printf("[Info] assignment lesson=%s diperbarui ke format tiptap (task_type=%s)", lesson.Uid, assignment.TaskType)
 			}
 		}
+	}
+}
+
+// seedLessonReadings mensimulasikan beberapa student yang sudah membaca lesson
+// dari course yang mereka ikuti. Lookup idempotent menggunakan (lesson_uid,
+// enrollment_uid) sehingga aman dijalankan berulang kali.
+func seedLessonReadings(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Lesson Readings...")
+
+	type seedReading struct {
+		StudentEmail string
+		CourseSlug   string
+		// LessonOrderIndexes adalah order_index lesson yang sudah dibaca student.
+		LessonOrderIndexes []int
+	}
+
+	// Budi sudah membaca lesson ber-order_index 1 dan 2 dari setiap course-nya.
+	// Siti baru membaca lesson pertama saja (sedang baru mulai).
+	readings := []seedReading{
+		// Budi — golang-fundamentals
+		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1, 2}},
+		// Budi — web-development-nextjs
+		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", LessonOrderIndexes: []int{1}},
+		// Budi — database-design-sql
+		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", LessonOrderIndexes: []int{1, 2}},
+		// Siti — golang-fundamentals
+		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1}},
+		// Siti — web-development-nextjs
+		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", LessonOrderIndexes: []int{1}},
+		// Siti — rest-api-development
+		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", LessonOrderIndexes: []int{1}},
+		// Siti — devops-essentials
+		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", LessonOrderIndexes: []int{1}},
+	}
+
+	for _, item := range readings {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk lesson reading: %v", item.StudentEmail, err)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course slug %s tidak ditemukan untuk lesson reading: %v", item.CourseSlug, err)
+			continue
+		}
+
+		// Cari enrollment aktif milik student pada course ini
+		var enrollment entity.Enrollment
+		enrollErr := db.Where("user_uid = ? AND course_uid = ? AND status IN ?",
+			student.Uid, course.Uid,
+			[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
+		).First(&enrollment).Error
+		if errors.Is(enrollErr, gorm.ErrRecordNotFound) {
+			log.Printf("[Seeder] User %s tidak punya enrollment aktif di course %s, reading dilewati", item.StudentEmail, item.CourseSlug)
+			continue
+		}
+		if enrollErr != nil {
+			log.Printf("[Error] Gagal cek enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, enrollErr)
+			continue
+		}
+
+		// Ambil lesson dari course ini yang sesuai order_index yang diminta
+		var lessons []entity.Lesson
+		db.Table("lessons l").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("m.course_uid = ? AND l.order_index IN ?", course.Uid, item.LessonOrderIndexes).
+			Order("l.order_index ASC").
+			Find(&lessons)
+
+		if len(lessons) == 0 {
+			log.Printf("[Seeder] Tidak ada lesson ditemukan untuk course %s dengan order_index %v", item.CourseSlug, item.LessonOrderIndexes)
+			continue
+		}
+
+		for _, lesson := range lessons {
+			var existing entity.LessonReading
+			err := db.Where("lesson_uid = ? AND enrollment_uid = ?", lesson.Uid, enrollment.Uid).First(&existing).Error
+			if err == nil {
+				continue // sudah ada, lewati
+			}
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("[Error] Gagal cek lesson reading %s / lesson=%s: %v", item.StudentEmail, lesson.Uid, err)
+				continue
+			}
+
+			reading := entity.LessonReading{
+				LessonUid:     lesson.Uid,
+				EnrollmentUid: enrollment.Uid,
+				ReadAt:        time.Now(),
+			}
+			if err := db.Create(&reading).Error; err != nil {
+				log.Printf("[Error] Gagal membuat lesson reading %s / lesson order_index=%d (course %s): %v", item.StudentEmail, lesson.OrderIndex, item.CourseSlug, err)
+				continue
+			}
+			log.Printf("[Success] Lesson reading %s / lesson order_index=%d (course %s) berhasil dibuat", item.StudentEmail, lesson.OrderIndex, item.CourseSlug)
+		}
+	}
+}
+
+// seedLessonAssignmentSubmissions membuat contoh submission assignment dari
+// student seed (Budi dan Siti) untuk beberapa assignment yang sudah ada di
+// course yang mereka ikuti. Submission mencakup:
+//   - Text submission sudah dinilai mentor (scored + feedback)
+//   - Quiz submission auto-graded
+//   - Submission yang masih pending penilaian
+//
+// Lookup idempotent menggunakan unique constraint (lesson_assignment_uid, user_uid).
+func seedLessonAssignmentSubmissions(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Lesson Assignment Submissions...")
+
+	// Pastikan status semua assignment seed menjadi TERBIT agar submission masuk akal.
+	if err := db.Model(&entity.LessonAssignment{}).
+		Where("status = ?", entity.LessonAssignmentStatusDraft).
+		Update("status", entity.LessonAssignmentStatusTerbit).Error; err != nil {
+		log.Printf("[Warning] Gagal publish assignment seed: %v", err)
+	}
+
+	type seedSubmission struct {
+		StudentEmail     string
+		CourseSlug       string
+		// ModuleOrderIndex dan LessonOrderIndex dipakai untuk mencari lesson spesifik.
+		ModuleOrderIndex int
+		LessonOrderIndex int
+		// Jika IsQuiz true, submission dikirim sebagai quiz answers.
+		IsQuiz      bool
+		PlainText   string
+		// QuizAnswers: map[questionId]selectedOptionId
+		QuizAnswers  map[string]string
+		AttemptCount int
+		// Grading (nil jika belum dinilai)
+		ScorePercent *float64
+		Passed       *bool
+		IsAutoGraded bool
+		Feedback     string
+		// Quiz scoring helpers
+		QuizCorrect *int
+		QuizTotal   *int
+	}
+
+	boolTrue  := true
+	boolFalse := false
+
+	score100 := 100.0
+	score85  := 85.0
+	score70  := 70.0
+	score66  := 66.67
+	score33  := 33.33
+
+	correct3 := 3
+	correct2 := 2
+	correct1 := 1
+	total3   := 3
+
+	submissions := []seedSubmission{
+		// ── BUDI ──────────────────────────────────────────────────────────────
+		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text assignment, dinilai sempurna
+		{
+			StudentEmail:     "budi@doscom.id",
+			CourseSlug:       "golang-fundamentals",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya membuat program Hello World menggunakan Go. Program menampilkan teks ke console melalui fmt.Println tanpa dependensi eksternal karena memanfaatkan standard library bawaan Go.",
+			AttemptCount:     1,
+			ScorePercent:     &score100,
+			Passed:           &boolTrue,
+			IsAutoGraded:     false,
+			Feedback:         "Excellent! Implementasi sudah benar dan penjelasannya sangat jelas. Terus pertahankan!",
+		},
+		// golang-fundamentals, Module 2 (Syntax dan Tipe Data), Lesson 1 — quiz, auto-graded sempurna
+		{
+			StudentEmail:     "budi@doscom.id",
+			CourseSlug:       "golang-fundamentals",
+			ModuleOrderIndex: 2,
+			LessonOrderIndex: 1,
+			IsQuiz:           true,
+			QuizAnswers:      map[string]string{"q1": "a", "q2": "b", "q3": "b"},
+			AttemptCount:     1,
+			ScorePercent:     &score100,
+			Passed:           &boolTrue,
+			IsAutoGraded:     true,
+			QuizCorrect:      &correct3,
+			QuizTotal:        &total3,
+		},
+		// golang-fundamentals, Module 3 (Control Flow dan Functions), Lesson 1 — quiz, auto-graded tidak lulus
+		{
+			StudentEmail:     "budi@doscom.id",
+			CourseSlug:       "golang-fundamentals",
+			ModuleOrderIndex: 3,
+			LessonOrderIndex: 1,
+			IsQuiz:           true,
+			QuizAnswers:      map[string]string{"q1": "a", "q2": "a", "q3": "b"},
+			AttemptCount:     2,
+			ScorePercent:     &score66,
+			Passed:           &boolFalse,
+			IsAutoGraded:     true,
+			QuizCorrect:      &correct2,
+			QuizTotal:        &total3,
+		},
+		// web-development-nextjs, Module 1 (React Basics), Lesson 1 — text, dinilai baik
+		{
+			StudentEmail:     "budi@doscom.id",
+			CourseSlug:       "web-development-nextjs",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya membuat komponen React yang menampilkan daftar item menggunakan useState dan map. Setiap item memiliki key unik untuk performa optimal. Komponen menerima props berupa array dan merender elemen li untuk tiap item.",
+			AttemptCount:     1,
+			ScorePercent:     &score85,
+			Passed:           &boolTrue,
+			IsAutoGraded:     false,
+			Feedback:         "Bagus! Penggunaan key prop sudah benar. Coba tambahkan PropTypes untuk type checking yang lebih baik.",
+		},
+		// database-design-sql, Module 1 (SQL Basics), Lesson 1 — text, pending penilaian
+		{
+			StudentEmail:     "budi@doscom.id",
+			CourseSlug:       "database-design-sql",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya merancang skema database toko online dengan tabel: users, products, orders, dan order_items. Relasi antar tabel menggunakan foreign key, dan primary key setiap tabel menggunakan UUID untuk menghindari sequential ID exposure.",
+			AttemptCount:     1,
+			ScorePercent:     nil,
+			Passed:           nil,
+			IsAutoGraded:     false,
+		},
+
+		// ── SITI ──────────────────────────────────────────────────────────────
+		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text, dinilai baik
+		{
+			StudentEmail:     "siti@doscom.id",
+			CourseSlug:       "golang-fundamentals",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Program Go pertama saya berhasil! Go punya sintaks bersih dan kompilasi cepat. Saya mencoba variasi fmt.Println, fmt.Printf, dan fmt.Sprintf untuk memahami perbedaan ketiganya.",
+			AttemptCount:     1,
+			ScorePercent:     &score85,
+			Passed:           &boolTrue,
+			IsAutoGraded:     false,
+			Feedback:         "Eksplorasi yang baik! Senang kamu mencoba berbagai fungsi fmt. Selanjutnya coba eksplorasi error handling di Go.",
+		},
+		// golang-fundamentals, Module 2 (Syntax dan Tipe Data), Lesson 1 — quiz, auto-graded skor rendah
+		{
+			StudentEmail:     "siti@doscom.id",
+			CourseSlug:       "golang-fundamentals",
+			ModuleOrderIndex: 2,
+			LessonOrderIndex: 1,
+			IsQuiz:           true,
+			QuizAnswers:      map[string]string{"q1": "a", "q2": "c", "q3": "a"},
+			AttemptCount:     1,
+			ScorePercent:     &score33,
+			Passed:           &boolFalse,
+			IsAutoGraded:     true,
+			QuizCorrect:      &correct1,
+			QuizTotal:        &total3,
+		},
+		// web-development-nextjs, Module 1 (React Basics), Lesson 1 — text, pending penilaian
+		{
+			StudentEmail:     "siti@doscom.id",
+			CourseSlug:       "web-development-nextjs",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya membuat komponen React untuk menampilkan profil pengguna dengan props nama, email, dan avatar. Saya menggunakan conditional rendering untuk fallback avatar jika URL gambar tidak tersedia.",
+			AttemptCount:     1,
+			ScorePercent:     nil,
+			Passed:           nil,
+			IsAutoGraded:     false,
+		},
+		// rest-api-development, Module 1 (API Principles), Lesson 1 — text, sudah dinilai
+		{
+			StudentEmail:     "siti@doscom.id",
+			CourseSlug:       "rest-api-development",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya mendokumentasikan perbedaan REST vs GraphQL. REST pakai endpoint berbeda per resource, GraphQL satu endpoint dengan query fleksibel. Untuk project kecil-menengah, REST lebih mudah di-debug.",
+			AttemptCount:     1,
+			ScorePercent:     &score70,
+			Passed:           &boolTrue,
+			IsAutoGraded:     false,
+			Feedback:         "Analisis sudah cukup baik. Coba tambahkan contoh konkret penggunaan masing-masing untuk memperkuat argumenmu.",
+		},
+		// devops-essentials, Module 1 (Docker Fundamentals), Lesson 1 — text, pending penilaian
+		{
+			StudentEmail:     "siti@doscom.id",
+			CourseSlug:       "devops-essentials",
+			ModuleOrderIndex: 1,
+			LessonOrderIndex: 1,
+			IsQuiz:           false,
+			PlainText:        "Saya membuat Dockerfile untuk aplikasi Node.js menggunakan multi-stage build agar ukuran image final minimal. Base image node:20-alpine dipilih karena ringan. Build menghasilkan image ~45MB.",
+			AttemptCount:     1,
+			ScorePercent:     nil,
+			Passed:           nil,
+			IsAutoGraded:     false,
+		},
+	}
+
+	for _, item := range submissions {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk submission: %v", item.StudentEmail, err)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course slug %s tidak ditemukan untuk submission: %v", item.CourseSlug, err)
+			continue
+		}
+
+		// Pastikan student punya enrollment aktif di course ini
+		var enrollment entity.Enrollment
+		if err := db.Where("user_uid = ? AND course_uid = ? AND status IN ?",
+			student.Uid, course.Uid,
+			[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
+		).First(&enrollment).Error; err != nil {
+			log.Printf("[Seeder] User %s tidak punya enrollment aktif di course %s, submission dilewati", item.StudentEmail, item.CourseSlug)
+			continue
+		}
+
+		// Cari module spesifik berdasarkan order_index
+		var module entity.Module
+		if err := db.Where("course_uid = ? AND order_index = ?", course.Uid, item.ModuleOrderIndex).First(&module).Error; err != nil {
+			log.Printf("[Seeder] Module order_index=%d di course %s tidak ditemukan: %v", item.ModuleOrderIndex, item.CourseSlug, err)
+			continue
+		}
+
+		// Cari lesson spesifik berdasarkan order_index dalam module
+		var lesson entity.Lesson
+		if err := db.Where("module_uid = ? AND order_index = ?", module.Uid, item.LessonOrderIndex).First(&lesson).Error; err != nil {
+			log.Printf("[Seeder] Lesson order_index=%d di module=%s tidak ditemukan: %v", item.LessonOrderIndex, module.Uid, err)
+			continue
+		}
+
+		// Cari assignment yang terpasang pada lesson ini
+		var assignment entity.LessonAssignment
+		if err := db.Where("lesson_uid = ?", lesson.Uid).First(&assignment).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("[Seeder] Lesson %s (module=%d, lesson=%d, course=%s) tidak punya assignment, submission dilewati",
+					lesson.Uid, item.ModuleOrderIndex, item.LessonOrderIndex, item.CourseSlug)
+			} else {
+				log.Printf("[Error] Gagal cek assignment lesson=%s: %v", lesson.Uid, err)
+			}
+			continue
+		}
+
+		// Idempoten: cek apakah submission sudah ada
+		var existing entity.LessonAssignmentSubmission
+		if err := db.Where("lesson_assignment_uid = ? AND user_uid = ?", assignment.Uid, student.Uid).First(&existing).Error; err == nil {
+			continue // sudah ada
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek submission %s / assignment=%s: %v", item.StudentEmail, assignment.Uid, err)
+			continue
+		}
+
+		// Susun submission
+		sub := entity.LessonAssignmentSubmission{
+			LessonAssignmentUid: assignment.Uid,
+			UserUid:             student.Uid,
+			AttemptCount:        item.AttemptCount,
+			ScorePercent:        item.ScorePercent,
+			Passed:              item.Passed,
+			IsAutoGraded:        item.IsAutoGraded,
+			QuizCorrectCount:    item.QuizCorrect,
+			QuizQuestionCount:   item.QuizTotal,
+		}
+
+		if item.IsQuiz {
+			quizAnswersJSON, _ := json.Marshal(item.QuizAnswers)
+			sub.QuizAnswers = quizAnswersJSON
+		} else {
+			sub.PlainText = item.PlainText
+			if item.Feedback != "" {
+				sub.Feedback = item.Feedback
+				gradedAt := time.Now().Add(-24 * time.Hour)
+				sub.GradedAt = &gradedAt
+			}
+		}
+
+		if err := db.Create(&sub).Error; err != nil {
+			log.Printf("[Error] Gagal membuat submission %s / assignment=%s: %v", item.StudentEmail, assignment.Uid, err)
+			continue
+		}
+		log.Printf("[Success] Submission %s untuk assignment di course=%s (module=%d, lesson=%d) berhasil dibuat",
+			item.StudentEmail, item.CourseSlug, item.ModuleOrderIndex, item.LessonOrderIndex)
 	}
 }

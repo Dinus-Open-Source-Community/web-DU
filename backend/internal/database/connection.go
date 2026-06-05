@@ -63,10 +63,12 @@ func ConnectDB() {
 		&entity.LessonAssignmentSubmission{},
 		&entity.Enrollment{},
 		&entity.Payment{},
+		&entity.PaymentMethodConfig{},
 		&entity.CourseReview{},
 		&entity.CourseReviewReply{},
 		&entity.CourseAnnouncement{},
 		&entity.LessonAttendance{},
+		&entity.LessonReading{},
 	)
 
 	log.Println("[Success] Berhasil terhubung ke database")

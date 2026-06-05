@@ -1251,6 +1251,56 @@ paths:
       summary: Assign mentors to course (Super Admin / Admin)
       tags:
       - Course
+  /courses/{id}/progress:
+    get:
+      consumes:
+      - application/json
+      description: Returns how many lessons the authenticated user has read out of
+        the total lessons
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Progress retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid course uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: must be enrolled in this course'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve progress
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get course reading progress for authenticated user (Enrolled Student/Admin/Mentor)
+      tags:
+      - Course
   /courses/{id}/review:
     post:
       consumes:
@@ -2366,6 +2416,113 @@ paths:
       summary: Grade text lesson assignment submission (Admin / Mentor)
       tags:
       - Lesson Assignment Submission
+  /lessons/{id}/read:
+    get:
+      consumes:
+      - application/json
+      description: Returns whether the authenticated user has read a specific lesson.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Enrollment UID (optional, auto-resolved if omitted)
+        in: query
+        name: enrollment_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reading status retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid lesson uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve reading status
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get lesson reading status for the authenticated user (Enrolled Student)
+      tags:
+      - Lesson
+    post:
+      consumes:
+      - application/json
+      description: Mark a lesson as read (is_reading) for the authenticated user's
+        enrollment.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson already marked as read (existing record returned)
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Lesson marked as read successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid lesson uid
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: must be enrolled in the course'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to mark lesson as read
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark lesson as read (Enrolled Student/Admin/Mentor)
+      tags:
+      - Lesson
   /lessons/attendances:
     post:
       consumes:
@@ -2687,6 +2844,85 @@ paths:
       summary: Get student attendance history (Student Only)
       tags:
       - Lesson Attendance
+  /lessons/readings/lesson/{lesson_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users who have read a specific lesson. Requires Admin,
+        Super Admin, or assigned Mentor.
+      parameters:
+      - description: Lesson UID
+        in: path
+        name: lesson_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson readings retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Lesson not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve lesson readings
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all reading records for a lesson (Admin/Mentor)
+      tags:
+      - Lesson Reading
+  /lessons/readings/my-history:
+    get:
+      consumes:
+      - application/json
+      description: Get all lessons that the authenticated user has read, optionally
+        filtered by enrollment.
+      parameters:
+      - description: Filter by enrollment UID
+        in: query
+        name: enrollment_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reading history retrieved
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve reading history
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my lesson reading history (Enrolled Student)
+      tags:
+      - Lesson Reading
   /login:
     post:
       consumes:
@@ -3185,6 +3421,75 @@ paths:
       summary: Create Payment (All Roles)
       tags:
       - Payment
+  /payment/method:
+    get:
+      description: Mengembalikan semua konfigurasi metode pembayaran yang tersedia
+        tanpa pagination.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of payment methods
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get All Payment Methods (All Roles)
+      tags:
+      - Payment
+    post:
+      consumes:
+      - multipart/form-data
+      description: Tambah atau perbarui konfigurasi metode pembayaran beserta gambar/logo-nya.
+      parameters:
+      - description: Kode metode pembayaran (e.g. BRIVA, OVO, QRIS2)
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: File gambar/logo metode pembayaran (opsional)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment method set successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set Payment Method (Admin)
+      tags:
+      - Payment
   /payment/tripay:
     get:
       consumes:
@@ -3326,9 +3631,9 @@ paths:
       consumes:
       - application/json
       description: Retrieve own detailed user data including profile, joined courses,
-        enrollment invoices (course detail per enrollment, without URLs — use GET
-        /invoices/url), transaction history, course reviews, enrollment summary, and
-        mentored courses.
+        enrollment invoices (same structure as GET /invoices/{enrollment_id}, with
+        invoice_url and filename per enrollment), transaction history, course reviews,
+        enrollment summary, and mentored courses.
       produces:
       - application/json
       responses:

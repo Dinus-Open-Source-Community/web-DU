@@ -242,10 +242,10 @@ func courseListResponse(courses []entity.Course, summaries map[uuid.UUID]courseR
 	return items
 }
 
-func joinedCourseListItemResponse(course entity.Course, enrollment entity.Enrollment) gin.H {
+func joinedCourseListItemResponse(course entity.Course, enrollment entity.Enrollment, calculatedProgress float64) gin.H {
 	item := courseListItemResponse(course, emptyCourseReviewSummary())
 	item["enrolled_at"] = enrollment.EnrolledAt
-	item["progress"] = enrollment.Progress
+	item["progress"] = calculatedProgress
 	item["enrollment_status"] = enrollment.Status
 	return item
 }
