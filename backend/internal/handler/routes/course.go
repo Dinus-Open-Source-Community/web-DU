@@ -24,11 +24,12 @@ func StartCourseRoutes(r *gin.Engine) {
 	authCourseGroup := r.Group("/courses")
 	authCourseGroup.Use(middleware.AuthMiddleware())
 	{
-		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                 // Students only
-		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                       // Enrolled students only
-		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
-		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Super Admin / Admin
-		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Super Admin / Admin
+		authCourseGroup.GET("/:id/progress", service.GetCourseProgressFunc)                            // Enrolled students / Admin / Mentor
+		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                       // Students only
+		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                             // Enrolled students only
+		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc)       // Mentor+ only
+		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                          // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)                  // Super Admin / Admin
 
 		authCourseGroup.POST("/", service.PostAdminCourseFunc) // Super Admin / Admin
 	}

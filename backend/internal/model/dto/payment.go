@@ -1,5 +1,20 @@
 package dto
 
+// SetPaymentMethodRequest adalah body request untuk POST /payment/method.
+// Menerima multipart/form-data dengan field 'name' (kode metode) dan
+// 'image' (file gambar/logo opsional).
+type SetPaymentMethodRequest struct {
+	// Name adalah kode metode pembayaran, contoh: BRIVA, OVO, QRIS2
+	Name string `form:"name" binding:"required"`
+}
+
+// PaymentMethodResponse adalah representasi response untuk satu metode pembayaran.
+type PaymentMethodResponse struct {
+	Uid      string `json:"uid"`
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
+}
+
 // OrderItem represents a single item in the order
 type OrderItem struct {
 	SKU        string `json:"sku"`

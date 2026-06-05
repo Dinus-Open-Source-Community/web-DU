@@ -60,6 +60,7 @@ func InitMinio() error {
 		os.Getenv("MINIO_BUCKET_COURSES"),
 		os.Getenv("MINIO_BUCKET_INVOICES"),
 		os.Getenv("MINIO_BUCKET_ASSIGNMENTS"),
+		os.Getenv("MINIO_BUCKET_PAYMENT_METHODS"),
 	}
 
 	ctx := context.Background()
@@ -314,6 +315,11 @@ func GetBucketInvoices() string {
 // GetBucketAssignments returns the lesson-assignment submissions bucket name from env
 func GetBucketAssignments() string {
 	return os.Getenv("MINIO_BUCKET_ASSIGNMENTS")
+}
+
+// GetBucketPaymentMethods returns the payment method images bucket name from env
+func GetBucketPaymentMethods() string {
+	return os.Getenv("MINIO_BUCKET_PAYMENT_METHODS")
 }
 
 // BucketAndObjectFromPublicURL mem-parse URL object MinIO yang dihasilkan

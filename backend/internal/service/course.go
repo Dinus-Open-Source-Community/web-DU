@@ -1133,3 +1133,134 @@ func GetInvoiceURLFunc(c *gin.Context) {
 		"error": nil,
 	})
 }
+
+// @Summary      Get course reading progress for authenticated user (Enrolled Student/Admin/Mentor)
+// @Description  Returns how many lessons the authenticated user has read out of the total lessons
+//
+//	in the given course, expressed as a decimal between 0.0 and 1.0.
+//	Formula: lessons_read / total_lessons.
+//	Requires the user to be enrolled (active or completed) in the course, or to be an
+//	admin / assigned mentor (they receive progress = 0.0 since they have no enrollment).
+//
+// @Tags         Course
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path  string  true  "Course UID"
+// @Success      200  {object}  map[string]any  "Progress retrieved successfully"
+// @Failure      400  {object}  map[string]any  "Invalid course uid"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: must be enrolled in this course"
+// @Failure      404  {object}  map[string]any  "Course not found"
+// @Failure      500  {object}  map[string]any  "Failed to retrieve progress"
+// @Router       /courses/{id}/progress [get]
+func GetCourseProgressFunc(c *gin.Context) {
+	userData, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+
+	// Pastikan course ada
+	var course entity.Course
+	if err := database.DB.First(&course, courseUID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// --- Hitung total lesson di course ini ---
+	var totalLessons int64
+	if err := database.DB.Table("lessons l").
+		Joins("JOIN modules m ON m.uid = l.module_uid").
+		Where("m.course_uid = ?", courseUID).
+		Count(&totalLessons).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count total lessons",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Admin & Mentor: boleh lihat, progress selalu 0 (tidak punya enrollment)
+	isAdminOrMentor := hasAdminAccess(userData.Role) || userData.Role == entity.MentorRole
+	if isAdminOrMentor {
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Course progress retrieved successfully",
+			"data": gin.H{
+				"course_uid":      courseUID,
+				"total_lessons":   totalLessons,
+				"lessons_read":    0,
+				"progress":        0.0,
+				"enrollment_uid":  nil,
+				"enrollment_status": nil,
+			},
+			"error": nil,
+		})
+		return
+	}
+
+	// Student: cari enrollment aktif/completed
+	var enrollment entity.Enrollment
+	err := database.DB.
+		Where("user_uid = ? AND course_uid = ? AND status IN ?",
+			userData.Uid,
+			courseUID,
+			[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
+		).
+		First(&enrollment).Error
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: you must be enrolled in this course",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	// --- Hitung lesson yang sudah dibaca user (via enrollment) ---
+	var lessonsRead int64
+	if err := database.DB.Model(&entity.LessonReading{}).
+		Where("enrollment_uid = ?", enrollment.Uid).
+		Count(&lessonsRead).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count read lessons",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Kalkulasi progress (0.0 – 1.0)
+	progress := 0.0
+	if totalLessons > 0 {
+		progress = float64(lessonsRead) / float64(totalLessons)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Course progress retrieved successfully",
+		"data": gin.H{
+			"course_uid":        courseUID,
+			"total_lessons":     totalLessons,
+			"lessons_read":      lessonsRead,
+			"progress":          progress,
+			"enrollment_uid":    enrollment.Uid,
+			"enrollment_status": enrollment.Status,
+		},
+		"error": nil,
+	})
+}
