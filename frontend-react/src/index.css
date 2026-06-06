@@ -8,6 +8,7 @@
 @import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant motion-reduce (@media (prefers-reduced-motion: reduce));
 
 @theme {
   --color-background: var(--background);
@@ -68,6 +69,8 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  --container-8xl: 88rem;
 }
 
 :root {

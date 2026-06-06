@@ -1,15 +1,24 @@
 /* TipTap / ProseMirror — imported by TipTapEditor.tsx */
 .tiptap-editor-root:not(.tiptap-preview) .ProseMirror {
   outline: none;
-  min-height: 240px;
-  padding: 0.75rem 1rem;
+  min-height: 280px;
+  padding: 1.25rem 1.5rem;
   font-size: 0.9375rem;
-  line-height: 1.65;
+  line-height: 1.7;
   color: rgb(15 23 42);
+}
+
+.tiptap-editor-root.tiptap-editor-root--compact:not(.tiptap-preview) .ProseMirror {
+  min-height: 160px;
+  padding: 1rem 1.25rem;
 }
 
 .tiptap-editor-root .ProseMirror-focused {
   outline: none;
+}
+
+.tiptap-bubble-menu {
+  z-index: 40;
 }
 
 .tiptap-editor-root .ProseMirror p.is-editor-empty:first-child::before {

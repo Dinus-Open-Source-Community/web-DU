@@ -19,11 +19,14 @@ export type SidebarUser = {
   avatar_url?: string
 }
 
-type AppSidebarProviderProps = {
+type AppLayoutProps = {
   children: ReactNode
   role: UserRole
   user: SidebarUser
+  contentClassName?: string
 }
+
+type AppSidebarProviderProps = AppLayoutProps
 
 const sidebarRoleConfig: Record<UserRole, { navigationKey: keyof typeof Navigation; title: string; roleLabel: string }> = {
   admin: {
@@ -190,11 +193,49 @@ function AppSidebar({ role }: { role: UserRole }) {
   )
 }
 
-export function AppSidebarProvider({ children, role, user }: AppSidebarProviderProps) {
-  const normalizedUser = {
+function normalizeSidebarUser(user: SidebarUser) {
+  return {
     ...user,
     avatar: user.avatar ?? user.avatar_url,
   }
+}
+
+export function AppNavbarProvider({
+  children,
+  role,
+  user,
+  contentClassName,
+}: AppLayoutProps) {
+  const normalizedUser = normalizeSidebarUser(user)
+
+  return (
+    <NavbarSearchProvider>
+      <div className="flex min-h-dvh w-full flex-col bg-white">
+        <AppTopNavbar
+          role={role}
+          user={normalizedUser}
+          title={sidebarRoleConfig[role].title}
+          showSidebarTrigger={false}
+        />
+        <main
+          className={cn(
+            'flex w-full flex-1 flex-col',
+            contentClassName ?? 'gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10',
+          )}>
+          {children}
+        </main>
+      </div>
+    </NavbarSearchProvider>
+  )
+}
+
+export function AppSidebarProvider({
+  children,
+  role,
+  user,
+  contentClassName,
+}: AppSidebarProviderProps) {
+  const normalizedUser = normalizeSidebarUser(user)
 
   return (
     <NavbarSearchProvider>
@@ -211,7 +252,13 @@ export function AppSidebarProvider({ children, role, user }: AppSidebarProviderP
 
         <main className="flex w-full flex-col">
           <AppTopNavbar role={role} user={normalizedUser} title={sidebarRoleConfig[role].title} />
-          <div className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</div>
+          <div
+            className={cn(
+              'flex w-full flex-col',
+              contentClassName ?? 'gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10',
+            )}>
+            {children}
+          </div>
         </main>
       </SidebarProvider>
     </NavbarSearchProvider>

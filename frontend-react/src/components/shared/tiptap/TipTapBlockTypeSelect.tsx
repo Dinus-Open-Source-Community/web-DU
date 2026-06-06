@@ -1,0 +1,76 @@
+import { ChevronDown } from 'lucide-react'
+import { useTiptap, useTiptapState } from '@tiptap/react'
+
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { applyTiptapBlockType } from '@/lib/tiptap-toolbar-actions'
+import {
+  selectTiptapToolbarState,
+  TIPTAP_BLOCK_TYPE_LABELS,
+  type TiptapToolbarState,
+} from '@/lib/tiptap-toolbar-state'
+import { cn } from '@/lib/utils'
+
+type TipTapBlockTypeSelectProps = {
+  size?: 'default' | 'compact' | 'bubble'
+}
+
+export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelectProps) {
+  const { editor } = useTiptap()
+  const { blockType } = useTiptapState(selectTiptapToolbarState)
+
+  const label =
+    size === 'bubble'
+      ? blockType === 'paragraph'
+        ? 'P'
+        : blockType.replace('h', 'H')
+      : TIPTAP_BLOCK_TYPE_LABELS[blockType]
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onMouseDown={(event) => {
+            if (size === 'bubble') event.preventDefault()
+          }}
+          className={cn(
+            'gap-1 border-slate-200 bg-white font-normal text-slate-700 shadow-none hover:bg-slate-50',
+            size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs font-medium',
+            size === 'compact' && 'h-8 min-w-[7.5rem] px-2.5 text-xs',
+            size === 'default' && 'h-9 min-w-[8.5rem] px-3 text-sm',
+          )}
+        >
+          <span className="truncate">{label}</span>
+          <ChevronDown className="size-3 shrink-0 opacity-60" aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-[10rem]">
+        <DropdownMenuLabel className="text-xs text-slate-500">Tipe blok</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={blockType}
+          onValueChange={(value) =>
+            applyTiptapBlockType(editor, value as TiptapToolbarState['blockType'])
+          }
+        >
+          {(Object.keys(TIPTAP_BLOCK_TYPE_LABELS) as TiptapToolbarState['blockType'][]).map(
+            (type) => (
+              <DropdownMenuRadioItem key={type} value={type} className="text-sm">
+                {TIPTAP_BLOCK_TYPE_LABELS[type]}
+              </DropdownMenuRadioItem>
+            ),
+          )}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
