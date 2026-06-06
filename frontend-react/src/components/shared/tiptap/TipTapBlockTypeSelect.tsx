@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useTiptap, useTiptapState } from '@tiptap/react'
 
@@ -22,6 +23,10 @@ type TipTapBlockTypeSelectProps = {
   size?: 'default' | 'compact' | 'bubble'
 }
 
+function preventEditorBlur(event: MouseEvent) {
+  event.preventDefault()
+}
+
 export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelectProps) {
   const { editor } = useTiptap()
   const { blockType } = useTiptapState(selectTiptapToolbarState)
@@ -34,17 +39,15 @@ export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelec
       : TIPTAP_BLOCK_TYPE_LABELS[blockType]
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          onMouseDown={(event) => {
-            if (size === 'bubble') event.preventDefault()
-          }}
+          onMouseDown={preventEditorBlur}
           className={cn(
-            'gap-1 border-slate-200 bg-white font-normal text-slate-700 shadow-none hover:bg-slate-50',
+            'gap-1.5 border-slate-200 bg-white font-normal text-slate-700 shadow-none hover:bg-slate-50 data-[state=open]:bg-slate-50',
             size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs font-medium',
             size === 'compact' && 'h-8 min-w-[7.5rem] px-2.5 text-xs',
             size === 'default' && 'h-9 min-w-[8.5rem] px-3 text-sm',
@@ -64,7 +67,12 @@ export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelec
         >
           {(Object.keys(TIPTAP_BLOCK_TYPE_LABELS) as TiptapToolbarState['blockType'][]).map(
             (type) => (
-              <DropdownMenuRadioItem key={type} value={type} className="text-sm">
+              <DropdownMenuRadioItem
+                key={type}
+                value={type}
+                className="text-sm"
+                onMouseDown={preventEditorBlur}
+              >
                 {TIPTAP_BLOCK_TYPE_LABELS[type]}
               </DropdownMenuRadioItem>
             ),

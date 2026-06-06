@@ -1,6 +1,9 @@
 import type { CourseDetailReview } from '@/lib/types/course'
 import { Star } from 'lucide-react'
 
+import { detailLayout } from '@/lib/course-detail/detail-layout'
+import { cn } from '@/lib/utils'
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -21,10 +24,10 @@ function formatReviewDate(value: string) {
 
 function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <section className={cn(detailLayout.sectionCard, detailLayout.sectionPadding)}>
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Reviews</h2>
-        <span className="text-sm font-medium text-slate-500">{reviews.length.toLocaleString('id-ID')} reviews</span>
+        <h2 className={detailLayout.sectionTitle}>Ulasan</h2>
+        <span className={detailLayout.sectionSubtitle}>{reviews.length.toLocaleString('id-ID')} ulasan</span>
       </div>
 
       {reviews.length > 0 ? (
@@ -34,35 +37,47 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
               <div className="flex items-start gap-3">
                 <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {review.user.avatar_url ? (
-                    <img src={review.user.avatar_url} alt={review.user.name} loading="lazy" className="h-full w-full object-cover" />
+                    <img
+                      src={review.user.avatar_url}
+                      alt={review.user.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-slate-500">{getInitials(review.user.name)}</div>
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-slate-500">
+                      {getInitials(review.user.name)}
+                    </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <h3 className="font-semibold text-slate-900">{review.user.name}</h3>
-                    <span className="text-xs text-slate-500">{formatReviewDate(review.created_at)}</span>
+                    <span className={detailLayout.meta}>{formatReviewDate(review.created_at)}</span>
                   </div>
 
-                  <div className="mt-1 flex items-center gap-0.5">
+                  <div className="mt-1 flex items-center gap-0.5" aria-hidden>
                     {Array.from({ length: 5 }).map((_, index) => {
                       const filled = index + 1 <= Math.round(review.rating)
 
-                      return <Star key={index} className={filled ? 'h-4 w-4 fill-amber-400 text-amber-400' : 'h-4 w-4 text-slate-300'} />
+                      return (
+                        <Star
+                          key={index}
+                          className={filled ? 'h-4 w-4 fill-amber-400 text-amber-400' : 'h-4 w-4 text-slate-300'}
+                        />
+                      )
                     })}
                   </div>
                 </div>
               </div>
 
-              <p className="text-sm leading-relaxed text-slate-600">{review.comment}</p>
+              <p className={detailLayout.body}>{review.comment}</p>
             </article>
           ))}
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
-          <p className="text-sm font-medium text-slate-600">Belum ada review dari user.</p>
+          <p className="text-sm font-medium text-slate-600">Belum ada ulasan dari peserta.</p>
         </div>
       )}
     </section>

@@ -1,7 +1,7 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import type { ICourseDetailItem } from "@/lib/types/course";
 import { useAuth } from "@/providers/auth-provider";
-import { useCourseEditData } from "@/hooks/use-course";
+import { useCourseEditModules } from "@/hooks/use-course";
 import { LottieOverlay } from "@/components/shared/Loader";
 import { NotFoundContent } from "@/components/shared/Error";
 import { CourseEditClient } from "@/components/courses/(authorized)/editCourse";
@@ -14,8 +14,8 @@ const CourseEdit = () => {
   const moduleId = searchParams.get("moduleId") ?? undefined;
 
   const { user } = useAuth();
-  const { courseDetail, modules, lessonsByModule, isLoading } =
-    useCourseEditData(courseUid ?? "");
+  const { courseDetail, modules, isLoading } =
+    useCourseEditModules(courseUid ?? "");
 
   const sidebarUser = user ?? { name: "Admin", email: "admin@doscom.id" };
 
@@ -44,7 +44,6 @@ const CourseEdit = () => {
       <CourseEditClient
         courseData={courseDetail.data as ICourseDetailItem}
         modules={modules}
-        lessonsByModule={lessonsByModule}
         initialModuleId={moduleId}
         role="admin"
       />

@@ -13,7 +13,7 @@ export function ToolbarDivider({ dense }: { dense?: boolean }) {
 }
 
 export function ToolbarGroup({ children }: { children: ReactNode }) {
-  return <div className="flex items-center gap-0.5">{children}</div>
+  return <div className="flex shrink-0 items-center gap-0.5">{children}</div>
 }
 
 type ToolbarIconButtonProps = {

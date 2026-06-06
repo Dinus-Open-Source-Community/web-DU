@@ -9,6 +9,10 @@ import type {
   LessonApiItem,
   LessonPayloadInput,
 } from './types'
+import {
+  resolveTextContentHtml,
+  resolveVideoFields,
+} from '@/lib/course-edit/switch-lesson-delivery-type'
 
 export function createLocalId(prefix: string): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -197,24 +201,27 @@ function buildEditableLessonFromOutline(
     homeworkDescriptionHtml: prevLesson?.homeworkDescriptionHtml ?? '<p></p>',
     homeworkQuiz: prevLesson?.homeworkQuiz ?? createDefaultQuiz(),
     contentFormat: prevLesson?.contentFormat ?? ('tiptap' as const),
+    contentDrafts: prevLesson?.contentDrafts,
   }
 
   if (deliveryType === 'video') {
+    const { videoUrl, descriptionHtml } = resolveVideoFields(
+      prevLesson,
+      outlineLesson.video_url ?? '',
+    )
+
     return {
       ...shared,
       contentType: 'video',
-      videoUrl:
-        prevLesson?.contentType === 'video'
-          ? prevLesson.videoUrl
-          : (outlineLesson.video_url ?? ''),
-      contentHtml: prevLesson?.contentHtml,
+      videoUrl,
+      contentHtml: descriptionHtml,
     }
   }
 
   return {
     ...shared,
     contentType: 'text',
-    contentHtml: prevLesson?.contentType === 'text' ? prevLesson.contentHtml : '',
+    contentHtml: resolveTextContentHtml(prevLesson),
   }
 }
 

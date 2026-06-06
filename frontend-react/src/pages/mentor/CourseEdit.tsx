@@ -4,7 +4,7 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { NotFoundContent } from '@/components/shared/Error'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { useAuth } from '@/providers/auth-provider'
-import { useCourseEditData } from '@/hooks/use-course'
+import { useCourseEditModules } from '@/hooks/use-course'
 import { useParams, useSearchParams } from 'react-router-dom'
 
 export default function MentorCourseEditPage() {
@@ -13,7 +13,7 @@ export default function MentorCourseEditPage() {
   const moduleId = searchParams.get('moduleId') ?? undefined
 
   const { user } = useAuth()
-  const { courseDetail, modules, lessonsByModule, isLoading } = useCourseEditData(
+  const { courseDetail, modules, isLoading } = useCourseEditModules(
     courseUid ?? '',
   )
 
@@ -32,7 +32,6 @@ export default function MentorCourseEditPage() {
       <CourseEditClient
         courseData={courseDetail.data as ICourseDetailItem}
         modules={modules}
-        lessonsByModule={lessonsByModule}
         initialModuleId={moduleId}
         role="mentor"
       />

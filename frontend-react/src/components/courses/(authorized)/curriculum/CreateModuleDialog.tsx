@@ -16,8 +16,9 @@ import { Label } from '@/components/ui/label'
 type CreateModuleDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateModule: (title: string) => void
+  onCreateModule: (title: string) => void | Promise<void>
   nextOrder: number
+  isSubmitting?: boolean
 }
 
 export function CreateModuleDialog({
@@ -25,6 +26,7 @@ export function CreateModuleDialog({
   onOpenChange,
   onCreateModule,
   nextOrder,
+  isSubmitting = false,
 }: CreateModuleDialogProps) {
   const [title, setTitle] = useState('')
 
@@ -34,9 +36,13 @@ export function CreateModuleDialog({
     }
   }, [open])
 
-  const handleSubmit = () => {
-    onCreateModule(title.trim() || `Modul ${nextOrder}`)
-    onOpenChange(false)
+  const handleSubmit = async () => {
+    try {
+      await onCreateModule(title.trim() || `Modul ${nextOrder}`)
+      onOpenChange(false)
+    } catch {
+      // Dialog stays open so the user can retry.
+    }
   }
 
   return (
@@ -83,11 +89,17 @@ export function CreateModuleDialog({
             variant="outline"
             className="rounded-xl"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
           >
             Batal
           </Button>
-          <Button type="button" className="rounded-xl" onClick={handleSubmit}>
-            Buat modul
+          <Button
+            type="button"
+            className="rounded-xl"
+            onClick={() => void handleSubmit()}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Membuat...' : 'Buat modul'}
           </Button>
         </DialogFooter>
       </DialogContent>

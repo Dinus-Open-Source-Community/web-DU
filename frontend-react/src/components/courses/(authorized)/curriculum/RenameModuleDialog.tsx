@@ -17,7 +17,8 @@ type RenameModuleDialogProps = {
   open: boolean
   currentTitle: string
   onOpenChange: (open: boolean) => void
-  onRename: (title: string) => void
+  onRename: (title: string) => void | Promise<void>
+  isSubmitting?: boolean
 }
 
 export function RenameModuleDialog({
@@ -25,6 +26,7 @@ export function RenameModuleDialog({
   currentTitle,
   onOpenChange,
   onRename,
+  isSubmitting = false,
 }: RenameModuleDialogProps) {
   const [title, setTitle] = useState(currentTitle)
 
@@ -34,9 +36,13 @@ export function RenameModuleDialog({
     }
   }, [open, currentTitle])
 
-  const handleSubmit = () => {
-    onRename(title.trim() || currentTitle)
-    onOpenChange(false)
+  const handleSubmit = async () => {
+    try {
+      await onRename(title.trim() || currentTitle)
+      onOpenChange(false)
+    } catch {
+      // Dialog stays open so the user can retry.
+    }
   }
 
   return (
@@ -82,11 +88,17 @@ export function RenameModuleDialog({
             variant="outline"
             className="rounded-xl"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
           >
             Batal
           </Button>
-          <Button type="button" className="rounded-xl" onClick={handleSubmit}>
-            Simpan
+          <Button
+            type="button"
+            className="rounded-xl"
+            onClick={() => void handleSubmit()}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Menyimpan...' : 'Simpan'}
           </Button>
         </DialogFooter>
       </DialogContent>

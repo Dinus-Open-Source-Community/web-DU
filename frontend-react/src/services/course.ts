@@ -10,6 +10,17 @@ import type {
   ICourseTypeListResponse,
   IDetailCourseResponse,
 } from '@/lib/types/course'
+import {
+  buildCreateCourseFormData,
+  buildUpdateCourseFormData,
+} from '@/lib/course-form/build-form-data'
+import type {
+  CreateCoursePayload,
+  UpdateCoursePayload,
+  UpdateCourseStatusRequest,
+} from '@/lib/course-form/types'
+
+export type { CreateCoursePayload, UpdateCoursePayload, UpdateCourseStatusRequest }
 import type { ICourseDetailModule } from '@/lib/types/module'
 import { fetchLessonsByModuleUid } from './lessons'
 import { fetchModulesByCourseUid } from './module'
@@ -47,6 +58,34 @@ export async function fetchCourseTypes(params?: IQueryParamsPayload) {
     API_ROUTES.courseTypes.getAll(params),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil tipe kursus')
+}
+
+export async function createCourse(payload: CreateCoursePayload) {
+  const formData = buildCreateCourseFormData(payload)
+  const response = await api.post<IResponse<IDetailCourseResponse>>(API_ROUTES.courses.create, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return unwrapApiResponse(response.data, 'Gagal membuat kursus')
+}
+
+export async function updateCourse(uid: string, payload: UpdateCoursePayload) {
+  const formData = buildUpdateCourseFormData(payload)
+  const response = await api.put<IResponse<IDetailCourseResponse>>(
+    API_ROUTES.courses.updateByUid(uid),
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  )
+  return unwrapApiResponse(response.data, 'Gagal memperbarui kursus')
+}
+
+/** PATCH /courses/:id/status — tanpa body; mengaktifkan status kursus menjadi ACTIVE. */
+export async function updateCourseStatus({ courseUid }: UpdateCourseStatusRequest) {
+  const response = await api.patch<IResponse<unknown>>(
+    API_ROUTES.courses.updateStatusByUid(courseUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal memperbarui status kursus')
 }
 
 export async function fetchCourseStudents(courseUid: string) {

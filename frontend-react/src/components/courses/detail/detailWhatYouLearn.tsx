@@ -1,14 +1,19 @@
 import { CheckCircle2 } from 'lucide-react'
 
+import { detailLayout } from '@/lib/course-detail/detail-layout'
+import { cn } from '@/lib/utils'
+
 interface CourseWhatYouLearnProps {
   title?: string
   items: string[]
 }
 
-export function CourseWhatYouLearn({ title = "What you'll learn", items }: CourseWhatYouLearnProps) {
+export function CourseWhatYouLearn({ title = 'Yang akan kamu pelajari', items }: CourseWhatYouLearnProps) {
+  if (items.length === 0) return null
+
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <h2 className="mb-4 text-lg font-semibold tracking-tight text-slate-900">{title}</h2>
+    <section className={cn(detailLayout.sectionCard, detailLayout.sectionPadding)}>
+      <h2 className={cn(detailLayout.sectionTitle, 'mb-4')}>{title}</h2>
       <ul className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
         {items.map((item) => (
           <li key={item} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700">

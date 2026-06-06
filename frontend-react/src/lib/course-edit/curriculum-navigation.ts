@@ -1,4 +1,5 @@
 import { getModuleLessons } from '@/lib/course-curriculum'
+import type { EditableLesson } from '@/lib/course-edit/types'
 import type { IModulesData } from '@/lib/types/module'
 
 export function resolveActiveModule(

@@ -15,7 +15,7 @@ export type CourseEditorTab = 'content' | 'homework'
 
 export type CourseEditNavigationActions = {
   onSelectModule: (moduleId: string) => void
-  onSelectLesson: (lessonId: string) => void
+  onSelectLesson: (lessonId: string) => boolean | void
   onOpenCreateModule: () => void
   onRenameModule: (moduleId: string) => void
   onDeleteModule: (moduleId: string) => void
@@ -31,12 +31,20 @@ export type CourseEditClientProps = {
   role?: CourseEditRole
   courseData: ICourseDetailItem
   modules: ICourseDetailModule[]
-  lessonsByModule: Record<string, LessonDetailItem[]>
 }
 
 export type LessonApiItem = LessonDetailItem
 
-export type EditableLesson = ILesson & { uid?: string }
+export type LessonContentDrafts = {
+  textContentHtml?: string
+  videoUrl?: string
+  videoDescriptionHtml?: string
+}
+
+export type EditableLesson = ILesson & {
+  uid?: string
+  contentDrafts?: LessonContentDrafts
+}
 
 export type EditableModule = Omit<ICourseDetailModule, 'lessons'> & {
   uid?: string

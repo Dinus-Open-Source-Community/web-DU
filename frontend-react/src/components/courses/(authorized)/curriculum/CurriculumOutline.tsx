@@ -22,7 +22,7 @@ import type { CourseEditNavigationActions } from "@/lib/course-edit/types";
 import type { IModulesData } from "@/lib/types/module";
 import { cn } from "@/lib/utils";
 
-import { editLayout } from "./edit-layout";
+import { editLayout, type CurriculumOutlineLayout } from "./edit-layout";
 import { editMotion } from "./editor/edit-motion";
 
 type CurriculumOutlineProps = Pick<
@@ -35,8 +35,11 @@ type CurriculumOutlineProps = Pick<
   | "onDeleteModule"
 > & {
   modules: IModulesData[];
+  loadedModuleIds: Set<string>;
+  loadingModuleId: string | null;
   activeModuleId: string | null;
   activeLessonId: string | null;
+  layout?: CurriculumOutlineLayout;
 };
 
 function LessonTypeIcon({ type }: { type: string | undefined }) {
@@ -72,9 +75,7 @@ function LessonRow({
         editMotion.rowSelect,
         editMotion.reducedMotion,
         "w-full",
-        isActive
-          ? cn(editLayout.lessonRowActive, "translate-x-0.5")
-          : editLayout.lessonRowIdle,
+        isActive ? editLayout.lessonRowActive : editLayout.lessonRowIdle,
       )}
     >
       <span className={editLayout.meta}>{index + 1}</span>
@@ -88,6 +89,8 @@ type ModuleGroupProps = {
   module: IModulesData;
   moduleIndex: number;
   activeLessonId: string | null;
+  isLoaded: boolean;
+  isLoading: boolean;
   onSelectModule: (moduleId: string) => void;
   onSelectLesson: (lessonId: string) => void;
   onAddLesson: (moduleId: string) => void;
@@ -100,6 +103,8 @@ function ModuleGroup({
   module,
   moduleIndex,
   activeLessonId,
+  isLoaded,
+  isLoading,
   onSelectModule,
   onSelectLesson,
   onAddLesson,
@@ -141,7 +146,7 @@ function ModuleGroup({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="size-8 shrink-0"
+              className={`${editLayout.iconButton} shrink-0`}
               aria-label={`Kelola modul ${module.title}`}
             >
               <MoreHorizontal className="size-4" />
@@ -164,26 +169,37 @@ function ModuleGroup({
         </DropdownMenu>
       </div>
 
-      {lessons.length > 0 ? (
-        <div className="space-y-0.5">
-          {lessons.map((lesson, lessonIndex) => (
-            <div
-              key={lesson.uid}
-              className={cn(editMotion.outlineItem, editMotion.reducedMotion)}
-              style={{ animationDelay: `${Math.min(lessonIndex, 8) * 30}ms` }}
-            >
-              <LessonRow
-                index={lessonIndex}
-                title={lesson.title}
-                contentType={lesson.content_type}
-                isActive={lesson.uid === activeLessonId}
-                onSelect={() => onSelectLesson(lesson.uid)}
-              />
-            </div>
-          ))}
+      {isLoading ? (
+        <div className="space-y-2 px-3 py-2">
+          <div className="h-8 animate-pulse rounded-md bg-slate-100" />
+          <div className="h-8 animate-pulse rounded-md bg-slate-100" />
         </div>
+      ) : isLoaded ? (
+        lessons.length > 0 ? (
+          <div className="space-y-0.5">
+            {lessons.map((lesson, lessonIndex) => (
+              <div
+                key={lesson.uid}
+                className={cn(editMotion.outlineItem, editMotion.reducedMotion)}
+                style={{ animationDelay: `${Math.min(lessonIndex, 8) * 30}ms` }}
+              >
+                <LessonRow
+                  index={lessonIndex}
+                  title={lesson.title}
+                  contentType={lesson.content_type}
+                  isActive={lesson.uid === activeLessonId}
+                  onSelect={() => onSelectLesson(lesson.uid)}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={`px-3 py-2 ${editLayout.body}`}>Belum ada lesson.</p>
+        )
       ) : (
-        <p className={`px-3 py-2 ${editLayout.body}`}>Belum ada lesson.</p>
+        <p className={`px-3 py-2 ${editLayout.body}`}>
+          Pilih modul untuk memuat daftar lesson.
+        </p>
       )}
 
       <Button
@@ -202,8 +218,11 @@ function ModuleGroup({
 
 export function CurriculumOutline({
   modules,
+  loadedModuleIds,
+  loadingModuleId,
   activeModuleId,
   activeLessonId,
+  layout = "sidebar",
   onSelectModule,
   onSelectLesson,
   onOpenCreateModule,
@@ -213,6 +232,7 @@ export function CurriculumOutline({
 }: CurriculumOutlineProps) {
   const resolvedModuleId = activeModuleId ?? modules[0]?.uid ?? null;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isFullLayout = layout === "full";
 
   useEffect(() => {
     if (!activeLessonId || !scrollContainerRef.current) return;
@@ -223,16 +243,28 @@ export function CurriculumOutline({
   }, [activeLessonId]);
 
   return (
-    <aside aria-label="Daftar kurikulum" className={editLayout.outlinePanel}>
+    <aside
+      aria-label="Daftar kurikulum"
+      className={cn(
+        isFullLayout ? editLayout.outlinePanelFull : editLayout.outlinePanel,
+      )}
+    >
       <div
-        className={`flex items-center justify-between pb-3 ${editLayout.divider}`}
+        className={`flex items-center justify-between gap-3 pb-3 ${editLayout.divider}`}
       >
-        <h2 className={editLayout.panelTitle}>Kurikulum</h2>
+        <div className="min-w-0">
+          <h2 className={editLayout.panelTitle}>Kurikulum</h2>
+          {isFullLayout && (
+            <p className={`mt-0.5 ${editLayout.body}`}>
+              {modules.length} modul · ketuk lesson untuk mengedit
+            </p>
+          )}
+        </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className={`${editLayout.control} gap-1.5 px-2.5`}
+          className={`${editLayout.control} shrink-0 gap-1.5 px-2.5`}
           onClick={onOpenCreateModule}
         >
           <Plus className="size-3.5" />
@@ -255,7 +287,13 @@ export function CurriculumOutline({
           </Button>
         </div>
       ) : (
-        <ScrollArea className="max-h-[min(40dvh,20rem)] flex-1 lg:max-h-[calc(100dvh-10rem)]">
+        <ScrollArea
+          className={cn(
+            isFullLayout
+              ? "min-h-[12rem] flex-1"
+              : "max-h-[min(40dvh,20rem)] flex-1 lg:max-h-[calc(100dvh-10rem)]",
+          )}
+        >
           <div
             ref={scrollContainerRef}
             className={`divide-y divide-slate-100 ${editLayout.divider}`}
@@ -266,6 +304,8 @@ export function CurriculumOutline({
                 module={module}
                 moduleIndex={index}
                 activeLessonId={activeLessonId}
+                isLoaded={loadedModuleIds.has(module.uid)}
+                isLoading={loadingModuleId === module.uid}
                 isActiveModule={module.uid === resolvedModuleId}
                 onSelectModule={onSelectModule}
                 onSelectLesson={onSelectLesson}

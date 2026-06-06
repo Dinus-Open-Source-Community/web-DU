@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type {
   CourseEditNavigationActions,
@@ -7,18 +7,30 @@ import type {
 } from '@/lib/course-edit/types'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import type { IModulesData } from '@/lib/types/module'
+import {
+  shouldShowEditorPane,
+  shouldShowOutlinePane,
+} from '@/lib/course-edit/viewport'
+import { useCourseEditBackNavigation } from '@/hooks/use-course-edit-back-navigation'
+import { useCourseEditViewport } from '@/hooks/use-course-edit-viewport'
+import { useCompactCourseEditNavigation } from '@/hooks/use-compact-course-edit-navigation'
 
+import { CourseEditCompactHeader } from './compact/CourseEditCompactHeader'
+import { CourseEditStickySaveBar } from './compact/CourseEditStickySaveBar'
 import { CourseEditToolbar } from './CourseEditChrome'
 import { CourseLessonWorkspace } from './CourseLessonWorkspace'
 import { CurriculumOutline } from './CurriculumOutline'
 import { editLayout } from './edit-layout'
 
 type CourseEditShellProps = CourseEditNavigationActions & {
+  routeBasePath: '/mentor' | '/admin'
   course: Partial<ICourseDetailItem>
   isAdmin: boolean
   isSaving: boolean
-  modifiedCount: number
+  hasUnsavedLesson: boolean
   modules: IModulesData[]
+  loadedModuleIds: Set<string>
+  loadingModuleId: string | null
   activeModuleId: string | null
   activeLessonId: string | null
   activeLesson: EditableLesson | null
@@ -35,11 +47,14 @@ type CourseEditShellProps = CourseEditNavigationActions & {
 }
 
 export function CourseEditShell({
+  routeBasePath,
   course,
   isAdmin,
   isSaving,
-  modifiedCount,
+  hasUnsavedLesson,
   modules,
+  loadedModuleIds,
+  loadingModuleId,
   activeModuleId,
   activeLessonId,
   activeLesson,
@@ -61,6 +76,22 @@ export function CourseEditShell({
   onChangeLessonType,
 }: CourseEditShellProps) {
   const [editorTab, setEditorTab] = useState<CourseEditorTab>('content')
+  const { goBack } = useCourseEditBackNavigation(routeBasePath)
+  const { isCompact, viewportMode } = useCourseEditViewport()
+  const { compactPane, openOutline, openEditor } = useCompactCourseEditNavigation(
+    isCompact,
+    activeLessonId,
+  )
+
+  const handleSelectLessonFromOutline = useCallback(
+    (lessonId: string) => {
+      const didNavigate = onSelectLesson(lessonId)
+      if (isCompact && compactPane === 'outline' && didNavigate !== false) {
+        openEditor()
+      }
+    },
+    [compactPane, isCompact, onSelectLesson, openEditor],
+  )
 
   useEffect(() => {
     setEditorTab('content')
@@ -71,45 +102,92 @@ export function CourseEditShell({
       ? `Modul ${activeModuleIndex + 1} · ${activeModuleTitle}`
       : undefined
 
+  const showOutline = shouldShowOutlinePane(viewportMode, compactPane)
+  const showEditor = shouldShowEditorPane(
+    viewportMode,
+    compactPane,
+    Boolean(activeLessonId),
+  )
+  const showCompactEditorChrome = isCompact && showEditor && Boolean(activeLesson)
+  const outlineLayout = isCompact ? 'full' : 'sidebar'
+
   return (
-    <div className={editLayout.page}>
+    <div className={`${editLayout.page} ${isCompact ? editLayout.pageCompact : ''}`}>
       <CourseEditToolbar
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
-        modifiedCount={modifiedCount}
+        hasUnsavedLesson={hasUnsavedLesson}
+        isCompact={isCompact}
+        compactPane={compactPane}
+        onBack={goBack}
         onPublish={onPublish}
         onSave={onSave}
       />
 
-      <div className={editLayout.shell}>
-        <CurriculumOutline
-          modules={modules}
-          activeModuleId={activeModuleId}
-          activeLessonId={activeLessonId}
-          onSelectModule={onSelectModule}
-          onSelectLesson={onSelectLesson}
-          onOpenCreateModule={onOpenCreateModule}
-          onAddLesson={onAddLesson}
-          onRenameModule={onRenameModule}
-          onDeleteModule={onDeleteModule}
-        />
+      <div className={isCompact ? 'flex min-h-0 flex-1 flex-col' : editLayout.shell}>
+        {showOutline && (
+          <div className={isCompact ? editLayout.shellCompactOutline : undefined}>
+            <CurriculumOutline
+              layout={outlineLayout}
+              modules={modules}
+              loadedModuleIds={loadedModuleIds}
+              loadingModuleId={loadingModuleId}
+              activeModuleId={activeModuleId}
+              activeLessonId={activeLessonId}
+              onSelectModule={onSelectModule}
+              onSelectLesson={handleSelectLessonFromOutline}
+              onOpenCreateModule={onOpenCreateModule}
+              onAddLesson={onAddLesson}
+              onRenameModule={onRenameModule}
+              onDeleteModule={onDeleteModule}
+            />
+          </div>
+        )}
 
-        <main className={editLayout.editorPanel}>
-          <CourseLessonWorkspace
-            activeLesson={activeLesson}
-            moduleLabel={moduleLabel}
-            editorTab={editorTab}
-            onEditorTabChange={setEditorTab}
-            editorReady={editorReady}
-            isLoadingDetail={isLoadingDetail}
-            onRenameLesson={onRenameLesson}
-            onDeleteLesson={onDeleteLesson}
-            onChangeLessonType={onChangeLessonType}
-            onPatchLesson={onPatchLesson}
-          />
-        </main>
+        {showEditor && (
+          <main
+            className={
+              isCompact ? editLayout.shellCompactEditor : editLayout.editorPanel
+            }
+          >
+            {showCompactEditorChrome && activeLesson && (
+              <CourseEditCompactHeader
+                lessonTitle={activeLesson.title}
+                moduleLabel={moduleLabel}
+                onBackToOutline={openOutline}
+              />
+            )}
+
+            <div className={isCompact ? editLayout.editorPanelCompact : undefined}>
+              <CourseLessonWorkspace
+                activeLesson={activeLesson}
+                moduleLabel={isCompact ? undefined : moduleLabel}
+                editorTab={editorTab}
+                onEditorTabChange={setEditorTab}
+                editorReady={editorReady}
+                isLoadingDetail={isLoadingDetail}
+                isCompact={isCompact}
+                onRenameLesson={onRenameLesson}
+                onDeleteLesson={onDeleteLesson}
+                onChangeLessonType={onChangeLessonType}
+                onPatchLesson={onPatchLesson}
+              />
+            </div>
+          </main>
+        )}
       </div>
+
+      {showCompactEditorChrome && (
+        <CourseEditStickySaveBar
+          isSaving={isSaving}
+          hasUnsavedLesson={hasUnsavedLesson}
+          isAdmin={isAdmin}
+          isPublished={Boolean(course.is_published)}
+          onSave={onSave}
+          onPublish={onPublish}
+        />
+      )}
     </div>
   )
 }

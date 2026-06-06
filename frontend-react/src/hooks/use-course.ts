@@ -121,6 +121,26 @@ export function useCombinedCourseCategoriesAndTypes(params?: IQueryParamsPayload
   }
 }
 
+export function useCourseEditModules(courseUid: string) {
+  const courseDetail = useCourseDetail(courseUid)
+  const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
+
+  const modules = useMemo(
+    () => stripLessonsFromModules(modulesQuery.data?.modules ?? []),
+    [modulesQuery.data?.modules],
+  )
+
+  const isLoading = courseDetail.isLoading || modulesQuery.isLoading
+  const error = courseDetail.error || modulesQuery.error
+
+  return {
+    courseDetail,
+    modules,
+    isLoading,
+    error,
+  }
+}
+
 export function useCourseEditData(courseUid: string) {
   const courseDetail = useCourseDetail(courseUid)
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })

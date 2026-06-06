@@ -5,8 +5,6 @@ import { toast } from 'sonner'
 
 import {
   addLesson,
-  addModule,
-  changeLessonDeliveryType,
   findModuleByLessonId,
   getFirstLessonId,
   removeLesson,
@@ -14,16 +12,30 @@ import {
   renameLesson,
   renameModule,
 } from '@/lib/course-curriculum'
+import { switchLessonDeliveryType } from '@/lib/course-edit/switch-lesson-delivery-type'
 import {
-  createFallbackLesson,
+  findModuleForLesson,
+  getFirstEditableLessonId,
+  mergeModuleLessonsFromApi,
+  remapLessonIdInModules,
+  toModuleShell,
+  collectPersistedLessonKeys,
+} from '@/lib/course-edit/merge-module-lessons'
+import { persistLesson } from '@/lib/course-edit/persist-lesson'
+import {
+  createPersistedModule,
+  deletePersistedModule,
+  isOnlyUnpersistedFallbackModule,
+  normalizeModuleTitle,
+  updatePersistedModule,
+} from '@/lib/course-edit/persist-module'
+import {
   createFallbackModule,
-  editableLessonToPayloadInput,
   findLesson,
   getLessonKey,
   mergeOutlineModules,
   toLesson,
   toMentorCourse,
-  toModule,
   toOutlineModules,
 } from '@/lib/course-edit/mappers'
 import type {
@@ -33,18 +45,19 @@ import type {
   LessonApiItem,
 } from '@/lib/course-edit/types'
 import type { ICourseDetailItem, ICourseDetailModule } from '@/lib/types/course'
-import { validateLessonPayloadInputs } from '@/lib/validator/lessons'
 import { courseKeys, lessonKeys, moduleKeys } from '@/hooks/query-keys'
-import { useLessonByUid } from '@/hooks/use-lessons'
-import { createLesson, deleteLesson, updateLesson } from '@/services/lessons'
-import { createModule, deleteModule, updateModule } from '@/services/module'
+import { useLessonByUid, useLessonsByModule } from '@/hooks/use-lessons'
+import { deleteLesson } from '@/services/lessons'
+
+type PendingNavigation =
+  | { type: 'lesson'; lessonId: string; label: string }
+  | { type: 'module'; moduleId: string; label: string }
 
 export function useCourseEditController({
   initialModuleId,
   routeBasePath = '/mentor',
   courseData,
   modules: sourceModules,
-  lessonsByModule,
 }: CourseEditClientProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -53,13 +66,21 @@ export function useCourseEditController({
   const [modules, setModules] = useState<EditableModule[]>([])
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null)
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
+  const [loadedModuleIds, setLoadedModuleIds] = useState<Set<string>>(() => new Set())
   const [isCreateModuleOpen, setIsCreateModuleOpen] = useState(false)
   const [renameModuleId, setRenameModuleId] = useState<string | null>(null)
+  const [deleteModuleId, setDeleteModuleId] = useState<string | null>(null)
+  const [isModuleMutating, setIsModuleMutating] = useState(false)
   const [editorReady, setEditorReady] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [modifiedLessons, setModifiedLessons] = useState<Set<string>>(new Set())
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [modifiedModuleUids, setModifiedModuleUids] = useState<Set<string>>(new Set())
   const [isSaving, setIsSaving] = useState(false)
+  const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(
+    null,
+  )
+
   const persistedModuleUidsRef = useRef<Set<string>>(new Set())
   const [persistedLessonUids, setPersistedLessonUids] = useState<Set<string>>(
     () => new Set(),
@@ -69,22 +90,7 @@ export function useCourseEditController({
 
   const hasCourseModules = sourceModules.length > 0
 
-  const fetchedModules = useMemo(() => {
-    if (!sourceModules || sourceModules.length === 0) return []
-    return sourceModules.map((module, index) => {
-      const lessonItems: LessonApiItem[] = (lessonsByModule[module.uid] ?? []).map(
-        (lesson) => ({
-          ...lesson,
-          is_reading: 'is_reading' in lesson ? Boolean(lesson.is_reading) : false,
-        }),
-      )
-      const lessons =
-        lessonItems.length > 0
-          ? lessonItems.map((item, lessonIndex) => toLesson(item, lessonIndex + 1))
-          : [createFallbackLesson(1)]
-      return toModule(module, lessons, index + 1)
-    })
-  }, [sourceModules, lessonsByModule])
+  const moduleLessonsQuery = useLessonsByModule(activeModuleId ?? '', { per_page: 100 })
 
   const shouldLoadLessonDetail = Boolean(
     activeLessonId &&
@@ -114,6 +120,17 @@ export function useCourseEditController({
   const renameModuleTitle =
     outlineModules.find((module) => module.uid === renameModuleId)?.title ?? ''
 
+  const deleteModuleTitle =
+    outlineModules.find((module) => module.uid === deleteModuleId)?.title ?? ''
+
+  const activeLessonModified = Boolean(
+    activeLessonId && modifiedLessons.has(activeLessonId),
+  )
+
+  const isModuleLessonsLoading = Boolean(
+    activeModuleId && moduleLessonsQuery.isLoading && !loadedModuleIds.has(activeModuleId),
+  )
+
   useEffect(() => {
     if (courseData && typeof courseData === 'object') {
       setCourse(toMentorCourse(courseData as ICourseDetailItem))
@@ -121,6 +138,78 @@ export function useCourseEditController({
     }
     setCourse(null)
   }, [courseData])
+
+  useEffect(() => {
+    if (isInitialized || !courseData || typeof courseData !== 'object') return
+
+    if (!hasCourseModules) {
+      const fallbackModule = createFallbackModule(1)
+      setModules([fallbackModule])
+      setActiveModuleId(fallbackModule.uid ?? null)
+      setActiveLessonId(getLessonKey(fallbackModule.lessons[0]))
+      setEditorReady(true)
+      setIsInitialized(true)
+      return
+    }
+
+    const nextModules = sourceModules.map((module, index) =>
+      toModuleShell(module, index + 1),
+    )
+
+    setModules(nextModules)
+
+    const initialModule =
+      (initialModuleId
+        ? nextModules.find((module) => module.uid === initialModuleId)
+        : undefined) ?? nextModules[0]
+
+    setActiveModuleId(initialModule?.uid ?? null)
+    setActiveLessonId(null)
+    setEditorReady(false)
+    setIsInitialized(true)
+
+    persistedModuleUidsRef.current = new Set(
+      sourceModules.map((module) => module.uid).filter(Boolean),
+    )
+    setPersistedLessonUids(new Set())
+    initialLessonModuleMapRef.current = new Map()
+  }, [isInitialized, sourceModules, initialModuleId, courseData, hasCourseModules])
+
+  useEffect(() => {
+    if (!activeModuleId || !moduleLessonsQuery.data) return
+
+    const apiLessons = moduleLessonsQuery.data.lessons ?? []
+
+    setModules((previous) => {
+      const merged = mergeModuleLessonsFromApi(previous, activeModuleId, apiLessons)
+
+      setActiveLessonId((current) => {
+        const targetModule = merged.find((module) => module.uid === activeModuleId)
+        if (
+          current &&
+          targetModule?.lessons.some((lesson) => getLessonKey(lesson) === current)
+        ) {
+          return current
+        }
+        return apiLessons[0]?.uid ?? getFirstEditableLessonId(targetModule!) ?? null
+      })
+
+      return merged
+    })
+
+    setLoadedModuleIds((previous) => new Set([...previous, activeModuleId]))
+
+    setPersistedLessonUids((previous) => {
+      const next = new Set(previous)
+      for (const lesson of apiLessons) {
+        next.add(lesson.uid)
+        initialLessonModuleMapRef.current.set(lesson.uid, activeModuleId)
+      }
+      return next
+    })
+
+    setEditorReady(true)
+  }, [activeModuleId, moduleLessonsQuery.data])
 
   useEffect(() => {
     if (!shouldLoadLessonDetail || !lessonDetailQuery.data || !activeLessonId) return
@@ -159,67 +248,6 @@ export function useCourseEditController({
     lastHydratedLessonRef.current = null
   }, [activeLessonId])
 
-  useEffect(() => {
-    if (!activeLessonId || outlineModules.length === 0) return
-    const moduleForLesson = findModuleByLessonId(outlineModules, activeLessonId)
-    if (moduleForLesson && moduleForLesson.uid !== activeModuleId) {
-      setActiveModuleId(moduleForLesson.uid)
-    }
-  }, [activeLessonId, outlineModules, activeModuleId])
-
-  useEffect(() => {
-    if (isInitialized || !courseData || typeof courseData !== 'object') return
-
-    if (!hasCourseModules) {
-      const fallbackModule = createFallbackModule(1)
-      setModules([fallbackModule])
-      setActiveModuleId(fallbackModule.uid ?? null)
-      setActiveLessonId(getLessonKey(fallbackModule.lessons[0]))
-      setEditorReady(true)
-      setIsInitialized(true)
-      return
-    }
-
-    const nextModules =
-      fetchedModules.length > 0 ? fetchedModules : [createFallbackModule(1)]
-    setModules(nextModules)
-
-    const initialModule =
-      (initialModuleId
-        ? nextModules.find((module) => module.uid === initialModuleId)
-        : undefined) ?? nextModules[0]
-
-    setActiveModuleId(initialModule?.uid ?? null)
-    setActiveLessonId(
-      initialModule?.lessons[0] ? getLessonKey(initialModule.lessons[0]) : null,
-    )
-    setEditorReady(true)
-    setIsInitialized(true)
-
-    if (hasCourseModules) {
-      const moduleUids = new Set<string>()
-      const lessonUids = new Set<string>()
-      const lessonModuleMap = new Map<string, string>()
-
-      for (const mod of nextModules) {
-        if (mod.uid) moduleUids.add(mod.uid)
-        for (const lesson of mod.lessons) {
-          const lessonUid = lesson.uid ?? lesson.id
-          lessonUids.add(lessonUid)
-          if (mod.uid) lessonModuleMap.set(lessonUid, mod.uid)
-        }
-      }
-
-      persistedModuleUidsRef.current = moduleUids
-      setPersistedLessonUids(lessonUids)
-      initialLessonModuleMapRef.current = lessonModuleMap
-    } else {
-      persistedModuleUidsRef.current = new Set()
-      setPersistedLessonUids(new Set())
-      initialLessonModuleMapRef.current = new Map()
-    }
-  }, [isInitialized, fetchedModules, initialModuleId, courseData, hasCourseModules])
-
   const patchLocalLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
       setModules((previous) =>
@@ -251,58 +279,466 @@ export function useCourseEditController({
     [handleModulesChange, outlineModules],
   )
 
-  const handleSelectModule = useCallback(
+  const invalidateModuleQueries = useCallback(
+    async (courseUid: string, moduleUid?: string) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: moduleKeys.all }),
+        queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) }),
+        ...(moduleUid
+          ? [queryClient.invalidateQueries({ queryKey: lessonKeys.byModule(moduleUid) })]
+          : []),
+      ])
+    },
+    [queryClient],
+  )
+
+  const moduleHasUnsavedLessons = useCallback(
     (moduleId: string) => {
-      setActiveModuleId(moduleId)
-      const targetModule = outlineModules.find((module) => module.uid === moduleId)
-      const firstLessonId = targetModule ? getFirstLessonId(targetModule) : null
-      if (firstLessonId) setActiveLessonId(firstLessonId)
+      const targetModule = modules.find((module) => module.uid === moduleId)
+      if (!targetModule) return false
+
+      return targetModule.lessons.some((lesson) =>
+        modifiedLessons.has(getLessonKey(lesson)),
+      )
+    },
+    [modules, modifiedLessons],
+  )
+
+  const saveLesson = useCallback(
+    async (lessonId: string, opts?: { silent?: boolean }) => {
+      if (isSaving) return false
+
+      const lesson = findLesson(modules, lessonId)
+      const moduleForLesson = findModuleForLesson(modules, lessonId)
+
+      if (!lesson || !moduleForLesson?.uid) {
+        throw new Error('Lesson tidak ditemukan.')
+      }
+
+      setIsSaving(true)
+      try {
+        const courseUid = courseData.uid
+        if (!courseUid) throw new Error('UID kursus tidak ditemukan.')
+
+        const result = await persistLesson({
+          courseUid,
+          module: moduleForLesson,
+          lesson,
+          persistedModuleUids: persistedModuleUidsRef.current,
+          persistedLessonUids: new Set(persistedLessonUids),
+          modifiedModuleUids: new Set(modifiedModuleUids),
+        })
+
+        setModules((previous) => {
+          let next = previous.map((module) => {
+            if (module.uid !== moduleForLesson.uid) return module
+            return {
+              ...result.module,
+              lessons: module.lessons.map((item) =>
+                getLessonKey(item) === result.previousLessonId ? result.lesson : item,
+              ),
+            }
+          })
+
+          if (result.previousLessonId !== result.nextLessonId) {
+            next = remapLessonIdInModules(
+              next,
+              result.previousLessonId,
+              result.nextLessonId,
+            )
+          }
+
+          return next
+        })
+
+        setPersistedLessonUids((previous) => {
+          const next = new Set(previous)
+          next.delete(result.previousLessonId)
+          next.add(result.nextLessonId)
+          return next
+        })
+
+        initialLessonModuleMapRef.current.set(
+          result.nextLessonId,
+          result.module.uid ?? moduleForLesson.uid!,
+        )
+
+        setModifiedLessons((previous) => {
+          const next = new Set(previous)
+          next.delete(result.previousLessonId)
+          next.delete(result.nextLessonId)
+          return next
+        })
+
+        setModifiedModuleUids((previous) => {
+          const next = new Set(previous)
+          if (result.module.uid) next.delete(result.module.uid)
+          return next
+        })
+
+        if (activeLessonId === result.previousLessonId) {
+          setActiveLessonId(result.nextLessonId)
+        }
+
+        if (result.createdModuleUid) {
+          setActiveModuleId(result.createdModuleUid)
+        }
+
+        lastHydratedLessonRef.current = null
+
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: lessonKeys.byModule(result.module.uid ?? activeModuleId ?? ''),
+          }),
+          queryClient.invalidateQueries({ queryKey: lessonKeys.detail(result.nextLessonId) }),
+          queryClient.invalidateQueries({ queryKey: moduleKeys.all }),
+          queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) }),
+        ])
+
+        if (!opts?.silent) toast.success('Lesson berhasil disimpan.')
+        return true
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Gagal menyimpan lesson.')
+        throw error
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [
+      activeLessonId,
+      activeModuleId,
+      courseData.uid,
+      isSaving,
+      modifiedModuleUids,
+      modules,
+      persistedLessonUids,
+      queryClient,
+    ],
+  )
+
+  const proceedSelectLesson = useCallback(
+    (lessonId: string) => {
+      setActiveLessonId(lessonId)
+      const moduleForLesson = findModuleByLessonId(outlineModules, lessonId)
+      if (moduleForLesson?.uid) setActiveModuleId(moduleForLesson.uid)
     },
     [outlineModules],
   )
 
-  const handleCreateModule = useCallback(
-    (title: string) => {
-      const nextOutline = addModule(outlineModules, title)
-      const createdModule = nextOutline[nextOutline.length - 1]
-      handleModulesChange(nextOutline)
-      setActiveModuleId(createdModule.uid)
-      const firstLessonId = getFirstLessonId(createdModule)
-      if (firstLessonId) setActiveLessonId(firstLessonId)
+  const proceedSelectModule = useCallback(
+    (moduleId: string) => {
+      setActiveModuleId(moduleId)
+      const targetModule = modules.find((module) => module.uid === moduleId)
+      const firstLessonId = targetModule ? getFirstEditableLessonId(targetModule) : null
+      setActiveLessonId(firstLessonId)
     },
-    [handleModulesChange, outlineModules],
+    [modules],
+  )
+
+  const requestNavigation = useCallback(
+    (navigation: PendingNavigation) => {
+      if (
+        activeLessonId &&
+        modifiedLessons.has(activeLessonId) &&
+        !(navigation.type === 'lesson' && navigation.lessonId === activeLessonId)
+      ) {
+        setPendingNavigation(navigation)
+        setUnsavedDialogOpen(true)
+        return false
+      }
+
+      if (navigation.type === 'lesson') {
+        proceedSelectLesson(navigation.lessonId)
+      } else {
+        proceedSelectModule(navigation.moduleId)
+      }
+      return true
+    },
+    [activeLessonId, modifiedLessons, proceedSelectLesson, proceedSelectModule],
+  )
+
+  const handleSelectLesson = useCallback(
+    (lessonId: string): boolean => {
+      const targetModule = findModuleByLessonId(outlineModules, lessonId)
+      const targetLesson = targetModule?.lessons?.find((lesson) => lesson.uid === lessonId)
+      return requestNavigation({
+        type: 'lesson',
+        lessonId,
+        label: `pindah ke "${targetLesson?.title ?? 'lesson lain'}"`,
+      })
+    },
+    [outlineModules, requestNavigation],
+  )
+
+  const handleSelectModule = useCallback(
+    (moduleId: string) => {
+      if (moduleId === activeModuleId) return
+      const targetModule = outlineModules.find((module) => module.uid === moduleId)
+      requestNavigation({
+        type: 'module',
+        moduleId,
+        label: `pindah ke "${targetModule?.title ?? 'modul lain'}"`,
+      })
+    },
+    [activeModuleId, outlineModules, requestNavigation],
+  )
+
+  const handleSaveCurrentLesson = useCallback(async () => {
+    if (!activeLessonId || !activeLessonModified) return
+    await saveLesson(activeLessonId)
+  }, [activeLessonId, activeLessonModified, saveLesson])
+
+  const handleSaveAndContinue = useCallback(async () => {
+    if (!activeLessonId || !pendingNavigation) return
+
+    try {
+      await saveLesson(activeLessonId, { silent: true })
+      setUnsavedDialogOpen(false)
+
+      if (pendingNavigation.type === 'lesson') {
+        proceedSelectLesson(pendingNavigation.lessonId)
+      } else {
+        proceedSelectModule(pendingNavigation.moduleId)
+      }
+
+      setPendingNavigation(null)
+      toast.success('Lesson disimpan. Melanjutkan navigasi.')
+    } catch {
+      // Error toast already shown in saveLesson.
+    }
+  }, [activeLessonId, pendingNavigation, proceedSelectLesson, proceedSelectModule, saveLesson])
+
+  const handleCreateModule = useCallback(
+    async (title: string) => {
+      if (isModuleMutating) return
+
+      const courseUid = courseData.uid
+      if (!courseUid) {
+        toast.error('UID kursus tidak ditemukan.')
+        return
+      }
+
+      const replacesFallback = isOnlyUnpersistedFallbackModule(
+        modules,
+        persistedModuleUidsRef.current,
+      )
+      const orderIndex = replacesFallback ? 1 : outlineModules.length + 1
+      const moduleTitle = normalizeModuleTitle(title, `Modul ${orderIndex}`)
+
+      setIsModuleMutating(true)
+      try {
+        const createdModule = await createPersistedModule({
+          courseUid,
+          title: moduleTitle,
+          orderIndex,
+        })
+
+        persistedModuleUidsRef.current.add(createdModule.uid!)
+
+        setModules((previous) =>
+          replacesFallback ? [createdModule] : [...previous, createdModule],
+        )
+        setLoadedModuleIds((previous) => new Set([...previous, createdModule.uid!]))
+
+        const firstLessonId = getFirstEditableLessonId(createdModule)
+        if (firstLessonId) {
+          setModifiedLessons((previous) => new Set([...previous, firstLessonId]))
+        }
+
+        await invalidateModuleQueries(courseUid, createdModule.uid)
+        toast.success('Modul berhasil dibuat.')
+        proceedSelectModule(createdModule.uid!)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Gagal membuat modul.')
+        throw error
+      } finally {
+        setIsModuleMutating(false)
+      }
+    },
+    [
+      courseData.uid,
+      invalidateModuleQueries,
+      isModuleMutating,
+      modules,
+      outlineModules.length,
+      proceedSelectModule,
+    ],
   )
 
   const handleRenameModule = useCallback(
-    (moduleId: string, title: string) => {
-      applyOutlineUpdate((current) => renameModule(current, moduleId, title))
+    async (moduleId: string, title: string) => {
+      const targetModule = modules.find((module) => module.uid === moduleId)
+      if (!targetModule) return
+
+      const previousTitle = targetModule.title
+      const nextTitle = normalizeModuleTitle(title, previousTitle)
+
+      applyOutlineUpdate((current) => renameModule(current, moduleId, nextTitle))
+
+      if (!persistedModuleUidsRef.current.has(moduleId)) {
+        setModifiedModuleUids((previous) => new Set([...previous, moduleId]))
+        return
+      }
+
+      if (nextTitle === previousTitle) return
+
+      setIsModuleMutating(true)
+      try {
+        await updatePersistedModule({
+          moduleUid: moduleId,
+          title: nextTitle,
+          orderIndex: targetModule.order_index,
+        })
+
+        setModifiedModuleUids((previous) => {
+          const next = new Set(previous)
+          next.delete(moduleId)
+          return next
+        })
+
+        const courseUid = courseData.uid
+        if (courseUid) {
+          await invalidateModuleQueries(courseUid, moduleId)
+        }
+
+        toast.success('Nama modul berhasil diperbarui.')
+      } catch (error) {
+        applyOutlineUpdate((current) => renameModule(current, moduleId, previousTitle))
+        toast.error(
+          error instanceof Error ? error.message : 'Gagal memperbarui nama modul.',
+        )
+        throw error
+      } finally {
+        setIsModuleMutating(false)
+      }
     },
-    [applyOutlineUpdate],
+    [applyOutlineUpdate, courseData.uid, invalidateModuleQueries, modules],
   )
 
-  const handleDeleteModule = useCallback(
+  const handleRequestDeleteModule = useCallback(
     (moduleId: string) => {
+      if (moduleHasUnsavedLessons(moduleId)) {
+        toast.error('Simpan semua perubahan lesson di modul ini sebelum menghapus.')
+        return
+      }
+
+      if (
+        activeLessonId &&
+        modifiedLessons.has(activeLessonId) &&
+        findModuleForLesson(modules, activeLessonId)?.uid === moduleId
+      ) {
+        toast.error('Simpan lesson yang sedang diedit sebelum menghapus modul.')
+        return
+      }
+
+      setDeleteModuleId(moduleId)
+    },
+    [activeLessonId, moduleHasUnsavedLessons, modifiedLessons, modules],
+  )
+
+  const handleConfirmDeleteModule = useCallback(async () => {
+    if (!deleteModuleId || isModuleMutating) return
+
+    const moduleId = deleteModuleId
+    const moduleToDelete = modules.find((module) => module.uid === moduleId)
+    if (!moduleToDelete) {
+      setDeleteModuleId(null)
+      return
+    }
+
+    setIsModuleMutating(true)
+    try {
+      const isPersisted = persistedModuleUidsRef.current.has(moduleId)
+
+      if (isPersisted) {
+        await deletePersistedModule(moduleId)
+        persistedModuleUidsRef.current.delete(moduleId)
+      }
+
       const nextOutline = removeModule(outlineModules, moduleId)
       handleModulesChange(nextOutline)
+
+      const deletedLessonKeys = collectPersistedLessonKeys(moduleToDelete.lessons)
+      setPersistedLessonUids((previous) => {
+        const next = new Set(previous)
+        for (const lessonKey of deletedLessonKeys) {
+          next.delete(lessonKey)
+          initialLessonModuleMapRef.current.delete(lessonKey)
+        }
+        return next
+      })
+
+      setModifiedLessons((previous) => {
+        const next = new Set(previous)
+        for (const lesson of moduleToDelete.lessons) {
+          next.delete(getLessonKey(lesson))
+        }
+        return next
+      })
+
+      setModifiedModuleUids((previous) => {
+        const next = new Set(previous)
+        next.delete(moduleId)
+        return next
+      })
+
+      setLoadedModuleIds((previous) => {
+        const next = new Set(previous)
+        next.delete(moduleId)
+        return next
+      })
+
       const fallbackModule = nextOutline[0]
-      setActiveModuleId(fallbackModule?.uid ?? null)
-      setActiveLessonId(fallbackModule ? getFirstLessonId(fallbackModule) : null)
-    },
-    [handleModulesChange, outlineModules],
-  )
+      if (activeModuleId === moduleId) {
+        setActiveModuleId(fallbackModule?.uid ?? null)
+        setActiveLessonId(fallbackModule ? getFirstLessonId(fallbackModule) : null)
+      }
+
+      const courseUid = courseData.uid
+      if (courseUid) {
+        await invalidateModuleQueries(courseUid, moduleId)
+      }
+
+      setDeleteModuleId(null)
+      toast.success('Modul berhasil dihapus.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menghapus modul.')
+      throw error
+    } finally {
+      setIsModuleMutating(false)
+    }
+  }, [
+    activeModuleId,
+    courseData.uid,
+    deleteModuleId,
+    handleModulesChange,
+    invalidateModuleQueries,
+    isModuleMutating,
+    modules,
+    outlineModules,
+  ])
 
   const handleAddLesson = useCallback(
     (moduleId?: string) => {
       const targetModuleId = moduleId ?? activeOutlineModule?.uid
       if (!targetModuleId) return
+
       const nextOutline = addLesson(outlineModules, targetModuleId)
       handleModulesChange(nextOutline)
-      setActiveModuleId(targetModuleId)
       const updatedModule = nextOutline.find((module) => module.uid === targetModuleId)
       const lastLesson = updatedModule?.lessons?.at(-1)
-      if (lastLesson) setActiveLessonId(lastLesson.uid)
+      const lastLessonId = lastLesson?.uid ?? null
+
+      if (lastLessonId) {
+        setModifiedLessons((previous) => new Set([...previous, lastLessonId]))
+        requestNavigation({
+          type: 'lesson',
+          lessonId: lastLessonId,
+          label: `pindah ke "${lastLesson?.title ?? 'lesson baru'}"`,
+        })
+      }
     },
-    [activeOutlineModule, handleModulesChange, outlineModules],
+    [activeOutlineModule, handleModulesChange, outlineModules, requestNavigation],
   )
 
   const handleRenameLesson = useCallback(
@@ -318,180 +754,84 @@ export function useCourseEditController({
   )
 
   const handleDeleteLesson = useCallback(
-    (lessonId: string) => {
+    async (lessonId: string) => {
+      if (activeLessonId === lessonId && modifiedLessons.has(lessonId)) {
+        toast.error('Simpan atau batalkan perubahan lesson ini sebelum menghapus.')
+        return
+      }
+
       const moduleForLesson = findModuleByLessonId(outlineModules, lessonId)
       if (!moduleForLesson) return
+
       const nextOutline = removeLesson(outlineModules, moduleForLesson.uid, lessonId)
       handleModulesChange(nextOutline)
+
+      if (persistedLessonUids.has(lessonId)) {
+        try {
+          await deleteLesson(lessonId)
+          setPersistedLessonUids((previous) => {
+            const next = new Set(previous)
+            next.delete(lessonId)
+            return next
+          })
+          initialLessonModuleMapRef.current.delete(lessonId)
+        } catch (error) {
+          toast.error(
+            error instanceof Error ? error.message : 'Gagal menghapus lesson.',
+          )
+          return
+        }
+      }
+
+      setModifiedLessons((previous) => {
+        const next = new Set(previous)
+        next.delete(lessonId)
+        return next
+      })
+
       if (activeLessonId === lessonId) {
         const updatedModule = nextOutline.find(
           (module) => module.uid === moduleForLesson.uid,
         )
         setActiveLessonId(updatedModule ? getFirstLessonId(updatedModule) : null)
       }
+
+      await queryClient.invalidateQueries({
+        queryKey: lessonKeys.byModule(moduleForLesson.uid),
+      })
     },
-    [activeLessonId, handleModulesChange, outlineModules],
+    [
+      activeLessonId,
+      handleModulesChange,
+      modifiedLessons,
+      outlineModules,
+      persistedLessonUids,
+      queryClient,
+    ],
   )
 
   const handleChangeLessonType = useCallback(
     (lessonId: string, deliveryType: 'text' | 'video') => {
-      const moduleForLesson = findModuleByLessonId(outlineModules, lessonId)
-      if (!moduleForLesson) return
-      applyOutlineUpdate((current) =>
-        changeLessonDeliveryType(
-          current,
-          moduleForLesson.uid,
-          lessonId,
-          deliveryType,
-        ),
-      )
-    },
-    [applyOutlineUpdate, outlineModules],
-  )
-
-  const handleSave = useCallback(
-    async (opts?: { silent?: boolean; redirect?: boolean }) => {
-      if (isSaving) return
-
-      setIsSaving(true)
-      try {
-        const courseUid = courseData.uid
-        if (!courseUid) throw new Error('UID kursus tidak ditemukan.')
-
-        const workingModules = modules.map((module) => ({
+      setModules((previous) =>
+        previous.map((module) => ({
           ...module,
-          lessons: module.lessons.map((lesson) => ({ ...lesson })),
-        }))
-
-        const currentModuleUids = new Set(
-          workingModules
-            .map((mod) => mod.uid)
-            .filter((uid): uid is string => Boolean(uid)),
-        )
-        const currentLessonUids = new Set(
-          workingModules.flatMap((mod) =>
-            mod.lessons.map((lesson) => lesson.uid ?? lesson.id),
-          ),
-        )
-
-        const lessonPayloadInputs = workingModules.flatMap((mod) => {
-          if (!mod.uid) return []
-          return mod.lessons.map((lesson) =>
-            editableLessonToPayloadInput(lesson, mod.uid!),
-          )
-        })
-
-        validateLessonPayloadInputs(lessonPayloadInputs)
-
-        const nextPersistedLessonUids = new Set(persistedLessonUids)
-        const removedModuleUids = [...persistedModuleUidsRef.current].filter(
-          (uid) => !currentModuleUids.has(uid),
-        )
-        const removedLessonUids = [...nextPersistedLessonUids].filter(
-          (uid) =>
-            !currentLessonUids.has(uid) &&
-            !removedModuleUids.includes(
-              initialLessonModuleMapRef.current.get(uid) ?? '',
-            ),
-        )
-
-        for (const lessonUid of removedLessonUids) {
-          await deleteLesson(lessonUid)
-          nextPersistedLessonUids.delete(lessonUid)
-          initialLessonModuleMapRef.current.delete(lessonUid)
-        }
-
-        for (const moduleUid of removedModuleUids) {
-          await deleteModule(moduleUid)
-          persistedModuleUidsRef.current.delete(moduleUid)
-        }
-
-        const lessonUidMap = new Map<string, string>()
-
-        for (const courseModule of workingModules) {
-          let moduleUid = courseModule.uid
-
-          if (moduleUid && persistedModuleUidsRef.current.has(moduleUid)) {
-            await updateModule(moduleUid, {
-              title: courseModule.title.trim(),
-              order_index: courseModule.order_index,
-            })
-          } else {
-            const createdModule = await createModule({
-              course_uid: courseUid,
-              title: courseModule.title.trim(),
-              order_index: courseModule.order_index,
-            })
-
-            if (!createdModule.uid) {
-              throw new Error('Backend tidak mengembalikan uid untuk modul baru.')
-            }
-
-            moduleUid = createdModule.uid
-            courseModule.uid = createdModule.uid
-            courseModule.course_uid = createdModule.course_uid
-            persistedModuleUidsRef.current.add(createdModule.uid)
-          }
-
-          for (const lesson of courseModule.lessons) {
-            const lessonUid = lesson.uid ?? lesson.id
-            const payload = editableLessonToPayloadInput(lesson, moduleUid)
-
-            if (nextPersistedLessonUids.has(lessonUid)) {
-              const savedLesson = await updateLesson(lessonUid, payload)
-              lesson.uid = savedLesson.uid
-              lesson.id = savedLesson.uid
-            } else {
-              const savedLesson = await createLesson(payload)
-              if (lessonUid !== savedLesson.uid) {
-                lessonUidMap.set(lessonUid, savedLesson.uid)
-              }
-              lesson.uid = savedLesson.uid
-              lesson.id = savedLesson.uid
-              nextPersistedLessonUids.add(savedLesson.uid)
-              initialLessonModuleMapRef.current.set(savedLesson.uid, moduleUid)
-            }
-          }
-        }
-
-        if (activeLessonId) {
-          const remappedActiveLessonId = lessonUidMap.get(activeLessonId)
-          if (remappedActiveLessonId) setActiveLessonId(remappedActiveLessonId)
-        }
-
-        setModules(workingModules)
-        setModifiedLessons(new Set())
-        setPersistedLessonUids(nextPersistedLessonUids)
-
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: lessonKeys.all }),
-          queryClient.invalidateQueries({ queryKey: moduleKeys.all }),
-          queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) }),
-        ])
-
-        if (!opts?.silent) toast.success('Perubahan berhasil disimpan.')
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : 'Gagal menyimpan perubahan.',
-        )
-        throw error
-      } finally {
-        setIsSaving(false)
-      }
+          lessons: module.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson)
+            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson
+            return switchLessonDeliveryType(lesson, deliveryType)
+          }),
+        })),
+      )
+      setModifiedLessons((previous) => new Set([...previous, lessonId]))
     },
-    [
-      modules,
-      courseData.uid,
-      isSaving,
-      activeLessonId,
-      queryClient,
-      persistedLessonUids,
-    ],
+    [],
   )
 
   const handlePublish = useCallback(async () => {
     try {
-      await handleSave({ silent: true, redirect: false })
+      if (activeLessonId && modifiedLessons.has(activeLessonId)) {
+        await saveLesson(activeLessonId, { silent: true })
+      }
       setCourse((previous) =>
         previous ? { ...previous, is_published: true } : previous,
       )
@@ -502,12 +842,7 @@ export function useCourseEditController({
         error instanceof Error ? error.message : 'Gagal mempublikasikan kursus.',
       )
     }
-  }, [handleSave, courseData.uid, routeBasePath, navigate])
-
-  const confirmSave = useCallback(() => {
-    setIsConfirmOpen(false)
-    void handleSave()
-  }, [handleSave])
+  }, [activeLessonId, courseData.uid, modifiedLessons, navigate, routeBasePath, saveLesson])
 
   return {
     course,
@@ -518,29 +853,38 @@ export function useCourseEditController({
     activeOutlineModule,
     editorReady,
     modifiedLessons,
+    activeLessonModified,
     isSaving,
-    isConfirmOpen,
     isCreateModuleOpen,
     renameModuleId,
     renameModuleTitle,
-    shouldLoadLessonDetail,
+    deleteModuleId,
+    deleteModuleTitle,
+    isModuleMutating,
+    loadedModuleIds,
+    isModuleLessonsLoading,
     isLessonDetailLoading: lessonDetailQuery.isLoading && shouldLoadLessonDetail,
+    unsavedDialogOpen,
+    pendingNavigation,
     routeBasePath,
     courseUid: courseData.uid,
-    setActiveLessonId,
-    setIsConfirmOpen,
+    setUnsavedDialogOpen,
     setIsCreateModuleOpen,
     setRenameModuleId,
+    setDeleteModuleId,
     handleSelectModule,
+    handleSelectLesson,
     handleCreateModule,
     handleRenameModule,
-    handleDeleteModule,
+    handleRequestDeleteModule,
+    handleConfirmDeleteModule,
     handleAddLesson,
     handleRenameLesson,
     handleDeleteLesson,
     handleChangeLessonType,
     handlePublish,
-    confirmSave,
+    handleSaveCurrentLesson,
+    handleSaveAndContinue,
     patchLocalLesson,
   }
 }

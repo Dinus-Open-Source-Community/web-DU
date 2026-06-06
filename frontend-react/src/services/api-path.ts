@@ -65,6 +65,7 @@ export const API_ROUTES = {
   courses: {
     getAll: (params?: IQueryParamsPayload) => withQuery(`/courses`, params),
     create: `/courses`,
+    updateByUid: (uid: Uid) => `/courses/${uid}`,
     getByUid: (uid: Uid) => `/courses/${uid}`,
     joinByUid: (uid: Uid) => `/courses/${uid}/join`,
     getMentorByUid: (uid: Uid) => `/courses/${uid}/mentor`,

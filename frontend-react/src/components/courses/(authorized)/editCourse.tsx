@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom'
 
-import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/routes'
 import type { CourseEditClientProps } from '@/lib/course-edit/types'
 import { useCourseEditController } from '@/hooks/use-course-edit-controller'
 
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { CourseEditShell } from './curriculum/CourseEditShell'
 import { CreateModuleDialog } from './curriculum/CreateModuleDialog'
 import { RenameModuleDialog } from './curriculum/RenameModuleDialog'
+import { UnsavedLessonDialog } from './curriculum/UnsavedLessonDialog'
 
 export function CourseEditClient({
   initialModuleId,
@@ -16,7 +17,6 @@ export function CourseEditClient({
   role = 'mentor',
   courseData,
   modules: sourceModules,
-  lessonsByModule,
 }: CourseEditClientProps) {
   const isAdmin = role === 'admin'
 
@@ -28,27 +28,36 @@ export function CourseEditClient({
     activeLesson,
     activeOutlineModule,
     editorReady,
-    modifiedLessons,
+    activeLessonModified,
     isSaving,
-    isConfirmOpen,
     isCreateModuleOpen,
     renameModuleId,
     renameModuleTitle,
+    deleteModuleId,
+    deleteModuleTitle,
+    isModuleMutating,
+    loadedModuleIds,
+    isModuleLessonsLoading,
     isLessonDetailLoading,
-    setActiveLessonId,
-    setIsConfirmOpen,
+    unsavedDialogOpen,
+    pendingNavigation,
+    setUnsavedDialogOpen,
     setIsCreateModuleOpen,
     setRenameModuleId,
+    setDeleteModuleId,
     handleSelectModule,
+    handleSelectLesson,
     handleCreateModule,
     handleRenameModule,
-    handleDeleteModule,
+    handleRequestDeleteModule,
+    handleConfirmDeleteModule,
     handleAddLesson,
     handleRenameLesson,
     handleDeleteLesson,
     handleChangeLessonType,
     handlePublish,
-    confirmSave,
+    handleSaveCurrentLesson,
+    handleSaveAndContinue,
     patchLocalLesson,
   } = useCourseEditController({
     initialModuleId,
@@ -56,7 +65,6 @@ export function CourseEditClient({
     role,
     courseData,
     modules: sourceModules,
-    lessonsByModule,
   })
 
   if (!course) {
@@ -79,40 +87,43 @@ export function CourseEditClient({
 
   return (
     <>
-      <ConfirmDialog
-        open={isConfirmOpen}
-        onOpenChange={setIsConfirmOpen}
-        title="Simpan perubahan kurikulum?"
-        description="Semua modul dan lesson akan divalidasi lalu disinkronkan ke backend. Lesson video membutuhkan URL YouTube yang valid; lesson teks membutuhkan konten yang tidak kosong."
-        confirmLabel={isSaving ? 'Menyimpan...' : 'Simpan'}
-        onConfirm={confirmSave}
-      />
-
       <CourseEditShell
+        routeBasePath={routeBasePath}
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
-        modifiedCount={modifiedLessons.size}
+        hasUnsavedLesson={activeLessonModified}
         modules={outlineModules}
+        loadedModuleIds={loadedModuleIds}
+        loadingModuleId={isModuleLessonsLoading ? activeModuleId : null}
         activeModuleId={activeModuleId ?? activeOutlineModule?.uid ?? null}
         activeLessonId={activeLessonId}
         activeLesson={activeLesson}
         activeModuleTitle={activeOutlineModule?.title ?? null}
         activeModuleIndex={activeModuleIndex >= 0 ? activeModuleIndex : null}
         editorReady={editorReady}
-        isLoadingDetail={isLessonDetailLoading}
+        isLoadingDetail={isLessonDetailLoading || isModuleLessonsLoading}
         onPublish={() => void handlePublish()}
-        onSave={() => setIsConfirmOpen(true)}
+        onSave={() => void handleSaveCurrentLesson()}
         onPatchLesson={patchLocalLesson}
         onSelectModule={handleSelectModule}
-        onSelectLesson={setActiveLessonId}
+        onSelectLesson={handleSelectLesson}
         onOpenCreateModule={() => setIsCreateModuleOpen(true)}
         onRenameModule={setRenameModuleId}
-        onDeleteModule={handleDeleteModule}
+        onDeleteModule={handleRequestDeleteModule}
         onAddLesson={handleAddLesson}
         onRenameLesson={handleRenameLesson}
         onDeleteLesson={handleDeleteLesson}
         onChangeLessonType={handleChangeLessonType}
+      />
+
+      <UnsavedLessonDialog
+        open={unsavedDialogOpen}
+        onOpenChange={setUnsavedDialogOpen}
+        lessonTitle={activeLesson?.title ?? 'Lesson ini'}
+        targetLabel={pendingNavigation?.label ?? 'melanjutkan'}
+        isSaving={isSaving}
+        onSaveAndContinue={() => void handleSaveAndContinue()}
       />
 
       <CreateModuleDialog
@@ -120,6 +131,7 @@ export function CourseEditClient({
         onOpenChange={setIsCreateModuleOpen}
         onCreateModule={handleCreateModule}
         nextOrder={outlineModules.length + 1}
+        isSubmitting={isModuleMutating}
       />
 
       <RenameModuleDialog
@@ -129,10 +141,27 @@ export function CourseEditClient({
           if (!open) setRenameModuleId(null)
         }}
         onRename={(title) => {
-          if (!renameModuleId) return
-          handleRenameModule(renameModuleId, title)
-          setRenameModuleId(null)
+          if (!renameModuleId) return Promise.resolve()
+          return handleRenameModule(renameModuleId, title)
         }}
+        isSubmitting={isModuleMutating}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteModuleId)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteModuleId(null)
+        }}
+        title="Hapus modul?"
+        description={
+          deleteModuleTitle
+            ? `Modul "${deleteModuleTitle}" dan semua lesson di dalamnya akan dihapus permanen.`
+            : 'Modul dan semua lesson di dalamnya akan dihapus permanen.'
+        }
+        confirmLabel={isModuleMutating ? 'Menghapus...' : 'Hapus modul'}
+        cancelLabel="Batal"
+        variant="destructive"
+        onConfirm={() => void handleConfirmDeleteModule()}
       />
     </>
   )
