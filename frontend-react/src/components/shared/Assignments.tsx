@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { CourseAssignmentDialog } from './CourseAssignmentDialog'
 import type { IMentorAssignmentSubmission, IMentorCourseAssignment } from '@/lib/types/course'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import type { CourseDetailItem } from '@/lib/types/api'
+import type { ICourseDetailItem } from '@/lib/types/course'
 import { ROUTES } from '@/lib/routes'
 import { PageHeader } from './Header'
 import { StatCard } from './StatCard'
@@ -20,7 +20,7 @@ import { ReviewSubmissionDateRange } from './ReviewSubmissionDate'
 import { computeAssignmentStats, deleteMentorAssignment, filterSubmissions, getDeadlineUrgency, getEffectiveAssignmentStatus, type SubmissionFilterStatus } from '@/lib/func/fungsi'
 
 type MentorCourseAssignmentsClientProps = {
-  courseData: CourseDetailItem
+  courseData: ICourseDetailItem
   assignmentData: IMentorCourseAssignment[]
   submissionData: IMentorAssignmentSubmission[]
 }

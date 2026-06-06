@@ -91,7 +91,7 @@ export function LessonSidebar({
 
                   {isExpanded && (
                     <div className={cn('ml-6 border-l pb-2 pl-4', isDark ? 'border-zinc-700' : 'border-slate-200')}>
-                      {mod.lessons.map((lesson, lessonIndex) => {
+                      {(mod.lessons ?? []).map((lesson, lessonIndex) => {
                         const isActive = lesson.uid === activeLessonId
                         const isDone = lessonEntries.findIndex((entry) => entry.lesson.uid === lesson.uid) < completedLessons - 1
                         const LessonIcon = getLessonIcon(lesson.content_type)

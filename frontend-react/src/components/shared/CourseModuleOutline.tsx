@@ -2,22 +2,26 @@
 
 import { useRef, useState, type KeyboardEvent } from 'react'
 import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react'
-import type { LessonContentType } from '../../lib/types/course'
-import type { IModulesData } from '../../lib/types/api'
+import type { IModulesData } from '../../lib/types/module'
+import type { CourseDetailLesson, LessonDeliveryType } from '../../lib/types/lesson'
+
+function moduleLessons(module: IModulesData): CourseDetailLesson[] {
+  return module.lessons ?? []
+}
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
 
-const LESSON_TYPE_ICON: Record<LessonContentType, typeof FileText> = {
+const LESSON_TYPE_ICON: Record<LessonDeliveryType, typeof FileText> = {
   text: FileText,
   video: Film,
 }
 
-const LESSON_TYPE_LABEL: Record<LessonContentType, string> = {
+const LESSON_TYPE_LABEL: Record<LessonDeliveryType, string> = {
   text: 'Teks',
   video: 'Video',
 }
 
-const LESSON_TYPE_COLOR: Record<LessonContentType, string> = {
+const LESSON_TYPE_COLOR: Record<LessonDeliveryType, string> = {
   text: 'bg-sky-50 text-sky-600',
   video: 'bg-violet-50 text-violet-600',
 }
@@ -36,21 +40,20 @@ function createModuleId() {
   return `mod_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
 }
 
-export function CreateDefaultLesson(order_index = 1): IModulesData['lessons'][number] {
+export function CreateDefaultLesson(order_index = 1): CourseDetailLesson {
+  const now = new Date().toISOString()
   return {
     uid: createLessonId(),
     title: `Lesson ${order_index}`,
     order_index,
     module_uid: '',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    // durationMinutes: 10,
-    // hasHomework: false,
-    // homeworkType: 'text',
-    // homeworkDescriptionHtml: '<p></p>',
-    // homeworkQuiz: { questions: [], passingScore: 70 },
+    created_at: now,
+    updated_at: now,
     content_type: 'text',
-    // contentHtml: '',
+    content: null,
+    video_url: '',
+    start_time: now,
+    end_time: now,
   }
 }
 
@@ -78,7 +81,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
   const [expandedModules, setExpandedModules] = useState<Set<string>>(() => {
     const initial = new Set<string>()
     for (const m of modules) {
-      for (const l of m.lessons) {
+      for (const l of moduleLessons(m)) {
         if (l.uid === activeLessonId) {
           initial.add(m.uid)
           break
@@ -115,9 +118,9 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
       onModulesChange(modules.map((m) => (m.uid === editing.moduleId ? { ...m, title: finalTitle } : m)))
     } else {
       const mod = modules.find((m) => m.uid === editing.moduleId)
-      const lesson = mod?.lessons.find((l) => l.uid === editing.lessonId)
+      const lesson = mod ? moduleLessons(mod).find((l) => l.uid === editing.lessonId) : undefined
       const finalTitle = trimmed || lesson?.title || `Lesson`
-      onModulesChange(modules.map((m) => (m.uid === editing.moduleId ? { ...m, lessons: m.lessons.map((l) => (l.uid === editing.lessonId ? { ...l, title: finalTitle } : l)) } : m)))
+      onModulesChange(modules.map((m) => (m.uid === editing.moduleId ? { ...m, lessons: moduleLessons(m).map((l) => (l.uid === editing.lessonId ? { ...l, title: finalTitle } : l)) } : m)))
     }
     setEditing(null)
   }
@@ -153,28 +156,30 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
     const next = [...modules, newModule]
     onModulesChange(next)
     setExpandedModules((prev) => new Set(prev).add(newModule.uid))
-    onSelectLesson(newModule.lessons[0].uid)
+    onSelectLesson(moduleLessons(newModule)[0].uid)
   }
 
   const handleDeleteModule = (moduleId: string) => {
     const next = modules.filter((m) => m.uid !== moduleId).map((m, i) => ({ ...m, order_index: i + 1 }))
     onModulesChange(next.length > 0 ? next : [CreateDefaultModule(1)])
     if (next.length > 0) {
-      onSelectLesson(next[0].lessons[0]?.uid ?? '')
+      onSelectLesson(moduleLessons(next[0])[0]?.uid ?? '')
     }
   }
 
   const handleAddLesson = (moduleId: string) => {
     const next = modules.map((m) => {
       if (m.uid !== moduleId) return m
-      const nextOrder = m.lessons.length + 1
+      const lessons = moduleLessons(m)
+      const nextOrder = lessons.length + 1
       const newLesson = CreateDefaultLesson(nextOrder)
-      return { ...m, lessons: [...m.lessons, newLesson] }
+      return { ...m, lessons: [...lessons, newLesson] }
     })
     onModulesChange(next)
     const mod = next.find((m) => m.uid === moduleId)
     if (mod) {
-      const lastLesson = mod.lessons[mod.lessons.length - 1]
+      const lessons = moduleLessons(mod)
+      const lastLesson = lessons[lessons.length - 1]
       onSelectLesson(lastLesson.uid)
       setExpandedModules((prev) => new Set(prev).add(moduleId))
     }
@@ -183,7 +188,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
   const handleDeleteLesson = (moduleId: string, lessonId: string) => {
     const next = modules.map((m) => {
       if (m.uid !== moduleId) return m
-      const filtered = m.lessons.filter((l) => l.uid !== lessonId).map((l, i) => ({ ...l, order_index: i + 1 }))
+      const filtered = moduleLessons(m).filter((l) => l.uid !== lessonId).map((l, i) => ({ ...l, order_index: i + 1 }))
       if (filtered.length === 0) {
         const fallback = CreateDefaultLesson(1)
         return { ...m, lessons: [fallback] }
@@ -193,20 +198,20 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
     onModulesChange(next)
   }
 
-  const handleChangeLessonType = (moduleId: string, lessonId: string, newType: LessonContentType) => {
+  const handleChangeLessonType = (moduleId: string, lessonId: string, newType: LessonDeliveryType) => {
     const next = modules.map((m) => {
       if (m.uid !== moduleId) return m
       return {
         ...m,
-        lessons: m.lessons.map((l) => {
+        lessons: moduleLessons(m).map((l) => {
           if (l.uid !== lessonId) return l
-          const content_type: IModulesData['lessons'][number]['content_type'] = newType === 'video' ? 'video' : 'text'
-          const base = { ...l, contentType: newType, content_type }
+          const content_type: CourseDetailLesson['content_type'] = newType === 'video' ? 'video' : 'text'
+          const base = { ...l, content_type }
           switch (newType) {
             case 'text':
-              return { ...base, contentHtml: '' }
+              return { ...base, content: null, video_url: '' }
             case 'video':
-              return { ...base, videoUrl: '', contentHtml: '' }
+              return { ...base, content: null, video_url: '' }
           }
         }),
       }
@@ -214,7 +219,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
     onModulesChange(next)
   }
 
-  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0)
+  const totalLessons = modules.reduce((sum, m) => sum + moduleLessons(m).length, 0)
 
   return (
     <aside className="rounded-2xl border border-slate-200/80 bg-white lg:sticky lg:top-6">
@@ -238,7 +243,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
         {modules.map((mod, mi) => {
           const isExpanded = expandedModules.has(mod.uid)
           const editingThisModule = isEditingModule(mod.uid)
-          const hasActiveLesson = mod.lessons.some((l) => l.uid === activeLessonId)
+          const hasActiveLesson = moduleLessons(mod).some((l) => l.uid === activeLessonId)
 
           return (
             <div key={mod.uid} className={cn('overflow-hidden rounded-xl transition-colors', hasActiveLesson && !isExpanded ? 'bg-primary/3' : '')}>
@@ -283,7 +288,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                   <>
                     <button type="button" onClick={() => toggleExpand(mod.uid)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
                       <span className="truncate text-xs font-semibold text-slate-700">{mod.title}</span>
-                      <span className="shrink-0 text-[10px] text-slate-400">({mod.lessons.length})</span>
+                      <span className="shrink-0 text-[10px] text-slate-400">({moduleLessons(mod).length})</span>
                     </button>
 
                     <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/mod:opacity-100">
@@ -310,9 +315,9 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
               {isExpanded && (
                 <div className="ml-4.5 border-l-2 border-slate-100 pb-1 pl-3 pr-2">
                   <div className="space-y-0.5 pt-0.5">
-                    {mod.lessons.map((lesson) => {
+                    {moduleLessons(mod).map((lesson) => {
                       const isActive = lesson.uid === activeLessonId
-                      const lessonType: LessonContentType = lesson.content_type === 'video' ? 'video' : 'text'
+                      const lessonType: LessonDeliveryType = lesson.content_type === 'video' ? 'video' : 'text'
                       const Icon = LESSON_TYPE_ICON[lessonType]
                       const editingThisLesson = isEditingLesson(mod.uid, lesson.uid)
                       const typeColor = LESSON_TYPE_COLOR[lessonType]
@@ -360,7 +365,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                               <div className="flex shrink-0 items-center gap-0.5 pr-1 opacity-100">
                                 <select
                                   value={lessonType}
-                                  onChange={(e) => handleChangeLessonType(mod.uid, lesson.uid, e.target.value as LessonContentType)}
+                                  onChange={(e) => handleChangeLessonType(mod.uid, lesson.uid, e.target.value as LessonDeliveryType)}
                                   className="h-5 cursor-pointer rounded-md border-0 bg-slate-100 px-1 text-[10px] font-medium text-slate-500 outline-none hover:bg-slate-200"
                                   title="Ubah tipe konten">
                                   <option value="text">{LESSON_TYPE_LABEL.text}</option>

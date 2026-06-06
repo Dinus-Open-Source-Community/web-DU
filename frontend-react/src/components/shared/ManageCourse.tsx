@@ -10,6 +10,7 @@ import { CreateCourseDialog } from './CreateCourse'
 import type { ICourseItem } from '@/lib/types/course'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
+type CourseFilter = (typeof filters)[number]
 const ITEMS_PER_PAGE = 6
 
 type CourseManagementSectionProps = {
@@ -19,7 +20,7 @@ type CourseManagementSectionProps = {
 
 export default function ManageCourseSection({ role = 'mentor', data }: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
-  const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]>('Semua')
+  const [activeFilter, setActiveFilter] = useState<CourseFilter>('Semua')
   const [currentPage, setCurrentPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
   const courses = useMemo(() => data ?? ([] as ICourseItem[]), [data])
@@ -47,7 +48,12 @@ export default function ManageCourseSection({ role = 'mentor', data }: CourseMan
           <PageHeader title="Courses" subtitle={isAdmin ? 'Kelola kursus platform: buat, atur, dan hapus kursus.' : 'Kelola konten modul, lesson, dan peserta kursus.'} />
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <SegmentedFilter items={filters.map((f) => ({ value: f, label: f }))} value={activeFilter} onChange={setActiveFilter} variant="scroll" />
+            <SegmentedFilter<CourseFilter>
+              items={filters.map((f) => ({ value: f, label: f }))}
+              value={activeFilter}
+              onChange={setActiveFilter}
+              variant="scroll"
+            />
             {isAdmin && (
               <Button className="h-11.5 shrink-0 gap-2 rounded-xl px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
                 <Plus className="h-5 w-5" />

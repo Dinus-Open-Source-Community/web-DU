@@ -1,12 +1,12 @@
 import { CourseDetailLayout } from '@/components/courses/DetailCourse'
 import { LottieOverlay } from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
-import { useGetCourseDetailWithCategories } from '@/services/course'
+import { useCourseDetailWithCategories } from '@/hooks/use-course'
 import { Link, useParams } from 'react-router-dom'
 
 export default function PublicCourseDetailPage() {
   const { courseUid } = useParams()
-  const { courseCategories, courseDetail, popularCourses, isLoading } = useGetCourseDetailWithCategories(courseUid ?? '')
+  const { courseCategories, courseDetail, popularCourses, isLoading } = useCourseDetailWithCategories(courseUid ?? '')
 
   if (isLoading) {
     return <LottieOverlay visible={isLoading} />

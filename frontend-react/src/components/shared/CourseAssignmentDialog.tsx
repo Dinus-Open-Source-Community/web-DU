@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Paperclip, X } from 'lucide-react'
 import { toast } from 'sonner'
-import type { CourseDetailItem } from '../../lib/types/api'
+import type { ICourseDetailItem } from '../../lib/types/course'
 import type { IMentorCourseAssignment, IQuiz, MentorAssignmentInput, MentorAssignmentLifecycleStatus, MentorAssignmentTaskType } from '../../lib/types/course'
 import { TiptapEditor } from './TipTapEditor'
 import { Checkbox } from '../ui/checkbox'
@@ -25,8 +25,8 @@ function datetimeLocalToIso(value: string): string | null {
   return d.toISOString()
 }
 
-function getCourseMeetingCount(course: CourseDetailItem): number {
-  const c = course as CourseDetailItem & { meetingCount?: number; meetings?: unknown[] }
+function getCourseMeetingCount(course: ICourseDetailItem): number {
+  const c = course as ICourseDetailItem & { meetingCount?: number; meetings?: unknown[] }
   const directCount = c.meetingCount
   if (typeof directCount === 'number' && Number.isFinite(directCount) && directCount >= 1) {
     return Math.floor(directCount)
@@ -44,7 +44,7 @@ type CourseAssignmentDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   variant?: 'modal' | 'inline'
-  course: CourseDetailItem
+  course: ICourseDetailItem
   courseUid: string
   mode: 'create' | 'edit'
   editing: IMentorCourseAssignment | null

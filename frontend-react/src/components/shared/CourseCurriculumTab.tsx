@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { BookOpen, ChevronDown, ChevronRight, FileText, Film, Layers3, PencilLine } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import type { CourseDetailModule, IModulesData } from '../../lib/types/course'
+import type { ICourseDetailModule, IModulesData } from '../../lib/types/course'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
 
 type CourseCurriculumTabProps = {
-  modules: Array<CourseDetailModule | IModulesData>
+  modules: Array<ICourseDetailModule | IModulesData>
   editHref: string
 }
 

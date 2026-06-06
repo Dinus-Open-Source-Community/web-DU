@@ -1,0 +1,233 @@
+import { useMemo } from 'react'
+import { useQueries, useQuery } from '@tanstack/react-query'
+import type { IQueryParamsPayload } from '@/services/api-path'
+import type { LessonDetailItem } from '@/lib/types/course'
+import {
+  fetchCourseByUid,
+  fetchCourseCategories,
+  fetchCourseCategoryByUid,
+  fetchCourses,
+  fetchCourseStudents,
+  fetchCourseTypes,
+  stripLessonsFromModules,
+} from '@/services/course'
+import { fetchLessonsByModuleUid } from '@/services/lessons'
+import { courseKeys, lessonKeys } from './query-keys'
+import { useModulesByCourse } from './use-modules'
+
+export function useCourses(params?: IQueryParamsPayload) {
+  return useQuery({
+    queryKey: courseKeys.list(params),
+    queryFn: () => fetchCourses(params),
+  })
+}
+
+export function useCourseDetail(uid: string) {
+  return useQuery({
+    queryKey: courseKeys.detail(uid),
+    enabled: !!uid,
+    queryFn: () => fetchCourseByUid(uid),
+  })
+}
+
+export function useCourseCategories(params?: IQueryParamsPayload) {
+  return useQuery({
+    queryKey: courseKeys.categories(params),
+    queryFn: () => fetchCourseCategories(params),
+  })
+}
+
+export function useCourseCategory(uid: string) {
+  return useQuery({
+    queryKey: courseKeys.category(uid),
+    enabled: Boolean(uid),
+    queryFn: () => fetchCourseCategoryByUid(uid),
+  })
+}
+
+export function useCourseTypes(params?: IQueryParamsPayload) {
+  return useQuery({
+    queryKey: courseKeys.types(params),
+    queryFn: () => fetchCourseTypes(params),
+  })
+}
+
+export function useCourseStudents(courseUid: string) {
+  return useQuery({
+    queryKey: courseKeys.students(courseUid),
+    enabled: !!courseUid,
+    queryFn: () => fetchCourseStudents(courseUid),
+  })
+}
+
+export function useCourseDetailWithCategories(uid: string) {
+  const courseDetail = useCourseDetail(uid)
+  const courseCategories = useCourseCategory(courseDetail.data?.category.uid ?? '')
+  const categoryUid = courseDetail.data?.category.uid
+  const popularCourses = useCourses({
+    course_category_id: categoryUid,
+    per_page: 5,
+  })
+
+  const isLoading =
+    courseDetail.isLoading || courseCategories.isLoading || popularCourses.isLoading
+  const error = courseDetail.error || courseCategories.error || popularCourses.error
+
+  return {
+    courseDetail,
+    courseCategories,
+    popularCourses,
+    isLoading,
+    error,
+  }
+}
+
+export function useCourseDetailAdminAndMentor(uid: string) {
+  const courseDetail = useCourseDetail(uid)
+  const userCourse = useCourseStudents(uid)
+  const moduleCourse = useModulesByCourse(uid)
+
+  const isLoading =
+    courseDetail.isLoading || userCourse.isLoading || moduleCourse.isLoading
+  const error = courseDetail.error || userCourse.error || moduleCourse.error
+
+  return {
+    courseDetail,
+    userCourse,
+    moduleCourse,
+    isLoading,
+    error,
+  }
+}
+
+export function useCombinedCourseCategoriesAndTypes(params?: IQueryParamsPayload) {
+  const courseCategoriesQuery = useCourseCategories(params)
+  const courseTypesQuery = useCourseTypes(params)
+  const courseList = useCourses(params)
+
+  const isLoading =
+    courseCategoriesQuery.isLoading ||
+    courseTypesQuery.isLoading ||
+    courseList.isLoading
+  const error =
+    courseCategoriesQuery.error || courseTypesQuery.error || courseList.error
+
+  return {
+    courseCategories: courseCategoriesQuery.data,
+    courseTypes: courseTypesQuery.data,
+    courses: courseList.data,
+    isLoading,
+    error,
+  }
+}
+
+export function useCourseEditData(courseUid: string) {
+  const courseDetail = useCourseDetail(courseUid)
+  const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
+
+  const moduleList = modulesQuery.data?.modules ?? []
+  const moduleUids = useMemo(
+    () => moduleList.map((module) => module.uid).filter(Boolean),
+    [moduleList],
+  )
+
+  const lessonQueries = useQueries({
+    queries: moduleUids.map((moduleUid) => ({
+      queryKey: lessonKeys.byModule(moduleUid, { per_page: 100 }),
+      queryFn: () => fetchLessonsByModuleUid(moduleUid, { per_page: 100 }),
+      enabled: Boolean(courseUid) && modulesQuery.isSuccess && !!moduleUid,
+    })),
+  })
+
+  const lessonsByModule = useMemo(() => {
+    const result: Record<string, LessonDetailItem[]> = {}
+    moduleUids.forEach((moduleUid, index) => {
+      result[moduleUid] = lessonQueries[index]?.data?.lessons ?? []
+    })
+    return result
+  }, [moduleUids, lessonQueries])
+
+  const modules = useMemo(() => stripLessonsFromModules(moduleList), [moduleList])
+
+  const isLoadingLessons = lessonQueries.some((query) => query.isLoading)
+  const isLoading =
+    courseDetail.isLoading || modulesQuery.isLoading || isLoadingLessons
+  const error =
+    courseDetail.error ||
+    modulesQuery.error ||
+    lessonQueries.find((query) => query.error)?.error
+
+  return {
+    courseDetail,
+    modules,
+    lessonsByModule,
+    isLoading,
+    error,
+  }
+}
+
+export function useCourseWithModules(courseUid: string) {
+  const editData = useCourseEditData(courseUid)
+
+  const modulesWithLessons = useMemo(
+    () =>
+      editData.modules.map((module) => ({
+        ...module,
+        lessons: editData.lessonsByModule[module.uid] ?? [],
+      })),
+    [editData.modules, editData.lessonsByModule],
+  )
+
+  const modulesData = useMemo(() => {
+    if (editData.isLoading) return undefined
+    return {
+      modules: modulesWithLessons,
+      meta: {
+        current_page: 1,
+        per_page: Math.max(modulesWithLessons.length, 1),
+        total: modulesWithLessons.length,
+        total_pages: 1,
+      },
+    }
+  }, [editData.isLoading, modulesWithLessons])
+
+  return {
+    courseDetail: editData.courseDetail,
+    modules: {
+      data: modulesData,
+      isLoading: editData.isLoading,
+      error: editData.error,
+      isSuccess:
+        editData.courseDetail.isSuccess && !editData.isLoading && !editData.error,
+    },
+    lessonsByModule: editData.lessonsByModule,
+    isLoading: editData.isLoading,
+    error: editData.error,
+  }
+}
+
+export function useCreateOrEditModuleAndLesson(uid: string, moduleId: string) {
+  const courseDetail = useCourseDetail(uid)
+  const modules = useModulesByCourse(uid, { per_page: 100 })
+  const lessons = useQueries({
+    queries: [
+      {
+        queryKey: ['lessons', 'module', moduleId, { per_page: 100 }],
+        queryFn: () => fetchLessonsByModuleUid(moduleId, { per_page: 100 }),
+        enabled: !!moduleId,
+      },
+    ],
+  })[0]
+
+  const isLoading =
+    courseDetail.isLoading || modules.isLoading || lessons.isLoading
+  const error = courseDetail.error || modules.error || lessons.error
+
+  return {
+    courseDetail,
+    modules,
+    lesson: lessons,
+    isLoading,
+    error,
+  }
+}

@@ -3,7 +3,7 @@ import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { useAuth } from '@/providers/auth-provider'
 import type { IUserData } from '@/lib/types/user'
-import { useGetCourseDetailAdminAndMentor } from '@/services/course'
+import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { NotFoundContent } from '@/components/shared/Error'
 import { LottieOverlay } from '@/components/shared/Loader'
 import type { IModulesData } from '@/lib/types/course'
@@ -11,7 +11,7 @@ import type { IModulesData } from '@/lib/types/course'
 export default function AdminCourseDetailPage() {
   const { courseUid } = useParams()
   const { user } = useAuth()
-  const { courseDetail, isLoading, userCourse, moduleCourse } = useGetCourseDetailAdminAndMentor(courseUid as string)
+  const { courseDetail, isLoading, userCourse, moduleCourse } = useCourseDetailAdminAndMentor(courseUid as string)
 
   if (!courseDetail?.data) return <NotFoundContent description="Detail course tidak di temukan" showBackButton={false} title="Course Tidak ditemukan" />
   if (isLoading) return <LottieOverlay visible={isLoading} message="Memuat Course" />

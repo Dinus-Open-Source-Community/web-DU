@@ -1,5 +1,5 @@
 import { MentorCourseAssignmentsClient } from '@/components/shared/Assignments'
-import type { CourseDetailItem } from '@/lib/types/api'
+import type { ICourseDetailItem } from '@/lib/types/course'
 import type { IMentorAssignmentSubmission, IMentorCourseAssignment } from '@/lib/types/course'
 import { useParams } from 'react-router-dom'
 
@@ -58,7 +58,7 @@ export default function MentorCourseAssignmentsPage() {
     },
   ]
 
-  const courseData: CourseDetailItem = {
+  const courseData: ICourseDetailItem = {
     category: {
       created_at: '2026-05-12T19:06:39.048745Z',
       description: 'Kategori untuk course pengembangan web',

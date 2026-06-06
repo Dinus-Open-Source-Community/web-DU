@@ -1,6 +1,6 @@
 import { FileText, Film } from 'lucide-react'
 
-import type { IModulesDetail, LessonContentType, LessonDetailItem } from '@/lib/types/course'
+import type { IModulesDetail, LessonDeliveryType, LessonDetailItem } from '@/lib/types/course'
 
 export type LessonThemeMode = 'dark' | 'light'
 
@@ -11,7 +11,7 @@ export type LessonEntry = {
   lessonIndex: number
 }
 
-export const LESSON_ICON_MAP: Record<LessonContentType, typeof FileText> = {
+export const LESSON_ICON_MAP: Record<LessonDeliveryType, typeof FileText> = {
   video: Film,
   text: FileText,
 }
@@ -42,9 +42,13 @@ export function getEmbedUrl(url: string): string | null {
   return null
 }
 
+function moduleLessons(mod: IModulesDetail) {
+  return mod.lessons ?? []
+}
+
 export function flattenLessons(modules: IModulesDetail[]): LessonEntry[] {
   return modules.flatMap((mod, moduleIndex) =>
-    mod.lessons.map((lesson, lessonIndex) => ({
+    moduleLessons(mod).map((lesson, lessonIndex) => ({
       lesson,
       module: mod,
       moduleIndex,
@@ -54,7 +58,8 @@ export function flattenLessons(modules: IModulesDetail[]): LessonEntry[] {
 }
 
 export function moduleProgress(mod: IModulesDetail, lessonEntries: LessonEntry[], completedLessons: number) {
-  const completedCount = mod.lessons.filter((lesson) => {
+  const lessons = moduleLessons(mod)
+  const completedCount = lessons.filter((lesson) => {
     const globalIndex = lessonEntries.findIndex((entry) => entry.lesson.uid === lesson.uid)
 
     return globalIndex >= 0 && globalIndex < completedLessons
@@ -62,6 +67,6 @@ export function moduleProgress(mod: IModulesDetail, lessonEntries: LessonEntry[]
 
   return {
     completedCount,
-    totalCount: mod.lessons.length,
+    totalCount: lessons.length,
   }
 }

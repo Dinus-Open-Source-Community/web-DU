@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import '@/styles/tiptap-editor.css'
+import { useLessonByUid } from '@/hooks/use-lessons'
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
 import type { ICourseDetailItem, IModulesDetail } from '@/lib/types/course'
 import type { ICardData } from '@/lib/types/utils'
@@ -59,6 +60,9 @@ export function CourseModulePreview({ courseUid, variant, mentorCourse, repoCour
 
   const activeEntry = useMemo(() => lessonEntries.find((entry) => entry.lesson.uid === effectiveActiveLessonId) ?? null, [effectiveActiveLessonId, lessonEntries])
   const activeLesson = activeEntry?.lesson ?? null
+
+  const lessonDetailQuery = useLessonByUid(effectiveActiveLessonId ?? '')
+  const displayedLesson = lessonDetailQuery.data ?? activeLesson
   const activeIndex = useMemo(() => lessonEntries.findIndex((entry) => entry.lesson.uid === effectiveActiveLessonId), [effectiveActiveLessonId, lessonEntries])
   const previousEntry = activeIndex > 0 ? lessonEntries[activeIndex - 1] : null
   const nextEntry = activeIndex >= 0 && activeIndex < lessonEntries.length - 1 ? lessonEntries[activeIndex + 1] : null
@@ -173,7 +177,11 @@ export function CourseModulePreview({ courseUid, variant, mentorCourse, repoCour
         onOpenThemeSettings={() => setIsThemeDialogOpen(true)}
       />
 
-      <LessonContent lesson={activeLesson} theme={theme} />
+      <LessonContent
+        lesson={displayedLesson}
+        theme={theme}
+        isLoading={lessonDetailQuery.isLoading && !lessonDetailQuery.data}
+      />
 
       <LessonSidebar
         modules={modulesState}

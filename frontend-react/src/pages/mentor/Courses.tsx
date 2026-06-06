@@ -1,5 +1,5 @@
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import type { ICourseItem } from '@/lib/types/api'
+import type { ICourseItem } from '@/lib/types/course'
 import ManageCourseSection from '../../components/shared/ManageCourse'
 
 export default function MentorCoursesPage() {
@@ -10,12 +10,18 @@ export default function MentorCoursesPage() {
       course_type_uid: 'type-online',
       cover_url: 'https://picsum.photos/seed/course-001/1200/600',
       created_at: '2024-01-10T08:30:00Z',
+      created_by: {
+        uid: 'mentor-001',
+        name: 'Mentor DOSCOM',
+        avatar_url: '',
+        role: 'mentor',
+        is_verified: true,
+      },
       description: 'Belajar dasar React dan membuat komponen UI modern dengan TypeScript.',
       event_uid: null,
       is_premium: true,
       is_published: true,
       level: 'beginner',
-      mentor_uid: 'mentor-001',
       mentors: [],
       price: 299000,
       price_strike: 499000,
@@ -34,12 +40,18 @@ export default function MentorCoursesPage() {
       course_type_uid: 'type-online',
       cover_url: 'https://picsum.photos/seed/course-002/1200/600',
       created_at: '2024-01-15T09:00:00Z',
+      created_by: {
+        uid: 'mentor-002',
+        name: 'Mentor DOSCOM',
+        avatar_url: '',
+        role: 'mentor',
+        is_verified: true,
+      },
       description: 'Bangun REST API dengan Node.js dan Express, lengkap dengan autentikasi.',
       event_uid: null,
       is_premium: false,
       is_published: true,
       level: 'intermediate',
-      mentor_uid: 'mentor-002',
       mentors: [],
       price: 0,
       price_strike: 199000,
@@ -55,7 +67,7 @@ export default function MentorCoursesPage() {
   ]
   return (
     <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
-      <ManageCourseSection role="mentor" data={{ courses: dataCourses, meta: { current_page: 1, per_page: 10, total: 2, total_pages: 1 } }} />
+      <ManageCourseSection role="mentor" data={dataCourses} />
     </AppSidebarProvider>
   )
 }

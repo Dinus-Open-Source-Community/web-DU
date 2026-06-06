@@ -39,7 +39,7 @@ export const API_ROUTES = {
     login: `/login`,
     register: `/register`,
     oauth: {
-      googleLogin: `/oauth/google/login`,
+      googleLogin: `/oauth/google`,
       googleCallback: `/oauth/google/callback`,
     },
   },
@@ -72,6 +72,7 @@ export const API_ROUTES = {
     replyReviewByUid: (courseUid: Uid, reviewUid: Uid) => `/courses/${courseUid}/review/${reviewUid}/reply`,
     updateStatusByUid: (uid: Uid) => `/courses/${uid}/status`,
     assignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/assign`,
+    getProgressByUid: (uid: Uid) => `/courses/${uid}/progress`,
     getStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) => withQuery(`/courses/${uid}/students`, params),
   },
   courseCategories: {
@@ -101,6 +102,14 @@ export const API_ROUTES = {
     getByUid: (uid: Uid) => `/lessons/${uid}`,
     updateByUid: (uid: Uid) => `/lessons/${uid}`,
     deleteByUid: (uid: Uid) => `/lessons/${uid}`,
+    read: {
+      getStatusByLessonUid: (lessonUid: Uid, params?: IQueryParamsPayload) => withQuery(`/lessons/${lessonUid}/read`, params),
+      markByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/read`,
+    },
+    readings: {
+      getByLessonUid: (lessonUid: Uid) => `/lessons/readings/lesson/${lessonUid}`,
+      getMyHistory: (params?: IQueryParamsPayload) => withQuery(`/lessons/readings/my-history`, params),
+    },
     assignment: {
       getByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment`,
       createByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment`,
@@ -134,7 +143,8 @@ export const API_ROUTES = {
   payment: {
     create: `/payment/create`,
     getAll: (params?: IQueryParamsPayload) => withQuery(`/payment`, params),
-    tripay: `/payment/tripay`,
+    method: `/payment/method`,
+    tripay: (params?: IQueryParamsPayload) => withQuery(`/payment/tripay`, params),
   },
   swagger: {
     ui: `/swagger/index.html`,

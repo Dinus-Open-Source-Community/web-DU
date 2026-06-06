@@ -1,7 +1,7 @@
 import { LottieOverlay } from '@/components/shared/Loader'
 import CourseSection1 from '../../components/courses/course'
 import GuestLayout from '../../components/layouts/GuestLayouts'
-import { useCombinedCourseCategoriesAndTypes } from '@/services/course'
+import { useCombinedCourseCategoriesAndTypes } from '@/hooks/use-course'
 import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 
 export default function CoursePage() {

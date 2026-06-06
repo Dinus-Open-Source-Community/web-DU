@@ -4,7 +4,7 @@ import Section from '@/components/student/BrowseCourseSection'
 import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 import type { IUserData } from '@/lib/types/user'
 import { useAuth } from '@/providers/auth-provider'
-import { useCombinedCourseCategoriesAndTypes } from '@/services/course'
+import { useCombinedCourseCategoriesAndTypes } from '@/hooks/use-course'
 
 const BrowseCourse = () => {
   const { user } = useAuth()

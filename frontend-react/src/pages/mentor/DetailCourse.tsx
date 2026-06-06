@@ -1,15 +1,15 @@
 import { useParams } from 'react-router-dom'
 import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
-import type { CourseDetailItem } from '../../lib/types/api'
+import type { ICourseDetailItem } from '../../lib/types/course'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 
 export default function MentorCourseDetailPage() {
   const { uid } = useParams()
-  const dataCourse: CourseDetailItem[] = [
+  const dataCourse: ICourseDetailItem[] = [
     {
-      category: {} as CourseDetailItem['category'],
-      course_type: {} as CourseDetailItem['course_type'],
+      category: {} as ICourseDetailItem['category'],
+      course_type: {} as ICourseDetailItem['course_type'],
       cover_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
       created_at: '2025-01-01T08:00:00.000Z',
       description: 'Kursus pengantar pengembangan web modern untuk pemula hingga menengah.',

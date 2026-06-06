@@ -3,7 +3,7 @@ import { ImageIcon, Loader2 } from 'lucide-react'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 import { toast } from 'sonner'
-import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/services/user'
+import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/hooks/use-user'
 import { Input } from '../ui/input'
 import { avatarFileSchema, changePasswordFormSchema, getValidationMessage, updateProfileSchema } from '@/lib/validator'
 
