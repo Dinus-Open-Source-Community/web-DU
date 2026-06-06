@@ -27,6 +27,7 @@ import { courseDetailToFormValues } from '@/lib/course-form/mappers'
 import type { CourseFormMode, CourseFormValues } from '@/lib/course-form/types'
 import { EMPTY_COURSE_FORM_VALUES } from '@/lib/course-form/types'
 import type { CourseLevel, ICourseDetailItem } from '@/lib/types/course'
+import { getCourseFormValidationMessage } from '@/lib/validator/course-form'
 import { courseFormLayout } from './course-form-layout'
 
 type CourseFormDialogProps = {
@@ -37,16 +38,6 @@ type CourseFormDialogProps = {
   submitting?: boolean
   onSubmitCreate?: (values: CourseFormValues) => Promise<void>
   onSubmitEdit?: (values: CourseFormValues) => Promise<void>
-}
-
-function validateForm(values: CourseFormValues): string | null {
-  if (!values.title.trim() || !values.subtitle.trim() || !values.description.trim()) {
-    return 'Judul, subtitle, dan deskripsi wajib diisi.'
-  }
-  if (!values.categoryUid) return 'Kategori wajib dipilih.'
-  if (!values.courseTypeUid) return 'Tipe kursus wajib dipilih.'
-  if (values.price === '' || values.price < 0) return 'Harga wajib diisi.'
-  return null
 }
 
 export function CourseFormDialog({
@@ -137,7 +128,7 @@ export function CourseFormDialog({
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault()
-      const validationError = validateForm(values)
+      const validationError = getCourseFormValidationMessage(values)
       if (validationError) {
         toast.error(validationError)
         return

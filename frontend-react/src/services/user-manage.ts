@@ -8,25 +8,34 @@ import type {
   ManagedUsersListResponse,
   UpdateUserRolePayload,
 } from '@/lib/user-manage/types'
+import {
+  parseManagedUserListParams,
+  parseManagedUserUidParam,
+  parseUpdateUserRolePayload,
+} from '@/lib/validator/user-manage'
 
 export async function fetchManagedUsers(params?: ManagedUserListParams) {
+  const validatedParams = parseManagedUserListParams(params)
   const response = await api.get<IResponse<ManagedUsersListResponse>>(
-    API_ROUTES.user.getAllManagedUsers(params),
+    API_ROUTES.user.getAllManagedUsers(validatedParams),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil daftar user')
 }
 
 export async function updateManagedUserRole(uid: string, payload: UpdateUserRolePayload) {
+  const validatedUid = parseManagedUserUidParam(uid)
+  const validatedPayload = parseUpdateUserRolePayload(payload)
   const response = await api.patch<IResponse<ManagedUserItem>>(
-    API_ROUTES.user.updateUserRoleByUid(uid),
-    payload,
+    API_ROUTES.user.updateUserRoleByUid(validatedUid),
+    validatedPayload,
   )
   return unwrapApiResponse(response.data, 'Gagal memperbarui role user')
 }
 
 export async function deleteManagedUser(uid: string) {
+  const validatedUid = parseManagedUserUidParam(uid)
   const response = await api.delete<IResponse<null>>(
-    API_ROUTES.user.deleteManagedUserByUid(uid),
+    API_ROUTES.user.deleteManagedUserByUid(validatedUid),
   )
 
   if (response.data.success === false) {

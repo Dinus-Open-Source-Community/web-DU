@@ -19,6 +19,16 @@ import type {
   UpdateCoursePayload,
   UpdateCourseStatusRequest,
 } from '@/lib/course-form/types'
+import {
+  parseAssignMentorsCourseUidParam,
+  parseAssignMentorsToCoursePayload,
+} from '@/lib/validator/course-mentor'
+import {
+  parseCourseUidParam,
+  parseCreateCoursePayload,
+  parseUpdateCoursePayload,
+  parseUpdateCourseStatusRequest,
+} from '@/lib/validator/course-form'
 
 export type { CreateCoursePayload, UpdateCoursePayload, UpdateCourseStatusRequest }
 import type {
@@ -65,7 +75,8 @@ export async function fetchCourseTypes(params?: IQueryParamsPayload) {
 }
 
 export async function createCourse(payload: CreateCoursePayload) {
-  const formData = buildCreateCourseFormData(payload)
+  const validatedPayload = parseCreateCoursePayload(payload)
+  const formData = buildCreateCourseFormData(validatedPayload)
   const response = await api.post<IResponse<IDetailCourseResponse>>(API_ROUTES.courses.create, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
@@ -73,9 +84,11 @@ export async function createCourse(payload: CreateCoursePayload) {
 }
 
 export async function updateCourse(uid: string, payload: UpdateCoursePayload) {
-  const formData = buildUpdateCourseFormData(payload)
+  const validatedUid = parseCourseUidParam(uid)
+  const validatedPayload = parseUpdateCoursePayload(payload)
+  const formData = buildUpdateCourseFormData(validatedPayload)
   const response = await api.put<IResponse<IDetailCourseResponse>>(
-    API_ROUTES.courses.updateByUid(uid),
+    API_ROUTES.courses.updateByUid(validatedUid),
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -90,9 +103,10 @@ export async function updateCourse(uid: string, payload: UpdateCoursePayload) {
  * - BE mengubah field `status` → ACTIVE
  * - BE tidak mengubah `is_published`; UI harus baca `status` juga (lihat isCoursePublished)
  */
-export async function updateCourseStatus({ courseUid }: UpdateCourseStatusRequest) {
+export async function updateCourseStatus(request: UpdateCourseStatusRequest) {
+  const validatedRequest = parseUpdateCourseStatusRequest(request)
   const response = await api.patch<IResponse<unknown>>(
-    API_ROUTES.courses.updateStatusByUid(courseUid),
+    API_ROUTES.courses.updateStatusByUid(validatedRequest.courseUid),
   )
   return unwrapApiResponse(response.data, 'Gagal memperbarui status kursus')
 }
@@ -108,9 +122,11 @@ export async function assignMentorsToCourse(
   courseUid: string,
   payload: AssignMentorsToCoursePayload,
 ) {
+  const validatedCourseUid = parseAssignMentorsCourseUidParam(courseUid)
+  const validatedPayload = parseAssignMentorsToCoursePayload(payload)
   const response = await api.post<IResponse<AssignMentorsToCourseResponse>>(
-    API_ROUTES.courses.assignMentorsByUid(courseUid),
-    payload,
+    API_ROUTES.courses.assignMentorsByUid(validatedCourseUid),
+    validatedPayload,
   )
   return unwrapApiResponse(response.data, 'Gagal menugaskan mentor ke kursus')
 }
