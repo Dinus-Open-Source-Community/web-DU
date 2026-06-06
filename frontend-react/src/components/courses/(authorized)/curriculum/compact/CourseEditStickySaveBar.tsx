@@ -3,6 +3,7 @@ import { editLayout } from '@/components/courses/(authorized)/curriculum/edit-la
 
 type CourseEditStickySaveBarProps = {
   isSaving: boolean
+  isPublishing: boolean
   hasUnsavedLesson: boolean
   isAdmin: boolean
   isPublished: boolean
@@ -12,6 +13,7 @@ type CourseEditStickySaveBarProps = {
 
 export function CourseEditStickySaveBar({
   isSaving,
+  isPublishing,
   hasUnsavedLesson,
   isAdmin,
   isPublished,
@@ -34,10 +36,10 @@ export function CourseEditStickySaveBar({
               variant="outline"
               size="sm"
               className={editLayout.control}
-              disabled={isSaving}
+              disabled={isSaving || isPublishing}
               onClick={onPublish}
             >
-              Publish
+              {isPublishing ? 'Menerbitkan...' : 'Terbitkan'}
             </Button>
           )}
 

@@ -2,7 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { courseKeys } from './query-keys'
+import type { AssignMentorsToCoursePayload } from '@/lib/course-mentor/types'
 import {
+  assignMentorsToCourse,
   createCourse,
   updateCourse,
   updateCourseStatus,
@@ -55,6 +57,28 @@ export function useUpdateCourseStatus() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Gagal memperbarui status kursus')
+    },
+  })
+}
+
+export function useAssignMentorsToCourse() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      courseUid,
+      payload,
+    }: {
+      courseUid: string
+      payload: AssignMentorsToCoursePayload
+    }) => assignMentorsToCourse(courseUid, payload),
+    onSuccess: (_data, { courseUid }) => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.all })
+      void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      toast.success('Mentor berhasil ditugaskan ke kursus')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Gagal menugaskan mentor')
     },
   })
 }

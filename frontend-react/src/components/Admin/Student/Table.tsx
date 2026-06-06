@@ -1,16 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Users2 } from 'lucide-react'
-import type { AdminStatus, AdminStudent } from '../../../lib/types/user'
+
+import { UserManageActions } from '@/components/Admin/shared/UserManageActions'
+import type { ManagedUsersTableControls } from '@/components/Admin/shared/managed-users-table-props'
 import { SearchForm } from '../../shared/SearchForm'
 import { EmptyState } from '../../shared/EmptyState'
 import { Button } from '../../ui/button'
 import { cn } from '../../../lib/utils'
 import { Link } from 'react-router-dom'
 import { Pagination } from '../../shared/Pagination'
-
-type StatusFilter = 'all' | AdminStatus
-
-const PAGE_SIZE = 10
+import type { AdminStudent } from '../../../lib/types/user'
 
 function ProgressCell({ value }: { value: number }) {
   return (
@@ -23,46 +22,40 @@ function ProgressCell({ value }: { value: number }) {
   )
 }
 
-export function TableManagementUsers({ studentData }: { studentData: AdminStudent[] }) {
-  const students = useMemo<AdminStudent[]>(() => studentData || [], [studentData])
+type TableManagementUsersProps = ManagedUsersTableControls & {
+  studentData: AdminStudent[]
+}
+
+export function TableManagementUsers({
+  studentData,
+  isLoading = false,
+  page,
+  totalPages,
+  onPageChange,
+  onSearch,
+  onUpdateRole,
+  onDeleteUser,
+  isMutating = false,
+}: TableManagementUsersProps) {
   const [search, setSearch] = useState('')
-  const [committedSearch, setCommittedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [page, setPage] = useState(1)
-
-  const filtered = useMemo(() => {
-    const q = committedSearch.toLowerCase().trim()
-    return students.filter((s) => {
-      const matchStatus = statusFilter === 'all' || s.status === statusFilter
-      const matchQuery = q === '' || s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.uid.toLowerCase().includes(q)
-      return matchStatus && matchQuery
-    })
-  }, [students, committedSearch, statusFilter])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pagedRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <div className="flex flex-col gap-5 ">
+    <div className="flex flex-col gap-5">
       <SearchForm
         value={search}
-        onChange={(v) => {
-          setSearch(v)
-          if (v === '') {
-            setCommittedSearch('')
-            setPage(1)
-          }
+        onChange={(value) => {
+          setSearch(value)
+          if (value === '') onSearch('')
         }}
-        onSubmit={() => {
-          setCommittedSearch(search)
-          setPage(1)
-        }}
+        onSubmit={() => onSearch(search)}
         placeholder="Cari nama, email, atau ID siswa..."
         submitLabel="Cari"
         className="w-full max-w-3xl"
       />
 
-      {pagedRows.length === 0 ? (
+      {isLoading ? (
+        <p className="text-sm text-slate-500">Memuat daftar siswa...</p>
+      ) : studentData.length === 0 ? (
         <EmptyState
           icon={<Users2 className="h-5 w-5" />}
           title="Belum ada siswa"
@@ -73,17 +66,17 @@ export function TableManagementUsers({ studentData }: { studentData: AdminStuden
               size="sm"
               onClick={() => {
                 setSearch('')
-                setCommittedSearch('')
-                setStatusFilter('all')
-                setPage(1)
-              }}>
+                onSearch('')
+                onPageChange(1)
+              }}
+            >
               Reset filter
             </Button>
           }
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {pagedRows.map((student) => (
+          {studentData.map((student) => (
             <article key={student.uid} className={cn('flex h-full flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs')}>
               <div className="flex items-start gap-3">
                 <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
@@ -93,6 +86,14 @@ export function TableManagementUsers({ studentData }: { studentData: AdminStuden
                   <h3 className="truncate text-sm font-semibold text-slate-900">{student.name}</h3>
                   <p className="truncate text-xs text-slate-500">{student.email}</p>
                 </div>
+                <UserManageActions
+                  uid={student.uid}
+                  name={student.name}
+                  roleTargets={['mentor', 'admin']}
+                  onUpdateRole={onUpdateRole}
+                  onDeleteUser={onDeleteUser}
+                  disabled={isMutating}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50/70 p-3">
@@ -119,7 +120,7 @@ export function TableManagementUsers({ studentData }: { studentData: AdminStuden
         </div>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+      <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
     </div>
   )
 }

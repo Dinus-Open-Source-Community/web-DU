@@ -1,8 +1,10 @@
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { ICourseItem } from '@/lib/types/course'
 import ManageCourseSection from '../../components/shared/ManageCourse'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 export default function MentorCoursesPage() {
+  const sidebarUser = useSidebarUser('mentor')
   const dataCourses: ICourseItem[] = [
     {
       uid: 'course-001',
@@ -66,7 +68,7 @@ export default function MentorCoursesPage() {
     },
   ]
   return (
-    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
+    <AppSidebarProvider role="mentor" user={sidebarUser}>
       <ManageCourseSection role="mentor" data={dataCourses} />
     </AppSidebarProvider>
   )

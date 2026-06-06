@@ -5,6 +5,11 @@ import { ReactIcon } from './icon'
 import type { ICardProps } from '../../lib/types/utils'
 import { Rating } from '../ui/rating'
 import { Profile } from '../ui/profile'
+import {
+  DEFAULT_COURSE_PROFILE_AVATAR,
+  resolveCourseProfile,
+  resolveCourseProfileAvatar,
+} from '@/lib/course-detail/course-profile'
 import { FormatRupiah } from '@/lib/func/func'
 
 type CourseLevelKey = 'PEMULA' | 'MENENGAH' | 'LANJUTAN'
@@ -75,6 +80,7 @@ function CourseLevelSignal({ level }: { level?: string }) {
 }
 
 const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: ICardProps }) => {
+  const profile = resolveCourseProfile(data)
   const isEnrolled =
     data.isEnrolled ?? (data.enrollment_status ? data.enrollment_status === 'active' || data.enrollment_status === 'completed' : data.progress !== undefined)
   const actionLabel = isEnrolled ? 'Mulai' : 'Enroll'
@@ -118,7 +124,14 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
 
         {/* Bottom Section (Author & Action) */}
         <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-          {data.mentors ? <Profile image={data.mentors[0].avatar_url ?? '/pinguin.png'} name={data.mentors[0]?.name ?? ''} /> : <div />}
+          {profile ? (
+            <Profile
+              image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
+              name={profile.name}
+            />
+          ) : (
+            <div />
+          )}
 
           <div className="flex items-center gap-3">
             {data.progress === 100 ? (

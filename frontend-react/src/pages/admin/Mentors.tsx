@@ -1,46 +1,59 @@
-import type { AdminMentor } from '../../lib/types/api'
-import type { AdminStudent } from '../../lib/types/user'
-import { MentorsTable } from '../../components/Admin/Mentors/Table'
-import { PageHeader } from '../../components/shared/Header'
-import { AppSidebarProvider } from '../../components/shared/Sidebar'
+import { useCallback, useMemo } from 'react'
+
+import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePageShell'
+import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
+import { useAdminUserPage } from '@/hooks/use-admin-user-page'
+import { useManagedUsers } from '@/hooks/use-managed-users'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { mapManagedUsers, toAdminMentor, toAdminStudent } from '@/lib/user-manage/mappers'
+import { mentorToRow, rowsToPromoteCandidates, studentToRow } from '@/lib/user-manage/view-models'
 
 export default function AdminMentorsPage() {
-  const dataMentors: AdminMentor[] = [
-    {
-      uid: 'mentor-001',
-      name: 'Budi Santoso',
-      email: 'budi.santoso@example.com',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      joinedAt: '2023-01-15',
-      totalCourses: 5,
-      rating: 4.8,
-      totalReviews: 20,
-      status: 'active',
-      studentsCount: 150,
+  const sidebarUser = useSidebarUser('admin')
+  const mentorsPage = useAdminUserPage({ role: 'mentor' })
+  const studentsQuery = useManagedUsers({
+    role: 'student',
+    per_page: 100,
+    sort: 'created_at',
+    order: 'desc',
+  })
+
+  const rows = useMemo(
+    () => mapManagedUsers(mentorsPage.users, toAdminMentor).map(mentorToRow),
+    [mentorsPage.users],
+  )
+
+  const promoteCandidates = useMemo(() => {
+    const students = mapManagedUsers(studentsQuery.data?.users ?? [], toAdminStudent).map(studentToRow)
+    return rowsToPromoteCandidates(students, 'Siswa')
+  }, [studentsQuery.data?.users])
+
+  const handlePromoteStudent = useCallback(
+    async (uid: string) => {
+      await mentorsPage.onUpdateRole(uid, 'mentor')
     },
-  ]
-  const studentData: AdminStudent[] = [
-    {
-      uid: 's12345',
-      name: 'Budi Santoso',
-      email: 'test@mail.com',
-      averageProgress: 75,
-      status: 'active',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      joinedAt: '2023-01-15T10:00:00Z',
-      enrolledCourses: 5,
-      totalSpent: 1500000,
-      phone: '081234567890',
-      lastActive: '2024-06-01T12:00:00Z',
-    },
-  ]
+    [mentorsPage],
+  )
+
+  const isInitialLoading = mentorsPage.isLoading && rows.length === 0
 
   return (
-    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
-      <div className="flex flex-col gap-6">
-        <PageHeader title="Manajemen Mentor" subtitle="Daftar mentor beserta spesialisasi, performa kelas, dan rating siswa." />
-        <MentorsTable dataMentors={dataMentors} dataStudents={studentData} />
-      </div>
-    </AppSidebarProvider>
+    <UserManagePageShell kind="mentor" user={sidebarUser} isLoading={isInitialLoading}>
+      <UserManagePanel
+        kind="mentor"
+        rows={rows}
+        totalUsers={mentorsPage.meta?.total}
+        isLoading={mentorsPage.isLoading}
+        page={mentorsPage.page}
+        totalPages={mentorsPage.totalPages}
+        onPageChange={mentorsPage.setPage}
+        onSearch={mentorsPage.onSearch}
+        onUpdateRole={mentorsPage.onUpdateRole}
+        onDeleteUser={mentorsPage.onDeleteUser}
+        isMutating={mentorsPage.isMutating}
+        promoteCandidates={promoteCandidates}
+        onPromote={handlePromoteStudent}
+      />
+    </UserManagePageShell>
   )
 }

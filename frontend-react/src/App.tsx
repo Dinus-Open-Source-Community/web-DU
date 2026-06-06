@@ -18,6 +18,8 @@ const AdminStudentsPage = React.lazy(() => import('./pages/admin/Student.tsx'))
 const AdminMentorsPage = React.lazy(() => import('./pages/admin/Mentors.tsx'))
 const AdminAdministratorsPage = React.lazy(() => import('./pages/admin/Admin.tsx'))
 const Courses = React.lazy(() => import('./pages/admin/Courses.tsx'))
+const AdminCourseCategories = React.lazy(() => import('./pages/admin/CourseCategories.tsx'))
+const AdminCourseTypes = React.lazy(() => import('./pages/admin/CourseTypes.tsx'))
 const CourseDetail = React.lazy(() => import('./pages/courses/detail.tsx'))
 const AdminDetailCourse = React.lazy(() => import('./pages/admin/DetailCourse.tsx'))
 const MentorDetailCourse = React.lazy(() => import('./pages/mentor/DetailCourse.tsx'))
@@ -140,6 +142,20 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.admin.courses,
     element: <Courses />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
+    path: ROUTES.admin.courseCategories,
+    element: <AdminCourseCategories />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
+    path: ROUTES.admin.courseTypes,
+    element: <AdminCourseTypes />,
     public: false,
     lazy: true,
     roles: ['admin'],

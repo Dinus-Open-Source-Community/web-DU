@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { InputHTMLAttributes, ReactNode } from 'react'
 import type { ClassType, CourseStatus, ICourseItem } from './course'
 import type { PaymentStatus } from './transaction'
-import type { EnrollmentStatus, IMentor } from './user'
+import type { EnrollmentStatus, IAuthorCourseItem, IMentor } from './user'
 
 export type FilterSelectOption<T extends string = string> = { value: T; label: string }
 
@@ -45,6 +45,7 @@ export interface ICardData {
   status: CourseStatus
   mentor_uid: string
   mentors: IMentor[]
+  created_by?: IAuthorCourseItem
   slot: number
   slug: string
   event_uid?: string | null

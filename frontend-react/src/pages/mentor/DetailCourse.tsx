@@ -3,8 +3,10 @@ import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import type { ICourseDetailItem } from '../../lib/types/course'
 import type { IMentorCourseStudent } from '../../lib/types/course'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 export default function MentorCourseDetailPage() {
+  const sidebarUser = useSidebarUser('mentor')
   const { uid } = useParams()
   const dataCourse: ICourseDetailItem[] = [
     {
@@ -104,7 +106,7 @@ export default function MentorCourseDetailPage() {
     },
   ]
   return (
-    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
+    <AppSidebarProvider role="mentor" user={sidebarUser}>
       <DetailCourse courseUid={uid as string} role="mentor" dataCourse={dataCourse} dataStudents={dataStudents} />
     </AppSidebarProvider>
   )

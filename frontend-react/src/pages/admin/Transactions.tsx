@@ -3,8 +3,10 @@ import type { ChartRatioPoint, TransactionTimelinePoint } from '../../lib/types/
 import { TransactionsDashboard } from '../../components/Admin/Transactions/TransDashboard'
 import { PageHeader } from '../../components/shared/Header'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 export default function AdminTransactionsPage() {
+  const sidebarUser = useSidebarUser('admin')
   const dataTransactions: AdminTransaction[] = [
     {
       uid: 'tx-001',
@@ -56,7 +58,7 @@ export default function AdminTransactionsPage() {
   ]
 
   return (
-    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
+    <AppSidebarProvider role="admin" user={sidebarUser}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Transaksi" subtitle="Pantau pendapatan, rasio status pembayaran, dan semua transaksi platform." />
         <TransactionsDashboard dataTransactions={dataTransactions} dataRatio={dataRatio} dataTimeline={dataTimeline} />

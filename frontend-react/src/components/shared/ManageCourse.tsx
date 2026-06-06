@@ -7,6 +7,7 @@ import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
 import { EmptyCourseIcon } from './icon'
 import { CreateCourseDialog } from './CreateCourse'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { ICourseItem } from '@/lib/types/course'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
@@ -31,7 +32,7 @@ export default function ManageCourseSection({ role = 'mentor', data }: CourseMan
 
   const filteredCourses = useMemo(() => {
     return courses.filter((c) => {
-      const published = c.status === 'published' || c.is_published
+      const published = isCoursePublished(c)
       if (activeFilter === 'Aktif' && !published) return false
       if (activeFilter === 'Draf' && published) return false
       return true

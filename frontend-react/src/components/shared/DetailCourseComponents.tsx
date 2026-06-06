@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { courseKeys } from '@/hooks/query-keys'
 import { useUpdateCourseStatus } from '@/hooks/use-course-mutations'
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
@@ -14,6 +15,7 @@ import { cn } from '../../lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { ConfirmDialog } from './ConfirmDialog'
 import { CourseParticipantsSection } from './CourseParticipation'
+import { AssignCourseMentorDialog } from './AssignCourseMentorDialog'
 import { CourseMentorTable } from './CourseMentorTable'
 import { CourseReviewSection } from './CourseReviewSection'
 import { CourseCurriculumTab } from './CourseCurriculumTab'
@@ -54,7 +56,7 @@ export function DetailCourse({
 
   if (!course) return null
 
-  const isPublished = Boolean(course.is_published)
+  const isPublished = isCoursePublished(course)
   const editHref = isAdmin
     ? ROUTES.admin.courseEditAdmin(courseUid)
     : ROUTES.mentor.courseEditMentor(courseUid)
@@ -129,7 +131,14 @@ export function DetailCourse({
             <CourseMentorTable
               mentors={course.mentors || []}
               isAdmin={isAdmin}
-              onAssign={() => console.log('Assign Mentor')}
+              assignAction={
+                isAdmin ? (
+                  <AssignCourseMentorDialog
+                    courseUid={courseUid}
+                    assignedMentorUids={(course.mentors ?? []).map((mentor) => mentor.uid)}
+                  />
+                ) : null
+              }
             />
           </TabsContent>
         </div>

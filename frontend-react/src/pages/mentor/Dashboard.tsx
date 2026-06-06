@@ -3,8 +3,10 @@ import { PageHeader } from '@/components/shared/Header'
 import QuickStats from '@/components/shared/QuickStats'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { IMentorStats, IScheduleItem } from '@/lib/types/utils'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 export default function MentorDashboardPage() {
+  const sidebarUser = useSidebarUser('mentor')
   const dataStats: IMentorStats = {
     pendingGrading: 0,
     unansweredQA: 0,
@@ -49,7 +51,7 @@ export default function MentorDashboardPage() {
   ] // Replace with actual schedule data
 
   return (
-    <AppSidebarProvider role="mentor" user={{ name: 'Mentor', email: 'mentor@doscom.id' }}>
+    <AppSidebarProvider role="mentor" user={sidebarUser}>
       <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <PageHeader title="Halo Mentor Budi!" subtitle="Selamat datang di dashboard Anda." />
         <div className="mb-10">

@@ -19,16 +19,24 @@ export default function Feature({ Data }: { Data: ICardData[] }) {
             <CardCourse
               key={data.uid ?? `${data.title}-${idx}`}
               data={{
-                variantBadge: data.is_premium ? 'premium' : 'free',
+                uid: data.uid,
                 title: data.title,
                 description: data.description,
-                author: data.mentors[0]
-                  ? {
-                      name: data.mentors[0].name,
-                      avatar: data.mentors[0].avatar_url,
-                    }
-                  : undefined,
-                image: data.thumbnail_url,
+                subtitle: data.subtitle,
+                thumbnail_url: data.thumbnail_url,
+                cover_url: data.cover_url,
+                is_premium: data.is_premium,
+                level: data.level,
+                price: data.price,
+                mentors: data.mentors,
+                created_by: data.created_by,
+                category_uid: data.category_uid,
+                course_type_uid: data.course_type_uid,
+                slug: data.slug,
+                status: data.status,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                event_uid: data.event_uid ?? null,
                 detailHref: `/course/${data.uid}`,
               }}
             />

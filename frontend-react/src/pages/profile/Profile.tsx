@@ -1,6 +1,7 @@
 import ProfileSection from '@/components/profile/Section'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { useAuth } from '@/providers/auth-provider'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 
 const fallbackUser: IAuthSessionUser = {
@@ -13,9 +14,10 @@ const fallbackUser: IAuthSessionUser = {
 export default function ProfilePage() {
   const { refreshProfile, user } = useAuth()
   const profileUser = user ?? fallbackUser
+  const sidebarUser = useSidebarUser(profileUser.role)
 
   return (
-    <AppSidebarProvider role={profileUser.role} user={{ name: profileUser.name, email: profileUser.email, avatar: profileUser.avatar_url }}>
+    <AppSidebarProvider role={profileUser.role} user={sidebarUser}>
       <main>
         <ProfileSection user={profileUser} onAvatarUpdated={refreshProfile} />
       </main>

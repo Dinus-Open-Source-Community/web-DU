@@ -1,3 +1,4 @@
+import type { ManagedUserListParams } from '@/lib/user-manage/types'
 import type { IQueryParamsPayload } from '@/services/api-path'
 
 export const courseKeys = {
@@ -31,4 +32,9 @@ export const paymentKeys = {
 
 export const authKeys = {
   session: ['auth', 'session'] as const,
+}
+
+export const userManageKeys = {
+  all: ['managed-users'] as const,
+  list: (params?: ManagedUserListParams) => ['managed-users', params] as const,
 }

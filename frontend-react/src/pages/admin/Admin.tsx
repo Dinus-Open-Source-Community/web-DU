@@ -1,69 +1,81 @@
-import type { AdminAdministrator, AdminMentor } from "../../lib/types/api";
-import type { AdminStudent } from "../../lib/types/user";
-import { AdministratorsTable } from "../../components/Admin/Administrators/table";
-import { PageHeader } from "../../components/shared/Header";
-import { AppSidebarProvider } from "../../components/shared/Sidebar";
+import { useCallback, useMemo } from 'react'
+
+import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePageShell'
+import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
+import { useAdminUserPage } from '@/hooks/use-admin-user-page'
+import { useManagedUsers } from '@/hooks/use-managed-users'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import {
+  mapManagedUsers,
+  toAdminAdministrator,
+  toAdminMentor,
+  toAdminStudent,
+} from '@/lib/user-manage/mappers'
+import {
+  administratorToRow,
+  mentorToRow,
+  rowsToPromoteCandidates,
+  studentToRow,
+  type PromoteCandidate,
+} from '@/lib/user-manage/view-models'
 
 export default function AdminAdministratorsPage() {
-  const dataAdmin: AdminAdministrator[] = [
-    {
-      uid: "admin-001",
-      name: "Siti Aminah",
-      email: "siti.aminah@example.com",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      role: "Super Admin",
-      lastActive: "2024-06-01T12:00:00Z",
-      status: "active",
-      createdAt: "2023-01-10T09:00:00Z",
-    },
-  ];
-  const dataMentors: AdminMentor[] = [
-    {
-      uid: "mentor-001",
-      name: "Budi Santoso",
-      email: "budi.santoso@example.com",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      joinedAt: "2023-01-15",
-      totalCourses: 5,
-      rating: 4.8,
-      totalReviews: 20,
-      status: "active",
-      studentsCount: 150,
-    },
-  ];
+  const sidebarUser = useSidebarUser('admin')
+  const adminsPage = useAdminUserPage({ role: 'admin' })
+  const mentorsQuery = useManagedUsers({
+    role: 'mentor',
+    per_page: 100,
+    sort: 'created_at',
+    order: 'desc',
+  })
+  const studentsQuery = useManagedUsers({
+    role: 'student',
+    per_page: 100,
+    sort: 'created_at',
+    order: 'desc',
+  })
 
-  const studentData: AdminStudent[] = [
-    {
-      uid: "s12345",
-      name: "Budi Santoso",
-      email: "test@mail.com",
-      averageProgress: 75,
-      status: "active",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      joinedAt: "2023-01-15T10:00:00Z",
-      enrolledCourses: 5,
-      totalSpent: 1500000,
-      phone: "081234567890",
-      lastActive: "2024-06-01T12:00:00Z",
+  const rows = useMemo(
+    () => mapManagedUsers(adminsPage.users, toAdminAdministrator).map(administratorToRow),
+    [adminsPage.users],
+  )
+
+  const promoteCandidates = useMemo(() => {
+    const mentors = mapManagedUsers(mentorsQuery.data?.users ?? [], toAdminMentor).map(mentorToRow)
+    const students = mapManagedUsers(studentsQuery.data?.users ?? [], toAdminStudent).map(studentToRow)
+
+    const mentorCandidates = rowsToPromoteCandidates(mentors, 'Mentor')
+    const studentCandidates = rowsToPromoteCandidates(students, 'Siswa')
+
+    return [...mentorCandidates, ...studentCandidates] as PromoteCandidate[]
+  }, [mentorsQuery.data?.users, studentsQuery.data?.users])
+
+  const handlePromoteToAdmin = useCallback(
+    async (uid: string) => {
+      await adminsPage.onUpdateRole(uid, 'admin')
     },
-  ];
+    [adminsPage],
+  )
+
+  const isInitialLoading = adminsPage.isLoading && rows.length === 0
 
   return (
-    <AppSidebarProvider
-      role="admin"
-      user={{ name: "Admin", email: "admin@doscom.id" }}
-    >
-      <div className="flex flex-col gap-6">
-        <PageHeader
-          title="Administrator Platform"
-          subtitle="Daftar staf internal dengan akses panel admin. Kelola role dan kredensial mereka."
-        />
-        <AdministratorsTable
-          dataAdmin={dataAdmin}
-          dataMentors={dataMentors}
-          dataStudents={studentData}
-        />
-      </div>
-    </AppSidebarProvider>
-  );
+    <UserManagePageShell kind="admin" user={sidebarUser} isLoading={isInitialLoading}>
+      <UserManagePanel
+        kind="admin"
+        rows={rows}
+        totalUsers={adminsPage.meta?.total}
+        isLoading={adminsPage.isLoading}
+        page={adminsPage.page}
+        totalPages={adminsPage.totalPages}
+        onPageChange={adminsPage.setPage}
+        onSearch={adminsPage.onSearch}
+        onUpdateRole={adminsPage.onUpdateRole}
+        onDeleteUser={adminsPage.onDeleteUser}
+        isMutating={adminsPage.isMutating}
+        promoteCandidates={promoteCandidates}
+        onPromote={handlePromoteToAdmin}
+      />
+    </UserManagePageShell>
+  )
 }

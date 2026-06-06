@@ -21,6 +21,10 @@ import type {
 } from '@/lib/course-form/types'
 
 export type { CreateCoursePayload, UpdateCoursePayload, UpdateCourseStatusRequest }
+import type {
+  AssignMentorsToCoursePayload,
+  AssignMentorsToCourseResponse,
+} from '@/lib/course-mentor/types'
 import type { ICourseDetailModule } from '@/lib/types/module'
 import { fetchLessonsByModuleUid } from './lessons'
 import { fetchModulesByCourseUid } from './module'
@@ -80,7 +84,12 @@ export async function updateCourse(uid: string, payload: UpdateCoursePayload) {
   return unwrapApiResponse(response.data, 'Gagal memperbarui kursus')
 }
 
-/** PATCH /courses/:id/status — tanpa body; mengaktifkan status kursus menjadi ACTIVE. */
+/**
+ * PATCH /courses/:id/status
+ * - Tanpa request body (hanya course UID di path)
+ * - BE mengubah field `status` → ACTIVE
+ * - BE tidak mengubah `is_published`; UI harus baca `status` juga (lihat isCoursePublished)
+ */
 export async function updateCourseStatus({ courseUid }: UpdateCourseStatusRequest) {
   const response = await api.patch<IResponse<unknown>>(
     API_ROUTES.courses.updateStatusByUid(courseUid),
@@ -93,6 +102,17 @@ export async function fetchCourseStudents(courseUid: string) {
     API_ROUTES.courses.getStudentsByUid(courseUid),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil peserta kursus')
+}
+
+export async function assignMentorsToCourse(
+  courseUid: string,
+  payload: AssignMentorsToCoursePayload,
+) {
+  const response = await api.post<IResponse<AssignMentorsToCourseResponse>>(
+    API_ROUTES.courses.assignMentorsByUid(courseUid),
+    payload,
+  )
+  return unwrapApiResponse(response.data, 'Gagal menugaskan mentor ke kursus')
 }
 
 export function stripLessonsFromModules(

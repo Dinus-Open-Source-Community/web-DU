@@ -1,3 +1,4 @@
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { parseLessonContent, toCourseDetailLesson } from '@/lib/rich-text'
 import type { RichTextContentFormat } from '@/lib/types/rich-text'
 import type { ICourseDetailItem, ICourseDetailModule } from '@/lib/types/course'
@@ -79,7 +80,8 @@ export function toMentorCourse(course: ICourseDetailItem): Partial<ICourseDetail
     subtitle: (course.subtitle as string) ?? '',
     description: (course.description as string) ?? '',
     cover_url: (course.cover_url as string) ?? (course.thumbnail_url as string) ?? '',
-    is_published: Boolean(course.is_published),
+    status: (course.status as string) ?? '',
+    is_published: isCoursePublished(course),
     updated_at: (course.updated_at as string) ?? '',
     category:
       typeof category?.name === 'string'

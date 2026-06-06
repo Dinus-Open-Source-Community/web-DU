@@ -5,13 +5,12 @@ import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
 import { LottieOverlay } from '@/components/shared/Loader'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
-import { useAuth } from '@/providers/auth-provider'
-import type { IUserData } from '@/lib/types/user'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IModulesData } from '@/lib/types/course'
 
 export default function AdminCourseDetailPage() {
   const { courseUid } = useParams()
-  const { user } = useAuth()
+  const sidebarUser = useSidebarUser('admin')
   const { courseDetail, isLoading, userCourse, moduleCourse } = useCourseDetailAdminAndMentor(
     courseUid as string,
   )
@@ -31,7 +30,7 @@ export default function AdminCourseDetailPage() {
   }
 
   return (
-    <AppSidebarProvider role="admin" user={user as IUserData}>
+    <AppSidebarProvider role="admin" user={sidebarUser}>
       <DetailCourse
         courseUid={courseUid as string}
         role="admin"

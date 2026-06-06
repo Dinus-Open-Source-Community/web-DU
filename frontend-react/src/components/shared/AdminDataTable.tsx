@@ -53,7 +53,20 @@ export function AdminDataTable<T>({ columns, data, keyField, toolbar, page, tota
           </TableBody>
         </Table>
       </div>
-      {page !== undefined && totalPages !== undefined && onPageChange && totalPages > 0 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />}
+      {page !== undefined && totalPages !== undefined && onPageChange ? (
+        <div className="flex flex-col items-center gap-3 border-t border-slate-100 bg-slate-50/40 px-5 py-4 sm:flex-row sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Halaman <span className="font-semibold tabular-nums text-slate-800">{page}</span> dari{' '}
+            <span className="font-semibold tabular-nums text-slate-800">{Math.max(totalPages, 1)}</span>
+          </p>
+          <Pagination
+            currentPage={page}
+            totalPages={Math.max(totalPages, 1)}
+            onPageChange={onPageChange}
+            className="mt-0"
+          />
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -6,6 +6,11 @@ import type { JoinedCourse } from '@/lib/types/user'
 import { Profile } from '../ui/profile'
 import { Check } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
+import {
+  DEFAULT_COURSE_PROFILE_AVATAR,
+  resolveCourseProfile,
+  resolveCourseProfileAvatar,
+} from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
@@ -57,7 +62,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
   const isResume = variant === 'resume'
   const image = data.cover_url || data.thumbnail_url
   const actionLabel = isResume ? 'Lanjut' : 'Mulai'
-  const mentor = data.mentors?.[0] ?? data.created_by
+  const profile = resolveCourseProfile(data)
 
   return (
     <div
@@ -106,7 +111,14 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
 
         <div className="mt-auto border-t border-slate-100 pt-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">{mentor ? <Profile image={mentor.avatar_url ?? '/pinguin.png'} name={mentor.name ?? ''} /> : null}</div>
+            <div className="min-w-0 flex-1">
+              {profile ? (
+                <Profile
+                  image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
+                  name={profile.name}
+                />
+              ) : null}
+            </div>
 
             {progress === 100 ? (
               <Badge variant="progressComplete" />

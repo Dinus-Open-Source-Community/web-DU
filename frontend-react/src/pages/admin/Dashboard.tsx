@@ -6,12 +6,11 @@ import { KpiGrid, type AdminKpi } from '../../components/Admin/Dashboard/Kpi'
 import { UnresolvedTickets, type AdminTicket } from '../../components/Admin/Dashboard/Ticket'
 import { RecentTransactions } from '../../components/Admin/Dashboard/RecentTransactions'
 import type { TransactionHistoryItem } from '../../lib/types/transaction'
-import { useAuth } from '@/providers/auth-provider'
-import type { IUserData } from '@/lib/types/user'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { FormatRupiah } from '@/lib/func/func'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const sidebarUser = useSidebarUser('admin')
   const dataKpi: AdminKpi[] = [
     {
       id: 'gross-revenue',
@@ -54,7 +53,7 @@ export default function Dashboard() {
   const dataTransactions: TransactionHistoryItem[] = []
 
   return (
-    <AppSidebarProvider role="admin" user={user as IUserData}>
+    <AppSidebarProvider role="admin" user={sidebarUser}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Dashboard" subtitle="Selamat datang di dashboard admin" />
         <KpiGrid adminKpis={dataKpi} />

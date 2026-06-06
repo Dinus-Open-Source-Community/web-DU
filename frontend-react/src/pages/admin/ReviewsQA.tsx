@@ -1,10 +1,12 @@
 import { ReviewsQaTabs } from '@/components/Admin/QA/ReviewsTabs'
 import { PageHeader } from '@/components/shared/Header'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { AdminQaThread, AdminReview } from '@/lib/types/course'
 import { useSearchParams } from 'react-router-dom'
 
 export default function AdminReviewsQaPage() {
+  const sidebarUser = useSidebarUser('admin')
   const [searchParams] = useSearchParams()
   const courseUid = searchParams.get('courseUid') || 'course-001'
   const dataAdminReviews: AdminReview[] = [
@@ -124,7 +126,7 @@ export default function AdminReviewsQaPage() {
   ]
 
   return (
-    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
+    <AppSidebarProvider role="admin" user={sidebarUser}>
       <div className="flex w-full flex-col gap-6">
         <PageHeader title="Reviews & Q&A" subtitle="Pantau review peserta, berikan balasan, dan tindak lanjuti diskusi Q&A secara terpusat." />
         <ReviewsQaTabs courseUid={courseUid as string} dataAdminReviews={dataAdminReviews} dataAdminQaThreads={dataAdminQaThreads} />

@@ -2,7 +2,18 @@ import { ChevronDown, X } from 'lucide-react'
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarProvider, useSidebar } from '../../components/ui/sidebar'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarProvider,
+  useSidebar,
+} from '../../components/ui/sidebar'
 import type { NavChildItem, NavItem } from '../../lib/types/utils'
 import { Navigation } from '../../lib/navigation'
 import { ROUTES } from '../../lib/routes'
@@ -250,16 +261,16 @@ export function AppSidebarProvider({
         }>
         <AppSidebar role={role} />
 
-        <main className="flex w-full flex-col">
+        <SidebarInset className="min-w-0">
           <AppTopNavbar role={role} user={normalizedUser} title={sidebarRoleConfig[role].title} />
           <div
             className={cn(
-              'flex w-full flex-col',
+              'flex w-full min-w-0 flex-col',
               contentClassName ?? 'gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10',
             )}>
             {children}
           </div>
-        </main>
+        </SidebarInset>
       </SidebarProvider>
     </NavbarSearchProvider>
   )

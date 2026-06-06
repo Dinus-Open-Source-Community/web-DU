@@ -28,6 +28,8 @@ export const ROUTES = {
       administrators: '/admin/users/administrators',
     },
     courses: '/admin/courses',
+    courseCategories: '/admin/course-categories',
+    courseTypes: '/admin/course-types',
     detailCourseAdmin: (courseId: string) => `/admin/courses/${courseId}`,
     courseEditAdmin: (courseId: string) => `/admin/courses/${courseId}/edit`,
     transactions: '/admin/transactions',
@@ -66,8 +68,12 @@ export const routeGroups: Record<string, RouteItem[]> = {
       ],
     },
     {
-      name: 'All Courses',
-      path: ROUTES.admin.courses,
+      name: 'Course Catalog',
+      children: [
+        { name: 'All Courses', path: ROUTES.admin.courses },
+        { name: 'Categories', path: ROUTES.admin.courseCategories },
+        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+      ],
     },
     {
       name: 'Transactions',

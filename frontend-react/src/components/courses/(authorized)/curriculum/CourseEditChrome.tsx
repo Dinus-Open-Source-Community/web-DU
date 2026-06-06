@@ -11,6 +11,7 @@ type CourseEditToolbarProps = {
   course: Partial<ICourseDetailItem>
   isAdmin: boolean
   isSaving: boolean
+  isPublishing: boolean
   hasUnsavedLesson: boolean
   isCompact: boolean
   compactPane: CompactPane
@@ -23,6 +24,7 @@ export function CourseEditToolbar({
   course,
   isAdmin,
   isSaving,
+  isPublishing,
   hasUnsavedLesson,
   isCompact,
   compactPane,
@@ -88,10 +90,10 @@ export function CourseEditToolbar({
               variant="outline"
               size="sm"
               className={`${editLayout.control} w-full sm:w-auto`}
-              disabled={isSaving}
+              disabled={isSaving || isPublishing}
               onClick={onPublish}
             >
-              Publish
+              {isPublishing ? 'Menerbitkan...' : 'Terbitkan'}
             </Button>
           )}
         </div>

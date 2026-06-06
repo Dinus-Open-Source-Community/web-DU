@@ -6,9 +6,11 @@ import { CategoryBarChart } from '../../components/shared/BarChart'
 import { TransactionRatioChart } from '../../components/shared/RatioChart'
 import type { ChartDataPoint, ChartRatioPoint } from '../../lib/types/utils'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { CurrencyCompact, FormatRupiah } from '../../lib/func/func'
 
 export default function AdminFinancialAnalyticsPage() {
+  const sidebarUser = useSidebarUser('admin')
   const monthlyRevenue: ChartDataPoint[] = [
     { label: 'Jul 2023', value: 4_500_000 },
     { label: 'Aug 2023', value: 5_200_000 },
@@ -42,7 +44,7 @@ export default function AdminFinancialAnalyticsPage() {
   const momPct = prevMonth > 0 ? ((lastMonth - prevMonth) / prevMonth) * 100 : 0
 
   return (
-    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
+    <AppSidebarProvider role="admin" user={sidebarUser}>
       <div className="flex flex-col gap-6">
         <PageHeader title="Financial Reports" subtitle="Ringkasan pendapatan, distribusi kategori, dan sumber penjualan." />
 

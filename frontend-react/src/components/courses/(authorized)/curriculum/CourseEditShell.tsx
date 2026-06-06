@@ -27,6 +27,7 @@ type CourseEditShellProps = CourseEditNavigationActions & {
   course: Partial<ICourseDetailItem>
   isAdmin: boolean
   isSaving: boolean
+  isPublishing: boolean
   hasUnsavedLesson: boolean
   modules: IModulesData[]
   loadedModuleIds: Set<string>
@@ -51,6 +52,7 @@ export function CourseEditShell({
   course,
   isAdmin,
   isSaving,
+  isPublishing,
   hasUnsavedLesson,
   modules,
   loadedModuleIds,
@@ -117,6 +119,7 @@ export function CourseEditShell({
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
+        isPublishing={isPublishing}
         hasUnsavedLesson={hasUnsavedLesson}
         isCompact={isCompact}
         compactPane={compactPane}
@@ -181,6 +184,7 @@ export function CourseEditShell({
       {showCompactEditorChrome && (
         <CourseEditStickySaveBar
           isSaving={isSaving}
+          isPublishing={isPublishing}
           hasUnsavedLesson={hasUnsavedLesson}
           isAdmin={isAdmin}
           isPublished={Boolean(course.is_published)}

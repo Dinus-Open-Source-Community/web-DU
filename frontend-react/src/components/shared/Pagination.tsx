@@ -1,13 +1,21 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { cn } from '@/lib/utils'
+
 export interface PaginationProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
+  className?: string
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationProps) => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -25,7 +33,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex items-center justify-center gap-3 mt-4">
+    <div className={cn('flex items-center justify-center gap-3', className)}>
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}

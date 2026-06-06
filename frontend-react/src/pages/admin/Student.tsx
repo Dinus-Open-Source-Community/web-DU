@@ -1,28 +1,38 @@
-import type { AdminStudent } from '../../lib/types/user'
-import { TableManagementUsers } from '../../components/Admin/Student/Table'
-import { PageHeader } from '../../components/shared/Header'
-import { AppSidebarProvider } from '../../components/shared/Sidebar'
+import { useMemo } from 'react'
+
+import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePageShell'
+import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
+import { useAdminUserPage } from '@/hooks/use-admin-user-page'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { mapManagedUsers, toAdminStudent } from '@/lib/user-manage/mappers'
+import { studentToRow } from '@/lib/user-manage/view-models'
 
 export default function AdminStudentsPage() {
-  const studentData: AdminStudent[] = [
-    {
-      uid: 's12345',
-      name: 'Budi Santoso',
-      email: 'test@mail.com',
-      averageProgress: 75,
-      status: 'active',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      joinedAt: '2023-01-15T10:00:00Z',
-      enrolledCourses: 5,
-      totalSpent: 1500000,
-      phone: '081234567890',
-      lastActive: '2024-06-01T12:00:00Z',
-    },
-  ]
+  const sidebarUser = useSidebarUser('admin')
+  const pageState = useAdminUserPage({ role: 'student' })
+
+  const rows = useMemo(
+    () => mapManagedUsers(pageState.users, toAdminStudent).map(studentToRow),
+    [pageState.users],
+  )
+
+  const isInitialLoading = pageState.isLoading && rows.length === 0
+
   return (
-    <AppSidebarProvider role="admin" user={{ name: 'Admin', email: 'admin@doscom.id' }}>
-      <PageHeader title="Manajemen Siswa" subtitle="Daftar siswa terdaftar, progres belajar, dan kredensial akun." />
-      <TableManagementUsers studentData={studentData} />
-    </AppSidebarProvider>
+    <UserManagePageShell kind="student" user={sidebarUser} isLoading={isInitialLoading}>
+      <UserManagePanel
+        kind="student"
+        rows={rows}
+        totalUsers={pageState.meta?.total}
+        isLoading={pageState.isLoading}
+        page={pageState.page}
+        totalPages={pageState.totalPages}
+        onPageChange={pageState.setPage}
+        onSearch={pageState.onSearch}
+        onUpdateRole={pageState.onUpdateRole}
+        onDeleteUser={pageState.onDeleteUser}
+        isMutating={pageState.isMutating}
+      />
+    </UserManagePageShell>
   )
 }

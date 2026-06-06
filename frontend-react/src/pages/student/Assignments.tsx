@@ -1,5 +1,6 @@
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { StudentAssignmentsSection, type StudentAssignmentSectionItem } from '@/components/student/AssignmentSection'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 const buildDeadline = (daysFromNow: number, hour = 17) => {
   const date = new Date()
@@ -108,8 +109,10 @@ const assignmentItems: StudentAssignmentSectionItem[] = [
 ]
 
 const Assignments = () => {
+  const sidebarUser = useSidebarUser('student')
+
   return (
-    <AppSidebarProvider role="student" user={{ name: 'Student', email: 'student@doscom.id' }}>
+    <AppSidebarProvider role="student" user={sidebarUser}>
       <StudentAssignmentsSection items={assignmentItems} />
     </AppSidebarProvider>
   )

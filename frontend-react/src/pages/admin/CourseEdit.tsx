@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import type { ICourseDetailItem } from "@/lib/types/course";
-import { useAuth } from "@/providers/auth-provider";
+import { useSidebarUser } from "@/hooks/use-sidebar-user";
 import { useCourseEditModules } from "@/hooks/use-course";
 import { LottieOverlay } from "@/components/shared/Loader";
 import { NotFoundContent } from "@/components/shared/Error";
@@ -13,11 +13,9 @@ const CourseEdit = () => {
 
   const moduleId = searchParams.get("moduleId") ?? undefined;
 
-  const { user } = useAuth();
+  const sidebarUser = useSidebarUser("admin");
   const { courseDetail, modules, isLoading } =
     useCourseEditModules(courseUid ?? "");
-
-  const sidebarUser = user ?? { name: "Admin", email: "admin@doscom.id" };
 
   if (isLoading) {
     return (

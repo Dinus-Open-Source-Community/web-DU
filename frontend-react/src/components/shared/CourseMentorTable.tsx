@@ -1,4 +1,5 @@
-import { ShieldCheck, UserPlus, UserRound, UsersRound } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { ShieldCheck, UserRound, UsersRound } from 'lucide-react'
 import type { ICourseMentorItem } from '@/lib/types/user'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Badge } from '../ui/badge'
@@ -8,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 interface CourseMentorTableProps {
   mentors: ICourseMentorItem[]
   isAdmin?: boolean
-  onAssign?: () => void
+  assignAction?: ReactNode
 }
 
 function MentorIdentity({ mentor, size = 'default' }: { mentor: ICourseMentorItem; size?: 'default' | 'compact' }) {
@@ -31,7 +32,7 @@ function MentorIdentity({ mentor, size = 'default' }: { mentor: ICourseMentorIte
   )
 }
 
-export function CourseMentorTable({ mentors, isAdmin, onAssign }: CourseMentorTableProps) {
+export function CourseMentorTable({ mentors, isAdmin, assignAction }: CourseMentorTableProps) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -43,12 +44,7 @@ export function CourseMentorTable({ mentors, isAdmin, onAssign }: CourseMentorTa
           <p className="mt-1 text-sm leading-6 text-slate-500">{mentors.length} mentor ditugaskan untuk kursus ini.</p>
         </div>
 
-        {isAdmin ? (
-          <Button type="button" onClick={onAssign} size="sm" className="h-9 w-full rounded-xl px-3 text-sm font-semibold sm:w-auto">
-            <UserPlus className="size-4" />
-            Assign mentor
-          </Button>
-        ) : null}
+        {isAdmin && assignAction ? assignAction : null}
       </div>
 
       {mentors.length === 0 ? (

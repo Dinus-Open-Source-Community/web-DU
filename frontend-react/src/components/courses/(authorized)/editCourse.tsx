@@ -30,6 +30,7 @@ export function CourseEditClient({
     editorReady,
     activeLessonModified,
     isSaving,
+    isPublishing,
     isCreateModuleOpen,
     renameModuleId,
     renameModuleTitle,
@@ -92,6 +93,7 @@ export function CourseEditClient({
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
+        isPublishing={isPublishing}
         hasUnsavedLesson={activeLessonModified}
         modules={outlineModules}
         loadedModuleIds={loadedModuleIds}

@@ -2,8 +2,14 @@ import { BookOpen, Users, Star } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { ICourseItem } from '@/lib/types/course'
 import { Profile } from '../ui/profile'
+import {
+  DEFAULT_COURSE_PROFILE_AVATAR,
+  resolveCourseProfile,
+  resolveCourseProfileAvatar,
+} from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
 import type { CourseLevel } from '@/lib/types/user'
 import { ReactIcon } from './icon'
@@ -15,7 +21,8 @@ interface CardMentorProps {
 }
 
 const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
-  const isPublished = data.status === 'published' || data.is_published
+  const profile = resolveCourseProfile(data)
+  const isPublished = isCoursePublished(data)
   const image = data.thumbnail_url || data.cover_url
 
   return (
@@ -68,7 +75,13 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
           </div>
 
           <div className="flex justify-between items-center gap-2 pt-1">
-            {data.mentors && <Profile image={data.mentors[0]?.avatar_url || '/default-avatar.png'} name={data.mentors[0]?.name || 'Unknown Mentor'} key={data.mentors[0]?.uid} />}
+            {profile ? (
+              <Profile
+                image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
+                name={profile.name}
+                key={profile.uid}
+              />
+            ) : null}
             {detailHref && (
               <Button variant="default" size="sm" className="rounded-xl px-3 py-2">
                 <Link to={detailHref}>Kelola Kursus</Link>

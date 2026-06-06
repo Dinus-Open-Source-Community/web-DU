@@ -4,6 +4,12 @@ import { Rating } from '../ui/rating'
 import { Profile } from '../ui/profile'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
+import {
+  DEFAULT_COURSE_PROFILE_AVATAR,
+  resolveCourseProfile,
+  resolveCourseProfileAvatar,
+  type CourseProfileSource,
+} from '@/lib/course-detail/course-profile'
 import type { BadgeVariant } from '@/lib/types/course'
 
 interface IResumeCardProps {
@@ -22,7 +28,13 @@ interface IResumeCardProps {
   resumeDetailHref?: string
 }
 
-const ResumeCard = ({ data }: { data: IResumeCardProps }) => {
+const ResumeCard = ({ data }: { data: IResumeCardProps & CourseProfileSource }) => {
+  const profile =
+    resolveCourseProfile(data) ??
+    (data.author?.name
+      ? { name: data.author.name, avatar_url: data.author.avatar }
+      : null)
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white transition-colors hover:border-slate-300/90">
       {/* Image Content */}
@@ -67,9 +79,12 @@ const ResumeCard = ({ data }: { data: IResumeCardProps }) => {
         )}
 
         {/* Bottom Section (Author & Action) */}
-        {data.author && (
+        {profile && (
           <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-            <Profile image={data.author.avatar ?? '/pinguin.png'} name={data.author.name ?? ''} />
+            <Profile
+              image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
+              name={profile.name}
+            />
             {data.progress === 100 ? (
               <Badge variant="progressComplete" />
             ) : data.resumeDetailHref ? (

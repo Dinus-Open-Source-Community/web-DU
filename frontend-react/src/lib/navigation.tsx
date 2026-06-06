@@ -33,7 +33,11 @@ export const Navigation: Record<string, NavItem[]> = {
     {
       name: 'Course Catalog',
       icon: GraduationCap,
-      children: [{ name: 'All Courses', path: ROUTES.admin.courses }],
+      children: [
+        { name: 'All Courses', path: ROUTES.admin.courses },
+        { name: 'Categories', path: ROUTES.admin.courseCategories },
+        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+      ],
     },
     {
       name: 'Transactions',
