@@ -975,6 +975,161 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing course metadata (cover, title, subtitle, category, class type, level, pricing, learning points). Only sent fields are updated. Requires Super Admin or Admin.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Update course (Super Admin / Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Course cover image (JPG, PNG recommended). Fallback key: thumbnail",
+                        "name": "cover",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course title",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course subtitle/header",
+                        "name": "subtitle",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Alias for subtitle",
+                        "name": "header",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course slug",
+                        "name": "slug",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dynamic category uid",
+                        "name": "category_uid",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dynamic course type uid",
+                        "name": "course_type_uid",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course level: PEMULA | MENENGAH | LANJUTAN",
+                        "name": "level",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Course selling price",
+                        "name": "price",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Displayed strike-through/original price",
+                        "name": "price_strike",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "JSON array of strings, e.g. [\\",
+                        "name": "what_you_learn",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course description",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Course slot capacity (0 = unlimited)",
+                        "name": "slot",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether course is premium",
+                        "name": "is_premium",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Super Admin or Admin only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update course",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/courses/{id}/join": {

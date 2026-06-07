@@ -348,6 +348,323 @@ func PostAdminCourseFunc(c *gin.Context) {
 	})
 }
 
+func multipartFormHas(c *gin.Context, key string) bool {
+	if c.Request.MultipartForm != nil {
+		if _, ok := c.Request.MultipartForm.Value[key]; ok {
+			return true
+		}
+	}
+	return c.Request.PostForm.Has(key)
+}
+
+// @Summary      Update course (Super Admin / Admin)
+// @Description  Update an existing course metadata (cover, title, subtitle, category, class type, level, pricing, learning points). Only sent fields are updated. Requires Super Admin or Admin.
+// @Tags         Course
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id               path      string  true   "Course UID"
+// @Param        cover            formData  file    false  "Course cover image (JPG, PNG recommended). Fallback key: thumbnail"
+// @Param        title            formData  string  false  "Course title"
+// @Param        subtitle         formData  string  false  "Course subtitle/header"
+// @Param        header           formData  string  false  "Alias for subtitle"
+// @Param        slug             formData  string  false  "Course slug"
+// @Param        category_uid     formData  string  false  "Dynamic category uid"
+// @Param        course_type_uid  formData  string  false  "Dynamic course type uid"
+// @Param        level            formData  string  false  "Course level: PEMULA | MENENGAH | LANJUTAN"
+// @Param        price            formData  number  false  "Course selling price"
+// @Param        price_strike     formData  number  false  "Displayed strike-through/original price"
+// @Param        what_you_learn   formData  string  false  "JSON array of strings, e.g. [\"Gtw 1\", \"Gtw 2\"]"
+// @Param        description      formData  string  false  "Course description"
+// @Param        slot             formData  int     false  "Course slot capacity (0 = unlimited)"
+// @Param        is_premium       formData  boolean false  "Whether course is premium"
+// @Success      200  {object}  map[string]any  "Course updated successfully"
+// @Failure      400  {object}  map[string]any  "Invalid request payload"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
+// @Failure      404  {object}  map[string]any  "Course or user not found"
+// @Failure      500  {object}  map[string]any  "Failed to update course"
+// @Router       /courses/{id} [put]
+func UpdateAdminCourseFunc(c *gin.Context) {
+	userID, _ := c.Get(middleware.UIDCK)
+
+	var userData entity.User
+	if err := database.DB.First(&userData, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if !hasAdminAccess(userData.Role) {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Update course access denied: Super Admin or Admin only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+
+	var course entity.Course
+	if err := database.DB.First(&course, courseID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if multipartFormHas(c, "title") {
+		title := strings.TrimSpace(c.PostForm("title"))
+		if title == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "title cannot be empty",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		course.Title = title
+	}
+
+	if multipartFormHas(c, "subtitle") || multipartFormHas(c, "header") {
+		subtitle := strings.TrimSpace(c.PostForm("subtitle"))
+		if subtitle == "" {
+			subtitle = strings.TrimSpace(c.PostForm("header"))
+		}
+		course.Subtitle = subtitle
+	}
+
+	if multipartFormHas(c, "description") {
+		description := strings.TrimSpace(c.PostForm("description"))
+		if description == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "description cannot be empty",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		course.Description = description
+	}
+
+	if multipartFormHas(c, "slug") {
+		slug := buildSlug(strings.TrimSpace(c.PostForm("slug")))
+		if slug != course.Slug {
+			var existingCount int64
+			if err := database.DB.Model(&entity.Course{}).Where("slug = ? AND uid != ?", slug, course.Uid).Count(&existingCount).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"success": false,
+					"message": "Failed to validate course slug",
+					"data":    nil,
+					"error":   err.Error(),
+				})
+				return
+			}
+			if existingCount > 0 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"message": "slug is already taken",
+					"data":    nil,
+					"error":   nil,
+				})
+				return
+			}
+		}
+		course.Slug = slug
+	}
+
+	if multipartFormHas(c, "price") {
+		priceStr := strings.TrimSpace(c.PostForm("price"))
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil || price < 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "price must be a valid non-negative number",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		course.Price = price
+	}
+
+	if multipartFormHas(c, "price_strike") {
+		priceStrikeStr := strings.TrimSpace(c.PostForm("price_strike"))
+		if priceStrikeStr == "" {
+			course.PriceStrike = 0
+		} else {
+			parsed, err := strconv.ParseFloat(priceStrikeStr, 64)
+			if err != nil || parsed < 0 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"message": "price_strike must be a valid non-negative number",
+					"data":    nil,
+					"error":   nil,
+				})
+				return
+			}
+			course.PriceStrike = parsed
+		}
+	}
+
+	if multipartFormHas(c, "what_you_learn") || len(c.PostFormArray("what_you_learn[]")) > 0 || len(c.PostFormArray("what_you_learn")) > 0 {
+		learningPointsRaw, err := parseWhatYouLearn(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "what_you_learn must be a valid JSON array of strings",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		course.WhatYouLearn = learningPointsRaw
+	}
+
+	if multipartFormHas(c, "category_uid") {
+		categoryUIDStr := strings.TrimSpace(c.PostForm("category_uid"))
+		categoryUID, ok := resolveUIDValue(c, "course_categories", categoryUIDStr, "category")
+		if !ok {
+			return
+		}
+
+		var category entity.CourseCategory
+		if err := database.DB.First(&category, categoryUID).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "category_uid not found",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		course.CategoryUid = &categoryUID
+	}
+
+	if multipartFormHas(c, "course_type_uid") || multipartFormHas(c, "class_type_uid") {
+		classTypeUIDStr := strings.TrimSpace(c.PostForm("course_type_uid"))
+		if classTypeUIDStr == "" {
+			classTypeUIDStr = strings.TrimSpace(c.PostForm("class_type_uid"))
+		}
+		classTypeUID, ok := resolveUIDValue(c, "class_types", classTypeUIDStr, "course type")
+		if !ok {
+			return
+		}
+
+		var classType entity.ClassType
+		if err := database.DB.First(&classType, classTypeUID).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "course_type_uid not found",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		course.ClassTypeUid = &classTypeUID
+	}
+
+	if multipartFormHas(c, "level") {
+		levelInput := strings.ToUpper(strings.TrimSpace(c.PostForm("level")))
+		switch entity.CourseLevel(levelInput) {
+		case entity.CourseLevelPemula, entity.CourseLevelMenengah, entity.CourseLevelLanjutan:
+			course.Level = entity.CourseLevel(levelInput)
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "level must be one of: PEMULA, MENENGAH, LANJUTAN (beginner, intermediate, advanced)",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+	}
+
+	if multipartFormHas(c, "slot") {
+		slotStr := c.PostForm("slot")
+		if slotStr == "" {
+			course.Slot = 0
+		} else {
+			slotInt, err := strconv.Atoi(slotStr)
+			if err != nil || slotInt < 0 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"message": "slot must be a valid non-negative integer",
+					"data":    nil,
+					"error":   nil,
+				})
+				return
+			}
+			course.Slot = slotInt
+		}
+	}
+
+	if multipartFormHas(c, "is_premium") {
+		course.IsPremium = parseFormBool(c.PostForm("is_premium"))
+	}
+
+	file, err := c.FormFile("cover")
+	if err != nil || file == nil {
+		file, err = c.FormFile("thumbnail")
+	}
+	if err == nil && file != nil {
+		bucket := utils.GetBucketCourses()
+		url, err := utils.UploadFile(file, bucket)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to upload thumbnail file",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		course.CoverURL = url
+		course.ThumbnailURL = url
+	}
+
+	if err := database.DB.Save(&course).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update course",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to retrieve updated course",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Course updated successfully",
+		"data":    courseResponse(course),
+		"error":   nil,
+	})
+}
+
 // GetAllCoursesFunc returns a paginated list of courses with optional filters.
 //
 // Query parameters (all optional):

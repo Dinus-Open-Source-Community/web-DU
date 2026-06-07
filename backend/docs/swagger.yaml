@@ -1096,6 +1096,112 @@ paths:
       summary: Get course by ID (Public)
       tags:
       - Course
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an existing course metadata (cover, title, subtitle, category,
+        class type, level, pricing, learning points). Only sent fields are updated.
+        Requires Super Admin or Admin.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Course cover image (JPG, PNG recommended). Fallback key: thumbnail'
+        in: formData
+        name: cover
+        type: file
+      - description: Course title
+        in: formData
+        name: title
+        type: string
+      - description: Course subtitle/header
+        in: formData
+        name: subtitle
+        type: string
+      - description: Alias for subtitle
+        in: formData
+        name: header
+        type: string
+      - description: Course slug
+        in: formData
+        name: slug
+        type: string
+      - description: Dynamic category uid
+        in: formData
+        name: category_uid
+        type: string
+      - description: Dynamic course type uid
+        in: formData
+        name: course_type_uid
+        type: string
+      - description: 'Course level: PEMULA | MENENGAH | LANJUTAN'
+        in: formData
+        name: level
+        type: string
+      - description: Course selling price
+        in: formData
+        name: price
+        type: number
+      - description: Displayed strike-through/original price
+        in: formData
+        name: price_strike
+        type: number
+      - description: JSON array of strings, e.g. [\
+        in: formData
+        name: what_you_learn
+        type: string
+      - description: Course description
+        in: formData
+        name: description
+        type: string
+      - description: Course slot capacity (0 = unlimited)
+        in: formData
+        name: slot
+        type: integer
+      - description: Whether course is premium
+        in: formData
+        name: is_premium
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin or Admin only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to update course
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update course (Super Admin / Admin)
+      tags:
+      - Course
   /courses/{id}/join:
     post:
       consumes:

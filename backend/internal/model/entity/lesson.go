@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"database/sql/driver"
 	"encoding/json"
 	"time"
 
@@ -35,17 +34,6 @@ type Lesson struct {
 	// Relations
 	Module     *Module           `gorm:"foreignKey:ModuleUid" json:"-"`
 	Assignment *LessonAssignment `gorm:"foreignKey:LessonUid" json:"assignment,omitempty"`
-}
-
-// Scan implements the sql.Scanner interface for JSONB
-func (l *Lesson) Scan(value interface{}) error {
-	bytes, _ := value.([]byte)
-	return json.Unmarshal(bytes, &l.Content)
-}
-
-// Value implements the driver.Valuer interface for JSONB
-func (l Lesson) Value() (driver.Value, error) {
-	return l.Content, nil
 }
 
 // AfterFind otomatis mendekripsi judul lesson. Field content (jsonb), video_url,
