@@ -1,99 +1,95 @@
-import { FileText, ListChecks } from "lucide-react";
+import { useEffect, useState } from 'react'
 
-import { LessonQuizEditor } from "@/components/shared/LessonQuizEditor";
-import { TiptapEditor } from "@/components/shared/TipTapEditor";
-import {
-  applyHomeworkPatch,
-  ensureHomeworkDefaults,
-} from "@/lib/course-edit/homework";
-import { getLessonKey } from "@/lib/course-edit/mappers";
-import type { EditableLesson } from "@/lib/course-edit/types";
-import type { HomeworkTaskType } from "@/lib/types/lesson";
+import { Skeleton } from '@/components/ui/skeleton'
+import { isHomeworkConfigured } from '@/lib/course-edit/homework'
+import type { EditableLesson } from '@/lib/course-edit/types'
+import { useHomeworkPanelController } from '@/hooks/use-homework-panel-controller'
 
-import { editLayout } from "../edit-layout";
-import { PanelTransition } from "./PanelTransition";
-import { SegmentedControl } from "./SegmentedControl";
-
-const HOMEWORK_TYPE_OPTIONS = [
-  {
-    value: "text" as const,
-    label: "Teks",
-    icon: <FileText className="size-3.5" aria-hidden />,
-  },
-  {
-    value: "quiz" as const,
-    label: "Quiz",
-    icon: <ListChecks className="size-3.5" aria-hidden />,
-  },
-];
+import { AssignmentRulesSection } from './AssignmentRulesSection'
+import { HomeworkInstructionSection } from './homework/HomeworkInstructionSection'
+import { HomeworkPanelActionBar } from './homework/HomeworkPanelActionBar'
+import { HomeworkSectionNav } from './homework/HomeworkSectionNav'
+import type { HomeworkPanelSection } from './homework/homework-panel.constants'
+import { PanelTransition } from './PanelTransition'
 
 type LessonHomeworkPanelProps = {
-  lesson: EditableLesson;
-  onPatchLesson: (
+  lesson: EditableLesson
+  isLoadingAssignment?: boolean
+  onPatchAssignment: (
     lessonId: string,
     updater: (lesson: EditableLesson) => EditableLesson,
-  ) => void;
-};
+  ) => void
+}
+
+function HomeworkPanelSkeleton() {
+  return (
+    <section aria-label="Tugas lesson" className="space-y-4 py-4">
+      <Skeleton className="h-12 w-full rounded-lg" />
+      <Skeleton className="h-10 w-full max-w-md" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-48 w-full rounded-lg" />
+    </section>
+  )
+}
 
 export function LessonHomeworkPanel({
   lesson,
-  onPatchLesson,
+  isLoadingAssignment = false,
+  onPatchAssignment,
 }: LessonHomeworkPanelProps) {
-  const lessonKey = getLessonKey(lesson);
-  const homeworkLesson = ensureHomeworkDefaults(lesson);
-  const homeworkType = homeworkLesson.homeworkType ?? "text";
+  const [activeSection, setActiveSection] = useState<HomeworkPanelSection>('instruction')
 
-  const patchHomework = (patch: Parameters<typeof applyHomeworkPatch>[1]) => {
-    onPatchLesson(lessonKey, (current) => applyHomeworkPatch(current, patch));
-  };
+  const controller = useHomeworkPanelController(lesson, onPatchAssignment)
 
-  const setHomeworkType = (type: HomeworkTaskType) => {
-    patchHomework({ homeworkType: type });
-  };
+  useEffect(() => {
+    setActiveSection('instruction')
+  }, [controller.lessonKey])
+
+  if (isLoadingAssignment) {
+    return <HomeworkPanelSkeleton />
+  }
 
   return (
-    <section aria-label="Tugas lesson" className="space-y-5 py-6">
-      <div className="space-y-1.5">
-        <p className={editLayout.fieldLabel}>Tipe tugas</p>
-        <SegmentedControl
-          value={homeworkType}
-          options={HOMEWORK_TYPE_OPTIONS}
-          onChange={setHomeworkType}
-          ariaLabel="Pilih tipe tugas lesson"
-        />
-      </div>
+    <section aria-label="Tugas lesson" className="min-w-0">
+      <HomeworkPanelActionBar
+        status={controller.rules.status}
+        canSaveAssignment={controller.canSaveAssignment}
+      />
 
-      <PanelTransition
-        panelKey={`${lessonKey}-${homeworkType}`}
-        direction="bottom"
-      >
-        {homeworkType === "text" ? (
-          <div className="space-y-2">
-            <TiptapEditor
-              key={`${lessonKey}-homework-text`}
-              variant="compact"
-              initialContent={
-                homeworkLesson.homeworkDescriptionHtml ?? "<p></p>"
-              }
-              onChange={(html: string) => {
-                patchHomework({ homeworkDescriptionHtml: html });
-              }}
-              placeholder="Contoh: Buat ringkasan 200 kata dari materi lesson ini."
-            />
-          </div>
+      <HomeworkSectionNav
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
+
+      <PanelTransition panelKey={`${controller.lessonKey}-${activeSection}`} direction="bottom">
+        {activeSection === 'instruction' ? (
+          <HomeworkInstructionSection
+            lessonKey={controller.lessonKey}
+            homeworkTitle={controller.homeworkLesson.homeworkTitle ?? ''}
+            homeworkType={controller.homeworkType}
+            homeworkDescriptionHtml={
+              controller.homeworkLesson.homeworkDescriptionHtml ?? '<p></p>'
+            }
+            homeworkQuiz={controller.homeworkLesson.homeworkQuiz!}
+            onTitleChange={(title) => controller.patchHomework({ homeworkTitle: title })}
+            onTypeChange={controller.setHomeworkType}
+            onDescriptionChange={(html) =>
+              controller.patchHomework({ homeworkDescriptionHtml: html })
+            }
+            onQuizChange={(quiz) => controller.patchHomework({ homeworkQuiz: quiz })}
+            instructionAttachments={controller.rules.instructionAttachments}
+            onInstructionAttachmentsChange={(attachments) =>
+              controller.patchRules({ instructionAttachments: attachments })
+            }
+          />
         ) : (
-          <div className="space-y-2">
-            <p className={editLayout.fieldLabel}>Soal quiz</p>
-            <LessonQuizEditor
-              key={`${lessonKey}-homework-quiz`}
-              quiz={homeworkLesson.homeworkQuiz!}
-              onChange={(quiz) => {
-                patchHomework({ homeworkQuiz: quiz });
-              }}
-            />
-          </div>
+          <AssignmentRulesSection
+            rules={controller.rules}
+            taskType={controller.homeworkType}
+            onChange={controller.patchRules}
+          />
         )}
       </PanelTransition>
     </section>
-  );
+  )
 }

@@ -1,13 +1,14 @@
 import type { IMentorCourseStudent } from '../../lib/types/course'
+import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 
 export const ProgressBar = ({ value }: { value: number }) => {
-  const normalized = Math.max(0, Math.min(100, value))
+  const normalized = toLearningProgressPercent(value)
   return (
     <div className="space-y-1">
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
         <div className="h-full rounded-full bg-primary" style={{ width: `${normalized}%` }} />
       </div>
-      <p className="text-xs font-medium tabular-nums text-slate-500">{normalized}%</p>
+      <p className="text-xs font-medium tabular-nums text-slate-500">{formatLearningProgressLabel(value)}</p>
     </div>
   )
 }

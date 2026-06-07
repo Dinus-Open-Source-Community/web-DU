@@ -51,7 +51,7 @@ export function CourseDetailManageHeader({
         </div>
       </div>
 
-      <div className="hidden flex-wrap items-center gap-2 lg:flex">
+      <div className="hidden flex-wrap items-center gap-2 md:flex">
         <HeaderActionButtons
           curriculumEditHref={curriculumEditHref}
           curriculumEditNavigationState={curriculumEditNavigationState}

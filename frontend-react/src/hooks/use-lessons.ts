@@ -7,12 +7,11 @@ import {
   fetchLessonByUid,
   fetchLessonReadingStatus,
   fetchLessonsByModuleUid,
-  markLessonAsRead,
   updateLesson,
   type CreateLessonInput,
   type UpdateLessonInput,
 } from '@/services/lessons'
-import { lessonKeys } from './query-keys'
+import { lessonKeys, lessonReadingKeys } from './query-keys'
 
 export function useLessonsByModule(moduleUid: string, params?: IQueryParamsPayload) {
   return useQuery({
@@ -77,25 +76,10 @@ export function useDeleteLesson(uid: string) {
   })
 }
 
-export function useLessonReadingStatus(uid: string) {
+export function useLessonReadingStatus(uid: string, enabled = true) {
   return useQuery({
-    queryKey: lessonKeys.reading(uid),
-    enabled: !!uid,
+    queryKey: lessonReadingKeys.status(uid),
+    enabled: !!uid && enabled,
     queryFn: () => fetchLessonReadingStatus(uid),
-  })
-}
-
-export function useMarkLessonAsRead(uid: string) {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: () => markLessonAsRead(uid),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: lessonKeys.reading(uid) })
-      toast.success('Lesson ditandai sudah dibaca')
-    },
-    onError: () => {
-      toast.error('Gagal menandai lesson sebagai sudah dibaca')
-    },
   })
 }

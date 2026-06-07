@@ -19,8 +19,10 @@ import {
 } from '@/lib/tiptap-toolbar-state'
 import { cn } from '@/lib/utils'
 
+import type { ToolbarControlSize } from './toolbar-primitives'
+
 type TipTapBlockTypeSelectProps = {
-  size?: 'default' | 'compact' | 'bubble'
+  size?: ToolbarControlSize
 }
 
 function preventEditorBlur(event: MouseEvent) {
@@ -47,18 +49,20 @@ export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelec
           size="sm"
           onMouseDown={preventEditorBlur}
           className={cn(
-            'gap-1.5 border-slate-200 bg-white font-normal text-slate-700 shadow-none hover:bg-slate-50 data-[state=open]:bg-slate-50',
-            size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs font-medium',
-            size === 'compact' && 'h-8 min-w-[7.5rem] px-2.5 text-xs',
-            size === 'default' && 'h-9 min-w-[8.5rem] px-3 text-sm',
+            'w-full justify-between gap-2 rounded-full border-slate-200/90 bg-slate-50/80 font-medium text-slate-700 shadow-none hover:bg-slate-100/90 data-[state=open]:bg-slate-100',
+            size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs',
+            size === 'compact' && 'h-8 min-w-[8.5rem] max-w-[10rem] px-3 text-xs',
+            size === 'default' && 'h-9 min-w-[9rem] max-w-[11rem] px-3.5 text-sm',
           )}
         >
           <span className="truncate">{label}</span>
-          <ChevronDown className="size-3 shrink-0 opacity-60" aria-hidden />
+          <ChevronDown className="size-3.5 shrink-0 opacity-50" aria-hidden />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[10rem]">
-        <DropdownMenuLabel className="text-xs text-slate-500">Tipe blok</DropdownMenuLabel>
+      <DropdownMenuContent align="start" className="min-w-[10.5rem]">
+        <DropdownMenuLabel className="text-xs font-normal text-slate-500">
+          Tipe blok
+        </DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={blockType}
           onValueChange={(value) =>

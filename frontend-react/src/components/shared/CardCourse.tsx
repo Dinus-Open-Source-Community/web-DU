@@ -11,6 +11,7 @@ import {
   resolveCourseProfileAvatar,
 } from '@/lib/course-detail/course-profile'
 import { FormatRupiah } from '@/lib/func/func'
+import { isLearningProgressComplete } from '@/lib/learning/progress'
 
 type CourseLevelKey = 'PEMULA' | 'MENENGAH' | 'LANJUTAN'
 
@@ -134,7 +135,7 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
           )}
 
           <div className="flex items-center gap-3">
-            {data.progress === 100 ? (
+            {data.progress !== undefined && isLearningProgressComplete(data.progress) ? (
               <Badge variant="progressComplete" />
             ) : data.detailHref ? (
               <Button asChild className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">

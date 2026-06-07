@@ -1,16 +1,15 @@
-import { useLayoutEffect, useRef, useState } from 'react'
 import { FileText } from 'lucide-react'
 
 import { getLessonKey } from '@/lib/course-edit/mappers'
 import { isHomeworkConfigured } from '@/lib/course-edit/homework'
 import type { CourseEditorTab, EditableLesson } from '@/lib/course-edit/types'
 import type { LessonDeliveryType } from '@/lib/types/lesson'
+import { cn } from '@/lib/utils'
 
 import { LessonContentPanel } from './editor/LessonContentPanel'
 import { LessonEditorHeader } from './editor/LessonEditorHeader'
 import { LessonHomeworkPanel } from './editor/LessonHomeworkPanel'
 import { PanelTransition } from './editor/PanelTransition'
-import { tabSlideDirection, type PanelSlideDirection } from './editor/edit-motion'
 import { editLayout } from './edit-layout'
 
 type CourseLessonWorkspaceProps = {
@@ -20,11 +19,15 @@ type CourseLessonWorkspaceProps = {
   onEditorTabChange: (tab: CourseEditorTab) => void
   editorReady: boolean
   isLoadingDetail: boolean
+  isAssignmentLoading?: boolean
   isCompact?: boolean
-  onRenameLesson: (lessonId: string, title: string) => void
-  onDeleteLesson: (lessonId: string) => void
+  onRenameLesson: (lessonId: string, title: string) => void | Promise<void>
   onChangeLessonType: (lessonId: string, type: LessonDeliveryType) => void
   onPatchLesson: (
+    lessonId: string,
+    updater: (lesson: EditableLesson) => EditableLesson,
+  ) => void
+  onPatchAssignment: (
     lessonId: string,
     updater: (lesson: EditableLesson) => EditableLesson,
   ) => void
@@ -65,35 +68,19 @@ export function CourseLessonWorkspace({
   onEditorTabChange,
   editorReady,
   isLoadingDetail,
+  isAssignmentLoading = false,
   isCompact = false,
   onRenameLesson,
-  onDeleteLesson,
   onChangeLessonType,
   onPatchLesson,
+  onPatchAssignment,
 }: CourseLessonWorkspaceProps) {
-  const [tabDirection, setTabDirection] = useState<PanelSlideDirection>('bottom')
-  const previousEditorTabRef = useRef(editorTab)
-
-  const handleEditorTabChange = (tab: CourseEditorTab) => {
-    setTabDirection(tabSlideDirection(tab, editorTab))
-    previousEditorTabRef.current = tab
-    onEditorTabChange(tab)
-  }
-
-  useLayoutEffect(() => {
-    if (previousEditorTabRef.current === editorTab) return
-
-    setTabDirection(tabSlideDirection(editorTab, previousEditorTabRef.current))
-    previousEditorTabRef.current = editorTab
-  }, [editorTab])
-
   if (!activeLesson) {
     return isLoadingDetail ? <LoadingWorkspace /> : <EmptyWorkspace isCompact={isCompact} />
   }
 
   const lessonKey = getLessonKey(activeLesson)
   const showEditor = editorReady && !isLoadingDetail
-  const panelKey = `${lessonKey}-${editorTab}`
 
   return (
     <PanelTransition panelKey={lessonKey} direction="bottom" className="min-w-0">
@@ -105,28 +92,27 @@ export function CourseLessonWorkspace({
         editorTab={editorTab}
         hasHomework={isHomeworkConfigured(activeLesson)}
         isCompact={isCompact}
-        onEditorTabChange={handleEditorTabChange}
+        onEditorTabChange={onEditorTabChange}
         onRenameLesson={onRenameLesson}
-        onDeleteLesson={onDeleteLesson}
       />
 
-      {editorTab === 'content' && (
-        <PanelTransition panelKey={panelKey} direction={tabDirection}>
-          <LessonContentPanel
-            lesson={activeLesson}
-            showEditor={showEditor}
-            isLoadingDetail={isLoadingDetail}
-            onChangeDeliveryType={(type) => onChangeLessonType(lessonKey, type)}
-            onPatchLesson={onPatchLesson}
-          />
-        </PanelTransition>
-      )}
+      <div className={cn(editorTab !== 'content' && 'hidden')}>
+        <LessonContentPanel
+          lesson={activeLesson}
+          showEditor={showEditor}
+          isLoadingDetail={isLoadingDetail}
+          onChangeDeliveryType={(type) => onChangeLessonType(lessonKey, type)}
+          onPatchLesson={onPatchLesson}
+        />
+      </div>
 
-      {editorTab === 'homework' && (
-        <PanelTransition panelKey={panelKey} direction={tabDirection}>
-          <LessonHomeworkPanel lesson={activeLesson} onPatchLesson={onPatchLesson} />
-        </PanelTransition>
-      )}
+      <div className={cn(editorTab !== 'homework' && 'hidden')}>
+        <LessonHomeworkPanel
+          lesson={activeLesson}
+          isLoadingAssignment={isAssignmentLoading}
+          onPatchAssignment={onPatchAssignment}
+        />
+      </div>
     </PanelTransition>
   )
 }

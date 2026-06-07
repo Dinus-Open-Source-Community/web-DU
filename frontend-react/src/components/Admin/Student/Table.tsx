@@ -10,13 +10,15 @@ import { cn } from '../../../lib/utils'
 import { Link } from 'react-router-dom'
 import { Pagination } from '../../shared/Pagination'
 import type { AdminStudent } from '../../../lib/types/user'
+import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 
 function ProgressCell({ value }: { value: number }) {
+  const progressPercent = toLearningProgressPercent(value)
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs font-semibold text-slate-600 tabular-nums">{value}%</span>
+      <span className="text-xs font-semibold text-slate-600 tabular-nums">{formatLearningProgressLabel(value)}</span>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-primary transition-[width] duration-200" style={{ width: `${value}%` }} />
+        <div className="h-full rounded-full bg-primary transition-[width] duration-200" style={{ width: `${progressPercent}%` }} />
       </div>
     </div>
   )

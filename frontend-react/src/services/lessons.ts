@@ -2,6 +2,7 @@ import {
   buildLessonCreatePayload,
   buildLessonUpdatePayload,
 } from '@/lib/rich-text'
+import { mapLessonDetailAssignment } from '@/lib/lesson-assignment/assignment-mapper'
 import type {
   CourseDetailLesson,
   LessonCreateRequest,
@@ -63,7 +64,14 @@ export async function fetchLessonByUid(uid: string): Promise<LessonDetailItem> {
   const response = await api.get<IResponse<LessonDetailItem>>(
     API_ROUTES.lessons.getByUid(uid),
   )
-  return unwrapApiResponse(response.data, 'Gagal mengambil detail lesson')
+  const lesson = unwrapApiResponse(response.data, 'Gagal mengambil detail lesson')
+
+  return {
+    ...lesson,
+    assignment: lesson.assignment
+      ? mapLessonDetailAssignment(lesson.assignment)
+      : null,
+  }
 }
 
 export async function createLesson(
@@ -103,16 +111,8 @@ export async function deleteLesson(uid: string): Promise<void> {
   }
 }
 
-export async function fetchLessonReadingStatus(lessonUid: string) {
-  const response = await api.get<IResponse<unknown>>(
-    API_ROUTES.lessons.read.getStatusByLessonUid(lessonUid),
-  )
-  return response.data.data
-}
-
-export async function markLessonAsRead(lessonUid: string) {
-  const response = await api.post<IResponse<null>>(
-    API_ROUTES.lessons.read.markByLessonUid(lessonUid),
-  )
-  return response.data.data
-}
+export {
+  fetchLessonReadingStatus,
+  fetchMyLessonReadingHistory,
+  markLessonAsRead,
+} from '@/services/lesson-reading'

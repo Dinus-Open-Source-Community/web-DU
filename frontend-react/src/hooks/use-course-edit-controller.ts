@@ -8,7 +8,6 @@ import {
   getFirstLessonId,
   removeLesson,
   removeModule,
-  renameLesson,
   renameModule,
 } from "@/lib/course-curriculum";
 import { isCoursePublished } from "@/lib/course-detail/publish-state";
@@ -34,10 +33,24 @@ import {
   findLesson,
   getLessonKey,
   mergeOutlineModules,
+  mergeLessonDetailFromApi,
   toLesson,
   toMentorCourse,
   toOutlineModules,
 } from "@/lib/course-edit/mappers";
+import {
+  applyHomeworkFromAssignment,
+  ensureHomeworkDefaults,
+  isHomeworkConfigured,
+} from "@/lib/course-edit/homework";
+import {
+  clearHomeworkFromLesson,
+  validateHomeworkForSave,
+} from "@/lib/course-edit/homework-rules";
+import {
+  useDeleteLessonAssignment,
+  useSaveLessonAssignment,
+} from "@/hooks/use-lesson-assignment-admin";
 import type {
   CourseEditClientProps,
   EditableLesson,
@@ -48,10 +61,11 @@ import type {
   ICourseDetailItem,
   ICourseDetailModule,
 } from "@/lib/types/course";
-import { courseKeys, lessonKeys, moduleKeys } from "@/hooks/query-keys";
+import { courseKeys, lessonAssignmentKeys, lessonKeys, moduleKeys } from "@/hooks/query-keys";
 import { useUpdateCourseStatus } from "@/hooks/use-course-mutations";
+import { useLessonAssignmentAdmin } from "@/hooks/use-lesson-assignment-admin";
 import { useLessonByUid, useLessonsByModule } from "@/hooks/use-lessons";
-import { deleteLesson } from "@/services/lessons";
+import { deleteLesson, updateLesson } from "@/services/lessons";
 
 type PendingNavigation =
   | { type: "lesson"; lessonId: string; label: string }
@@ -82,6 +96,9 @@ export function useCourseEditController({
   const [modifiedLessons, setModifiedLessons] = useState<Set<string>>(
     new Set(),
   );
+  const [modifiedAssignmentLessons, setModifiedAssignmentLessons] = useState<
+    Set<string>
+  >(new Set());
   const [modifiedModuleUids, setModifiedModuleUids] = useState<Set<string>>(
     new Set(),
   );
@@ -96,6 +113,18 @@ export function useCourseEditController({
   );
   const initialLessonModuleMapRef = useRef<Map<string, string>>(new Map());
   const lastHydratedLessonRef = useRef<string | null>(null);
+  const lastHydratedAssignmentRef = useRef<string | null>(null);
+
+  const shouldLoadAssignment = Boolean(
+    activeLessonId &&
+      persistedLessonUids.has(activeLessonId) &&
+      !modifiedAssignmentLessons.has(activeLessonId),
+  );
+
+  const assignmentQuery = useLessonAssignmentAdmin(
+    shouldLoadAssignment ? activeLessonId : null,
+    shouldLoadAssignment,
+  );
 
   const hasCourseModules = sourceModules.length > 0;
 
@@ -136,6 +165,15 @@ export function useCourseEditController({
 
   const activeLessonModified = Boolean(
     activeLessonId && modifiedLessons.has(activeLessonId),
+  );
+
+  const activeAssignmentModified = Boolean(
+    activeLessonId && modifiedAssignmentLessons.has(activeLessonId),
+  );
+
+  const saveAssignmentMutation = useSaveLessonAssignment();
+  const deleteAssignmentMutation = useDeleteLessonAssignment(
+    activeLesson?.uid ?? null,
   );
 
   const isModuleLessonsLoading = Boolean(
@@ -259,11 +297,11 @@ export function useCourseEditController({
         lessons: courseModule.lessons.map((lesson) => {
           const lessonKey = getLessonKey(lesson);
           if (lessonKey !== activeLessonId) return lesson;
-          return {
-            ...hydrated,
-            id: lesson.id,
-            uid: lesson.uid ?? lessonApiItem.uid,
-          };
+          return mergeLessonDetailFromApi(
+            lesson,
+            hydrated,
+            lessonApiItem.uid,
+          );
         }),
       })),
     );
@@ -276,7 +314,35 @@ export function useCourseEditController({
 
   useEffect(() => {
     lastHydratedLessonRef.current = null;
+    lastHydratedAssignmentRef.current = null;
   }, [activeLessonId]);
+
+  useEffect(() => {
+    if (!shouldLoadAssignment || !activeLessonId) return;
+    if (!assignmentQuery.isFetched) return;
+    if (modifiedAssignmentLessons.has(activeLessonId)) return;
+    if (lastHydratedAssignmentRef.current === activeLessonId) return;
+
+    lastHydratedAssignmentRef.current = activeLessonId;
+    const assignment = assignmentQuery.data ?? null;
+
+    setModules((previous) =>
+      previous.map((courseModule) => ({
+        ...courseModule,
+        lessons: courseModule.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== activeLessonId) return lesson;
+          return applyHomeworkFromAssignment(lesson, assignment);
+        }),
+      })),
+    );
+  }, [
+    activeLessonId,
+    assignmentQuery.data,
+    assignmentQuery.isFetched,
+    modifiedAssignmentLessons,
+    shouldLoadAssignment,
+  ]);
 
   const patchLocalLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
@@ -287,6 +353,23 @@ export function useCourseEditController({
             const lessonKey = getLessonKey(lesson);
             if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
             setModifiedLessons((prev) => new Set([...prev, lessonKey]));
+            return updater(lesson);
+          }),
+        })),
+      );
+    },
+    [],
+  );
+
+  const patchAssignmentLesson = useCallback(
+    (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
+      setModules((previous) =>
+        previous.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson);
+            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+            setModifiedAssignmentLessons((prev) => new Set([...prev, lessonKey]));
             return updater(lesson);
           }),
         })),
@@ -343,10 +426,13 @@ export function useCourseEditController({
   );
 
   const saveLesson = useCallback(
-    async (lessonId: string, opts?: { silent?: boolean }) => {
+    async (
+      lessonId: string,
+      opts?: { silent?: boolean; lesson?: EditableLesson },
+    ) => {
       if (isSaving) return false;
 
-      const lesson = findLesson(modules, lessonId);
+      const lesson = opts?.lesson ?? findLesson(modules, lessonId);
       const moduleForLesson = findModuleForLesson(modules, lessonId);
 
       if (!lesson || !moduleForLesson?.uid) {
@@ -424,22 +510,25 @@ export function useCourseEditController({
           setActiveModuleId(result.createdModuleUid);
         }
 
-        lastHydratedLessonRef.current = null;
+        lastHydratedLessonRef.current = result.nextLessonId;
 
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: lessonKeys.byModule(
-              result.module.uid ?? activeModuleId ?? "",
+              result.module.uid ?? activeModuleId ?? '',
             ),
           }),
           queryClient.invalidateQueries({
             queryKey: lessonKeys.detail(result.nextLessonId),
           }),
+          queryClient.invalidateQueries({
+            queryKey: lessonAssignmentKeys.detail(result.nextLessonId),
+          }),
           queryClient.invalidateQueries({ queryKey: moduleKeys.all }),
           queryClient.invalidateQueries({
             queryKey: courseKeys.detail(courseUid),
           }),
-        ]);
+        ])
 
         if (!opts?.silent) toast.success("Lesson berhasil disimpan.");
         return true;
@@ -487,9 +576,13 @@ export function useCourseEditController({
 
   const requestNavigation = useCallback(
     (navigation: PendingNavigation) => {
-      if (
+      const hasUnsavedChanges =
         activeLessonId &&
-        modifiedLessons.has(activeLessonId) &&
+        (modifiedLessons.has(activeLessonId) ||
+          modifiedAssignmentLessons.has(activeLessonId));
+
+      if (
+        hasUnsavedChanges &&
         !(
           navigation.type === "lesson" && navigation.lessonId === activeLessonId
         )
@@ -506,7 +599,13 @@ export function useCourseEditController({
       }
       return true;
     },
-    [activeLessonId, modifiedLessons, proceedSelectLesson, proceedSelectModule],
+    [
+      activeLessonId,
+      modifiedLessons,
+      modifiedAssignmentLessons,
+      proceedSelectLesson,
+      proceedSelectModule,
+    ],
   );
 
   const handleSelectLesson = useCallback(
@@ -544,11 +643,121 @@ export function useCourseEditController({
     await saveLesson(activeLessonId);
   }, [activeLessonId, activeLessonModified, saveLesson]);
 
+  const handleSaveCurrentAssignment = useCallback(async () => {
+    if (!activeLessonId || !activeLesson) return;
+
+    const persistedLessonUid = activeLesson.uid ?? null;
+    if (!persistedLessonUid) {
+      toast.error("Simpan lesson terlebih dahulu sebelum menyimpan tugas.");
+      return;
+    }
+
+    const homeworkLesson = ensureHomeworkDefaults(activeLesson);
+    const validationError = validateHomeworkForSave(homeworkLesson);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    try {
+      const result = await saveAssignmentMutation.mutateAsync({
+        lessonUid: persistedLessonUid,
+        lesson: homeworkLesson,
+      });
+
+      setModules((previous) =>
+        previous.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson);
+            if (lessonKey !== activeLessonId && lesson.id !== activeLessonId) {
+              return lesson;
+            }
+
+            return {
+              ...lesson,
+              homeworkAssignmentUid: result.assignmentUid,
+              hasHomework: Boolean(
+                result.assignmentUid && isHomeworkConfigured(homeworkLesson),
+              ),
+            };
+          }),
+        })),
+      );
+
+      setModifiedAssignmentLessons((previous) => {
+        const next = new Set(previous);
+        next.delete(activeLessonId);
+        return next;
+      });
+
+      lastHydratedAssignmentRef.current = activeLessonId;
+
+      toast.success(
+        result.assignmentUid
+          ? "Tugas berhasil disimpan."
+          : "Tugas dihapus dari server.",
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menyimpan tugas.",
+      );
+      throw error;
+    }
+  }, [activeLesson, activeLessonId, saveAssignmentMutation]);
+
+  const handleDeleteCurrentAssignment = useCallback(async () => {
+    if (!activeLessonId || !activeLesson) return;
+
+    const persistedLessonUid = activeLesson.uid ?? null;
+    const hasPersistedAssignment = Boolean(activeLesson.homeworkAssignmentUid);
+
+    try {
+      if (hasPersistedAssignment && persistedLessonUid) {
+        await deleteAssignmentMutation.mutateAsync();
+      }
+
+      setModules((previous) =>
+        previous.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson);
+            if (lessonKey !== activeLessonId && lesson.id !== activeLessonId) {
+              return lesson;
+            }
+            return clearHomeworkFromLesson(lesson);
+          }),
+        })),
+      );
+
+      setModifiedAssignmentLessons((previous) => {
+        const next = new Set(previous);
+        next.delete(activeLessonId);
+        return next;
+      });
+
+      lastHydratedAssignmentRef.current = null;
+
+      toast.success("Tugas dihapus dari lesson ini.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus tugas.",
+      );
+      throw error;
+    }
+  }, [activeLesson, activeLessonId, deleteAssignmentMutation]);
+
   const handleSaveAndContinue = useCallback(async () => {
     if (!activeLessonId || !pendingNavigation) return;
 
     try {
-      await saveLesson(activeLessonId, { silent: true });
+      if (modifiedLessons.has(activeLessonId)) {
+        await saveLesson(activeLessonId, { silent: true });
+      }
+      if (modifiedAssignmentLessons.has(activeLessonId)) {
+        await handleSaveCurrentAssignment();
+      }
+
       setUnsavedDialogOpen(false);
 
       if (pendingNavigation.type === "lesson") {
@@ -558,16 +767,19 @@ export function useCourseEditController({
       }
 
       setPendingNavigation(null);
-      toast.success("Lesson disimpan. Melanjutkan navigasi.");
+      toast.success("Perubahan disimpan. Melanjutkan navigasi.");
     } catch {
-      // Error toast already shown in saveLesson.
+      // Error toast already shown in save handlers.
     }
   }, [
     activeLessonId,
     pendingNavigation,
+    modifiedLessons,
+    modifiedAssignmentLessons,
     proceedSelectLesson,
     proceedSelectModule,
     saveLesson,
+    handleSaveCurrentAssignment,
   ]);
 
   const handleCreateModule = useCallback(
@@ -833,15 +1045,72 @@ export function useCourseEditController({
   );
 
   const handleRenameLesson = useCallback(
-    (lessonId: string, title: string) => {
-      const moduleForLesson = findModuleByLessonId(outlineModules, lessonId);
-      if (!moduleForLesson) return;
-      applyOutlineUpdate((current) =>
-        renameLesson(current, moduleForLesson.uid, lessonId, title),
+    async (lessonId: string, title: string) => {
+      const trimmed = title.trim();
+      if (!trimmed) return;
+
+      const moduleForLesson = findModuleForLesson(modules, lessonId);
+      if (!moduleForLesson?.uid) return;
+
+      const currentLesson = findLesson(modules, lessonId);
+      if (!currentLesson || trimmed === currentLesson.title) return;
+
+      const previousTitle = currentLesson.title;
+
+      setModules((previous) =>
+        previous.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson);
+            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+            return { ...lesson, title: trimmed };
+          }),
+        })),
       );
-      setModifiedLessons((previous) => new Set([...previous, lessonId]));
+
+      try {
+        if (persistedLessonUids.has(lessonId)) {
+          await updateLesson(lessonId, { title: trimmed });
+          await Promise.all([
+            invalidateModuleQueries(courseData.uid, moduleForLesson.uid),
+            queryClient.invalidateQueries({
+              queryKey: lessonKeys.detail(lessonId),
+            }),
+          ]);
+          toast.success("Nama lesson diperbarui.");
+          return;
+        }
+
+        await saveLesson(lessonId, {
+          silent: true,
+          lesson: { ...currentLesson, title: trimmed },
+        });
+        toast.success("Nama lesson diperbarui.");
+      } catch (error) {
+        setModules((previous) =>
+          previous.map((module) => ({
+            ...module,
+            lessons: module.lessons.map((lesson) => {
+              const lessonKey = getLessonKey(lesson);
+              if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+              return { ...lesson, title: previousTitle };
+            }),
+          })),
+        );
+        toast.error(
+          error instanceof Error ? error.message : "Gagal memperbarui nama lesson.",
+        );
+        throw error;
+      }
     },
-    [applyOutlineUpdate, outlineModules],
+    [
+      courseData.uid,
+      invalidateModuleQueries,
+      modules,
+      persistedLessonUids,
+      queryClient,
+      saveLesson,
+    ],
   );
 
   const handleDeleteLesson = useCallback(
@@ -973,6 +1242,10 @@ export function useCourseEditController({
     updateCourseStatus,
   ]);
 
+  const isAssignmentLoading = Boolean(
+    shouldLoadAssignment && assignmentQuery.isLoading,
+  );
+
   return {
     course,
     outlineModules,
@@ -983,6 +1256,9 @@ export function useCourseEditController({
     editorReady,
     modifiedLessons,
     activeLessonModified,
+    activeAssignmentModified,
+    isSavingAssignment: saveAssignmentMutation.isPending,
+    isDeletingAssignment: deleteAssignmentMutation.isPending,
     isSaving,
     isPublishing: updateCourseStatus.isPending,
     isCreateModuleOpen,
@@ -995,6 +1271,7 @@ export function useCourseEditController({
     isModuleLessonsLoading,
     isLessonDetailLoading:
       lessonDetailQuery.isLoading && shouldLoadLessonDetail,
+    isAssignmentLoading,
     unsavedDialogOpen,
     pendingNavigation,
     routeBasePath,
@@ -1015,7 +1292,10 @@ export function useCourseEditController({
     handleChangeLessonType,
     handlePublish,
     handleSaveCurrentLesson,
+    handleSaveCurrentAssignment,
+    handleDeleteCurrentAssignment,
     handleSaveAndContinue,
     patchLocalLesson,
+    patchAssignmentLesson,
   };
 }

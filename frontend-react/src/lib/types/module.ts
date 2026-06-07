@@ -1,4 +1,4 @@
-import type { CourseDetailLesson } from './lesson'
+import type { CourseDetailLesson, LessonDetailItem } from './lesson'
 
 // =====================
 // Module API
@@ -11,7 +11,7 @@ export interface IModulesDetail {
   order_index: number
   created_at: string
   /** Diisi via GET `/lessons?module_uid=` — tidak lagi nested di response modul. */
-  lessons?: CourseDetailLesson[]
+  lessons?: LessonDetailItem[]
 }
 
 export interface ICourseDetailModule {

@@ -3,9 +3,11 @@ import { toast } from 'sonner'
 
 import { courseKeys } from './query-keys'
 import type { AssignMentorsToCoursePayload } from '@/lib/course-mentor/types'
+import type { CreateCourseReviewReplyPayload } from '@/lib/course-review/types'
 import {
   assignMentorsToCourse,
   createCourse,
+  replyToCourseReview,
   updateCourse,
   updateCourseStatus,
   type CreateCoursePayload,
@@ -57,6 +59,29 @@ export function useUpdateCourseStatus() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Gagal memperbarui status kursus')
+    },
+  })
+}
+
+export function useReplyCourseReview() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      courseUid,
+      reviewUid,
+      payload,
+    }: {
+      courseUid: string
+      reviewUid: string
+      payload: CreateCourseReviewReplyPayload
+    }) => replyToCourseReview(courseUid, reviewUid, payload),
+    onSuccess: (_data, { courseUid }) => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      toast.success('Balasan review berhasil dikirim')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Gagal mengirim balasan review')
     },
   })
 }

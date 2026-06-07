@@ -6,6 +6,7 @@ import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { Button } from '@/components/ui/button'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 import type { ManagedUserRow } from '@/lib/user-manage/view-models'
+import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 
 type BuildColumnsOptions = {
   kind: UserManageKind
@@ -16,13 +17,14 @@ type BuildColumnsOptions = {
 }
 
 function ProgressCell({ value }: { value: number }) {
+  const progressPercent = toLearningProgressPercent(value)
   return (
     <div className="flex min-w-[120px] flex-col gap-1.5">
-      <span className="text-xs font-semibold text-slate-600 tabular-nums">{value}%</span>
+      <span className="text-xs font-semibold text-slate-600 tabular-nums">{formatLearningProgressLabel(value)}</span>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
           className="h-full rounded-full bg-primary transition-[width] duration-200"
-          style={{ width: `${value}%` }}
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
     </div>

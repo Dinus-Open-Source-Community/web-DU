@@ -164,9 +164,12 @@ export interface CourseDetailReviewUser {
 export interface CourseDetailReviewReply {
   comment: string;
   created_at: string;
-  rating: number;
+  /** Opsional — BE tidak mengirim rating pada balasan review. */
+  rating?: number;
   uid: string;
   user: CourseDetailReviewUser;
+  /** Field mentah dari BE; dinormalisasi ke `user` di mapper. */
+  replier?: CourseDetailReviewUser | null;
 }
 
 export interface CourseDetailReview {
@@ -344,6 +347,16 @@ export interface IMentorAssignmentStats {
   awaitingReview: number;
   dueSoonCount: number;
   resubmitAwaitingReview: number;
+}
+
+export interface CourseReadingProgress {
+  course_uid: string;
+  total_lessons: number;
+  lessons_read: number;
+  /** Progress fraction 0.0–1.0 from BE */
+  progress: number;
+  enrollment_uid?: string | null;
+  enrollment_status?: string | null;
 }
 
 export interface StudentEnrolledCourse {

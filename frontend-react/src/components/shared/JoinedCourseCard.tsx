@@ -12,6 +12,11 @@ import {
   resolveCourseProfileAvatar,
 } from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
+import {
+  formatLearningProgressLabel,
+  isLearningProgressComplete,
+  toLearningProgressPercent,
+} from '@/lib/learning/progress'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
 export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
@@ -22,13 +27,11 @@ interface JoinedCourseCardProps {
   size?: JoinedCourseCardSize
 }
 
-const clampProgress = (progress: number) => Math.min(100, Math.max(0, Math.round(progress)))
-
 const sizes = {
   container: {
-    sm: 'w-[280px] max-w-full',
-    md: 'w-[340px] max-w-full',
-    lg: 'w-[420px] max-w-full',
+    sm: 'w-full max-w-full',
+    md: 'w-full max-w-full',
+    lg: 'w-full max-w-full',
   },
   imageWrapper: {
     sm: 'min-h-[160px]',
@@ -58,10 +61,13 @@ const sizes = {
 }
 
 const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedCourseCardProps) => {
-  const progress = clampProgress(data.progress)
+  const progress = toLearningProgressPercent(data.progress)
+  const progressLabel = formatLearningProgressLabel(data.progress)
+  const isComplete = isLearningProgressComplete(data.progress)
   const isResume = variant === 'resume'
+  const showProgress = isResume || isComplete
   const image = data.cover_url || data.thumbnail_url
-  const actionLabel = isResume ? 'Lanjut' : 'Mulai'
+  const actionLabel = isComplete ? 'Belajar lagi' : isResume ? 'Lanjut' : 'Mulai'
   const profile = resolveCourseProfile(data)
 
   return (
@@ -97,11 +103,14 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
           <p className={`line-clamp-2 font-normal leading-[1.55] text-slate-500 ${sizes.description[size]}`}>{data.description || data.subtitle}</p>
         </div>
 
-        {isResume && (
+        {showProgress && (
           <div className={`mt-auto mb-5 w-full rounded-xl border border-slate-100 bg-slate-50/70 ${sizes.progress[size]}`}>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-slate-500">Progres Belajar</span>
-              <span className="text-xs font-bold text-primary">{progress}%</span>
+              <div className="flex items-center gap-2">
+                {isComplete ? <Badge variant="progressComplete" /> : null}
+                <span className="text-xs font-bold text-primary tabular-nums">{progressLabel}</span>
+              </div>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
               <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
@@ -120,13 +129,12 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
               ) : null}
             </div>
 
-            {progress === 100 ? (
-              <Badge variant="progressComplete" />
-            ) : (
-              <Button asChild className="rounded-lg px-5 py-2 text-sm font-semibold shadow-none" variant="default" size="sm">
-                <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
-              </Button>
-            )}
+            <Button
+              asChild
+              className="h-9 shrink-0 rounded-[10px] px-5 text-sm font-semibold shadow-none"
+              variant="default">
+              <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
+            </Button>
           </div>
         </div>
       </div>

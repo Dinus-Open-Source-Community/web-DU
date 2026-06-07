@@ -10,6 +10,7 @@ export const courseKeys = {
   category: (id: string) => ['course-category', id] as const,
   types: (params?: IQueryParamsPayload) => ['course-types', params] as const,
   edit: (courseUid: string) => ['courses', 'edit', courseUid] as const,
+  progress: (courseUid: string) => ['courses', courseUid, 'progress'] as const,
 }
 
 export const moduleKeys = {
@@ -24,6 +25,17 @@ export const lessonKeys = {
     ['lessons', 'module', moduleUid, params] as const,
   detail: (uid: string) => ['lesson', uid] as const,
   reading: (uid: string) => ['lessons', 'readings', uid] as const,
+}
+
+export const lessonReadingKeys = {
+  all: ['lesson-readings'] as const,
+  status: (lessonUid: string) => ['lesson-readings', 'status', lessonUid] as const,
+}
+
+export const lessonAssignmentKeys = {
+  all: ['lesson-assignments'] as const,
+  detail: (lessonUid: string) => ['lesson-assignments', 'detail', lessonUid] as const,
+  mySubmission: (lessonUid: string) => ['lesson-assignments', 'my-submission', lessonUid] as const,
 }
 
 export const paymentKeys = {

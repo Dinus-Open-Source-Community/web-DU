@@ -4,6 +4,12 @@ import type { IModulesDetail, LessonDeliveryType, LessonDetailItem } from '@/lib
 
 export type LessonThemeMode = 'dark' | 'light'
 
+/** Lebar sidebar modul di desktop/tablet (px). */
+export const LESSON_SIDEBAR_WIDTH_PX = 348
+
+/** Breakpoint Tailwind tempat sidebar persisten + push layout aktif. */
+export const LESSON_SIDEBAR_LAYOUT_BREAKPOINT = 'lg' as const
+
 export type LessonEntry = {
   lesson: LessonDetailItem
   module: IModulesDetail
@@ -57,16 +63,18 @@ export function flattenLessons(modules: IModulesDetail[]): LessonEntry[] {
   )
 }
 
-export function moduleProgress(mod: IModulesDetail, lessonEntries: LessonEntry[], completedLessons: number) {
+export function moduleProgress(mod: IModulesDetail, readLessonIds: ReadonlySet<string>) {
   const lessons = moduleLessons(mod)
-  const completedCount = lessons.filter((lesson) => {
-    const globalIndex = lessonEntries.findIndex((entry) => entry.lesson.uid === lesson.uid)
-
-    return globalIndex >= 0 && globalIndex < completedLessons
-  }).length
+  const completedCount = lessons.filter((lesson) => readLessonIds.has(lesson.uid)).length
 
   return {
     completedCount,
     totalCount: lessons.length,
   }
 }
+
+export function isModuleComplete(mod: IModulesDetail, readLessonIds: ReadonlySet<string>) {
+  const { completedCount, totalCount } = moduleProgress(mod, readLessonIds)
+  return totalCount > 0 && completedCount === totalCount
+}
+

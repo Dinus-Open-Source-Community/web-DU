@@ -10,6 +10,7 @@ import type {
   LessonApiItem,
   LessonPayloadInput,
 } from './types'
+import { createDefaultHomeworkRules } from '@/lib/course-edit/homework-rules'
 import {
   resolveTextContentHtml,
   resolveVideoFields,
@@ -33,9 +34,12 @@ export function createFallbackLesson(order = 1): EditableLesson {
     order,
     durationMinutes: 10,
     hasHomework: false,
+    homeworkTitle: '',
+    homeworkAssignmentUid: null,
     homeworkType: 'text',
     homeworkDescriptionHtml: '<p></p>',
     homeworkQuiz: createDefaultQuiz(),
+    homeworkRules: createDefaultHomeworkRules('text'),
     contentType: 'text',
     contentHtml: '',
     contentFormat: 'tiptap',
@@ -108,23 +112,19 @@ export function toLesson(item: LessonApiItem, fallbackOrder: number): EditableLe
   const lessonContentType =
     item.content_type === 'video' || Boolean(item.video_url) ? 'video' : 'text'
 
-  const assignment = item.assignment ?? null
-  const taskDescription = assignment?.task_description
-  const homeworkDescriptionHtml =
-    typeof taskDescription?.contentHtml === 'string'
-      ? taskDescription.contentHtml
-      : '<p></p>'
-
   const base = {
     id: item.uid ?? `lesson-${fallbackOrder}`,
     uid: item.uid,
     title: item.title ?? `Lesson ${fallbackOrder}`,
     order: Number(item.order_index ?? fallbackOrder) || fallbackOrder,
     durationMinutes: 10,
-    hasHomework: Boolean(assignment),
-    homeworkType: assignment?.task_type ?? ('text' as const),
-    homeworkDescriptionHtml,
-    homeworkQuiz: assignment?.quiz_payload ?? createDefaultQuiz(),
+    hasHomework: false,
+    homeworkTitle: item.title ?? `Lesson ${fallbackOrder}`,
+    homeworkAssignmentUid: null,
+    homeworkType: 'text' as const,
+    homeworkDescriptionHtml: '<p></p>',
+    homeworkQuiz: createDefaultQuiz(),
+    homeworkRules: createDefaultHomeworkRules('text'),
   }
 
   const contentHtml = parsedContent.contentHtml
@@ -145,6 +145,25 @@ export function toLesson(item: LessonApiItem, fallbackOrder: number): EditableLe
     contentType: 'text',
     contentHtml,
     contentFormat,
+  }
+}
+
+export function mergeLessonDetailFromApi(
+  existing: EditableLesson,
+  hydrated: EditableLesson,
+  lessonUid: string,
+): EditableLesson {
+  return {
+    ...hydrated,
+    id: existing.id,
+    uid: existing.uid ?? lessonUid,
+    hasHomework: existing.hasHomework,
+    homeworkTitle: existing.homeworkTitle,
+    homeworkAssignmentUid: existing.homeworkAssignmentUid,
+    homeworkType: existing.homeworkType,
+    homeworkDescriptionHtml: existing.homeworkDescriptionHtml,
+    homeworkQuiz: existing.homeworkQuiz,
+    homeworkRules: existing.homeworkRules,
   }
 }
 
@@ -199,9 +218,14 @@ function buildEditableLessonFromOutline(
     order: outlineLesson.order_index ?? lessonIndex + 1,
     durationMinutes: prevLesson?.durationMinutes ?? 10,
     hasHomework: prevLesson?.hasHomework ?? false,
+    homeworkTitle: prevLesson?.homeworkTitle ?? outlineLesson.title,
+    homeworkAssignmentUid: prevLesson?.homeworkAssignmentUid ?? null,
     homeworkType: prevLesson?.homeworkType ?? ('text' as const),
     homeworkDescriptionHtml: prevLesson?.homeworkDescriptionHtml ?? '<p></p>',
     homeworkQuiz: prevLesson?.homeworkQuiz ?? createDefaultQuiz(),
+    homeworkRules:
+      prevLesson?.homeworkRules ??
+      createDefaultHomeworkRules(prevLesson?.homeworkType ?? 'text'),
     contentFormat: prevLesson?.contentFormat ?? ('tiptap' as const),
     contentDrafts: prevLesson?.contentDrafts,
   }

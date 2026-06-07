@@ -1,6 +1,7 @@
 import type { AdminAdministrator, AdminMentor } from '@/lib/types/api'
 import type { AdminStatus, AdminStudent } from '@/lib/types/user'
 import type { ManagedUserItem } from './types'
+import { toLearningProgressPercent } from '@/lib/learning/progress'
 
 const DEFAULT_AVATAR = '/pinguin.png'
 
@@ -22,8 +23,11 @@ function resolveStatus(isVerified: boolean): AdminStatus {
 
 function averageProgress(enrollments?: ManagedUserItem['enrollments']) {
   if (!enrollments?.length) return 0
-  const total = enrollments.reduce((sum, item) => sum + (item.progress ?? 0), 0)
-  return Math.round(total / enrollments.length)
+  const total = enrollments.reduce(
+    (sum, item) => sum + toLearningProgressPercent(item.progress),
+    0,
+  )
+  return Math.round((total / enrollments.length) * 100) / 100
 }
 
 function mapAdministratorRole(role: string): AdminAdministrator['role'] {

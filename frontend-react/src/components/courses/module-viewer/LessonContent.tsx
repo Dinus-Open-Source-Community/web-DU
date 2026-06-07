@@ -15,7 +15,7 @@ type LessonContentProps = {
 export function LessonContent({ lesson, theme, isLoading = false }: LessonContentProps) {
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6 pb-28 pt-26">
+      <main className="flex min-h-dvh items-center justify-center px-4 pb-24 pt-20 sm:px-6 sm:pb-28 sm:pt-24 xl:pt-26">
         <p className={theme === 'dark' ? 'text-zinc-400' : 'text-slate-500'}>Memuat konten lesson...</p>
       </main>
     )
@@ -26,7 +26,7 @@ export function LessonContent({ lesson, theme, isLoading = false }: LessonConten
   const hasRenderableContent = Boolean(resolvedContent?.contentHtml?.trim())
 
   return (
-    <main className="min-h-screen px-6 pb-28 pt-26 transition-[padding] duration-200 md:px-10">
+    <main className="min-h-dvh px-4 pb-24 pt-20 transition-[padding] duration-200 sm:px-6 sm:pb-28 sm:pt-24 md:px-8 xl:px-10 xl:pt-26">
       <div className="mx-auto flex w-full max-w-7xl justify-center">
         <article className="w-full max-w-[920px]">
           <div className={cn('lesson-reader', isDark ? 'lesson-reader--dark text-zinc-200' : 'lesson-reader--light text-slate-700')}>

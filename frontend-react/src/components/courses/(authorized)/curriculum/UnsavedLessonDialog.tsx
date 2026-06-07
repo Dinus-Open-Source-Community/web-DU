@@ -50,7 +50,10 @@ export function UnsavedLessonDialog({
         </div>
 
         <div className="space-y-2 px-6 py-5 text-sm text-slate-600">
-          <p>Hanya lesson yang sedang diedit yang akan disinkronkan ke backend.</p>
+          <p>
+            Perubahan konten lesson atau tugas yang sedang diedit perlu disimpan ke backend
+            sebelum navigasi.
+          </p>
         </div>
 
         <DialogFooter className="border-t border-slate-100 bg-slate-50/60 px-6 py-4 sm:justify-end">

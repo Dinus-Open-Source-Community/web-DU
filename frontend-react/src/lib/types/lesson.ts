@@ -22,7 +22,8 @@ export interface IQuizOption {
 
 export interface IQuizQuestion {
   id: string
-  prompt: string
+  /** Plain string atau rich text envelope dari backend. */
+  prompt: string | RichTextEnvelope
   options: IQuizOption[]
   correctOptionId: string
   explanation?: string
@@ -45,6 +46,19 @@ export type LessonAssignmentStatus = 'DRAFT' | 'TERBIT' | 'DITUTUP'
 export interface LessonAssignmentInstructionAttachment {
   url: string
   name: string
+}
+
+export type HomeworkRulesDraft = {
+  allowFileSubmission: boolean
+  allowPlainTextSubmission: boolean
+  allowRichTextSubmission: boolean
+  requireFileDescription: boolean
+  deadlineAt: string
+  status: LessonAssignmentStatus
+  autoCloseAfterDeadline: boolean
+  allowResubmit: boolean
+  maxResubmitCount: number | null
+  instructionAttachments: LessonAssignmentInstructionAttachment[]
 }
 
 export interface LessonDetailAssignment {
@@ -142,9 +156,12 @@ interface ILessonEditorBase {
   order: number
   durationMinutes: number
   hasHomework?: boolean
+  homeworkTitle?: string
+  homeworkAssignmentUid?: string | null
   homeworkType?: HomeworkTaskType
   homeworkDescriptionHtml?: string
   homeworkQuiz?: IQuiz
+  homeworkRules?: HomeworkRulesDraft
 }
 
 /**

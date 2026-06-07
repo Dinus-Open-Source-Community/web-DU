@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, Settings } from 'lucide-react'
+import { ArrowLeft, List, Search, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
@@ -11,15 +11,32 @@ type LessonViewerHeaderProps = {
   theme: LessonThemeMode
   onOpenSearch: () => void
   onOpenThemeSettings: () => void
+  onOpenModules?: () => void
 }
 
-export function LessonViewerHeader({ backHref, courseTitle, theme, onOpenSearch, onOpenThemeSettings }: LessonViewerHeaderProps) {
+export function LessonViewerHeader({
+  backHref,
+  courseTitle,
+  theme,
+  onOpenSearch,
+  onOpenThemeSettings,
+  onOpenModules,
+}: LessonViewerHeaderProps) {
   const isDark = theme === 'dark'
 
   return (
-    <header className={cn('fixed inset-x-0 top-0 z-40 flex h-16 items-center border-b px-6', isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-100' : 'border-slate-200 bg-white text-slate-950')}>
-      <Link to={backHref} className={cn('flex min-w-0 items-center gap-2 text-sm font-semibold transition', isDark ? 'hover:text-white' : 'hover:text-primary')}>
-        <ArrowLeft className="h-5 w-5" />
+    <header
+      className={cn(
+        'fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-2 border-b px-4 sm:h-16 sm:gap-3 sm:px-6',
+        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
+      )}>
+      <Link
+        to={backHref}
+        className={cn(
+          'flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold transition sm:flex-none sm:max-w-[min(100%,320px)]',
+          isDark ? 'hover:text-white' : 'hover:text-primary',
+        )}>
+        <ArrowLeft className="h-5 w-5 shrink-0" />
         <span className="truncate">{courseTitle}</span>
       </Link>
 
@@ -40,16 +57,48 @@ export function LessonViewerHeader({ backHref, courseTitle, theme, onOpenSearch,
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={onOpenThemeSettings}
-        className={cn(
-          'ml-3 flex h-10 w-10 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-primary/30',
-          isDark ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100' : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-900',
-        )}
-        aria-label="Ubah mode membaca">
-        <Settings className="h-4 w-4" />
-      </button>
+      <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-3">
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className={cn(
+            'flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-primary/30 sm:h-10 sm:w-10 lg:hidden',
+            isDark
+              ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100'
+              : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-900',
+          )}
+          aria-label="Cari modul atau konten">
+          <Search className="h-4 w-4" />
+        </button>
+
+        {onOpenModules ? (
+          <button
+            type="button"
+            onClick={onOpenModules}
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-primary/30 sm:h-10 sm:w-10 lg:hidden',
+              isDark
+                ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100'
+                : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-900',
+            )}
+            aria-label="Buka daftar modul">
+            <List className="h-4 w-4" />
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onOpenThemeSettings}
+          className={cn(
+            'flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-primary/30 sm:h-10 sm:w-10',
+            isDark
+              ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100'
+              : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white hover:text-slate-900',
+          )}
+          aria-label="Ubah mode membaca">
+          <Settings className="h-4 w-4" />
+        </button>
+      </div>
     </header>
   )
 }

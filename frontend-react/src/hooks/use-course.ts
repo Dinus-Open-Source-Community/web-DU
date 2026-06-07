@@ -7,6 +7,7 @@ import {
   fetchCourseCategories,
   fetchCourseCategoryByUid,
   fetchCourses,
+  fetchCourseProgress,
   fetchCourseStudents,
   fetchCourseTypes,
   stripLessonsFromModules,
@@ -57,6 +58,14 @@ export function useCourseStudents(courseUid: string) {
     queryKey: courseKeys.students(courseUid),
     enabled: !!courseUid,
     queryFn: () => fetchCourseStudents(courseUid),
+  })
+}
+
+export function useCourseProgress(courseUid: string, enabled = true) {
+  return useQuery({
+    queryKey: courseKeys.progress(courseUid),
+    enabled: !!courseUid && enabled,
+    queryFn: () => fetchCourseProgress(courseUid),
   })
 }
 

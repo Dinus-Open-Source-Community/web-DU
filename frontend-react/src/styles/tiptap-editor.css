@@ -21,6 +21,10 @@
   z-index: 40;
 }
 
+.tiptap-editor-root [role='toolbar'] {
+  touch-action: manipulation;
+}
+
 .tiptap-editor-root .ProseMirror p.is-editor-empty:first-child::before {
   color: rgb(148 163 184);
   content: attr(data-placeholder);

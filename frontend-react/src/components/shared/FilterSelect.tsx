@@ -1,6 +1,7 @@
 import type { FilterSelectOption } from '../../lib/types/utils'
 import { cn } from '../../lib/utils'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui/select'
+
 type FilterSelectProps<T extends string> = {
   id: string
   label: string
@@ -9,14 +10,22 @@ type FilterSelectProps<T extends string> = {
   options: FilterSelectOption<T>[]
   className?: string
 }
+
 export function FilterSelect<T extends string>({ id, label, value, onChange, options, className }: FilterSelectProps<T>) {
   return (
-    <div className={cn('flex shrink-0 items-center gap-2', className)}>
-      <label htmlFor={id} className="whitespace-nowrap text-xs font-medium text-slate-500">
+    <div
+      className={cn(
+        'flex w-full min-w-0 flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2',
+        className,
+      )}>
+      <label htmlFor={id} className="shrink-0 text-xs font-medium text-slate-500 sm:whitespace-nowrap">
         {label}
       </label>
       <Select value={value} onValueChange={(v) => onChange(v as T)}>
-        <SelectTrigger id={id}>
+        <SelectTrigger
+          id={id}
+          size="sm"
+          className="h-9 w-full min-w-0 rounded-xl border-slate-200 px-3 text-xs sm:h-9 sm:w-36 sm:rounded-3xl sm:text-sm md:w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

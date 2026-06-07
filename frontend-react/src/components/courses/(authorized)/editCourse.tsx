@@ -29,6 +29,8 @@ export function CourseEditClient({
     activeOutlineModule,
     editorReady,
     activeLessonModified,
+    activeAssignmentModified,
+    isSavingAssignment,
     isSaving,
     isPublishing,
     isCreateModuleOpen,
@@ -40,6 +42,7 @@ export function CourseEditClient({
     loadedModuleIds,
     isModuleLessonsLoading,
     isLessonDetailLoading,
+    isAssignmentLoading,
     unsavedDialogOpen,
     pendingNavigation,
     setUnsavedDialogOpen,
@@ -58,8 +61,11 @@ export function CourseEditClient({
     handleChangeLessonType,
     handlePublish,
     handleSaveCurrentLesson,
+    handleSaveCurrentAssignment,
+    handleDeleteCurrentAssignment,
     handleSaveAndContinue,
     patchLocalLesson,
+    patchAssignmentLesson,
   } = useCourseEditController({
     initialModuleId,
     routeBasePath,
@@ -93,8 +99,11 @@ export function CourseEditClient({
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
+        isSavingAssignment={isSavingAssignment}
         isPublishing={isPublishing}
         hasUnsavedLesson={activeLessonModified}
+        hasUnsavedAssignment={activeAssignmentModified}
+        canSaveAssignment={Boolean(activeLesson?.uid)}
         modules={outlineModules}
         loadedModuleIds={loadedModuleIds}
         loadingModuleId={isModuleLessonsLoading ? activeModuleId : null}
@@ -105,9 +114,13 @@ export function CourseEditClient({
         activeModuleIndex={activeModuleIndex >= 0 ? activeModuleIndex : null}
         editorReady={editorReady}
         isLoadingDetail={isLessonDetailLoading || isModuleLessonsLoading}
+        isAssignmentLoading={isAssignmentLoading}
         onPublish={() => void handlePublish()}
-        onSave={() => void handleSaveCurrentLesson()}
+        onSaveLesson={handleSaveCurrentLesson}
+        onSaveAssignment={handleSaveCurrentAssignment}
+        onDeleteAssignment={handleDeleteCurrentAssignment}
         onPatchLesson={patchLocalLesson}
+        onPatchAssignment={patchAssignmentLesson}
         onSelectModule={handleSelectModule}
         onSelectLesson={handleSelectLesson}
         onOpenCreateModule={() => setIsCreateModuleOpen(true)}
@@ -124,7 +137,7 @@ export function CourseEditClient({
         onOpenChange={setUnsavedDialogOpen}
         lessonTitle={activeLesson?.title ?? 'Lesson ini'}
         targetLabel={pendingNavigation?.label ?? 'melanjutkan'}
-        isSaving={isSaving}
+        isSaving={isSaving || isSavingAssignment}
         onSaveAndContinue={() => void handleSaveAndContinue()}
       />
 

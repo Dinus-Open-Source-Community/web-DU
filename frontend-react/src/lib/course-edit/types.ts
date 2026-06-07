@@ -7,6 +7,7 @@ import type {
   LessonDetailItem,
   LessonPayloadInput,
 } from '@/lib/types/course'
+import type { HomeworkRulesDraft } from '@/lib/types/lesson'
 import type { LessonDeliveryType } from '@/lib/types/lesson'
 
 export type CourseEditRole = 'mentor' | 'admin'
@@ -20,7 +21,7 @@ export type CourseEditNavigationActions = {
   onRenameModule: (moduleId: string) => void
   onDeleteModule: (moduleId: string) => void
   onAddLesson: (moduleId?: string) => void
-  onRenameLesson: (lessonId: string, title: string) => void
+  onRenameLesson: (lessonId: string, title: string) => void | Promise<void>
   onDeleteLesson: (lessonId: string) => void
   onChangeLessonType: (lessonId: string, type: LessonDeliveryType) => void
 }

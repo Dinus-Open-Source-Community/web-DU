@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Layers3, UsersRound, LayoutDashboard, Star } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -7,12 +6,12 @@ import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-sta
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { courseKeys } from '@/hooks/query-keys'
-import { useUpdateCourseStatus } from '@/hooks/use-course-mutations'
+import { useReplyCourseReview, useUpdateCourseStatus } from '@/hooks/use-course-mutations'
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
 import type { ICourseDetailItem, IMentorCourseStudent, IModulesData } from '../../lib/types/course'
 import { ROUTES } from '../../lib/routes.ts'
 import { cn } from '../../lib/utils'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
+import { Tabs, TabsContent } from '../ui/tabs'
 import { ConfirmDialog } from './ConfirmDialog'
 import { CourseParticipantsSection } from './CourseParticipation'
 import { AssignCourseMentorDialog } from './AssignCourseMentorDialog'
@@ -21,6 +20,7 @@ import { CourseReviewSection } from './CourseReviewSection'
 import { CourseCurriculumTab } from './CourseCurriculumTab'
 import { CourseDetailManageHeader } from './course-detail-manage/CourseDetailManageHeader'
 import { CourseDetailMobileActions } from './course-detail-manage/CourseDetailMobileActions'
+import { CourseDetailNavTabs } from './course-detail-manage/CourseDetailNavTabs'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
 
 type CourseDetailProps = {
@@ -30,14 +30,6 @@ type CourseDetailProps = {
   dataModules?: IModulesData[]
   role?: 'mentor' | 'admin'
 }
-
-const DETAIL_TABS = [
-  { value: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { value: 'kurikulum', label: 'Kurikulum', icon: Layers3 },
-  { value: 'peserta', label: 'Peserta', icon: UsersRound },
-  { value: 'review', label: 'Review', icon: Star },
-  { value: 'mentor', label: 'Mentor', icon: UsersRound },
-] as const
 
 export function DetailCourse({
   courseUid,
@@ -49,9 +41,11 @@ export function DetailCourse({
   const location = useLocation()
   const queryClient = useQueryClient()
   const updateCourseStatus = useUpdateCourseStatus()
+  const replyCourseReview = useReplyCourseReview()
   const isAdmin = role === 'admin'
   const [isConfirm, setIsConfirm] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [submittingReviewUid, setSubmittingReviewUid] = useState<string | null>(null)
   const course = Array.isArray(dataCourse) ? dataCourse[0] : dataCourse
 
   if (!course) return null
@@ -64,8 +58,17 @@ export function DetailCourse({
   const curriculumEditNavigationState = buildCourseEditNavigationState(location)
   const modules = dataModules ?? course.modules ?? []
 
-  const handleReplyReview = (reviewUid: string, comment: string) => {
-    console.log(`Replying to review ${reviewUid}: ${comment}`)
+  const handleReplyReview = async (reviewUid: string, comment: string) => {
+    setSubmittingReviewUid(reviewUid)
+    try {
+      await replyCourseReview.mutateAsync({
+        courseUid,
+        reviewUid,
+        payload: { comment },
+      })
+    } finally {
+      setSubmittingReviewUid(null)
+    }
   }
 
   const handleConfirmStatusUpdate = async () => {
@@ -91,20 +94,7 @@ export function DetailCourse({
       />
 
       <Tabs defaultValue="overview" className="w-full gap-4 sm:gap-6">
-        <div className={manageDetailLayout.tabScroll}>
-          <TabsList variant="line" className={manageDetailLayout.tabList}>
-            {DETAIL_TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className={manageDetailLayout.tabTrigger}
-              >
-                <tab.icon className="size-4 opacity-70" aria-hidden />
-                <span>{tab.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+        <CourseDetailNavTabs isAdmin={isAdmin} />
 
         <div className="min-h-[18rem] sm:min-h-[24rem]">
           <TabsContent value="overview" className="mt-0 animate-in fade-in duration-300">
@@ -124,23 +114,24 @@ export function DetailCourse({
               reviews={course.reviews || []}
               isAdmin={isAdmin}
               onReply={handleReplyReview}
+              submittingReviewUid={submittingReviewUid}
             />
           </TabsContent>
 
-          <TabsContent value="mentor" className="mt-0 animate-in fade-in duration-300">
-            <CourseMentorTable
-              mentors={course.mentors || []}
-              isAdmin={isAdmin}
-              assignAction={
-                isAdmin ? (
+          {isAdmin ? (
+            <TabsContent value="mentor" className="mt-0 animate-in fade-in duration-300">
+              <CourseMentorTable
+                mentors={course.mentors || []}
+                isAdmin={isAdmin}
+                assignAction={
                   <AssignCourseMentorDialog
                     courseUid={courseUid}
                     assignedMentorUids={(course.mentors ?? []).map((mentor) => mentor.uid)}
                   />
-                ) : null
-              }
-            />
-          </TabsContent>
+                }
+              />
+            </TabsContent>
+          ) : null}
         </div>
       </Tabs>
 

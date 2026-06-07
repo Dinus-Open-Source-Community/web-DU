@@ -8,6 +8,7 @@ import type {
   ICourseListResponse,
   ICourseStudentListResponse,
   ICourseTypeListResponse,
+  CourseReadingProgress,
   IDetailCourseResponse,
 } from '@/lib/types/course'
 import {
@@ -23,12 +24,21 @@ import {
   parseAssignMentorsCourseUidParam,
   parseAssignMentorsToCoursePayload,
 } from '@/lib/validator/course-mentor'
+import { normalizeCourseDetailItem } from '@/lib/course-review/mappers'
+import type {
+  CreateCourseReviewReplyPayload,
+  CreateCourseReviewReplyResponse,
+} from '@/lib/course-review/types'
 import {
   parseCourseUidParam,
   parseCreateCoursePayload,
   parseUpdateCoursePayload,
   parseUpdateCourseStatusRequest,
 } from '@/lib/validator/course-form'
+import {
+  parseCourseReviewReplyParams,
+  parseCreateCourseReviewReplyPayload,
+} from '@/lib/validator/course-review'
 
 export type { CreateCoursePayload, UpdateCoursePayload, UpdateCourseStatusRequest }
 import type {
@@ -47,10 +57,12 @@ export async function fetchCourses(params?: IQueryParamsPayload) {
 }
 
 export async function fetchCourseByUid(uid: string) {
+  const validatedUid = parseCourseUidParam(uid)
   const response = await api.get<IResponse<IDetailCourseResponse>>(
-    API_ROUTES.courses.getByUid(uid),
+    API_ROUTES.courses.getByUid(validatedUid),
   )
-  return unwrapApiResponse(response.data, 'Gagal mengambil detail kursus')
+  const course = unwrapApiResponse(response.data, 'Gagal mengambil detail kursus')
+  return normalizeCourseDetailItem(course)
 }
 
 export async function fetchCourseCategories(params?: IQueryParamsPayload) {
@@ -116,6 +128,28 @@ export async function fetchCourseStudents(courseUid: string) {
     API_ROUTES.courses.getStudentsByUid(courseUid),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil peserta kursus')
+}
+
+export async function fetchCourseProgress(courseUid: string) {
+  const validatedUid = parseCourseUidParam(courseUid)
+  const response = await api.get<IResponse<CourseReadingProgress>>(
+    API_ROUTES.courses.getProgressByUid(validatedUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil progress kursus')
+}
+
+export async function replyToCourseReview(
+  courseUid: string,
+  reviewUid: string,
+  payload: CreateCourseReviewReplyPayload,
+) {
+  const validatedParams = parseCourseReviewReplyParams(courseUid, reviewUid)
+  const validatedPayload = parseCreateCourseReviewReplyPayload(payload)
+  const response = await api.post<IResponse<CreateCourseReviewReplyResponse>>(
+    API_ROUTES.courses.replyReviewByUid(validatedParams.courseUid, validatedParams.reviewUid),
+    validatedPayload,
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengirim balasan review')
 }
 
 export async function assignMentorsToCourse(

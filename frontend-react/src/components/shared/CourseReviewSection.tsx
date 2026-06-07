@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
-import { MessageSquareText, Reply, Send, Star, UserRound } from 'lucide-react'
+import { Loader2, MessageSquareText, Reply, Send, Star, UserRound } from 'lucide-react'
 import type { CourseDetailReview } from '@/lib/types/course'
 import { cn } from '../../lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
@@ -12,7 +12,8 @@ import { Textarea } from '../ui/textarea'
 interface CourseReviewSectionProps {
   reviews: CourseDetailReview[]
   isAdmin?: boolean
-  onReply?: (reviewUid: string, comment: string) => void
+  onReply?: (reviewUid: string, comment: string) => Promise<void>
+  submittingReviewUid?: string | null
 }
 
 function formatReviewDate(value: string) {
@@ -47,7 +48,12 @@ function ReviewStars({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'm
   )
 }
 
-export function CourseReviewSection({ reviews, isAdmin, onReply }: CourseReviewSectionProps) {
+export function CourseReviewSection({
+  reviews,
+  isAdmin,
+  onReply,
+  submittingReviewUid = null,
+}: CourseReviewSectionProps) {
   const totalReplies = useMemo(() => reviews.reduce((total, review) => total + (review.replies?.length ?? 0), 0), [reviews])
   const averageRating = useMemo(() => {
     if (reviews.length === 0) return 0
@@ -131,7 +137,13 @@ export function CourseReviewSection({ reviews, isAdmin, onReply }: CourseReviewS
       ) : (
         <div className="divide-y divide-slate-200">
           {reviews.map((review) => (
-            <ReviewItem key={review.uid} review={review} isAdmin={isAdmin} onReply={onReply} />
+            <ReviewItem
+              key={review.uid}
+              review={review}
+              isAdmin={isAdmin}
+              onReply={onReply}
+              isSubmitting={submittingReviewUid === review.uid}
+            />
           ))}
         </div>
       )}
@@ -139,17 +151,32 @@ export function CourseReviewSection({ reviews, isAdmin, onReply }: CourseReviewS
   )
 }
 
-function ReviewItem({ review, isAdmin, onReply }: { review: CourseDetailReview; isAdmin?: boolean; onReply?: (uid: string, comment: string) => void }) {
+function ReviewItem({
+  review,
+  isAdmin,
+  onReply,
+  isSubmitting = false,
+}: {
+  review: CourseDetailReview
+  isAdmin?: boolean
+  onReply?: (uid: string, comment: string) => Promise<void>
+  isSubmitting?: boolean
+}) {
   const [replyText, setReplyText] = useState('')
   const canReply = Boolean(onReply)
   const rating = Number.isFinite(review.rating) ? review.rating : 0
   const replies = review.replies ?? []
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     const comment = replyText.trim()
-    if (!comment) return
-    onReply?.(review.uid, comment)
-    setReplyText('')
+    if (!comment || !onReply || isSubmitting) return
+
+    try {
+      await onReply(review.uid, comment)
+      setReplyText('')
+    } catch {
+      // Error toast ditangani oleh mutation hook.
+    }
   }
 
   return (
@@ -213,13 +240,20 @@ function ReviewItem({ review, isAdmin, onReply }: { review: CourseDetailReview; 
                 value={replyText}
                 onChange={(event) => setReplyText(event.target.value)}
                 placeholder="Tulis balasan yang jelas dan membantu..."
+                disabled={isSubmitting}
                 className="min-h-24 resize-none border-slate-200 bg-slate-50 text-sm leading-6 shadow-none focus-visible:bg-white"
               />
               <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs leading-5 text-slate-500">Balasan akan muncul sebagai thread di bawah review ini.</p>
-                <Button type="button" size="sm" className="h-9 rounded-xl px-3 text-sm font-semibold" disabled={!replyText.trim()} onClick={handleSendReply}>
-                  <Send className="size-4" />
-                  Kirim
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-9 rounded-xl px-3 text-sm font-semibold"
+                  disabled={!replyText.trim() || isSubmitting}
+                  onClick={() => void handleSendReply()}
+                >
+                  {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                  {isSubmitting ? 'Mengirim...' : 'Kirim'}
                 </Button>
               </div>
             </div>
