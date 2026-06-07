@@ -25,6 +25,8 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Katalog & detail kursus admin | ✅ Live | List kursus, detail, publish, assign mentor |
 | Form buat/edit metadata kursus | 🟡 Partial | UI + validator siap; **update kursus butuh `PUT /courses/:id` dari BE** |
 | Editor kurikulum (module/lesson) | ✅ Live | Admin & mentor bisa kelola konten kursus |
+| Editor kurikulum — tab Tugas & save kontekstual | ✅ Live | Simpan/hapus lesson vs tugas per tab + guard unsaved |
+| Editor kurikulum — rename judul inline + API | ✅ Live | Ubah nama lesson langsung `PUT /lessons/:uid` |
 | Validator payload (Zod) | ✅ Live | Validasi strict sebelum hit API — kurangi error 400 |
 | Layout sidebar | ✅ Fixed | Sidebar konsisten di breakpoint `lg` (1024px) |
 | Dokumentasi gap FE↔BE | ✅ Done | PM/BE tahu apa yang masih kurang |
@@ -44,6 +46,7 @@ Lihat [../priority-backlog.md](../priority-backlog.md) — contoh: admin transac
 | [architecture.md](./architecture.md) | Struktur folder & pola clean architecture |
 | [files-changed.md](./files-changed.md) | Peta file utama yang ditambah/diubah |
 | [qa-checklist.md](./qa-checklist.md) | Skenario uji untuk fitur yang sudah live |
+| [course-editor-ux-session.md](./course-editor-ux-session.md) | Sesi course editor: tugas lesson, tab save, rename inline |
 
 ### Dokumen terkait (di luar folder progress)
 

@@ -193,6 +193,31 @@ lib/validator/
 
 ---
 
+## Fase 10 — Course Editor UX: Tugas, Tab Save & Rename Inline
+
+**Tujuan:** Lengkapi editor kurikulum dengan panel tugas, aksi save/delete per tab, guard unsaved, perbaikan bug konten, dan rename judul langsung ke API.
+
+**Dokumentasi lengkap:** [course-editor-ux-session.md](./course-editor-ux-session.md)
+
+**Highlight:**
+
+| Item | Status |
+|------|--------|
+| Admin CRUD assignment per lesson | ✅ |
+| Dirty state terpisah (konten vs tugas) | ✅ |
+| `UnsavedEditorTabDialog` (Konten ↔ Tugas) | ✅ |
+| Fix konten hilang setelah save + pindah tab | ✅ |
+| `LessonTitleRenameField` + `PUT /lessons/:uid` | ✅ |
+| TipTap toolbar refactor (dua baris) | ✅ |
+
+**Draft commit:**
+
+```
+feat(course-editor): tab-aware save, assignment panel, and inline lesson rename
+```
+
+---
+
 ## Timeline Visual
 
 ```mermaid
