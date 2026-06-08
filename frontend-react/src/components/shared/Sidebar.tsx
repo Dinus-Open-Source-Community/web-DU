@@ -21,6 +21,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { cn } from '../../lib/utils'
 import type { UserRole } from '../../lib/types/user'
 import { NavbarSearchProvider } from '../../providers/navbar-search-provider'
+import { useAppTopNavbarAuth } from '@/hooks/layout/use-navbar-auth'
 import { AppTopNavbar } from './AppTopNavbar'
 
 export type SidebarUser = {
@@ -218,6 +219,7 @@ export function AppNavbarProvider({
   contentClassName,
 }: AppLayoutProps) {
   const normalizedUser = normalizeSidebarUser(user)
+  const { onSignOut } = useAppTopNavbarAuth()
 
   return (
     <NavbarSearchProvider>
@@ -227,6 +229,7 @@ export function AppNavbarProvider({
           user={normalizedUser}
           title={sidebarRoleConfig[role].title}
           showSidebarTrigger={false}
+          onSignOut={onSignOut}
         />
         <main
           className={cn(
@@ -247,6 +250,7 @@ export function AppSidebarProvider({
   contentClassName,
 }: AppSidebarProviderProps) {
   const normalizedUser = normalizeSidebarUser(user)
+  const { onSignOut } = useAppTopNavbarAuth()
 
   return (
     <NavbarSearchProvider>
@@ -262,7 +266,7 @@ export function AppSidebarProvider({
         <AppSidebar role={role} />
 
         <SidebarInset className="min-w-0">
-          <AppTopNavbar role={role} user={normalizedUser} title={sidebarRoleConfig[role].title} />
+          <AppTopNavbar role={role} user={normalizedUser} title={sidebarRoleConfig[role].title} onSignOut={onSignOut} />
           <div
             className={cn(
               'flex w-full min-w-0 flex-col',

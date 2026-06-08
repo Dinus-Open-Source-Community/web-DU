@@ -66,7 +66,7 @@ export async function persistLesson({
     'Data lesson tidak valid',
   )
 
-  let savedLesson = lesson
+  let savedLesson: EditableLesson
 
   if (persistedLessonUids.has(previousLessonId)) {
     const updated = await updateLesson(previousLessonId, payload)

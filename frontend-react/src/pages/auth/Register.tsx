@@ -13,7 +13,7 @@ import { parseWithValidationMessage, registerFormSchema } from '../../lib/valida
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  const { signUp } = useAuth()
+  const { signUp, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [name, setName] = useState('')
@@ -117,7 +117,7 @@ export default function RegisterPage() {
             <span className="text-sm font-medium text-slate-400">atau daftar dengan</span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
-          <OauthButton isSubmitting={isSubmitting} />
+          <OauthButton isSubmitting={isSubmitting} onGoogleSignIn={startGoogleOAuth} />
         </form>
       </div>
     </AuthLayout>

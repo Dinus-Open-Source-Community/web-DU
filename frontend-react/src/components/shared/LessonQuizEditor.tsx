@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, GripVertical, CheckCircle2 } from 'lucide-react'
-import type { IQuiz, IQuizOption, IQuizQuestion } from '../../lib/types/course'
+import type { IRichTextEnvelope, IQuiz, IQuizOption, IQuizQuestion } from '../../lib/types/course'
+
+function promptToEditableText(prompt: string | IRichTextEnvelope): string {
+  return typeof prompt === 'string' ? prompt : prompt.contentHtml
+}
 import { Button } from '../ui/button'
 
 type LessonQuizEditorProps = {
@@ -86,7 +90,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                 <span className="shrink-0 text-xs font-bold text-slate-500">Q{qi + 1}</span>
                 <input
                   type="text"
-                  value={q.prompt}
+                  value={promptToEditableText(q.prompt)}
                   onChange={(e) => updateQuestion(q.id, (x) => ({ ...x, prompt: e.target.value }))}
                   placeholder="Tulis pertanyaan..."
                   className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"

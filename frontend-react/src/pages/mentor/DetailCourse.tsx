@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom'
+
 import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
-import type { ICourseDetailItem } from '../../lib/types/course'
-import type { IMentorCourseStudent } from '../../lib/types/course'
+import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
+import { buildLessonResponseStub } from '@/lib/fixtures/lesson-response'
+import type { ICourseDetailItem, IMentorCourseStudent } from '@/lib/types/course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 
 export default function MentorCourseDetailPage() {
@@ -14,6 +16,13 @@ export default function MentorCourseDetailPage() {
       course_type: {} as ICourseDetailItem['course_type'],
       cover_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
       created_at: '2025-01-01T08:00:00.000Z',
+      created_by: {
+        avatar_url: 'https://i.pravatar.cc/150?img=12',
+        is_verified: true,
+        name: 'Rahmat Hidayat',
+        role: 'mentor',
+        uid: 'mentor-001',
+      },
       description: 'Kursus pengantar pengembangan web modern untuk pemula hingga menengah.',
       event_uid: null,
       is_premium: true,
@@ -37,22 +46,22 @@ export default function MentorCourseDetailPage() {
           course_uid: 'course-001',
           created_at: '2025-01-01T08:00:00.000Z',
           lessons: [
-            {
+            buildLessonResponseStub({
               title: 'Pengenalan HTML',
               created_at: '2025-01-01T08:15:00.000Z',
               module_uid: 'module-001',
               order_index: 1,
               uid: 'lesson-001',
               updated_at: '2025-01-01T09:00:00.000Z',
-            },
-            {
+            }),
+            buildLessonResponseStub({
               title: 'Membuat Komponen Web',
               created_at: '2025-01-01T08:30:00.000Z',
               module_uid: 'module-001',
               order_index: 2,
               uid: 'lesson-002',
               updated_at: '2025-01-01T09:15:00.000Z',
-            },
+            }),
           ],
           order_index: 1,
           title: 'Pengenalan Dasar',
@@ -61,7 +70,10 @@ export default function MentorCourseDetailPage() {
       ],
       price: 250000,
       price_strike: 350000,
+      rating: 4.8,
+      reviews: [],
       slot: 30,
+      total_reviews: 24,
       slug: 'pengembangan-web-modern',
       status: 'active',
       subtitle: 'Belajar membangun aplikasi web dari nol.',
@@ -69,45 +81,80 @@ export default function MentorCourseDetailPage() {
       title: 'Web Development Fundamentals',
       uid: 'course-001',
       updated_at: '2025-01-10T10:30:00.000Z',
-      what_you_learn: ['Memahami dasar HTML, CSS, dan JavaScript', 'Membuat komponen web yang responsif', 'Membangun aplikasi sederhana dengan praktik terbaik'],
+      what_you_learn: [
+        'Memahami dasar HTML, CSS, dan JavaScript',
+        'Membuat komponen web yang responsif',
+        'Membangun aplikasi sederhana dengan praktik terbaik',
+      ],
     },
   ]
 
   const dataStudents: IMentorCourseStudent[] = [
     {
-      uid: 'stu-mc001-1',
-      name: 'Aditya Pratama',
-      email: '',
-      progressPercent: 92,
-      attendancePresent: 11,
-      attendanceTotal: 12,
+      enrollment_uid: 'enr-mc001-1',
+      student_uid: 'stu-mc001-1',
+      student_name: 'Aditya Pratama',
+      student_avatar_url: '',
+      enrolled_at: '2025-01-02T08:00:00.000Z',
+      progress: 92,
       status: 'Aktif',
-      lastActiveLabel: '2 jam lalu',
+      student_attendance_present: 11,
+      student_attendance_total: 12,
     },
     {
-      uid: 'stu-mc001-2',
-      name: 'Siti Nurhaliza',
-      email: '',
-      progressPercent: 78,
-      attendancePresent: 9,
-      attendanceTotal: 12,
+      enrollment_uid: 'enr-mc001-2',
+      student_uid: 'stu-mc001-2',
+      student_name: 'Siti Nurhaliza',
+      student_avatar_url: '',
+      enrolled_at: '2025-01-03T08:00:00.000Z',
+      progress: 78,
       status: 'Aktif',
-      lastActiveLabel: 'Kemarin',
+      student_attendance_present: 9,
+      student_attendance_total: 12,
     },
     {
-      uid: 'stu-mc001-3',
-      name: 'Budi Santoso',
-      email: '',
-      progressPercent: 100,
-      attendancePresent: 12,
-      attendanceTotal: 12,
+      enrollment_uid: 'enr-mc001-3',
+      student_uid: 'stu-mc001-3',
+      student_name: 'Budi Santoso',
+      student_avatar_url: '',
+      enrolled_at: '2025-01-04T08:00:00.000Z',
+      progress: 100,
       status: 'Selesai',
-      lastActiveLabel: '3 hari lalu',
+      student_attendance_present: 12,
+      student_attendance_total: 12,
     },
   ]
+
   return (
     <AppSidebarProvider role="mentor" user={sidebarUser}>
-      <DetailCourse courseUid={uid as string} role="mentor" dataCourse={dataCourse} dataStudents={dataStudents} />
+      <MentorCourseDetailContent
+        courseUid={uid as string}
+        dataCourse={dataCourse}
+        dataStudents={dataStudents}
+      />
     </AppSidebarProvider>
   )
+}
+
+type MentorCourseDetailContentProps = {
+  courseUid: string
+  dataCourse: ICourseDetailItem[]
+  dataStudents: IMentorCourseStudent[]
+}
+
+function MentorCourseDetailContent({
+  courseUid,
+  dataCourse,
+  dataStudents,
+}: MentorCourseDetailContentProps) {
+  const view = useCourseDetailManageView({
+    courseUid,
+    role: 'mentor',
+    dataCourse,
+    dataStudents,
+  })
+
+  if (!view) return null
+
+  return <DetailCourse view={view} />
 }

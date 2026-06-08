@@ -11,7 +11,7 @@ import {
   resolveCourseProfileAvatar,
 } from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
-import type { CourseLevel } from '@/lib/types/user'
+import type { CourseApiLevel } from '@/lib/types/user'
 import { ReactIcon } from './icon'
 
 interface CardMentorProps {
@@ -51,7 +51,7 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
       <div className="flex flex-1 flex-col p-5 ">
         <div className="mb-4 flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2 ">
-            <CourseLevelSignal level={data.level as CourseLevel} />
+            <CourseLevelSignal level={data.level as CourseApiLevel} />
             <div className="flex items-center gap-1">
               <Star className="size-3 fill-amber-400 text-amber-400" />
               <span className="text-xs font-bold text-slate-900">{data.rating || '0.0'}</span>

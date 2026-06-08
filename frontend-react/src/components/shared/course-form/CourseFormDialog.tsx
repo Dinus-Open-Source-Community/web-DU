@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 import { DynamicListField } from '@/components/shared/DynamicField'
 import { RupiahInput } from '@/components/shared/InputRupiah'
-import { useCourseCategories, useCourseTypes } from '@/hooks/use-course'
+import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import { apiLevelToUi, COURSE_FORM_LEVELS, uiLevelToApi } from '@/lib/course-form/level'
 import { courseDetailToFormValues } from '@/lib/course-form/mappers'
 import type { CourseFormMode, CourseFormValues } from '@/lib/course-form/types'
@@ -30,7 +30,7 @@ import type { CourseLevel, ICourseDetailItem } from '@/lib/types/course'
 import { getCourseFormValidationMessage } from '@/lib/validator/course-form'
 import { courseFormLayout } from './course-form-layout'
 
-type CourseFormDialogProps = {
+type CourseFormDialogProps = CourseFormOptionsViewModel & {
   open: boolean
   onOpenChange: (open: boolean) => void
   mode: CourseFormMode
@@ -48,16 +48,14 @@ export function CourseFormDialog({
   submitting = false,
   onSubmitCreate,
   onSubmitEdit,
+  categories,
+  courseTypes,
+  optionsLoading,
 }: CourseFormDialogProps) {
   const isEdit = mode === 'edit'
-  const { data: categoryResponse, isLoading: categoriesLoading } = useCourseCategories({ per_page: 100 })
-  const { data: courseTypeResponse, isLoading: typesLoading } = useCourseTypes({ per_page: 100 })
-
   const [values, setValues] = useState<CourseFormValues>(EMPTY_COURSE_FORM_VALUES)
   const [listDraft, setListDraft] = useState('')
 
-  const categories = useMemo(() => categoryResponse?.course_categories ?? [], [categoryResponse])
-  const courseTypes = useMemo(() => courseTypeResponse?.course_types ?? [], [courseTypeResponse])
   const activeCategories = useMemo(() => categories.filter((item) => item.is_active), [categories])
   const activeCourseTypes = useMemo(() => courseTypes.filter((item) => item.is_active), [courseTypes])
 
@@ -151,7 +149,7 @@ export function CourseFormDialog({
   )
 
   const uiLevel = apiLevelToUi(values.level)
-  const metadataLoading = categoriesLoading || typesLoading
+  const metadataLoading = optionsLoading
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

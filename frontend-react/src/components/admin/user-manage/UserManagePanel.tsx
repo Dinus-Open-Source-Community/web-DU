@@ -69,7 +69,7 @@ export function UserManagePanel({
         onDelete: setDeleteTarget,
         disabled: isMutating,
       }),
-    [kind, isMutating],
+    [kind, isMutating, setRoleTarget, setDeleteTarget],
   )
 
   const EmptyIcon = EMPTY_ICONS[kind]

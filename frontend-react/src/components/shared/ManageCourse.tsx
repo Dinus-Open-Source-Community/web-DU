@@ -8,18 +8,32 @@ import { Pagination } from './Pagination'
 import { EmptyCourseIcon } from './icon'
 import { CreateCourseDialog } from './CreateCourse'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
+import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
+import type { CourseFormValues } from '@/lib/course-form/types'
 import type { ICourseItem } from '@/lib/types/course'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
 type CourseFilter = (typeof filters)[number]
 const ITEMS_PER_PAGE = 6
 
+type CreateCourseActions = {
+  submitting: boolean
+  onSubmit: (values: CourseFormValues) => Promise<void>
+}
+
 type CourseManagementSectionProps = {
   role: 'mentor' | 'admin'
   data: ICourseItem[] | null
+  formOptions?: CourseFormOptionsViewModel
+  createCourse?: CreateCourseActions
 }
 
-export default function ManageCourseSection({ role = 'mentor', data }: CourseManagementSectionProps) {
+export default function ManageCourseSection({
+  role = 'mentor',
+  data,
+  formOptions,
+  createCourse,
+}: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
   const [activeFilter, setActiveFilter] = useState<CourseFilter>('Semua')
   const [currentPage, setCurrentPage] = useState(1)
@@ -97,7 +111,17 @@ export default function ManageCourseSection({ role = 'mentor', data }: CourseMan
         )}
       </div>
 
-      <CreateCourseDialog open={createOpen} onOpenChange={setCreateOpen} roleBasePath={isAdmin ? '/admin' : '/mentor'} />
+      {isAdmin && formOptions && createCourse ? (
+        <CreateCourseDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          submitting={createCourse.submitting}
+          onSubmitCreate={createCourse.onSubmit}
+          categories={formOptions.categories}
+          courseTypes={formOptions.courseTypes}
+          optionsLoading={formOptions.optionsLoading}
+        />
+      ) : null}
     </>
   )
 }

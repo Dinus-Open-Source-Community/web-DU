@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/routes'
-import type { CourseEditClientProps } from '@/lib/course-edit/types'
-import { useCourseEditController } from '@/hooks/use-course-edit-controller'
+import type { CourseEditClientShellProps } from '@/lib/course-edit/course-edit-client-view-model'
 
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { CourseEditShell } from './curriculum/CourseEditShell'
@@ -11,15 +10,7 @@ import { CreateModuleDialog } from './curriculum/CreateModuleDialog'
 import { RenameModuleDialog } from './curriculum/RenameModuleDialog'
 import { UnsavedLessonDialog } from './curriculum/UnsavedLessonDialog'
 
-export function CourseEditClient({
-  initialModuleId,
-  routeBasePath = '/mentor',
-  role = 'mentor',
-  courseData,
-  modules: sourceModules,
-}: CourseEditClientProps) {
-  const isAdmin = role === 'admin'
-
+export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) {
   const {
     course,
     outlineModules,
@@ -45,6 +36,7 @@ export function CourseEditClient({
     isAssignmentLoading,
     unsavedDialogOpen,
     pendingNavigation,
+    routeBasePath,
     setUnsavedDialogOpen,
     setIsCreateModuleOpen,
     setRenameModuleId,
@@ -66,20 +58,13 @@ export function CourseEditClient({
     handleSaveAndContinue,
     patchLocalLesson,
     patchAssignmentLesson,
-  } = useCourseEditController({
-    initialModuleId,
-    routeBasePath,
-    role,
-    courseData,
-    modules: sourceModules,
-  })
+  } = view
 
   if (!course) {
     return (
       <section className="flex flex-col gap-4 py-10">
         <p className="text-sm text-slate-600">
-          Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah
-          membuat kursus baru.
+          Kursus tidak ditemukan. Akses editor hanya dari daftar kursus atau setelah membuat kursus baru.
         </p>
         <Button asChild variant="outline" className="w-fit rounded-lg">
           <Link to={ROUTES.courses}>Kembali ke daftar</Link>

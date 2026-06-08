@@ -1,4 +1,9 @@
-import type { CourseDetailReview, CourseDetailReviewReply, ICourseDetailItem } from '@/lib/types/course'
+import type {
+  CourseDetailReview,
+  CourseDetailReviewReply,
+  CourseDetailReviewUser,
+  ICourseDetailItem,
+} from '@/lib/types/course'
 import type { CourseReviewReplyApiItem } from './types'
 
 type ReviewReplyAuthorSource = {

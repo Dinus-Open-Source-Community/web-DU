@@ -25,7 +25,6 @@ type LessonAssignmentOverviewProps = {
 }
 
 export function LessonAssignmentOverview({
-  lesson: _lesson,
   assignment,
   submission,
   phase,

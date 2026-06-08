@@ -1,16 +1,7 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
-
-import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-state'
-import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
-import { isCoursePublished } from '@/lib/course-detail/publish-state'
-import { courseKeys } from '@/hooks/query-keys'
-import { useReplyCourseReview, useUpdateCourseStatus } from '@/hooks/use-course-mutations'
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
-import type { ICourseDetailItem, IMentorCourseStudent, IModulesData } from '../../lib/types/course'
-import { ROUTES } from '../../lib/routes.ts'
-import { cn } from '../../lib/utils'
+import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import type { CourseDetailShellProps } from '@/lib/course-detail/course-detail-manage-view-model'
+import { cn } from '@/lib/utils'
 import { Tabs, TabsContent } from '../ui/tabs'
 import { ConfirmDialog } from './ConfirmDialog'
 import { CourseParticipantsSection } from './CourseParticipation'
@@ -23,62 +14,35 @@ import { CourseDetailMobileActions } from './course-detail-manage/CourseDetailMo
 import { CourseDetailNavTabs } from './course-detail-manage/CourseDetailNavTabs'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
 
-type CourseDetailProps = {
-  courseUid: string
-  dataCourse: ICourseDetailItem | ICourseDetailItem[] | null
-  dataStudents: IMentorCourseStudent[]
-  dataModules?: IModulesData[]
-  role?: 'mentor' | 'admin'
-}
-
-export function DetailCourse({
-  courseUid,
-  role = 'mentor',
-  dataCourse,
-  dataStudents,
-  dataModules,
-}: CourseDetailProps) {
-  const location = useLocation()
-  const queryClient = useQueryClient()
-  const updateCourseStatus = useUpdateCourseStatus()
-  const replyCourseReview = useReplyCourseReview()
-  const isAdmin = role === 'admin'
-  const [isConfirm, setIsConfirm] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
-  const [submittingReviewUid, setSubmittingReviewUid] = useState<string | null>(null)
-  const course = Array.isArray(dataCourse) ? dataCourse[0] : dataCourse
-
-  if (!course) return null
-
-  const isPublished = isCoursePublished(course)
-  const editHref = isAdmin
-    ? ROUTES.admin.courseEditAdmin(courseUid)
-    : ROUTES.mentor.courseEditMentor(courseUid)
-  const previewHref = ROUTES.viewModuleAndLessons(courseUid)
-  const curriculumEditNavigationState = buildCourseEditNavigationState(location)
-  const modules = dataModules ?? course.modules ?? []
-
-  const handleReplyReview = async (reviewUid: string, comment: string) => {
-    setSubmittingReviewUid(reviewUid)
-    try {
-      await replyCourseReview.mutateAsync({
-        courseUid,
-        reviewUid,
-        payload: { comment },
-      })
-    } finally {
-      setSubmittingReviewUid(null)
-    }
-  }
-
-  const handleConfirmStatusUpdate = async () => {
-    try {
-      await updateCourseStatus.mutateAsync({ courseUid })
-      setIsConfirm(false)
-    } catch {
-      // Error toast ditangani oleh mutation hook.
-    }
-  }
+export function DetailCourse({ view }: CourseDetailShellProps) {
+  const {
+    course,
+    courseUid,
+    isAdmin,
+    isPublished,
+    editHref,
+    previewHref,
+    curriculumEditNavigationState,
+    modules,
+    dataStudents,
+    editOpen,
+    onEditOpenChange,
+    isConfirmOpen,
+    onConfirmOpenChange,
+    onEditClick,
+    onPublishClick,
+    confirmTitle,
+    confirmDescription,
+    confirmLabel,
+    onConfirmPublish,
+    onCancelPublish,
+    onReplyReview,
+    submittingReviewUid,
+    editDialogSubmitting,
+    onEditCourseSubmit,
+    formOptions,
+    assignMentorDialog,
+  } = view
 
   return (
     <div className={cn(manageDetailLayout.page, manageDetailLayout.pageBottomMobile, 'animate-in fade-in duration-500')}>
@@ -89,8 +53,8 @@ export function DetailCourse({
         previewHref={previewHref}
         isAdmin={isAdmin}
         isPublished={isPublished}
-        onEditClick={() => setEditOpen(true)}
-        onPublishClick={() => setIsConfirm(true)}
+        onEditClick={onEditClick}
+        onPublishClick={onPublishClick}
       />
 
       <Tabs defaultValue="overview" className="w-full gap-4 sm:gap-6">
@@ -113,22 +77,17 @@ export function DetailCourse({
             <CourseReviewSection
               reviews={course.reviews || []}
               isAdmin={isAdmin}
-              onReply={handleReplyReview}
+              onReply={onReplyReview}
               submittingReviewUid={submittingReviewUid}
             />
           </TabsContent>
 
-          {isAdmin ? (
+          {isAdmin && assignMentorDialog ? (
             <TabsContent value="mentor" className="mt-0 animate-in fade-in duration-300">
               <CourseMentorTable
                 mentors={course.mentors || []}
                 isAdmin={isAdmin}
-                assignAction={
-                  <AssignCourseMentorDialog
-                    courseUid={courseUid}
-                    assignedMentorUids={(course.mentors ?? []).map((mentor) => mentor.uid)}
-                  />
-                }
+                assignAction={<AssignCourseMentorDialog {...assignMentorDialog} />}
               />
             </TabsContent>
           ) : null}
@@ -141,32 +100,30 @@ export function DetailCourse({
         previewHref={previewHref}
         isAdmin={isAdmin}
         isPublished={isPublished}
-        onEditClick={() => setEditOpen(true)}
-        onPublishClick={() => setIsConfirm(true)}
+        onEditClick={onEditClick}
+        onPublishClick={onPublishClick}
       />
 
       <EditCourseDialog
         open={editOpen}
-        onOpenChange={setEditOpen}
+        onOpenChange={onEditOpenChange}
         course={course}
-        onSuccess={() => {
-          void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-        }}
+        submitting={editDialogSubmitting}
+        onSubmitEdit={onEditCourseSubmit}
+        categories={formOptions.categories}
+        courseTypes={formOptions.courseTypes}
+        optionsLoading={formOptions.optionsLoading}
       />
 
-      {isConfirm ? (
+      {isConfirmOpen ? (
         <ConfirmDialog
-          title={isPublished ? 'Pembaruan status' : 'Publikasikan kursus'}
-          description={
-            isPublished
-              ? 'Status kursus akan disinkronkan ulang menjadi aktif di platform.'
-              : 'Kursus akan diaktifkan dan statusnya diperbarui menjadi aktif.'
-          }
-          confirmLabel={isPublished ? 'Update status' : 'Terbitkan'}
-          onOpenChange={setIsConfirm}
-          open={isConfirm}
-          onConfirm={() => void handleConfirmStatusUpdate()}
-          onCancel={() => setIsConfirm(false)}
+          title={confirmTitle}
+          description={confirmDescription}
+          confirmLabel={confirmLabel}
+          onOpenChange={onConfirmOpenChange}
+          open={isConfirmOpen}
+          onConfirm={onConfirmPublish}
+          onCancel={onCancelPublish}
         />
       ) : null}
     </div>

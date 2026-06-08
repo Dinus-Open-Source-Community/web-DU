@@ -1,11 +1,16 @@
-import { MentorCourseAssignmentsClient } from '@/components/shared/Assignments'
+import { useCallback, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
+
+import { MentorCourseAssignmentsSection } from '@/components/shared/Assignments'
+import { useMentorCourseAssignmentsView } from '@/hooks/mentor-assignments/use-mentor-course-assignments-view'
+import { deleteMentorAssignment } from '@/lib/func/fungsi'
+import { ROUTES } from '@/lib/routes'
+import { buildLessonResponseStub } from '@/lib/fixtures/lesson-response'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import type { IMentorAssignmentSubmission, IMentorCourseAssignment } from '@/lib/types/course'
-import { useParams } from 'react-router-dom'
 
 export default function MentorCourseAssignmentsPage() {
-  const { courseUid } = useParams()
-  console.log('Course UID:', courseUid)
   const assignmentData: IMentorCourseAssignment[] = [
     {
       uid: 'assign-001',
@@ -77,6 +82,13 @@ export default function MentorCourseAssignmentsPage() {
     },
     cover_url: 'https://via.placeholder.com/400x300?text=DevOps',
     created_at: '2026-05-12T19:06:39.074659Z',
+    created_by: {
+      avatar_url: 'https://via.placeholder.com/150?text=Dimas',
+      is_verified: true,
+      name: 'Dimas Saputra',
+      role: 'mentor',
+      uid: '2f49d823',
+    },
     description: 'Pelajari deployment, Docker, dan CI/CD pipeline untuk production',
     event_uid: null,
     is_premium: true,
@@ -100,30 +112,30 @@ export default function MentorCourseAssignmentsPage() {
         course_uid: '6f43bd95',
         created_at: '2026-05-12T19:06:39.108838Z',
         lessons: [
-          {
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.200634Z',
             module_uid: '38ae27a2',
             order_index: 1,
             title: 'Pengenalan Docker',
             uid: 'd23601da',
             updated_at: '2026-05-12T19:06:39.200634Z',
-          },
-          {
+          }),
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.203752Z',
             module_uid: '38ae27a2',
             order_index: 2,
             title: 'Membuat Dockerfile',
             uid: '8ca72ea1',
             updated_at: '2026-05-12T19:06:39.203752Z',
-          },
-          {
+          }),
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.207852Z',
             module_uid: '38ae27a2',
             order_index: 3,
             title: 'Docker Compose Dasar',
             uid: '6ed755d4',
             updated_at: '2026-05-12T19:06:39.207852Z',
-          },
+          }),
         ],
         order_index: 1,
         title: 'Docker Fundamentals',
@@ -133,22 +145,22 @@ export default function MentorCourseAssignmentsPage() {
         course_uid: '6f43bd95',
         created_at: '2026-05-12T19:06:39.111355Z',
         lessons: [
-          {
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.211129Z',
             module_uid: '129f691c',
             order_index: 1,
             title: 'Konsep CI/CD',
             uid: 'ca91192d',
             updated_at: '2026-05-12T19:06:39.211129Z',
-          },
-          {
+          }),
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.213454Z',
             module_uid: '129f691c',
             order_index: 2,
             title: 'Setup Pipeline Otomatis',
             uid: 'ae1fdd9b',
             updated_at: '2026-05-12T19:06:39.213454Z',
-          },
+          }),
         ],
         order_index: 2,
         title: 'CI/CD Pipeline',
@@ -158,22 +170,22 @@ export default function MentorCourseAssignmentsPage() {
         course_uid: '6f43bd95',
         created_at: '2026-05-12T19:06:39.113729Z',
         lessons: [
-          {
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.215637Z',
             module_uid: 'a7759a81',
             order_index: 1,
             title: 'Arsitektur Kubernetes',
             uid: 'f41d335b',
             updated_at: '2026-05-12T19:06:39.215637Z',
-          },
-          {
+          }),
+          buildLessonResponseStub({
             created_at: '2026-05-12T19:06:39.218225Z',
             module_uid: 'a7759a81',
             order_index: 2,
             title: 'Deploy Aplikasi ke Cluster',
             uid: '6720d9bb',
             updated_at: '2026-05-12T19:06:39.218225Z',
-          },
+          }),
         ],
         order_index: 3,
         title: 'Kubernetes Basics',
@@ -182,7 +194,10 @@ export default function MentorCourseAssignmentsPage() {
     ],
     price: 329000,
     price_strike: 429000,
+    rating: 4.6,
+    reviews: [],
     slot: 20,
+    total_reviews: 18,
     slug: 'devops-essentials',
     status: 'DRAFT',
     subtitle: 'Deploy aplikasi dengan pipeline modern',
@@ -274,5 +289,62 @@ export default function MentorCourseAssignmentsPage() {
     },
   ]
 
-  return <MentorCourseAssignmentsClient courseData={courseData} assignmentData={assignmentData} submissionData={submissionData} />
+  return (
+    <MentorCourseAssignmentsPageContent
+      courseData={courseData}
+      assignmentData={assignmentData}
+      submissionData={submissionData}
+    />
+  )
+}
+
+type MentorCourseAssignmentsPageContentProps = {
+  courseData: ICourseDetailItem
+  assignmentData: IMentorCourseAssignment[]
+  submissionData: IMentorAssignmentSubmission[]
+}
+
+function MentorCourseAssignmentsPageContent({
+  courseData,
+  assignmentData,
+  submissionData,
+}: MentorCourseAssignmentsPageContentProps) {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const openCreateFormOnMount = searchParams.get('new') === '1'
+
+  const handleDeleteAssignment = useCallback((assignment: IMentorCourseAssignment) => {
+    if (deleteMentorAssignment(assignment.uid)) {
+      toast.success('Tugas berhasil dihapus.')
+      return true
+    }
+
+    toast.error('Gagal menghapus tugas.')
+    return false
+  }, [])
+
+  const handleReviewSaved = useCallback(() => {
+    toast.success('Review berhasil disimpan.')
+  }, [])
+
+  const handleAssignmentSaved = useCallback((mode: 'create' | 'edit') => {
+    toast.success(`Tugas berhasil ${mode === 'edit' ? 'diperbarui' : 'dibuat'}.`)
+  }, [])
+
+  const view = useMentorCourseAssignmentsView({
+    courseData,
+    assignmentData,
+    submissionData,
+    openCreateFormOnMount,
+    onDeleteAssignment: handleDeleteAssignment,
+    onReviewSaved: handleReviewSaved,
+    onAssignmentSaved: handleAssignmentSaved,
+  })
+
+  useEffect(() => {
+    if (!openCreateFormOnMount) return
+    navigate(ROUTES.mentor.assignments(courseData.uid), { replace: true })
+  }, [courseData.uid, navigate, openCreateFormOnMount])
+
+  return <MentorCourseAssignmentsSection view={view} />
 }

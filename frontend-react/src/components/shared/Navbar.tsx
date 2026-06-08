@@ -4,8 +4,8 @@ import { ChevronDown, LayoutDashboard, LogOut, Menu, UserCircle } from 'lucide-r
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { navLinks } from '../../lib/navigation'
+import type { GuestNavbarAuthProps } from '@/lib/layout/navbar-auth-view-model'
 import type { UserRole } from '../../lib/types/user'
-import { useAuth } from '../../providers/auth-provider'
 import { ROUTES } from '../../lib/routes'
 
 function userInitials(name: string): string {
@@ -27,16 +27,15 @@ const dashboardPath: Record<UserRole, string> = {
   admin: ROUTES.admin.dashboard,
 }
 
-export default function Navbar() {
+type NavbarProps = {
+  auth: GuestNavbarAuthProps
+}
+
+export default function Navbar({ auth }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { isAuthenticated, profile, signOut, user } = useAuth()
-  const sessionUser = profile ?? user
-  const userName = sessionUser?.name ?? 'User'
-  const userEmail = sessionUser?.email ?? ''
-  const userRole = sessionUser?.role ?? 'student'
-  const userAvatar = sessionUser?.avatar_url ?? ''
+  const { isAuthenticated, userName, userEmail, userRole, userAvatar, onSignOut } = auth
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -51,8 +50,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     setIsMenuOpen(false)
-    signOut()
-    navigate(ROUTES.login)
+    onSignOut()
   }
 
   const handleProfile = () => {
@@ -88,7 +86,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-4 lg:flex">
-          {isAuthenticated && sessionUser ? (
+          {isAuthenticated ? (
             <div className="group relative">
               <div className="pb-2">
                 <button
@@ -157,7 +155,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div className={`overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="flex flex-col gap-3 px-6 pb-8 bg-primary">
-          {isAuthenticated && sessionUser && (
+          {isAuthenticated && (
             <div className="flex items-center gap-3 rounded-2xl border border-white/25 bg-white/10 px-3 py-2">
               <Avatar className="size-10 ring-2 ring-white/35">
                 {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
@@ -180,7 +178,7 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          {isAuthenticated && sessionUser ? (
+          {isAuthenticated ? (
             <div className="flex flex-col gap-1 border-t border-white/20 pt-3">
               <p className="px-4 text-xs font-semibold tracking-wide text-white/60 uppercase">Menu akun</p>
               <button type="button" className="flex items-center gap-2 px-4 py-2 text-left text-base text-white hover:text-white/85" onClick={handleDashboard}>

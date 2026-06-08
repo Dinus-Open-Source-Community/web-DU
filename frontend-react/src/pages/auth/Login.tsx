@@ -11,7 +11,7 @@ import { loginSchema, parseWithValidationMessage } from '../../lib/validator'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { signIn } = useAuth()
+  const { signIn, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -118,7 +118,7 @@ export default function LoginPage() {
         </div>
 
         {/* Social Logins */}
-        <OauthButton isSubmitting={isSubmitting} />
+        <OauthButton isSubmitting={isSubmitting} onGoogleSignIn={startGoogleOAuth} />
       </div>
     </AuthLayout>
   )

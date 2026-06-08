@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { isHomeworkConfigured } from '@/lib/course-edit/homework'
 import type { EditableLesson } from '@/lib/course-edit/types'
 import { useHomeworkPanelController } from '@/hooks/use-homework-panel-controller'
 

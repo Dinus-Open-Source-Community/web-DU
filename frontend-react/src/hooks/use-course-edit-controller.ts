@@ -1299,3 +1299,5 @@ export function useCourseEditController({
     patchAssignmentLesson,
   };
 }
+
+export type CourseEditControllerView = ReturnType<typeof useCourseEditController>;

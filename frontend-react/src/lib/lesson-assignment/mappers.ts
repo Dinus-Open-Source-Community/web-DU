@@ -1,4 +1,14 @@
+import type { IRichTextEnvelope } from '@/lib/types/rich-text'
 import type { LessonAssignmentGrading, LessonAssignmentSubmissionRecord, QuizAnswersMap } from './types'
+
+function parseRichTextValue(raw: unknown): IRichTextEnvelope | string | null {
+  if (raw == null) return null
+  if (typeof raw === 'string') return raw
+  if (typeof raw === 'object' && 'contentHtml' in raw && typeof (raw as IRichTextEnvelope).contentHtml === 'string') {
+    return raw as IRichTextEnvelope
+  }
+  return null
+}
 
 function parseQuizAnswers(raw: unknown): QuizAnswersMap {
   if (!raw || typeof raw !== 'object') return {}
@@ -83,7 +93,7 @@ export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssig
   return {
     uid: String(submission.uid ?? ''),
     plainText: typeof submission.plain_text === 'string' ? submission.plain_text : '',
-    richText: submission.rich_text ?? null,
+    richText: parseRichTextValue(submission.rich_text),
     fileUrl: typeof submission.file_url === 'string' ? submission.file_url : '',
     fileOriginalFilename:
       typeof submission.file_original_filename === 'string' ? submission.file_original_filename : '',

@@ -4,12 +4,10 @@ import type { RichTextContentFormat } from '@/lib/types/rich-text'
 import type { ICourseDetailItem, ICourseDetailModule } from '@/lib/types/course'
 import type {
   CourseDetailLesson,
-  EditableLesson,
-  EditableModule,
   IQuiz,
-  LessonApiItem,
   LessonPayloadInput,
-} from './types'
+} from '@/lib/types/lesson'
+import type { EditableLesson, EditableModule, LessonApiItem } from './types'
 import { createDefaultHomeworkRules } from '@/lib/course-edit/homework-rules'
 import {
   resolveTextContentHtml,

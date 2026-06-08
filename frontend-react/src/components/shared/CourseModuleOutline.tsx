@@ -206,13 +206,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
         lessons: moduleLessons(m).map((l) => {
           if (l.uid !== lessonId) return l
           const content_type: CourseDetailLesson['content_type'] = newType === 'video' ? 'video' : 'text'
-          const base = { ...l, content_type }
-          switch (newType) {
-            case 'text':
-              return { ...base, content: null, video_url: '' }
-            case 'video':
-              return { ...base, content: null, video_url: '' }
-          }
+          return { ...l, content_type, content: null, video_url: '' }
         }),
       }
     })

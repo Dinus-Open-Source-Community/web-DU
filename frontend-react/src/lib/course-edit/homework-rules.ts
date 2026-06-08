@@ -11,7 +11,8 @@ import type {
   LessonDetailAssignment,
 } from '@/lib/types/lesson'
 
-import type { EditableLesson, HomeworkRulesDraft } from './types'
+import type { HomeworkRulesDraft } from '@/lib/types/lesson'
+import type { EditableLesson } from './types'
 
 const DEFAULT_DEADLINE_OFFSET_MS = 7 * 24 * 60 * 60 * 1000
 

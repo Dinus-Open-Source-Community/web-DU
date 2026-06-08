@@ -28,7 +28,6 @@ type LessonAssignmentWorkProps = {
 }
 
 export function LessonAssignmentWork({
-  lesson: _lesson,
   assignment,
   submission,
   quiz,

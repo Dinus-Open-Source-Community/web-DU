@@ -10,7 +10,7 @@ import { ROUTES } from '../../lib/routes'
 import { cn } from '../../lib/utils'
 import type { UserRole } from '../../lib/types/user'
 import type { SidebarUser } from './Sidebar'
-import { useAuth } from '../../providers/auth-provider'
+import type { AppTopNavbarAuthProps } from '@/lib/layout/navbar-auth-view-model'
 import { useNavbarSearch, type NavbarSearchItem } from '../../providers/navbar-search-provider'
 import { SidebarTrigger } from '../ui/sidebar'
 
@@ -19,6 +19,7 @@ type AppTopNavbarProps = {
   user: SidebarUser
   title: string
   showSidebarTrigger?: boolean
+  onSignOut: AppTopNavbarAuthProps['onSignOut']
 }
 
 function getUserInitial(user: SidebarUser) {
@@ -55,10 +56,10 @@ export function AppTopNavbar({
   user,
   title,
   showSidebarTrigger = true,
+  onSignOut,
 }: AppTopNavbarProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { signOut } = useAuth()
   const { localSearch } = useNavbarSearch()
   const [query, setQuery] = useState('')
   const [isCommandOpen, setIsCommandOpen] = useState(false)
@@ -91,17 +92,17 @@ export function AppTopNavbar({
   const placeholder = localSearch?.placeholder ?? 'Cari halaman, data, atau navigasi...'
   const profileImage = user.avatar ?? user.avatar_url
 
-  const breadcrumbs = useMemo(() => {
+  const dashboardPath =
+    role === 'admin' ? ROUTES.admin.dashboard : role === 'mentor' ? ROUTES.mentor.dashboard : ROUTES.student.dashboard
+  const navKey = role === 'admin' ? 'Admin' : role === 'mentor' ? 'Mentor' : 'Student'
+  const navItems = Navigation[navKey]
+
+  const breadcrumbs = (() => {
     if (pathname === ROUTES.profile) {
-      return [
-        { label: title, path: role === 'admin' ? ROUTES.admin.dashboard : role === 'mentor' ? ROUTES.mentor.dashboard : ROUTES.student.dashboard },
-        { label: 'Profile', path: ROUTES.profile },
-      ]
+      return [{ label: title, path: dashboardPath }, { label: 'Profile', path: ROUTES.profile }]
     }
 
-    const key = role === 'admin' ? 'Admin' : role === 'mentor' ? 'Mentor' : 'Student'
-    const navItems = Navigation[key]
-    const trail = [{ label: title, path: role === 'admin' ? ROUTES.admin.dashboard : role === 'mentor' ? ROUTES.mentor.dashboard : ROUTES.student.dashboard }]
+    const trail = [{ label: title, path: dashboardPath }]
 
     for (const item of navItems) {
       if (item.path && isActivePath(pathname, item.path)) {
@@ -122,7 +123,7 @@ export function AppTopNavbar({
       .map((segment) => ({ label: titleCase(segment) }))
 
     return [...trail, ...dynamicSegments]
-  }, [pathname, role, title])
+  })()
 
   const visibleBreadcrumbs = breadcrumbs.length > 3 ? breadcrumbs.slice(-3) : breadcrumbs
   const hasHiddenBreadcrumbs = breadcrumbs.length > visibleBreadcrumbs.length
@@ -166,7 +167,7 @@ export function AppTopNavbar({
   }
 
   const handleLogout = () => {
-    signOut()
+    onSignOut()
     navigate(ROUTES.login)
   }
 

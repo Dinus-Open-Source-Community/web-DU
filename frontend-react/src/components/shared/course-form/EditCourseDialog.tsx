@@ -1,35 +1,37 @@
 import { CourseFormDialog } from './CourseFormDialog'
-import { useUpdateCourse } from '@/hooks/use-course-mutations'
-import { formValuesToUpdatePayload } from '@/lib/course-form/mappers'
+import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import type { CourseFormValues } from '@/lib/course-form/types'
 import type { ICourseDetailItem } from '@/lib/types/course'
 
-type EditCourseDialogProps = {
+type EditCourseDialogProps = CourseFormOptionsViewModel & {
   open: boolean
   onOpenChange: (open: boolean) => void
   course: ICourseDetailItem
-  onSuccess?: () => void
+  submitting?: boolean
+  onSubmitEdit: (values: CourseFormValues) => Promise<void>
 }
 
-export function EditCourseDialog({ open, onOpenChange, course, onSuccess }: EditCourseDialogProps) {
-  const updateCourse = useUpdateCourse()
-
-  const handleSubmit = async (values: CourseFormValues) => {
-    await updateCourse.mutateAsync({
-      uid: course.uid,
-      payload: formValuesToUpdatePayload(values),
-    })
-    onSuccess?.()
-  }
-
+export function EditCourseDialog({
+  open,
+  onOpenChange,
+  course,
+  submitting = false,
+  onSubmitEdit,
+  categories,
+  courseTypes,
+  optionsLoading,
+}: EditCourseDialogProps) {
   return (
     <CourseFormDialog
       open={open}
       onOpenChange={onOpenChange}
       mode="edit"
       course={course}
-      submitting={updateCourse.isPending}
-      onSubmitEdit={handleSubmit}
+      submitting={submitting}
+      onSubmitEdit={onSubmitEdit}
+      categories={categories}
+      courseTypes={courseTypes}
+      optionsLoading={optionsLoading}
     />
   )
 }

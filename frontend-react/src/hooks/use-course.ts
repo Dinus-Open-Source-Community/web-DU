@@ -154,7 +154,7 @@ export function useCourseEditData(courseUid: string) {
   const courseDetail = useCourseDetail(courseUid)
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
 
-  const moduleList = modulesQuery.data?.modules ?? []
+  const moduleList = useMemo(() => modulesQuery.data?.modules ?? [], [modulesQuery.data?.modules])
   const moduleUids = useMemo(
     () => moduleList.map((module) => module.uid).filter(Boolean),
     [moduleList],

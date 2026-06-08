@@ -1,45 +1,33 @@
-import { useLocation, useNavigate } from 'react-router-dom'
-
 import { CourseFormDialog } from '@/components/shared/course-form/CourseFormDialog'
-import { useCreateCourse } from '@/hooks/use-course-mutations'
-import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-state'
-import { formValuesToCreatePayload } from '@/lib/course-form/mappers'
+import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import type { CourseFormValues } from '@/lib/course-form/types'
 
-type CreateCourseDialogProps = {
+type CreateCourseDialogProps = CourseFormOptionsViewModel & {
   open: boolean
   onOpenChange: (open: boolean) => void
-  roleBasePath?: '/mentor' | '/admin'
+  submitting?: boolean
+  onSubmitCreate: (values: CourseFormValues) => Promise<void>
 }
 
 export function CreateCourseDialog({
   open,
   onOpenChange,
-  roleBasePath = '/mentor',
+  submitting = false,
+  onSubmitCreate,
+  categories,
+  courseTypes,
+  optionsLoading,
 }: CreateCourseDialogProps) {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const createCourse = useCreateCourse()
-
-  const handleSubmit = async (values: CourseFormValues) => {
-    const created = await createCourse.mutateAsync(formValuesToCreatePayload(values))
-    if (!created.uid) {
-      throw new Error('Backend tidak mengembalikan uid kursus')
-    }
-
-    onOpenChange(false)
-    navigate(`${roleBasePath}/courses/${created.uid}/edit`, {
-      state: buildCourseEditNavigationState(location),
-    })
-  }
-
   return (
     <CourseFormDialog
       open={open}
       onOpenChange={onOpenChange}
       mode="create"
-      submitting={createCourse.isPending}
-      onSubmitCreate={handleSubmit}
+      submitting={submitting}
+      onSubmitCreate={onSubmitCreate}
+      categories={categories}
+      courseTypes={courseTypes}
+      optionsLoading={optionsLoading}
     />
   )
 }
