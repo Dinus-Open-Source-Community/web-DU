@@ -1264,6 +1264,87 @@ func fetchEnrollmentAttendancePresent(courseUID uuid.UUID, enrollmentUIDs []uuid
 	return result
 }
 
+// buildEnrollmentProgressMap menghitung progress (0.0–1.0) per enrollment dari lesson_readings.
+func buildEnrollmentProgressMap(enrollments []entity.Enrollment) map[uuid.UUID]float64 {
+	result := make(map[uuid.UUID]float64, len(enrollments))
+	if len(enrollments) == 0 {
+		return result
+	}
+
+	enrollmentUIDs := make([]uuid.UUID, 0, len(enrollments))
+	courseUIDs := make([]uuid.UUID, 0, len(enrollments))
+	seenCourse := make(map[uuid.UUID]struct{}, len(enrollments))
+
+	for _, en := range enrollments {
+		enrollmentUIDs = append(enrollmentUIDs, en.Uid)
+		if _, ok := seenCourse[en.CourseUid]; !ok {
+			seenCourse[en.CourseUid] = struct{}{}
+			courseUIDs = append(courseUIDs, en.CourseUid)
+		}
+	}
+
+	type lessonCountRow struct {
+		CourseUID    uuid.UUID `gorm:"column:course_uid"`
+		TotalLessons int64     `gorm:"column:total_lessons"`
+	}
+	var lessonCountRows []lessonCountRow
+	if len(courseUIDs) > 0 {
+		database.DB.Table("lessons l").
+			Select("m.course_uid AS course_uid, COUNT(l.uid) AS total_lessons").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("m.course_uid IN ?", courseUIDs).
+			Group("m.course_uid").
+			Scan(&lessonCountRows)
+	}
+	totalLessonByCourse := make(map[uuid.UUID]int64, len(lessonCountRows))
+	for _, row := range lessonCountRows {
+		totalLessonByCourse[row.CourseUID] = row.TotalLessons
+	}
+
+	readCountMap := fetchEnrollmentLessonReadCount(enrollmentUIDs)
+	for _, en := range enrollments {
+		total := totalLessonByCourse[en.CourseUid]
+		read := readCountMap[en.Uid]
+		if total > 0 {
+			result[en.Uid] = float64(read) / float64(total)
+		}
+	}
+	return result
+}
+
+func applyCalculatedEnrollmentProgress(enrollments []entity.Enrollment) {
+	progressMap := buildEnrollmentProgressMap(enrollments)
+	for i := range enrollments {
+		enrollments[i].Progress = progressMap[enrollments[i].Uid]
+	}
+}
+
+func applyCalculatedEnrollmentProgressPtr(enrollment *entity.Enrollment) {
+	if enrollment == nil {
+		return
+	}
+	progressMap := buildEnrollmentProgressMap([]entity.Enrollment{*enrollment})
+	enrollment.Progress = progressMap[enrollment.Uid]
+}
+
+func applyCalculatedEnrollmentProgressToAttendances(attendances []entity.LessonAttendance, enrollments []entity.Enrollment) {
+	progressMap := buildEnrollmentProgressMap(enrollments)
+	for i := range attendances {
+		if attendances[i].Enrollment != nil {
+			attendances[i].Enrollment.Progress = progressMap[attendances[i].EnrollmentUid]
+		}
+	}
+}
+
+func applyCalculatedEnrollmentProgressToReadings(readings []entity.LessonReading, enrollments []entity.Enrollment) {
+	progressMap := buildEnrollmentProgressMap(enrollments)
+	for i := range readings {
+		if readings[i].Enrollment != nil {
+			readings[i].Enrollment.Progress = progressMap[readings[i].EnrollmentUid]
+		}
+	}
+}
+
 func fetchEnrollmentLessonReadCount(enrollmentUIDs []uuid.UUID) map[uuid.UUID]int64 {
 	result := make(map[uuid.UUID]int64, len(enrollmentUIDs))
 	if len(enrollmentUIDs) == 0 {

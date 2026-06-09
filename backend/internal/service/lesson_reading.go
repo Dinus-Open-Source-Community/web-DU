@@ -424,6 +424,20 @@ func GetLessonReadingsByLessonFunc(c *gin.Context) {
 		return
 	}
 
+	enrollmentsForProgress := make([]entity.Enrollment, 0, len(readings))
+	seenEnrollment := make(map[uuid.UUID]struct{}, len(readings))
+	for _, reading := range readings {
+		if reading.Enrollment == nil {
+			continue
+		}
+		if _, exists := seenEnrollment[reading.EnrollmentUid]; exists {
+			continue
+		}
+		seenEnrollment[reading.EnrollmentUid] = struct{}{}
+		enrollmentsForProgress = append(enrollmentsForProgress, *reading.Enrollment)
+	}
+	applyCalculatedEnrollmentProgressToReadings(readings, enrollmentsForProgress)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Lesson readings retrieved successfully",
@@ -508,6 +522,8 @@ func GetMyLessonReadingHistoryFunc(c *gin.Context) {
 		})
 		return
 	}
+
+	applyCalculatedEnrollmentProgressToReadings(readings, enrollments)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

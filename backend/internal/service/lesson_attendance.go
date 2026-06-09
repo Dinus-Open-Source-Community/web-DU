@@ -280,6 +280,7 @@ func GetAttendanceByIDFunc(c *gin.Context) {
 	}
 
 	attendance.Note, _ = utils.Decrypt(attendance.Note)
+	applyCalculatedEnrollmentProgressPtr(attendance.Enrollment)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -521,6 +522,7 @@ func CheckAttendanceStatusFunc(c *gin.Context) {
 	}
 
 	attendance.Note, _ = utils.Decrypt(attendance.Note)
+	applyCalculatedEnrollmentProgressPtr(attendance.Enrollment)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -609,6 +611,7 @@ func GetMyAttendanceHistoryFunc(c *gin.Context) {
 	for i := range attendances {
 		attendances[i].Note, _ = utils.Decrypt(attendances[i].Note)
 	}
+	applyCalculatedEnrollmentProgressToAttendances(attendances, enrollments)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

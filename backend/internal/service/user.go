@@ -1235,7 +1235,9 @@ func GetAllUsersService(c *gin.Context) {
 
 		// decrypt and build result
 		result := make([]gin.H, 0, len(users))
-		for _, u := range users {
+		for i := range users {
+			applyCalculatedEnrollmentProgress(users[i].Enrollments)
+			u := users[i]
 			nameDecrypted, _ := utils.Decrypt(u.Name)
 			emailDecrypted, _ := utils.Decrypt(u.Email)
 			result = append(result, gin.H{
@@ -1338,6 +1340,7 @@ func GetAllUsersService(c *gin.Context) {
 	result := make([]gin.H, 0, len(paginated))
 	for _, item := range paginated {
 		u := item.User
+		applyCalculatedEnrollmentProgress(u.Enrollments)
 		result = append(result, gin.H{
 			"uid":         u.Uid,
 			"name":        item.Name,
