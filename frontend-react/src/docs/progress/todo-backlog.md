@@ -3,7 +3,7 @@
 Dokumen **living backlog** untuk PM, FE, dan QA.  
 **Aturan:** item requirement lama **tidak dihapus** — hanya diubah statusnya.
 
-**Terakhir diperbarui:** 9 Juni 2026 (sesi publish & delete kursus) · branch `features/frontend-sapto`  
+**Terakhir diperbarui:** 9 Juni 2026 (BE: `graded_by` submission + verifikasi D12) · branch `features/frontend-sapto`  
 **Status lengkap:** [integration-status.md](./integration-status.md)
 
 ---
@@ -37,7 +37,7 @@ Requirement dari sesi implementasi tab **Tugas** di detail kursus admin/mentor.
 | A9 | Feedback **bukan modal**; style mirip reply review | ✅ Selesai | `StaffSubmissionFeedbackSection` |
 | A10 | Feedback **timpa** (1 field `feedback` — selaras BE) | ✅ Selesai | PUT grade kirim `feedback` |
 | A11 | UI flat — tanpa card-dalam-card / container bertumpuk | ✅ Selesai | Token `manage-detail-layout` |
-| A12 | Tampilkan profil pemberi feedback lengkap | 🟡 Partial | BE hanya `graded_by_uid`; profil lengkap hanya jika UID = user login |
+| A12 | Tampilkan profil pemberi feedback lengkap | 🟡 Partial | BE kirim `graded_by` object; FE perlu mapper di `staff-submission-mapper.ts` |
 | A13 | Validator Zod strict untuk request tugas/kehadiran | ✅ Selesai | `lib/validator/lesson-assignment/`, `lesson-attendance/` |
 | A14 | Jangan ubah backend untuk fitur profil penilai | ✅ Selesai | Relasi `GradedBy` di-revert; FE menyesuaikan |
 
@@ -122,10 +122,10 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | D6 | `GET /admin/financial/summary` | Admin financial mock | ⏳ Tunggu FE | BE ada; service admin belum |
 | D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ⏳ Tunggu FE | BE ada; service admin belum |
 | D8 | `attendance_*` di `GET /courses/:id/students` | Bar kehadiran tab Peserta salah | 🟡 Partial | BE kirim field; FE belum mapper |
-| D9 | Profil user penilai (`graded_by` object) di response submission | Profil feedback staff selalu lengkap | ⏳ Tunggu BE | A12 — sengaja tidak diubah BE |
+| D9 | Profil user penilai (`graded_by` object) di response submission | Profil feedback staff selalu lengkap | 🟡 Partial | BE kirim `graded_by` di list/get/grade submission; FE perlu wire mapper |
 | D10 | Forgot / reset password | Auth recovery mock | ⏳ Tunggu BE | `api-route-gaps.md` §9 |
 | D11 | Domain sertifikat | `student/Certificates` mock | ⏳ Tunggu BE | `api-route-gaps.md` §10 |
-| D12 | Domain Q&A / moderation lintas kursus | `admin/ReviewsQA` unregistered | ⏳ Tunggu BE | `api-route-gaps.md` §8 |
+| D12 | Domain Q&A / moderation lintas kursus | `admin/ReviewsQA` unregistered | ⏳ Tunggu FE | BE ada: `GET/POST /admin/reviews`, `GET/POST /admin/qna`, `POST /courses/:id/qna` |
 | D13 | `GET /courses?category_uid=` filter | Filter kategori browse tidak akurat | 🟡 Partial | Param dikirim; verifikasi hasil filter |
 | D14 | `DELETE /courses/:id` | Tidak ada hapus kursus di UI | ✅ Selesai | Fase 16 — `deleteCourse`, `useDeleteCourse`, dialog admin |
 | D15 | Admin reviews & Q&A moderasi | `ReviewsQA` mock | ⏳ Tunggu FE | BE ada; route dikomentari |
@@ -180,7 +180,7 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 |---|-------|--------|----------|
 | F1 | `mentor/CourseAssignments.tsx` masih mock penuh | 🔴 | Redirect ke detail course tab Tugas atau rewire API |
 | F2 | `student/Assignments.tsx` masih mock | ✅ | Selesai — `useStudentMyAssignments` |
-| F3 | Profil penilai fallback "Penilai" tanpa avatar | 🟡 Expected | Tunggu D9 atau cache staff directory |
+| F3 | Profil penilai fallback "Penilai" tanpa avatar | 🟡 Partial | BE kirim `graded_by`; FE belum map ke `presentSubmissionGrader` |
 | F4 | Filter `super_admin` di halaman administrator | ✅ | BE fix merge J-yriz (B25) |
 | F5 | `GET /lessons/readings/my-history` — komentar broken di BE | 🔴 | Verifikasi dengan tim BE |
 | F6 | Perubahan branch belum di-commit | 🟡 | Menunggu permintaan developer |

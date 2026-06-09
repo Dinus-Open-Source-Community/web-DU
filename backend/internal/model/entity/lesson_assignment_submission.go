@@ -35,6 +35,7 @@ type LessonAssignmentSubmission struct {
 
 	LessonAssignment *LessonAssignment `gorm:"foreignKey:LessonAssignmentUid" json:"lesson_assignment,omitempty"`
 	User             *User             `gorm:"foreignKey:UserUid" json:"user,omitempty"`
+	GradedBy         *User             `gorm:"foreignKey:GradedByUid" json:"graded_by,omitempty"`
 }
 
 func (LessonAssignmentSubmission) TableName() string {

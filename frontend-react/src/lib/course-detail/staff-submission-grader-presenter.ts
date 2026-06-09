@@ -26,9 +26,17 @@ export function formatGraderRoleLabel(role: UserRole | null | undefined): string
   return GRADER_ROLE_LABELS[role] ?? role
 }
 
+export type ResolvedSubmissionGraderProfile = {
+  uid: string
+  name: string
+  avatar_url: string
+  role: UserRole | null
+}
+
 export function presentSubmissionGrader(
   gradedByUid: string | null,
   viewer: StaffSubmissionViewer | null,
+  resolvedProfile?: ResolvedSubmissionGraderProfile | null,
 ): StaffSubmissionGraderView | null {
   if (!gradedByUid) return null
 
@@ -38,6 +46,16 @@ export function presentSubmissionGrader(
       name: viewer.name,
       avatar_url: viewer.avatar_url,
       role: viewer.role,
+      isKnownViewer: true,
+    }
+  }
+
+  if (resolvedProfile?.uid === gradedByUid) {
+    return {
+      uid: resolvedProfile.uid,
+      name: resolvedProfile.name,
+      avatar_url: resolvedProfile.avatar_url,
+      role: resolvedProfile.role,
       isKnownViewer: true,
     }
   }

@@ -9,11 +9,30 @@ import type {
   ManagedUsersListResponse,
   UpdateUserRolePayload,
 } from '@/lib/user-manage/types'
+import type { UserRole } from '@/lib/types/user'
+import type { ResolvedSubmissionGraderProfile } from '@/lib/course-detail/staff-submission-grader-presenter'
 import {
   parseManagedUserListParams,
   parseManagedUserUidParam,
   parseUpdateUserRolePayload,
 } from '@/lib/validator/user-manage'
+
+function normalizeProfileRole(role: string): UserRole | null {
+  if (role === 'admin' || role === 'mentor' || role === 'student') return role
+  if (role === 'super_admin') return 'admin'
+  return null
+}
+
+export async function fetchUserProfileLite(uid: string): Promise<ResolvedSubmissionGraderProfile> {
+  const data = await fetchManagedUserDetail(uid)
+
+  return {
+    uid: data.uid,
+    name: data.name,
+    avatar_url: data.avatar_url ?? '',
+    role: normalizeProfileRole(data.role),
+  }
+}
 
 export async function fetchManagedUserDetail(uid: string) {
   const validatedUid = parseManagedUserUidParam(uid)

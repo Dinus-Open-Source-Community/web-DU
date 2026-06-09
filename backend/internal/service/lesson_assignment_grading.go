@@ -234,10 +234,10 @@ func GradeLessonAssignmentSubmissionForStaffFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Preload("User").First(&row, row.Uid).Error; err != nil {
+	if err := preloadSubmissionRelations(database.DB).First(&row, row.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to reload submission", "data": nil, "error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission graded successfully", "data": row, "error": nil})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission graded successfully", "data": submissionToResponse(row), "error": nil})
 }

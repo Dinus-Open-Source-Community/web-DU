@@ -61,6 +61,13 @@ export const userManageKeys = {
   all: ['managed-users'] as const,
   list: (params?: ManagedUserListParams) => ['managed-users', params] as const,
   detail: (uid: string) => ['managed-users', 'detail', uid] as const,
+  graderProfile: (uid: string) => ['managed-users', 'grader-profile', uid] as const,
+}
+
+export const adminModerationKeys = {
+  all: ['admin-moderation'] as const,
+  reviews: (params?: IQueryParamsPayload) => ['admin-moderation', 'reviews', params] as const,
+  qna: (params?: IQueryParamsPayload) => ['admin-moderation', 'qna', params] as const,
 }
 
 export const studentAssignmentKeys = {

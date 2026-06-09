@@ -10,17 +10,20 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import type { StaffGraderDirectoryEntry } from '@/lib/course-detail/staff-grader-directory'
 import {
   formatGraderRoleLabel,
-  presentSubmissionGrader,
+  type StaffSubmissionGraderView,
   type StaffSubmissionViewer,
 } from '@/lib/course-detail/staff-submission-grader-presenter'
+import { useSubmissionGraderProfile } from '@/hooks/course-detail/use-submission-grader-profile'
 import type { ICourseStaffSubmission } from '@/lib/types/features/course-detail-assignments'
 import { Initials } from '@/lib/func/func'
 
 type StaffSubmissionFeedbackSectionProps = {
   submission: ICourseStaffSubmission
   staffViewer: StaffSubmissionViewer | null
+  staffDirectory?: StaffGraderDirectoryEntry[]
   onSubmit: (feedback: string) => Promise<void>
   isSubmitting: boolean
 }
@@ -32,12 +35,11 @@ function formatFeedbackDate(value: string | null) {
 
 function StaffSubmissionFeedbackThread({
   submission,
-  staffViewer,
+  grader,
 }: {
   submission: ICourseStaffSubmission
-  staffViewer: StaffSubmissionViewer | null
+  grader: StaffSubmissionGraderView | null
 }) {
-  const grader = presentSubmissionGrader(submission.gradedByUid, staffViewer)
   const graderName = grader?.name ?? 'Penilai'
   const roleLabel = formatGraderRoleLabel(grader?.role)
   const feedbackDate = formatFeedbackDate(submission.gradedAt)
@@ -91,10 +93,16 @@ function StaffSubmissionFeedbackThread({
 export function StaffSubmissionFeedbackSection({
   submission,
   staffViewer,
+  staffDirectory = [],
   onSubmit,
   isSubmitting,
 }: StaffSubmissionFeedbackSectionProps) {
   const [feedbackText, setFeedbackText] = useState('')
+  const grader = useSubmissionGraderProfile({
+    gradedByUid: submission.gradedByUid,
+    staffViewer,
+    staffDirectory,
+  })
 
   useEffect(() => {
     setFeedbackText('')
@@ -116,7 +124,7 @@ export function StaffSubmissionFeedbackSection({
       description="Feedback terbaru mengganti feedback sebelumnya untuk kiriman ini."
     >
       {hasFeedback ? (
-        <StaffSubmissionFeedbackThread submission={submission} staffViewer={staffViewer} />
+        <StaffSubmissionFeedbackThread submission={submission} grader={grader} />
       ) : (
         <p className="text-sm text-slate-500">Belum ada feedback untuk jawaban ini.</p>
       )}

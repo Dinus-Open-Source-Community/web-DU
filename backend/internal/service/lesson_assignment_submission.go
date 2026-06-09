@@ -485,10 +485,9 @@ func ListLessonAssignmentSubmissionsForStaffFunc(c *gin.Context) {
 	}
 
 	var submissions []entity.LessonAssignmentSubmission
-	if err := database.DB.Where("lesson_assignment_uid = ?", assignment.Uid).
-		Preload("User").
-		Order("updated_at DESC").
-		Find(&submissions).Error; err != nil {
+	if err := preloadSubmissionRelations(
+		database.DB.Where("lesson_assignment_uid = ?", assignment.Uid),
+	).Order("updated_at DESC").Find(&submissions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to list submissions", "data": nil, "error": err.Error()})
 		return
 	}
@@ -499,7 +498,7 @@ func ListLessonAssignmentSubmissionsForStaffFunc(c *gin.Context) {
 		"data": gin.H{
 			"lesson_uid":     lesson.Uid,
 			"assignment_uid": assignment.Uid,
-			"submissions":    submissions,
+			"submissions":    submissionsToResponse(submissions),
 		},
 		"error": nil,
 	})
@@ -554,9 +553,9 @@ func GetLessonAssignmentSubmissionForStaffFunc(c *gin.Context) {
 	}
 
 	var row entity.LessonAssignmentSubmission
-	if err := database.DB.Where("uid = ? AND lesson_assignment_uid = ?", submissionID, assignment.Uid).
-		Preload("User").
-		First(&row).Error; err != nil {
+	if err := preloadSubmissionRelations(
+		database.DB.Where("uid = ? AND lesson_assignment_uid = ?", submissionID, assignment.Uid),
+	).First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Submission not found", "data": nil, "error": err.Error()})
 			return
@@ -565,7 +564,7 @@ func GetLessonAssignmentSubmissionForStaffFunc(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission retrieved successfully", "data": row, "error": nil})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission retrieved successfully", "data": submissionToResponse(row), "error": nil})
 }
 
 func assertAssignmentAcceptsSubmission(a *entity.LessonAssignment, now time.Time) error {

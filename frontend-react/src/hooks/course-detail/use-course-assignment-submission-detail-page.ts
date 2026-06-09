@@ -19,6 +19,10 @@ import {
   buildGradePayloadFromSubmission,
   type StaffSubmissionGradeDraft,
 } from '@/lib/course-detail/staff-submission-grade-presenter'
+import {
+  buildStaffGraderDirectory,
+  type StaffGraderDirectoryEntry,
+} from '@/lib/course-detail/staff-grader-directory'
 import type { StaffSubmissionViewer } from '@/lib/course-detail/staff-submission-grader-presenter'
 import type { IMentorCourseStudent, IModulesData } from '@/lib/types/course'
 import { deriveLessonsFromModules } from '@/lib/course-detail/derive-lessons-from-modules'
@@ -33,6 +37,7 @@ type UseCourseAssignmentSubmissionDetailPageOptions = {
   courseTitle: string
   modules: IModulesData[]
   students: IMentorCourseStudent[]
+  staffDirectory?: StaffGraderDirectoryEntry[]
 }
 
 export function useCourseAssignmentSubmissionDetailPage({
@@ -43,6 +48,7 @@ export function useCourseAssignmentSubmissionDetailPage({
   courseTitle,
   modules,
   students,
+  staffDirectory: staffDirectoryInput,
 }: UseCourseAssignmentSubmissionDetailPageOptions): CourseAssignmentSubmissionDetailPageViewModel {
   const { user } = useAuth()
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('')
@@ -58,6 +64,11 @@ export function useCourseAssignmentSubmissionDetailPage({
       role: user.role,
     }
   }, [user])
+
+  const staffDirectory = useMemo(
+    () => staffDirectoryInput ?? [],
+    [staffDirectoryInput],
+  )
 
   const lessonRef = useMemo(() => {
     const lessons = deriveLessonsFromModules(modules)
@@ -163,6 +174,7 @@ export function useCourseAssignmentSubmissionDetailPage({
     assignment: assignmentQuery.data ?? null,
     submission,
     staffViewer,
+    staffDirectory,
     activeSubmissionUid: submissionUid,
     sidebarRows,
     sidebarSearchQuery,

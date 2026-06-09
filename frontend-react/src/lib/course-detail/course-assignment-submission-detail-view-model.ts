@@ -2,6 +2,7 @@ import type { ICourseAssignmentRosterRow, ICourseStaffSubmission } from '@/lib/t
 import type { ILessonDetailAssignment } from '@/lib/types/lesson'
 
 import type { StaffSubmissionGradeDraft } from './staff-submission-grade-presenter'
+import type { StaffGraderDirectoryEntry } from './staff-grader-directory'
 import type { StaffSubmissionViewer } from './staff-submission-grader-presenter'
 
 export type CourseAssignmentSubmissionDetailPageViewModel = {
@@ -13,6 +14,7 @@ export type CourseAssignmentSubmissionDetailPageViewModel = {
   assignment: ILessonDetailAssignment | null
   submission: ICourseStaffSubmission | null
   staffViewer: StaffSubmissionViewer | null
+  staffDirectory: StaffGraderDirectoryEntry[]
   activeSubmissionUid: string | null
   sidebarRows: ICourseAssignmentRosterRow[]
   sidebarSearchQuery: string

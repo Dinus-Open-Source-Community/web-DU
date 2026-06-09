@@ -51,5 +51,5 @@ dist
 # Gatsby files
 .cache
 public
-/bun.lock
-/package-lock.json
+package-lock.json
+*.lock
