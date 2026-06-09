@@ -74,19 +74,24 @@ Tidak ada gap route signifikan. Validasi FE sudah di `lib/validator/course-maste
 | CRUD module | `POST/PUT/DELETE/GET` | `/modules`, `/modules/course/:id` | ✅ | `admin/CourseEdit`, `mentor/CourseEdit` |
 | CRUD lesson | `POST/PUT/DELETE/GET` | `/lessons` | ✅ | Editor kurikulum |
 | Mark lesson read | `POST` | `/lessons/:id/read` | ✅ | `courses/view.tsx` (perlu verifikasi wire) |
-| Attendance | `POST/GET` | `/lessons/attendances/*` | ✅ | Belum ada halaman khusus |
+| Attendance list/update/delete | `GET/PUT/DELETE` | `/lessons/attendances/*` | ✅ | 🟡 Partial | Tab Kehadiran admin |
+| Attendance create (check-in) | `POST` | `/lessons/attendances` | ✅ | 🔴 Belum | Tidak ada UI siswa/admin create |
+| Attendance check-status / my-history | `GET` | `/lessons/attendances/check-status`, `my-history` | ✅ | 🔴 Belum | — |
 
 ---
 
 ## 5. Assignment & Submission
 
-| Kebutuhan FE | Method | Path | Status BE | Halaman |
-|--------------|--------|------|-----------|---------|
-| CRUD assignment per lesson | `POST/PUT/DELETE/GET` | `/lessons/:id/assignment` | ✅ | `mentor/CourseAssignments` — **belum di-wire** |
-| Submission siswa | `POST/PUT/GET` | `/lessons/:id/assignment/submission` | ✅ | `student/Assignments` — **mock** |
-| List submission (staff) | `GET` | `/lessons/:id/assignment/submissions` | ✅ | Mentor assignments — **mock** |
-| Grade submission | `PUT` | `.../submissions/:uid/grade` | ✅ | Mentor assignments — **mock** |
-| **List assignment per course** | — | — | 🔴 | FE butuh aggregate per course, BE hanya per lesson |
+| Kebutuhan FE | Method | Path | Status BE | Status FE | Halaman |
+|--------------|--------|------|-----------|-----------|---------|
+| CRUD assignment per lesson | `POST/PUT/DELETE/GET` | `/lessons/:id/assignment` | ✅ | ✅ Live | Course editor + `lesson-assignment-admin.ts` |
+| Submission siswa | `POST/PUT/GET` | `/lessons/:id/assignment/submission` | ✅ | ✅ Live | Module viewer `LessonAssignmentWork` |
+| List submission (staff) | `GET` | `/lessons/:id/assignment/submissions` | ✅ | ✅ Live | Tab Tugas → roster admin/mentor |
+| Grade submission | `PUT` | `.../submissions/:uid/grade` | ✅ | ✅ Live | `AssignmentSubmissionDetail` |
+| Get submission by UID (staff) | `GET` | `.../submissions/:submissionUid` | ✅ | 🔴 Belum | FE pakai data dari list |
+| **List assignment per course** | — | — | 🔴 | 🔴 Mock | `mentor/CourseAssignments` legacy |
+| **List tugas siswa lintas kursus** | — | — | 🔴 | 🔴 Mock | `student/Assignments` |
+| Profil penilai (`graded_by` object) | — | response submission | 🔴 | 🟡 Partial | Hanya `graded_by_uid`; FE fallback |
 
 ### Rekomendasi endpoint baru (Assignment)
 

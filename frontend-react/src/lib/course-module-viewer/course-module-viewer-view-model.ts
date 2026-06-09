@@ -42,6 +42,7 @@ export type CourseModuleViewerViewModel = {
   activeEntry: LessonEntry | null
   displayedLesson: LessonDetailItem | null
   isLessonLoading: boolean
+  isAssignmentLoading: boolean
   readLessonIds: ReadonlySet<string>
   completedLessonsCount: number
   progressPercent: number

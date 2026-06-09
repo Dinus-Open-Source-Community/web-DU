@@ -50,7 +50,9 @@ Status integrasi setiap halaman di `frontend-react/src/pages/` per Juni 2026.
 | `/admin/users/mentors` | `admin/Mentors.tsx` | Live | Sama + promote dari list siswa | `totalCourses`, `rating`, `studentsCount` = 0 |
 | `/admin/users/administrators` | `admin/Admin.tsx` | Partial | `GET /user/manage/all?role=admin` | User `super_admin` tidak muncul di filter `admin` |
 | `/admin/courses` | `admin/Courses.tsx` | Live | `GET /courses` | Filter Aktif/Draf client-side; tidak ada delete course |
-| `/admin/courses/:courseUid` | `admin/DetailCourse.tsx` | Partial | `GET /courses/:uid`, `GET /courses/:uid/students`, modules | Assign mentor live; lepas mentor & reply review belum |
+| `/admin/courses/:courseUid` | `admin/DetailCourse.tsx` | Partial | `GET /courses/:uid`, `GET /courses/:uid/students`, modules, assignment, attendances | Tab **Tugas** + penilaian live; tab **Kehadiran** partial; lepas mentor & reply review belum |
+| `/admin/courses/:courseUid/lessons/:lessonUid/submissions` | `admin/AssignmentSubmissions.tsx` | Live | `GET /lessons/:id/assignment/submissions` | Roster pengumpulan |
+| `/admin/courses/.../submissions/:submissionUid` | `admin/AssignmentSubmissionDetail.tsx` | Live | `PUT .../submissions/:uid/grade` | Penilaian + feedback inline |
 | `/admin/courses/:courseUid/edit` | `admin/CourseEdit.tsx` | Live | modules, lessons CRUD | Update metadata kursus via `PUT /courses/:uid` → **BE belum ada** |
 | `/admin/course-categories` | `admin/CourseCategories.tsx` | Live | CRUD `/course-categories` | — |
 | `/admin/course-types` | `admin/CourseTypes.tsx` | Live | CRUD `/course-types` | — |
@@ -68,7 +70,10 @@ Status integrasi setiap halaman di `frontend-react/src/pages/` per Juni 2026.
 | `/mentor/courses` | `mentor/Courses.tsx` | Mock | `ICourseItem[]` hardcoded | Seharusnya `GET /courses?mentor_id={uid}` |
 | `/mentor/courses/:courseUid` | `mentor/DetailCourse.tsx` | Mock | Course & students hardcoded | Admin detail sudah live; mentor belum disamakan |
 | `/mentor/courses/:courseUid/edit` | `mentor/CourseEdit.tsx` | Live | Sama seperti admin edit | — |
-| `/mentor/courses/:courseUid/assignments` | `mentor/CourseAssignments.tsx` | Mock | Assignment & submission hardcoded | BE punya lesson assignment API, belum di-wire |
+| `/mentor/courses/:courseUid` (tab Tugas) | `mentor/DetailCourse.tsx` | Partial | Sama admin minus tab Kehadiran/Mentor | Tab Tugas + roster + penilaian live |
+| `/mentor/courses/.../submissions` | `mentor/AssignmentSubmissions.tsx` | Live | `GET /lessons/:id/assignment/submissions` | Roster |
+| `/mentor/courses/.../submissions/:submissionUid` | `mentor/AssignmentSubmissionDetail.tsx` | Live | `PUT .../grade` | Detail + penilaian |
+| `/mentor/courses/:courseUid/assignments` | `mentor/CourseAssignments.tsx` | Mock | Assignment hardcoded | Route legacy; gunakan tab Tugas di detail course |
 
 ---
 
@@ -80,7 +85,8 @@ Status integrasi setiap halaman di `frontend-react/src/pages/` per Juni 2026.
 | `/student/learning` | `student/Learning.tsx` | Partial | `joined_courses` dari `GET /user/data` | — |
 | `/student/learning/course/:courseUid` | `courses/view.tsx` (reuse) | Live | course + modules + lessons | — |
 | `/student/browse` | `student/BrowseCourse.tsx` | Live | `GET /courses`, categories | — |
-| `/student/assignments` | `student/Assignments.tsx` | Mock | Array hardcoded di page | BE punya submission endpoints per lesson |
+| `/student/assignments` | `student/Assignments.tsx` | Mock | Array hardcoded di page | Submit per lesson live di module viewer; halaman aggregate butuh endpoint baru |
+| `/student/learning/course/:uid` (assignment work) | `courses/view.tsx` + module viewer | Live | `POST/PUT /lessons/:id/assignment/submission` | Kerja & kumpul tugas per lesson |
 | `/student/certificates` | `student/Certificates.tsx` | Mock | `certificateRows = []` kosong | Tidak ada API certificate di BE |
 | `/student/transactions` | `student/Transactions.tsx` | Partial | `transaction_history` dari `GET /user/data` | Tidak pakai `GET /payment`; filter/pagination client-side |
 

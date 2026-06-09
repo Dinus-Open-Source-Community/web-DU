@@ -224,7 +224,84 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 
 ---
 
-## G. Regresi — Halaman yang Masih Mock (jangan expect API)
+## G. Tab Tugas Staff & Penilaian Submission
+
+### G1 — Tab Tugas di detail course
+
+| | |
+|---|---|
+| **Route** | `/admin/courses/:courseUid?tab=assignments` atau `/mentor/courses/:courseUid` → tab Tugas |
+| **Precondition** | Login admin/mentor; kursus punya lesson dengan assignment |
+| **Langkah** | Buka detail → tab Tugas → filter Kuis/Teks → cari judul |
+| **Expected** | Daftar assignment per lesson; jumlah pengumpul; avatar peserta |
+
+### G2 — Roster pengumpulan
+
+| | |
+|---|---|
+| **Langkah** | Klik "Lihat pengumpulan" pada satu tugas |
+| **Expected** | Tabel semua siswa terdaftar; kolom status sudah/belum kumpul |
+| **API** | `GET /lessons/:id/assignment/submissions` |
+
+### G3 — Detail jawaban & penilaian inline
+
+| | |
+|---|---|
+| **Route** | `.../submissions/:submissionUid` |
+| **Langkah** | Klik "Lihat jawaban" pada baris siswa yang sudah kumpul |
+| **Expected** | Layout kiri jawaban + kanan daftar siswa; tanpa sidebar app utama |
+| **Langkah 2** | Isi nilai 0–100 + centang lulus → Simpan nilai |
+| **Expected** | Toast sukses; badge status graded |
+| **API** | `PUT .../submissions/:uid/grade` body `{ score_percent, passed }` |
+
+### G4 — Feedback timpa
+
+| | |
+|---|---|
+| **Langkah** | Tulis feedback → Kirim / Perbarui feedback |
+| **Expected** | Feedback lama diganti (bukan thread); profil penilai lengkap hanya jika Anda yang menilai |
+| **Known issue** | Penilai lain tampil sebagai "Penilai" — BE tidak kirim objek `graded_by` |
+
+### G5 — Validator negative (tugas)
+
+| | |
+|---|---|
+| **Langkah** | Coba nilai -1 atau 101 via devtools / bypass UI |
+| **Expected** | FE validator tolak sebelum request |
+| **Langkah** | Upload file >10MB (tugas teks) |
+| **Expected** | Validator tolak "Ukuran file maksimal 10 MB" |
+
+---
+
+## H. Tab Kehadiran Admin (Partial)
+
+### H1 — List & update kehadiran
+
+| | |
+|---|---|
+| **Route** | `/admin/courses/:courseUid` → tab Kehadiran |
+| **Precondition** | Login **admin** (mentor tidak lihat tab ini) |
+| **Langkah** | Pilih lesson → ubah status siswa yang sudah check-in |
+| **Expected** | Status berubah; toast sukses |
+| **API** | `GET /lessons/attendances/lesson/:id`, `PUT /lessons/attendances/:id` |
+
+### H2 — Siswa belum absen (NEGATIVE — belum create UI)
+
+| | |
+|---|---|
+| **Expected saat ini** | Baris "Belum absen" — **tidak ada** tombol create manual |
+| **Status** | 🔴 Known gap — BE `POST /lessons/attendances` belum di-wire FE |
+
+### H3 — Field note (NEGATIVE — belum di UI)
+
+| | |
+|---|---|
+| **Expected saat ini** | Update hanya status; note tidak bisa diisi dari UI |
+| **Status** | 🔴 Known gap |
+
+---
+
+## I. Regresi — Halaman yang Masih Mock (jangan expect API)
 
 | Route | Status |
 |-------|--------|
@@ -233,15 +310,15 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | `/admin/financial` | Mock |
 | `/mentor/courses` | Mock list |
 | `/mentor/courses/:uid` | Mock detail |
-| `/mentor/courses/:uid/assignments` | Mock |
-| `/student/assignments` | Mock |
+| `/mentor/courses/:uid/assignments` | Mock (tab Tugas di detail course sudah live) |
+| `/student/assignments` | Mock (submit per lesson di module viewer sudah live) |
 | `/student/certificates` | Empty |
 | `/auth/forgot-password` | Tidak hit API |
 | `/admin/reviews-and-qa` | Route tidak aktif |
 
 ---
 
-## H. Smoke Test Sequence (15 menit)
+## J. Smoke Test Sequence (20 menit)
 
 Urutan cepat untuk regression smoke:
 
@@ -253,10 +330,14 @@ Urutan cepat untuk regression smoke:
 5. /admin/courses → buat kursus (jika staging allow)
 6. /admin/courses/:uid → assign mentor
 7. /admin/courses/:uid/edit → tambah module+lesson
-8. Publish kursus dari detail
-9. Resize sidebar 1024px
-10. Logout
+8. Tab Tugas → roster → buka 1 jawaban → simpan nilai (opsional)
+9. Tab Kehadiran → ubah status (jika ada data check-in)
+10. Publish kursus dari detail
+11. Resize sidebar 1024px
+12. Logout
 ```
+
+**Checklist TODO lengkap:** [todo-backlog.md](./todo-backlog.md)
 
 ---
 

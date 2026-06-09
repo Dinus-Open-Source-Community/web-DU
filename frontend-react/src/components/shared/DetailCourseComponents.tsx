@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
+import { useCourseDetailAssignmentsView } from '@/hooks/course-detail/use-course-detail-assignments-view'
+import { useCourseDetailAttendanceView } from '@/hooks/course-detail/use-course-detail-attendance-view'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import type { CourseDetailShellProps } from '@/lib/course-detail/course-detail-manage-view-model'
 import { cn } from '@/lib/utils'
@@ -11,7 +16,12 @@ import { CourseReviewSection } from './CourseReviewSection'
 import { CourseCurriculumTab } from './CourseCurriculumTab'
 import { CourseDetailManageHeader } from './course-detail-manage/CourseDetailManageHeader'
 import { CourseDetailMobileActions } from './course-detail-manage/CourseDetailMobileActions'
-import { CourseDetailNavTabs } from './course-detail-manage/CourseDetailNavTabs'
+import {
+  CourseDetailNavTabs,
+  type CourseDetailTabValue,
+} from './course-detail-manage/CourseDetailNavTabs'
+import { CourseDetailAssignmentsTab } from './course-detail-manage/CourseDetailAssignmentsTab'
+import { CourseDetailAttendanceTab } from './course-detail-manage/CourseDetailAttendanceTab'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
 
 export function DetailCourse({ view }: CourseDetailShellProps) {
@@ -44,6 +54,31 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     assignMentorDialog,
   } = view
 
+  const [searchParams] = useSearchParams()
+  const tabFromQuery = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<CourseDetailTabValue>(
+    tabFromQuery === 'assignments' ? 'assignments' : 'overview',
+  )
+
+  useEffect(() => {
+    if (tabFromQuery === 'assignments') {
+      setActiveTab('assignments')
+    }
+  }, [tabFromQuery])
+
+  const assignmentsView = useCourseDetailAssignmentsView({
+    courseUid,
+    role: isAdmin ? 'admin' : 'mentor',
+    modules,
+    students: dataStudents,
+    enabled: activeTab === 'assignments',
+  })
+  const attendanceView = useCourseDetailAttendanceView({
+    modules,
+    students: dataStudents,
+    enabled: isAdmin && activeTab === 'attendance',
+  })
+
   return (
     <div className={cn(manageDetailLayout.page, manageDetailLayout.pageBottomMobile, 'animate-in fade-in duration-500')}>
       <CourseDetailManageHeader
@@ -57,7 +92,11 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         onPublishClick={onPublishClick}
       />
 
-      <Tabs defaultValue="overview" className="w-full gap-4 sm:gap-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as CourseDetailTabValue)}
+        className="w-full gap-4 sm:gap-6"
+      >
         <CourseDetailNavTabs isAdmin={isAdmin} />
 
         <div className="min-h-[18rem] sm:min-h-[24rem]">
@@ -72,6 +111,16 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           <TabsContent value="peserta" className="mt-0 animate-in fade-in duration-300">
             <CourseParticipantsSection courseUid={courseUid} studentsData={dataStudents} />
           </TabsContent>
+
+          <TabsContent value="assignments" className="mt-0 animate-in fade-in duration-300">
+            <CourseDetailAssignmentsTab view={assignmentsView} />
+          </TabsContent>
+
+          {isAdmin ? (
+            <TabsContent value="attendance" className="mt-0 animate-in fade-in duration-300">
+              <CourseDetailAttendanceTab view={attendanceView} />
+            </TabsContent>
+          ) : null}
 
           <TabsContent value="review" className="mt-0 animate-in fade-in duration-300">
             <CourseReviewSection

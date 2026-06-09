@@ -31,6 +31,13 @@ export const ROUTES = {
     courseCategories: '/admin/course-categories',
     courseTypes: '/admin/course-types',
     detailCourseAdmin: (courseId: string) => `/admin/courses/${courseId}`,
+    assignmentSubmissions: (courseUid: string, lessonUid: string) =>
+      `/admin/courses/${courseUid}/assignments/${lessonUid}`,
+    assignmentSubmissionDetail: (
+      courseUid: string,
+      lessonUid: string,
+      submissionUid: string,
+    ) => `/admin/courses/${courseUid}/assignments/${lessonUid}/submissions/${submissionUid}`,
     courseEditAdmin: (courseId: string) => `/admin/courses/${courseId}/edit`,
     transactions: '/admin/transactions',
     financial: '/admin/financial',
@@ -42,6 +49,13 @@ export const ROUTES = {
     dashboard: '/mentor/dashboard',
     courses: '/mentor/courses',
     detailCourseMentor: (courseId: string) => `/mentor/courses/${courseId}`,
+    assignmentSubmissions: (courseUid: string, lessonUid: string) =>
+      `/mentor/courses/${courseUid}/assignments/${lessonUid}`,
+    assignmentSubmissionDetail: (
+      courseUid: string,
+      lessonUid: string,
+      submissionUid: string,
+    ) => `/mentor/courses/${courseUid}/assignments/${lessonUid}/submissions/${submissionUid}`,
     courseEditMentor: (courseId: string) => `/mentor/courses/${courseId}/edit`,
     assignments: (courseId: string) => `/mentor/courses/${courseId}/assignments`,
   },

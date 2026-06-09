@@ -27,9 +27,13 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Editor kurikulum (module/lesson) | ✅ Live | Admin & mentor bisa kelola konten kursus |
 | Editor kurikulum — tab Tugas & save kontekstual | ✅ Live | Simpan/hapus lesson vs tugas per tab + guard unsaved |
 | Editor kurikulum — rename judul inline + API | ✅ Live | Ubah nama lesson langsung `PUT /lessons/:uid` |
-| Validator payload (Zod) | ✅ Live | Validasi strict sebelum hit API — kurangi error 400 |
+| Tab Tugas staff di detail course (admin/mentor) | ✅ Live | Overview tugas, roster pengumpulan, detail jawaban + penilaian |
+| Penilaian & feedback submission inline | ✅ Live | `PUT .../submissions/:uid/grade` — feedback timpa 1 field |
+| Tab Kehadiran admin (detail course) | 🟡 Partial | List + update + delete ✅; create manual & note UI ❌ |
+| Validator payload (Zod) | ✅ Live | + domain `lesson-assignment`, `lesson-attendance` |
 | Layout sidebar | ✅ Fixed | Sidebar konsisten di breakpoint `lg` (1024px) |
 | Dokumentasi gap FE↔BE | ✅ Done | PM/BE tahu apa yang masih kurang |
+| TODO & backlog terpusat | ✅ Done | [todo-backlog.md](./todo-backlog.md) |
 
 ### Apa yang belum (sengaja di luar scope sesi ini)?
 
@@ -47,6 +51,8 @@ Lihat [../priority-backlog.md](../priority-backlog.md) — contoh: admin transac
 | [files-changed.md](./files-changed.md) | Peta file utama yang ditambah/diubah |
 | [qa-checklist.md](./qa-checklist.md) | Skenario uji untuk fitur yang sudah live |
 | [course-editor-ux-session.md](./course-editor-ux-session.md) | Sesi course editor: tugas lesson, tab save, rename inline |
+| [assignment-staff-session.md](./assignment-staff-session.md) | Sesi tab Tugas staff, roster, penilaian inline, validator |
+| [todo-backlog.md](./todo-backlog.md) | **TODO & kekurangan FE vs BE** (requirement lama + baru) |
 
 ### Dokumen terkait (di luar folder progress)
 
@@ -64,9 +70,9 @@ Lihat [../priority-backlog.md](../priority-backlog.md) — contoh: admin transac
 
 | Metrik | Nilai |
 |--------|-------|
-| Halaman admin terintegrasi API | 7 dari 12 |
-| Domain validator baru | 4 (user-manage, course-master, course-mentor, course-form) |
-| Endpoint BE baru dipakai FE | 8+ |
+| Halaman admin terintegrasi API | 7+ dari 12 (detail course +2 subflow tugas) |
+| Domain validator | 6 (user-manage, course-master, course-mentor, course-form, lesson-assignment, lesson-attendance) |
+| Endpoint BE assignment/attendance dipakai FE | 6+ |
 | Komponen user-manage baru | ~10 |
 | Branch | `features/frontend-sapto` |
 
@@ -81,7 +87,8 @@ Lihat [../priority-backlog.md](../priority-backlog.md) — contoh: admin transac
 ✅  /admin/course-categories
 ✅  /admin/course-types
 ✅  /admin/courses
-🟡 /admin/courses/:uid          (assign mentor live; lepas mentor & reply review belum)
+🟡 /admin/courses/:uid          (tab Tugas + Kehadiran partial live; lepas mentor & reply review belum)
+🟡 /admin/courses/.../submissions & /submissions/:uid  (roster + penilaian live)
 🟡 /admin/courses/:uid/edit     (kurikulum live; update metadata tunggu BE)
 🔴 /admin/dashboard|transactions|financial  (belum disentuh — masih mock)
 ```

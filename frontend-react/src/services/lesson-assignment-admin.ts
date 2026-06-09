@@ -1,6 +1,10 @@
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import type { LessonAssignmentUpsertPayload } from '@/lib/course-edit/homework-rules'
 import { mapLessonDetailAssignment } from '@/lib/lesson-assignment/assignment-mapper'
+import {
+  parseLessonAssignmentUpsertRequest,
+  parseLessonUidParam,
+} from '@/lib/validator/lesson-assignment'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
 import { unwrapApiResponse, withApiErrorHandling } from './api-error'
@@ -24,9 +28,10 @@ export async function fetchLessonAssignment(
   lessonUid: string,
 ): Promise<LessonDetailAssignment | null> {
   return withApiErrorHandling(async () => {
+    const validatedLessonUid = parseLessonUidParam(lessonUid)
     try {
       const response = await api.get<IResponse<unknown>>(
-        API_ROUTES.lessons.assignment.getByLessonUid(lessonUid),
+        API_ROUTES.lessons.assignment.getByLessonUid(validatedLessonUid),
       )
       const data = unwrapApiResponse(response.data, 'Gagal mengambil konfigurasi tugas')
       return mapAssignmentResponse(data)
@@ -42,9 +47,11 @@ export async function createLessonAssignment(
   payload: LessonAssignmentUpsertPayload,
 ): Promise<LessonDetailAssignment> {
   return withApiErrorHandling(async () => {
+    const validatedLessonUid = parseLessonUidParam(lessonUid)
+    const validatedPayload = parseLessonAssignmentUpsertRequest(payload)
     const response = await api.post<IResponse<unknown>>(
-      API_ROUTES.lessons.assignment.createByLessonUid(lessonUid),
-      payload,
+      API_ROUTES.lessons.assignment.createByLessonUid(validatedLessonUid),
+      validatedPayload,
     )
     const data = unwrapApiResponse(response.data, 'Gagal membuat tugas')
     return mapAssignmentResponse(data)
@@ -56,9 +63,11 @@ export async function updateLessonAssignment(
   payload: LessonAssignmentUpsertPayload,
 ): Promise<LessonDetailAssignment> {
   return withApiErrorHandling(async () => {
+    const validatedLessonUid = parseLessonUidParam(lessonUid)
+    const validatedPayload = parseLessonAssignmentUpsertRequest(payload)
     const response = await api.put<IResponse<unknown>>(
-      API_ROUTES.lessons.assignment.updateByLessonUid(lessonUid),
-      payload,
+      API_ROUTES.lessons.assignment.updateByLessonUid(validatedLessonUid),
+      validatedPayload,
     )
     const data = unwrapApiResponse(response.data, 'Gagal memperbarui tugas')
     return mapAssignmentResponse(data)
@@ -67,8 +76,9 @@ export async function updateLessonAssignment(
 
 export async function deleteLessonAssignment(lessonUid: string): Promise<void> {
   return withApiErrorHandling(async () => {
+    const validatedLessonUid = parseLessonUidParam(lessonUid)
     await api.delete<IResponse<unknown>>(
-      API_ROUTES.lessons.assignment.deleteByLessonUid(lessonUid),
+      API_ROUTES.lessons.assignment.deleteByLessonUid(validatedLessonUid),
     )
   }, 'Gagal menghapus tugas')
 }

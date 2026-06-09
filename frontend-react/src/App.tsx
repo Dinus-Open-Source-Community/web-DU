@@ -22,7 +22,11 @@ const AdminCourseCategories = React.lazy(() => import('./pages/admin/CourseCateg
 const AdminCourseTypes = React.lazy(() => import('./pages/admin/CourseTypes.tsx'))
 const CourseDetail = React.lazy(() => import('./pages/courses/detail.tsx'))
 const AdminDetailCourse = React.lazy(() => import('./pages/admin/DetailCourse.tsx'))
+const AdminAssignmentSubmissions = React.lazy(() => import('./pages/admin/AssignmentSubmissions.tsx'))
+const AdminAssignmentSubmissionDetail = React.lazy(() => import('./pages/admin/AssignmentSubmissionDetail.tsx'))
 const MentorDetailCourse = React.lazy(() => import('./pages/mentor/DetailCourse.tsx'))
+const MentorAssignmentSubmissions = React.lazy(() => import('./pages/mentor/AssignmentSubmissions.tsx'))
+const MentorAssignmentSubmissionDetail = React.lazy(() => import('./pages/mentor/AssignmentSubmissionDetail.tsx'))
 const Transactions = React.lazy(() => import('./pages/admin/Transactions.tsx'))
 const Financial = React.lazy(() => import('./pages/admin/Financial.tsx'))
 const CourseEditAdmin = React.lazy(() => import('./pages/admin/CourseEdit.tsx'))
@@ -168,6 +172,24 @@ const routeConfig: RouteConfig[] = [
     roles: ['admin'],
   },
   {
+    path: ROUTES.admin.assignmentSubmissionDetail(
+      ':courseUid',
+      ':lessonUid',
+      ':submissionUid',
+    ),
+    element: <AdminAssignmentSubmissionDetail />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
+    path: ROUTES.admin.assignmentSubmissions(':courseUid', ':lessonUid'),
+    element: <AdminAssignmentSubmissions />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
     path: ROUTES.admin.courseEditAdmin(':courseUid'),
     element: <CourseEditAdmin />,
     public: false,
@@ -205,6 +227,24 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.mentor.detailCourseMentor(':courseUid'),
     element: <MentorDetailCourse />,
+    public: false,
+    lazy: true,
+    roles: ['mentor', 'admin'],
+  },
+  {
+    path: ROUTES.mentor.assignmentSubmissionDetail(
+      ':courseUid',
+      ':lessonUid',
+      ':submissionUid',
+    ),
+    element: <MentorAssignmentSubmissionDetail />,
+    public: false,
+    lazy: true,
+    roles: ['mentor', 'admin'],
+  },
+  {
+    path: ROUTES.mentor.assignmentSubmissions(':courseUid', ':lessonUid'),
+    element: <MentorAssignmentSubmissions />,
     public: false,
     lazy: true,
     roles: ['mentor', 'admin'],

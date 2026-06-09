@@ -90,9 +90,18 @@ export function useCourseModuleViewer({
   })
 
   const displayedLesson = lessonDetailQuery.data ?? activeLesson
+  const isAssignmentPane =
+    viewerPane === 'assignment' ||
+    viewerPane === 'assignment-detail' ||
+    viewerPane === 'assignment-work'
+  const assignmentLesson =
+    lessonDetailQuery.data ??
+    (isAssignmentPane && (lessonDetailQuery.isPending || lessonDetailQuery.isFetching)
+      ? null
+      : activeLesson)
   const assignmentHookState = useLessonAssignment({
-    lesson: displayedLesson,
-    enabled: variant === 'student',
+    lesson: assignmentLesson,
+    enabled: variant === 'student' && Boolean(assignmentLesson),
   })
 
   const activeIndex = useMemo(
@@ -276,20 +285,31 @@ export function useCourseModuleViewer({
     ],
   )
 
+  const hasResolvedAssignmentLesson = Boolean(lessonDetailQuery.data)
+
   const showAssignmentOverview =
     variant === 'student' &&
     viewerPane === 'assignment' &&
-    Boolean(assignmentState.assignment && displayedLesson)
+    hasResolvedAssignmentLesson &&
+    Boolean(assignmentState.assignment && assignmentLesson)
 
   const showAssignmentDetail =
     variant === 'student' &&
     viewerPane === 'assignment-detail' &&
-    Boolean(assignmentState.assignment && assignmentState.submission && displayedLesson)
+    hasResolvedAssignmentLesson &&
+    Boolean(assignmentState.assignment && assignmentState.submission && assignmentLesson)
 
   const showAssignmentWork =
     variant === 'student' &&
     viewerPane === 'assignment-work' &&
-    Boolean(assignmentState.assignment && displayedLesson)
+    hasResolvedAssignmentLesson &&
+    Boolean(assignmentState.assignment && assignmentLesson)
+
+  const isAssignmentLoading =
+    variant === 'student' &&
+    isAssignmentPane &&
+    !hasResolvedAssignmentLesson &&
+    (lessonDetailQuery.isPending || lessonDetailQuery.isFetching)
 
   return {
     courseUid,
@@ -306,6 +326,7 @@ export function useCourseModuleViewer({
     activeEntry,
     displayedLesson,
     isLessonLoading: lessonDetailQuery.isLoading && !lessonDetailQuery.data,
+    isAssignmentLoading,
     readLessonIds,
     completedLessonsCount,
     progressPercent,

@@ -1,7 +1,10 @@
 import { toRichTextEnvelope } from '@/lib/rich-text'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
-import { getAssignmentSubmissionBlockReason } from './assignment-rules'
+import {
+  getAssignmentSubmissionBlockReason,
+  getAssignmentSubmissionCapabilities,
+} from './assignment-rules'
 import type { LessonAssignmentSubmissionRecord, QuizAnswersMap } from './types'
 
 const EMPTY_HTML_PATTERN = /^(?:<p>\s*(?:<br\s*\/?>)?\s*<\/p>|<br\s*\/?>|\s|&nbsp;)*$/i
@@ -21,6 +24,10 @@ export type SubmitLessonAssignmentPayload = {
   fileDescription?: string
   quizAnswers?: QuizAnswersMap
 }
+
+export type AssignmentSubmissionValidationResult =
+  | { ok: true; payload: SubmitLessonAssignmentPayload }
+  | { ok: false; message: string }
 
 function hasMeaningfulPlainText(value: string) {
   return value.trim().length > 0
@@ -42,11 +49,13 @@ export function validateAssignmentSubmissionDraft(
   quizQuestionIds: string[] = [],
   submission: LessonAssignmentSubmissionRecord | null = null,
   now = new Date(),
-): { ok: true; payload: SubmitLessonAssignmentPayload } | { ok: false; message: string } {
+): AssignmentSubmissionValidationResult {
   const blockReason = getAssignmentSubmissionBlockReason(assignment, submission, now)
   if (blockReason) {
     return { ok: false, message: blockReason }
   }
+
+  const capabilities = getAssignmentSubmissionCapabilities(assignment)
 
   if (assignment.task_type === 'quiz') {
     const answers = draft.quizAnswers ?? {}
@@ -66,24 +75,28 @@ export function validateAssignmentSubmissionDraft(
     return { ok: true, payload: { quizAnswers: answers } }
   }
 
-  const plainText = draft.plainText?.trim() ?? ''
-  const richTextHtml = draft.richTextHtml?.trim() ?? ''
-  const file = draft.file ?? null
-  const fileDescription = draft.fileDescription?.trim() ?? ''
+  if (!capabilities.hasAnyMethod) {
+    return { ok: false, message: 'Tugas ini belum memiliki metode pengumpulan yang aktif.' }
+  }
+
+  const plainText = capabilities.allowPlainText ? (draft.plainText?.trim() ?? '') : ''
+  const richTextHtml = capabilities.allowRichText ? (draft.richTextHtml?.trim() ?? '') : ''
+  const file = capabilities.allowFile ? (draft.file ?? null) : null
+  const fileDescription = capabilities.allowFile ? (draft.fileDescription?.trim() ?? '') : ''
 
   const hasPlain = hasMeaningfulPlainText(plainText)
   const hasRich = hasMeaningfulRichTextHtml(richTextHtml)
   const hasFile = file != null
 
-  if (hasPlain && !assignment.allow_plain_text_submission) {
+  if (hasPlain && !capabilities.allowPlainText) {
     return { ok: false, message: 'Jawaban teks biasa tidak diizinkan untuk tugas ini.' }
   }
 
-  if (hasRich && !assignment.allow_rich_text_submission) {
+  if (hasRich && !capabilities.allowRichText) {
     return { ok: false, message: 'Jawaban rich text tidak diizinkan untuk tugas ini.' }
   }
 
-  if (hasFile && !assignment.allow_file_submission) {
+  if (hasFile && !capabilities.allowFile) {
     return { ok: false, message: 'Unggahan file tidak diizinkan untuk tugas ini.' }
   }
 
@@ -91,9 +104,9 @@ export function validateAssignmentSubmissionDraft(
     return { ok: false, message: 'Deskripsi file wajib diisi.' }
   }
 
-  const hasAllowedPlain = hasPlain && assignment.allow_plain_text_submission
-  const hasAllowedRich = hasRich && assignment.allow_rich_text_submission
-  const hasAllowedFile = hasFile && assignment.allow_file_submission
+  const hasAllowedPlain = hasPlain && capabilities.allowPlainText
+  const hasAllowedRich = hasRich && capabilities.allowRichText
+  const hasAllowedFile = hasFile && capabilities.allowFile
 
   if (!hasAllowedPlain && !hasAllowedRich && !hasAllowedFile) {
     return { ok: false, message: 'Isi jawaban atau unggah file terlebih dahulu.' }
@@ -101,11 +114,41 @@ export function validateAssignmentSubmissionDraft(
 
   return {
     ok: true,
-    payload: {
+    payload: sanitizeSubmissionPayload(assignment, {
       plainText: hasAllowedPlain ? plainText : undefined,
       richText: hasAllowedRich ? toRichTextEnvelope(richTextHtml) : undefined,
       file: hasAllowedFile ? file : undefined,
       fileDescription: fileDescription || undefined,
-    },
+    }),
   }
+}
+
+export function sanitizeSubmissionPayload(
+  assignment: LessonDetailAssignment,
+  payload: SubmitLessonAssignmentPayload,
+): SubmitLessonAssignmentPayload {
+  const capabilities = getAssignmentSubmissionCapabilities(assignment)
+
+  if (assignment.task_type === 'quiz') {
+    return payload.quizAnswers ? { quizAnswers: payload.quizAnswers } : {}
+  }
+
+  const sanitized: SubmitLessonAssignmentPayload = {}
+
+  if (capabilities.allowPlainText && payload.plainText?.trim()) {
+    sanitized.plainText = payload.plainText.trim()
+  }
+
+  if (capabilities.allowRichText && payload.richText) {
+    sanitized.richText = payload.richText
+  }
+
+  if (capabilities.allowFile && payload.file) {
+    sanitized.file = payload.file
+    if (payload.fileDescription?.trim()) {
+      sanitized.fileDescription = payload.fileDescription.trim()
+    }
+  }
+
+  return sanitized
 }

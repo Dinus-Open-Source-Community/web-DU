@@ -50,7 +50,7 @@ Fitur yang UI-nya sudah ada tetapi **tidak akan jalan** tanpa ini.
 | # | Item | Tim | Effort | Kriteria selesai |
 |---|------|-----|--------|------------------|
 | 4.1 | **`GET /students/me/assignments`** atau aggregate per course | BE | L | `student/Assignments` live |
-| 4.2 | Wire `mentor/CourseAssignments` ke lesson assignment API | FE | L | CRUD + grade submission |
+| 4.2 | Wire `mentor/CourseAssignments` ke lesson assignment API | FE | L | **🟡 Partial** — tab Tugas detail course + roster + grade ✅; route `/assignments` legacy masih mock |
 | 4.3 | **`GET /courses?category_uid=`** filter | BE | S | Popular & browse filter akurat |
 | 4.4 | Forgot / reset password endpoints + wire auth pages | BE + FE | L | Flow recovery password |
 | 4.5 | Certificate domain (`GET /certificates/me`, public verify) | BE | XL | `student/Certificates` live |

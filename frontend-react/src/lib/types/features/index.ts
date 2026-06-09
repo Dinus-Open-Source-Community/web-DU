@@ -1,3 +1,4 @@
+export * from './course-detail-assignments'
 export * from './course-edit'
 export * from './course-form'
 export * from './course-master'

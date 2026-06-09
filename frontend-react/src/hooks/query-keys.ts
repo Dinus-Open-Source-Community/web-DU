@@ -36,6 +36,13 @@ export const lessonAssignmentKeys = {
   all: ['lesson-assignments'] as const,
   detail: (lessonUid: string) => ['lesson-assignments', 'detail', lessonUid] as const,
   mySubmission: (lessonUid: string) => ['lesson-assignments', 'my-submission', lessonUid] as const,
+  staffSubmissions: (lessonUid: string) =>
+    ['lesson-assignments', 'staff-submissions', lessonUid] as const,
+}
+
+export const attendanceKeys = {
+  all: ['lesson-attendances'] as const,
+  byLesson: (lessonUid: string) => ['lesson-attendances', 'lesson', lessonUid] as const,
 }
 
 export const paymentKeys = {

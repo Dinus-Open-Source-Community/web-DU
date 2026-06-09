@@ -316,10 +316,103 @@ flowchart LR
 | Course form | `parseCreateCoursePayload`, `parseUpdateCoursePayload` |
 | Course mentor | `parseAssignMentorsToCoursePayload` |
 | Lesson | `parseLessonCreateRequest`, dll. (sudah ada sebelumnya) |
+| Lesson assignment | `parseLessonAssignmentUpsertRequest`, `parseLessonAssignmentSubmissionInput`, `parseGradeStaffSubmissionPayload` |
+| Lesson attendance | `parseUpdateAttendancePayload`, `parseCreateAttendancePayload` |
 
 ---
 
-## 12. Arsitektur Layer (Dependency Flow)
+## 12. Tab Tugas Staff — Detail Course → Roster
+
+**Actor:** Admin / Mentor  
+**Tab:** Detail course → **Tugas**
+
+```mermaid
+sequenceDiagram
+  actor Staff
+  participant Tab as CourseDetailAssignmentsTab
+  participant Hook as useCourseDetailAssignmentsView
+  participant Svc as lesson-assignment-admin + submission
+  participant API as GET assignment + submissions
+
+  Staff->>Tab: Buka tab Tugas
+  Tab->>Hook: modules + students
+  Hook->>API: GET /lessons/:id/assignment (per lesson)
+  Hook->>API: GET /lessons/:id/assignment/submissions
+  API-->>Tab: overview + jumlah pengumpul
+  Staff->>Tab: Lihat pengumpulan
+  Tab-->>Staff: Roster tabel (semua siswa terdaftar)
+```
+
+---
+
+## 13. Penilaian & Feedback Submission (Staff)
+
+**Actor:** Admin / Mentor  
+**Route:** `.../submissions/:submissionUid`
+
+```mermaid
+sequenceDiagram
+  actor Staff
+  participant View as CourseAssignmentSubmissionDetailView
+  participant Hook as useCourseAssignmentSubmissionDetailPage
+  participant Val as validator/lesson-assignment
+  participant API as PUT .../grade
+
+  Staff->>View: Buka jawaban siswa
+  Staff->>View: Simpan nilai (inline)
+  View->>Hook: onSubmitScore(draft)
+  Hook->>Val: parseGradeStaffSubmissionPayload
+  Hook->>API: PUT { score_percent, passed, feedback }
+  Staff->>View: Kirim / perbarui feedback
+  Hook->>API: PUT { feedback baru, score/passed existing }
+  Note over API: Feedback menimpa field sebelumnya
+```
+
+**Profil penilai di feedback:** FE cocokkan `graded_by_uid` dengan user login; selain itu tampil label generik "Penilai".
+
+---
+
+## 14. Tab Kehadiran Admin (Partial)
+
+**Actor:** Admin  
+**Tab:** Detail course → **Kehadiran** (`adminOnly`)
+
+```mermaid
+sequenceDiagram
+  actor Admin
+  participant Tab as CourseDetailAttendanceTab
+  participant Svc as lesson-attendance.ts
+  participant API as GET/PUT/DELETE attendances
+
+  Admin->>Tab: Pilih lesson
+  Tab->>API: GET /lessons/attendances/lesson/:lesson_id
+  Admin->>Tab: Ubah status / hapus record
+  Tab->>Svc: parseUpdateAttendancePayload / parseAttendanceUidParam
+  Svc->>API: PUT atau DELETE
+```
+
+**Belum:** `POST /lessons/attendances` (create manual), input **note** di UI, tab untuk mentor.
+
+---
+
+## 15. Siswa — Submit Tugas (Module Viewer)
+
+**Actor:** Student  
+**Route:** `/student/learning/course/:uid` → assignment work
+
+```mermaid
+flowchart LR
+  A[LessonAssignmentWork] --> B[validateAssignmentSubmissionDraft]
+  B --> C[sanitizeSubmissionPayload]
+  C --> D[parseLessonAssignmentSubmissionInput]
+  D --> E[POST atau PUT /assignment/submission]
+```
+
+Sudah live sebelum sesi tab staff; validator submission ditambahkan di Fase 12.
+
+---
+
+## 16. Arsitektur Layer (Dependency Flow)
 
 ```mermaid
 flowchart TB
@@ -358,12 +451,17 @@ flowchart TB
 
 ---
 
-## Workflow yang BELUM diimplementasikan (referensi QA)
+## Workflow yang BELUM / PARTIAL (referensi QA)
 
 | Workflow | Status | Lihat |
 |----------|--------|-------|
 | Lepas mentor | UI only | [api-route-gaps.md](../api-route-gaps.md) |
-| Reply review | console.log | payload-gaps §11 |
+| Reply review | console.log | [todo-backlog.md](./todo-backlog.md) B8 |
 | Admin transactions | mock | page-coverage |
 | Mentor detail course | mock | page-coverage |
+| Mentor `/assignments` route terpisah | mock | [todo-backlog.md](./todo-backlog.md) B19 |
+| Student `/assignments` aggregate | mock | [todo-backlog.md](./todo-backlog.md) B18 |
+| Siswa check-in absen | belum | [todo-backlog.md](./todo-backlog.md) C2 |
+| Admin create absen manual | belum | [todo-backlog.md](./todo-backlog.md) C4 |
+| Profil penilai lengkap (bukan user login) | partial | [todo-backlog.md](./todo-backlog.md) A12, D9 |
 | Forgot/reset password | mock | page-coverage |

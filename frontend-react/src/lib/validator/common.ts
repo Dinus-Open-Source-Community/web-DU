@@ -47,6 +47,12 @@ export const ALLOWED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'
 
 export const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 
+/** Selaras `utils.MaxLessonAssignmentSubmissionAttachmentBytes` di BE — 10 MiB per file. */
+export const MAX_LESSON_ASSIGNMENT_SUBMISSION_FILE_BYTES = 10 * 1024 * 1024
+
+/** Selaras `entity.LessonAssignment.Title` — varchar(200). */
+export const MAX_ASSIGNMENT_TITLE_LENGTH = 200
+
 export const imageUploadFileSchema = z
   .instanceof(File, { message: 'File gambar tidak valid' })
   .refine((file) => file.size > 0, 'File gambar tidak boleh kosong')

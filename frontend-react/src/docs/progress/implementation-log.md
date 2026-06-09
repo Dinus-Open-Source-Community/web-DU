@@ -218,6 +218,69 @@ feat(course-editor): tab-aware save, assignment panel, and inline lesson rename
 
 ---
 
+## Fase 11 — Tab Tugas Staff, Roster & Penilaian Submission
+
+**Tujuan:** Staff (admin/mentor) mengelola pengumpulan tugas dari detail kursus — roster siswa, review jawaban, nilai & feedback inline.
+
+**Dokumentasi lengkap:** [assignment-staff-session.md](./assignment-staff-session.md)  
+**TODO & gap:** [todo-backlog.md](./todo-backlog.md)
+
+**Highlight:**
+
+| Item | Status |
+|------|--------|
+| Tab Tugas di `DetailCourse` (admin + mentor) | ✅ |
+| Roster pengumpulan tabel (semua siswa terdaftar) | ✅ |
+| Halaman detail submission (navbar only, sidebar siswa) | ✅ |
+| Penilaian inline + feedback timpa (bukan modal) | ✅ |
+| UI flat tanpa nested card | ✅ |
+| Validator `lesson-assignment` + `lesson-attendance` | ✅ |
+| Tab Kehadiran admin (update/delete) | 🟡 Partial |
+| Profil penilai lengkap di feedback | 🟡 Partial (butuh `graded_by_uid` + session user) |
+| `mentor/CourseAssignments` route terpisah | 🔴 Masih mock |
+| `student/Assignments` aggregate | 🔴 Masih mock |
+
+**API staff yang baru di-wire:**
+
+```
+GET  /lessons/:id/assignment/submissions
+PUT  /lessons/:id/assignment/submissions/:submissionUid/grade
+GET  /lessons/attendances/lesson/:lesson_id
+PUT  /lessons/attendances/:id
+DELETE /lessons/attendances/:id
+```
+
+---
+
+## Fase 12 — Validator Assignment & Attendance (Zod)
+
+**Tujuan:** Validasi strict request tugas & kehadiran sebelum hit API — selaras kontrak BE.
+
+**Struktur baru:**
+
+```
+lib/validator/
+  lesson-assignment/
+    assignment.schema.ts   ← upsert assignment
+    submission.schema.ts   ← submit siswa (konteks assignment)
+    grade.schema.ts        ← penilaian staff
+    index.ts
+  lesson-attendance/
+    attendance.schema.ts
+    index.ts
+```
+
+**Di-wire ke services:**
+
+- `lesson-assignment-admin.ts`
+- `lesson-assignment.ts`
+- `lesson-assignment-submission.ts`
+- `lesson-attendance.ts`
+
+**Hasil:** Payload invalid (score di luar 0–100, file >10MB, status absen invalid, dll.) ditangkap di FE.
+
+---
+
 ## Timeline Visual
 
 ```mermaid
@@ -236,6 +299,9 @@ gantt
     Zod Validators          :done, f7, after f6, 2d
     Gap Documentation       :done, f8, after f7, 1d
     TSConfig Fix            :done, f9, after f8, 1d
+  section Assignment Staff
+    Tab Tugas & Roster      :done, f11, after f9, 3d
+    Validator Assignment    :done, f12, after f11, 1d
 ```
 
 ---

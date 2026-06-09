@@ -4,7 +4,7 @@ Dokumen ini merangkum **gap integrasi** antara halaman di `frontend-react/src/pa
 
 **Audiens:** Backend engineer, PM, dan frontend engineer yang mengerjakan integrasi berikutnya.
 
-**Terakhir diperbarui:** Juni 2026 (branch `features/frontend-sapto`)
+**Terakhir diperbarui:** 9 Juni 2026 (branch `features/frontend-sapto`)
 
 ---
 
@@ -37,6 +37,8 @@ Setiap gap punya:
 | [progress/architecture.md](./progress/architecture.md) | Struktur folder & pola arsitektur |
 | [progress/files-changed.md](./progress/files-changed.md) | Peta file baru/diubah untuk code review |
 | [progress/qa-checklist.md](./progress/qa-checklist.md) | Skenario uji manual fitur live |
+| [progress/todo-backlog.md](./progress/todo-backlog.md) | **TODO & kekurangan FE vs BE** (requirement lama + baru) |
+| [progress/assignment-staff-session.md](./progress/assignment-staff-session.md) | Sesi tab Tugas staff, roster, penilaian |
 
 ### Gap & backlog (PM · BE)
 

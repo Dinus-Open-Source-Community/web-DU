@@ -48,6 +48,27 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 | `lib/validator/course-mentor/index.ts` | Parse helpers |
 | `lib/validator/course-form.schema.ts` | Schema create/update course |
 | `lib/validator/course-form/index.ts` | Parse helpers |
+| `lib/validator/lesson-assignment/*.ts` | Schema upsert, submission, grade |
+| `lib/validator/lesson-attendance/*.ts` | Schema update/create attendance |
+
+### Tab Tugas Staff & Penilaian (sesi Juni 2026)
+
+| File | Peran |
+|------|-------|
+| `pages/admin/AssignmentSubmissions.tsx` | Roster pengumpulan |
+| `pages/admin/AssignmentSubmissionDetail.tsx` | Detail jawaban + penilaian |
+| `pages/mentor/AssignmentSubmissions.tsx` | Sama untuk mentor |
+| `pages/mentor/AssignmentSubmissionDetail.tsx` | Sama untuk mentor |
+| `components/shared/course-detail-manage/CourseDetailAssignmentsTab.tsx` | Tab Tugas |
+| `components/shared/course-detail-manage/CourseAssignmentRosterView.tsx` | Roster tabel |
+| `components/shared/course-detail-manage/CourseAssignmentSubmissionDetailView.tsx` | Layout detail |
+| `components/shared/course-detail-manage/StaffSubmissionInlineGradePanel.tsx` | Penilaian inline |
+| `components/shared/course-detail-manage/StaffSubmissionFeedbackSection.tsx` | Feedback timpa |
+| `components/shared/course-detail-manage/CourseDetailAttendanceTab.tsx` | Tab Kehadiran admin |
+| `hooks/course-detail/use-course-*-assignment*.ts` | View-model hooks |
+| `lib/course-detail/course-assignment-*.ts` | Presenter, navigation, mapper |
+| `services/lesson-assignment-submission.ts` | List submission + grade |
+| `services/lesson-attendance.ts` | Attendance CRUD partial |
 
 ### Dokumentasi
 
@@ -59,6 +80,8 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 | `docs/payload-gaps.md` | Gap payload |
 | `docs/priority-backlog.md` | Backlog PM |
 | `docs/progress/*` | Progress report (folder ini) |
+| `docs/progress/todo-backlog.md` | TODO & gap FE vs BE |
+| `docs/progress/assignment-staff-session.md` | Sesi tab Tugas staff |
 
 ---
 

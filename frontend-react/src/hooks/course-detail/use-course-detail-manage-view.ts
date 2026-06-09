@@ -54,8 +54,6 @@ export function useCourseDetailManageView({
     () => buildCourseEditNavigationState(location),
     [location],
   )
-  const modules = dataModules ?? course?.modules ?? []
-
   const onReplyReview = useCallback(
     async (reviewUid: string, comment: string) => {
       setSubmittingReviewUid(reviewUid)
@@ -106,7 +104,7 @@ export function useCourseDetailManageView({
     editHref,
     previewHref,
     curriculumEditNavigationState,
-    modules,
+    modules: dataModules ?? course.modules ?? [],
     dataStudents,
     editOpen,
     onEditOpenChange: setEditOpen,

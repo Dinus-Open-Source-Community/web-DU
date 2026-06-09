@@ -46,6 +46,15 @@ function prepareUpdatePayload(input: UpdateLessonInput): LessonUpdateRequest {
   return parseLessonUpdateRequest(input)
 }
 
+function mapLessonDetailItem(lesson: LessonDetailItem): LessonDetailItem {
+  return {
+    ...lesson,
+    assignment: lesson.assignment
+      ? mapLessonDetailAssignment(lesson.assignment)
+      : null,
+  }
+}
+
 export async function fetchLessonsByModuleUid(
   moduleUid: string,
   params?: IQueryParamsPayload,
@@ -57,7 +66,12 @@ export async function fetchLessonsByModuleUid(
       ...params,
     }),
   )
-  return unwrapApiResponse(response.data, 'Gagal mengambil daftar lesson')
+  const data = unwrapApiResponse(response.data, 'Gagal mengambil daftar lesson')
+
+  return {
+    ...data,
+    lessons: data.lessons.map(mapLessonDetailItem),
+  }
 }
 
 export async function fetchLessonByUid(uid: string): Promise<LessonDetailItem> {

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { canStartAssignmentWork, getAssignmentSubmissionBlockReason } from '@/lib/lesson-assignment/assignment-rules'
+import { sanitizeSubmissionPayload } from '@/lib/lesson-assignment/submission-draft'
 import { normalizeQuizPayload } from '@/lib/lesson-assignment/quiz-payload'
 import { buildQuizReviewSummary } from '@/lib/lesson-assignment/quiz-review'
 import {
@@ -73,8 +74,18 @@ export function useLessonAssignment({ lesson, enabled }: UseLessonAssignmentOpti
   )
 
   const submitMutation = useMutation({
-    mutationFn: (input: SubmitLessonAssignmentInput) =>
-      submitLessonAssignment(lessonUid, input, Boolean(submission)),
+    mutationFn: (input: SubmitLessonAssignmentInput) => {
+      if (!assignment) {
+        throw new Error('Data tugas belum tersedia.')
+      }
+
+      const sanitized = sanitizeSubmissionPayload(assignment, input)
+      return submitLessonAssignment(lessonUid, sanitized, {
+        assignment,
+        priorFileUrl: submission?.fileUrl ?? null,
+        hasExistingSubmission: Boolean(submission),
+      })
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: lessonAssignmentKeys.mySubmission(lessonUid) })
     },

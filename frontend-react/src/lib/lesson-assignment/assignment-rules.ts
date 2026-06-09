@@ -2,6 +2,41 @@ import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
 import type { LessonAssignmentSubmissionRecord } from './types'
 
+export type AssignmentSubmissionCapabilities = {
+  allowPlainText: boolean
+  allowRichText: boolean
+  allowFile: boolean
+  hasAnyMethod: boolean
+}
+
+export function getAssignmentSubmissionCapabilities(
+  assignment: LessonDetailAssignment,
+): AssignmentSubmissionCapabilities {
+  if (assignment.task_type === 'quiz') {
+    return {
+      allowPlainText: false,
+      allowRichText: false,
+      allowFile: false,
+      hasAnyMethod: true,
+    }
+  }
+
+  const allowPlainText = assignment.allow_plain_text_submission
+  const allowRichText = assignment.allow_rich_text_submission
+  const allowFile = assignment.allow_file_submission
+
+  return {
+    allowPlainText,
+    allowRichText,
+    allowFile,
+    hasAnyMethod: allowPlainText || allowRichText || allowFile,
+  }
+}
+
+export function hasAssignmentSubmissionMethods(assignment: LessonDetailAssignment): boolean {
+  return getAssignmentSubmissionCapabilities(assignment).hasAnyMethod
+}
+
 /** Selaras `assertAssignmentAcceptsSubmission` + `maxSubmissionAttempts` di backend. */
 export function getAssignmentDeadlineAt(assignment: LessonDetailAssignment): string {
   return assignment.deadline_at
@@ -74,6 +109,10 @@ export function getAssignmentSubmissionBlockReason(
     return 'Pengumpulan ulang tidak diizinkan untuk tugas ini.'
   }
 
+  if (assignment.task_type === 'text' && !hasAssignmentSubmissionMethods(assignment)) {
+    return 'Tugas ini belum memiliki metode pengumpulan yang aktif.'
+  }
+
   return null
 }
 
@@ -111,11 +150,12 @@ export function getResubmitPolicyLabel(assignment: LessonDetailAssignment) {
 }
 
 export function getAllowedSubmissionMethodsLabel(assignment: LessonDetailAssignment) {
+  const capabilities = getAssignmentSubmissionCapabilities(assignment)
   const methods: string[] = []
 
-  if (assignment.allow_plain_text_submission) methods.push('Teks')
-  if (assignment.allow_rich_text_submission) methods.push('Rich text')
-  if (assignment.allow_file_submission) methods.push('File')
+  if (capabilities.allowPlainText) methods.push('Teks')
+  if (capabilities.allowRichText) methods.push('Rich text')
+  if (capabilities.allowFile) methods.push('File')
 
   return methods.length > 0 ? methods.join(', ') : 'Tidak ada metode aktif'
 }
