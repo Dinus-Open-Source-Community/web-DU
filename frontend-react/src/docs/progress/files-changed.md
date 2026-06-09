@@ -51,6 +51,33 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 | `lib/validator/lesson-assignment/*.ts` | Schema upsert, submission, grade |
 | `lib/validator/lesson-attendance/*.ts` | Schema update/create attendance |
 
+### Publish & Hapus Kursus (Fase 16)
+
+| File | Peran |
+|------|-------|
+| `lib/course-detail/publish-state.ts` | `isCoursePublished()` — logika status selaras BE |
+| `services/course.ts` | + `deleteCourse()`, dokumentasi `updateCourseStatus` |
+| `services/api-path.ts` | + `courses.deleteByUid` |
+| `hooks/use-course-mutations.ts` | + `useDeleteCourse()` |
+| `hooks/course-detail/use-course-detail-manage-view.ts` | Flow publish + hapus + dialog |
+| `lib/course-detail/course-detail-manage-view-model.ts` | Props delete di view model |
+| `components/shared/DetailCourseComponents.tsx` | Dialog hapus + wire header/mobile |
+| `components/shared/course-detail-manage/CourseDetailManageHeader.tsx` | Tombol Terbit (draft) + Hapus |
+| `components/shared/course-detail-manage/CourseDetailMobileActions.tsx` | Menu Terbit/Hapus mobile |
+| `lib/landing/featured-courses.ts` | Filter kursus terbit via `isCoursePublished()` |
+| `backend/internal/service/course.go` | `ActivateCourseStatusFunc` set `is_published=true` |
+
+### Detail User Admin (Fase 14)
+
+| File | Peran |
+|------|-------|
+| `lib/user-manage/user-detail-*.ts` | Types, mapper, presenter, navigation, layout |
+| `hooks/use-managed-user-detail.ts`, `use-admin-user-detail-page.ts` | Data + page controller |
+| `hooks/use-user-detail-section.ts` | Navigasi section SegmentedFilter |
+| `components/admin/user-manage/UserDetailView.tsx` | Shell halaman detail |
+| `components/admin/user-manage/user-detail/*` | Header, stats, filter, cards, progress bar |
+| `pages/admin/*Detail.tsx` | Route detail siswa/mentor/administrator |
+
 ### Tab Tugas Staff & Penilaian (sesi Juni 2026)
 
 | File | Peran |
@@ -111,8 +138,10 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 
 | File | Perubahan |
 |------|-----------|
-| `components/shared/DetailCourseComponents.tsx` | Assign mentor dialog, publish status |
-| `components/shared/CourseMentorTable.tsx` | Tabel mentor + tombol Lepas (belum wired) |
+| `components/shared/DetailCourseComponents.tsx` | Assign mentor, publish, dialog hapus kursus |
+| `components/shared/CourseMentorTable.tsx` | Tabel mentor + unassign live |
+| `components/shared/CardMentor.tsx` | Badge Terbit/Draft via `isCoursePublished()` |
+| `components/courses/(authorized)/curriculum/CourseEditChrome.tsx` | Tombol Terbit hanya draft |
 | `components/shared/AdminDataTable.tsx` | Footer pagination terintegrasi |
 | `components/shared/Pagination.tsx` | + `className` prop |
 | `components/shared/course-form/CourseFormDialog.tsx` | Validator Zod menggantikan inline validate |
@@ -123,7 +152,7 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 
 | File | Perubahan |
 |------|-----------|
-| `hooks/use-course-mutations.ts` | + `useAssignMentorsToCourse` |
+| `hooks/use-course-mutations.ts` | + assign/unassign, `useDeleteCourse`, publish toast |
 | `hooks/query-keys.ts` | + userManageKeys |
 | `hooks/use-mobile.ts` | Breakpoint 768 → 1024 |
 | `lib/course-master/validation.ts` | Delegasi ke Zod validator |

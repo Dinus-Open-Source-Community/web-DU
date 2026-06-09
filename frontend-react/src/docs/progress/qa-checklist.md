@@ -116,12 +116,31 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | **Expected** | Overview, kurikulum, peserta, review, mentor tabs |
 | **Data** | Course detail + students + modules dari API |
 
-### C4 — Publish kursus
+### C4 — Terbit kursus (draft)
 
 | | |
 |---|---|
-| **Langkah** | Klik publish → konfirmasi |
-| **Expected** | `PATCH /courses/:uid/status` sukses; badge status berubah |
+| **Precondition** | Kursus masih draft (badge **Draft**) |
+| **Langkah** | Klik **Terbit** → konfirmasi dialog |
+| **Expected** | `PATCH /courses/:uid/status` sukses; badge **Terbit**; tombol **Terbit** hilang dari header & menu mobile |
+| **API** | Response `status=ACTIVE`, `is_published=true` |
+
+### C4b — Tombol Terbit tidak muncul saat sudah terbit
+
+| | |
+|---|---|
+| **Precondition** | Kursus sudah terbit |
+| **Expected** | Tidak ada tombol **Terbit** di header desktop, menu mobile, atau editor kurikulum |
+| **Catatan** | Tombol **Hapus kursus** tetap ada untuk admin |
+
+### C4c — Hapus / nonaktifkan kursus
+
+| | |
+|---|---|
+| **Precondition** | Login admin; buka detail kursus |
+| **Langkah** | Klik **Hapus kursus** → konfirmasi |
+| **Expected** | `DELETE /courses/:uid` sukses; toast; redirect ke `/admin/courses`; kursus pindah ke filter Draf / tidak di Aktif |
+| **API** | Soft delete: `status=TIDAK ACTIVE`, `is_published=false` |
 
 ### C5 — Assign mentor
 
@@ -132,21 +151,21 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | **Expected** | Mentor muncul di tabel tim pengajar |
 | **Edge case** | Assign UID invalid → error dari BE |
 
-### C6 — Lepas mentor (NEGATIVE — belum implement)
+### C6 — Lepas mentor
 
 | | |
 |---|---|
-| **Langkah** | Klik "Lepas" |
-| **Expected saat ini** | **Tidak ada aksi** — tombol tidak wired |
-| **Status** | 🔴 Known gap |
+| **Langkah** | Tab Mentor → klik **Lepas** → konfirmasi |
+| **Expected** | `POST /courses/:uid/mentors/unassign` sukses; mentor hilang dari tabel |
+| **API** | Body `{ mentor_uids: [uid] }` |
 
-### C7 — Edit metadata kursus (NEGATIVE — tunggu BE)
+### C7 — Edit metadata kursus
 
 | | |
 |---|---|
-| **Langkah** | Edit → ubah judul → simpan |
-| **Expected saat ini** | **Gagal** — `PUT /courses/:id` belum ada di BE |
-| **Verifikasi FE** | Validasi form tetap jalan sebelum request |
+| **Langkah** | Edit kursus → ubah judul → simpan |
+| **Expected** | `PUT /courses/:uid` sukses; judul terbarui di header |
+| **Catatan** | `PUT` tidak mengubah status publish — gunakan **Terbit** terpisah |
 
 ### C8 — Tab peserta — kehadiran
 
@@ -311,7 +330,7 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | `/mentor/courses` | Mock list |
 | `/mentor/courses/:uid` | Mock detail |
 | `/mentor/courses/:uid/assignments` | Mock (tab Tugas di detail course sudah live) |
-| `/student/assignments` | Mock (submit per lesson di module viewer sudah live) |
+| `/student/assignments` | ✅ Live (`GET /students/me/assignments`) |
 | `/student/certificates` | Empty |
 | `/auth/forgot-password` | Tidak hit API |
 | `/admin/reviews-and-qa` | Route tidak aktif |
@@ -332,9 +351,10 @@ Urutan cepat untuk regression smoke:
 7. /admin/courses/:uid/edit → tambah module+lesson
 8. Tab Tugas → roster → buka 1 jawaban → simpan nilai (opsional)
 9. Tab Kehadiran → ubah status (jika ada data check-in)
-10. Publish kursus dari detail
-11. Resize sidebar 1024px
-12. Logout
+10. Terbit kursus dari detail (jika masih draft)
+11. Hapus kursus test (opsional, staging only)
+12. Resize sidebar 1024px
+13. Logout
 ```
 
 **Checklist TODO lengkap:** [todo-backlog.md](./todo-backlog.md)

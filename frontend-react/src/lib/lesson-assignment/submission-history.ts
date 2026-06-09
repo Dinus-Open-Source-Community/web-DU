@@ -10,7 +10,7 @@ import {
   getMaxSubmissionAttempts,
   getResubmitPolicyLabel,
 } from './assignment-rules'
-import { formatSubmissionSubmittedAt } from './submission-status'
+import { deriveAttemptPhase, formatSubmissionSubmittedAt } from './submission-status'
 import type { LessonAssignmentSubmissionRecord, StudentSubmissionPhase } from './types'
 
 export type SubmissionPassOutcome = 'passed' | 'failed' | 'pending' | 'graded' | 'unavailable'
@@ -168,15 +168,20 @@ function buildGradingTypeLabel(
 
 export function buildAssignmentHistoryPolicy(
   assignment: LessonDetailAssignment,
+  maxAttemptsOverride?: number | null,
 ): AssignmentHistoryPolicyViewModel {
   const passingScore = getPassingScore(assignment)
+  const maxAttempts =
+    typeof maxAttemptsOverride === 'number' && maxAttemptsOverride > 0
+      ? maxAttemptsOverride
+      : getMaxSubmissionAttempts(assignment)
 
   return {
     taskTypeLabel: getAssignmentTaskTypeLabel(assignment),
     resubmitPolicyLabel: getResubmitPolicyLabel(assignment),
     submissionMethodsLabel: getAllowedSubmissionMethodsLabel(assignment),
     passingScoreLabel: passingScore != null ? `Syarat lulus ${passingScore}%` : null,
-    maxAttempts: getMaxSubmissionAttempts(assignment),
+    maxAttempts,
   }
 }
 
@@ -224,32 +229,45 @@ export function buildSubmissionHistoryViewModel(
   }
 }
 
-export function buildSubmissionHistoryRows(
+function buildSubmissionHistoryRow(
   assignment: LessonDetailAssignment,
-  submission: LessonAssignmentSubmissionRecord | null,
-  phase: StudentSubmissionPhase,
-): SubmissionHistoryRowViewModel[] {
-  if (!submission) return []
-
-  const history = buildSubmissionHistoryViewModel(assignment, submission, phase)
-  const maxAttempts = getMaxSubmissionAttempts(assignment)
+  attempt: LessonAssignmentSubmissionRecord,
+  maxAttempts: number,
+): SubmissionHistoryRowViewModel {
+  const phase = deriveAttemptPhase(assignment, attempt)
+  const history = buildSubmissionHistoryViewModel(assignment, attempt, phase)
   const isQuiz = assignment.task_type === 'quiz'
 
-  return [
-    {
-      id: submission.uid,
-      submittedAtLabel: history.submittedAtLabel ?? '-',
-      gradedAtLabel: formatGradedAt(submission.grading.gradedAt),
-      attemptLabel: formatSubmissionAttemptUsage(submission.attemptCount, maxAttempts),
-      scoreLabel: history.showScore && history.scoreLabel ? history.scoreLabel : '-',
-      quizAccuracyLabel: isQuiz ? buildQuizAccuracyLabel(submission) : null,
-      gradingTypeLabel: buildGradingTypeLabel(assignment, submission, phase),
-      passOutcome: history.passOutcome,
-      passOutcomeLabel: history.passOutcomeLabel,
-      showPassResult: history.showPassResult,
-      showScore: history.showScore,
-      hasFeedback: submission.grading.hasFeedback,
-      isQuiz,
-    },
-  ]
+  return {
+    id: `${attempt.uid}-${attempt.attemptCount}`,
+    submittedAtLabel: history.submittedAtLabel ?? '-',
+    gradedAtLabel: formatGradedAt(attempt.grading.gradedAt),
+    attemptLabel: formatSubmissionAttemptUsage(attempt.attemptCount, maxAttempts),
+    scoreLabel: history.showScore && history.scoreLabel ? history.scoreLabel : '-',
+    quizAccuracyLabel: isQuiz ? buildQuizAccuracyLabel(attempt) : null,
+    gradingTypeLabel: buildGradingTypeLabel(assignment, attempt, phase),
+    passOutcome: history.passOutcome,
+    passOutcomeLabel: history.passOutcomeLabel,
+    showPassResult: history.showPassResult,
+    showScore: history.showScore,
+    hasFeedback: attempt.grading.hasFeedback,
+    isQuiz,
+  }
+}
+
+export function buildSubmissionHistoryRows(
+  assignment: LessonDetailAssignment,
+  attempts: LessonAssignmentSubmissionRecord[],
+  maxAttemptsOverride?: number | null,
+): SubmissionHistoryRowViewModel[] {
+  if (attempts.length === 0) return []
+
+  const maxAttempts =
+    typeof maxAttemptsOverride === 'number' && maxAttemptsOverride > 0
+      ? maxAttemptsOverride
+      : getMaxSubmissionAttempts(assignment)
+
+  return [...attempts]
+    .sort((left, right) => right.attemptCount - left.attemptCount)
+    .map((attempt) => buildSubmissionHistoryRow(assignment, attempt, maxAttempts))
 }

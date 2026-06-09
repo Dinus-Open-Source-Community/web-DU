@@ -1,4 +1,4 @@
-import { Eye, Layers3, Pencil, Sparkles } from 'lucide-react'
+import { Eye, Layers3, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ type CourseDetailManageHeaderProps = {
   isPublished: boolean
   onEditClick: () => void
   onPublishClick: () => void
+  onDeleteClick?: () => void
 }
 
 export function CourseDetailManageHeader({
@@ -29,6 +30,7 @@ export function CourseDetailManageHeader({
   isPublished,
   onEditClick,
   onPublishClick,
+  onDeleteClick,
 }: CourseDetailManageHeaderProps) {
   return (
     <section className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -38,7 +40,7 @@ export function CourseDetailManageHeader({
             variant={isPublished ? 'coursePublished' : 'courseDraft'}
             className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide"
           >
-            {isPublished ? 'Published' : 'Draft'}
+            {isPublished ? 'Terbit' : 'Draft'}
           </Badge>
           <CourseLevelSignal level={course.level as JoinedCourse['level']} />
         </div>
@@ -60,6 +62,7 @@ export function CourseDetailManageHeader({
           isPublished={isPublished}
           onEditClick={onEditClick}
           onPublishClick={onPublishClick}
+          onDeleteClick={onDeleteClick}
         />
       </div>
     </section>
@@ -74,6 +77,7 @@ type HeaderActionButtonsProps = {
   isPublished: boolean
   onEditClick: () => void
   onPublishClick: () => void
+  onDeleteClick?: () => void
   compact?: boolean
 }
 
@@ -85,6 +89,7 @@ export function HeaderActionButtons({
   isPublished,
   onEditClick,
   onPublishClick,
+  onDeleteClick,
   compact = false,
 }: HeaderActionButtonsProps) {
   return (
@@ -125,20 +130,38 @@ export function HeaderActionButtons({
       </Button>
 
       {isAdmin ? (
-        <Button
-          type="button"
-          onClick={onPublishClick}
-          className={cn(
-            manageDetailLayout.actionButton,
-            compact ? 'w-full' : 'px-6',
-            isPublished
-              ? 'bg-primary text-white hover:bg-primary/90'
-              : 'bg-slate-900 text-white hover:bg-slate-800',
-          )}
-        >
-          <Sparkles className="mr-2 size-4" aria-hidden />
-          {isPublished ? 'Update status' : 'Terbitkan'}
-        </Button>
+        <>
+          {!isPublished ? (
+            <Button
+              type="button"
+              onClick={onPublishClick}
+              className={cn(
+                manageDetailLayout.actionButton,
+                compact ? 'w-full' : 'px-6',
+                'bg-slate-900 text-white hover:bg-slate-800',
+              )}
+            >
+              <Sparkles className="mr-2 size-4" aria-hidden />
+              Terbit
+            </Button>
+          ) : null}
+
+          {onDeleteClick ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onDeleteClick}
+              className={cn(
+                manageDetailLayout.actionButton,
+                compact ? 'w-full' : 'px-6',
+                'border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700',
+              )}
+            >
+              <Trash2 className="mr-2 size-4" aria-hidden />
+              Hapus kursus
+            </Button>
+          ) : null}
+        </>
       ) : null}
     </>
   )

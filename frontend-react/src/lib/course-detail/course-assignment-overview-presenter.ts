@@ -1,8 +1,6 @@
 import { buildAssignmentSubmissionsHref, type StaffAssignmentRole } from '@/lib/course-detail/course-assignment-navigation'
-import type {
-  ICourseLessonAssignmentBundle,
-  IAssignmentParticipantAvatar,
-} from '@/lib/types/features/course-detail-assignments'
+import type { CourseAssignmentOverviewSource } from '@/lib/course-detail/assignment-overview-types'
+import type { IAssignmentParticipantAvatar } from '@/lib/types/features/course-detail-assignments'
 import type { LessonAssignmentTaskType } from '@/lib/types/common/domain'
 import type { IMentorCourseStudent } from '@/lib/types/course'
 
@@ -16,6 +14,7 @@ export type CourseAssignmentOverviewItem = {
   totalStudents: number
   pendingGradingCount: number
   participants: IAssignmentParticipantAvatar[]
+  isParticipantsLoading: boolean
   submissionsHref: string
 }
 
@@ -33,35 +32,43 @@ export function buildAssignmentParticipants(
     .sort((left, right) => left.name.localeCompare(right.name, 'id'))
 }
 
+function countPendingGrading(
+  source: CourseAssignmentOverviewSource,
+): number {
+  if (source.taskType !== 'text') return 0
+
+  return source.submissions.filter((submission) => submission.gradedAt === null).length
+}
+
 export function toAssignmentOverviewItems(
-  bundles: ICourseLessonAssignmentBundle[],
+  sources: readonly CourseAssignmentOverviewSource[],
   role: StaffAssignmentRole,
   courseUid: string,
   students: IMentorCourseStudent[],
 ): CourseAssignmentOverviewItem[] {
-  return bundles
-    .filter((bundle) => bundle.assignment !== null)
-    .map((bundle) => {
-      const submissions = bundle.submissions
-      const submittedStudentUids = new Set(
-        submissions.map((item) => item.student.uid).filter(Boolean),
-      )
-      const participants = buildAssignmentParticipants(students, submittedStudentUids)
+  return sources.map((source) => {
+    const submittedStudentUids = new Set(
+      source.submissions.map((submission) => submission.studentUid).filter(Boolean),
+    )
+    const participants = buildAssignmentParticipants(students, submittedStudentUids)
+    const submissionCount = source.isSubmissionsLoading
+      ? source.submissionCount
+      : source.submissionCount > 0
+        ? source.submissions.length
+        : 0
 
-      return {
-        lessonUid: bundle.lessonUid,
-        lessonTitle: bundle.lessonTitle,
-        moduleTitle: bundle.moduleTitle,
-        assignmentTitle: bundle.assignment?.title ?? 'Tugas',
-        taskType: bundle.assignment?.task_type ?? 'text',
-        submissionCount: submissions.length,
-        totalStudents: students.length,
-        pendingGradingCount: submissions.filter(
-          (item) => item.taskType === 'text' && item.gradingStatus === 'pending',
-        ).length,
-        participants,
-        submissionsHref: buildAssignmentSubmissionsHref(role, courseUid, bundle.lessonUid),
-      }
-    })
-    .sort((a, b) => a.moduleTitle.localeCompare(b.moduleTitle) || a.lessonTitle.localeCompare(b.lessonTitle))
+    return {
+      lessonUid: source.lessonUid,
+      lessonTitle: source.lessonTitle,
+      moduleTitle: source.moduleTitle,
+      assignmentTitle: source.assignmentTitle,
+      taskType: source.taskType,
+      submissionCount,
+      totalStudents: students.length,
+      pendingGradingCount: countPendingGrading(source),
+      participants,
+      isParticipantsLoading: source.isSubmissionsLoading,
+      submissionsHref: buildAssignmentSubmissionsHref(role, courseUid, source.lessonUid),
+    }
+  })
 }

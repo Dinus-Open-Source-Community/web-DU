@@ -3,7 +3,8 @@
 Dokumen **living backlog** untuk PM, FE, dan QA.  
 **Aturan:** item requirement lama **tidak dihapus** — hanya diubah statusnya.
 
-**Terakhir diperbarui:** 9 Juni 2026 · branch `features/frontend-sapto`
+**Terakhir diperbarui:** 9 Juni 2026 (sesi publish & delete kursus) · branch `features/frontend-sapto`  
+**Status lengkap:** [integration-status.md](./integration-status.md)
 
 ---
 
@@ -53,8 +54,8 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B3 | Katalog & detail kursus admin | ✅ Selesai | Partial di B6, B7 |
 | B4 | Assign mentor ke kursus | ✅ Selesai | Fase 2 |
 | B5 | Editor kurikulum module/lesson | ✅ Selesai | Fase 10 |
-| B6 | **Update metadata kursus** (`PUT /courses/:id`) | ⏳ Tunggu BE | Form + validator FE siap |
-| B7 | **Lepas mentor** dari kursus | ⏳ Tunggu BE | Tombol UI ada, endpoint belum |
+| B6 | **Update metadata kursus** (`PUT /courses/:id`) | ✅ Selesai | Fase 13 — `updateCourse` live |
+| B7 | **Lepas mentor** dari kursus | ✅ Selesai | Fase 13 — `unassignMentorsFromCourse` live |
 | B8 | **Reply review** tersimpan ke API | 🔴 Belum | Handler masih `console.log` |
 | B9 | Validator payload domain lama (user, course, lesson) | ✅ Selesai | Fase 7 |
 | B10 | Dokumentasi gap FE↔BE | ✅ Selesai | `docs/*.md` |
@@ -65,14 +66,18 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B15 | Tab **Kehadiran** di detail course (admin) | 🟡 Partial | Lihat C4 |
 | B16 | Mentor detail course pakai API live | 🔴 Belum | Masih mock — backlog Fase 1.4 |
 | B17 | Mentor list courses pakai API live | 🔴 Belum | Masih mock — backlog Fase 1.5 |
-| B18 | Halaman `student/Assignments` aggregate lintas kursus | 🔴 Belum | Masih mock — butuh endpoint aggregate |
+| B18 | Halaman `student/Assignments` aggregate lintas kursus | ✅ Selesai | Fase 13 — `GET /students/me/assignments` |
 | B19 | Halaman `mentor/.../assignments` (route terpisah) | 🔴 Belum | Masih mock; tab Tugas di detail course sudah live |
+| B26 | **Halaman detail user admin** (`GET /user/:uid`) | ✅ Selesai | Fase 14 — `UserDetailView` + progress bar |
+| B27 | **Publish kursus** selaras BE (`PATCH /courses/:id/status`) | ✅ Selesai | Fase 16 — `isCoursePublished()`, label Terbit/Draft |
+| B28 | **Hapus / nonaktifkan kursus** (`DELETE /courses/:id`) | ✅ Selesai | Fase 16 — dialog + redirect daftar kursus |
+| B29 | Tombol **Terbit** disembunyikan setelah kursus publish | ✅ Selesai | Fase 16 — header, mobile, editor kurikulum |
 | B20 | Admin dashboard / transactions / financial | 🔴 Belum | Masih mock |
 | B21 | Forgot / reset password | 🔴 Belum | Tidak ada endpoint BE |
 | B22 | Sertifikat siswa | 🔴 Belum | Tidak ada domain BE |
 | B23 | Ganti password kirim `old_password` | 🔴 Belum | `profile` partial |
 | B24 | Tab peserta — bar kehadiran akurat | ⏳ Tunggu BE | `attendance_*` tidak ada di `GET /courses/:id/students` |
-| B25 | Halaman administrator tampilkan `super_admin` | 🟡 Partial | Filter `role=admin` tidak mencakup super_admin |
+| B25 | Halaman administrator tampilkan `super_admin` | ✅ Selesai | BE fix: `role=admin` include `super_admin` |
 
 ---
 
@@ -92,10 +97,10 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | C8 | `GET` | `/lessons/attendances/:id` | 🔴 Belum | Detail satu record absensi | Rendah |
 | C9 | `GET` | `/lessons/readings/lesson/:lesson_id` | 🔴 Belum | Admin/mentor lihat siapa sudah baca lesson | Sedang |
 | C10 | `GET` | `/lessons/readings/my-history` | 🔴 Belum | Service ada, route BE bermasalah (komentar di FE) | Rendah |
-| C11 | `GET` | `/courses/:uid/progress` | 🔴 Belum | Progress enrollment — tidak dipakai halaman | Sedang |
+| C11 | `GET` | `/courses/:uid/progress` | ✅ Selesai | `use-course-lesson-reading.ts` | — |
 | C12 | `GET` | `/courses/:uid/mentor` | 🔴 Belum | List mentor kursus (terpisah dari detail) | Rendah |
 | C13 | `POST` | `/courses/:uid/review/:id/reply` | 🔴 Belum | Endpoint ada; FE belum wire | Tinggi |
-| C14 | `GET` | `/user/:uid` | 🔴 Belum | Detail user untuk drawer admin | Rendah |
+| C14 | `GET` | `/user/:uid` | ✅ Selesai | Halaman detail user admin (Fase 14) | — |
 | C15 | `GET` | `/invoices/:enrollmentUid` | 🔴 Belum | Invoice enrollment | Rendah |
 | C16 | `GET` | `/mentor/all`, `/mentor/:id` | 🔴 Belum | Landing mentor publik | Rendah |
 | C17 | `POST` | `/lessons/:id/assignment/submission` (siswa) | ✅ Selesai | Module viewer assignment work | — |
@@ -109,20 +114,23 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 
 | # | Kebutuhan | Dampak FE | Status | Ref |
 |---|-----------|-----------|--------|-----|
-| D1 | `PUT /courses/:id` update metadata | Edit kursus gagal | ⏳ Tunggu BE | `api-route-gaps.md` §1 |
-| D2 | `POST /courses/:id/mentors/unassign` | Tombol Lepas mentor | ⏳ Tunggu BE | `api-route-gaps.md` §1 |
-| D3 | `GET /courses/:courseUid/assignments` aggregate | `mentor/CourseAssignments` mock | ⏳ Tunggu BE | Bisa workaround: loop lesson (berat) |
-| D4 | `GET /students/me/assignments` aggregate | `student/Assignments` mock | ⏳ Tunggu BE | `api-route-gaps.md` §5 |
-| D5 | `GET /admin/transactions` + summary | Admin transactions mock | ⏳ Tunggu BE | `priority-backlog.md` 2.3 |
-| D6 | `GET /admin/financial/summary` | Admin financial mock | ⏳ Tunggu BE | `priority-backlog.md` 3.2 |
-| D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ⏳ Tunggu BE | `priority-backlog.md` 3.1 |
-| D8 | `attendance_*` di `GET /courses/:id/students` | Bar kehadiran tab Peserta salah | ⏳ Tunggu BE | `priority-backlog.md` 2.6 |
+| D1 | `PUT /courses/:id` update metadata | Edit kursus gagal | ✅ Selesai | Fase 13 |
+| D2 | `POST /courses/:id/mentors/unassign` | Tombol Lepas mentor | ✅ Selesai | Fase 13 |
+| D3 | `GET /courses/:courseUid/assignments` aggregate | `mentor/CourseAssignments` mock | 🟡 Partial | Service live; legacy page masih mock |
+| D4 | `GET /students/me/assignments` aggregate | `student/Assignments` mock | ✅ Selesai | Fase 13 |
+| D5 | `GET /admin/transactions` + summary | Admin transactions mock | ⏳ Tunggu FE | BE ada; service admin belum |
+| D6 | `GET /admin/financial/summary` | Admin financial mock | ⏳ Tunggu FE | BE ada; service admin belum |
+| D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ⏳ Tunggu FE | BE ada; service admin belum |
+| D8 | `attendance_*` di `GET /courses/:id/students` | Bar kehadiran tab Peserta salah | 🟡 Partial | BE kirim field; FE belum mapper |
 | D9 | Profil user penilai (`graded_by` object) di response submission | Profil feedback staff selalu lengkap | ⏳ Tunggu BE | A12 — sengaja tidak diubah BE |
 | D10 | Forgot / reset password | Auth recovery mock | ⏳ Tunggu BE | `api-route-gaps.md` §9 |
 | D11 | Domain sertifikat | `student/Certificates` mock | ⏳ Tunggu BE | `api-route-gaps.md` §10 |
 | D12 | Domain Q&A / moderation lintas kursus | `admin/ReviewsQA` unregistered | ⏳ Tunggu BE | `api-route-gaps.md` §8 |
-| D13 | `GET /courses?category_uid=` filter | Filter kategori browse tidak akurat | ⏳ Tunggu BE | `api-route-gaps.md` §1 |
-| D14 | `DELETE /courses/:id` | Tidak ada hapus kursus di UI | 🚫 Out of scope | Nice to have |
+| D13 | `GET /courses?category_uid=` filter | Filter kategori browse tidak akurat | 🟡 Partial | Param dikirim; verifikasi hasil filter |
+| D14 | `DELETE /courses/:id` | Tidak ada hapus kursus di UI | ✅ Selesai | Fase 16 — `deleteCourse`, `useDeleteCourse`, dialog admin |
+| D15 | Admin reviews & Q&A moderasi | `ReviewsQA` mock | ⏳ Tunggu FE | BE ada; route dikomentari |
+| D16 | Mentor dashboard KPI + jadwal | `mentor/Dashboard` mock | ⏳ Tunggu FE | BE ada; service belum |
+| D17 | Q&A per course (student) | Tidak ada UI | ⏳ Tunggu FE | BE ada; belum di api-path |
 
 ---
 
@@ -140,11 +148,13 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 ### Prioritas 2 — Setelah BE menyediakan endpoint
 
-- [ ] **E6** Wire edit metadata kursus setelah `PUT /courses/:id` (B6, D1)
-- [ ] **E7** Wire unassign mentor setelah endpoint unassign (B7, D2)
-- [ ] **E8** Tab Peserta: bar kehadiran setelah field attendance di students API (B24, D8)
-- [ ] **E9** `student/Assignments` setelah aggregate API (B18, D4)
+- [x] **E6** Wire edit metadata kursus setelah `PUT /courses/:id` (B6, D1)
+- [x] **E7** Wire unassign mentor setelah endpoint unassign (B7, D2)
+- [ ] **E8** Tab Peserta: mapper `attendance_present/total` di students API (B24, D8)
+- [x] **E9** `student/Assignments` setelah aggregate API (B18, D4)
 - [ ] **E10** Refactor `mentor/CourseAssignments` atau deprecate ke tab detail course (B19, D3)
+- [x] **E21** `DELETE /courses/:id` — route, service, dialog hapus (D14, B28)
+- [ ] **E22** Halaman detail user — QA skenario lengkap (B26)
 
 ### Prioritas 3 — Enhancement tanpa blocker BE besar
 
@@ -169,9 +179,9 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 | # | Issue | Status | Tindakan |
 |---|-------|--------|----------|
 | F1 | `mentor/CourseAssignments.tsx` masih mock penuh | 🔴 | Redirect ke detail course tab Tugas atau rewire API |
-| F2 | `student/Assignments.tsx` masih mock | 🔴 | Tunggu D4 atau build client-side aggregate |
+| F2 | `student/Assignments.tsx` masih mock | ✅ | Selesai — `useStudentMyAssignments` |
 | F3 | Profil penilai fallback "Penilai" tanpa avatar | 🟡 Expected | Tunggu D9 atau cache staff directory |
-| F4 | Filter `super_admin` di halaman administrator | 🟡 | Koordinasi BE/FE (B25) |
+| F4 | Filter `super_admin` di halaman administrator | ✅ | BE fix merge J-yriz (B25) |
 | F5 | `GET /lessons/readings/my-history` — komentar broken di BE | 🔴 | Verifikasi dengan tim BE |
 | F6 | Perubahan branch belum di-commit | 🟡 | Menunggu permintaan developer |
 
@@ -183,9 +193,12 @@ Saat menutup item di dokumen ini, update juga:
 
 | Dokumen | Path |
 |---------|------|
+| **Integration status** | `progress/integration-status.md` |
 | Progress README | `progress/README.md` |
 | Implementation log | `progress/implementation-log.md` |
+| Backend changes | `../backend-changes-j-yriz-merge.md` |
 | QA checklist | `progress/qa-checklist.md` |
 | Page coverage | `../page-coverage.md` |
 | API route gaps | `../api-route-gaps.md` |
+| Admin Transaksi & Financial spec | `progress/admin-financial-transactions-spec.md` |
 | Priority backlog | `../priority-backlog.md` |

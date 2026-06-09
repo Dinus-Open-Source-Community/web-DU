@@ -4,6 +4,7 @@ import { Trash2, UserCog } from 'lucide-react'
 import { UserIdentityCell } from '@/components/admin/user-manage/UserIdentityCell'
 import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/lib/routes'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 import type { ManagedUserRow } from '@/lib/user-manage/view-models'
 import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
@@ -151,7 +152,7 @@ export function buildUserManageColumns({
 }
 
 export function getUserDetailPath(kind: UserManageKind, uid: string) {
-  if (kind === 'student') return `/admin/users/students/${uid}`
-  if (kind === 'mentor') return `/admin/users/mentors/${uid}`
-  return `/admin/users/administrators/${uid}`
+  if (kind === 'student') return ROUTES.admin.users.studentDetail(uid)
+  if (kind === 'mentor') return ROUTES.admin.users.mentorDetail(uid)
+  return ROUTES.admin.users.administratorDetail(uid)
 }

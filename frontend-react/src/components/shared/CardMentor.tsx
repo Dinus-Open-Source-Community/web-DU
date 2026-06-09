@@ -42,7 +42,7 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
           <Badge
             variant={isPublished ? 'coursePublished' : 'courseDraft'}
             className="rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest shadow-xs border-none bg-white/95 backdrop-blur-sm">
-            {isPublished ? 'Published' : 'Draft'}
+            {isPublished ? 'Terbit' : 'Draft'}
           </Badge>
         </div>
       </div>

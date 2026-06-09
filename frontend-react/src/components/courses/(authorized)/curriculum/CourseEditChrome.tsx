@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { isCoursePublished } from "@/lib/course-detail/publish-state";
 import type { CourseEditorTab } from "@/lib/course-edit/types";
 import type { ICourseDetailItem } from "@/lib/types/course";
 import type { CompactPane } from "@/lib/course-edit/viewport";
@@ -49,6 +50,7 @@ export function CourseEditToolbar({
   onDeleteLesson,
   onDeleteAssignment,
 }: CourseEditToolbarProps) {
+  const published = isCoursePublished(course);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const hideActionsOnCompactEditor = isCompact && compactPane === "editor";
   const isHomeworkTab = editorTab === "homework";
@@ -99,7 +101,7 @@ export function CourseEditToolbar({
           </Button>
           <h1 className={editLayout.pageTitle}>{course.title}</h1>
           <Badge
-            variant={course.is_published ? "coursePublished" : "courseDraft"}
+            variant={published ? "coursePublished" : "courseDraft"}
             className="shrink-0"
           />
         </div>
@@ -148,7 +150,7 @@ export function CourseEditToolbar({
                 : "Simpan lesson"}
           </Button>
 
-          {!course.is_published && isAdmin && (
+          {!published && isAdmin && (
             <Button
               type="button"
               variant="outline"
@@ -157,7 +159,7 @@ export function CourseEditToolbar({
               disabled={isSaving || isPublishing}
               onClick={onPublish}
             >
-              {isPublishing ? "Menerbitkan..." : "Terbitkan"}
+              {isPublishing ? "Memproses..." : "Terbit"}
             </Button>
           )}
         </div>

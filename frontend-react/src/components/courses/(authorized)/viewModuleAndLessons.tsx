@@ -101,7 +101,8 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
             lesson={displayedLesson}
             assignment={assignmentState.assignment}
             submission={assignmentState.submission}
-            phase={assignmentState.phase}
+            submissionAttempts={assignmentState.submissionAttempts}
+            submissionMaxAttempts={assignmentState.submissionMaxAttempts}
             canStart={assignmentState.canStart}
             submissionBlockReason={assignmentState.submissionBlockReason}
             theme={theme}

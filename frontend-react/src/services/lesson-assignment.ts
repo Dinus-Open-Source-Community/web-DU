@@ -1,5 +1,8 @@
-import { mapLessonAssignmentSubmissionResponse } from '@/lib/lesson-assignment/mappers'
-import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
+import {
+  mapLessonAssignmentSubmissionBundle,
+  mapLessonAssignmentSubmissionResponse,
+} from '@/lib/lesson-assignment/mappers'
+import type { LessonAssignmentSubmissionBundle } from '@/lib/lesson-assignment/types'
 import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/submission-draft'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import {
@@ -33,7 +36,7 @@ function isAlreadySubmittedError(error: unknown) {
 
 export async function fetchMyLessonAssignmentSubmission(
   lessonUid: string,
-): Promise<LessonAssignmentSubmissionRecord | null> {
+): Promise<LessonAssignmentSubmissionBundle | null> {
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     try {
@@ -41,7 +44,7 @@ export async function fetchMyLessonAssignmentSubmission(
         API_ROUTES.lessons.assignment.submission.getByLessonUid(validatedLessonUid),
       )
       const data = unwrapApiResponse(response.data, 'Gagal mengambil submission tugas')
-      return mapLessonAssignmentSubmissionResponse(data)
+      return mapLessonAssignmentSubmissionBundle(data)
     } catch (error) {
       if (isNotFoundError(error)) return null
       throw error

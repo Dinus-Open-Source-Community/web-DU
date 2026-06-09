@@ -52,7 +52,7 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   couponActive: 'Aktif',
   couponExpired: 'Kedaluwarsa',
   couponScheduled: 'Terjadwal',
-  coursePublished: 'Published',
+  coursePublished: 'Terbit',
   courseDraft: 'Draft',
   coursePending: 'Pending',
   courseRejected: 'Rejected',

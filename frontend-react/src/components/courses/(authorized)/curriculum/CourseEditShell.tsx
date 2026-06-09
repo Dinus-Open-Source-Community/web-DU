@@ -8,6 +8,7 @@ import type {
 import type { ICourseDetailItem } from '@/lib/types/course'
 import type { IModulesData } from '@/lib/types/module'
 import { getLessonKey } from '@/lib/course-edit/mappers'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import {
   shouldShowEditorPane,
   shouldShowOutlinePane,
@@ -269,7 +270,7 @@ export function CourseEditShell({
           hasUnsavedAssignment={hasUnsavedAssignment}
           canSaveAssignment={canSaveAssignment}
           isAdmin={isAdmin}
-          isPublished={Boolean(course.is_published)}
+          isPublished={isCoursePublished(course)}
           onSaveLesson={() => void onSaveLesson()}
           onSaveAssignment={() => void onSaveAssignment()}
           onPublish={onPublish}

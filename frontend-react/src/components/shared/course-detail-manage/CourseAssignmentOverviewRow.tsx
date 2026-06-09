@@ -1,14 +1,17 @@
+import { memo } from 'react'
 import { ArrowRight, FileText, HelpCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { AssignmentSubmitterAvatarGroup } from '@/components/shared/course-detail-manage/AssignmentSubmitterAvatarGroup'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { CourseAssignmentOverviewItem } from '@/lib/course-detail/course-assignment-overview-presenter'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
 
 type CourseAssignmentOverviewRowProps = {
   item: CourseAssignmentOverviewItem
+  onPrefetchRoster?: () => void
 }
 
 function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['taskType'] }) {
@@ -30,7 +33,10 @@ function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['t
   )
 }
 
-export function CourseAssignmentOverviewRow({ item }: CourseAssignmentOverviewRowProps) {
+function CourseAssignmentOverviewRowBase({
+  item,
+  onPrefetchRoster,
+}: CourseAssignmentOverviewRowProps) {
   return (
     <li className={manageDetailLayout.flatListItem}>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -57,13 +63,26 @@ export function CourseAssignmentOverviewRow({ item }: CourseAssignmentOverviewRo
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-          <AssignmentSubmitterAvatarGroup participants={item.participants} />
+          {item.isParticipantsLoading ? (
+            <div className="space-y-2" aria-hidden>
+              <div className="flex -space-x-2">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <Skeleton key={index} className="size-8 rounded-full" />
+                ))}
+              </div>
+              <Skeleton className="h-3 w-28" />
+            </div>
+          ) : (
+            <AssignmentSubmitterAvatarGroup participants={item.participants} />
+          )}
           <Button
             asChild
             type="button"
             size="sm"
             variant="outline"
             className="h-9 shrink-0 rounded-lg"
+            onMouseEnter={onPrefetchRoster}
+            onFocus={onPrefetchRoster}
           >
             <Link to={item.submissionsHref}>
               Lihat pengumpulan
@@ -75,3 +94,5 @@ export function CourseAssignmentOverviewRow({ item }: CourseAssignmentOverviewRo
     </li>
   )
 }
+
+export const CourseAssignmentOverviewRow = memo(CourseAssignmentOverviewRowBase)

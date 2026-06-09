@@ -30,9 +30,14 @@ export function useGradeLessonSubmission() {
         input.context,
       ),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({
-        queryKey: lessonAssignmentKeys.staffSubmissions(variables.lessonUid),
-      })
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: lessonAssignmentKeys.staffSubmissions(variables.lessonUid),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: lessonAssignmentKeys.overviewSubmissions(variables.lessonUid),
+        }),
+      ])
       toast.success(variables.successMessage ?? 'Penilaian disimpan')
     },
     onError: (error: Error) => {

@@ -112,15 +112,30 @@ export async function updateCourse(uid: string, payload: UpdateCoursePayload) {
 /**
  * PATCH /courses/:id/status
  * - Tanpa request body (hanya course UID di path)
- * - BE mengubah field `status` → ACTIVE
- * - BE tidak mengubah `is_published`; UI harus baca `status` juga (lihat isCoursePublished)
+ * - BE mengubah `status` → ACTIVE dan `is_published` → true
  */
 export async function updateCourseStatus(request: UpdateCourseStatusRequest) {
   const validatedRequest = parseUpdateCourseStatusRequest(request)
-  const response = await api.patch<IResponse<unknown>>(
+  const response = await api.patch<IResponse<IDetailCourseResponse>>(
     API_ROUTES.courses.updateStatusByUid(validatedRequest.courseUid),
   )
   return unwrapApiResponse(response.data, 'Gagal memperbarui status kursus')
+}
+
+export type DeleteCourseResponse = {
+  uid: string
+  status: string
+}
+
+/**
+ * DELETE /courses/:id — soft delete: status TIDAK ACTIVE, is_published false.
+ */
+export async function deleteCourse(uid: string) {
+  const validatedUid = parseCourseUidParam(uid)
+  const response = await api.delete<IResponse<DeleteCourseResponse>>(
+    API_ROUTES.courses.deleteByUid(validatedUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal menghapus kursus')
 }
 
 export async function fetchCourseStudents(courseUid: string) {
@@ -163,6 +178,19 @@ export async function assignMentorsToCourse(
     validatedPayload,
   )
   return unwrapApiResponse(response.data, 'Gagal menugaskan mentor ke kursus')
+}
+
+export async function unassignMentorsFromCourse(
+  courseUid: string,
+  payload: AssignMentorsToCoursePayload,
+) {
+  const validatedCourseUid = parseAssignMentorsCourseUidParam(courseUid)
+  const validatedPayload = parseAssignMentorsToCoursePayload(payload)
+  const response = await api.post<IResponse<AssignMentorsToCourseResponse>>(
+    API_ROUTES.courses.unassignMentorsByUid(validatedCourseUid),
+    validatedPayload,
+  )
+  return unwrapApiResponse(response.data, 'Gagal melepas mentor dari kursus')
 }
 
 export function stripLessonsFromModules(

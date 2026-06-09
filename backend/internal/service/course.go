@@ -1062,6 +1062,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 	}
 
 	course.Status = entity.CourseStatusActive
+	course.IsPublished = true
 	if err := database.DB.Save(&course).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

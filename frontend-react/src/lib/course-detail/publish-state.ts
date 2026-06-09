@@ -4,11 +4,16 @@ export type CoursePublishFields = {
   status?: string
 }
 
+const INACTIVE_STATUSES = new Set(['TIDAK ACTIVE', 'DRAFT'])
+
 /**
- * PATCH /courses/:id/status hanya mengubah `status` menjadi ACTIVE (tanpa body).
- * Field `is_published` tidak di-set oleh endpoint tersebut.
+ * Selaras BE:
+ * - `PATCH /courses/:id/status` → `status=ACTIVE` + `is_published=true`
+ * - `DELETE /courses/:id` → `status=TIDAK ACTIVE` + `is_published=false`
+ * - `PUT /courses/:id` tidak mengubah status / is_published
  */
 export function isCoursePublished(course: CoursePublishFields): boolean {
   const status = (course.status ?? '').trim().toUpperCase()
-  return Boolean(course.is_published) || status === 'ACTIVE' || status === 'PUBLISHED'
+  if (INACTIVE_STATUSES.has(status)) return false
+  return Boolean(course.is_published) || status === 'ACTIVE'
 }

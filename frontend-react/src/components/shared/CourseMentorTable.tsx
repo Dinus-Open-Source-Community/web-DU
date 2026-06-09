@@ -5,11 +5,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface CourseMentorTableProps {
   mentors: ICourseMentorItem[]
   isAdmin?: boolean
   assignAction?: ReactNode
+  pendingUnassignMentor?: ICourseMentorItem | null
+  onRequestUnassignMentor?: (mentor: ICourseMentorItem) => void
+  onCancelUnassignMentor?: () => void
+  onConfirmUnassignMentor?: () => void | Promise<void>
+  unassigningMentorUid?: string | null
 }
 
 function MentorIdentity({ mentor, size = 'default' }: { mentor: ICourseMentorItem; size?: 'default' | 'compact' }) {
@@ -32,7 +38,46 @@ function MentorIdentity({ mentor, size = 'default' }: { mentor: ICourseMentorIte
   )
 }
 
-export function CourseMentorTable({ mentors, isAdmin, assignAction }: CourseMentorTableProps) {
+function UnassignMentorButton({
+  mentor,
+  onRequestUnassignMentor,
+  unassigningMentorUid,
+  className,
+}: {
+  mentor: ICourseMentorItem
+  onRequestUnassignMentor: (mentor: ICourseMentorItem) => void
+  unassigningMentorUid?: string | null
+  className?: string
+}) {
+  const isUnassigning = unassigningMentorUid === mentor.uid
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className={className}
+      onClick={() => onRequestUnassignMentor(mentor)}
+      disabled={Boolean(unassigningMentorUid)}
+      aria-busy={isUnassigning}
+    >
+      {isUnassigning ? 'Melepas...' : 'Lepas'}
+    </Button>
+  )
+}
+
+export function CourseMentorTable({
+  mentors,
+  isAdmin,
+  assignAction,
+  pendingUnassignMentor,
+  onRequestUnassignMentor,
+  onCancelUnassignMentor,
+  onConfirmUnassignMentor,
+  unassigningMentorUid,
+}: CourseMentorTableProps) {
+  const canUnassign = isAdmin && Boolean(onRequestUnassignMentor)
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -68,7 +113,7 @@ export function CourseMentorTable({ mentors, isAdmin, assignAction }: CourseMent
                   <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Mentor</TableHead>
                   <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Peran</TableHead>
                   <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Deskripsi</TableHead>
-                  {isAdmin ? <TableHead className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Aksi</TableHead> : null}
+                  {canUnassign ? <TableHead className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Aksi</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -85,11 +130,14 @@ export function CourseMentorTable({ mentors, isAdmin, assignAction }: CourseMent
                     <TableCell className="max-w-md px-5 py-4">
                       <p className="line-clamp-2 text-sm leading-6 text-slate-600">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
                     </TableCell>
-                    {isAdmin ? (
+                    {canUnassign ? (
                       <TableCell className="px-5 py-4 text-right">
-                        <Button type="button" variant="outline" size="sm" className="h-8 rounded-xl border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700">
-                          Lepas
-                        </Button>
+                        <UnassignMentorButton
+                          mentor={mentor}
+                          onRequestUnassignMentor={onRequestUnassignMentor!}
+                          unassigningMentorUid={unassigningMentorUid}
+                          className="h-8 rounded-xl border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                        />
                       </TableCell>
                     ) : null}
                   </TableRow>
@@ -114,16 +162,35 @@ export function CourseMentorTable({ mentors, isAdmin, assignAction }: CourseMent
                   ) : null}
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-600">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
-                {isAdmin ? (
-                  <Button type="button" variant="outline" size="sm" className="mt-4 h-9 w-full rounded-xl border-slate-200 text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700">
-                    Lepas mentor
-                  </Button>
+                {canUnassign ? (
+                  <UnassignMentorButton
+                    mentor={mentor}
+                    onRequestUnassignMentor={onRequestUnassignMentor!}
+                    unassigningMentorUid={unassigningMentorUid}
+                    className="mt-4 h-9 w-full rounded-xl border-slate-200 text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                  />
                 ) : null}
               </article>
             ))}
           </div>
         </>
       )}
+
+      {pendingUnassignMentor ? (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) onCancelUnassignMentor?.()
+          }}
+          title="Lepas mentor dari kursus?"
+          description={`${pendingUnassignMentor.name} tidak lagi ditugaskan untuk kursus ini.`}
+          confirmLabel="Lepas mentor"
+          cancelLabel="Batal"
+          variant="destructive"
+          onConfirm={() => void onConfirmUnassignMentor?.()}
+          onCancel={() => onCancelUnassignMentor?.()}
+        />
+      ) : null}
     </section>
   )
 }

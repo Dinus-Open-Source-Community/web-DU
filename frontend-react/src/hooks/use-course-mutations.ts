@@ -6,7 +6,9 @@ import type { AssignMentorsToCoursePayload } from '@/lib/course-mentor/types'
 import type { CreateCourseReviewReplyPayload } from '@/lib/course-review/types'
 import {
   assignMentorsToCourse,
+  unassignMentorsFromCourse,
   createCourse,
+  deleteCourse,
   replyToCourseReview,
   updateCourse,
   updateCourseStatus,
@@ -22,7 +24,7 @@ export function useCreateCourse() {
     mutationFn: (payload: CreateCoursePayload) => createCourse(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
-      toast.success('Kursus dibuat sebagai draf. Terbitkan lewat tombol Update status.')
+      toast.success('Kursus dibuat sebagai draf. Terbit lewat tombol Terbit.')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Gagal membuat kursus')
@@ -55,7 +57,7 @@ export function useUpdateCourseStatus() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-      toast.success('Status kursus berhasil diperbarui')
+      toast.success('Kursus berhasil terbit')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Gagal memperbarui status kursus')
@@ -104,6 +106,44 @@ export function useAssignMentorsToCourse() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Gagal menugaskan mentor')
+    },
+  })
+}
+
+export function useDeleteCourse() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (uid: string) => deleteCourse(uid),
+    onSuccess: (_data, uid) => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.all })
+      void queryClient.removeQueries({ queryKey: courseKeys.detail(uid) })
+      toast.success('Kursus berhasil dinonaktifkan')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Gagal menghapus kursus')
+    },
+  })
+}
+
+export function useUnassignMentorsFromCourse() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      courseUid,
+      payload,
+    }: {
+      courseUid: string
+      payload: AssignMentorsToCoursePayload
+    }) => unassignMentorsFromCourse(courseUid, payload),
+    onSuccess: (_data, { courseUid }) => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.all })
+      void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      toast.success('Mentor berhasil dilepas dari kursus')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Gagal melepas mentor')
     },
   })
 }

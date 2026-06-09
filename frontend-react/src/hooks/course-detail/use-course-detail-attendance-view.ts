@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { useCourseAttendanceData } from '@/hooks/course-detail/use-course-attendance-data'
-import { useCourseDetailLessons } from '@/hooks/course-detail/use-course-detail-lessons'
 import { useDeleteLessonAttendance, useUpdateLessonAttendance } from '@/hooks/use-lesson-attendance-mutations'
+import { deriveLessonsFromModules } from '@/lib/course-detail/derive-lessons-from-modules'
 import type { CourseDetailAttendanceViewModel } from '@/lib/course-detail/course-detail-attendance-view-model'
 import type { IMentorCourseStudent } from '@/lib/types/course'
 import type { AttendanceStatusValue } from '@/lib/types/features/course-detail-assignments'
@@ -21,22 +21,16 @@ export function useCourseDetailAttendanceView({
 }: UseCourseDetailAttendanceViewOptions): CourseDetailAttendanceViewModel {
   const [attendanceLessonUid, setAttendanceLessonUid] = useState('')
 
-  const { lessons, isLoading: lessonsLoading, isError: lessonsError, error: lessonsErrorObj } =
-    useCourseDetailLessons(modules, enabled)
+  const lessons = useMemo(
+    () => (enabled ? deriveLessonsFromModules(modules) : []),
+    [enabled, modules],
+  )
 
   const effectiveLessonUid = attendanceLessonUid || lessons[0]?.uid || null
   const attendanceQuery = useCourseAttendanceData(effectiveLessonUid, enabled && Boolean(effectiveLessonUid))
 
   const updateAttendanceMutation = useUpdateLessonAttendance(effectiveLessonUid)
   const deleteAttendanceMutation = useDeleteLessonAttendance(effectiveLessonUid)
-
-  const presentCount = useMemo(
-    () =>
-      (attendanceQuery.data ?? []).filter(
-        (record) => record.status === 'present' || record.status === 'late',
-      ).length,
-    [attendanceQuery.data],
-  )
 
   const onUpdateAttendance = useCallback(
     async (attendanceUid: string, status: AttendanceStatusValue, note?: string) => {
@@ -61,13 +55,10 @@ export function useCourseDetailAttendanceView({
     selectedLessonUid: effectiveLessonUid ?? '',
     onLessonChange: setAttendanceLessonUid,
     attendances: attendanceQuery.data ?? [],
-    isLoading: lessonsLoading || attendanceQuery.isLoading,
-    isError: lessonsError || attendanceQuery.isError,
+    isLoading: attendanceQuery.isLoading,
+    isError: attendanceQuery.isError,
     errorMessage:
-      (lessonsErrorObj as Error | undefined)?.message ??
-      (attendanceQuery.error as Error | undefined)?.message ??
-      null,
-    presentCount,
+      (attendanceQuery.error as Error | undefined)?.message ?? null,
     onUpdateAttendance,
     onDeleteAttendance,
     isMutating: updateAttendanceMutation.isPending || deleteAttendanceMutation.isPending,

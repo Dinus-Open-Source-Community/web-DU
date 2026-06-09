@@ -27,6 +27,7 @@ export function CourseDetailAssignmentsTab({
 }: CourseDetailAssignmentsTabProps) {
   const {
     isLoading,
+    isHydratingSubmissions,
     isError,
     errorMessage,
     taskFilter,
@@ -34,7 +35,10 @@ export function CourseDetailAssignmentsTab({
     searchQuery,
     onSearchQueryChange,
     assignmentItems,
+    prefetchSubmissionRoster,
   } = view;
+
+  const showInitialSkeleton = isLoading
 
   return (
     <div className={manageDetailLayout.flatPage}>
@@ -88,7 +92,7 @@ export function CourseDetailAssignmentsTab({
         </div>
       </div>
 
-      {isLoading ? (
+      {showInitialSkeleton ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="h-24 w-full" />
@@ -110,11 +114,22 @@ export function CourseDetailAssignmentsTab({
           </p>
         </div>
       ) : (
-        <ul className={manageDetailLayout.flatList}>
-          {assignmentItems.map((item) => (
-            <CourseAssignmentOverviewRow key={item.lessonUid} item={item} />
-          ))}
-        </ul>
+        <>
+          {isHydratingSubmissions ? (
+            <p className="mb-3 text-xs text-slate-400" aria-live="polite">
+              Memuat ringkasan pengumpulan...
+            </p>
+          ) : null}
+          <ul className={manageDetailLayout.flatList}>
+            {assignmentItems.map((item) => (
+              <CourseAssignmentOverviewRow
+                key={item.lessonUid}
+                item={item}
+                onPrefetchRoster={() => prefetchSubmissionRoster(item.lessonUid)}
+              />
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

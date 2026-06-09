@@ -29,6 +29,16 @@ export interface ILessonAssignmentSubmissionRecord {
   grading: ILessonAssignmentGrading
 }
 
+/** Hasil GET submission siswa — berisi attempt terbaru + seluruh riwayat. */
+export interface ILessonAssignmentSubmissionBundle {
+  submissionUid: string
+  latestAttemptNumber: number
+  maxAttempts: number | null
+  totalAttempts: number
+  latest: ILessonAssignmentSubmissionRecord
+  attempts: ILessonAssignmentSubmissionRecord[]
+}
+
 export type StudentSubmissionPhase = 'not_submitted' | 'pending_review' | 'graded'
 
 export interface IQuizQuestionReview {
@@ -64,6 +74,7 @@ export interface IAssignmentContext {
 /** Alias backward-compat. */
 export type LessonAssignmentGrading = ILessonAssignmentGrading
 export type LessonAssignmentSubmissionRecord = ILessonAssignmentSubmissionRecord
+export type LessonAssignmentSubmissionBundle = ILessonAssignmentSubmissionBundle
 export type QuizQuestionReview = IQuizQuestionReview
 export type QuizReviewSummary = IQuizReviewSummary
 export type AssignmentContext = IAssignmentContext

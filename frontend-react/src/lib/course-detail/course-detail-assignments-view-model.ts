@@ -3,6 +3,7 @@ import type { CourseAssignmentTaskFilter } from '@/lib/types/features/course-det
 
 export type CourseDetailAssignmentsViewModel = {
   isLoading: boolean
+  isHydratingSubmissions: boolean
   isError: boolean
   errorMessage: string | null
   taskFilter: CourseAssignmentTaskFilter
@@ -10,4 +11,5 @@ export type CourseDetailAssignmentsViewModel = {
   searchQuery: string
   onSearchQueryChange: (query: string) => void
   assignmentItems: CourseAssignmentOverviewItem[]
+  prefetchSubmissionRoster: (lessonUid: string) => void
 }

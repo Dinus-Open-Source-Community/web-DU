@@ -66,6 +66,7 @@ export const API_ROUTES = {
     getAll: (params?: IQueryParamsPayload) => withQuery(`/courses`, params),
     create: `/courses`,
     updateByUid: (uid: Uid) => `/courses/${uid}`,
+    deleteByUid: (uid: Uid) => `/courses/${uid}`,
     getByUid: (uid: Uid) => `/courses/${uid}`,
     joinByUid: (uid: Uid) => `/courses/${uid}/join`,
     getMentorByUid: (uid: Uid) => `/courses/${uid}/mentor`,
@@ -73,8 +74,16 @@ export const API_ROUTES = {
     replyReviewByUid: (courseUid: Uid, reviewUid: Uid) => `/courses/${courseUid}/review/${reviewUid}/reply`,
     updateStatusByUid: (uid: Uid) => `/courses/${uid}/status`,
     assignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/assign`,
+    unassignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/unassign`,
     getProgressByUid: (uid: Uid) => `/courses/${uid}/progress`,
     getStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) => withQuery(`/courses/${uid}/students`, params),
+    assignments: {
+      getAllByCourseUid: (courseUid: Uid, params?: IQueryParamsPayload) =>
+        withQuery(`/courses/${courseUid}/assignments`, params),
+    },
+  },
+  students: {
+    getMyAssignments: (params?: IQueryParamsPayload) => withQuery(`/students/me/assignments`, params),
   },
   courseCategories: {
     getAll: (params?: IQueryParamsPayload) => withQuery(`/course-categories`, params),
