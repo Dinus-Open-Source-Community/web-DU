@@ -61,6 +61,7 @@ func ConnectDB() {
 		&entity.Lesson{},
 		&entity.LessonAssignment{},
 		&entity.LessonAssignmentSubmission{},
+		&entity.LessonAssignmentSubmissionAttempt{},
 		&entity.Enrollment{},
 		&entity.Payment{},
 		&entity.PaymentMethodConfig{},
@@ -69,6 +70,8 @@ func ConnectDB() {
 		&entity.CourseAnnouncement{},
 		&entity.LessonAttendance{},
 		&entity.LessonReading{},
+		&entity.CourseQaThread{},
+		&entity.CourseQaReply{},
 	)
 
 	log.Println("[Success] Berhasil terhubung ke database")

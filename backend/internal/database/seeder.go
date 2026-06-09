@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,11 +33,14 @@ func RunSeeder(db *gorm.DB) {
 	seedClassTypes(db)
 	seedCourses(db)
 	seedEnrollments(db)
+	seedPayments(db)
 	seedCourseReviews(db)
+	seedCourseQaThreads(db)
 	seedModules(db)
 	seedLessons(db)
 	seedLessonAssignments(db)
 	seedLessonReadings(db)
+	seedLessonAttendances(db)
 	seedLessonAssignmentSubmissions(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
@@ -291,6 +295,7 @@ func seedCourses(db *gorm.DB) {
 			PriceStrike:  399000,
 			IsPremium:    true,
 			IsPublished:  true,
+			Status:       entity.CourseStatusActive,
 			Slot:         30,
 		},
 		{
@@ -310,6 +315,7 @@ func seedCourses(db *gorm.DB) {
 			PriceStrike:  449000,
 			IsPremium:    true,
 			IsPublished:  true,
+			Status:       entity.CourseStatusActive,
 			Slot:         25,
 		},
 		{
@@ -329,6 +335,7 @@ func seedCourses(db *gorm.DB) {
 			PriceStrike:  329000,
 			IsPremium:    false,
 			IsPublished:  true,
+			Status:       entity.CourseStatusActive,
 			Slot:         40,
 		},
 		{
@@ -348,6 +355,7 @@ func seedCourses(db *gorm.DB) {
 			PriceStrike:  379000,
 			IsPremium:    true,
 			IsPublished:  true,
+			Status:       entity.CourseStatusActive,
 			Slot:         35,
 		},
 		{
@@ -367,6 +375,7 @@ func seedCourses(db *gorm.DB) {
 			PriceStrike:  429000,
 			IsPremium:    true,
 			IsPublished:  true,
+			Status:       entity.CourseStatusActive,
 			Slot:         20,
 		},
 	}
@@ -382,11 +391,20 @@ func seedCourses(db *gorm.DB) {
 			log.Printf("[Success] Course %s berhasil dibuat", course.Title)
 		} else if err != nil {
 			log.Printf("[Error] Gagal cek course %s: %v", course.Slug, err)
-		} else if existing.CreatedByUid == nil {
-			if err := db.Model(&existing).Update("created_by_uid", createdByUID).Error; err != nil {
-				log.Printf("[Warning] Gagal set created_by_uid course %s: %v", course.Slug, err)
-			} else {
-				log.Printf("[Info] created_by_uid course %s diperbarui", course.Slug)
+		} else {
+			patch := map[string]any{}
+			if existing.CreatedByUid == nil {
+				patch["created_by_uid"] = createdByUID
+			}
+			if existing.Status != entity.CourseStatusActive {
+				patch["status"] = entity.CourseStatusActive
+			}
+			if len(patch) > 0 {
+				if err := db.Model(&existing).Updates(patch).Error; err != nil {
+					log.Printf("[Warning] Gagal patch course %s: %v", course.Slug, err)
+				} else {
+					log.Printf("[Info] course %s diperbarui (%v)", course.Slug, patch)
+				}
 			}
 		}
 	}
@@ -402,17 +420,21 @@ func seedEnrollments(db *gorm.DB) {
 	type seedEnrollment struct {
 		StudentEmail string
 		CourseSlug   string
+		Progress     float64
+		Status       entity.EnrollmentStatus
 	}
 
-	// Budi di-enroll ke 3 course, Siti ke semua 5 course — semua dengan status active.
+	// Budi di-enroll ke 3 course aktif, Siti ke 4 course aktif + 1 pending checkout.
 	enrollments := []seedEnrollment{
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals"},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs"},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql"},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals"},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs"},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development"},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials"},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", Progress: 75, Status: entity.EnrollmentActive},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", Progress: 40, Status: entity.EnrollmentActive},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", Progress: 55, Status: entity.EnrollmentActive},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", Progress: 0, Status: entity.EnrollmentPending},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", Progress: 90, Status: entity.EnrollmentActive},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", Progress: 65, Status: entity.EnrollmentActive},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", Progress: 30, Status: entity.EnrollmentActive},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", Progress: 15, Status: entity.EnrollmentActive},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", Progress: 0, Status: entity.EnrollmentPending},
 	}
 
 	for _, item := range enrollments {
@@ -428,10 +450,22 @@ func seedEnrollments(db *gorm.DB) {
 			continue
 		}
 
+		status := item.Status
+		if status == "" {
+			status = entity.EnrollmentActive
+		}
+
 		var existing entity.Enrollment
 		err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&existing).Error
 		if err == nil {
-			continue // sudah ada
+			updates := map[string]any{
+				"progress": item.Progress,
+				"status":   status,
+			}
+			if err := db.Model(&existing).Updates(updates).Error; err != nil {
+				log.Printf("[Warning] Gagal update enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
+			}
+			continue
 		}
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("[Error] Gagal cek enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
@@ -441,14 +475,101 @@ func seedEnrollments(db *gorm.DB) {
 		enrollment := entity.Enrollment{
 			UserUid:   student.Uid,
 			CourseUid: course.Uid,
-			Status:    entity.EnrollmentActive,
-			Progress:  0,
+			Status:    status,
+			Progress:  item.Progress,
 		}
 		if err := db.Create(&enrollment).Error; err != nil {
 			log.Printf("[Error] Gagal membuat enrollment %s / %s: %v", item.StudentEmail, item.CourseSlug, err)
 		} else {
 			log.Printf("[Success] Enrollment %s untuk course %s berhasil dibuat", item.StudentEmail, item.CourseSlug)
 		}
+	}
+}
+
+// seedPayments membuat riwayat transaksi dummy untuk halaman admin (transactions,
+// financial, dashboard). Idempoten: lookup transaction_id.
+func seedPayments(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Payments...")
+
+	now := time.Now()
+
+	type seedPayment struct {
+		StudentEmail  string
+		CourseSlug    string
+		TransactionID string
+		Method        entity.PaymentMethod
+		Status        entity.PaymentStatus
+		DaysAgo       int
+	}
+
+	payments := []seedPayment{
+		// Transaksi sukses tersebar 12 bulan terakhir untuk chart financial
+		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250108-001", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 330},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250215-002", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 290},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250320-003", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 250},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250405-004", Method: "BRIVA", Status: entity.PaymentSuccess, DaysAgo: 210},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250510-005", Method: "PERMATAVA", Status: entity.PaymentSuccess, DaysAgo: 170},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250601-006", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 120},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250718-007", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 75},
+		// Transaksi terbaru untuk dashboard recent-transactions
+		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250820-008", Method: "BNIVA", Status: entity.PaymentSuccess, DaysAgo: 14},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250902-009", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 7},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250910-010", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 3},
+		// Pending & failed untuk ratio chart admin transactions
+		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250915-011", Method: "PERMATAVA", Status: entity.PaymentPending, DaysAgo: 2},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250916-012", Method: "BCAVA", Status: entity.PaymentFailed, DaysAgo: 1},
+	}
+
+	for _, item := range payments {
+		var existing entity.Payment
+		if err := db.Where("transaction_id = ?", item.TransactionID).First(&existing).Error; err == nil {
+			continue
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek payment %s: %v", item.TransactionID, err)
+			continue
+		}
+
+		enrollment, err := findSeedEnrollment(db, item.StudentEmail, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Enrollment tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
+			continue
+		}
+
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
+			continue
+		}
+
+		createdAt := now.AddDate(0, 0, -item.DaysAgo)
+		enrollmentUID := enrollment.Uid
+		payment := entity.Payment{
+			EnrollmentUid: &enrollmentUID,
+			Amount:        course.Price,
+			Method:        item.Method,
+			Status:        item.Status,
+			TransactionID: item.TransactionID,
+			CheckoutURL:   "https://tripay.co.id/checkout/seed-" + item.TransactionID,
+			CreatedAt:     createdAt,
+		}
+		if item.Status == entity.PaymentSuccess {
+			paidAt := createdAt.Add(2 * time.Hour)
+			payment.PaidAt = &paidAt
+		}
+
+		if err := db.Create(&payment).Error; err != nil {
+			log.Printf("[Error] Gagal membuat payment %s: %v", item.TransactionID, err)
+			continue
+		}
+		// Pastikan timestamp historis tidak ditimpa autoCreateTime.
+		updates := map[string]any{"created_at": createdAt}
+		if payment.PaidAt != nil {
+			updates["paid_at"] = *payment.PaidAt
+		}
+		if err := db.Model(&payment).Updates(updates).Error; err != nil {
+			log.Printf("[Warning] Gagal set timestamp payment %s: %v", item.TransactionID, err)
+		}
+		log.Printf("[Success] Payment %s (%s) berhasil dibuat", item.TransactionID, item.Status)
 	}
 }
 
@@ -594,6 +715,12 @@ func seedCourseReviewReplies(db *gorm.DB) {
 			MentorEmail:  "andi.mentor@doscom.id",
 			Comment:      "Terima kasih Siti, saran latihan mandirinya akan kami pertimbangkan di update berikutnya.",
 		},
+		{
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "rest-api-development",
+			MentorEmail:  "admin@doscom.id",
+			Comment:      "Terima kasih feedbacknya Siti. Kami akan menambah modul latihan autentikasi di update berikutnya.",
+		},
 	}
 
 	for _, item := range replies {
@@ -646,6 +773,155 @@ func seedCourseReviewReplies(db *gorm.DB) {
 		}
 		log.Printf("[Success] Balasan mentor %s pada review %s / %s berhasil dibuat", item.MentorEmail, item.StudentEmail, item.CourseSlug)
 	}
+}
+
+func seedCourseQaThreads(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Course Q&A Threads...")
+
+	type seedQaReply struct {
+		AuthorEmail string
+		Body        string
+	}
+
+	type seedThread struct {
+		SeedKey      string
+		StudentEmail string
+		CourseSlug   string
+		Title        string
+		Body         string
+		Replies      []seedQaReply
+	}
+
+	threads := []seedThread{
+		{
+			SeedKey:      "qa-go-error-handling",
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "golang-fundamentals",
+			Title:        "Bagaimana cara menangani error di Go?",
+			Body:         "Saya bingung kapan pakai panic vs return error. Ada contoh praktisnya?",
+			Replies: []seedQaReply{
+				{
+					AuthorEmail: "andi.mentor@doscom.id",
+					Body:        "Untuk aplikasi production, lebih baik return error. Panic hanya untuk kondisi yang benar-benar tidak terduga.",
+				},
+			},
+		},
+		{
+			SeedKey:      "qa-nextjs-rsc",
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "web-development-nextjs",
+			Title:        "Perbedaan Server Component dan Client Component",
+			Body:         "Kapan sebaiknya memakai masing-masing di Next.js App Router?",
+			Replies: []seedQaReply{
+				{
+					AuthorEmail: "rina.mentor@doscom.id",
+					Body:        "Gunakan Server Component untuk data fetching dan konten statis. Client Component untuk interaksi seperti form dan state.",
+				},
+			},
+		},
+		{
+			SeedKey:      "qa-sql-index",
+			StudentEmail: "budi@doscom.id",
+			CourseSlug:   "database-design-sql",
+			Title:        "Kapan perlu menambahkan index di tabel?",
+			Body:         "Apakah semua kolom foreign key wajib di-index?",
+		},
+		{
+			SeedKey:      "qa-rest-jwt",
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "rest-api-development",
+			Title:        "Best practice menyimpan JWT di frontend",
+			Body:         "Lebih aman di httpOnly cookie atau localStorage?",
+			Replies: []seedQaReply{
+				{
+					AuthorEmail: "admin@doscom.id",
+					Body:        "Disarankan httpOnly cookie dengan SameSite=Lax/Strict. Hindari localStorage untuk token sensitif.",
+				},
+			},
+		},
+		{
+			SeedKey:      "qa-devops-docker",
+			StudentEmail: "siti@doscom.id",
+			CourseSlug:   "devops-essentials",
+			Title:        "Perbedaan Docker image dan container",
+			Body:         "Saya masih bingung konsep image vs container saat deploy.",
+		},
+	}
+
+	for _, item := range threads {
+		student, err := findSeedUserByEmail(db, item.StudentEmail)
+		if err != nil {
+			log.Printf("[Error] Siswa seed %s tidak ditemukan untuk Q&A: %v", item.StudentEmail, err)
+			continue
+		}
+		course, err := findSeedCourseBySlug(db, item.CourseSlug)
+		if err != nil {
+			log.Printf("[Error] Course seed %s tidak ditemukan untuk Q&A: %v", item.CourseSlug, err)
+			continue
+		}
+
+		if seedQaThreadExists(db, student.Uid, course.Uid, item.SeedKey) {
+			continue
+		}
+
+		bodyWithMarker := item.Body + "\n\n<!-- seed:" + item.SeedKey + " -->"
+		thread := entity.CourseQaThread{
+			AuthorUid: student.Uid,
+			CourseUid: course.Uid,
+			Title:     item.Title,
+			Body:      bodyWithMarker,
+		}
+		if err := db.Create(&thread).Error; err != nil {
+			log.Printf("[Error] Gagal membuat Q&A thread: %v", err)
+			continue
+		}
+		log.Printf("[Success] Q&A thread %s untuk course %s berhasil dibuat", item.Title, item.CourseSlug)
+
+		for _, replySeed := range item.Replies {
+			author, err := findSeedUserByEmail(db, replySeed.AuthorEmail)
+			if err != nil {
+				log.Printf("[Error] Author %s tidak ditemukan untuk balasan Q&A: %v", replySeed.AuthorEmail, err)
+				continue
+			}
+
+			reply := entity.CourseQaReply{
+				ThreadUid: thread.Uid,
+				AuthorUid: author.Uid,
+				Body:      replySeed.Body,
+			}
+			if err := db.Create(&reply).Error; err != nil {
+				log.Printf("[Error] Gagal membuat balasan Q&A: %v", err)
+			}
+		}
+	}
+}
+
+func seedQaThreadExists(db *gorm.DB, authorUID, courseUID uuid.UUID, seedKey string) bool {
+	var threads []entity.CourseQaThread
+	if err := db.Where("author_uid = ? AND course_uid = ?", authorUID, courseUID).Find(&threads).Error; err != nil {
+		return false
+	}
+	marker := "<!-- seed:" + seedKey + " -->"
+	for _, thread := range threads {
+		if strings.Contains(thread.Body, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func findSeedEnrollment(db *gorm.DB, studentEmail, courseSlug string) (entity.Enrollment, error) {
+	student, err := findSeedUserByEmail(db, studentEmail)
+	if err != nil {
+		return entity.Enrollment{}, err
+	}
+	course, err := findSeedCourseBySlug(db, courseSlug)
+	if err != nil {
+		return entity.Enrollment{}, err
+	}
+	var enrollment entity.Enrollment
+	err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&enrollment).Error
+	return enrollment, err
 }
 
 func findSeedUserByEmail(db *gorm.DB, email string) (entity.User, error) {
@@ -1070,6 +1346,43 @@ func seedLessonReadings(db *gorm.DB) {
 	}
 }
 
+// seedLessonAttendances mensimulasikan kehadiran siswa pada lesson yang sudah
+// mereka baca. Dipakai oleh GET /courses/:id/students (attendance_present).
+// Idempoten: lookup (lesson_uid, enrollment_uid).
+func seedLessonAttendances(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Lesson Attendances...")
+
+	var readings []entity.LessonReading
+	if err := db.Find(&readings).Error; err != nil {
+		log.Printf("[Error] Gagal mengambil lesson readings untuk attendance: %v", err)
+		return
+	}
+
+	for _, reading := range readings {
+		var existing entity.LessonAttendance
+		err := db.Where("lesson_uid = ? AND enrollment_uid = ?", reading.LessonUid, reading.EnrollmentUid).First(&existing).Error
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Error] Gagal cek lesson attendance: %v", err)
+			continue
+		}
+
+		attendance := entity.LessonAttendance{
+			LessonUid:     reading.LessonUid,
+			EnrollmentUid: reading.EnrollmentUid,
+			Status:        entity.AttendancePresent,
+			CheckedInAt:   reading.ReadAt,
+		}
+		if err := db.Create(&attendance).Error; err != nil {
+			log.Printf("[Error] Gagal membuat lesson attendance: %v", err)
+			continue
+		}
+	}
+	log.Printf("[Success] Lesson attendances disinkronkan dari %d lesson readings", len(readings))
+}
+
 // seedLessonAssignmentSubmissions membuat contoh submission assignment dari
 // student seed (Budi dan Siti) untuk beberapa assignment yang sudah ada di
 // course yang mereka ikuti. Submission mencakup:
@@ -1354,6 +1667,27 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 
 		if err := db.Create(&sub).Error; err != nil {
 			log.Printf("[Error] Gagal membuat submission %s / assignment=%s: %v", item.StudentEmail, assignment.Uid, err)
+			continue
+		}
+		attempt := entity.LessonAssignmentSubmissionAttempt{
+			LessonAssignmentSubmissionUid: sub.Uid,
+			AttemptNumber:                 sub.AttemptCount,
+			PlainText:                     sub.PlainText,
+			RichText:                      sub.RichText,
+			FileURL:                       sub.FileURL,
+			FileOriginalFilename:          sub.FileOriginalFilename,
+			FileDescription:               sub.FileDescription,
+			QuizAnswers:                   sub.QuizAnswers,
+			ScorePercent:                  sub.ScorePercent,
+			Passed:                        sub.Passed,
+			QuizCorrectCount:              sub.QuizCorrectCount,
+			QuizQuestionCount:             sub.QuizQuestionCount,
+			Feedback:                      sub.Feedback,
+			GradedAt:                      sub.GradedAt,
+			IsAutoGraded:                  sub.IsAutoGraded,
+		}
+		if err := db.Create(&attempt).Error; err != nil {
+			log.Printf("[Error] Gagal membuat submission attempt %s / assignment=%s: %v", item.StudentEmail, assignment.Uid, err)
 			continue
 		}
 		log.Printf("[Success] Submission %s untuk assignment di course=%s (module=%d, lesson=%d) berhasil dibuat",
