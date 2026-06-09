@@ -114,6 +114,7 @@ export interface EnrollmentInvoice {
 export interface JoinedCourse extends CourseDetail {
   enrolled_at: string
   enrollment_status: EnrollmentStatus
+  /** Rasio progress belajar dari API, skala 0.0–1.0 */
   progress: number
 }
 

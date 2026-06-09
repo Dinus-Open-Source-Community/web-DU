@@ -169,6 +169,10 @@ func CreateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save submission", "data": nil, "error": err.Error()})
 		return
 	}
+	if err := recordSubmissionAttempt(&row, row.AttemptCount); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save submission attempt history", "data": nil, "error": err.Error()})
+		return
+	}
 
 	utils.DecryptFields(&row.PlainText, &row.FileOriginalFilename, &row.FileDescription, &row.Feedback)
 	c.JSON(http.StatusCreated, gin.H{"success": true, "message": "Submission recorded successfully", "data": row, "error": nil})
@@ -333,18 +337,22 @@ func UpdateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to update submission", "data": nil, "error": err.Error()})
 		return
 	}
+	if err := recordSubmissionAttempt(&row, row.AttemptCount); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save submission attempt history", "data": nil, "error": err.Error()})
+		return
+	}
 
 	utils.DecryptFields(&row.PlainText, &row.FileOriginalFilename, &row.FileDescription, &row.Feedback)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission updated successfully", "data": row, "error": nil})
 }
 
-// @Summary      Get my lesson assignment submission (Enrollment User)
-// @Description  Returns submission content plus a grading object: score_percent, passed, feedback, has_feedback, is_graded, quiz counts (quiz assignments).
+// @Summary      Get my lesson assignment submissions (Enrollment User)
+// @Description  Returns all submission attempts for the authenticated user as an array. Each item includes answer content and grading (score_percent, passed, feedback, has_feedback, is_graded, quiz counts).
 // @Tags         Lesson Assignment Submission
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id  path  string  true  "Lesson UID"
-// @Success      200  {object}  map[string]any  "submission + grading"
+// @Success      200  {object}  map[string]any  "submissions array + attempt metadata"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Not found"
@@ -390,26 +398,45 @@ func GetMyLessonAssignmentSubmissionFunc(c *gin.Context) {
 		return
 	}
 
-	feedbackTrim := strings.TrimSpace(row.Feedback)
-	isGraded := row.ScorePercent != nil || row.GradedAt != nil
+	if err := ensureSubmissionAttemptsBackfilled(&row); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to load submission history", "data": nil, "error": err.Error()})
+		return
+	}
+
+	attempts, err := listSubmissionAttemptsForUser(row.Uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to load submission history", "data": nil, "error": err.Error()})
+		return
+	}
+
+	// Sinkronkan grading terbaru dari baris submission utama (mis. penilaian manual mentor).
+	if len(attempts) > 0 {
+		latest := &attempts[len(attempts)-1]
+		latest.ScorePercent = row.ScorePercent
+		latest.Passed = row.Passed
+		latest.QuizCorrectCount = row.QuizCorrectCount
+		latest.QuizQuestionCount = row.QuizQuestionCount
+		latest.Feedback = row.Feedback
+		latest.GradedAt = row.GradedAt
+		latest.IsAutoGraded = row.IsAutoGraded
+	}
+
+	submissions := make([]gin.H, 0, len(attempts))
+	for _, attempt := range attempts {
+		submissions = append(submissions, buildSubmissionAttemptItem(attempt))
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Submission retrieved successfully",
+		"message": "Submissions retrieved successfully",
 		"data": gin.H{
-			"submission": row,
-			"grading": gin.H{
-				"score_percent":       row.ScorePercent,
-				"passed":              row.Passed,
-				"feedback":            feedbackTrim,
-				"has_feedback":        feedbackTrim != "",
-				"is_graded":           isGraded,
-				"graded_at":           row.GradedAt,
-				"graded_by_uid":       row.GradedByUid,
-				"is_auto_graded":      row.IsAutoGraded,
-				"quiz_correct_count":  row.QuizCorrectCount,
-				"quiz_question_count": row.QuizQuestionCount,
-			},
+			"lesson_uid":            lesson.Uid,
+			"assignment_uid":        assignment.Uid,
+			"submission_uid":          row.Uid,
+			"total_attempts":          len(submissions),
+			"latest_attempt_number":   row.AttemptCount,
+			"max_attempts":          maxSubmissionAttempts(&assignment),
+			"submissions":           submissions,
 		},
 		"error": nil,
 	})

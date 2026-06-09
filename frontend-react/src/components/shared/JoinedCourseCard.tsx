@@ -12,6 +12,7 @@ import {
   resolveCourseProfileAvatar,
 } from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
+import { isProgressComplete, progressToPercent } from '@/lib/progress'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
 export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
@@ -21,8 +22,6 @@ interface JoinedCourseCardProps {
   variant?: JoinedCourseCardVariant
   size?: JoinedCourseCardSize
 }
-
-const clampProgress = (progress: number) => Math.min(100, Math.max(0, Math.round(progress)))
 
 const sizes = {
   container: {
@@ -58,7 +57,7 @@ const sizes = {
 }
 
 const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedCourseCardProps) => {
-  const progress = clampProgress(data.progress)
+  const progress = progressToPercent(data.progress)
   const isResume = variant === 'resume'
   const image = data.cover_url || data.thumbnail_url
   const actionLabel = isResume ? 'Lanjut' : 'Mulai'
@@ -120,7 +119,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
               ) : null}
             </div>
 
-            {progress === 100 ? (
+            {isProgressComplete(data.progress) ? (
               <Badge variant="progressComplete" />
             ) : (
               <Button asChild className="rounded-lg px-5 py-2 text-sm font-semibold shadow-none" variant="default" size="sm">

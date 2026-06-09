@@ -28,11 +28,16 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                       // Students only
 		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                             // Enrolled students only
 		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc)       // Mentor+ only
+		authCourseGroup.POST("/:id/qna", service.CreateCourseQaThreadFunc)                              // Enrolled students only
+		authCourseGroup.POST("/:id/qna/:thread_id/replies", service.CreateCourseQaReplyFunc)            // Student / Mentor / Admin
 		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                          // Super Admin / Admin
 		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)                  // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)              // Super Admin / Admin
+		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                         // Admin / Mentor
 
-		authCourseGroup.POST("/", service.PostAdminCourseFunc)       // Super Admin / Admin
-		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc) // Super Admin / Admin
+		authCourseGroup.POST("/", service.PostAdminCourseFunc)        // Super Admin / Admin
+		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc)    // Super Admin / Admin
+		authCourseGroup.DELETE("/:id", service.DeleteAdminCourseFunc) // Super Admin / Admin
 	}
 
 	// Invoice routes

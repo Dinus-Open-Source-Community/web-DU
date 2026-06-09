@@ -11,6 +11,7 @@ import {
   type CourseProfileSource,
 } from '@/lib/course-detail/course-profile'
 import type { BadgeVariant } from '@/lib/types/course'
+import { isProgressComplete, progressToPercent } from '@/lib/progress'
 
 interface IResumeCardProps {
   title: string
@@ -29,6 +30,7 @@ interface IResumeCardProps {
 }
 
 const ResumeCard = ({ data }: { data: IResumeCardProps & CourseProfileSource }) => {
+  const progressPercent = data.progress === undefined ? undefined : progressToPercent(data.progress)
   const profile =
     resolveCourseProfile(data) ??
     (data.author?.name
@@ -66,14 +68,14 @@ const ResumeCard = ({ data }: { data: IResumeCardProps & CourseProfileSource }) 
         </div>
 
         {/* Progress */}
-        {data.progress !== undefined && (
+        {progressPercent !== undefined && (
           <div className="mt-auto mb-5 w-full">
             <div className="mb-1.5 flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">Progres Belajar</span>
-              <span className="text-xs font-bold text-primary">{data.progress}%</span>
+              <span className="text-xs font-bold text-primary">{progressPercent}%</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${data.progress}%` }} />
+              <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
         )}
@@ -85,7 +87,7 @@ const ResumeCard = ({ data }: { data: IResumeCardProps & CourseProfileSource }) 
               image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
               name={profile.name}
             />
-            {data.progress === 100 ? (
+            {data.progress !== undefined && isProgressComplete(data.progress) ? (
               <Badge variant="progressComplete" />
             ) : data.resumeDetailHref ? (
               <Button asChild className="px-5 py-2 text-sm font-semibold rounded-lg shadow-none" variant="default" size="sm">

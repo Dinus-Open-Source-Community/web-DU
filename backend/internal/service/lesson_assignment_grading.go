@@ -229,6 +229,10 @@ func GradeLessonAssignmentSubmissionForStaffFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save grade", "data": nil, "error": err.Error()})
 		return
 	}
+	if err := syncLatestAttemptGradingFromSubmission(database.DB, &row); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to sync submission attempt grade", "data": nil, "error": err.Error()})
+		return
+	}
 
 	if err := database.DB.Preload("User").First(&row, row.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to reload submission", "data": nil, "error": err.Error()})

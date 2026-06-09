@@ -665,6 +665,82 @@ func UpdateAdminCourseFunc(c *gin.Context) {
 	})
 }
 
+// @Summary      Delete course (Super Admin / Admin)
+// @Description  Soft-delete a course by setting status to TIDAK ACTIVE and unpublishing it. Requires Super Admin or Admin.
+// @Tags         Course
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Course UID"
+// @Success      200  {object}  map[string]any  "Course deleted successfully"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
+// @Failure      404  {object}  map[string]any  "Course or user not found"
+// @Failure      500  {object}  map[string]any  "Failed to delete course"
+// @Router       /courses/{id} [delete]
+func DeleteAdminCourseFunc(c *gin.Context) {
+	userID, _ := c.Get(middleware.UIDCK)
+
+	var userData entity.User
+	if err := database.DB.First(&userData, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if !hasAdminAccess(userData.Role) {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Delete course access denied: Super Admin or Admin only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+
+	var course entity.Course
+	if err := database.DB.First(&course, courseID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	course.Status = entity.CourseStatusTidakActive
+	course.IsPublished = false
+
+	if err := database.DB.Save(&course).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to delete course",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Course deleted successfully",
+		"data": gin.H{
+			"uid":    course.Uid,
+			"status": course.Status,
+		},
+		"error": nil,
+	})
+}
+
 // GetAllCoursesFunc returns a paginated list of courses with optional filters.
 //
 // Query parameters (all optional):
@@ -689,6 +765,51 @@ func UpdateAdminCourseFunc(c *gin.Context) {
 // @Success      200  {object}  map[string]any  "Courses retrieved successfully"
 // @Failure      500  {object}  map[string]any  "Failed to retrieve courses"
 // @Router       /courses [get]
+func applyCourseListFilters(db *gorm.DB, c *gin.Context) *gorm.DB {
+	categoryIDStr := c.Query("course_category_id")
+	if categoryIDStr == "" {
+		categoryIDStr = c.Query("category_uid")
+	}
+	if categoryIDStr != "" {
+		if categoryUID, err := database.ResolveUID("course_categories", categoryIDStr); err == nil {
+			db = db.Where("category_uid = ?", categoryUID)
+		}
+	}
+
+	classTypeIDStr := c.Query("course_type_id")
+	if classTypeIDStr == "" {
+		classTypeIDStr = c.Query("class_type_id")
+	}
+	if classTypeIDStr != "" {
+		if classTypeUID, err := database.ResolveUID("class_types", classTypeIDStr); err == nil {
+			db = db.Where("class_type_uid = ?", classTypeUID)
+		}
+	}
+
+	if statusFilter := strings.TrimSpace(c.Query("status")); statusFilter != "" {
+		db = db.Where("status = ?", statusFilter)
+	}
+
+	return db
+}
+
+func courseListOrderClause(c *gin.Context) string {
+	sortBy := strings.ToLower(strings.TrimSpace(c.Query("sort_by")))
+	order := strings.ToLower(strings.TrimSpace(c.DefaultQuery("sort_order", "desc")))
+	if order != "asc" && order != "desc" {
+		order = "desc"
+	}
+
+	switch sortBy {
+	case "price":
+		return "price " + order
+	case "created_at", "":
+		return "created_at " + order
+	default:
+		return "created_at desc"
+	}
+}
+
 func GetAllCoursesFunc(c *gin.Context) {
 	// Parse query params
 	pageStr := c.DefaultQuery("page", "1")
@@ -713,6 +834,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 
 	// Build query with filters
 	db := database.DB.Model(&entity.Course{})
+	db = applyCourseListFilters(db, c)
 
 	// Filter by mentor_uid (UUID atau 8-char prefix) across legacy primary mentor and new course_mentors assignments.
 	if mentorIDStr != "" {
@@ -744,7 +866,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// pada GetAllUsersService) agar fungsionalitas pencarian tetap berjalan.
 	if strings.TrimSpace(titleFilter) != "" {
 		var allCourses []entity.Course
-		if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order("created_at DESC").Find(&allCourses).Error; err != nil {
+		if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order(courseListOrderClause(c)).Find(&allCourses).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
 				"message": "Failed to retrieve courses for search",
@@ -807,7 +929,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	// Apply pagination
 	offset := (page - 1) * perPage
 	var courses []entity.Course
-	if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order("created_at DESC").Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
+	if err := db.Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Order(courseListOrderClause(c)).Limit(perPage).Offset(offset).Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve courses",
@@ -1094,13 +1216,102 @@ func JoinCourseFunc(c *gin.Context) {
 }
 
 type CourseStudentSafeItem struct {
-	EnrollmentUid    uuid.UUID               `json:"enrollment_uid"`
-	StudentUid       uuid.UUID               `json:"student_uid"`
-	StudentName      string                  `json:"student_name"`
-	StudentAvatarURL string                  `json:"student_avatar_url,omitempty"`
-	EnrolledAt       time.Time               `json:"enrolled_at"`
-	Progress         float64                 `json:"progress"`
-	Status           entity.EnrollmentStatus `json:"status"`
+	EnrollmentUid       uuid.UUID               `json:"enrollment_uid"`
+	StudentUid          uuid.UUID               `json:"student_uid"`
+	StudentName         string                  `json:"student_name"`
+	StudentAvatarURL    string                  `json:"student_avatar_url,omitempty"`
+	EnrolledAt          time.Time               `json:"enrolled_at"`
+	Progress            float64                 `json:"progress"`
+	Status              entity.EnrollmentStatus `json:"status"`
+	AttendancePresent   int                     `json:"attendance_present"`
+	AttendanceTotal     int                     `json:"attendance_total"`
+	LastActiveAt        *time.Time              `json:"last_active_at,omitempty"`
+}
+
+func countCourseLessons(courseUID uuid.UUID) int {
+	var count int64
+	database.DB.Table("lessons l").
+		Joins("JOIN modules m ON m.uid = l.module_uid").
+		Where("m.course_uid = ?", courseUID).
+		Count(&count)
+	return int(count)
+}
+
+func fetchEnrollmentAttendancePresent(courseUID uuid.UUID, enrollmentUIDs []uuid.UUID) map[uuid.UUID]int {
+	result := make(map[uuid.UUID]int, len(enrollmentUIDs))
+	if len(enrollmentUIDs) == 0 {
+		return result
+	}
+
+	type row struct {
+		EnrollmentUID uuid.UUID `gorm:"column:enrollment_uid"`
+		Count         int       `gorm:"column:cnt"`
+	}
+	var rows []row
+	database.DB.Table("lesson_attendances la").
+		Select("la.enrollment_uid, COUNT(*) AS cnt").
+		Joins("JOIN lessons l ON l.uid = la.lesson_uid").
+		Joins("JOIN modules m ON m.uid = l.module_uid").
+		Where("m.course_uid = ?", courseUID).
+		Where("la.enrollment_uid IN ?", enrollmentUIDs).
+		Where("la.status IN ?", []entity.AttendanceStatus{entity.AttendancePresent, entity.AttendanceLate}).
+		Group("la.enrollment_uid").
+		Scan(&rows)
+
+	for _, r := range rows {
+		result[r.EnrollmentUID] = r.Count
+	}
+	return result
+}
+
+func fetchEnrollmentLessonReadCount(enrollmentUIDs []uuid.UUID) map[uuid.UUID]int64 {
+	result := make(map[uuid.UUID]int64, len(enrollmentUIDs))
+	if len(enrollmentUIDs) == 0 {
+		return result
+	}
+
+	type row struct {
+		EnrollmentUID uuid.UUID `gorm:"column:enrollment_uid"`
+		ReadCount     int64     `gorm:"column:read_count"`
+	}
+	var rows []row
+	database.DB.Table("lesson_readings").
+		Select("enrollment_uid, COUNT(uid) AS read_count").
+		Where("enrollment_uid IN ?", enrollmentUIDs).
+		Group("enrollment_uid").
+		Scan(&rows)
+
+	for _, r := range rows {
+		result[r.EnrollmentUID] = r.ReadCount
+	}
+	return result
+}
+
+func fetchEnrollmentLastActive(courseUID uuid.UUID, enrollmentUIDs []uuid.UUID) map[uuid.UUID]*time.Time {
+	result := make(map[uuid.UUID]*time.Time, len(enrollmentUIDs))
+	if len(enrollmentUIDs) == 0 {
+		return result
+	}
+
+	type row struct {
+		EnrollmentUID uuid.UUID `gorm:"column:enrollment_uid"`
+		LastActiveAt  time.Time `gorm:"column:last_active_at"`
+	}
+	var rows []row
+	database.DB.Table("lesson_readings lr").
+		Select("lr.enrollment_uid, MAX(lr.read_at) AS last_active_at").
+		Joins("JOIN lessons l ON l.uid = lr.lesson_uid").
+		Joins("JOIN modules m ON m.uid = l.module_uid").
+		Where("m.course_uid = ?", courseUID).
+		Where("lr.enrollment_uid IN ?", enrollmentUIDs).
+		Group("lr.enrollment_uid").
+		Scan(&rows)
+
+	for _, r := range rows {
+		t := r.LastActiveAt
+		result[r.EnrollmentUID] = &t
+	}
+	return result
 }
 
 // @Summary      Get all enrolled students in a course (Public)
@@ -1184,7 +1395,6 @@ func GetCourseStudentsFunc(c *gin.Context) {
 			u.name as student_name,
 			u.avatar_url as student_avatar_url,
 			e.enrolled_at,
-			e.progress,
 			e.status
 		`).
 		Joins("JOIN users u ON u.uid = e.user_uid").
@@ -1210,9 +1420,24 @@ func GetCourseStudentsFunc(c *gin.Context) {
 		return
 	}
 
+	lessonTotal := countCourseLessons(course.Uid)
+	enrollmentUIDs := make([]uuid.UUID, 0, len(students))
 	for i := range students {
 		if decryptedName, decErr := utils.Decrypt(students[i].StudentName); decErr == nil {
 			students[i].StudentName = decryptedName
+		}
+		students[i].AttendanceTotal = lessonTotal
+		enrollmentUIDs = append(enrollmentUIDs, students[i].EnrollmentUid)
+	}
+
+	attendanceMap := fetchEnrollmentAttendancePresent(course.Uid, enrollmentUIDs)
+	lastActiveMap := fetchEnrollmentLastActive(course.Uid, enrollmentUIDs)
+	readCountMap := fetchEnrollmentLessonReadCount(enrollmentUIDs)
+	for i := range students {
+		students[i].AttendancePresent = attendanceMap[students[i].EnrollmentUid]
+		students[i].LastActiveAt = lastActiveMap[students[i].EnrollmentUid]
+		if lessonTotal > 0 {
+			students[i].Progress = float64(readCountMap[students[i].EnrollmentUid]) / float64(lessonTotal)
 		}
 	}
 

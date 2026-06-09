@@ -1181,12 +1181,21 @@ func GetAllUsersService(c *gin.Context) {
 		perPage = maxPerPage
 	}
 
+	applyRoleFilter := func(db *gorm.DB) *gorm.DB {
+		switch roleFilter {
+		case string(entity.AdminRole):
+			return db.Where("role IN ?", []entity.UserRole{entity.AdminRole, entity.SuperAdminRole})
+		case "":
+			return db
+		default:
+			return db.Where("role = ?", roleFilter)
+		}
+	}
+
 	// If no search query provided, do DB-level pagination and filtering by role.
 	if search == "" {
 		db := database.DB.Model(&entity.User{})
-		if roleFilter != "" {
-			db = db.Where("role = ?", roleFilter)
-		}
+		db = applyRoleFilter(db)
 
 		var total int64
 		if err := db.Count(&total).Error; err != nil {
@@ -1263,9 +1272,7 @@ func GetAllUsersService(c *gin.Context) {
 
 	// If search is provided -> need to decrypt and filter in-memory.
 	db := database.DB.Model(&entity.User{})
-	if roleFilter != "" {
-		db = db.Where("role = ?", roleFilter)
-	}
+	db = applyRoleFilter(db)
 
 	var users []entity.User
 	if err := db.Preload("Enrollments", func(db *gorm.DB) *gorm.DB {

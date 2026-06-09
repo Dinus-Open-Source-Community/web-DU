@@ -216,6 +216,7 @@ export interface IMentorCourseStudent {
   student_name: string;
   student_avatar_url: string;
   enrolled_at: string;
+  /** Rasio progress belajar dari API, skala 0.0–1.0 */
   progress: number;
   status: MentorCourseStudentStatus;
 }

@@ -306,7 +306,7 @@ interface AdminTransactionsResponse {
     total: number
     total_pages: number
   }
-  summary: {
+  summary: {ce
     grossRevenue: number
     paidCount: number
     pendingCount: number
@@ -426,3 +426,4 @@ Response:
 ```ts
 type Response = IResponse<AdminQaThread>
 ```
+

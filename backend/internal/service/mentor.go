@@ -211,6 +211,155 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	})
 }
 
+// @Summary      Unassign mentors from course (Super Admin / Admin)
+// @Description  Remove one or more mentors from a course assignment.
+// @Tags         Course
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id    path      string                            true  "Course UID"
+// @Param        body  body      dto.AssignMentorsToCourseRequest  true  "Mentor UIDs to remove"
+// @Success      200  {object}  map[string]any  "Mentors unassigned successfully"
+// @Failure      400  {object}  map[string]any  "Invalid request"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
+// @Failure      404  {object}  map[string]any  "Course not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /courses/{id}/mentors/unassign [post]
+func UnassignMentorsFromCourseFunc(c *gin.Context) {
+	adminRaw, exists := c.Get(middleware.UIDCK)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Unauthorized",
+			"data":    nil,
+			"error":   "user_id not found in context",
+		})
+		return
+	}
+
+	var admin entity.User
+	if err := database.DB.Select("uid", "role").First(&admin, adminRaw).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Unauthorized",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if !hasAdminAccess(admin.Role) {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: Super Admin or Admin only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+
+	var course entity.Course
+	if err := database.DB.Select("uid", "mentor_uid").First(&course, courseUID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Course not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	var req dto.AssignMentorsToCourseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid request data",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	resolvedMentorUIDs, err := database.ResolveUIDs("users", req.MentorUids)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Failed to resolve mentor uids",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	uniqueMentorUIDs := make([]uuid.UUID, 0, len(resolvedMentorUIDs))
+	seen := make(map[uuid.UUID]struct{}, len(resolvedMentorUIDs))
+	for _, mentorUID := range resolvedMentorUIDs {
+		if _, ok := seen[mentorUID]; ok {
+			continue
+		}
+		seen[mentorUID] = struct{}{}
+		uniqueMentorUIDs = append(uniqueMentorUIDs, mentorUID)
+	}
+
+	if len(uniqueMentorUIDs) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "mentor_uids cannot be empty",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	if err := database.DB.Where("course_uid = ? AND mentor_uid IN ?", courseUID, uniqueMentorUIDs).
+		Delete(&entity.CourseMentor{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to unassign mentors from course",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	primaryRemoved := false
+	if course.MentorUid != nil {
+		for _, uid := range uniqueMentorUIDs {
+			if *course.MentorUid == uid {
+				primaryRemoved = true
+				break
+			}
+		}
+	}
+
+	if primaryRemoved {
+		var replacement entity.CourseMentor
+		if err := database.DB.Where("course_uid = ? AND status = ?", courseUID, entity.CourseMentorJoined).
+			Order("joined_at ASC").
+			First(&replacement).Error; err == nil {
+			database.DB.Model(&course).Update("mentor_uid", replacement.MentorUid)
+		} else {
+			database.DB.Model(&course).Update("mentor_uid", nil)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Mentors unassigned successfully",
+		"data": gin.H{
+			"course_uid":          courseUID,
+			"removed_mentor_uids": uniqueMentorUIDs,
+		},
+		"error": nil,
+	})
+}
+
 // @Summary      Get mentors by course ID (Public)
 // @Description  Public endpoint to retrieve mentors assigned to a specific course.
 // @Tags         Course

@@ -5,6 +5,7 @@ import { Pagination } from '../shared/Pagination'
 import type { IUserData } from '@/lib/types/user'
 import JoinedCourseCard from '../shared/JoinedCourseCard'
 import { SafeLottie } from '../ui/lottie'
+import { isProgressComplete, isProgressInProgress, isProgressStarted } from '@/lib/progress'
 
 const filters = ['Semua', 'Sedang Berjalan', 'Baru', 'Selesai'] as const
 const ITEMS_PER_PAGE = 6
@@ -26,9 +27,9 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
     }
 
     if (activeFilter === 'Semua') return true
-    if (activeFilter === 'Sedang Berjalan') return course.progress > 0 && course.progress < 100
-    if (activeFilter === 'Baru') return course.progress === 0
-    if (activeFilter === 'Selesai') return course.progress === 100
+    if (activeFilter === 'Sedang Berjalan') return isProgressInProgress(course.progress)
+    if (activeFilter === 'Baru') return !isProgressStarted(course.progress)
+    if (activeFilter === 'Selesai') return isProgressComplete(course.progress)
     return true
   })
 
@@ -68,7 +69,7 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
         <div className="flex flex-col gap-10">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {paginatedCourses.map((course) => {
-              const isInProgress = course.progress > 0 && course.progress < 100
+              const isInProgress = isProgressInProgress(course.progress)
 
               return <JoinedCourseCard key={course.uid} data={course} variant={isInProgress ? 'resume' : 'non-resume'} size="lg" />
             })}

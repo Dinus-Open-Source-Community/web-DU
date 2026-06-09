@@ -57,6 +57,23 @@ definitions:
     required:
     - name
     type: object
+  dto.CreateCourseQaReplyRequest:
+    properties:
+      body:
+        type: string
+    required:
+    - body
+    type: object
+  dto.CreateCourseQaThreadRequest:
+    properties:
+      body:
+        type: string
+      title:
+        type: string
+    required:
+    - body
+    - title
+    type: object
   dto.CreateCourseReviewReplyRequest:
     properties:
       comment:
@@ -440,6 +457,357 @@ info:
   title: Web DU Backend
   version: "1.0"
 paths:
+  /admin/dashboard/kpis:
+    get:
+      consumes:
+      - application/json
+      description: Aggregate KPI metrics for the admin dashboard.
+      parameters:
+      - description: 'Period: 7d, 30d, 90d, 12m (default 30d)'
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard KPIs retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get admin dashboard KPIs
+      tags:
+      - Admin
+  /admin/dashboard/recent-transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve recent transactions for the admin dashboard.
+      parameters:
+      - description: 'Number of items (default: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Recent transactions retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get recent admin transactions
+      tags:
+      - Admin
+  /admin/financial/summary:
+    get:
+      consumes:
+      - application/json
+      description: Revenue analytics for the admin financial page.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Financial summary retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get admin financial summary
+      tags:
+      - Admin
+  /admin/qna:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated Q&A threads across courses.
+      parameters:
+      - description: Filter by course UID
+        in: query
+        name: courseUid
+        type: string
+      - description: answered or unanswered
+        in: query
+        name: status
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Q&A threads retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List Q&A threads (Admin)
+      tags:
+      - Admin
+  /admin/qna/{thread_id}/replies:
+    post:
+      consumes:
+      - application/json
+      description: Create an admin reply on a Q&A thread.
+      parameters:
+      - description: Thread UID
+        in: path
+        name: thread_id
+        required: true
+        type: string
+      - description: Reply body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseQaReplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Q&A reply created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Thread not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reply to a Q&A thread (Admin)
+      tags:
+      - Admin
+  /admin/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated reviews across all courses for moderation.
+      parameters:
+      - description: Filter by course UID
+        in: query
+        name: courseUid
+        type: string
+      - description: Filter by rating
+        in: query
+        name: rating
+        type: integer
+      - description: Filter reviews with replies
+        in: query
+        name: has_reply
+        type: boolean
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List course reviews (Admin)
+      tags:
+      - Admin
+  /admin/reviews/{review_id}/reply:
+    post:
+      consumes:
+      - application/json
+      description: Create an admin reply for a course review.
+      parameters:
+      - description: Review UID
+        in: path
+        name: review_id
+        required: true
+        type: string
+      - description: Reply body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseReviewReplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Review reply created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Review not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reply to a review (Admin)
+      tags:
+      - Admin
+  /admin/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated admin transaction list with summary counts.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by payment status
+        in: query
+        name: status
+        type: string
+      - description: Search by reference, course, or student
+        in: query
+        name: search
+        type: string
+      - description: Filter from date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all transactions (Admin)
+      tags:
+      - Admin
   /avatar:
     post:
       consumes:
@@ -1357,6 +1725,61 @@ paths:
       summary: Assign mentors to course (Super Admin / Admin)
       tags:
       - Course
+  /courses/{id}/mentors/unassign:
+    post:
+      consumes:
+      - application/json
+      description: Remove one or more mentors from a course assignment.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Mentor UIDs to remove
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignMentorsToCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentors unassigned successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin or Admin only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Unassign mentors from course (Super Admin / Admin)
+      tags:
+      - Course
   /courses/{id}/progress:
     get:
       consumes:
@@ -1405,6 +1828,96 @@ paths:
       security:
       - BearerAuth: []
       summary: Get course reading progress for authenticated user (Enrolled Student/Admin/Mentor)
+      tags:
+      - Course
+  /courses/{id}/qna:
+    post:
+      consumes:
+      - application/json
+      description: Create a new Q&A thread in a course.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Thread data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseQaThreadRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Q&A thread created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create Q&A thread (Enrolled Student)
+      tags:
+      - Course
+  /courses/{id}/qna/{thread_id}/replies:
+    post:
+      consumes:
+      - application/json
+      description: Reply to an existing Q&A thread in a course.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Thread UID
+        in: path
+        name: thread_id
+        required: true
+        type: string
+      - description: Reply body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseQaReplyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Q&A reply created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Thread not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reply to Q&A thread (Student / Mentor)
       tags:
       - Course
   /courses/{id}/review:

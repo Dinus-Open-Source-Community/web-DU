@@ -3,6 +3,7 @@ import { Calendar, MessageSquare, PlayCircle } from 'lucide-react'
 import ResumeCard from '@/components/shared/ResumeCard'
 import FeedbackCard from '@/components/shared/Feedback'
 import type { IUserData } from '@/lib/types/user'
+import { isProgressInProgress } from '@/lib/progress'
 
 const feedbackDateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',
@@ -17,7 +18,7 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
     Pending: Calendar,
   }
   const joinedCourses = (Data?.joined_courses as { uid: string; title: string; progress?: number; image?: string; module?: string }[]) ?? []
-  const resumeCourses = joinedCourses.filter((course) => course.progress !== undefined && course.progress < 100 && course.progress > 0)
+  const resumeCourses = joinedCourses.filter((course) => course.progress !== undefined && isProgressInProgress(course.progress))
   const recentFeedback = Data.course_reviews.slice(0, 3).map((review) => ({
     status: (review.rating >= 4 ? 'Lulus' : 'Perlu Revisi') as 'Lulus' | 'Perlu Revisi',
     time: feedbackDateFormatter.format(new Date(review.created_at)),

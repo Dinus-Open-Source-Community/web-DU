@@ -1,7 +1,8 @@
 import type { IMentorCourseStudent } from '../../lib/types/course'
+import { progressToPercent } from '@/lib/progress'
 
 export const ProgressBar = ({ value }: { value: number }) => {
-  const normalized = Math.max(0, Math.min(100, value))
+  const normalized = progressToPercent(value)
   return (
     <div className="space-y-1">
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
