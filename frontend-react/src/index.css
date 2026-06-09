@@ -1,11 +1,14 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Explicit content paths so utilities are generated from all TS/TSX (including route groups like `(authorized)`). */
 @source "./**/*.{js,ts,jsx,tsx}";
 
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant motion-reduce (@media (prefers-reduced-motion: reduce));
@@ -107,7 +110,7 @@
   --sidebar-accent-foreground: #0a84dc;
   --sidebar-border: #dcdcdc;
   --sidebar-ring: #0a84dc;
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: Poppins;
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
@@ -115,11 +118,16 @@
 
   --shadow-2xs: 0px 4px 10px 0px hsl(0 0 0 / 0.05);
   --shadow-xs: 0px 4px 10px 0px hsl(0 0 0 / 0.05);
-  --shadow-sm: 0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 1px 2px -1px hsl(0 0 0 / 0.1);
-  --shadow: 0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 1px 2px -1px hsl(0 0 0 / 0.1);
-  --shadow-md: 0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 2px 4px -1px hsl(0 0 0 / 0.1);
-  --shadow-lg: 0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 4px 6px -1px hsl(0 0 0 / 0.1);
-  --shadow-xl: 0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 8px 10px -1px hsl(0 0 0 / 0.1);
+  --shadow-sm:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 1px 2px -1px hsl(0 0 0 / 0.1);
+  --shadow:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 1px 2px -1px hsl(0 0 0 / 0.1);
+  --shadow-md:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 2px 4px -1px hsl(0 0 0 / 0.1);
+  --shadow-lg:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 4px 6px -1px hsl(0 0 0 / 0.1);
+  --shadow-xl:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 8px 10px -1px hsl(0 0 0 / 0.1);
   --shadow-2xl: 0px 4px 10px 0px hsl(0 0 0 / 0.25);
 }
 
@@ -160,11 +168,16 @@
 
   --shadow-2xs: 0px 10px 20px 0px hsl(0 0 0 / 0.25);
   --shadow-xs: 0px 10px 20px 0px hsl(0 0 0 / 0.25);
-  --shadow-sm: 0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 1px 2px -1px hsl(0 0 0 / 0.5);
-  --shadow: 0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 1px 2px -1px hsl(0 0 0 / 0.5);
-  --shadow-md: 0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 2px 4px -1px hsl(0 0 0 / 0.5);
-  --shadow-lg: 0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 4px 6px -1px hsl(0 0 0 / 0.5);
-  --shadow-xl: 0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 8px 10px -1px hsl(0 0 0 / 0.5);
+  --shadow-sm:
+    0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 1px 2px -1px hsl(0 0 0 / 0.5);
+  --shadow:
+    0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 1px 2px -1px hsl(0 0 0 / 0.5);
+  --shadow-md:
+    0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 2px 4px -1px hsl(0 0 0 / 0.5);
+  --shadow-lg:
+    0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 4px 6px -1px hsl(0 0 0 / 0.5);
+  --shadow-xl:
+    0px 10px 20px 0px hsl(0 0 0 / 0.5), 0px 8px 10px -1px hsl(0 0 0 / 0.5);
   --shadow-2xl: 0px 10px 20px 0px hsl(0 0 0 / 1.25);
 }
 
@@ -172,8 +185,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     letter-spacing: var(--tracking-normal);
+    font-family: var(--font-sans);
   }
 }

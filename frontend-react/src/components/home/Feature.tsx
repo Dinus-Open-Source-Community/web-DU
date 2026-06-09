@@ -1,11 +1,16 @@
-import type { ICardData } from "../../lib/types/utils";
-import CardCourse from "../shared/CardCourse";
+import CardCourse from '../shared/CardCourse'
+import { ROUTES } from '@/lib/routes'
+import type { ICourseItem } from '@/lib/types/course'
 
-export default function Feature({ Data }: { Data: ICardData[] }) {
+type FeatureProps = {
+  courses: ICourseItem[]
+  isLoading?: boolean
+}
+
+export default function Feature({ courses, isLoading = false }: FeatureProps) {
   return (
     <section className="relative z-10 h-full w-full bg-muted">
       <div className="container mx-auto pt-25 pb-15 2xl:px-0">
-        {/*header section*/}
         <div className="mx-auto h-full w-full max-w-3xl">
           <h2 className="text-center text-5xl leading-[1.3] font-bold">Featured Courses</h2>
           <p className="mt-4 text-center text-xl leading-[1.3] font-normal text-[#383838]">
@@ -13,34 +18,41 @@ export default function Feature({ Data }: { Data: ICardData[] }) {
             membangun portofolio yang solid.
           </p>
         </div>
-        {/*card section*/}
-        <div className="mt-12 grid w-full grid-cols-1 gap-8 px-20 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {Data.map((data, idx) => (
-            <CardCourse
-              key={data.uid ?? `${data.title}-${idx}`}
-              data={{
-                uid: data.uid,
-                title: data.title,
-                description: data.description,
-                subtitle: data.subtitle,
-                thumbnail_url: data.thumbnail_url,
-                cover_url: data.cover_url,
-                is_premium: data.is_premium,
-                level: data.level,
-                price: data.price,
-                mentors: data.mentors,
-                created_by: data.created_by,
-                category_uid: data.category_uid,
-                course_type_uid: data.course_type_uid,
-                slug: data.slug,
-                status: data.status,
-                created_at: data.created_at,
-                updated_at: data.updated_at,
-                event_uid: data.event_uid ?? null,
-                detailHref: `/course/${data.uid}`,
-              }}
-            />
-          ))}
+
+        <div className="mt-12 grid w-full grid-cols-1 gap-8 px-6 md:grid-cols-2 md:px-12 lg:grid-cols-3 lg:px-20">
+          {isLoading &&
+            Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`featured-skeleton-${index}`}
+                className="flex h-[420px] animate-pulse flex-col overflow-hidden rounded-xl bg-white"
+                aria-hidden
+              >
+                <div className="aspect-video w-full bg-slate-200" />
+                <div className="flex grow flex-col gap-3 p-5">
+                  <div className="h-5 w-2/3 rounded bg-slate-200" />
+                  <div className="h-4 w-full rounded bg-slate-100" />
+                  <div className="h-4 w-5/6 rounded bg-slate-100" />
+                  <div className="mt-auto h-10 w-full rounded bg-slate-100" />
+                </div>
+              </div>
+            ))}
+
+          {!isLoading && courses.length === 0 && (
+            <p className="col-span-full text-center text-base text-slate-500">
+              Belum ada kursus unggulan yang tersedia saat ini.
+            </p>
+          )}
+
+          {!isLoading &&
+            courses.map((course) => (
+              <CardCourse
+                key={course.uid}
+                data={{
+                  ...course,
+                  detailHref: ROUTES.courseDetail(course.uid),
+                }}
+              />
+            ))}
         </div>
       </div>
     </section>
