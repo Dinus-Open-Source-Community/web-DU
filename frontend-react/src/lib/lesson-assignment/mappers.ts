@@ -86,9 +86,46 @@ function mapGrading(raw: unknown, submissionRaw?: Record<string, unknown>): Less
   }
 }
 
+function extractSubmissionPayload(raw: unknown): Record<string, unknown> {
+  const payload = (raw ?? {}) as Record<string, unknown>
+
+  // Format GET setelah merge backend-fajar: { submission_uid, submissions[], latest_attempt_number }
+  if (Array.isArray(payload.submissions) && payload.submissions.length > 0) {
+    const attempts = payload.submissions as Record<string, unknown>[]
+    const latest = attempts[attempts.length - 1] ?? {}
+    const attemptCount =
+      typeof payload.latest_attempt_number === 'number'
+        ? payload.latest_attempt_number
+        : typeof latest.attempt_number === 'number'
+          ? latest.attempt_number
+          : 1
+
+    return {
+      ...latest,
+      uid: String(payload.submission_uid ?? latest.uid ?? ''),
+      attempt_count: attemptCount,
+      created_at:
+        typeof latest.submitted_at === 'string'
+          ? latest.submitted_at
+          : typeof latest.created_at === 'string'
+            ? latest.created_at
+            : '',
+      updated_at:
+        typeof latest.submitted_at === 'string'
+          ? latest.submitted_at
+          : typeof latest.updated_at === 'string'
+            ? latest.updated_at
+            : '',
+    }
+  }
+
+  // Format POST/PUT atau legacy GET: entity submission langsung
+  return (payload.submission ?? payload) as Record<string, unknown>
+}
+
 export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssignmentSubmissionRecord {
   const payload = (raw ?? {}) as Record<string, unknown>
-  const submission = (payload.submission ?? payload) as Record<string, unknown>
+  const submission = extractSubmissionPayload(payload)
 
   return {
     uid: String(submission.uid ?? ''),
