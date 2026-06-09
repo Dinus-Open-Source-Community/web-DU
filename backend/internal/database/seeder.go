@@ -14,7 +14,23 @@ import (
 	"gorm.io/gorm"
 )
 
-// RunSeeder menjalankan semua seeder untuk database secara berurutan.
+// RunSeeder menjalankan semua seeder untuk database secara berurutan (mode incremental).
+//
+// # Incremental — aman dijalankan ulang tanpa hapus data
+//
+// Seeder ini TIDAK melakukan TRUNCATE/DELETE massal. Setiap seed*():
+//   - INSERT jika record belum ada (lookup via kunci stabil: slug, email_hash, transaction_id, dll.)
+//   - SKIP jika sudah ada (enrollment, payment, review, submission, attendance, …)
+//   - UPDATE ringan pada beberapa seed lama (mis. user seed, patch course created_by_uid)
+//
+// Cara menjalankan ulang setelah mengubah seeder.go:
+//   1. CLI (disarankan):  cd backend && go run ./cmd/seed
+//   2. Saat startup app:  set SEED=true di .env lalu restart backend
+//
+// Cara menambah data seed baru:
+//   1. Tambahkan entry di slice seed*() yang relevan
+//   2. Pastikan ada kunci idempoten (transaction_id unik, seed key Q&A, slug, order_index, …)
+//   3. Jalankan salah satu cara di atas — hanya data baru yang masuk
 //
 // Catatan terkait sistem enkripsi:
 //   - Field sensitif (User.Name/Email/Description, Course.Title/Subtitle/Description,

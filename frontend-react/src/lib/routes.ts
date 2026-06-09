@@ -24,8 +24,11 @@ export const ROUTES = {
     dashboard: '/admin/dashboard',
     users: {
       students: '/admin/users/students',
+      studentDetail: (userUid: string) => `/admin/users/students/${userUid}`,
       mentors: '/admin/users/mentors',
+      mentorDetail: (userUid: string) => `/admin/users/mentors/${userUid}`,
       administrators: '/admin/users/administrators',
+      administratorDetail: (userUid: string) => `/admin/users/administrators/${userUid}`,
     },
     courses: '/admin/courses',
     courseCategories: '/admin/course-categories',

@@ -10,7 +10,6 @@ import {
   removeModule,
   renameModule,
 } from "@/lib/course-curriculum";
-import { isCoursePublished } from "@/lib/course-detail/publish-state";
 import { switchLessonDeliveryType } from "@/lib/course-edit/switch-lesson-delivery-type";
 import {
   findModuleForLesson,
@@ -523,6 +522,9 @@ export function useCourseEditController({
           }),
           queryClient.invalidateQueries({
             queryKey: lessonAssignmentKeys.detail(result.nextLessonId),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: courseKeys.assignments(courseUid),
           }),
           queryClient.invalidateQueries({ queryKey: moduleKeys.all }),
           queryClient.invalidateQueries({
@@ -1205,32 +1207,19 @@ export function useCourseEditController({
         courseUid: courseData.uid,
       });
 
-      const statusPatch =
-        typeof updated === "object" &&
-        updated !== null &&
-        "status" in updated &&
-        typeof (updated as { status?: unknown }).status === "string"
-          ? (updated as { status: string }).status
-          : "ACTIVE";
+      setCourse((previous) => {
+        if (!previous || typeof updated !== "object" || updated === null) {
+          return previous;
+        }
 
-      setCourse((previous) =>
-        previous
-          ? {
-              ...previous,
-              status: statusPatch,
-              is_published: isCoursePublished({
-                ...previous,
-                status: statusPatch,
-                is_published:
-                  typeof updated === "object" &&
-                  updated !== null &&
-                  "is_published" in updated
-                    ? Boolean((updated as { is_published?: boolean }).is_published)
-                    : previous.is_published,
-              }),
-            }
-          : previous,
-      );
+        const patch = updated as { status?: string; is_published?: boolean };
+
+        return {
+          ...previous,
+          status: patch.status ?? "ACTIVE",
+          is_published: patch.is_published ?? true,
+        };
+      });
     } catch {
       // Error toast sudah ditangani di saveLesson atau useUpdateCourseStatus.
     }

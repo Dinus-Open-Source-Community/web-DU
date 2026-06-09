@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
-import { useCourseDetailAssignmentsView } from '@/hooks/course-detail/use-course-detail-assignments-view'
 import { useCourseDetailAttendanceView } from '@/hooks/course-detail/use-course-detail-attendance-view'
+import { useCourseMentorManagement } from '@/hooks/course-detail/use-course-mentor-management'
+import { CourseDetailAssignmentsTabPanel } from '@/components/shared/course-detail-manage/CourseDetailAssignmentsTabPanel'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import type { CourseDetailShellProps } from '@/lib/course-detail/course-detail-manage-view-model'
 import { cn } from '@/lib/utils'
@@ -20,7 +21,6 @@ import {
   CourseDetailNavTabs,
   type CourseDetailTabValue,
 } from './course-detail-manage/CourseDetailNavTabs'
-import { CourseDetailAssignmentsTab } from './course-detail-manage/CourseDetailAssignmentsTab'
 import { CourseDetailAttendanceTab } from './course-detail-manage/CourseDetailAttendanceTab'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
 
@@ -46,6 +46,10 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     confirmLabel,
     onConfirmPublish,
     onCancelPublish,
+    isDeleteConfirmOpen,
+    onDeleteConfirmOpenChange,
+    onDeleteClick,
+    onConfirmDelete,
     onReplyReview,
     submittingReviewUid,
     editDialogSubmitting,
@@ -66,17 +70,14 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     }
   }, [tabFromQuery])
 
-  const assignmentsView = useCourseDetailAssignmentsView({
-    courseUid,
-    role: isAdmin ? 'admin' : 'mentor',
-    modules,
-    students: dataStudents,
-    enabled: activeTab === 'assignments',
-  })
   const attendanceView = useCourseDetailAttendanceView({
     modules,
     students: dataStudents,
     enabled: isAdmin && activeTab === 'attendance',
+  })
+  const mentorManagement = useCourseMentorManagement({
+    courseUid,
+    enabled: isAdmin,
   })
 
   return (
@@ -90,6 +91,7 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         isPublished={isPublished}
         onEditClick={onEditClick}
         onPublishClick={onPublishClick}
+        onDeleteClick={isAdmin ? onDeleteClick : undefined}
       />
 
       <Tabs
@@ -113,7 +115,12 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           </TabsContent>
 
           <TabsContent value="assignments" className="mt-0 animate-in fade-in duration-300">
-            <CourseDetailAssignmentsTab view={assignmentsView} />
+            <CourseDetailAssignmentsTabPanel
+              active={activeTab === 'assignments'}
+              courseUid={courseUid}
+              role={isAdmin ? 'admin' : 'mentor'}
+              students={dataStudents}
+            />
           </TabsContent>
 
           {isAdmin ? (
@@ -137,6 +144,11 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
                 mentors={course.mentors || []}
                 isAdmin={isAdmin}
                 assignAction={<AssignCourseMentorDialog {...assignMentorDialog} />}
+                pendingUnassignMentor={mentorManagement.pendingUnassignMentor}
+                onRequestUnassignMentor={mentorManagement.onRequestUnassignMentor}
+                onCancelUnassignMentor={mentorManagement.onCancelUnassignMentor}
+                onConfirmUnassignMentor={mentorManagement.onConfirmUnassignMentor}
+                unassigningMentorUid={mentorManagement.unassigningMentorUid}
               />
             </TabsContent>
           ) : null}
@@ -151,6 +163,7 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         isPublished={isPublished}
         onEditClick={onEditClick}
         onPublishClick={onPublishClick}
+        onDeleteClick={isAdmin ? onDeleteClick : undefined}
       />
 
       <EditCourseDialog
@@ -173,6 +186,20 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           open={isConfirmOpen}
           onConfirm={onConfirmPublish}
           onCancel={onCancelPublish}
+        />
+      ) : null}
+
+      {isAdmin && isDeleteConfirmOpen ? (
+        <ConfirmDialog
+          title="Hapus kursus?"
+          description={`Kursus "${course.title}" akan dinonaktifkan (status TIDAK ACTIVE) dan tidak lagi terbit. Data kurikulum tetap tersimpan.`}
+          confirmLabel="Hapus kursus"
+          cancelLabel="Batal"
+          variant="destructive"
+          onOpenChange={onDeleteConfirmOpenChange}
+          open={isDeleteConfirmOpen}
+          onConfirm={onConfirmDelete}
+          onCancel={() => onDeleteConfirmOpenChange(false)}
         />
       ) : null}
     </div>

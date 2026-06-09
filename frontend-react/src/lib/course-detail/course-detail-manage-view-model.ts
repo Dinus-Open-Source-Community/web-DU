@@ -25,6 +25,11 @@ export type CourseDetailManageViewModel = {
   confirmLabel: string
   onConfirmPublish: () => void
   onCancelPublish: () => void
+  isDeleteConfirmOpen: boolean
+  onDeleteConfirmOpenChange: (open: boolean) => void
+  onDeleteClick: () => void
+  onConfirmDelete: () => void
+  isDeleting: boolean
   onReplyReview: (reviewUid: string, comment: string) => Promise<void>
   submittingReviewUid: string | null
   editDialogSubmitting: boolean

@@ -13,7 +13,6 @@ export type CourseDetailAttendanceViewModel = {
   isLoading: boolean
   isError: boolean
   errorMessage: string | null
-  presentCount: number
   onUpdateAttendance: (
     attendanceUid: string,
     status: ILessonAttendanceRecord['status'],

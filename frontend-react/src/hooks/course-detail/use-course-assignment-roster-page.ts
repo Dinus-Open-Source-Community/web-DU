@@ -15,7 +15,7 @@ import {
 import type { CourseAssignmentRosterPageViewModel } from '@/lib/course-detail/course-assignment-roster-view-model'
 import type { AssignmentRosterStatusFilter } from '@/lib/types/features/course-detail-assignments'
 import type { IMentorCourseStudent, IModulesData } from '@/lib/types/course'
-import { useCourseDetailLessons } from '@/hooks/course-detail/use-course-detail-lessons'
+import { deriveLessonsFromModules } from '@/lib/course-detail/derive-lessons-from-modules'
 import { fetchLessonAssignment } from '@/services/lesson-assignment-admin'
 import { fetchLessonAssignmentSubmissions } from '@/services/lesson-assignment-submission'
 
@@ -39,12 +39,10 @@ export function useCourseAssignmentRosterPage({
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AssignmentRosterStatusFilter>('all')
 
-  const { lessons } = useCourseDetailLessons(modules, Boolean(lessonUid))
-
-  const lessonRef = useMemo(
-    () => lessons.find((lesson) => lesson.uid === lessonUid) ?? null,
-    [lessonUid, lessons],
-  )
+  const lessonRef = useMemo(() => {
+    const lessons = deriveLessonsFromModules(modules)
+    return lessons.find((lesson) => lesson.uid === lessonUid) ?? null
+  }, [lessonUid, modules])
 
   const assignmentQuery = useQuery({
     queryKey: lessonAssignmentKeys.detail(lessonUid),

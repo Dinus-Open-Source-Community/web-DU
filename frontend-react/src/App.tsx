@@ -17,6 +17,9 @@ const Dashboard = React.lazy(() => import('./pages/admin/Dashboard.tsx'))
 const AdminStudentsPage = React.lazy(() => import('./pages/admin/Student.tsx'))
 const AdminMentorsPage = React.lazy(() => import('./pages/admin/Mentors.tsx'))
 const AdminAdministratorsPage = React.lazy(() => import('./pages/admin/Admin.tsx'))
+const AdminStudentDetailPage = React.lazy(() => import('./pages/admin/StudentDetail.tsx'))
+const AdminMentorDetailPage = React.lazy(() => import('./pages/admin/MentorDetail.tsx'))
+const AdminAdministratorDetailPage = React.lazy(() => import('./pages/admin/AdministratorDetail.tsx'))
 const Courses = React.lazy(() => import('./pages/admin/Courses.tsx'))
 const AdminCourseCategories = React.lazy(() => import('./pages/admin/CourseCategories.tsx'))
 const AdminCourseTypes = React.lazy(() => import('./pages/admin/CourseTypes.tsx'))
@@ -130,6 +133,13 @@ const routeConfig: RouteConfig[] = [
     roles: ['admin'],
   },
   {
+    path: `${ROUTES.admin.users.students}/:userUid`,
+    element: <AdminStudentDetailPage />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
     path: ROUTES.admin.users.mentors,
     element: <AdminMentorsPage />,
     public: false,
@@ -137,8 +147,22 @@ const routeConfig: RouteConfig[] = [
     roles: ['admin'],
   },
   {
+    path: `${ROUTES.admin.users.mentors}/:userUid`,
+    element: <AdminMentorDetailPage />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
     path: ROUTES.admin.users.administrators,
     element: <AdminAdministratorsPage />,
+    public: false,
+    lazy: true,
+    roles: ['admin'],
+  },
+  {
+    path: `${ROUTES.admin.users.administrators}/:userUid`,
+    element: <AdminAdministratorDetailPage />,
     public: false,
     lazy: true,
     roles: ['admin'],

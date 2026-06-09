@@ -94,7 +94,7 @@ export function useCourseDetailWithCategories(uid: string) {
 export function useCourseDetailAdminAndMentor(uid: string) {
   const courseDetail = useCourseDetail(uid)
   const userCourse = useCourseStudents(uid)
-  const moduleCourse = useModulesByCourse(uid)
+  const moduleCourse = useModulesByCourse(uid, { per_page: 100 })
 
   const isLoading =
     courseDetail.isLoading || userCourse.isLoading || moduleCourse.isLoading

@@ -20,6 +20,8 @@ export type CourseModuleViewerAssignmentState = {
   assignment: LessonDetailAssignment | null
   quiz: NormalizedQuiz | null
   submission: LessonAssignmentSubmissionRecord | null
+  submissionAttempts: LessonAssignmentSubmissionRecord[]
+  submissionMaxAttempts: number | null
   phase: StudentSubmissionPhase
   canStart: boolean
   submissionBlockReason: string | null

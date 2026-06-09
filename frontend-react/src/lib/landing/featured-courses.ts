@@ -1,3 +1,4 @@
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { ICourseItem } from '@/lib/types/course'
 
 export const FEATURED_COURSE_LIMIT = 3
@@ -7,7 +8,7 @@ export function pickTopRatedCourses(
   limit = FEATURED_COURSE_LIMIT,
 ): ICourseItem[] {
   return [...courses]
-    .filter((course) => course.is_published !== false)
+    .filter((course) => isCoursePublished(course))
     .sort((left, right) => {
       const ratingDiff = (right.rating ?? 0) - (left.rating ?? 0)
       if (ratingDiff !== 0) return ratingDiff

@@ -19,29 +19,33 @@ Dokumen ini merangkum **semua perubahan backend** dari **2 commit terakhir J-yri
 
 **Testing lokal:** jalankan BE dengan `SEED=true` (lihat `.env.example`). Dokumen cURL lengkap ada di `backend/archive/gap-route.md` dan `backend/archive/assignment-submission-attempts-curl.md`.
 
+> **Status FE terkini:** lihat [progress/integration-status.md](./progress/integration-status.md) — dokumen ini fokus perubahan BE; kolom "Status FE" di bawah bisa ketinggalan setelah implementasi lanjutan.
+
 ---
 
 ## Ringkasan Cepat
 
 | Area | Endpoint baru / berubah | Status FE saat ini |
 |------|-------------------------|-------------------|
-| Update kursus | `PUT /courses/:id` | ✅ Service sudah ada (`updateCourse`) |
-| Hapus kursus | `DELETE /courses/:id` | 🔴 Belum di-wire |
-| Unassign mentor | `POST /courses/:id/mentors/unassign` | 🔴 Belum di-wire |
-| Filter katalog kursus | `GET /courses?course_category_id=...` | 🟡 Param sudah dikirim, verifikasi filter |
-| Assignment per course | `GET /courses/:id/assignments` | 🔴 Halaman mentor masih mock |
-| Assignment siswa lintas kursus | `GET /students/me/assignments` | 🔴 Halaman student masih pakai profil |
-| GET submission siswa | `GET /lessons/:id/assignment/submission` | ✅ Mapper sudah disesuaikan (format array) |
-| Peserta kursus + kehadiran | `GET /courses/:id/students` | 🟡 Field baru belum dipetakan semua |
-| Profil user + assignments | `GET /user/data` → `joined_courses[].assignments` | 🟡 Dipakai student assignments (parsial) |
-| Admin dashboard | `GET /admin/dashboard/*` | 🔴 Mock di `pages/admin/Dashboard.tsx` |
+| Update kursus | `PUT /courses/:id` | ✅ Live (`updateCourse`, form edit) |
+| Hapus kursus | `DELETE /courses/:id` | ✅ Live (`deleteCourse`, dialog di detail admin) |
+| Publish kursus | `PATCH /courses/:id/status` | ✅ Live — set `ACTIVE` + `is_published=true` |
+| Unassign mentor | `POST /courses/:id/mentors/unassign` | ✅ Live (`CourseMentorTable`) |
+| Filter katalog kursus | `GET /courses?course_category_id=...` | 🟡 Param dikirim, verifikasi hasil filter |
+| Assignment per course | `GET /courses/:id/assignments` | ✅ Tab Tugas admin; legacy `mentor/CourseAssignments` masih mock |
+| Assignment siswa lintas kursus | `GET /students/me/assignments` | ✅ Live (`student/Assignments.tsx`) |
+| GET submission siswa | `GET /lessons/:id/assignment/submission` | ✅ Mapper format array attempt |
+| Peserta kursus + kehadiran | `GET /courses/:id/students` | 🟡 BE kirim `attendance_*`; FE belum mapper ke `AttendanceBar` |
+| Detail user admin | `GET /user/:uid` | ✅ Live (`UserDetailView`) |
+| Profil user + assignments | `GET /user/data` → `joined_courses[].assignments` | 🟡 Dipakai detail user; tidak dipakai halaman Assignments |
+| Admin dashboard | `GET /admin/dashboard/*` | 🔴 Mock (service admin belum ada) |
 | Admin transaksi | `GET /admin/transactions` (+ summary) | 🔴 Mock |
 | Admin financial | `GET /admin/financial/summary` | 🔴 Mock |
-| Admin reviews | `GET /admin/reviews`, `POST .../reply` | 🔴 Route FE dikomentari |
-| Admin Q&A | `GET /admin/qna`, `POST .../replies` | 🔴 Route FE dikomentari |
+| Admin reviews | `GET /admin/reviews`, `POST .../reply` | 🔴 Mock; route dikomentari |
+| Admin Q&A | `GET /admin/qna`, `POST .../replies` | 🔴 Mock; route dikomentari |
 | Q&A per course | `POST /courses/:id/qna`, `POST .../replies` | 🔴 Belum di-wire |
-| Mentor dashboard | `GET /mentor/dashboard/kpis`, `.../schedules` | 🔴 Mock |
-| User manage filter admin | `GET /user/manage/all?role=admin` | ✅ Sekarang include `super_admin` |
+| Mentor dashboard | `GET /mentor/dashboard/kpis`, `.../schedules` | 🔴 Mock (service belum ada) |
+| User manage filter admin | `GET /user/manage/all?role=admin` | ✅ Include `super_admin` |
 
 ---
 
@@ -103,12 +107,14 @@ Dokumen ini merangkum **semua perubahan backend** dari **2 commit terakhir J-yri
 }
 ```
 
-**Implementasi FE yang disarankan:**
+**Implementasi FE (✅ selesai — Fase 16):**
 
-1. Tambah `deleteCourse(uid)` di `services/course.ts`
-2. Tambah validator minimal (UID saja)
-3. Hook `useDeleteCourse()` + konfirmasi dialog di `admin/ManageCourse` atau `DetailCourse`
-4. Invalidate query `courses` setelah sukses
+1. ✅ `deleteCourse(uid)` di `services/course.ts` + `api-path.ts` → `courses.deleteByUid`
+2. ✅ Validator UID via `parseCourseUidParam`
+3. ✅ `useDeleteCourse()` + dialog konfirmasi di `DetailCourseComponents` (halaman detail admin)
+4. ✅ Invalidate `courseKeys.all` + remove `courseKeys.detail` setelah sukses; redirect `/admin/courses`
+
+**Catatan UX:** Hapus belum ada di kartu daftar `ManageCourse` — hanya dari halaman detail.
 
 ---
 
@@ -581,14 +587,17 @@ Urutan disarankan setelah merge:
 
 - [x] `PUT /courses/:id` — sudah di-wire
 - [x] Parser GET submission format array attempt — `mappers.ts`
+- [x] `GET /students/me/assignments` → `student/Assignments.tsx`
+- [x] `GET /courses/:id/assignments` → tab Tugas admin
+- [x] `POST /courses/:id/mentors/unassign` → tombol Lepas mentor
+- [x] `GET /user/:uid` → halaman detail user admin
 
-### P1 — Halaman utama masih mock
+### P1 — Halaman utama masih mock / partial
 
-- [ ] `GET /students/me/assignments` → `student/Assignments.tsx`
-- [ ] `GET /courses/:id/assignments` → `mentor/CourseAssignments.tsx` (atau deprecate halaman)
-- [ ] `POST /courses/:id/mentors/unassign` → tombol Lepas mentor
-- [ ] `DELETE /courses/:id` → hapus/nonaktifkan kursus admin
+- [x] `DELETE /courses/:id` → hapus/nonaktifkan kursus admin
 - [ ] Map `attendance_present` / `attendance_total` di roster & `AttendanceBar`
+- [ ] Samakan `mentor/Courses` & `mentor/DetailCourse` dengan pola admin API
+- [ ] Deprecate `mentor/CourseAssignments.tsx` legacy mock
 
 ### P2 — Admin analytics
 

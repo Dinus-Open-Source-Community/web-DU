@@ -2,6 +2,7 @@ import { api } from './axios'
 import { unwrapApiResponse } from './api-error'
 import { API_ROUTES } from './api-path'
 import type { IResponse } from '@/lib/types/api'
+import type { ManagedUserDetailApiResponse } from '@/lib/user-manage/user-detail-api-types'
 import type {
   ManagedUserItem,
   ManagedUserListParams,
@@ -13,6 +14,14 @@ import {
   parseManagedUserUidParam,
   parseUpdateUserRolePayload,
 } from '@/lib/validator/user-manage'
+
+export async function fetchManagedUserDetail(uid: string) {
+  const validatedUid = parseManagedUserUidParam(uid)
+  const response = await api.get<IResponse<ManagedUserDetailApiResponse>>(
+    API_ROUTES.user.getUserByUid(validatedUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil detail user')
+}
 
 export async function fetchManagedUsers(params?: ManagedUserListParams) {
   const validatedParams = parseManagedUserListParams(params)

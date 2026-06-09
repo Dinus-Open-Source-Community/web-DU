@@ -306,10 +306,99 @@ gantt
 
 ---
 
+## Fase 13 — Merge Backend J-yriz & Integrasi Post-Merge
+
+**Tujuan:** Wire endpoint baru dari merge `feature/backend-fajar` (commit `d4e9fe7`, `b043d4e`).
+
+**Referensi BE:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)
+
+| Item | Status | File utama |
+|------|--------|------------|
+| `PUT /courses/:id` update metadata | ✅ | `services/course.ts`, `useUpdateCourse` |
+| `POST /courses/:id/mentors/unassign` | ✅ | `use-course-mentor-management.ts`, `CourseMentorTable` |
+| `GET /courses/:id/assignments` bulk | ✅ | `services/course-assignments.ts`, tab Tugas admin |
+| `GET /students/me/assignments` | ✅ | `services/student-assignments.ts`, `student/Assignments.tsx` |
+| GET submission format array attempt | ✅ | `lib/lesson-assignment/mappers.ts` |
+| `DELETE /courses/:id` | ✅ | Fase 16 — `deleteCourse`, `useDeleteCourse` |
+| Admin dashboard / transactions / financial | 🔴 | Masih mock |
+| Mentor dashboard | 🔴 | Masih mock |
+
+---
+
+## Fase 14 — Halaman Detail User Admin
+
+**Tujuan:** Admin bisa melihat profil lengkap user, kursus, ulasan, dan transaksi dari satu halaman.
+
+**Halaman:** `pages/admin/StudentDetail.tsx`, `MentorDetail.tsx`, `AdministratorDetail.tsx`
+
+**Yang dibuat:**
+
+| Layer | Path |
+|-------|------|
+| Types & mapper | `lib/user-manage/user-detail-types.ts`, `map-user-detail.ts`, `user-detail-presenter.ts` |
+| Navigasi section | `lib/user-manage/user-detail-navigation.ts` |
+| Layout tokens | `lib/user-manage/user-detail-layout.ts` |
+| Hook section | `hooks/use-user-detail-section.ts` |
+| Service | `services/user-manage.ts` → `fetchManagedUserDetail` |
+| UI | `components/admin/user-manage/user-detail/*`, `UserDetailView.tsx` |
+
+**API:**
+
+```
+GET /user/:uid   — profil, joined_courses, mentored_courses, reviews, transactions
+```
+
+**Hasil:** Satu filter navigasi (`SegmentedFilter`), card modern konsisten, progress bar di kursus diikuti.
+
+---
+
+## Fase 15 — Dokumentasi Status Integrasi
+
+**Tujuan:** Satu dokumen living status FE↔BE untuk PM/QA/BE.
+
+**File:** [integration-status.md](./integration-status.md)
+
+**Isi:** Matriks fitur implemented/belum, API dipakai/belum, gap FE expects vs BE, delta vs backend-changes doc.
+
+---
+
+## Fase 16 — Publish & Hapus Kursus (Selaras BE)
+
+**Tujuan:** Selaraskan status publish FE↔BE, implement soft delete kursus, dan perbaiki UX label aksi publish.
+
+**Referensi BE:** `ActivateCourseStatusFunc`, `DeleteAdminCourseFunc` di `backend/internal/service/course.go`
+
+| Item | Status | File utama |
+|------|--------|------------|
+| Logika publish terpusat | ✅ | `lib/course-detail/publish-state.ts` → `isCoursePublished()` |
+| `PATCH /courses/:id/status` | ✅ | `services/course.ts` → `updateCourseStatus()` |
+| BE set `is_published=true` saat activate | ✅ | `course.go` — `ActivateCourseStatusFunc` |
+| `DELETE /courses/:id` soft delete | ✅ | `api-path.ts`, `deleteCourse()`, `useDeleteCourse()` |
+| Dialog hapus + redirect daftar | ✅ | `use-course-detail-manage-view.ts`, `DetailCourseComponents.tsx` |
+| Tombol Terbit (hanya draft) | ✅ | `CourseDetailManageHeader`, `CourseDetailMobileActions`, editor kurikulum |
+| Label UI Terbit / Draft | ✅ | Badge `coursePublished` / `courseDraft`, toast, form copy |
+| Featured courses filter | ✅ | `lib/landing/featured-courses.ts` pakai `isCoursePublished()` |
+
+**API:**
+
+```
+PATCH /courses/:uid/status   → status ACTIVE + is_published true (tanpa body)
+DELETE /courses/:uid         → status TIDAK ACTIVE + is_published false
+```
+
+**UX publish:**
+
+- Badge status: **Terbit** / **Draft** (bukan Published/Draft)
+- Tombol aksi: **Terbit** — disembunyikan setelah kursus sudah publish
+- Hapus kursus tetap tersedia untuk admin pada kursus yang sudah terbit
+
+**Catatan PM:**
+
+- Hapus dari halaman **detail** kursus admin (belum ada di kartu daftar `ManageCourse`)
+- `PUT /courses/:id` tidak mengubah status / `is_published` — publish hanya lewat PATCH status
+
+---
+
 ## Commit Status
 
-Perubahan pada branch **belum di-commit** pada akhir sesi (menunggu permintaan explicit dari developer). Draft pesan commit yang pernah disiapkan:
-
-```
-feat(frontend-react): integrasikan manajemen user admin, course master, dan perbaikan layout sidebar
-```
+Perubahan pada branch **belum di-commit** pada akhir sesi (menunggu permintaan explicit dari developer).

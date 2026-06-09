@@ -31,7 +31,9 @@ Setiap gap punya:
 
 | Dokumen | Isi |
 |---------|-----|
-| [**progress/README.md**](./progress/README.md) | **Mulai di sini** — ringkasan kemajuan & indeks progress |
+| [**progress/integration-status.md**](./progress/integration-status.md) | **Status FE↔BE** — fitur, API dipakai/belum, gap |
+| [**progress/README.md**](./progress/README.md) | Ringkasan kemajuan & indeks progress |
+| [backend-changes-j-yriz-merge.md](./backend-changes-j-yriz-merge.md) | Perubahan BE merge J-yriz + kontrak endpoint |
 | [progress/implementation-log.md](./progress/implementation-log.md) | Kronologi fase kerja dari awal sesi |
 | [progress/workflows.md](./progress/workflows.md) | Diagram alur fitur yang sudah di-wire |
 | [progress/architecture.md](./progress/architecture.md) | Struktur folder & pola arsitektur |

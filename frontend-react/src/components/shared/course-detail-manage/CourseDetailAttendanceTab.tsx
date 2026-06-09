@@ -61,7 +61,6 @@ export function CourseDetailAttendanceTab({ view }: CourseDetailAttendanceTabPro
     isLoading,
     isError,
     errorMessage,
-    presentCount,
     onUpdateAttendance,
     onDeleteAttendance,
     isMutating,
@@ -82,27 +81,6 @@ export function CourseDetailAttendanceTab({ view }: CourseDetailAttendanceTabPro
         title="Kehadiran"
         description="Pilih pertemuan, lalu perbarui status kehadiran peserta yang sudah check-in."
       />
-
-      <dl className={manageDetailLayout.flatStats}>
-        <div>
-          <dt className={manageDetailLayout.flatStatLabel}>Total peserta</dt>
-          <dd className={manageDetailLayout.flatStatValue}>{students.length}</dd>
-        </div>
-        <div>
-          <dt className={manageDetailLayout.flatStatLabel}>Hadir</dt>
-          <dd className={manageDetailLayout.flatStatValue}>{presentCount}</dd>
-        </div>
-        <div>
-          <dt className={manageDetailLayout.flatStatLabel}>Tidak hadir</dt>
-          <dd className={manageDetailLayout.flatStatValue}>
-            {Math.max(students.length - presentCount, 0)}
-          </dd>
-        </div>
-        <div>
-          <dt className={manageDetailLayout.flatStatLabel}>Pertemuan</dt>
-          <dd className={manageDetailLayout.flatStatValue}>{lessons.length}</dd>
-        </div>
-      </dl>
 
       <div className={manageDetailLayout.flatToolbar}>
         <div className="space-y-2">

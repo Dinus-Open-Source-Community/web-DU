@@ -81,7 +81,7 @@ export function CourseEditStickySaveBar({
                 disabled={isSaving || isPublishing}
                 onClick={onPublish}
               >
-                {isPublishing ? 'Menerbitkan...' : 'Terbitkan'}
+                {isPublishing ? 'Memproses...' : 'Terbit'}
               </Button>
             )}
 

@@ -16,7 +16,7 @@ import {
   submitLessonAssignment,
   type SubmitLessonAssignmentInput,
 } from '@/services/lesson-assignment'
-import { lessonAssignmentKeys } from './query-keys'
+import { lessonAssignmentKeys, studentAssignmentKeys } from './query-keys'
 
 type UseLessonAssignmentOptions = {
   lesson: LessonDetailItem | null | undefined
@@ -39,7 +39,11 @@ export function useLessonAssignment({ lesson, enabled }: UseLessonAssignmentOpti
     staleTime: 30_000,
   })
 
-  const submission = submissionQuery.data ?? null
+  const submissionBundle = submissionQuery.data ?? null
+  const submission = submissionBundle?.latest ?? null
+  const submissionAttempts = submissionBundle?.attempts ?? []
+  const submissionMaxAttempts = submissionBundle?.maxAttempts ?? null
+  const submissionTotalAttempts = submissionBundle?.totalAttempts ?? 0
 
   const phase = useMemo(
     () => (assignment ? deriveSubmissionPhase(assignment, submission) : 'not_submitted'),
@@ -87,7 +91,10 @@ export function useLessonAssignment({ lesson, enabled }: UseLessonAssignmentOpti
       })
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: lessonAssignmentKeys.mySubmission(lessonUid) })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: lessonAssignmentKeys.mySubmission(lessonUid) }),
+        queryClient.invalidateQueries({ queryKey: studentAssignmentKeys.all }),
+      ])
     },
   })
 
@@ -95,6 +102,9 @@ export function useLessonAssignment({ lesson, enabled }: UseLessonAssignmentOpti
     assignment: assignment as LessonDetailAssignment | null,
     quiz,
     submission,
+    submissionAttempts,
+    submissionMaxAttempts,
+    submissionTotalAttempts,
     phase,
     statusLabel,
     canStart,

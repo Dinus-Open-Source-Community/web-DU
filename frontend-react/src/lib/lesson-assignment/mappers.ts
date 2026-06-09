@@ -1,5 +1,10 @@
 import type { IRichTextEnvelope } from '@/lib/types/rich-text'
-import type { LessonAssignmentGrading, LessonAssignmentSubmissionRecord, QuizAnswersMap } from './types'
+import type {
+  LessonAssignmentGrading,
+  LessonAssignmentSubmissionBundle,
+  LessonAssignmentSubmissionRecord,
+  QuizAnswersMap,
+} from './types'
 
 function parseRichTextValue(raw: unknown): IRichTextEnvelope | string | null {
   if (raw == null) return null
@@ -86,46 +91,25 @@ function mapGrading(raw: unknown, submissionRaw?: Record<string, unknown>): Less
   }
 }
 
-function extractSubmissionPayload(raw: unknown): Record<string, unknown> {
-  const payload = (raw ?? {}) as Record<string, unknown>
+function mapSubmissionEntity(
+  submission: Record<string, unknown>,
+  options?: { attemptNumber?: number; submittedAt?: string },
+): LessonAssignmentSubmissionRecord {
+  const attemptCount =
+    options?.attemptNumber ??
+    (typeof submission.attempt_count === 'number' ? submission.attempt_count : 1)
 
-  // Format GET setelah merge backend-fajar: { submission_uid, submissions[], latest_attempt_number }
-  if (Array.isArray(payload.submissions) && payload.submissions.length > 0) {
-    const attempts = payload.submissions as Record<string, unknown>[]
-    const latest = attempts[attempts.length - 1] ?? {}
-    const attemptCount =
-      typeof payload.latest_attempt_number === 'number'
-        ? payload.latest_attempt_number
-        : typeof latest.attempt_number === 'number'
-          ? latest.attempt_number
-          : 1
+  const createdAt =
+    options?.submittedAt ??
+    (typeof submission.created_at === 'string' ? submission.created_at : '')
 
-    return {
-      ...latest,
-      uid: String(payload.submission_uid ?? latest.uid ?? ''),
-      attempt_count: attemptCount,
-      created_at:
-        typeof latest.submitted_at === 'string'
-          ? latest.submitted_at
-          : typeof latest.created_at === 'string'
-            ? latest.created_at
-            : '',
-      updated_at:
-        typeof latest.submitted_at === 'string'
-          ? latest.submitted_at
-          : typeof latest.updated_at === 'string'
-            ? latest.updated_at
-            : '',
-    }
-  }
-
-  // Format POST/PUT atau legacy GET: entity submission langsung
-  return (payload.submission ?? payload) as Record<string, unknown>
-}
-
-export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssignmentSubmissionRecord {
-  const payload = (raw ?? {}) as Record<string, unknown>
-  const submission = extractSubmissionPayload(payload)
+  const updatedAt =
+    options?.submittedAt ??
+    (typeof submission.updated_at === 'string'
+      ? submission.updated_at
+      : typeof submission.created_at === 'string'
+        ? submission.created_at
+        : '')
 
   return {
     uid: String(submission.uid ?? ''),
@@ -136,9 +120,81 @@ export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssig
       typeof submission.file_original_filename === 'string' ? submission.file_original_filename : '',
     fileDescription: typeof submission.file_description === 'string' ? submission.file_description : '',
     quizAnswers: parseQuizAnswers(submission.quiz_answers),
-    attemptCount: typeof submission.attempt_count === 'number' ? submission.attempt_count : 1,
-    createdAt: typeof submission.created_at === 'string' ? submission.created_at : '',
-    updatedAt: typeof submission.updated_at === 'string' ? submission.updated_at : '',
-    grading: mapGrading(payload.grading, submission),
+    attemptCount,
+    createdAt,
+    updatedAt,
+    grading: mapGrading(submission.grading, submission),
   }
+}
+
+function mapSubmissionAttemptItem(
+  attempt: Record<string, unknown>,
+  submissionUid: string,
+): LessonAssignmentSubmissionRecord {
+  const attemptNumber =
+    typeof attempt.attempt_number === 'number' ? attempt.attempt_number : 1
+
+  const submittedAt =
+    typeof attempt.submitted_at === 'string'
+      ? attempt.submitted_at
+      : typeof attempt.created_at === 'string'
+        ? attempt.created_at
+        : ''
+
+  return mapSubmissionEntity(
+    {
+      ...attempt,
+      uid: attempt.uid ?? `${submissionUid}-${attemptNumber}`,
+    },
+    {
+      attemptNumber,
+      submittedAt,
+    },
+  )
+}
+
+function mapSingleSubmissionPayload(raw: unknown): LessonAssignmentSubmissionRecord {
+  const payload = (raw ?? {}) as Record<string, unknown>
+  const submission = (payload.submission ?? payload) as Record<string, unknown>
+  return mapSubmissionEntity(submission)
+}
+
+export function mapLessonAssignmentSubmissionBundle(raw: unknown): LessonAssignmentSubmissionBundle {
+  const payload = (raw ?? {}) as Record<string, unknown>
+
+  if (Array.isArray(payload.submissions) && payload.submissions.length > 0) {
+    const submissionUid = String(payload.submission_uid ?? '')
+    const attempts = (payload.submissions as Record<string, unknown>[]).map((item) =>
+      mapSubmissionAttemptItem(item, submissionUid),
+    )
+    const latest = attempts[attempts.length - 1]
+
+    return {
+      submissionUid,
+      latestAttemptNumber:
+        typeof payload.latest_attempt_number === 'number'
+          ? payload.latest_attempt_number
+          : latest.attemptCount,
+      maxAttempts: typeof payload.max_attempts === 'number' ? payload.max_attempts : null,
+      totalAttempts:
+        typeof payload.total_attempts === 'number' ? payload.total_attempts : attempts.length,
+      latest,
+      attempts,
+    }
+  }
+
+  const latest = mapSingleSubmissionPayload(payload)
+
+  return {
+    submissionUid: latest.uid,
+    latestAttemptNumber: latest.attemptCount,
+    maxAttempts: null,
+    totalAttempts: 1,
+    latest,
+    attempts: [latest],
+  }
+}
+
+export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssignmentSubmissionRecord {
+  return mapLessonAssignmentSubmissionBundle(raw).latest
 }

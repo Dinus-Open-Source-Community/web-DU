@@ -11,13 +11,15 @@ import { useAuth } from '@/providers/auth-provider'
 const Assignments = () => {
   const [searchParams] = useSearchParams()
   const courseUidFilter = searchParams.get('courseUid')
-  const { profile, isLoading } = useAuth()
+  const { profile, isLoading: isAuthLoading } = useAuth()
   const sidebarUser = useSidebarUser('student')
-  const assignmentItems = useStudentAssignmentItems(profile)
+  const { items: assignmentItems, isLoading: isAssignmentsLoading } =
+    useStudentAssignmentItems(profile)
   const assignmentListView = useStudentAssignmentListView({
     items: assignmentItems,
     courseUidFilter,
   })
+  const isLoading = isAuthLoading || isAssignmentsLoading
 
   return (
     <AppSidebarProvider role="student" user={sidebarUser}>

@@ -17,12 +17,19 @@ export function deriveSubmissionPhase(
   submission: LessonAssignmentSubmissionRecord | null,
 ): StudentSubmissionPhase {
   if (!submission) return 'not_submitted'
+  return deriveAttemptPhase(assignment, submission)
+}
 
+/** Fase per attempt — dipakai riwayat pengumpulan multi-attempt. */
+export function deriveAttemptPhase(
+  assignment: LessonDetailAssignment,
+  attempt: LessonAssignmentSubmissionRecord,
+): StudentSubmissionPhase {
   if (assignment.task_type === 'quiz') {
     return 'graded'
   }
 
-  if (submission.grading.isGraded) {
+  if (attempt.grading.isGraded) {
     return 'graded'
   }
 

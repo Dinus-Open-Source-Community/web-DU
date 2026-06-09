@@ -267,6 +267,8 @@ export function useCourseModuleViewer({
       assignment: assignmentHookState.assignment,
       quiz: assignmentHookState.quiz,
       submission: assignmentHookState.submission,
+      submissionAttempts: assignmentHookState.submissionAttempts,
+      submissionMaxAttempts: assignmentHookState.submissionMaxAttempts,
       phase: assignmentHookState.phase,
       canStart: assignmentHookState.canStart,
       submissionBlockReason: assignmentHookState.submissionBlockReason,
@@ -281,6 +283,8 @@ export function useCourseModuleViewer({
       assignmentHookState.quiz,
       assignmentHookState.quizReview,
       assignmentHookState.submission,
+      assignmentHookState.submissionAttempts,
+      assignmentHookState.submissionMaxAttempts,
       assignmentHookState.submissionBlockReason,
     ],
   )

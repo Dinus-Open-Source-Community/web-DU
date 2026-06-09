@@ -8,7 +8,7 @@ import {
   buildSubmissionHistoryRows,
 } from '@/lib/lesson-assignment/submission-history'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
-import type { LessonAssignmentSubmissionRecord, StudentSubmissionPhase } from '@/lib/lesson-assignment/types'
+import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
 
 import { AssignmentSubmissionHistoryTable } from './AssignmentSubmissionHistoryTable'
@@ -17,7 +17,8 @@ import type { LessonThemeMode } from '../utils'
 type AssignmentSubmissionHistorySectionProps = {
   assignment: LessonDetailAssignment
   submission: LessonAssignmentSubmissionRecord | null
-  phase: StudentSubmissionPhase
+  submissionAttempts: LessonAssignmentSubmissionRecord[]
+  submissionMaxAttempts?: number | null
   canStart: boolean
   submissionBlockReason?: string | null
   theme: LessonThemeMode
@@ -28,7 +29,8 @@ type AssignmentSubmissionHistorySectionProps = {
 export function AssignmentSubmissionHistorySection({
   assignment,
   submission,
-  phase,
+  submissionAttempts,
+  submissionMaxAttempts,
   canStart,
   submissionBlockReason,
   theme,
@@ -37,11 +39,14 @@ export function AssignmentSubmissionHistorySection({
 }: AssignmentSubmissionHistorySectionProps) {
   const isDark = theme === 'dark'
 
-  const policy = useMemo(() => buildAssignmentHistoryPolicy(assignment), [assignment])
+  const policy = useMemo(
+    () => buildAssignmentHistoryPolicy(assignment, submissionMaxAttempts),
+    [assignment, submissionMaxAttempts],
+  )
 
   const rows = useMemo(
-    () => buildSubmissionHistoryRows(assignment, submission, phase),
-    [assignment, phase, submission],
+    () => buildSubmissionHistoryRows(assignment, submissionAttempts, submissionMaxAttempts),
+    [assignment, submissionAttempts, submissionMaxAttempts],
   )
 
   const canViewDetail = canViewSubmissionDetail(submission)

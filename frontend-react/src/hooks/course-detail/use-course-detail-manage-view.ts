@@ -1,11 +1,16 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useCourseFormOptions } from '@/hooks/course-form/use-course-form-options'
 import { useAssignCourseMentorDialog } from '@/hooks/course-detail/use-assign-course-mentor-dialog'
 import { courseKeys } from '@/hooks/query-keys'
-import { useReplyCourseReview, useUpdateCourseStatus, useUpdateCourse } from '@/hooks/use-course-mutations'
+import {
+  useDeleteCourse,
+  useReplyCourseReview,
+  useUpdateCourseStatus,
+  useUpdateCourse,
+} from '@/hooks/use-course-mutations'
 import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type {
@@ -26,13 +31,16 @@ export function useCourseDetailManageView({
   dataModules,
 }: CourseDetailManageInput): CourseDetailManageViewModel | null {
   const location = useLocation()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const updateCourseStatus = useUpdateCourseStatus()
+  const deleteCourseMutation = useDeleteCourse()
   const replyCourseReview = useReplyCourseReview()
   const updateCourse = useUpdateCourse()
   const formOptions = useCourseFormOptions()
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [submittingReviewUid, setSubmittingReviewUid] = useState<string | null>(null)
 
@@ -79,6 +87,16 @@ export function useCourseDetailManageView({
     }
   }, [courseUid, updateCourseStatus])
 
+  const onConfirmDelete = useCallback(async () => {
+    try {
+      await deleteCourseMutation.mutateAsync(courseUid)
+      setIsDeleteConfirmOpen(false)
+      navigate(ROUTES.admin.courses)
+    } catch {
+      // Error toast ditangani oleh mutation hook.
+    }
+  }, [courseUid, deleteCourseMutation, navigate])
+
   const onEditCourseSubmit = useCallback(
     async (values: CourseFormValues) => {
       if (!course) return
@@ -112,13 +130,17 @@ export function useCourseDetailManageView({
     onConfirmOpenChange: setIsConfirmOpen,
     onEditClick: () => setEditOpen(true),
     onPublishClick: () => setIsConfirmOpen(true),
-    confirmTitle: isPublished ? 'Pembaruan status' : 'Publikasikan kursus',
-    confirmDescription: isPublished
-      ? 'Status kursus akan disinkronkan ulang menjadi aktif di platform.'
-      : 'Kursus akan diaktifkan dan statusnya diperbarui menjadi aktif.',
-    confirmLabel: isPublished ? 'Update status' : 'Terbitkan',
+    confirmTitle: 'Terbit kursus?',
+    confirmDescription:
+      'Kursus akan diaktifkan (status ACTIVE) dan ditandai terbit (is_published).',
+    confirmLabel: 'Terbit',
     onConfirmPublish: () => void onConfirmPublish(),
     onCancelPublish: () => setIsConfirmOpen(false),
+    isDeleteConfirmOpen,
+    onDeleteConfirmOpenChange: setIsDeleteConfirmOpen,
+    onDeleteClick: () => setIsDeleteConfirmOpen(true),
+    onConfirmDelete: () => void onConfirmDelete(),
+    isDeleting: deleteCourseMutation.isPending,
     onReplyReview,
     submittingReviewUid,
     editDialogSubmitting: updateCourse.isPending,

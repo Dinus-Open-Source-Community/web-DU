@@ -161,7 +161,7 @@ export function CourseFormDialog({
           <DialogDescription className={courseFormLayout.description}>
             {isEdit
               ? 'Perbarui informasi dasar kursus. Perubahan kurikulum tetap dilakukan di tab Kurikulum.'
-              : 'Isi detail kursus lengkap. Kursus disimpan sebagai draf; terbitkan nanti lewat tombol Update status.'}
+              : 'Isi detail kursus lengkap. Kursus disimpan sebagai draf; terbit nanti lewat tombol Terbit.'}
           </DialogDescription>
         </DialogHeader>
 

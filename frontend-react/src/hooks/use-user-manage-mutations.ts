@@ -11,8 +11,14 @@ const ROLE_LABELS: Record<AssignableUserRole, string> = {
   admin: 'Admin',
 }
 
-function invalidateManagedUserQueries(queryClient: ReturnType<typeof useQueryClient>) {
+function invalidateManagedUserQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  uid?: string,
+) {
   void queryClient.invalidateQueries({ queryKey: userManageKeys.all })
+  if (uid) {
+    void queryClient.invalidateQueries({ queryKey: userManageKeys.detail(uid) })
+  }
   void queryClient.invalidateQueries({ queryKey: authKeys.session })
 }
 
@@ -23,7 +29,7 @@ export function useUpdateManagedUserRole() {
     mutationFn: ({ uid, payload }: { uid: string; payload: UpdateUserRolePayload }) =>
       updateManagedUserRole(uid, payload),
     onSuccess: (_data, variables) => {
-      invalidateManagedUserQueries(queryClient)
+      invalidateManagedUserQueries(queryClient, variables.uid)
       toast.success(`Role diubah menjadi ${ROLE_LABELS[variables.payload.role]}`)
     },
     onError: (error: Error) => {

@@ -5,7 +5,7 @@ import { getAssignmentDeadlineAt } from '@/lib/lesson-assignment/assignment-rule
 import { formatAssignmentDeadlineLabel } from '@/lib/lesson-assignment/deadline-format'
 import { parseLessonContent } from '@/lib/rich-text'
 import type { LessonDetailAssignment, LessonDetailItem } from '@/lib/types/lesson'
-import type { LessonAssignmentSubmissionRecord, StudentSubmissionPhase } from '@/lib/lesson-assignment/types'
+import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
 
 import { AssignmentDeadlineTimer } from './AssignmentDeadlineTimer'
@@ -16,7 +16,8 @@ type LessonAssignmentOverviewProps = {
   lesson: LessonDetailItem
   assignment: LessonDetailAssignment
   submission: LessonAssignmentSubmissionRecord | null
-  phase: StudentSubmissionPhase
+  submissionAttempts: LessonAssignmentSubmissionRecord[]
+  submissionMaxAttempts?: number | null
   canStart: boolean
   submissionBlockReason?: string | null
   theme: LessonThemeMode
@@ -27,7 +28,8 @@ type LessonAssignmentOverviewProps = {
 export function LessonAssignmentOverview({
   assignment,
   submission,
-  phase,
+  submissionAttempts,
+  submissionMaxAttempts,
   canStart,
   submissionBlockReason,
   theme,
@@ -130,7 +132,8 @@ export function LessonAssignmentOverview({
         <AssignmentSubmissionHistorySection
           assignment={assignment}
           submission={submission}
-          phase={phase}
+          submissionAttempts={submissionAttempts}
+          submissionMaxAttempts={submissionMaxAttempts}
           canStart={canStart}
           submissionBlockReason={submissionBlockReason}
           theme={theme}

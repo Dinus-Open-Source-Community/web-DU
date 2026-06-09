@@ -11,6 +11,8 @@ export const courseKeys = {
   types: (params?: IQueryParamsPayload) => ['course-types', params] as const,
   edit: (courseUid: string) => ['courses', 'edit', courseUid] as const,
   progress: (courseUid: string) => ['courses', courseUid, 'progress'] as const,
+  assignments: (courseUid: string, params?: IQueryParamsPayload) =>
+    ['courses', courseUid, 'assignments', params] as const,
 }
 
 export const moduleKeys = {
@@ -38,6 +40,8 @@ export const lessonAssignmentKeys = {
   mySubmission: (lessonUid: string) => ['lesson-assignments', 'my-submission', lessonUid] as const,
   staffSubmissions: (lessonUid: string) =>
     ['lesson-assignments', 'staff-submissions', lessonUid] as const,
+  overviewSubmissions: (lessonUid: string) =>
+    ['lesson-assignments', 'overview-submissions', lessonUid] as const,
 }
 
 export const attendanceKeys = {
@@ -56,4 +60,10 @@ export const authKeys = {
 export const userManageKeys = {
   all: ['managed-users'] as const,
   list: (params?: ManagedUserListParams) => ['managed-users', params] as const,
+  detail: (uid: string) => ['managed-users', 'detail', uid] as const,
+}
+
+export const studentAssignmentKeys = {
+  all: ['student-assignments'] as const,
+  myList: (params?: IQueryParamsPayload) => ['student-assignments', 'my', params] as const,
 }

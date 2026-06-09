@@ -1,4 +1,4 @@
-import { Eye, Layers3, MoreHorizontal, Pencil, Sparkles } from 'lucide-react'
+import { Eye, Layers3, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ type CourseDetailMobileActionsProps = {
   isPublished: boolean
   onEditClick: () => void
   onPublishClick: () => void
+  onDeleteClick?: () => void
 }
 
 export function CourseDetailMobileActions({
@@ -29,6 +30,7 @@ export function CourseDetailMobileActions({
   isPublished,
   onEditClick,
   onPublishClick,
+  onDeleteClick,
 }: CourseDetailMobileActionsProps) {
   return (
     <div className={manageDetailLayout.stickyBar}>
@@ -68,7 +70,7 @@ export function CourseDetailMobileActions({
             </Link>
           </Button>
 
-          {isAdmin ? (
+          {isAdmin && (!isPublished || onDeleteClick) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -81,10 +83,21 @@ export function CourseDetailMobileActions({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem onClick={onPublishClick}>
-                  <Sparkles className="size-4" aria-hidden />
-                  {isPublished ? 'Update status' : 'Terbitkan kursus'}
-                </DropdownMenuItem>
+                {!isPublished ? (
+                  <DropdownMenuItem onClick={onPublishClick}>
+                    <Sparkles className="size-4" aria-hidden />
+                    Terbit
+                  </DropdownMenuItem>
+                ) : null}
+                {onDeleteClick ? (
+                  <DropdownMenuItem
+                    onClick={onDeleteClick}
+                    className="text-rose-600 focus:text-rose-600"
+                  >
+                    <Trash2 className="size-4" aria-hidden />
+                    Hapus kursus
+                  </DropdownMenuItem>
+                ) : null}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
