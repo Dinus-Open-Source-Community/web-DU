@@ -20,6 +20,9 @@ func StartFileProxyRoutes(r *gin.Engine) {
 	fileGroup := r.Group("/files")
 	fileGroup.Use(middleware.AuthMiddleware())
 	{
+		// Route literal "batch" harus didaftarkan sebelum wildcard GET agar
+		// tidak tertangkap sebagai object key.
+		fileGroup.POST("/:bucket/batch", service.ServeMultiFileBatchFunc)
 		fileGroup.GET("/:bucket/*object", service.ServeFileProxyFunc)
 	}
 }

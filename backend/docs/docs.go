@@ -466,19 +466,25 @@ const docTemplate = `{
                 "security": [
                     {
                         "BearerAuth": []
+                    },
+                    {
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve paginated admin transaction list with summary counts.",
+                "description": "Retrieve paginated admin transaction list with summary counts.\nAggregate payment counts and gross revenue for admin dashboards.",
                 "consumes": [
+                    "application/json",
                     "application/json"
                 ],
                 "produces": [
+                    "application/json",
                     "application/json"
                 ],
                 "tags": [
+                    "Admin",
                     "Admin"
                 ],
-                "summary": "List all transactions (Admin)",
+                "summary": "Get admin transactions summary",
                 "parameters": [
                     {
                         "type": "integer",
@@ -515,11 +521,153 @@ const docTemplate = `{
                         "description": "Filter to date (YYYY-MM-DD or RFC3339)",
                         "name": "date_to",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by reference, course, or student",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_to",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Transactions retrieved successfully",
+                        "description": "Transaction summary retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/transactions/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve paginated admin transaction list with summary counts.\nAggregate payment counts and gross revenue for admin dashboards.",
+                "consumes": [
+                    "application/json",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin",
+                    "Admin"
+                ],
+                "summary": "Get admin transactions summary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by reference, course, or student",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by reference, course, or student",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
+                        "name": "date_to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction summary retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1664,6 +1812,148 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft-delete a course by setting status to TIDAK ACTIVE and unpublishing it. Requires Super Admin or Admin.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Delete course (Super Admin / Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Super Admin or Admin only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete course",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{id}/assignments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all lesson assignments within a course, including lesson/module context and submission counts.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "List assignments in a course (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 50, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by assignment status (DRAFT, TERBIT, DITUTUP)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course assignments retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/courses/{id}/join": {
@@ -2478,6 +2768,81 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to retrieve students",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{bucket}/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches multiple objects from the same MinIO bucket, decrypts each one, and returns them as base64-encoded file data in JSON. Intended for displaying images and other inline content on the web (e.g. img src via data URLs). Requires Bearer JWT; all authenticated roles are allowed. Maximum 50 objects per request.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Fetch multiple encrypted MinIO files for web display (All Roles)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MinIO bucket name",
+                        "name": "bucket",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Object keys to fetch",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.multiFileBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON with files array (object, content_type, data as base64)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — missing or invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "One or more objects not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to decrypt or read objects",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -3971,14 +4336,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns submission content plus a grading object: score_percent, passed, feedback, has_feedback, is_graded, quiz counts (quiz assignments).",
+                "description": "Returns all submission attempts for the authenticated user as an array. Each item includes answer content and grading (score_percent, passed, feedback, has_feedback, is_graded, quiz counts).",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Lesson Assignment Submission"
                 ],
-                "summary": "Get my lesson assignment submission (Enrollment User)",
+                "summary": "Get my lesson assignment submissions (Enrollment User)",
                 "parameters": [
                     {
                         "type": "string",
@@ -3990,7 +4355,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "submission + grading",
+                        "description": "submissions array + attempt metadata",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -4652,6 +5017,132 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Mentors retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/mentor/dashboard/kpis": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Aggregate KPI metrics for the authenticated mentor dashboard.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Get mentor dashboard KPIs",
+                "responses": {
+                    "200": {
+                        "description": "Mentor dashboard KPIs retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/mentor/dashboard/schedules": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve upcoming lesson schedules across courses assigned to the authenticated mentor.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mentor"
+                ],
+                "summary": "Get mentor class schedules",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include past schedules (default: false)",
+                        "name": "include_past",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max items (default: 50, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor schedules retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5507,6 +5998,67 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Email already registered",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/students/me/assignments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all published assignments across courses the authenticated student is enrolled in, with latest submission if any.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "List my assignments (Student)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student assignments retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Students only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -6668,6 +7220,17 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "mentor"
+                }
+            }
+        },
+        "service.multiFileBatchRequest": {
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

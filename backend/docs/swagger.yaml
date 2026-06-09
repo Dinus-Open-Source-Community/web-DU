@@ -450,6 +450,13 @@ definitions:
     required:
     - role
     type: object
+  service.multiFileBatchRequest:
+    properties:
+      objects:
+        items:
+          type: string
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -754,7 +761,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve paginated admin transaction list with summary counts.
+      - application/json
+      description: |-
+        Retrieve paginated admin transaction list with summary counts.
+        Aggregate payment counts and gross revenue for admin dashboards.
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -780,11 +790,28 @@ paths:
         in: query
         name: date_to
         type: string
+      - description: Filter by payment status
+        in: query
+        name: status
+        type: string
+      - description: Search by reference, course, or student
+        in: query
+        name: search
+        type: string
+      - description: Filter from date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_to
+        type: string
       produces:
+      - application/json
       - application/json
       responses:
         "200":
-          description: Transactions retrieved successfully
+          description: Transaction summary retrieved successfully
           schema:
             additionalProperties: true
             type: object
@@ -805,8 +832,90 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: List all transactions (Admin)
+      - BearerAuth: []
+      summary: Get admin transactions summary
       tags:
+      - Admin
+      - Admin
+  /admin/transactions/summary:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      description: |-
+        Retrieve paginated admin transaction list with summary counts.
+        Aggregate payment counts and gross revenue for admin dashboards.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by payment status
+        in: query
+        name: status
+        type: string
+      - description: Search by reference, course, or student
+        in: query
+        name: search
+        type: string
+      - description: Filter from date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_to
+        type: string
+      - description: Filter by payment status
+        in: query
+        name: status
+        type: string
+      - description: Search by reference, course, or student
+        in: query
+        name: search
+        type: string
+      - description: Filter from date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: Transaction summary retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Get admin transactions summary
+      tags:
+      - Admin
       - Admin
   /avatar:
     post:
@@ -1432,6 +1541,48 @@ paths:
       tags:
       - Course
   /courses/{id}:
+    delete:
+      description: Soft-delete a course by setting status to TIDAK ACTIVE and unpublishing
+        it. Requires Super Admin or Admin.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin or Admin only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete course
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete course (Super Admin / Admin)
+      tags:
+      - Course
     get:
       consumes:
       - application/json
@@ -1568,6 +1719,61 @@ paths:
       security:
       - BearerAuth: []
       summary: Update course (Super Admin / Admin)
+      tags:
+      - Course
+  /courses/{id}/assignments:
+    get:
+      description: Retrieve all lesson assignments within a course, including lesson/module
+        context and submission counts.
+      parameters:
+      - description: Course UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 50, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by assignment status (DRAFT, TERBIT, DITUTUP)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course assignments retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List assignments in a course (Admin/Mentor)
       tags:
       - Course
   /courses/{id}/join:
@@ -2177,6 +2383,59 @@ paths:
       summary: Serve encrypted MinIO file (All Roles)
       tags:
       - File
+  /files/{bucket}/batch:
+    post:
+      consumes:
+      - application/json
+      description: Fetches multiple objects from the same MinIO bucket, decrypts each
+        one, and returns them as base64-encoded file data in JSON. Intended for displaying
+        images and other inline content on the web (e.g. img src via data URLs). Requires
+        Bearer JWT; all authenticated roles are allowed. Maximum 50 objects per request.
+      parameters:
+      - description: MinIO bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      - description: Object keys to fetch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.multiFileBatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JSON with files array (object, content_type, data as base64)
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized — missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: One or more objects not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to decrypt or read objects
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Fetch multiple encrypted MinIO files for web display (All Roles)
+      tags:
+      - File
   /invoices/{enrollment_id}:
     get:
       consumes:
@@ -2735,8 +2994,9 @@ paths:
       - Lesson Assignment
   /lessons/{id}/assignment/submission:
     get:
-      description: 'Returns submission content plus a grading object: score_percent,
-        passed, feedback, has_feedback, is_graded, quiz counts (quiz assignments).'
+      description: Returns all submission attempts for the authenticated user as an
+        array. Each item includes answer content and grading (score_percent, passed,
+        feedback, has_feedback, is_graded, quiz counts).
       parameters:
       - description: Lesson UID
         in: path
@@ -2747,7 +3007,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: submission + grading
+          description: submissions array + attempt metadata
           schema:
             additionalProperties: true
             type: object
@@ -2768,7 +3028,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get my lesson assignment submission (Enrollment User)
+      summary: Get my lesson assignment submissions (Enrollment User)
       tags:
       - Lesson Assignment Submission
     post:
@@ -3655,6 +3915,90 @@ paths:
       summary: Get all mentors (Public)
       tags:
       - Mentor
+  /mentor/dashboard/kpis:
+    get:
+      consumes:
+      - application/json
+      description: Aggregate KPI metrics for the authenticated mentor dashboard.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentor dashboard KPIs retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get mentor dashboard KPIs
+      tags:
+      - Mentor
+  /mentor/dashboard/schedules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve upcoming lesson schedules across courses assigned to the
+        authenticated mentor.
+      parameters:
+      - description: Filter from date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: from
+        type: string
+      - description: Filter to date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: to
+        type: string
+      - description: 'Include past schedules (default: false)'
+        in: query
+        name: include_past
+        type: boolean
+      - description: 'Max items (default: 50, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mentor schedules retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get mentor class schedules
+      tags:
+      - Mentor
   /modules:
     post:
       consumes:
@@ -4195,6 +4539,47 @@ paths:
       summary: Register new user (Public)
       tags:
       - Auth
+  /students/me/assignments:
+    get:
+      description: Retrieve all published assignments across courses the authenticated
+        student is enrolled in, with latest submission if any.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Student assignments retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Students only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List my assignments (Student)
+      tags:
+      - Student
   /user/{id}:
     get:
       consumes:
