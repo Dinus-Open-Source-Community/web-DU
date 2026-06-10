@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	TripayCreatePath = "/transaction/create"
-	TripayDetailPath = "/transaction/detail"
+	TripayCreatePath         = "/transaction/create"
+	TripayDetailPath         = "/transaction/detail"
+	TripayPaymentChannelPath = "/merchant/payment-channel"
 )
 
 func getTripayBaseURL() string {
@@ -429,71 +430,6 @@ func CreatePaymentFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Get Payment (DB)
-// @Description  Get payment details from database by reference or enrollmentId
-// @Tags         Payment
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        reference  query     string          false  "Payment Reference"
-// @Param        enrollmentId  query     string      false  "Enrollment UID (full UUID atau 8-char prefix)"
-// @Success      200        {object}  map[string]any  "Payment details retrieved successfully"
-// @Failure      400        {object}  map[string]any  "Reference parameter is missing"
-// @Failure      401        {object}  map[string]any  "Unauthorized - Invalid or missing JWT token"
-// @Failure      404        {object}  map[string]any  "Payment not found"
-// @Failure      500        {object}  map[string]any  "Internal server error"
-// @Router       /payment [get]
-func GetPaymentFunc(c *gin.Context) {
-	reference := c.Query("reference")
-	enrollmentIDStr := c.Query("enrollmentId")
-
-	if reference == "" && enrollmentIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Either reference or enrollmentId parameter is required",
-			"data":    nil,
-			"error":   "missing query parameters",
-		})
-		return
-	}
-
-	var payment *entity.Payment
-	var err error
-
-	if reference != "" {
-		payment, err = GetPaymentByReference(reference)
-	} else {
-		enrollmentUid, err2 := database.ResolveUID("enrollments", enrollmentIDStr)
-		if err2 != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": "Invalid enrollmentId",
-				"data":    nil,
-				"error":   err2.Error(),
-			})
-			return
-		}
-		payment, err = GetPaymentByEnrollmentID(enrollmentUid)
-	}
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "Payment not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Payment details retrieved successfully",
-		"data":    payment,
-		"error":   nil,
-	})
-}
-
 // @Summary      Get Payment (Tripay)
 // @Description  Get payment details directly from Tripay by reference or merchant_ref
 // @Tags         Payment
@@ -674,161 +610,79 @@ func PaymentCallbackFunc(c *gin.Context) {
 	})
 }
 
-// @Summary      Set Payment Method (Admin)
-// @Description  Tambah atau perbarui konfigurasi metode pembayaran beserta gambar/logo-nya.
-//
-//	Jika method dengan nama tersebut sudah ada, data akan diperbarui (upsert).
-//
-// @Tags         Payment
-// @Accept       multipart/form-data
-// @Produce      json
-// @Security     BearerAuth
-// @Param        name   formData  string  true  "Kode metode pembayaran (e.g. BRIVA, OVO, QRIS2)"
-// @Param        image  formData  file    false "File gambar/logo metode pembayaran (opsional)"
-// @Success      200  {object}  map[string]any  "Payment method set successfully"
-// @Failure      400  {object}  map[string]any  "Invalid request"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /payment/method [post]
-func SetPaymentMethodFunc(c *gin.Context) {
-	var req dto.SetPaymentMethodRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Invalid request format",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	// Cari record yang sudah ada berdasarkan name
-	var existing entity.PaymentMethodConfig
-	queryErr := database.DB.Where("name = ?", req.Name).First(&existing).Error
-	isNew := queryErr == gorm.ErrRecordNotFound
-	if queryErr != nil && !isNew {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to query payment method",
-			"data":    nil,
-			"error":   queryErr.Error(),
-		})
-		return
-	}
-
-	// Pertahankan imageURL lama; akan diganti jika ada upload baru
-	imageURL := existing.ImageURL
-
-	// Proses upload gambar (opsional)
-	file, fileErr := c.FormFile("image")
-	if fileErr != nil && fileErr != http.ErrMissingFile {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Failed to read image file",
-			"data":    nil,
-			"error":   fileErr.Error(),
-		})
-		return
-	}
-
-	if file != nil {
-		bucket := utils.GetBucketPaymentMethods()
-		if bucket == "" {
-			// Fallback ke bucket courses jika env belum dikonfigurasi
-			bucket = utils.GetBucketCourses()
-		}
-		uploadedURL, uploadErr := utils.UploadFile(file, bucket)
-		if uploadErr != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Failed to upload payment method image",
-				"data":    nil,
-				"error":   uploadErr.Error(),
-			})
-			return
-		}
-		imageURL = uploadedURL
-	}
-
-	if isNew {
-		// Buat record baru
-		newMethod := entity.PaymentMethodConfig{
-			Name:     req.Name,
-			ImageURL: imageURL,
-		}
-		if err := database.DB.Create(&newMethod).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Failed to create payment method",
-				"data":    nil,
-				"error":   err.Error(),
-			})
-			return
-		}
-		existing = newMethod
-	} else {
-		// Perbarui record yang sudah ada
-		if err := database.DB.Model(&existing).Updates(map[string]interface{}{
-			"name":      req.Name,
-			"image_url": imageURL,
-		}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Failed to update payment method",
-				"data":    nil,
-				"error":   err.Error(),
-			})
-			return
-		}
-		existing.ImageURL = imageURL
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Payment method set successfully",
-		"data": dto.PaymentMethodResponse{
-			Uid:      existing.Uid.String(),
-			Name:     existing.Name,
-			ImageURL: existing.ImageURL,
-		},
-		"error": nil,
-	})
-}
-
-// @Summary      Get All Payment Methods (All Roles)
-// @Description  Mengembalikan semua konfigurasi metode pembayaran yang tersedia tanpa pagination.
+// @Summary      Get Payment Channels (Tripay)
+// @Description  Mengambil daftar channel pembayaran langsung dari Tripay API.
 // @Tags         Payment
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  map[string]any  "List of payment methods"
+// @Success      200  {object}  map[string]any  "Tripay payment channels"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Failure      502  {object}  map[string]any  "Failed to fetch from Tripay"
 // @Router       /payment/method [get]
 func GetPaymentMethodsFunc(c *gin.Context) {
-	var methods []entity.PaymentMethodConfig
-	if err := database.DB.Order("created_at ASC").Find(&methods).Error; err != nil {
+	apiKey := strings.TrimSpace(os.Getenv("TRIPAY_API_KEY"))
+	if apiKey == "" {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Failed to fetch payment methods",
+			"message": "Server misconfiguration: TRIPAY_API_KEY not set",
+			"data":    nil,
+			"error":   "missing TRIPAY_API_KEY",
+		})
+		return
+	}
+
+	channelURL, err := buildTripayURL(getTripayBaseURL(), TripayPaymentChannelPath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to build Tripay payment channel URL",
 			"data":    nil,
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	response := make([]dto.PaymentMethodResponse, len(methods))
-	for i, m := range methods {
-		response[i] = dto.PaymentMethodResponse{
-			Uid:      m.Uid.String(),
-			Name:     m.Name,
-			ImageURL: m.ImageURL,
-		}
+	httpReq, err := http.NewRequest("GET", channelURL, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to create Tripay request",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Payment methods retrieved successfully",
-		"data":    response,
-		"error":   nil,
-	})
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	client := &http.Client{Timeout: time.Second * 10}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"success": false,
+			"message": "Failed to fetch Tripay payment channels",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"success": false,
+			"message": "Failed to read Tripay response",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	contentType := strings.TrimSpace(resp.Header.Get("Content-Type"))
+	if contentType == "" {
+		contentType = "application/json"
+	}
+
+	c.Data(resp.StatusCode, contentType, body)
 }
