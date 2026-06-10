@@ -51,6 +51,23 @@ export const attendanceKeys = {
 
 export const paymentKeys = {
   all: ['payment'] as const,
+  tripayDetail: (reference: string, merchantRef: string) =>
+    ['payment', 'tripay', 'detail', reference, merchantRef] as const,
+}
+
+export const adminDashboardKeys = {
+  all: ['admin-dashboard'] as const,
+  kpis: (period: string) => ['admin-dashboard', 'kpis', period] as const,
+  recentTransactions: (limit: number) =>
+    ['admin-dashboard', 'recent-transactions', limit] as const,
+  transactionSummary: ['admin-dashboard', 'transaction-summary'] as const,
+  financialCharts: ['admin-dashboard', 'financial-charts'] as const,
+}
+
+export const adminTransactionsKeys = {
+  all: ['admin-transactions'] as const,
+  list: (params?: Record<string, unknown>) =>
+    ['admin-transactions', 'list', params] as const,
 }
 
 export const authKeys = {
@@ -73,4 +90,11 @@ export const adminModerationKeys = {
 export const studentAssignmentKeys = {
   all: ['student-assignments'] as const,
   myList: (params?: IQueryParamsPayload) => ['student-assignments', 'my', params] as const,
+}
+
+export const mentorDashboardKeys = {
+  all: ['mentor-dashboard'] as const,
+  kpis: ['mentor-dashboard', 'kpis'] as const,
+  schedules: (params?: IQueryParamsPayload) =>
+    ['mentor-dashboard', 'schedules', params] as const,
 }

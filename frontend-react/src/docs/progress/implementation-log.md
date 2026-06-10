@@ -320,8 +320,8 @@ gantt
 | `GET /students/me/assignments` | ✅ | `services/student-assignments.ts`, `student/Assignments.tsx` |
 | GET submission format array attempt | ✅ | `lib/lesson-assignment/mappers.ts` |
 | `DELETE /courses/:id` | ✅ | Fase 16 — `deleteCourse`, `useDeleteCourse` |
-| Admin dashboard / transactions / financial | 🔴 | Masih mock |
-| Mentor dashboard | 🔴 | Masih mock |
+| Admin dashboard / transactions / financial | ✅ | Fase 18 — `admin-dashboard.ts`, `admin-transactions.ts` |
+| Mentor dashboard | ✅ | Fase 19 — `mentor-dashboard.ts`, `use-mentor-dashboard` |
 
 ---
 
@@ -396,6 +396,168 @@ DELETE /courses/:uid         → status TIDAK ACTIVE + is_published false
 
 - Hapus dari halaman **detail** kursus admin (belum ada di kartu daftar `ManageCourse`)
 - `PUT /courses/:id` tidak mengubah status / `is_published` — publish hanya lewat PATCH status
+
+---
+
+## Fase 17 — Halaman Detail Pembayaran Siswa (Tripay)
+
+**Tujuan:** Siswa bisa melihat detail pembayaran (invoice) dari riwayat transaksi — status, kode bayar, instruksi, dan rincian pembelian via Tripay API.
+
+**Halaman:** `pages/student/TransactionPayment.tsx`  
+**Route:** `/student/transactions/payment?reference=&merchant_ref=`
+
+**Yang dibuat:**
+
+| Layer | Path |
+|-------|------|
+| Types & kontrak | `lib/transactions/payment-types.ts`, `payment-api-types.ts` |
+| Mapper | `lib/transactions/map-tripay-payment-detail.ts`, `map-tripay-status.ts`, `format-payment-method.ts`, `parse-tripay-timestamp.ts` |
+| Presenter | `lib/transactions/present-transaction-payment-detail.ts`, `present-payment-invoice-view.ts` |
+| Helper domain | `lib/transactions/filter-transactions.ts`, `build-course-image-map.ts`, `build-payment-detail-query.ts`, `unwrap-tripay-response.ts`, `to-tripay-merchant-ref.ts`, `find-transaction-by-reference.ts`, `find-transaction-by-enrollment.ts` |
+| Service | `services/payment.ts` → `fetchTripayPaymentDetail()` |
+| Hooks | `hooks/use-payment-detail.ts`, `hooks/use-student-transactions-view-model.ts` |
+| UI | `components/student/transactions/TransactionPaymentDetailView.tsx`, `TransactionPaymentLink.tsx`, `PaymentDetailSkeleton.tsx` |
+| Route config | `lib/routes.ts` → `ROUTES.student.transactionPayment()` |
+
+**API yang dipakai:**
+
+```
+GET /payment/tripay?reference=<ref>&merchant_ref=<merchant_ref>
+```
+
+**Refactor terkait:**
+
+- `TransactionsSection.tsx` — Ekstrak logik ke `useStudentTransactionsViewModel`, ganti tombol "Invoice" dengan `TransactionPaymentLink`, label UI bahasa Indonesia
+- `services/invoice.ts` — Dihapus (file kosong)
+- `UserDetailPageShell.tsx` — `children` prop jadi opsional
+- `use-course-assignments-overview.ts` — `assignments` dibungkus `useMemo`
+- `use-course-assignment-submission-detail-page.ts` — Hapus import `buildStaffGraderDirectory` yang tidak dipakai
+- `lib/course-detail/staff-grader-directory.ts` — Diekstrak sebagai modul terpisah
+- `hooks/course-detail/use-submission-grader-profile.ts` — Hook baru untuk resolve profil penilai dari directory
+- `lib/variant.tsx` — Tambah varian badge `outline`
+- `hooks/query-keys.ts` — Tambah `paymentKeys.tripayDetail()`
+
+**Hasil:**
+
+- Siswa klik "Detail" dari tabel transaksi → halaman detail pembayaran lengkap
+- Status pembayaran (pending/success/failed) dengan badge warna
+- Kode bayar (VA/QRIS) dengan tombol salin
+- Instruksi pembayaran accordion dari Tripay
+- Rincian line items + total nominal
+- CTA "Lanjutkan Pembayaran" ke checkout Tripay untuk status pending
+- Breadcrumb navigasi Transaksi → Detail Pembayaran
+
+**Catatan PM:**
+
+- Data Tripay diambil dari `GET /payment/tripay` — bukan `/invoices/*`
+- Course title & image dicocokkan dari profil siswa (`transaction_history` + `joined_courses`)
+- Jika `reference` atau `enrollment_uid` tidak ada di transaksi, tombol "Detail" tidak ditampilkan (graceful fallback)
+
+---
+
+## Fase 18 — Admin Dashboard, Transaksi & Financial
+
+**Tujuan:** Ganti mock admin analytics dengan data live dari endpoint post-merge J-yriz.
+
+**Halaman:** `pages/admin/Dashboard.tsx`, `Transactions.tsx`, `Financial.tsx`
+
+**Yang dibuat / diubah:**
+
+| Layer | Path |
+|-------|------|
+| Routes | `services/api-path.ts` → `admin.dashboard.*`, `admin.transactions.*`, `admin.financial.*`, `admin.courses.popular` |
+| Service | `services/admin-dashboard.ts`, `services/admin-transactions.ts` |
+| Hooks | `hooks/use-admin-dashboard.ts`, `use-admin-transactions.ts`, `use-admin-financial.ts` |
+| Query keys | `hooks/query-keys.ts` → `adminDashboardKeys`, `adminTransactionsKeys` |
+| UI admin | `components/Admin/Dashboard/Kpi.tsx`, `RecentTransactions.tsx`, `PeriodSelector.tsx`, `QuickLinks.tsx`, `DashboardError.tsx` |
+| UI transaksi | `components/Admin/Transactions/TransDashboard.tsx` (wire props dari hook) |
+| Pages | `pages/admin/Dashboard.tsx`, `Transactions.tsx`, `Financial.tsx` |
+
+**API yang dipakai:**
+
+```
+GET /admin/dashboard/kpis?period=
+GET /admin/dashboard/recent-transactions?limit=
+GET /admin/transactions?search=&status=&page=
+GET /admin/transactions/summary
+GET /admin/financial/summary
+GET /admin/courses/popular?limit=
+```
+
+**Hasil:**
+
+- Dashboard admin: KPI grid, tren revenue, rasio transaksi, revenue per kategori, kursus populer, transaksi terbaru
+- Halaman transaksi: list paginated + filter status/method + summary chart
+- Halaman financial: KPI + chart revenue bulanan & sumber pendapatan
+- Loading skeleton + `DashboardError` dengan retry di setiap section
+
+---
+
+## Fase 19 — Mentor Dashboard (KPI + Jadwal)
+
+**Tujuan:** Ganti mock mentor dashboard dengan aggregate KPI dan jadwal kelas dari BE.
+
+**Halaman:** `pages/mentor/Dashboard.tsx`
+
+**Yang dibuat / diubah:**
+
+| Layer | Path |
+|-------|------|
+| Routes | `services/api-path.ts` → `mentor.dashboard.kpis`, `mentor.dashboard.schedules` |
+| Service | `services/mentor-dashboard.ts` → `fetchMentorDashboardKpis`, `fetchMentorDashboardSchedules` |
+| Hook | `hooks/use-mentor-dashboard.ts` |
+| Query keys | `hooks/query-keys.ts` → `mentorDashboardKeys` |
+| Page | `pages/mentor/Dashboard.tsx` — mock diganti API; greeting dinamis dari `useSidebarUser` |
+
+**API yang dipakai:**
+
+```
+GET /mentor/dashboard/kpis
+GET /mentor/dashboard/schedules?limit=50
+```
+
+**Response KPI (`data`):** `pendingGrading`, `unansweredQA`, `activeStudents`, `totalCourses`
+
+**Response jadwal (`data[]`):** `uid`, `courseId`, `courseName`, `scheduleDate`, `scheduleTime`, `endTime`, `location`, `classType`, `studentCount` — map ke `IScheduleItem` untuk `QuickStats` + `CalendarView`
+
+**Hasil:**
+
+- Stat card mentor menampilkan data real dari kursus yang di-assign
+- Kalender jadwal kelas dari `lessons.start_time` / `end_time`
+- Error state + skeleton loading per section
+
+**Belum (backlog terpisah):** `mentor/Courses.tsx`, `mentor/DetailCourse.tsx` masih mock (B16–B17)
+
+---
+
+## Timeline Visual (updated)
+
+```mermaid
+gantt
+  title Fase Implementasi (sesi integrasi)
+  dateFormat YYYY-MM-DD
+  section Core
+    User Management API     :done, f1, 2026-06-01, 2d
+    Assign Mentor           :done, f2, after f1, 1d
+    Sidebar Fix             :done, f3, after f2, 1d
+  section UX
+    User Pages Redesign     :done, f4, after f3, 2d
+    Remove UserManageNav    :done, f5, after f4, 1d
+    Table Pagination        :done, f6, after f5, 1d
+  section Quality
+    Zod Validators          :done, f7, after f6, 2d
+    Gap Documentation       :done, f8, after f7, 1d
+    TSConfig Fix            :done, f9, after f8, 1d
+  section Assignment Staff
+    Tab Tugas & Roster      :done, f11, after f9, 3d
+    Validator Assignment    :done, f12, after f11, 1d
+  section Student Payment
+    Transaction Payment     :done, f17, after f12, 1d
+  section Admin Analytics
+    Dashboard Transactions  :done, f18, after f17, 2d
+  section Mentor
+    Mentor Dashboard        :done, f19, after f18, 1d
+```
 
 ---
 

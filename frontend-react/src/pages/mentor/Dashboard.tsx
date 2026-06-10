@@ -2,62 +2,69 @@ import CalendarView from '@/components/shared/Calendar/View'
 import { PageHeader } from '@/components/shared/Header'
 import QuickStats from '@/components/shared/QuickStats'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import type { IMentorStats, IScheduleItem } from '@/lib/types/utils'
+import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
+import { useMentorDashboard } from '@/hooks/use-mentor-dashboard'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
+
+function QuickStatsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="h-[104px] animate-pulse rounded-2xl border border-slate-100 bg-white shadow-2xs"
+        />
+      ))}
+    </div>
+  )
+}
+
+function CalendarSkeleton() {
+  return (
+    <div className="h-[700px] animate-pulse rounded-2xl border border-slate-200/80 bg-white shadow-sm" />
+  )
+}
 
 export default function MentorDashboardPage() {
   const sidebarUser = useSidebarUser('mentor')
-  const dataStats: IMentorStats = {
-    pendingGrading: 0,
-    unansweredQA: 0,
-    activeStudents: 0,
-    totalCourses: 0,
-  }
-
-  const schedules: IScheduleItem[] = [
-    {
-      uid: 'sch-001',
-      courseId: 'cs-101',
-      courseName: 'Pemrograman Dasar',
-      scheduleDate: '2024-10-10',
-      scheduleTime: '09:00',
-      endTime: '11:00',
-      location: 'Ruang 101',
-      classType: 'offline',
-      studentCount: 28,
-    },
-    {
-      uid: 'sch-002',
-      courseId: 'web-201',
-      courseName: 'Pengembangan Web',
-      scheduleDate: '2024-10-12',
-      scheduleTime: '13:00',
-      endTime: '15:00',
-      location: 'Lab Komputer A',
-      classType: 'offline',
-      studentCount: 32,
-    },
-    {
-      uid: 'sch-003',
-      courseId: 'uiux-301',
-      courseName: 'UI/UX Design',
-      scheduleDate: '2024-10-15',
-      scheduleTime: '16:00',
-      endTime: '18:00',
-      location: 'Zoom Meeting',
-      classType: 'online',
-      studentCount: 24,
-    },
-  ] // Replace with actual schedule data
+  const { kpis, schedules } = useMentorDashboard()
 
   return (
     <AppSidebarProvider role="mentor" user={sidebarUser}>
       <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-        <PageHeader title="Halo Mentor Budi!" subtitle="Selamat datang di dashboard Anda." />
+        <PageHeader
+          title={`Halo Mentor ${sidebarUser.name}!`}
+          subtitle="Selamat datang di dashboard Anda."
+        />
+
         <div className="mb-10">
-          <QuickStats stats={dataStats} />
+          {kpis.isError ? (
+            <DashboardError
+              message={kpis.error?.message ?? 'Terjadi kesalahan saat memuat statistik'}
+              onRetry={() => kpis.refetch()}
+            />
+          ) : kpis.isLoading ? (
+            <QuickStatsSkeleton />
+          ) : (
+            <QuickStats stats={kpis.data ?? {
+              pendingGrading: 0,
+              unansweredQA: 0,
+              activeStudents: 0,
+              totalCourses: 0,
+            }} />
+          )}
         </div>
-        <CalendarView schedules={schedules} />
+
+        {schedules.isError ? (
+          <DashboardError
+            message={schedules.error?.message ?? 'Terjadi kesalahan saat memuat jadwal'}
+            onRetry={() => schedules.refetch()}
+          />
+        ) : schedules.isLoading ? (
+          <CalendarSkeleton />
+        ) : (
+          <CalendarView schedules={schedules.data ?? []} />
+        )}
       </section>
     </AppSidebarProvider>
   )

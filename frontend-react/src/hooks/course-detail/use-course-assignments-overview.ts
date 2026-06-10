@@ -20,7 +20,10 @@ export function useCourseAssignmentsOverview(courseUid: string, enabled = true) 
     retry: false,
   })
 
-  const assignments = bulkQuery.data?.assignments ?? []
+  const assignments = useMemo(
+    () => bulkQuery.data?.assignments ?? [],
+    [bulkQuery.data?.assignments],
+  )
 
   const assignmentsNeedingSubmissions = useMemo(
     () => assignments.filter((assignment) => assignment.submissionCount > 0),

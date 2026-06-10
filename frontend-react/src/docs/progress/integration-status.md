@@ -4,7 +4,7 @@ Dokumen **living status** untuk branch `features/frontend-sapto`.
 Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipakai FE, dan gap FE↔BE.
 
 **Referensi backend:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)  
-**Terakhir diperbarui:** 9 Juni 2026 (sesi publish & delete kursus)
+**Terakhir diperbarui:** 10 Juni 2026 (Fase 18: admin dashboard/transactions/financial · Fase 19: mentor dashboard)
 
 ---
 
@@ -26,13 +26,13 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 
 | Metrik | Nilai |
 |--------|-------|
-| Halaman admin terintegrasi API (live/partial) | 10+ dari 15 route utama |
-| Halaman student live/partial | 5 dari 7 |
-| Halaman mentor live/partial | 3 dari 6 |
-| Service domain (`services/*.ts`) | 14 file |
-| Endpoint di `api-path.ts` | ~55 path |
-| Endpoint BE merge J-yriz belum di `api-path.ts` | 7+ (admin, mentor dashboard, qna) |
-| Halaman masih mock penuh | Admin dashboard/transactions/financial, mentor dashboard/courses/detail, landing Home, auth recovery, sertifikat |
+| Halaman admin terintegrasi API (live/partial) | 13+ dari 15 route utama |
+| Halaman student live/partial | 6 dari 8 |
+| Halaman mentor live/partial | 4 dari 6 |
+| Service domain (`services/*.ts`) | 17 file |
+| Endpoint di `api-path.ts` | ~60 path |
+| Endpoint BE merge J-yriz belum di-wire FE | 5+ (admin reviews/Q&A, course Q&A) |
+| Halaman masih mock penuh | Mentor courses/detail, legacy assignments, landing Home, auth recovery, sertifikat |
 
 ---
 
@@ -58,16 +58,16 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | Tab Tugas (overview + roster + grade) | `CourseDetailAssignmentsTab` + routes submissions | ✅ | Bulk `GET /courses/:id/assignments` + hydrate per lesson |
 | Tab Kehadiran | `CourseDetailAttendanceTab` | 🟡 | GET/PUT/DELETE ✅; create & note UI ❌ |
 | Balas review per course | `CourseReviewSection` | 🟡 | Service `replyToCourseReview` ada; verifikasi handler tidak `console.log` |
-| Dashboard KPI | `admin/Dashboard.tsx` | 🔴 | Mock hardcode |
-| Transaksi admin | `admin/Transactions.tsx` | 🔴 | Mock hardcode — spesifikasi: [admin-financial-transactions-spec.md](./admin-financial-transactions-spec.md) |
-| Financial analytics | `admin/Financial.tsx` | 🔴 | Mock hardcode — BE `GET /admin/financial/summary` ✅ |
+| Dashboard KPI + chart | `admin/Dashboard.tsx` | ✅ | `GET /admin/dashboard/kpis`, recent-transactions, financial summary, popular courses |
+| Transaksi admin | `admin/Transactions.tsx` | ✅ | `GET /admin/transactions` + summary — filter, pagination, chart |
+| Financial analytics | `admin/Financial.tsx` | ✅ | `GET /admin/financial/summary` |
 | Reviews & Q&A moderasi | `admin/ReviewsQA.tsx` | 🔴 | Mock; route dikomentari di `App.tsx` |
 
 ### Mentor
 
 | Fitur | Halaman | Status | Catatan |
 |-------|---------|--------|---------|
-| Dashboard KPI + jadwal | `mentor/Dashboard.tsx` | 🔴 | Mock; BE endpoint ada |
+| Dashboard KPI + jadwal | `mentor/Dashboard.tsx` | ✅ | `GET /mentor/dashboard/kpis`, `GET /mentor/dashboard/schedules` |
 | List kursus | `mentor/Courses.tsx` | 🔴 | Hardcode; `fetchCourses` tersedia |
 | Detail kursus | `mentor/DetailCourse.tsx` | 🔴 | Data kursus & siswa mock; tab Tugas bisa jalan jika UID valid |
 | Edit kurikulum | `mentor/CourseEdit.tsx` | ✅ | Sama pola admin |
@@ -83,7 +83,8 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | Module viewer + submit tugas | `courses/view.tsx` | ✅ | Submission POST/PUT live |
 | **Assignments lintas kursus** | `student/Assignments.tsx` | ✅ | `GET /students/me/assignments` |
 | Browse kursus | `student/BrowseCourse.tsx` | ✅ | `GET /courses` |
-| Transaksi | `student/Transactions.tsx` | 🟡 | `transaction_history` dari profil; invoice link belum |
+| Transaksi | `student/Transactions.tsx` | ✅ | Refactor view model; detail pembayaran via Tripay (Fase 17) |
+| **Detail pembayaran** | `student/TransactionPayment.tsx` | ✅ | `GET /payment/tripay`; invoice, kode bayar, instruksi |
 | Sertifikat | `student/Certificates.tsx` | 🔴 | Mock kosong; tidak ada API BE |
 
 ### Public & Auth
@@ -130,6 +131,15 @@ Endpoint dari merge J-yriz dan route existing yang **sudah di-wire** ke service 
 | `GET/PUT/DELETE` | `/lessons/attendances/lesson/:id` dll. | `lesson-attendance.ts` | Tab Kehadiran admin |
 | CRUD | `/course-categories`, `/course-types` | `course-master.ts` | Admin master data |
 | `POST` | `/courses/:uid/review/:id/reply` | `course.ts` | Review reply (perlu verifikasi UI) |
+| `GET` | `/payment/tripay?reference=&merchant_ref=` | `payment.ts` | Detail pembayaran siswa (Fase 17) |
+| `GET` | `/admin/dashboard/kpis` | `admin-dashboard.ts` | `admin/Dashboard.tsx` |
+| `GET` | `/admin/dashboard/recent-transactions` | `admin-dashboard.ts` | `admin/Dashboard.tsx` |
+| `GET` | `/admin/transactions` | `admin-transactions.ts` | `admin/Transactions.tsx` |
+| `GET` | `/admin/transactions/summary` | `admin-dashboard.ts`, `admin-transactions.ts` | Dashboard + Transactions |
+| `GET` | `/admin/financial/summary` | `admin-dashboard.ts` | `admin/Dashboard.tsx`, `admin/Financial.tsx` |
+| `GET` | `/admin/courses/popular` | `admin-dashboard.ts` | `admin/Dashboard.tsx` |
+| `GET` | `/mentor/dashboard/kpis` | `mentor-dashboard.ts` | `mentor/Dashboard.tsx` |
+| `GET` | `/mentor/dashboard/schedules` | `mentor-dashboard.ts` | `mentor/Dashboard.tsx` |
 
 ---
 
@@ -139,17 +149,10 @@ Endpoint tersedia di backend (post-merge) tapi **belum** ada di `api-path.ts` da
 
 | Method | Endpoint | Status FE | Halaman terdampak | Prioritas |
 |--------|----------|-----------|---------------------|-----------|
-| `GET` | `/admin/dashboard/kpis` | 🔴 | `admin/Dashboard.tsx` | P2 |
-| `GET` | `/admin/dashboard/recent-transactions` | 🔴 | `admin/Dashboard.tsx` | P2 |
-| `GET` | `/admin/transactions` | 🔴 | `admin/Transactions.tsx` | P2 |
-| `GET` | `/admin/transactions/summary` | 🔴 | `admin/Transactions.tsx` | P2 |
-| `GET` | `/admin/financial/summary` | 🔴 | `admin/Financial.tsx` | P2 |
 | `GET` | `/admin/reviews` | 🔴 | `ReviewsQA.tsx` | P2 |
 | `POST` | `/admin/reviews/:id/reply` | 🔴 | `ReviewsQA.tsx` | P2 |
 | `GET` | `/admin/qna` | 🔴 | `ReviewsQA.tsx` | P2 |
 | `POST` | `/admin/qna/:id/replies` | 🔴 | `ReviewsQA.tsx` | P2 |
-| `GET` | `/mentor/dashboard/kpis` | 🔴 | `mentor/Dashboard.tsx` | P3 |
-| `GET` | `/mentor/dashboard/schedules` | 🔴 | `mentor/Dashboard.tsx` | P3 |
 | `POST` | `/courses/:id/qna` | 🔴 | Belum ada UI | P3 |
 | `POST` | `/courses/:id/qna/:id/replies` | 🔴 | Belum ada UI | P3 |
 
@@ -172,11 +175,11 @@ Route sudah dideklarasikan tapi **tidak ada** pemanggilan di `services/*.ts`.
 | `lessons.attendances.checkStatus` | check-status | — |
 | `lessons.attendances.getMyHistory` | my-history | — |
 | `lessons.attendances.getByUid` | detail record | — |
-| `invoices.*` | invoice URL / by enrollment | Link transaksi siswa 404 |
+| `invoices.*` | invoice URL / by enrollment | Diganti `GET /payment/tripay` (Fase 17); route invoice lama tidak terpakai |
 | `payment.method`, `payment.tripay` | payment aux | — |
 | `files.getByBucketAndObject` | file proxy | — |
 
-**Catatan:** `payment.create` dan `payment.getAll` punya service (`payment.ts`) + hook, tapi **tidak dipakai halaman** (checkout mock/absen).
+**Catatan:** `payment.create` dan `payment.getAll` punya service (`payment.ts`) + hook, tapi **tidak dipakai halaman** (checkout mock/absen). `payment.tripay` sekarang dipakai `TransactionPayment.tsx` (Fase 17).
 
 ---
 
@@ -192,7 +195,7 @@ Route sudah dideklarasikan tapi **tidak ada** pemanggilan di `services/*.ts`.
 | Forgot / reset password | 🔴 Tidak ada / tidak wire | Auth recovery mock |
 | `GET /payment` sebagai list transaksi admin | 🟡 Kontrak salah | BE wajib `?reference=`; admin butuh `/admin/transactions` |
 | `revenueSource` di financial summary | 🟡 Placeholder BE | Chart sumber penjualan tidak akurat |
-| Route checkout + enrollment flow | BE join/payment ada | FE link `/checkout/*` tidak terdaftar |
+| Route checkout + enrollment flow | BE join/payment ada | FE link `/checkout/*` tidak terdaftar; detail Tripay ✅ (Fase 17) |
 
 ---
 
@@ -212,9 +215,9 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 | `GET /user/:uid` detail | — | ✅ Live (halaman detail user) |
 | `joined_courses[].assignments` di profil | 🟡 Parsial | 🟡 Dipakai user detail; **tidak** dipakai halaman Assignments lagi |
 | `attendance_present/total` di students | 🟡 Belum map | 🟡 BE kirim; FE expect `student_attendance_*` — **belum mapper** |
-| Admin dashboard/transactions/financial | 🔴 Mock | 🔴 Masih mock |
+| Admin dashboard/transactions/financial | 🔴 Mock | ✅ Live (Fase 18) |
 | Admin/mentor reviews & Q&A | 🔴 | 🔴 Masih mock |
-| Mentor dashboard | 🔴 Mock | 🔴 Masih mock |
+| Mentor dashboard | 🔴 Mock | ✅ Live (Fase 19) |
 | `role=admin` include super_admin | ✅ | ✅ BE fixed |
 
 ---
@@ -231,23 +234,24 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 - [x] Halaman detail user admin — `GET /user/:uid`
 - [x] `DELETE /courses/:id` — soft delete + dialog konfirmasi admin
 - [x] Publish kursus — selaras BE (`status` + `is_published`); label UI **Terbit** / **Draft**; tombol Terbit disembunyikan setelah publish
+- [x] Detail pembayaran siswa — `GET /payment/tripay`; halaman `TransactionPayment.tsx` + refactor `TransactionsSection`
+- [x] Admin dashboard — KPI, chart revenue, transaksi terbaru, kursus populer (Fase 18)
+- [x] Admin transactions & financial — list, summary, filter, chart (Fase 18)
+- [x] Mentor dashboard — KPI + jadwal kelas (Fase 19)
 
 ### P1 — Gap utama
 
 - [ ] Mapper `attendance_present` / `attendance_total` → field FE di roster peserta
 - [ ] Samakan `mentor/Courses.tsx` & `mentor/DetailCourse.tsx` dengan pola admin API
 - [ ] Deprecate atau rewire `mentor/CourseAssignments.tsx`
-- [ ] Checkout route + wire `payment.create` / invoice
+- [ ] Checkout route + wire `payment.create` (detail Tripay ✅ Fase 17; checkout join flow belum)
 
-### P2 — Admin analytics (BE sudah ada)
+### P2 — Admin moderasi (BE sudah ada)
 
-- [ ] Tambah `services/admin-*.ts` + routes di `api-path.ts`
-- [ ] Wire `admin/Dashboard`, `Transactions`, `Financial`
 - [ ] Aktifkan route `ReviewsQA` + wire reviews/Q&A moderasi
 
 ### P3 — Enhancement
 
-- [ ] Mentor dashboard service + halaman
 - [ ] Q&A per course (student-facing)
 - [ ] Attendance create / check-status / my-history
 - [ ] UI riwayat multi-attempt penuh di module viewer

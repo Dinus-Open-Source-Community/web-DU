@@ -106,6 +106,45 @@ lib/validator/
   course-mentor.schema.ts
 ```
 
+### Student Transactions & Payment Detail
+
+```
+pages/student/
+  Transactions.tsx           ← root halaman riwayat transaksi
+  TransactionPayment.tsx     ← detail pembayaran Tripay
+
+components/student/
+  TransactionsSection.tsx    ← tabel transaksi + filter + pagination
+  transactions/
+    TransactionPaymentDetailView.tsx  ← UI invoice lengkap
+    TransactionPaymentLink.tsx        ← link "Detail" per baris transaksi
+    PaymentDetailSkeleton.tsx         ← loading state
+
+lib/transactions/
+  payment-types.ts           ← PaymentDetail, PaymentInstruction, PaymentOrderItem
+  payment-api-types.ts       ← TripayPaymentApiEnvelope, PaymentDetailQuery
+  map-tripay-payment-detail.ts  ← Tripay response → PaymentDetail
+  map-tripay-status.ts       ← status string → PaymentStatus
+  format-payment-method.ts
+  parse-tripay-timestamp.ts
+  unwrap-tripay-response.ts  ← unwrap Tripay envelope
+  present-transaction-payment-detail.ts  ← enrich with profile data
+  present-payment-invoice-view.ts        ← invoice view model
+  build-payment-detail-query.ts
+  to-tripay-merchant-ref.ts
+  filter-transactions.ts     ← filterTransactions(), paginateTransactions()
+  build-course-image-map.ts
+  find-transaction-by-reference.ts
+  find-transaction-by-enrollment.ts
+
+hooks/
+  use-payment-detail.ts      ← useQuery untuk Tripay detail
+  use-student-transactions-view-model.ts  ← state filter/search/pagination
+
+services/
+  payment.ts                 ← fetchTripayPaymentDetail()
+```
+
 ### Course Edit (Kurikulum)
 
 ```
@@ -155,6 +194,7 @@ services/
 | User manage | `userManageKeys.list(params)` | update role, delete user |
 | User manage | `userManageKeys.all` | semua mutation user |
 | Auth session | `authKeys.session` | update role (role di sidebar bisa berubah) |
+| Payment | `paymentKeys.tripayDetail(ref, merchantRef)` | — (read-only) |
 | Course | `courseKeys.detail(uid)` | assign mentor, update status |
 | Course master | `courseMasterKeys.*` | create/update/delete |
 
@@ -198,6 +238,9 @@ services/
 | Validator terpisah per domain | Selaras pola `lessons/` yang sudah ada |
 | Hapus `UserManageNav` | Single navigation via sidebar — kurangi confusion |
 | `services/` panggil validator | Satu pintu validasi — hooks tidak duplikasi parse |
+| Domain `lib/transactions/` terpisah | Transactions punya mapper, presenter, types sendiri — tidak campur di `services/` |
+| View model hook (`useStudentTransactionsViewModel`) | Logik filter/search/pagination diekstrak dari komponen; komponen hanya render |
+| Tripay detail bukan invoice endpoint | `GET /payment/tripay` lebih lengkap (instruksi, pay code) daripada `/invoices/*` |
 
 ---
 
@@ -206,5 +249,8 @@ services/
 | Area | Alasan |
 |------|--------|
 | `components/Admin/Student/Table.tsx` (lama) | Deprecated, tidak dipakai — bisa dihapus di cleanup |
-| `mentor/DetailCourse.tsx` mock | Belum masuk scope sesi — dokumentasi di gap |
+| `mentor/Dashboard.tsx` | ✅ Live (Fase 19) |
+| `mentor/DetailCourse.tsx` mock | Belum masuk scope — backlog B16 |
+| `mentor/Courses.tsx` mock | Belum masuk scope — backlog B17 |
 | `profile` password tanpa `old_password` | Bug/ gap terdokumentasi di payload-gaps |
+| `services/invoice.ts` dihapus (kosong) | Digantikan `fetchTripayPaymentDetail` di `payment.ts` |

@@ -320,17 +320,114 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 
 ---
 
-## I. Regresi — Halaman yang Masih Mock (jangan expect API)
+## I-A. Detail Pembayaran Siswa (Tripay)
+
+### IA1 — Navigasi dari tabel transaksi
+
+| | |
+|---|---|
+| **Route** | `/student/transactions` → klik "Detail" pada baris transaksi |
+| **Precondition** | Login sebagai student; punya transaksi dengan `reference` & `enrollment_uid` valid |
+| **Expected** | Redirect ke `/student/transactions/payment?reference=...&merchant_ref=...` |
+| **Edge case** | Transaksi tanpa `reference` / `enrollment_uid` → tombol "Detail" tidak ditampilkan (label "Tidak tersedia") |
+
+### IA2 — Halaman detail pembayaran
+
+| | |
+|---|---|
+| **Route** | `/student/transactions/payment?reference=TRX-xxx&merchant_ref=abc123` |
+| **Expected** | `GET /payment/tripay?reference=TRX-xxx&merchant_ref=abc123`; kartu invoice, status badge, rincian item, total, referensi transaksi |
+| **Data** | Course title & image dicocokkan dari profil siswa (`transaction_history` + `joined_courses`) |
+
+### IA3 — Status pending + CTA lanjut bayar
+
+| | |
+|---|---|
+| **Precondition** | Transaksi dengan `paymentStatus: pending` |
+| **Expected** | CTA "Lanjutkan Pembayaran" muncul; link ke `checkoutUrl` Tripay (buka tab baru) |
+| **Edge case** | Status `success` atau `failed` → CTA tidak muncul |
+
+### IA4 — Kode pembayaran (VA/QRIS)
+
+| | |
+|---|---|
+| **Precondition** | Transaksi punya `payCode` (misal Virtual Account) |
+| **Expected** | Kode bayar ditampilkan besar; tombol "Salin" berfungsi |
+| **Edge case** | Tidak ada `payCode` → blok kode bayar tidak tampil |
+
+### IA5 — Instruksi pembayaran accordion
+
+| | |
+|---|---|
+| **Precondition** | Tripay response punya `instructions` |
+| **Expected** | Accordion per metode; klik expand menampilkan langkah-langkah |
+| **Edge case** | Tidak ada instruksi → section tidak tampil |
+
+### IA6 — Reference not found
+
+| | |
+|---|---|
+| **Route** | `/student/transactions/payment?reference=INVALID` |
+| **Expected** | EmptyState "Invoice tidak ditemukan" dengan tombol kembali |
+
+### IA7 — No query params
+
+| | |
+|---|---|
+| **Route** | `/student/transactions/payment` (tanpa query params) |
+| **Expected** | EmptyState "Invoice tidak ditemukan" |
+
+---
+
+## H. Mentor Dashboard (Fase 19)
+
+### H1 — KPI mentor
+
+| | |
+|---|---|
+| **Route** | `/mentor/dashboard` |
+| **Precondition** | Login mentor (`andi.mentor@doscom.id`) |
+| **Expected** | 4 stat card: menunggu dinilai, Q&A belum dijawab, siswa aktif, total kursus — angka dari API |
+| **API** | `GET /mentor/dashboard/kpis` |
+
+### H2 — Jadwal kelas
+
+| | |
+|---|---|
+| **Route** | `/mentor/dashboard` |
+| **Expected** | Kalender + panel upcoming menampilkan lesson dari kursus assigned mentor |
+| **API** | `GET /mentor/dashboard/schedules?limit=50` |
+
+### H3 — Error & retry
+
+| | |
+|---|---|
+| **Langkah** | Matikan BE / token invalid |
+| **Expected** | `DashboardError` + tombol "Coba lagi" per section (KPI / jadwal) |
+
+---
+
+## I. Status Regresi Halaman (live vs mock)
+
+### Sudah live (expect API)
+
+| Route | API / Catatan |
+|-------|---------------|
+| `/admin/dashboard` | `GET /admin/dashboard/kpis`, recent-transactions, financial summary |
+| `/admin/transactions` | `GET /admin/transactions`, summary |
+| `/admin/financial` | `GET /admin/financial/summary` |
+| `/mentor/dashboard` | `GET /mentor/dashboard/kpis`, schedules |
+| `/student/assignments` | `GET /students/me/assignments` |
+| `/student/transactions` | View model + `TransactionPaymentLink` |
+| `/student/transactions/payment` | `GET /payment/tripay` |
+
+### Masih mock / belum API
 
 | Route | Status |
 |-------|--------|
-| `/admin/dashboard` | Mock KPI |
-| `/admin/transactions` | Mock |
-| `/admin/financial` | Mock |
 | `/mentor/courses` | Mock list |
 | `/mentor/courses/:uid` | Mock detail |
 | `/mentor/courses/:uid/assignments` | Mock (tab Tugas di detail course sudah live) |
-| `/student/assignments` | ✅ Live (`GET /students/me/assignments`) |
 | `/student/certificates` | Empty |
 | `/auth/forgot-password` | Tidak hit API |
 | `/admin/reviews-and-qa` | Route tidak aktif |
@@ -354,7 +451,9 @@ Urutan cepat untuk regression smoke:
 10. Terbit kursus dari detail (jika masih draft)
 11. Hapus kursus test (opsional, staging only)
 12. Resize sidebar 1024px
-13. Logout
+13. Login student → /student/transactions → klik Detail → cek invoice Tripay
+14. Login mentor → /mentor/dashboard → cek KPI + jadwal kelas (Fase 19)
+15. Logout
 ```
 
 **Checklist TODO lengkap:** [todo-backlog.md](./todo-backlog.md)

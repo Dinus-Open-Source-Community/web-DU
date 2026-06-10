@@ -455,13 +455,11 @@ flowchart TB
 
 | Workflow | Status | Lihat |
 |----------|--------|-------|
-| Lepas mentor | UI only | [api-route-gaps.md](../api-route-gaps.md) |
 | Reply review | console.log | [todo-backlog.md](./todo-backlog.md) B8 |
-| Admin transactions | mock | page-coverage |
-| Mentor detail course | mock | page-coverage |
+| Mentor list/detail course | mock | [todo-backlog.md](./todo-backlog.md) B16–B17 |
 | Mentor `/assignments` route terpisah | mock | [todo-backlog.md](./todo-backlog.md) B19 |
-| Student `/assignments` aggregate | mock | [todo-backlog.md](./todo-backlog.md) B18 |
 | Siswa check-in absen | belum | [todo-backlog.md](./todo-backlog.md) C2 |
 | Admin create absen manual | belum | [todo-backlog.md](./todo-backlog.md) C4 |
 | Profil penilai lengkap (bukan user login) | partial | [todo-backlog.md](./todo-backlog.md) A12, D9 |
 | Forgot/reset password | mock | page-coverage |
+| Admin reviews & Q&A moderasi | mock | [todo-backlog.md](./todo-backlog.md) D12 |

@@ -16,7 +16,7 @@ type UserDetailPageShellProps = {
   backHref: string
   isLoading?: boolean
   loadingMessage?: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function UserDetailPageShell({

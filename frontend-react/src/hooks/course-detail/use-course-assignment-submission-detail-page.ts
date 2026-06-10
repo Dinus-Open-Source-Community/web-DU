@@ -19,10 +19,7 @@ import {
   buildGradePayloadFromSubmission,
   type StaffSubmissionGradeDraft,
 } from '@/lib/course-detail/staff-submission-grade-presenter'
-import {
-  buildStaffGraderDirectory,
-  type StaffGraderDirectoryEntry,
-} from '@/lib/course-detail/staff-grader-directory'
+import type { StaffGraderDirectoryEntry } from '@/lib/course-detail/staff-grader-directory'
 import type { StaffSubmissionViewer } from '@/lib/course-detail/staff-submission-grader-presenter'
 import type { IMentorCourseStudent, IModulesData } from '@/lib/types/course'
 import { deriveLessonsFromModules } from '@/lib/course-detail/derive-lessons-from-modules'

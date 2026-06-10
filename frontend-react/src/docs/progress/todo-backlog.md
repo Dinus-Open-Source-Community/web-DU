@@ -3,7 +3,7 @@
 Dokumen **living backlog** untuk PM, FE, dan QA.  
 **Aturan:** item requirement lama **tidak dihapus** — hanya diubah statusnya.
 
-**Terakhir diperbarui:** 9 Juni 2026 (BE: `graded_by` submission + verifikasi D12) · branch `features/frontend-sapto`  
+**Terakhir diperbarui:** 10 Juni 2026 (Fase 18–19: admin analytics + mentor dashboard) · branch `features/frontend-sapto`  
 **Status lengkap:** [integration-status.md](./integration-status.md)
 
 ---
@@ -72,7 +72,8 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B27 | **Publish kursus** selaras BE (`PATCH /courses/:id/status`) | ✅ Selesai | Fase 16 — `isCoursePublished()`, label Terbit/Draft |
 | B28 | **Hapus / nonaktifkan kursus** (`DELETE /courses/:id`) | ✅ Selesai | Fase 16 — dialog + redirect daftar kursus |
 | B29 | Tombol **Terbit** disembunyikan setelah kursus publish | ✅ Selesai | Fase 16 — header, mobile, editor kurikulum |
-| B20 | Admin dashboard / transactions / financial | 🔴 Belum | Masih mock |
+| B20 | Admin dashboard / transactions / financial | ✅ Selesai | Fase 18 — `admin-dashboard.ts`, `admin-transactions.ts`, hooks + halaman live |
+| B30 | Mentor dashboard KPI + jadwal | ✅ Selesai | Fase 19 — `mentor-dashboard.ts`, `use-mentor-dashboard`, `mentor/Dashboard.tsx` |
 | B21 | Forgot / reset password | 🔴 Belum | Tidak ada endpoint BE |
 | B22 | Sertifikat siswa | 🔴 Belum | Tidak ada domain BE |
 | B23 | Ganti password kirim `old_password` | 🔴 Belum | `profile` partial |
@@ -101,12 +102,21 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | C12 | `GET` | `/courses/:uid/mentor` | 🔴 Belum | List mentor kursus (terpisah dari detail) | Rendah |
 | C13 | `POST` | `/courses/:uid/review/:id/reply` | 🔴 Belum | Endpoint ada; FE belum wire | Tinggi |
 | C14 | `GET` | `/user/:uid` | ✅ Selesai | Halaman detail user admin (Fase 14) | — |
-| C15 | `GET` | `/invoices/:enrollmentUid` | 🔴 Belum | Invoice enrollment | Rendah |
+| C15 | `GET` | `/invoices/:enrollmentUid` | 🟡 Partial | Tidak dipakai langsung; diganti `GET /payment/tripay` (Fase 17) | Rendah |
+| C21 | `GET` | `/payment/tripay?reference=&merchant_ref=` | ✅ Selesai | Detail pembayaran Tripay (Fase 17) | — |
 | C16 | `GET` | `/mentor/all`, `/mentor/:id` | 🔴 Belum | Landing mentor publik | Rendah |
 | C17 | `POST` | `/lessons/:id/assignment/submission` (siswa) | ✅ Selesai | Module viewer assignment work | — |
 | C18 | `PUT` | `/lessons/:id/assignment/submissions/:uid/grade` | ✅ Selesai | Detail submission staff | — |
 | C19 | `GET` | `/lessons/:id/assignment/submissions` | ✅ Selesai | Roster & tab tugas | — |
 | C20 | `POST/PUT` | `/lessons/:id/assignment` | ✅ Selesai | Course editor + validator | — |
+| C22 | `GET` | `/admin/dashboard/kpis` | ✅ Selesai | `admin/Dashboard.tsx` (Fase 18) | — |
+| C23 | `GET` | `/admin/dashboard/recent-transactions` | ✅ Selesai | `admin/Dashboard.tsx` (Fase 18) | — |
+| C24 | `GET` | `/admin/transactions` | ✅ Selesai | `admin/Transactions.tsx` (Fase 18) | — |
+| C25 | `GET` | `/admin/transactions/summary` | ✅ Selesai | Dashboard + Transactions (Fase 18) | — |
+| C26 | `GET` | `/admin/financial/summary` | ✅ Selesai | `admin/Dashboard.tsx`, `admin/Financial.tsx` (Fase 18) | — |
+| C27 | `GET` | `/admin/courses/popular` | ✅ Selesai | `admin/Dashboard.tsx` (Fase 18) | — |
+| C28 | `GET` | `/mentor/dashboard/kpis` | ✅ Selesai | `mentor/Dashboard.tsx` (Fase 19) | — |
+| C29 | `GET` | `/mentor/dashboard/schedules` | ✅ Selesai | `mentor/Dashboard.tsx` (Fase 19) | — |
 
 ---
 
@@ -118,9 +128,9 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | D2 | `POST /courses/:id/mentors/unassign` | Tombol Lepas mentor | ✅ Selesai | Fase 13 |
 | D3 | `GET /courses/:courseUid/assignments` aggregate | `mentor/CourseAssignments` mock | 🟡 Partial | Service live; legacy page masih mock |
 | D4 | `GET /students/me/assignments` aggregate | `student/Assignments` mock | ✅ Selesai | Fase 13 |
-| D5 | `GET /admin/transactions` + summary | Admin transactions mock | ⏳ Tunggu FE | BE ada; service admin belum |
-| D6 | `GET /admin/financial/summary` | Admin financial mock | ⏳ Tunggu FE | BE ada; service admin belum |
-| D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ⏳ Tunggu FE | BE ada; service admin belum |
+| D5 | `GET /admin/transactions` + summary | Admin transactions mock | ✅ Selesai | Fase 18 |
+| D6 | `GET /admin/financial/summary` | Admin financial mock | ✅ Selesai | Fase 18 |
+| D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ✅ Selesai | Fase 18 |
 | D8 | `attendance_*` di `GET /courses/:id/students` | Bar kehadiran tab Peserta salah | 🟡 Partial | BE kirim field; FE belum mapper |
 | D9 | Profil user penilai (`graded_by` object) di response submission | Profil feedback staff selalu lengkap | 🟡 Partial | BE kirim `graded_by` di list/get/grade submission; FE perlu wire mapper |
 | D10 | Forgot / reset password | Auth recovery mock | ⏳ Tunggu BE | `api-route-gaps.md` §9 |
@@ -129,7 +139,7 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | D13 | `GET /courses?category_uid=` filter | Filter kategori browse tidak akurat | 🟡 Partial | Param dikirim; verifikasi hasil filter |
 | D14 | `DELETE /courses/:id` | Tidak ada hapus kursus di UI | ✅ Selesai | Fase 16 — `deleteCourse`, `useDeleteCourse`, dialog admin |
 | D15 | Admin reviews & Q&A moderasi | `ReviewsQA` mock | ⏳ Tunggu FE | BE ada; route dikomentari |
-| D16 | Mentor dashboard KPI + jadwal | `mentor/Dashboard` mock | ⏳ Tunggu FE | BE ada; service belum |
+| D16 | Mentor dashboard KPI + jadwal | `mentor/Dashboard` mock | ✅ Selesai | Fase 19 — `services/mentor-dashboard.ts` |
 | D17 | Q&A per course (student) | Tidak ada UI | ⏳ Tunggu FE | BE ada; belum di api-path |
 
 ---
@@ -167,7 +177,8 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 ### Prioritas 4 — Epic terpisah
 
-- [ ] **E17** Admin transactions & financial (B20, D5, D6)
+- [x] **E17** Admin transactions & financial (B20, D5, D6, D7) — Fase 18
+- [x] **E23** Mentor dashboard (B30, D16) — Fase 19
 - [ ] **E18** Forgot/reset password (B21, D10)
 - [ ] **E19** Sertifikat (B22, D11)
 - [ ] **E20** Reviews & Q&A moderation page (D12)
@@ -184,6 +195,7 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 | F4 | Filter `super_admin` di halaman administrator | ✅ | BE fix merge J-yriz (B25) |
 | F5 | `GET /lessons/readings/my-history` — komentar broken di BE | 🔴 | Verifikasi dengan tim BE |
 | F6 | Perubahan branch belum di-commit | 🟡 | Menunggu permintaan developer |
+| F7 | `mentor/Courses.tsx` & `mentor/DetailCourse.tsx` masih mock | 🔴 | Backlog B16–B17 |
 
 ---
 

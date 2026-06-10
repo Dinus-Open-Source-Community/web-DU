@@ -138,6 +138,18 @@ export async function deleteCourse(uid: string) {
   return unwrapApiResponse(response.data, 'Gagal menghapus kursus')
 }
 
+export interface JoinCourseResponse {
+  enrollment: { uid: string; user_uid: string; course_uid: string; status: string }
+  invoice_url: string
+}
+
+export async function joinCourse(courseUid: string) {
+  const response = await api.post<IResponse<JoinCourseResponse>>(
+    API_ROUTES.courses.joinByUid(courseUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mendaftar kursus')
+}
+
 export async function fetchCourseStudents(courseUid: string) {
   const response = await api.get<IResponse<ICourseStudentListResponse>>(
     API_ROUTES.courses.getStudentsByUid(courseUid),

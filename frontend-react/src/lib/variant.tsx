@@ -8,6 +8,7 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       premium: 'rounded-[9px] bg-[#E2F7FF] px-3 py-1 text-sm leading-[1.3] text-[#2290DF]',
       event: 'rounded-[9px] bg-[#D8DEFF] px-3 py-1 text-sm leading-[1.3] text-[#B922DF]',
       draft: 'rounded-[9px] bg-gray-100 px-3 py-1 text-sm leading-[1.3] text-gray-600',
+      outline: 'rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-medium text-slate-700',
       // Payment (transaksi)
       paymentPaid: 'rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide border-emerald-200 bg-emerald-50 text-emerald-700',
       paymentPending: 'rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide border-amber-200 bg-amber-50 text-amber-700',

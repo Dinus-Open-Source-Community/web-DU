@@ -81,7 +81,13 @@ export const FormatTrend = (value?: number) => {
   return `${rounded}%`
 }
 
-export const CurrencyCompact = (v: number) => (v >= 1_000_000_000 ? `${(v / 1_000_000_000).toFixed(1)}M` : `${(v / 1_000_000).toFixed(0)}jt`)
+export const CurrencyCompact = (v: number) => {
+  const abs = Math.abs(v)
+  if (abs >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}M`
+  if (abs >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}jt`
+  if (abs >= 1_000) return `${(v / 1_000).toFixed(0)}rb`
+  return v.toLocaleString('id-ID')
+}
 
 export const Initials = (name: string) => {
   return name

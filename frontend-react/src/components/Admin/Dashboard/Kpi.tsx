@@ -1,5 +1,6 @@
 import { DollarSign, Users2, CreditCard, TrendingUp, type LucideIcon } from 'lucide-react'
 import { StatCard } from '../../shared/StatCard'
+import { cn } from '../../../lib/utils'
 
 export interface AdminKpi {
   id: string
@@ -22,9 +23,37 @@ const iconMap: Record<AdminKpi['iconName'], LucideIcon> = {
   failed: DollarSign,
 }
 
-export function KpiGrid({ adminKpis }: { adminKpis?: AdminKpi[] }) {
+function KpiSkeleton() {
   return (
-    <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="flex w-full animate-pulse flex-col items-start gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50/70 p-4 shadow-xs">
+      <div className="flex w-full items-start justify-between gap-3">
+        <div className="flex flex-col gap-2">
+          <div className="h-3 w-20 rounded bg-slate-200" />
+          <div className="h-7 w-28 rounded bg-slate-200" />
+        </div>
+        <div className="h-10 w-10 rounded-xl bg-slate-200" />
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-5 w-14 rounded-full bg-slate-200" />
+        <div className="h-3 w-24 rounded bg-slate-200" />
+      </div>
+    </div>
+  )
+}
+
+export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLoading?: boolean }) {
+  if (isLoading) {
+    return (
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <KpiSkeleton key={i} />
+        ))}
+      </section>
+    )
+  }
+
+  return (
+    <section className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4')}>
       {adminKpis?.map((k) => {
         const Icon = iconMap[k.iconName]
         return (

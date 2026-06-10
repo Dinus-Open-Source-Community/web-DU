@@ -13,6 +13,7 @@ export const ROUTES = {
   home: '/',
   profile: '/profile',
   courses: '/course',
+  checkout: (courseUid: string) => `/checkout/${courseUid}`,
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',
@@ -70,6 +71,16 @@ export const ROUTES = {
     browse: '/student/browse',
     certificates: '/student/certificates',
     transactions: '/student/transactions',
+    transactionPaymentPath: '/student/transactions/payment',
+    transactionPayment: (query: { reference?: string; merchantRef?: string }) => {
+      const params = new URLSearchParams()
+      if (query.reference) params.set('reference', query.reference)
+      if (query.merchantRef) params.set('merchant_ref', query.merchantRef)
+      const queryString = params.toString()
+      return queryString
+        ? `${ROUTES.student.transactionPaymentPath}?${queryString}`
+        : ROUTES.student.transactionPaymentPath
+    },
   },
 } as const
 

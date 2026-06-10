@@ -35,6 +35,11 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Penilaian & feedback submission inline | ✅ Live | `PUT .../submissions/:uid/grade` |
 | Student module viewer — kerja & submit tugas | ✅ Live | Multi-attempt GET submission |
 | Tab Kehadiran admin (detail course) | 🟡 Partial | List + update + delete ✅; create manual & note UI ❌ |
+| **Detail pembayaran siswa** (Tripay) | ✅ Live | `GET /payment/tripay`; invoice, kode bayar, instruksi, rincian |
+| **Refactor TransactionsSection** | ✅ Live | Ekstrak view model + label bahasa Indonesia |
+| **Admin dashboard** (KPI, chart, transaksi terbaru) | ✅ Live | `GET /admin/dashboard/*`, `/admin/financial/summary` |
+| **Admin transaksi & financial** | ✅ Live | `GET /admin/transactions`, summary, financial charts |
+| **Mentor dashboard** (KPI + jadwal kelas) | ✅ Live | `GET /mentor/dashboard/kpis`, `.../schedules` |
 | Validator payload (Zod) | ✅ Live | + domain `lesson-assignment`, `lesson-attendance` |
 | Layout sidebar | ✅ Fixed | Sidebar konsisten di breakpoint `lg` (1024px) |
 | Publish & hapus kursus admin | ✅ Live | `PATCH/DELETE /courses/:uid`; label Terbit/Draft; tombol Terbit hanya draft |
@@ -45,11 +50,10 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Area | Status | Blocker |
 |------|--------|---------|
 | Hapus kursus dari daftar (`ManageCourse` kartu) | 🟡 | Hapus hanya dari halaman detail; kartu belum punya aksi |
-| Admin dashboard | 🔴 Mock | Service admin belum dibuat |
-| Admin transactions / financial | 🔴 Mock | BE ✅ — lihat [admin-financial-transactions-spec.md](./admin-financial-transactions-spec.md) |
-| Mentor dashboard & list/detail kursus | 🔴 Mock | Halaman belum pakai hook API |
+| Mentor list & detail kursus | 🔴 Mock | `mentor/Courses.tsx`, `mentor/DetailCourse.tsx` masih hardcode |
+| Halaman `mentor/.../assignments` (legacy) | 🔴 Mock | Tab Tugas di detail course sudah live |
 | Reviews & Q&A moderasi admin | 🔴 Mock | Route dikomentari |
-| Checkout & payment flow | 🔴 | Route `/checkout/*` tidak ada |
+| Checkout & payment flow (join course) | 🔴 | Route `/checkout/*` tidak ada; detail Tripay ✅ (Fase 17) |
 | Attendance bar di tab Peserta | 🟡 | Mapper field `attendance_*` belum |
 | Sertifikat, forgot password | 🔴 | Tidak ada domain BE |
 
@@ -89,10 +93,11 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 
 | Metrik | Nilai |
 |--------|-------|
-| Halaman admin terintegrasi API | 10+ dari 15 route utama |
+| Halaman admin terintegrasi API | 13+ dari 15 route utama |
+| Halaman mentor terintegrasi API | 4 dari 6 route utama |
 | Domain validator | 6+ |
 | Endpoint assignment/attendance dipakai FE | 10+ |
-| Service baru post-merge | `course-assignments`, `student-assignments`, user detail |
+| Service baru post-merge | `admin-dashboard`, `admin-transactions`, `mentor-dashboard`, `course-assignments`, `student-assignments`, payment (Tripay) |
 | Branch | `features/frontend-sapto` |
 
 ---
@@ -110,13 +115,18 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 🟡 /admin/courses/:uid          (Tugas + publish + hapus live; Kehadiran partial; attendance bar belum map)
 ✅  /admin/courses/.../submissions & /submissions/:uid
 ✅  /admin/courses/:uid/edit     (kurikulum + PUT metadata live)
-🔴 /admin/dashboard|transactions|financial|reviews-and-qa
+✅  /admin/dashboard              (KPI, chart, transaksi terbaru — Fase 18)
+✅  /admin/transactions           (list + summary + filter — Fase 18)
+✅  /admin/financial              (revenue chart + KPI — Fase 18)
+🔴 /admin/reviews-and-qa
 
 ✅  /student/assignments         (GET /students/me/assignments)
 ✅  /student/learning + module viewer
-🟡 /student/dashboard|transactions
+✅  /student/transactions/payment     (detail pembayaran Tripay — Fase 17)
+🟡 /student/dashboard
 
-🔴 /mentor/dashboard|courses|courses/:uid  (mock — edit & submissions route live)
+✅  /mentor/dashboard            (KPI + jadwal — Fase 19)
+🔴 /mentor/courses|courses/:uid  (mock — edit & submissions route live)
 🔴 /mentor/courses/:uid/assignments       (legacy mock)
 ```
 
