@@ -5646,77 +5646,6 @@
                 }
             }
         },
-        "/payment": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get payment details from database by reference or enrollmentId",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Get Payment (DB)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Payment Reference",
-                        "name": "reference",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Enrollment UID (full UUID atau 8-char prefix)",
-                        "name": "enrollmentId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Payment details retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Reference parameter is missing",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Payment not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/payment/create": {
             "post": {
                 "security": [
@@ -5784,17 +5713,17 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Mengembalikan semua konfigurasi metode pembayaran yang tersedia tanpa pagination.",
+                "description": "Mengambil daftar channel pembayaran langsung dari Tripay API.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Payment"
                 ],
-                "summary": "Get All Payment Methods (All Roles)",
+                "summary": "Get Payment Channels (Tripay)",
                 "responses": {
                     "200": {
-                        "description": "List of payment methods",
+                        "description": "Tripay payment channels",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5807,71 +5736,8 @@
                             "additionalProperties": true
                         }
                     },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Tambah atau perbarui konfigurasi metode pembayaran beserta gambar/logo-nya.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Set Payment Method (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Kode metode pembayaran (e.g. BRIVA, OVO, QRIS2)",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "File gambar/logo metode pembayaran (opsional)",
-                        "name": "image",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Payment method set successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
+                    "502": {
+                        "description": "Failed to fetch from Tripay",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

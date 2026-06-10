@@ -4298,53 +4298,6 @@ paths:
       summary: Google OAuth callback (Public)
       tags:
       - Auth
-  /payment:
-    get:
-      consumes:
-      - application/json
-      description: Get payment details from database by reference or enrollmentId
-      parameters:
-      - description: Payment Reference
-        in: query
-        name: reference
-        type: string
-      - description: Enrollment UID (full UUID atau 8-char prefix)
-        in: query
-        name: enrollmentId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment details retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Reference parameter is missing
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - Invalid or missing JWT token
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Payment not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get Payment (DB)
-      tags:
-      - Payment
   /payment/create:
     post:
       consumes:
@@ -4386,13 +4339,12 @@ paths:
       - Payment
   /payment/method:
     get:
-      description: Mengembalikan semua konfigurasi metode pembayaran yang tersedia
-        tanpa pagination.
+      description: Mengambil daftar channel pembayaran langsung dari Tripay API.
       produces:
       - application/json
       responses:
         "200":
-          description: List of payment methods
+          description: Tripay payment channels
           schema:
             additionalProperties: true
             type: object
@@ -4401,56 +4353,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "500":
-          description: Internal server error
+        "502":
+          description: Failed to fetch from Tripay
           schema:
             additionalProperties: true
             type: object
       security:
       - BearerAuth: []
-      summary: Get All Payment Methods (All Roles)
-      tags:
-      - Payment
-    post:
-      consumes:
-      - multipart/form-data
-      description: Tambah atau perbarui konfigurasi metode pembayaran beserta gambar/logo-nya.
-      parameters:
-      - description: Kode metode pembayaran (e.g. BRIVA, OVO, QRIS2)
-        in: formData
-        name: name
-        required: true
-        type: string
-      - description: File gambar/logo metode pembayaran (opsional)
-        in: formData
-        name: image
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment method set successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Set Payment Method (Admin)
+      summary: Get Payment Channels (Tripay)
       tags:
       - Payment
   /payment/tripay:
