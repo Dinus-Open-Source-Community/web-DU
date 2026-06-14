@@ -35,7 +35,9 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Penilaian & feedback submission inline | ✅ Live | `PUT .../submissions/:uid/grade` |
 | Student module viewer — kerja & submit tugas | ✅ Live | Multi-attempt GET submission |
 | **Checkout & join kursus** | ✅ Live | Route `/checkout/:courseUid`; join + `POST /payment` → detail Tripay |
-| **Detail pembayaran siswa** (Tripay) | ✅ Live | `GET /payment/tripay`; invoice, kode bayar, instruksi, rincian |
+| **Katalog available-only** | ✅ Live | Student/login hanya lihat kursus yang belum active/completed; guest tetap lihat semua |
+| **Detail pembayaran siswa** (Tripay) | ✅ Live | Polling status, Suspense skeleton, status animation, invoice, kode bayar, instruksi |
+| **Redesign payment detail** | ✅ Live | Hero status terpusat, progress navigation, responsive summary, komponen terpisah per file |
 | **Refactor TransactionsSection** | ✅ Live | Ekstrak view model + label bahasa Indonesia |
 | **Admin dashboard** (KPI, chart, transaksi terbaru) | ✅ Live | `GET /admin/dashboard/*`, `/admin/financial/summary` |
 | **Admin transaksi & financial** | ✅ Live | `GET /admin/transactions`, summary, financial charts |
@@ -121,9 +123,13 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 
 ✅  /student/assignments         (GET /students/me/assignments)
 ✅  /student/learning + module viewer
-✅  /student/transactions/payment     (detail pembayaran Tripay — Fase 17)
+✅  /student/browse              (available-only dari joined_courses — Fase 21)
+✅  /student/transactions/payment     (detail + polling + redesign — Fase 17/21)
 ✅  /checkout/:courseUid              (join kursus + pilih metode bayar — Fase 20)
 🟡 /student/dashboard
+
+🟡 /course                       (enrollment-aware ✅; filter kategori perlu verifikasi)
+✅  /course/:courseUid            (guest CTA login → kembali ke checkout — Fase 21)
 
 ✅  /mentor/dashboard            (KPI + jadwal — Fase 19)
 🔴 /mentor/courses|courses/:uid  (mock — edit & submissions route live)

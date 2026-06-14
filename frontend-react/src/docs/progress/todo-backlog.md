@@ -3,7 +3,7 @@
 Dokumen **living backlog** untuk PM, FE, dan QA.  
 **Aturan:** item requirement lama **tidak dihapus** — hanya diubah statusnya.
 
-**Terakhir diperbarui:** 14 Juni 2026 (Fase 20: checkout join kursus · kehadiran ditunda) · branch `features/frontend-sapto`  
+**Terakhir diperbarui:** 14 Juni 2026 (Fase 21: katalog enrollment-aware + payment detail UX) · branch `features/frontend-sapto`
 **Status lengkap:** [integration-status.md](./integration-status.md)
 
 ---
@@ -74,6 +74,9 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B20 | Admin dashboard / transactions / financial | ✅ Selesai | Fase 18 — `admin-dashboard.ts`, `admin-transactions.ts`, hooks + halaman live |
 | B30 | Mentor dashboard KPI + jadwal | ✅ Selesai | Fase 19 — `mentor-dashboard.ts`, `use-mentor-dashboard`, `mentor/Dashboard.tsx` |
 | B31 | **Checkout join kursus** (`/checkout/:courseUid`) | ✅ Selesai | Fase 20 — `use-checkout.ts`, `joinCourse` + `createPayment` → detail Tripay |
+| B32 | **Katalog hanya course available** untuk user login | ✅ Selesai | Fase 21 — filter enrollment `active` / `completed` |
+| B33 | Guest login sebelum checkout + kembali ke tujuan awal | ✅ Selesai | Fase 21 — route state `from` |
+| B34 | Redesign detail pembayaran + polling status | ✅ Selesai | Fase 21 — Suspense, status overlay, modular components |
 | B21 | Forgot / reset password | 🔴 Belum | Tidak ada endpoint BE |
 | B22 | Sertifikat siswa | 🔴 Belum | Tidak ada domain BE |
 | B23 | Ganti password kirim `old_password` | 🔴 Belum | `profile` partial |
@@ -169,6 +172,9 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 - [x] **E17** Admin transactions & financial (B20, D5, D6, D7) — Fase 18
 - [x] **E23** Mentor dashboard (B30, D16) — Fase 19
 - [x] **E24** Checkout join kursus (B31) — Fase 20
+- [x] **E25** Filter katalog berdasarkan enrollment user (B32) — Fase 21
+- [x] **E26** Auth redirect ke checkout setelah login (B33) — Fase 21
+- [x] **E27** Redesign + modularisasi detail pembayaran (B34) — Fase 21
 - [ ] **E18** Forgot/reset password (B21, D10)
 - [ ] **E19** Sertifikat (B22, D11)
 - [ ] **E20** Reviews & Q&A moderation page (D12)

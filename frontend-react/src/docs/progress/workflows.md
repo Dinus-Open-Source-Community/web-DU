@@ -399,7 +399,52 @@ sequenceDiagram
 
 ---
 
-## 15. Siswa — Submit Tugas (Module Viewer)
+## 15. Katalog Enrollment-Aware & Auth ke Checkout
+
+```mermaid
+flowchart LR
+  Guest[Guest membuka katalog] --> All[Semua course publik]
+  Login[User login membuka katalog] --> Profile[joined_courses]
+  Profile --> Filter[Filter active/completed]
+  Filter --> Available[Course available]
+  Guest --> Detail[Detail course]
+  Detail --> Auth{Sudah login?}
+  Auth -- Tidak --> LoginPage[Login dengan state from checkout]
+  LoginPage --> Checkout[/checkout/:courseUid]
+  Auth -- Ya --> Checkout
+```
+
+Status enrollment `pending` dan `cancelled` tidak difilter agar pembayaran dapat dicoba kembali.
+
+---
+
+## 16. Detail Pembayaran — Polling, Suspense & Status Transition
+
+```mermaid
+sequenceDiagram
+  actor Student
+  participant Page as TransactionPayment.tsx
+  participant Query as usePaymentDetail
+  participant API as GET /payment/tripay
+  participant View as Payment Detail Components
+
+  Student->>Page: Buka detail transaksi
+  Page->>Page: Suspense / skeleton
+  Page->>Query: query reference + merchant_ref
+  Query->>API: GET payment detail
+  API-->>View: pending
+  loop Setiap 5 detik selama pending
+    Query->>API: Refetch status
+  end
+  API-->>View: success / failed
+  View-->>Student: Lottie overlay → hero status + detail invoice
+```
+
+`TransactionPaymentDetailView.tsx` hanya menyusun komponen. Overlay, hero, progress, detail, payment method, instruction, summary, actions, hooks, dan types berada di file terpisah pada `components/student/transactions/payment-detail/`.
+
+---
+
+## 17. Siswa — Submit Tugas (Module Viewer)
 
 **Actor:** Student  
 **Route:** `/student/learning/course/:uid` → assignment work
@@ -416,7 +461,7 @@ Sudah live sebelum sesi tab staff; validator submission ditambahkan di Fase 12.
 
 ---
 
-## 16. Arsitektur Layer (Dependency Flow)
+## 18. Arsitektur Layer (Dependency Flow)
 
 ```mermaid
 flowchart TB
@@ -462,8 +507,7 @@ flowchart TB
 | Reply review | console.log | [todo-backlog.md](./todo-backlog.md) B8 |
 | Mentor list/detail course | mock | [todo-backlog.md](./todo-backlog.md) B16–B17 |
 | Mentor `/assignments` route terpisah | mock | [todo-backlog.md](./todo-backlog.md) B19 |
-| Siswa check-in absen | belum | [todo-backlog.md](./todo-backlog.md) C2 |
-| Admin create absen manual | belum | [todo-backlog.md](./todo-backlog.md) C4 |
+| Kehadiran siswa/admin | ditunda | [todo-backlog.md](./todo-backlog.md) §H |
 | Profil penilai lengkap (bukan user login) | partial | [todo-backlog.md](./todo-backlog.md) A12, D9 |
 | Forgot/reset password | mock | page-coverage |
 | Admin reviews & Q&A moderasi | mock | [todo-backlog.md](./todo-backlog.md) D12 |

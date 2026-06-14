@@ -119,9 +119,14 @@ Referensi cepat untuk reviewer: file apa saja yang **ditambah** atau **dimodifik
 | `hooks/use-payment-detail.ts` | Query Tripay payment detail |
 | `hooks/use-student-transactions-view-model.ts` | View model TransactionsSection (diekstrak) |
 | `components/student/transactions/TransactionPaymentDetailView.tsx` | UI detail pembayaran lengkap |
+| `components/student/transactions/payment-detail/*` | Fase 21 — komponen status, progress, detail, metode bayar, instruksi, summary, actions, hooks |
 | `components/student/transactions/TransactionPaymentLink.tsx` | Link "Detail" di tabel transaksi |
 | `components/student/transactions/PaymentDetailSkeleton.tsx` | Loading skeleton |
 | `pages/student/TransactionPayment.tsx` | Route page halaman detail pembayaran |
+| `lib/course-catalog/available-courses.ts` | Filter course dengan enrollment `active` / `completed` |
+| `pages/student/BrowseCourse.tsx` | Katalog student hanya course available |
+| `pages/landing/Course.tsx` | Guest semua course; login available-only |
+| `pages/courses/detail.tsx`, `pages/auth/Login.tsx` | Login gate + redirect kembali ke checkout |
 
 ### Profil Penilai (refactor)
 

@@ -4,7 +4,7 @@ Dokumen **living status** untuk branch `features/frontend-sapto`.
 Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipakai FE, dan gap FE↔BE.
 
 **Referensi backend:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)  
-**Terakhir diperbarui:** 14 Juni 2026 (Fase 20: checkout join kursus · kehadiran ditunda dari tracking progress)
+**Terakhir diperbarui:** 14 Juni 2026 (Fase 21: katalog enrollment-aware + redesign detail pembayaran)
 
 ---
 
@@ -81,9 +81,9 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | Learning (kursus diikuti) | `student/Learning.tsx` | ✅ | `joined_courses` dari profil |
 | Module viewer + submit tugas | `courses/view.tsx` | ✅ | Submission POST/PUT live |
 | **Assignments lintas kursus** | `student/Assignments.tsx` | ✅ | `GET /students/me/assignments` |
-| Browse kursus | `student/BrowseCourse.tsx` | ✅ | `GET /courses` |
+| Browse kursus | `student/BrowseCourse.tsx` | ✅ | `GET /courses`; enrollment active/completed disembunyikan |
 | Transaksi | `student/Transactions.tsx` | ✅ | Refactor view model; detail pembayaran via Tripay (Fase 17) |
-| **Detail pembayaran** | `student/TransactionPayment.tsx` | ✅ | `GET /payment/tripay`; invoice, kode bayar, instruksi |
+| **Detail pembayaran** | `student/TransactionPayment.tsx` | ✅ | Polling pending, Suspense skeleton, status animation, modular responsive UI |
 | **Checkout join kursus** | `checkout/Checkout.tsx` | ✅ | `POST /courses/:uid/join` + `POST /payment` + redirect ke detail Tripay |
 | Sertifikat | `student/Certificates.tsx` | 🔴 | Mock kosong; tidak ada API BE |
 
@@ -92,9 +92,9 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | Fitur | Halaman | Status | Catatan |
 |-------|---------|--------|---------|
 | Landing home | `landing/Home.tsx` | 🔴 | Data kosong/hardcode |
-| Katalog publik | `landing/Course.tsx` | 🟡 | API live; filter kategori perlu verifikasi |
-| Detail kursus publik | `courses/detail.tsx` | ✅ | Join link ke `/checkout/:courseUid` |
-| Login / register / OAuth | `auth/*` | ✅ | — |
+| Katalog publik | `landing/Course.tsx` | 🟡 | Enrollment-aware ✅; filter kategori masih perlu verifikasi |
+| Detail kursus publik | `courses/detail.tsx` | ✅ | Guest diarahkan login sebelum checkout |
+| Login / register / OAuth | `auth/*` | ✅ | Login mempertahankan tujuan checkout melalui route state |
 | Forgot / reset password | `auth/ForgotPass`, `ResetPass` | 🔴 | Tidak ada API |
 | Profil user | `profile/Profile.tsx` | 🟡 | Update profil ✅; ganti password tanpa `old_password` |
 
@@ -232,6 +232,8 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 - [x] Admin transactions & financial — list, summary, filter, chart (Fase 18)
 - [x] Mentor dashboard — KPI + jadwal kelas (Fase 19)
 - [x] Checkout join kursus — route `/checkout/:courseUid`, `joinCourse` + `createPayment` → detail Tripay (Fase 20)
+- [x] Katalog enrollment-aware + login redirect kembali ke checkout (Fase 21)
+- [x] Detail pembayaran: polling pending, Suspense skeleton, redesign modular, status animation (Fase 21)
 
 ### P1 — Gap utama
 

@@ -579,6 +579,37 @@ POST /payment
 
 ---
 
+## Fase 21 — Katalog Enrollment-Aware & Redesign Detail Pembayaran
+
+**Tujuan:** Kursus yang sudah dimiliki tidak muncul lagi di katalog user, guest tetap dapat melihat katalog lengkap, dan halaman detail pembayaran memiliki feedback status yang jelas serta codebase yang modular.
+
+### Katalog & auth checkout
+
+| Perubahan | Implementasi |
+|-----------|--------------|
+| Filter katalog student | `filterAvailableCourses()` menyembunyikan enrollment `active` / `completed` |
+| Katalog publik saat login | Filter yang sama diterapkan di `landing/Course.tsx` |
+| Katalog guest | Tetap menampilkan semua kursus |
+| CTA detail course guest | Redirect ke login dengan state tujuan checkout |
+| Setelah login | `Login.tsx` membaca `location.state.from` dan kembali ke `/checkout/:courseUid` |
+
+Status `pending` dan `cancelled` tetap tersedia agar user dapat mencoba enrollment/pembayaran kembali.
+
+### Detail pembayaran
+
+| Layer | Implementasi |
+|-------|--------------|
+| Polling | `use-payment-detail.ts` refetch tiap 5 detik selama status `pending` |
+| Loading | `Suspense` + `PaymentDetailSkeleton`; tidak lagi blank saat initial load |
+| Status transition | Overlay success/failed dengan Lottie dan transisi panjang |
+| Layout | Hero status terpusat, progress navigation, payment method, instruksi, sticky summary |
+| Arsitektur UI | `TransactionPaymentDetailView.tsx` menjadi composition root; komponen dipisah ke `transactions/payment-detail/` |
+| Accessibility | Touch target, focus state, reduced-motion, semantic navigation/status |
+
+**Hasil verifikasi:** TypeScript, ESLint, dan production build lulus.
+
+---
+
 ## Timeline Visual (updated)
 
 ```mermaid
@@ -608,6 +639,9 @@ gantt
     Mentor Dashboard        :done, f19, after f18, 1d
   section Checkout
     Checkout Join Course    :done, f20, after f19, 1d
+  section Catalog & Payment UX
+    Enrollment-aware Catalog :done, f21a, after f20, 1d
+    Payment Detail Redesign  :done, f21b, after f21a, 1d
 ```
 
 ---

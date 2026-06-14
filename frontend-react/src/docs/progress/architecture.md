@@ -116,9 +116,20 @@ pages/student/
 components/student/
   TransactionsSection.tsx    ← tabel transaksi + filter + pagination
   transactions/
-    TransactionPaymentDetailView.tsx  ← UI invoice lengkap
+    TransactionPaymentDetailView.tsx  ← composition root detail pembayaran
     TransactionPaymentLink.tsx        ← link "Detail" per baris transaksi
     PaymentDetailSkeleton.tsx         ← loading state
+    payment-detail/
+      LottieStatusOverlay.tsx         ← overlay status success/failed
+      PaymentStatusHero.tsx           ← status terpusat + Lottie inline
+      PaymentProgressNavigation.tsx   ← tahapan pembayaran
+      PaymentDetailsCard.tsx          ← metadata transaksi
+      PaymentMethodCard.tsx           ← QRIS / kode bayar
+      PaymentInstructions.tsx         ← accordion instruksi
+      PaymentSummaryCard.tsx          ← ringkasan + total
+      PaymentActions.tsx              ← lanjut bayar / invoice / riwayat
+      use-copy-to-clipboard.ts
+      use-invoice-download.ts
 
 lib/transactions/
   payment-types.ts           ← PaymentDetail, PaymentInstruction, PaymentOrderItem

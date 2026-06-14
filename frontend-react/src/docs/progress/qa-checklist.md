@@ -328,8 +328,24 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | | |
 |---|---|
 | **Route** | `/student/transactions/payment?reference=TRX-xxx&merchant_ref=abc123` |
-| **Expected** | `GET /payment/tripay?reference=TRX-xxx&merchant_ref=abc123`; kartu invoice, status badge, rincian item, total, referensi transaksi |
+| **Expected** | Skeleton tampil saat loading; kemudian hero status terpusat, progress navigation, detail, total, dan referensi transaksi |
 | **Data** | Course title & image dicocokkan dari profil siswa (`transaction_history` + `joined_courses`) |
+
+### IA2A — Polling status pembayaran
+
+| | |
+|---|---|
+| **Precondition** | Transaksi awal berstatus `pending` |
+| **Langkah** | Buka detail → ubah status payment menjadi success/failed dari Tripay/BE → tunggu maksimal 5 detik |
+| **Expected** | Query refetch otomatis; overlay status muncul satu kali; detail halaman berubah tanpa reload manual |
+
+### IA2B — Animasi & aksesibilitas status
+
+| | |
+|---|---|
+| **Expected** | Overlay success/failed tampil ±3,5 detik; exit transition ±1,2 detik; Lottie inline tetap loop di hero |
+| **Interaksi** | Klik overlay mempercepat exit; tombol dan accordion tetap keyboard-accessible |
+| **Reduced motion** | Dengan `prefers-reduced-motion: reduce`, perpindahan transform kompleks dinonaktifkan |
 
 ### IA3 — Status pending + CTA lanjut bayar
 
@@ -368,6 +384,22 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 |---|---|
 | **Route** | `/student/transactions/payment` (tanpa query params) |
 | **Expected** | EmptyState "Invoice tidak ditemukan" |
+
+### IA8 — Katalog enrollment-aware
+
+| | |
+|---|---|
+| **Route** | `/student/browse` dan `/course` |
+| **Precondition** | User memiliki joined course berstatus `active` atau `completed` |
+| **Expected login** | Course tersebut tidak muncul; course `pending` / `cancelled` tetap tersedia |
+| **Expected guest** | `/course` menampilkan semua course publik |
+
+### IA9 — Guest menuju checkout
+
+| | |
+|---|---|
+| **Langkah** | Logout → buka `/course/:courseUid` → klik "Daftar sekarang" → login |
+| **Expected** | Guest diarahkan ke `/auth/login`; setelah login student kembali ke `/checkout/:courseUid` |
 
 ---
 
@@ -412,6 +444,9 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | `/student/assignments` | `GET /students/me/assignments` |
 | `/student/transactions` | View model + `TransactionPaymentLink` |
 | `/student/transactions/payment` | `GET /payment/tripay` |
+| `/student/browse` | `GET /courses` + filter joined courses |
+| `/course` | Guest semua course; login available-only |
+| `/checkout/:courseUid` | Join + create payment |
 
 ### Masih mock / belum API
 
@@ -439,13 +474,13 @@ Urutan cepat untuk regression smoke:
 6. /admin/courses/:uid → assign mentor
 7. /admin/courses/:uid/edit → tambah module+lesson
 8. Tab Tugas → roster → buka 1 jawaban → simpan nilai (opsional)
-9. Tab Kehadiran → ubah status (jika ada data check-in)
-10. Terbit kursus dari detail (jika masih draft)
-11. Hapus kursus test (opsional, staging only)
-12. Resize sidebar 1024px
-13. Login student → /student/transactions → klik Detail → cek invoice Tripay
+9. Terbit kursus dari detail (jika masih draft)
+10. Login student → /student/browse → pastikan kursus active/completed tidak muncul
+11. /student/transactions → klik Detail → cek skeleton, invoice, dan polling Tripay
+12. Logout → buka detail course → daftar → login → kembali ke checkout
+13. Resize sidebar 1024px
 14. Login mentor → /mentor/dashboard → cek KPI + jadwal kelas (Fase 19)
-15. Logout
+15. Hapus kursus test (opsional, staging only) → logout
 ```
 
 **Checklist TODO lengkap:** [todo-backlog.md](./todo-backlog.md)
