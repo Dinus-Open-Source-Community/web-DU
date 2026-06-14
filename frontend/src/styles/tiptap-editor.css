@@ -1,11 +1,28 @@
-/* TipTap editor surface — ringan, selaras slate + primary app */
-.tiptap-editor-root .ProseMirror {
-  min-height: min(70vh, 560px);
-  padding: 1rem 1.125rem;
+/* TipTap / ProseMirror — imported by TipTapEditor.tsx */
+.tiptap-editor-root:not(.tiptap-preview) .ProseMirror {
   outline: none;
+  min-height: 280px;
+  padding: 1rem 1.25rem 1.25rem;
   font-size: 0.9375rem;
-  line-height: 1.65;
+  line-height: 1.7;
   color: rgb(15 23 42);
+}
+
+.tiptap-editor-root.tiptap-editor-root--compact:not(.tiptap-preview) .ProseMirror {
+  min-height: 160px;
+  padding: 1rem 1.25rem;
+}
+
+.tiptap-editor-root .ProseMirror-focused {
+  outline: none;
+}
+
+.tiptap-bubble-menu {
+  z-index: 40;
+}
+
+.tiptap-editor-root [role='toolbar'] {
+  touch-action: manipulation;
 }
 
 .tiptap-editor-root .ProseMirror p.is-editor-empty:first-child::before {
@@ -36,10 +53,63 @@
   margin: 0.875rem 0 0.375rem;
 }
 
-.tiptap-editor-root .ProseMirror ul,
-.tiptap-editor-root .ProseMirror ol {
-  padding-left: 1.35rem;
+.tiptap-editor-root .ProseMirror h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.tiptap-editor-root .ProseMirror h5 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0.625rem 0 0.25rem;
+}
+
+.tiptap-editor-root .ProseMirror h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.tiptap-editor-root .ProseMirror ul:not([data-type='taskList']),
+.tiptap-preview .ProseMirror ul:not([data-type='taskList']),
+.lesson-html-raw ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
   margin: 0.5rem 0;
+}
+
+.tiptap-editor-root .ProseMirror ol,
+.tiptap-preview .ProseMirror ol,
+.lesson-html-raw ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor-root .ProseMirror li,
+.tiptap-preview .ProseMirror li,
+.lesson-html-raw li {
+  display: list-item;
+  margin: 0.2rem 0;
+}
+
+.tiptap-editor-root .ProseMirror li > p,
+.tiptap-preview .ProseMirror li > p,
+.lesson-html-raw li > p {
+  margin: 0;
+}
+
+.tiptap-editor-root .ProseMirror ul:not([data-type='taskList']) ul,
+.tiptap-preview .ProseMirror ul:not([data-type='taskList']) ul,
+.lesson-html-raw ul ul {
+  list-style-type: circle;
+}
+
+.tiptap-editor-root .ProseMirror ol ol,
+.tiptap-preview .ProseMirror ol ol,
+.lesson-html-raw ol ol {
+  list-style-type: lower-alpha;
 }
 
 .tiptap-editor-root .ProseMirror blockquote {
@@ -52,7 +122,7 @@
 .tiptap-editor-root .ProseMirror pre {
   background: rgb(241 245 249);
   border-radius: 0.5rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: ui-monospace, monospace;
   font-size: 0.8125rem;
   margin: 0.75rem 0;
   padding: 0.75rem 1rem;
@@ -71,17 +141,161 @@
   border-radius: 0.5rem;
 }
 
-/* YouTube embed (TipTap) */
 .tiptap-editor-root .ProseMirror div[data-youtube-video] {
   margin: 1rem 0;
 }
 
-/* —— Preview halaman mentor saja (CoursePreviewClient: .tiptap-preview) —— */
+.tiptap-editor-root .ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor-root .ProseMirror ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor-root .ProseMirror ul[data-type='taskList'] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+}
+
+.tiptap-editor-root .ProseMirror ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+}
+
+.tiptap-editor-root .ProseMirror table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  table-layout: fixed;
+}
+
+.tiptap-editor-root .ProseMirror th,
+.tiptap-editor-root .ProseMirror td {
+  border: 1px solid rgb(226 232 240);
+  padding: 0.5rem 0.625rem;
+  vertical-align: top;
+  min-width: 4rem;
+}
+
+.tiptap-editor-root .ProseMirror th {
+  background: rgb(248 250 252);
+  font-weight: 600;
+  text-align: left;
+}
+
+.tiptap-editor-root .ProseMirror mark {
+  border-radius: 0.2rem;
+  padding: 0.05rem 0.15rem;
+}
+
+.tiptap-preview .ProseMirror table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.tiptap-preview .ProseMirror th,
+.tiptap-preview .ProseMirror td {
+  border: 1px solid var(--border, #dcdcdc);
+  padding: 0.5rem 0.625rem;
+}
+
+.tiptap-preview .ProseMirror th {
+  background: color-mix(in srgb, var(--primary, #0a84dc) 8%, white);
+}
+
+.tiptap-preview .ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* Preview konten Tiptap (bukan HTML mentah dari BE) */
 .tiptap-preview .ProseMirror {
-  min-height: min(50vh, 480px);
+  min-height: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
+  color: inherit;
+}
+
+/* Lesson reader — light */
+.lesson-reader--light .tiptap-preview .ProseMirror {
+  color: rgb(51 65 85);
+}
+
+.lesson-reader--light .tiptap-preview .ProseMirror h1,
+.lesson-reader--light .tiptap-preview .ProseMirror h2,
+.lesson-reader--light .tiptap-preview .ProseMirror h3,
+.lesson-reader--light .tiptap-preview .ProseMirror h4,
+.lesson-reader--light .tiptap-preview .ProseMirror strong {
+  color: rgb(15 23 42);
+}
+
+.lesson-reader--light .tiptap-preview .ProseMirror a {
+  color: rgb(10 132 220);
+}
+
+/* Lesson reader — dark */
+.lesson-reader--dark .tiptap-preview .ProseMirror {
+  color: rgb(228 228 231);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror h1,
+.lesson-reader--dark .tiptap-preview .ProseMirror h2,
+.lesson-reader--dark .tiptap-preview .ProseMirror h3,
+.lesson-reader--dark .tiptap-preview .ProseMirror h4,
+.lesson-reader--dark .tiptap-preview .ProseMirror strong {
+  color: rgb(250 250 250);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror em {
+  color: rgb(212 212 216);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror a {
+  color: rgb(103 232 249);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror blockquote {
+  border-left-color: rgb(63 63 70);
+  background-color: color-mix(in srgb, var(--primary, #0a84dc) 14%, rgb(24 24 27));
+  color: rgb(212 212 216);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror pre,
+.lesson-reader--dark .tiptap-preview .ProseMirror code {
+  background: rgb(39 39 42);
+  color: rgb(228 228 231);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror pre {
+  border: 1px solid rgb(63 63 70);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror th,
+.lesson-reader--dark .tiptap-preview .ProseMirror td {
+  border-color: rgb(63 63 70);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror th {
+  background: rgb(39 39 42);
+  color: rgb(250 250 250);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror img {
+  border: 1px solid rgb(63 63 70);
+}
+
+.lesson-reader--dark .tiptap-preview .ProseMirror div[data-youtube-video],
+.lesson-reader--dark .tiptap-preview .ProseMirror iframe {
+  border-color: rgb(63 63 70);
+}
+
+.lesson-reader--dark .lesson-html-raw {
+  color: rgb(228 228 231);
 }
 
 .tiptap-preview .ProseMirror p,
@@ -154,6 +368,13 @@
 }
 
 .tiptap-preview .ProseMirror a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* HTML mentah dari BE — tanpa override style */
+.lesson-html-raw {
+  max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
 }

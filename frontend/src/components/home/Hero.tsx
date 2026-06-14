@@ -1,10 +1,9 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { SquareIcon } from "../ui/icons";
+import { SquareIcon } from "../shared/icon";
+import { Button } from "../ui/button";
 
 export default function Hero() {
   return (
-    <section className="bg-primary/90 relative w-full py-20 md:py-32">
+    <section className="bg-primary/90 relative w-full py-20 md:py-40">
       <div className="container mx-auto flex items-center justify-between gap-10 px-20">
         {/*Hero Description*/}
         <div className="w-full max-w-130 space-y-2 text-start">
@@ -30,13 +29,13 @@ export default function Hero() {
         {/* Hero Image */}
         <div className="pointer-events-none select-none">
           <SquareIcon className="absolute right-30 bottom-0 z-10 2xl:right-100" />
-          <Image
+          <img
             src="/pinguin.png"
+            loading="lazy"
             width={800}
             height={800}
             alt="Doscom Mascot"
             className="absolute right-10 bottom-0 z-10 -mb-39.5 object-cover 2xl:right-80"
-            priority
           />
         </div>
 

@@ -1,0 +1,93 @@
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+
+import {
+  TransactionPaymentDetailView,
+} from '@/components/student/transactions/TransactionPaymentDetailView'
+import { LottieStatusOverlay } from '@/components/student/transactions/payment-detail/LottieStatusOverlay'
+import { TransactionPaymentNotFound } from '@/components/student/transactions/payment-detail/TransactionPaymentNotFound'
+import { PaymentDetailSkeleton } from '@/components/student/transactions/PaymentDetailSkeleton'
+import { AppNavbarProvider } from '@/components/shared/Sidebar'
+import { usePaymentDetail } from '@/hooks/use-payment-detail'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { buildPaymentDetailQuery } from '@/lib/transactions/build-payment-detail-query'
+import { presentTransactionPaymentDetail } from '@/lib/transactions/present-transaction-payment-detail'
+import { useAuth } from '@/providers/auth-provider'
+
+type OverlayPhase = 'loading' | 'status' | 'none'
+
+export default function StudentTransactionPaymentPage() {
+  const [searchParams] = useSearchParams()
+  const sidebarUser = useSidebarUser('student')
+  const { profile } = useAuth()
+
+  const paymentQuery$ = useMemo(
+    () => buildPaymentDetailQuery(searchParams.get('reference'), searchParams.get('merchant_ref')),
+    [searchParams],
+  )
+
+  const { data, isLoading, isError, statusTransition, clearTransition } = usePaymentDetail(paymentQuery$)
+
+  const detail = useMemo(() => {
+    if (!data) return null
+    return presentTransactionPaymentDetail(data, profile)
+  }, [data, profile])
+
+  const status = detail?.payment.paymentStatus ?? null
+  const isTerminal = status === 'success' || status === 'failed'
+
+  const [overlayPhase, setOverlayPhase] = useState<OverlayPhase>('loading')
+  const hasShownStatusRef = useRef(false)
+  const lottieTargetRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isLoading) return
+
+    if (isTerminal && !hasShownStatusRef.current) {
+      hasShownStatusRef.current = true
+      setOverlayPhase('status')
+      return
+    }
+
+    setOverlayPhase('none')
+  }, [isLoading, isTerminal])
+
+  useEffect(() => {
+    if (statusTransition && overlayPhase === 'none') {
+      hasShownStatusRef.current = true
+      setOverlayPhase('status')
+    }
+  }, [statusTransition, overlayPhase])
+
+  const dismissOverlay = useCallback(() => {
+    setOverlayPhase('none')
+    clearTransition()
+  }, [clearTransition])
+
+  const showStatusOverlay = overlayPhase === 'status' && isTerminal
+
+  return (
+    <AppNavbarProvider role="student" user={sidebarUser} contentClassName="mx-auto w-full max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <Suspense fallback={<PaymentDetailSkeleton />}>
+        {showStatusOverlay && (
+          <LottieStatusOverlay
+            status={status as 'success' | 'failed'}
+            targetRef={lottieTargetRef}
+            onComplete={dismissOverlay}
+          />
+        )}
+
+        {!paymentQuery$ ? (
+          <TransactionPaymentNotFound />
+        ) : isLoading ? <PaymentDetailSkeleton /> : isError ? (
+          <TransactionPaymentNotFound />
+        ) : detail ? (
+          <TransactionPaymentDetailView
+            detail={detail}
+            lottieTargetRef={lottieTargetRef}
+          />
+        ) : null}
+      </Suspense>
+    </AppNavbarProvider>
+  )
+}

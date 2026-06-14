@@ -1,10 +1,12 @@
-/** Barrel: impor domain dari file terpisah agar `import { X } from '@/lib/types'` tetap stabil. */
+/**
+ * Barrel export types — struktur:
+ * - common/   : primitive & shared (api, domain, pagination)
+ * - data/     : response & entity dari API
+ * - features/ : view-model & payload per fitur
+ * - components/: props komponen UI
+ */
 
-export * from './transaction'
-export * from './user-profile'
-export * from './course'
-export * from './mentor'
-export * from './admin'
-export * from './analytics'
-export * from './dashboard'
-export * from './payment'
+export * from './common'
+export * from './data'
+export * from './features'
+export * from './components'

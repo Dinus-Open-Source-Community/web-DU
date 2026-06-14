@@ -1,4 +1,5 @@
-import { IProgramFeatures } from '@/lib/types'
+import type { IProgramFeatures } from "../../lib/types/utils";
+
 
 export default function Benefit({ DataFeatures }: { DataFeatures: IProgramFeatures[] }) {
   return (
