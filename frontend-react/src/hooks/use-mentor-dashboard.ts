@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
 import { mentorDashboardKeys } from './query-keys'
+import { buildMentorScheduleTimeline } from '@/lib/mentor-dashboard/schedule-chart'
 import type { IQueryParamsPayload } from '@/services/api-path'
 import {
   fetchMentorDashboardKpis,
@@ -27,5 +29,10 @@ export function useMentorDashboard(
     staleTime: 60_000,
   })
 
-  return { kpis, schedules }
+  const scheduleTimeline = useMemo(
+    () => buildMentorScheduleTimeline(schedules.data ?? []),
+    [schedules.data],
+  )
+
+  return { kpis, schedules, scheduleTimeline }
 }

@@ -317,7 +317,8 @@ flowchart LR
 | Course mentor | `parseAssignMentorsToCoursePayload` |
 | Lesson | `parseLessonCreateRequest`, dll. (sudah ada sebelumnya) |
 | Lesson assignment | `parseLessonAssignmentUpsertRequest`, `parseLessonAssignmentSubmissionInput`, `parseGradeStaffSubmissionPayload` |
-| Lesson attendance | `parseUpdateAttendancePayload`, `parseCreateAttendancePayload` |
+
+*(Validator `lesson-attendance` ada di repo; fitur kehadiran ditunda — lihat `todo-backlog.md` §H.)*
 
 ---
 
@@ -372,26 +373,29 @@ sequenceDiagram
 
 ---
 
-## 14. Tab Kehadiran Admin (Partial)
+## 14. Checkout — Join Kursus & Pembayaran
 
-**Actor:** Admin  
-**Tab:** Detail course → **Kehadiran** (`adminOnly`)
+**Actor:** Student (guest layout, harus login)  
+**Route:** `/checkout/:courseUid`
 
 ```mermaid
 sequenceDiagram
-  actor Admin
-  participant Tab as CourseDetailAttendanceTab
-  participant Svc as lesson-attendance.ts
-  participant API as GET/PUT/DELETE attendances
+  actor Student
+  participant Page as Checkout.tsx
+  participant Hook as useCheckout
+  participant Course as course.ts
+  participant Pay as payment.ts
 
-  Admin->>Tab: Pilih lesson
-  Tab->>API: GET /lessons/attendances/lesson/:lesson_id
-  Admin->>Tab: Ubah status / hapus record
-  Tab->>Svc: parseUpdateAttendancePayload / parseAttendanceUidParam
-  Svc->>API: PUT atau DELETE
+  Student->>Page: Buka dari detail kursus publik
+  Page->>Course: GET /courses/:uid
+  Page->>Pay: GET /payment/method
+  Student->>Page: Pilih metode bayar → Bayar
+  Hook->>Course: POST /courses/:uid/join
+  Hook->>Pay: POST /payment { enrollment_uid, method, order_items }
+  Hook->>Student: Redirect /student/transactions/payment?reference=&merchant_ref=
 ```
 
-**Belum:** `POST /lessons/attendances` (create manual), input **note** di UI, tab untuk mentor.
+**Fallback:** Jika response payment tanpa reference → redirect ke `/student/transactions`.
 
 ---
 

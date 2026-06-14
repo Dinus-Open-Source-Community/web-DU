@@ -6,9 +6,11 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
 import { useCourseDetailWithCategories } from '@/hooks/use-course'
 import { ROUTES } from '@/lib/routes'
+import { useAuth } from '@/providers/auth-provider'
 
 export default function PublicCourseDetailPage() {
   const { courseUid } = useParams()
+  const { isAuthenticated } = useAuth()
   const { courseCategories, courseDetail, popularCourses, isLoading } = useCourseDetailWithCategories(courseUid ?? '')
 
   if (isLoading) {
@@ -49,7 +51,16 @@ export default function PublicCourseDetailPage() {
             backLabel: 'Kembali ke kursus',
             sidebarCta: (
               <Button asChild className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white">
-                <Link to={`/checkout/${course.uid}`}>Daftar sekarang</Link>
+                <Link
+                  to={isAuthenticated ? ROUTES.checkout(course.uid) : ROUTES.login}
+                  state={
+                    isAuthenticated
+                      ? undefined
+                      : { from: { pathname: ROUTES.checkout(course.uid) } }
+                  }
+                >
+                  Daftar sekarang
+                </Link>
               </Button>
             ),
             PopularCourse: popularCourses.data?.courses ?? [],

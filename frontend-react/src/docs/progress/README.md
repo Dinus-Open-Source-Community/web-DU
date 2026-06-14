@@ -34,13 +34,13 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | **Tugas siswa lintas kursus** | ✅ Live | `GET /students/me/assignments` → `student/Assignments.tsx` |
 | Penilaian & feedback submission inline | ✅ Live | `PUT .../submissions/:uid/grade` |
 | Student module viewer — kerja & submit tugas | ✅ Live | Multi-attempt GET submission |
-| Tab Kehadiran admin (detail course) | 🟡 Partial | List + update + delete ✅; create manual & note UI ❌ |
+| **Checkout & join kursus** | ✅ Live | Route `/checkout/:courseUid`; join + `POST /payment` → detail Tripay |
 | **Detail pembayaran siswa** (Tripay) | ✅ Live | `GET /payment/tripay`; invoice, kode bayar, instruksi, rincian |
 | **Refactor TransactionsSection** | ✅ Live | Ekstrak view model + label bahasa Indonesia |
 | **Admin dashboard** (KPI, chart, transaksi terbaru) | ✅ Live | `GET /admin/dashboard/*`, `/admin/financial/summary` |
 | **Admin transaksi & financial** | ✅ Live | `GET /admin/transactions`, summary, financial charts |
 | **Mentor dashboard** (KPI + jadwal kelas) | ✅ Live | `GET /mentor/dashboard/kpis`, `.../schedules` |
-| Validator payload (Zod) | ✅ Live | + domain `lesson-assignment`, `lesson-attendance` |
+| Validator payload (Zod) | ✅ Live | + domain `lesson-assignment` (dan `lesson-attendance` — kode ada, fitur ditunda) |
 | Layout sidebar | ✅ Fixed | Sidebar konsisten di breakpoint `lg` (1024px) |
 | Publish & hapus kursus admin | ✅ Live | `PATCH/DELETE /courses/:uid`; label Terbit/Draft; tombol Terbit hanya draft |
 | Dokumentasi gap FE↔BE | ✅ Done | [integration-status.md](./integration-status.md) |
@@ -53,9 +53,8 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 | Mentor list & detail kursus | 🔴 Mock | `mentor/Courses.tsx`, `mentor/DetailCourse.tsx` masih hardcode |
 | Halaman `mentor/.../assignments` (legacy) | 🔴 Mock | Tab Tugas di detail course sudah live |
 | Reviews & Q&A moderasi admin | 🔴 Mock | Route dikomentari |
-| Checkout & payment flow (join course) | 🔴 | Route `/checkout/*` tidak ada; detail Tripay ✅ (Fase 17) |
-| Attendance bar di tab Peserta | 🟡 | Mapper field `attendance_*` belum |
 | Sertifikat, forgot password | 🔴 | Tidak ada domain BE |
+| Kehadiran (attendance) | 🚫 Ditunda | Sengaja dikeluarkan dari tracking progress — menunggu keputusan selanjutnya |
 
 Detail lengkap: [integration-status.md](./integration-status.md)
 
@@ -96,8 +95,8 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 | Halaman admin terintegrasi API | 13+ dari 15 route utama |
 | Halaman mentor terintegrasi API | 4 dari 6 route utama |
 | Domain validator | 6+ |
-| Endpoint assignment/attendance dipakai FE | 10+ |
-| Service baru post-merge | `admin-dashboard`, `admin-transactions`, `mentor-dashboard`, `course-assignments`, `student-assignments`, payment (Tripay) |
+| Endpoint assignment dipakai FE | 8+ |
+| Service baru post-merge | `admin-dashboard`, `admin-transactions`, `mentor-dashboard`, `course-assignments`, `student-assignments`, payment (Tripay + checkout) |
 | Branch | `features/frontend-sapto` |
 
 ---
@@ -112,7 +111,7 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 ✅  /admin/course-categories
 ✅  /admin/course-types
 ✅  /admin/courses
-🟡 /admin/courses/:uid          (Tugas + publish + hapus live; Kehadiran partial; attendance bar belum map)
+✅  /admin/courses/:uid          (Tugas + publish + hapus live)
 ✅  /admin/courses/.../submissions & /submissions/:uid
 ✅  /admin/courses/:uid/edit     (kurikulum + PUT metadata live)
 ✅  /admin/dashboard              (KPI, chart, transaksi terbaru — Fase 18)
@@ -123,6 +122,7 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 ✅  /student/assignments         (GET /students/me/assignments)
 ✅  /student/learning + module viewer
 ✅  /student/transactions/payment     (detail pembayaran Tripay — Fase 17)
+✅  /checkout/:courseUid              (join kursus + pilih metode bayar — Fase 20)
 🟡 /student/dashboard
 
 ✅  /mentor/dashboard            (KPI + jadwal — Fase 19)

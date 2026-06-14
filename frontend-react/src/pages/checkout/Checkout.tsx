@@ -1,45 +1,74 @@
-import { useCallback, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowLeft, Check, Lock, ShieldCheck, BookOpen, Loader2 } from 'lucide-react'
 
 import GuestLayout from '@/components/layouts/GuestLayouts'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { fetchCourseByUid, joinCourse } from '@/services/course'
-import { fetchPaymentMethods, type PaymentMethodItem } from '@/services/payment'
-import { createPayment } from '@/services/payment'
-import { courseKeys, paymentKeys } from '@/hooks/query-keys'
 import { ROUTES } from '@/lib/routes'
+import { cn } from '@/lib/utils'
+import { useCheckout, type PaymentMethodGroup } from '@/hooks/use-checkout'
+import {
+  formatCurrency,
+  formatFeeLabel,
+  presentCheckoutCourse,
+  presentPaymentMethod,
+  type CheckoutCourseViewModel,
+  type PaymentMethodCardViewModel,
+} from '@/lib/checkout/present-checkout-view'
+import type { PaymentMethodItem } from '@/services/payment'
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)
-}
+// ---------------------------------------------------------------------------
+// Loading Skeleton
+// ---------------------------------------------------------------------------
 
 function CheckoutSkeleton() {
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
+    <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-[120px] w-full rounded-2xl" />
-        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-[140px] w-full rounded-2xl" />
+        <Skeleton className="h-6 w-40" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-20 rounded-xl" />
           ))}
         </div>
       </div>
-      <Skeleton className="h-[280px] rounded-2xl" />
+      <Skeleton className="h-[320px] rounded-2xl" />
     </div>
   )
 }
 
-function PaymentMethodCard({
-  method,
+// ---------------------------------------------------------------------------
+// Course Not Found
+// ---------------------------------------------------------------------------
+
+function CourseNotFound() {
+  return (
+    <div className="mx-auto flex min-h-[60dvh] max-w-md flex-col items-center justify-center px-4 text-center">
+      <BookOpen className="size-12 text-slate-300" aria-hidden />
+      <h2 className="mt-4 text-lg font-bold text-slate-900">Kursus tidak ditemukan</h2>
+      <p className="mt-1 text-sm leading-relaxed text-slate-500">
+        Kursus yang Anda cari tidak tersedia atau sudah dihapus.
+      </p>
+      <Button asChild className="mt-6">
+        <Link to={ROUTES.courses}>Kembali ke Katalog</Link>
+      </Button>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Payment Method Card
+// ---------------------------------------------------------------------------
+
+function MethodCard({
+  vm,
   selected,
   onSelect,
 }: {
-  method: PaymentMethodItem
+  vm: PaymentMethodCardViewModel
   selected: boolean
   onSelect: () => void
 }) {
@@ -47,109 +76,243 @@ function PaymentMethodCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 transition-all duration-150
-        ${selected
-          ? 'border-blue-600 bg-blue-50/60 shadow-sm ring-1 ring-blue-600/20'
-          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
-        }`}
+      className={cn(
+        'relative flex items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left transition-all duration-150',
+        selected
+          ? 'border-primary bg-primary/[0.03] ring-1 ring-primary/20'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
+      )}
     >
       {selected && (
-        <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600">
-          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+        <span className="absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full bg-primary">
+          <Check className="size-3 text-white" strokeWidth={3} aria-hidden />
         </span>
       )}
-      {method.image_url ? (
-        <img
-          src={method.image_url}
-          alt={method.name}
-          className="h-8 w-auto max-w-[80px] object-contain"
-        />
-      ) : (
-        <div className="flex h-8 w-12 items-center justify-center rounded bg-slate-100 text-[10px] font-semibold text-slate-500">
-          {method.name}
-        </div>
-      )}
-      <span className="text-xs font-medium text-slate-700">{method.name}</span>
+
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+        {vm.iconUrl ? (
+          <img src={vm.iconUrl} alt="" className="h-6 w-auto max-w-[40px] object-contain" />
+        ) : (
+          <span className="text-[9px] font-bold text-slate-400">{vm.code}</span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-slate-800">{vm.name}</p>
+        <p className={cn(
+          'text-xs',
+          vm.isFree ? 'font-medium text-emerald-600' : 'text-slate-400',
+        )}>
+          {vm.isFree ? 'Tanpa biaya tambahan' : `Biaya ${vm.feeLabel}`}
+        </p>
+      </div>
     </button>
   )
 }
 
-export default function CheckoutPage() {
-  const { courseUid } = useParams<{ courseUid: string }>()
-  const navigate = useNavigate()
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
+// ---------------------------------------------------------------------------
+// Method Group
+// ---------------------------------------------------------------------------
 
-  const courseQuery = useQuery({
-    queryKey: courseKeys.detail(courseUid ?? ''),
-    queryFn: () => fetchCourseByUid(courseUid!),
-    enabled: !!courseUid,
-  })
-
-  const methodsQuery = useQuery({
-    queryKey: [...paymentKeys.all, 'methods'],
-    queryFn: fetchPaymentMethods,
-    staleTime: 300_000,
-  })
-
-  const joinMutation = useMutation({ mutationFn: joinCourse })
-  const paymentMutation = useMutation({ mutationFn: createPayment })
-
-  const course = courseQuery.data
-  const methods = methodsQuery.data ?? []
-  const isLoading = courseQuery.isLoading || methodsQuery.isLoading
-  const price = course?.price ?? 0
-
-  const selectedMethodData = useMemo(
-    () => methods.find((m) => m.name === selectedMethod),
-    [methods, selectedMethod],
+function MethodGroupSection({
+  group,
+  selectedCode,
+  onSelect,
+}: {
+  group: PaymentMethodGroup
+  selectedCode: string | null
+  onSelect: (code: string) => void
+}) {
+  const viewModels = useMemo(
+    () => group.methods.map(presentPaymentMethod),
+    [group.methods],
   )
 
-  const handleCheckout = useCallback(async () => {
-    if (!courseUid || !selectedMethod || !course) return
+  return (
+    <div className="px-5 py-5 sm:px-6">
+      <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+        {group.name}
+      </h3>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {viewModels.map((vm) => (
+          <MethodCard
+            key={vm.code}
+            vm={vm}
+            selected={selectedCode === vm.code}
+            onSelect={() => onSelect(vm.code)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
-    try {
-      const joinResult = await joinMutation.mutateAsync(courseUid)
-      const enrollmentUid = joinResult.enrollment.uid
+// ---------------------------------------------------------------------------
+// Course Preview
+// ---------------------------------------------------------------------------
 
-      const paymentResult = await paymentMutation.mutateAsync({
-        enrollment_uid: enrollmentUid,
-        method: selectedMethod,
-        amount: price,
-        order_items: [
-          {
-            sku: courseUid,
-            name: course.title,
-            price: price,
-            quantity: 1,
-            product_url: '',
-            image_url: course.cover_url ?? '',
-          },
-        ],
-        return_url: `${window.location.origin}${ROUTES.student.transactions}`,
-      })
+function CoursePreview({ vm }: { vm: CheckoutCourseViewModel }) {
+  return (
+    <div className="flex gap-4">
+      {vm.coverUrl ? (
+        <img
+          src={vm.coverUrl}
+          alt={vm.title}
+          className="size-16 shrink-0 rounded-xl object-cover sm:size-20"
+        />
+      ) : (
+        <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 sm:size-20">
+          <BookOpen className="size-7 text-primary/40" aria-hidden />
+        </div>
+      )}
+      <div className="flex min-w-0 flex-col justify-center">
+        <p className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{vm.title}</p>
+        {vm.level && (
+          <p className="mt-0.5 text-xs text-slate-500">{vm.level}</p>
+        )}
+        <div className="mt-1.5 flex items-baseline gap-2">
+          <span className="text-base font-extrabold tracking-tight text-primary">{vm.priceLabel}</span>
+          {vm.strikePriceLabel && (
+            <span className="text-xs text-slate-400 line-through">{vm.strikePriceLabel}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
-      const ref = paymentResult?.data?.reference
-      const merchantRef = paymentResult?.data?.merchant_ref
-      if (ref || merchantRef) {
-        navigate(ROUTES.student.transactionPayment({ reference: ref, merchantRef }))
-      } else {
-        toast.success('Pembayaran berhasil dibuat')
-        navigate(ROUTES.student.transactions)
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Gagal memproses pembayaran'
-      toast.error(message)
-    }
-  }, [courseUid, selectedMethod, course, price, joinMutation, paymentMutation, navigate])
+// ---------------------------------------------------------------------------
+// Order Summary Sidebar
+// ---------------------------------------------------------------------------
 
-  const isProcessing = joinMutation.isPending || paymentMutation.isPending
+function OrderSummary({
+  courseVm,
+  price,
+  selectedMethod,
+  canSubmit,
+  isProcessing,
+  onSubmit,
+}: {
+  courseVm: CheckoutCourseViewModel
+  price: number
+  selectedMethod: PaymentMethodItem | null
+  canSubmit: boolean
+  isProcessing: boolean
+  onSubmit: () => void
+}) {
+  const feeLabel = selectedMethod ? formatFeeLabel(selectedMethod.fee_customer) : null
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-6 py-4">
+        <h2 className="text-sm font-bold text-slate-900">Ringkasan Pesanan</h2>
+      </div>
+
+      <div className="border-b border-slate-100 px-6 py-5">
+        <CoursePreview vm={courseVm} />
+      </div>
+
+      <div className="space-y-2.5 px-6 py-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Harga</span>
+          <span className="font-semibold tabular-nums text-slate-800">{formatCurrency(price)}</span>
+        </div>
+        {feeLabel && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Biaya admin</span>
+            <span className={cn(
+              'font-semibold tabular-nums',
+              feeLabel === 'Gratis' ? 'text-emerald-600' : 'text-slate-800',
+            )}>
+              {feeLabel}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/80 px-6 py-4">
+        <span className="text-sm font-bold text-slate-900">Total</span>
+        <span className="text-lg font-extrabold tabular-nums tracking-tight text-primary">
+          {formatCurrency(price)}
+        </span>
+      </div>
+
+      {selectedMethod && (
+        <div className="px-6 pt-3">
+          <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2">
+            {selectedMethod.icon_url && (
+              <img src={selectedMethod.icon_url} alt="" className="h-4 w-auto shrink-0" />
+            )}
+            <span className="text-xs text-slate-500">
+              Bayar via <strong className="font-semibold text-slate-700">{selectedMethod.name}</strong>
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="p-6 pt-4">
+        <Button
+          className="w-full text-sm font-bold"
+          size="lg"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Memproses...
+            </>
+          ) : (
+            'Bayar Sekarang'
+          )}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Trust Bar
+// ---------------------------------------------------------------------------
+
+function TrustBar() {
+  return (
+    <div className="flex items-center justify-center gap-6 py-3">
+      <span className="flex items-center gap-1.5 text-xs text-slate-400">
+        <Lock className="size-3" aria-hidden />
+        Terenkripsi SSL
+      </span>
+      <span className="flex items-center gap-1.5 text-xs text-slate-400">
+        <ShieldCheck className="size-3" aria-hidden />
+        Pembayaran Aman
+      </span>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+export default function CheckoutPage() {
+  const {
+    course,
+    price,
+    groups,
+    selectedCode,
+    selectedMethod,
+    isLoading,
+    isProcessing,
+    canSubmit,
+    selectMethod,
+    submit,
+    goBack,
+  } = useCheckout()
 
   if (isLoading) {
     return (
       <GuestLayout>
-        <main className="min-h-[100dvh] bg-slate-50">
+        <main className="min-h-[100dvh] bg-slate-50/60">
           <CheckoutSkeleton />
         </main>
       </GuestLayout>
@@ -159,129 +322,117 @@ export default function CheckoutPage() {
   if (!course) {
     return (
       <GuestLayout>
-        <main className="flex min-h-[60dvh] items-center justify-center bg-slate-50">
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-slate-800">Kursus tidak ditemukan</h2>
-            <p className="mt-1 text-sm text-slate-500">Silakan kembali dan coba lagi.</p>
-            <Button className="mt-4" onClick={() => navigate(ROUTES.courses)}>
-              Kembali
-            </Button>
-          </div>
+        <main className="min-h-[100dvh] bg-slate-50/60">
+          <CourseNotFound />
         </main>
       </GuestLayout>
     )
   }
 
+  const courseVm = presentCheckoutCourse(course)
+
   return (
     <GuestLayout>
-      <main className="min-h-[100dvh] bg-slate-50">
-        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-          <h1 className="mb-8 text-2xl font-bold text-slate-900">Checkout</h1>
+      <main className="min-h-[100dvh] bg-slate-50/60">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
-          <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-            {/* Left - Payment Method Selection */}
-            <div className="space-y-6">
-              {/* Course Summary (mobile-first, shows above on small screens) */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 lg:hidden">
-                <CourseSummaryContent course={course} price={price} />
+          {/* Navigation */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-2 mb-6 text-slate-500 hover:text-slate-800"
+            onClick={goBack}
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            Kembali
+          </Button>
+
+          {/* Title */}
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Checkout
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Pilih metode pembayaran untuk menyelesaikan pesanan
+          </p>
+
+          {/* Two-column layout */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
+
+            {/* Left: Method Selection */}
+            <div className="space-y-5">
+
+              {/* Course card (mobile only) */}
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:hidden">
+                <CoursePreview vm={courseVm} />
               </div>
 
-              {/* Payment Methods */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-                <h2 className="mb-1 text-base font-semibold text-slate-900">Pilih Metode Pembayaran</h2>
-                <p className="mb-5 text-sm text-slate-500">Pilih salah satu metode untuk melanjutkan pembayaran</p>
+              {/* Methods */}
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Metode Pembayaran
+                  </h2>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    Pilih salah satu metode di bawah
+                  </p>
+                </div>
 
-                {methods.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500">
-                    Tidak ada metode pembayaran tersedia
+                {groups.length === 0 ? (
+                  <div className="px-6 py-16 text-center">
+                    <p className="text-sm text-slate-400">Tidak ada metode tersedia saat ini</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {methods.map((method) => (
-                      <PaymentMethodCard
-                        key={method.uid}
-                        method={method}
-                        selected={selectedMethod === method.name}
-                        onSelect={() => setSelectedMethod(method.name)}
+                  <div className="divide-y divide-slate-100">
+                    {groups.map((g) => (
+                      <MethodGroupSection
+                        key={g.name}
+                        group={g}
+                        selectedCode={selectedCode}
+                        onSelect={selectMethod}
                       />
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Action Button (mobile) */}
+              <TrustBar />
+
+              {/* CTA (mobile) */}
               <div className="lg:hidden">
                 <Button
-                  className="w-full rounded-xl py-3 text-sm font-semibold"
-                  disabled={!selectedMethod || isProcessing}
-                  onClick={handleCheckout}
+                  className="w-full text-sm font-bold"
+                  size="lg"
+                  disabled={!canSubmit}
+                  onClick={submit}
                 >
-                  {isProcessing ? 'Memproses...' : `Bayar ${formatCurrency(price)}`}
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                      Memproses...
+                    </>
+                  ) : (
+                    `Bayar ${formatCurrency(price)}`
+                  )}
                 </Button>
               </div>
             </div>
 
-            {/* Right - Order Summary (desktop sticky) */}
+            {/* Right: Order Summary (desktop) */}
             <div className="hidden lg:block">
-              <div className="sticky top-6 space-y-5 rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-base font-semibold text-slate-900">Ringkasan Pesanan</h2>
-                <CourseSummaryContent course={course} price={price} />
-
-                <div className="border-t border-slate-100 pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-600">Total</span>
-                    <span className="text-lg font-bold text-slate-900">{formatCurrency(price)}</span>
-                  </div>
-                </div>
-
-                {selectedMethodData && (
-                  <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                    {selectedMethodData.image_url && (
-                      <img src={selectedMethodData.image_url} alt="" className="h-5 w-auto" />
-                    )}
-                    <span className="text-xs text-slate-600">Bayar via <strong>{selectedMethodData.name}</strong></span>
-                  </div>
-                )}
-
-                <Button
-                  className="w-full rounded-xl py-3 text-sm font-semibold"
-                  disabled={!selectedMethod || isProcessing}
-                  onClick={handleCheckout}
-                >
-                  {isProcessing ? 'Memproses...' : 'Bayar Sekarang'}
-                </Button>
+              <div className="sticky top-6">
+                <OrderSummary
+                  courseVm={courseVm}
+                  price={price}
+                  selectedMethod={selectedMethod}
+                  canSubmit={canSubmit}
+                  isProcessing={isProcessing}
+                  onSubmit={submit}
+                />
               </div>
             </div>
           </div>
         </div>
       </main>
     </GuestLayout>
-  )
-}
-
-function CourseSummaryContent({ course, price }: { course: { cover_url?: string; title?: string; level?: string }; price: number }) {
-  return (
-    <div className="flex gap-4">
-      {course.cover_url ? (
-        <img
-          src={course.cover_url}
-          alt={course.title}
-          className="h-20 w-28 flex-shrink-0 rounded-lg object-cover"
-        />
-      ) : (
-        <div className="flex h-20 w-28 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100">
-          <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-      )}
-      <div className="flex min-w-0 flex-col justify-center">
-        <h3 className="truncate text-sm font-semibold text-slate-900">{course.title}</h3>
-        {course.level && (
-          <span className="mt-0.5 text-xs text-slate-500">{course.level}</span>
-        )}
-        <span className="mt-1 text-sm font-bold text-blue-600">{formatCurrency(price)}</span>
-      </div>
-    </div>
   )
 }

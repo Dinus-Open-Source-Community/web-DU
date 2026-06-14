@@ -11,17 +11,32 @@ import { API_ROUTES, type IQueryParamsPayload } from "./api-path";
 import { withApiErrorHandling } from "./api-error";
 import type { IResponse } from "@/lib/types/api";
 
+export interface TripayFee {
+  flat: number;
+  percent: number;
+}
+
 export interface PaymentMethodItem {
-  uid: string;
+  group: string;
+  code: string;
   name: string;
-  image_url: string;
+  type: 'direct' | 'redirect';
+  fee_merchant: TripayFee;
+  fee_customer: TripayFee;
+  total_fee: TripayFee;
+  minimum_fee: number;
+  maximum_fee: number;
+  minimum_amount: number;
+  maximum_amount: number;
+  icon_url: string;
+  active: boolean;
 }
 
 export async function fetchPaymentMethods(): Promise<PaymentMethodItem[]> {
   const response = await api.get<IResponse<PaymentMethodItem[]>>(
     API_ROUTES.payment.method,
   );
-  return response.data.data ?? [];
+  return (response.data.data ?? []).filter((ch) => ch.active);
 }
 
 export async function fetchPayments(params?: IQueryParamsPayload) {

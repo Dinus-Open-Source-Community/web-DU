@@ -234,8 +234,7 @@ feat(course-editor): tab-aware save, assignment panel, and inline lesson rename
 | Halaman detail submission (navbar only, sidebar siswa) | ✅ |
 | Penilaian inline + feedback timpa (bukan modal) | ✅ |
 | UI flat tanpa nested card | ✅ |
-| Validator `lesson-assignment` + `lesson-attendance` | ✅ |
-| Tab Kehadiran admin (update/delete) | 🟡 Partial |
+| Validator `lesson-assignment` | ✅ |
 | Profil penilai lengkap di feedback | 🟡 Partial (butuh `graded_by_uid` + session user) |
 | `mentor/CourseAssignments` route terpisah | 🔴 Masih mock |
 | `student/Assignments` aggregate | 🔴 Masih mock |
@@ -245,16 +244,15 @@ feat(course-editor): tab-aware save, assignment panel, and inline lesson rename
 ```
 GET  /lessons/:id/assignment/submissions
 PUT  /lessons/:id/assignment/submissions/:submissionUid/grade
-GET  /lessons/attendances/lesson/:lesson_id
-PUT  /lessons/attendances/:id
-DELETE /lessons/attendances/:id
 ```
+
+*(Endpoint kehadiran ada di repo tetapi fitur attendance ditunda dari tracking progress — lihat `todo-backlog.md` §H.)*
 
 ---
 
-## Fase 12 — Validator Assignment & Attendance (Zod)
+## Fase 12 — Validator Assignment (Zod)
 
-**Tujuan:** Validasi strict request tugas & kehadiran sebelum hit API — selaras kontrak BE.
+**Tujuan:** Validasi strict request tugas sebelum hit API — selaras kontrak BE. *(Validator kehadiran juga ada di `lesson-attendance/` tetapi fitur attendance ditunda.)*
 
 **Struktur baru:**
 
@@ -530,6 +528,57 @@ GET /mentor/dashboard/schedules?limit=50
 
 ---
 
+## Fase 20 — Checkout & Join Kursus
+
+**Tujuan:** Siswa bisa mendaftar kursus berbayar lewat halaman checkout — pilih metode bayar Tripay, buat enrollment, lalu redirect ke detail pembayaran.
+
+**Halaman:** `pages/checkout/Checkout.tsx`  
+**Route:** `/checkout/:courseUid` (terdaftar di `App.tsx`)
+
+**Yang dibuat / diubah:**
+
+| Layer | Path |
+|-------|------|
+| Hook | `hooks/use-checkout.ts` — query kursus + metode bayar, mutasi join + create payment |
+| Presenter | `lib/checkout/present-checkout-view.ts` — view model kursus & kartu metode bayar |
+| Page | `pages/checkout/Checkout.tsx` — UI pilih metode, ringkasan order, CTA bayar |
+| Service | `services/payment.ts` — `fetchPaymentMethods()`, `createPayment()`; kontrak `PaymentMethodItem` selaras BE Tripay |
+| Service | `services/course.ts` → `joinCourse()` |
+| Route | `lib/routes.ts` → `ROUTES.checkout(courseUid)` |
+
+**Alur:**
+
+```
+Detail kursus publik → /checkout/:courseUid
+  → GET course + GET payment methods
+  → POST /courses/:uid/join (enrollment)
+  → POST /payment (Tripay)
+  → redirect /student/transactions/payment?reference=&merchant_ref=
+```
+
+**API yang dipakai:**
+
+```
+GET  /courses/:uid
+GET  /payment/method
+POST /courses/:uid/join
+POST /payment
+```
+
+**Hasil:**
+
+- Link "Daftar sekarang" di `courses/detail.tsx` menuju checkout live
+- Metode bayar dikelompokkan per kategori (`group`), hanya channel `active`
+- Biaya admin & total ditampilkan per metode (`formatFeeLabel`)
+- Setelah submit sukses, siswa diarahkan ke halaman detail pembayaran Tripay (Fase 17)
+
+**Catatan PM:**
+
+- Checkout membutuhkan login (GuestLayout); enrollment dibuat sebelum payment
+- Jika response payment tidak punya `reference`/`merchant_ref`, fallback redirect ke daftar transaksi
+
+---
+
 ## Timeline Visual (updated)
 
 ```mermaid
@@ -557,6 +606,8 @@ gantt
     Dashboard Transactions  :done, f18, after f17, 2d
   section Mentor
     Mentor Dashboard        :done, f19, after f18, 1d
+  section Checkout
+    Checkout Join Course    :done, f20, after f19, 1d
 ```
 
 ---

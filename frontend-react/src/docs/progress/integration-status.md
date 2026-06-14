@@ -4,7 +4,7 @@ Dokumen **living status** untuk branch `features/frontend-sapto`.
 Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipakai FE, dan gap FE↔BE.
 
 **Referensi backend:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)  
-**Terakhir diperbarui:** 10 Juni 2026 (Fase 18: admin dashboard/transactions/financial · Fase 19: mentor dashboard)
+**Terakhir diperbarui:** 14 Juni 2026 (Fase 20: checkout join kursus · kehadiran ditunda dari tracking progress)
 
 ---
 
@@ -48,7 +48,7 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | **Detail user** (profil, kursus, ulasan, transaksi) | `admin/*Detail.tsx` → `UserDetailView` | ✅ | `GET /user/:uid`, SegmentedFilter navigasi |
 | CRUD kategori & tipe kursus | `CourseCategories`, `CourseTypes` | ✅ | — |
 | Katalog kursus admin | `admin/Courses.tsx` | ✅ | Filter Aktif/Draf via `isCoursePublished()`; hapus hanya dari detail |
-| Detail kursus admin | `admin/DetailCourse.tsx` | 🟡 | Tugas + roster + penilaian ✅; publish + hapus ✅; kehadiran partial; attendance bar peserta belum map field |
+| Detail kursus admin | `admin/DetailCourse.tsx` | ✅ | Tugas + roster + penilaian ✅; publish + hapus ✅ |
 | Edit kurikulum | `admin/CourseEdit.tsx` | ✅ | Module/lesson CRUD |
 | Update metadata kursus | `CourseFormDialog`, `EditCourseDialog` | ✅ | `PUT /courses/:uid` |
 | Publish / status kursus | `DetailCourseComponents`, editor kurikulum | ✅ | `PATCH /courses/:uid/status` → `ACTIVE` + `is_published=true`; tombol **Terbit** hanya saat draft |
@@ -56,7 +56,6 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | **Unassign mentor** | `CourseMentorTable` | ✅ | `POST /courses/:uid/mentors/unassign` |
 | **Hapus / nonaktifkan kursus** | `DetailCourseComponents` | ✅ | `DELETE /courses/:id` — soft delete; dialog konfirmasi; redirect ke `/admin/courses` |
 | Tab Tugas (overview + roster + grade) | `CourseDetailAssignmentsTab` + routes submissions | ✅ | Bulk `GET /courses/:id/assignments` + hydrate per lesson |
-| Tab Kehadiran | `CourseDetailAttendanceTab` | 🟡 | GET/PUT/DELETE ✅; create & note UI ❌ |
 | Balas review per course | `CourseReviewSection` | 🟡 | Service `replyToCourseReview` ada; verifikasi handler tidak `console.log` |
 | Dashboard KPI + chart | `admin/Dashboard.tsx` | ✅ | `GET /admin/dashboard/kpis`, recent-transactions, financial summary, popular courses |
 | Transaksi admin | `admin/Transactions.tsx` | ✅ | `GET /admin/transactions` + summary — filter, pagination, chart |
@@ -85,6 +84,7 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 | Browse kursus | `student/BrowseCourse.tsx` | ✅ | `GET /courses` |
 | Transaksi | `student/Transactions.tsx` | ✅ | Refactor view model; detail pembayaran via Tripay (Fase 17) |
 | **Detail pembayaran** | `student/TransactionPayment.tsx` | ✅ | `GET /payment/tripay`; invoice, kode bayar, instruksi |
+| **Checkout join kursus** | `checkout/Checkout.tsx` | ✅ | `POST /courses/:uid/join` + `POST /payment` + redirect ke detail Tripay |
 | Sertifikat | `student/Certificates.tsx` | 🔴 | Mock kosong; tidak ada API BE |
 
 ### Public & Auth
@@ -93,7 +93,7 @@ Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipaka
 |-------|---------|--------|---------|
 | Landing home | `landing/Home.tsx` | 🔴 | Data kosong/hardcode |
 | Katalog publik | `landing/Course.tsx` | 🟡 | API live; filter kategori perlu verifikasi |
-| Detail kursus publik | `courses/detail.tsx` | ✅ | Join link ke `/checkout/*` **route tidak ada** |
+| Detail kursus publik | `courses/detail.tsx` | ✅ | Join link ke `/checkout/:courseUid` |
 | Login / register / OAuth | `auth/*` | ✅ | — |
 | Forgot / reset password | `auth/ForgotPass`, `ResetPass` | 🔴 | Tidak ada API |
 | Profil user | `profile/Profile.tsx` | 🟡 | Update profil ✅; ganti password tanpa `old_password` |
@@ -128,10 +128,12 @@ Endpoint dari merge J-yriz dan route existing yang **sudah di-wire** ke service 
 | `GET/POST/PUT` | `/lessons/:id/assignment/submission` | `lesson-assignment.ts` | Module viewer siswa |
 | `GET` | `/lessons/:id/assignment/submissions` | `lesson-assignment-submission.ts` | Roster staff |
 | `PUT` | `.../submissions/:uid/grade` | `lesson-assignment-submission.ts` | Penilaian inline |
-| `GET/PUT/DELETE` | `/lessons/attendances/lesson/:id` dll. | `lesson-attendance.ts` | Tab Kehadiran admin |
+| `POST` | `/courses/:uid/join` | `course.ts` | Checkout — enrollment sebelum bayar |
+| `GET` | `/payment/method` | `payment.ts` | Checkout — daftar metode bayar Tripay |
+| `POST` | `/payment` | `payment.ts` | Checkout — buat transaksi Tripay |
+| `GET` | `/payment/tripay?reference=&merchant_ref=` | `payment.ts` | Detail pembayaran siswa (Fase 17) |
 | CRUD | `/course-categories`, `/course-types` | `course-master.ts` | Admin master data |
 | `POST` | `/courses/:uid/review/:id/reply` | `course.ts` | Review reply (perlu verifikasi UI) |
-| `GET` | `/payment/tripay?reference=&merchant_ref=` | `payment.ts` | Detail pembayaran siswa (Fase 17) |
 | `GET` | `/admin/dashboard/kpis` | `admin-dashboard.ts` | `admin/Dashboard.tsx` |
 | `GET` | `/admin/dashboard/recent-transactions` | `admin-dashboard.ts` | `admin/Dashboard.tsx` |
 | `GET` | `/admin/transactions` | `admin-transactions.ts` | `admin/Transactions.tsx` |
@@ -164,22 +166,16 @@ Route sudah dideklarasikan tapi **tidak ada** pemanggilan di `services/*.ts`.
 
 | Route constant | Path | Keterangan |
 |----------------|------|------------|
-| `courses.joinByUid` | `POST /courses/:uid/join` | Checkout tidak ada di `App.tsx` |
 | `courses.getMentorByUid` | `GET /courses/:uid/mentor` | — |
 | `courses.createReviewByUid` | `POST /courses/:uid/review` | Form review siswa belum wire |
 | `mentor.getAll`, `getByUid` | `/mentor/all`, `/mentor/:id` | Landing mentor publik |
 | `modules.getByUid` | `GET /modules/:uid` | — |
 | `lessons.readings.*` | readings endpoints | — |
 | `lessons.assignment.submissions.getByUid` | GET submission by UID | Roster pakai list saja |
-| `lessons.attendances.create` | `POST /lessons/attendances` | Check-in siswa |
-| `lessons.attendances.checkStatus` | check-status | — |
-| `lessons.attendances.getMyHistory` | my-history | — |
-| `lessons.attendances.getByUid` | detail record | — |
 | `invoices.*` | invoice URL / by enrollment | Diganti `GET /payment/tripay` (Fase 17); route invoice lama tidak terpakai |
-| `payment.method`, `payment.tripay` | payment aux | — |
 | `files.getByBucketAndObject` | file proxy | — |
 
-**Catatan:** `payment.create` dan `payment.getAll` punya service (`payment.ts`) + hook, tapi **tidak dipakai halaman** (checkout mock/absen). `payment.tripay` sekarang dipakai `TransactionPayment.tsx` (Fase 17).
+**Catatan:** `payment.create`, `payment.method`, dan `payment.tripay` dipakai halaman checkout + detail pembayaran (Fase 17–20). `payment.getAll` punya service tapi tidak dipakai halaman manapun.
 
 ---
 
@@ -190,12 +186,10 @@ Route sudah dideklarasikan tapi **tidak ada** pemanggilan di `services/*.ts`.
 | `GET /admin/dashboard/support-tickets` | 🚫 Sengaja tidak ada | `UnresolvedTickets` selalu kosong |
 | Invite / create user admin baru | 🔴 Tidak ada | Hanya promote role user existing |
 | Objek `graded_by` lengkap di submission | 🔴 Hanya `graded_by_uid` | Profil penilai terbatas di UI staff |
-| `student_attendance_*` di `joined_courses` profil | 🔴 Hanya di `GET /courses/:id/students` | Dashboard/learning tidak punya aggregate kehadiran |
 | Domain sertifikat | 🔴 Tidak ada | `student/Certificates` mock |
 | Forgot / reset password | 🔴 Tidak ada / tidak wire | Auth recovery mock |
 | `GET /payment` sebagai list transaksi admin | 🟡 Kontrak salah | BE wajib `?reference=`; admin butuh `/admin/transactions` |
 | `revenueSource` di financial summary | 🟡 Placeholder BE | Chart sumber penjualan tidak akurat |
-| Route checkout + enrollment flow | BE join/payment ada | FE link `/checkout/*` tidak terdaftar; detail Tripay ✅ (Fase 17) |
 
 ---
 
@@ -214,7 +208,6 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 | GET submission format array | ✅ Mapper | ✅ Live |
 | `GET /user/:uid` detail | — | ✅ Live (halaman detail user) |
 | `joined_courses[].assignments` di profil | 🟡 Parsial | 🟡 Dipakai user detail; **tidak** dipakai halaman Assignments lagi |
-| `attendance_present/total` di students | 🟡 Belum map | 🟡 BE kirim; FE expect `student_attendance_*` — **belum mapper** |
 | Admin dashboard/transactions/financial | 🔴 Mock | ✅ Live (Fase 18) |
 | Admin/mentor reviews & Q&A | 🔴 | 🔴 Masih mock |
 | Mentor dashboard | 🔴 Mock | ✅ Live (Fase 19) |
@@ -238,13 +231,12 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 - [x] Admin dashboard — KPI, chart revenue, transaksi terbaru, kursus populer (Fase 18)
 - [x] Admin transactions & financial — list, summary, filter, chart (Fase 18)
 - [x] Mentor dashboard — KPI + jadwal kelas (Fase 19)
+- [x] Checkout join kursus — route `/checkout/:courseUid`, `joinCourse` + `createPayment` → detail Tripay (Fase 20)
 
 ### P1 — Gap utama
 
-- [ ] Mapper `attendance_present` / `attendance_total` → field FE di roster peserta
 - [ ] Samakan `mentor/Courses.tsx` & `mentor/DetailCourse.tsx` dengan pola admin API
 - [ ] Deprecate atau rewire `mentor/CourseAssignments.tsx`
-- [ ] Checkout route + wire `payment.create` (detail Tripay ✅ Fase 17; checkout join flow belum)
 
 ### P2 — Admin moderasi (BE sudah ada)
 
@@ -253,9 +245,12 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 ### P3 — Enhancement
 
 - [ ] Q&A per course (student-facing)
-- [ ] Attendance create / check-status / my-history
 - [ ] UI riwayat multi-attempt penuh di module viewer
 - [ ] Wire `GET .../submissions/:submissionUid` untuk refresh detail
+
+### P4 — Ditunda (kehadiran)
+
+Fitur **kehadiran / attendance** sengaja **dikeluarkan dari tracking progress** — menunggu keputusan selanjutnya. Kode partial (tab admin, validator, service) tetap ada di repo; lihat catatan historis di `assignment-staff-session.md` jika diperlukan.
 
 ---
 

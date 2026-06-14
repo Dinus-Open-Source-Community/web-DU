@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
 import { GlobalInput } from '../../components/shared/Input'
 import AuthLayout from '../../components/layouts/AuthLayouts'
@@ -11,6 +11,7 @@ import { loginSchema, parseWithValidationMessage } from '../../lib/validator'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -25,7 +26,15 @@ export default function LoginPage() {
     try {
       const payload = parseWithValidationMessage(loginSchema, { email, password }, 'Data login tidak valid')
       const { redirectPath } = await signIn(payload)
-      navigate(redirectPath)
+      const requestedPath = location.state?.from
+      navigate(
+        typeof requestedPath === 'string'
+          ? requestedPath
+          : requestedPath?.pathname
+            ? `${requestedPath.pathname}${requestedPath.search ?? ''}${requestedPath.hash ?? ''}`
+            : redirectPath,
+        { replace: true },
+      )
       toast.success('Login berhasil')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Login gagal')

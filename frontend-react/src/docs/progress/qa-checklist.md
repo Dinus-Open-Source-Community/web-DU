@@ -167,14 +167,6 @@ Panduan uji manual untuk QA. Setiap skenario punya **precondition**, **langkah**
 | **Expected** | `PUT /courses/:uid` sukses; judul terbarui di header |
 | **Catatan** | `PUT` tidak mengubah status publish — gunakan **Terbit** terpisah |
 
-### C8 — Tab peserta — kehadiran
-
-| | |
-|---|---|
-| **Tab** | Peserta |
-| **Known issue** | Bar kehadiran salah/kosong — BE tidak kirim `attendance_*` fields |
-| **Yang benar** | Progress % dari `enrollment.progress` |
-
 ---
 
 ## D. Editor Kurikulum

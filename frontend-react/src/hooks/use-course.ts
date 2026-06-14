@@ -16,10 +16,18 @@ import { fetchLessonsByModuleUid } from '@/services/lessons'
 import { courseKeys, lessonKeys } from './query-keys'
 import { useModulesByCourse } from './use-modules'
 
-export function useCourses(params?: IQueryParamsPayload) {
+type UseCoursesOptions = {
+  enabled?: boolean
+}
+
+export function useCourses(
+  params?: IQueryParamsPayload,
+  options: UseCoursesOptions = {},
+) {
   return useQuery({
     queryKey: courseKeys.list(params),
     queryFn: () => fetchCourses(params),
+    enabled: options.enabled,
   })
 }
 

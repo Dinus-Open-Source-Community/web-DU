@@ -3,7 +3,7 @@
 Dokumen **living backlog** untuk PM, FE, dan QA.  
 **Aturan:** item requirement lama **tidak dihapus** — hanya diubah statusnya.
 
-**Terakhir diperbarui:** 10 Juni 2026 (Fase 18–19: admin analytics + mentor dashboard) · branch `features/frontend-sapto`  
+**Terakhir diperbarui:** 14 Juni 2026 (Fase 20: checkout join kursus · kehadiran ditunda) · branch `features/frontend-sapto`  
 **Status lengkap:** [integration-status.md](./integration-status.md)
 
 ---
@@ -38,7 +38,7 @@ Requirement dari sesi implementasi tab **Tugas** di detail kursus admin/mentor.
 | A10 | Feedback **timpa** (1 field `feedback` — selaras BE) | ✅ Selesai | PUT grade kirim `feedback` |
 | A11 | UI flat — tanpa card-dalam-card / container bertumpuk | ✅ Selesai | Token `manage-detail-layout` |
 | A12 | Tampilkan profil pemberi feedback lengkap | 🟡 Partial | BE kirim `graded_by` object; FE perlu mapper di `staff-submission-mapper.ts` |
-| A13 | Validator Zod strict untuk request tugas/kehadiran | ✅ Selesai | `lib/validator/lesson-assignment/`, `lesson-attendance/` |
+| A13 | Validator Zod strict untuk request tugas | ✅ Selesai | `lib/validator/lesson-assignment/` |
 | A14 | Jangan ubah backend untuk fitur profil penilai | ✅ Selesai | Relasi `GradedBy` di-revert; FE menyesuaikan |
 
 ---
@@ -63,7 +63,6 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B12 | Panel tugas di **course editor** (CRUD assignment per lesson) | ✅ Selesai | `course-editor-ux-session.md` |
 | B13 | Student module viewer — kerja tugas & submit | ✅ Selesai | `use-lesson-assignment`, `LessonAssignmentWork` |
 | B14 | Mark lesson as read (siswa) | ✅ Selesai | `use-course-lesson-reading` |
-| B15 | Tab **Kehadiran** di detail course (admin) | 🟡 Partial | Lihat C4 |
 | B16 | Mentor detail course pakai API live | 🔴 Belum | Masih mock — backlog Fase 1.4 |
 | B17 | Mentor list courses pakai API live | 🔴 Belum | Masih mock — backlog Fase 1.5 |
 | B18 | Halaman `student/Assignments` aggregate lintas kursus | ✅ Selesai | Fase 13 — `GET /students/me/assignments` |
@@ -74,10 +73,10 @@ Item dari sesi integrasi awal & course editor — tetap dilacak.
 | B29 | Tombol **Terbit** disembunyikan setelah kursus publish | ✅ Selesai | Fase 16 — header, mobile, editor kurikulum |
 | B20 | Admin dashboard / transactions / financial | ✅ Selesai | Fase 18 — `admin-dashboard.ts`, `admin-transactions.ts`, hooks + halaman live |
 | B30 | Mentor dashboard KPI + jadwal | ✅ Selesai | Fase 19 — `mentor-dashboard.ts`, `use-mentor-dashboard`, `mentor/Dashboard.tsx` |
+| B31 | **Checkout join kursus** (`/checkout/:courseUid`) | ✅ Selesai | Fase 20 — `use-checkout.ts`, `joinCourse` + `createPayment` → detail Tripay |
 | B21 | Forgot / reset password | 🔴 Belum | Tidak ada endpoint BE |
 | B22 | Sertifikat siswa | 🔴 Belum | Tidak ada domain BE |
 | B23 | Ganti password kirim `old_password` | 🔴 Belum | `profile` partial |
-| B24 | Tab peserta — bar kehadiran akurat | ⏳ Tunggu BE | `attendance_*` tidak ada di `GET /courses/:id/students` |
 | B25 | Halaman administrator tampilkan `super_admin` | ✅ Selesai | BE fix: `role=admin` include `super_admin` |
 
 ---
@@ -89,13 +88,6 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | # | Method | Endpoint BE | Status FE | Halaman / Catatan | Prioritas |
 |---|--------|-------------|-----------|-------------------|-----------|
 | C1 | `GET` | `/lessons/:id/assignment/submissions/:submissionUid` | 🔴 Belum | Staff detail saat ini ambil dari list, bukan GET by UID | Rendah |
-| C2 | `POST` | `/lessons/attendances` | 🔴 Belum | Check-in siswa; tidak ada service/UI | Tinggi |
-| C3 | `GET` | `/lessons/attendances/check-status` | 🔴 Belum | Siswa cek sudah absen | Tinggi |
-| C4 | `GET` | `/lessons/attendances/lesson/:lesson_id` | 🟡 Partial | Tab Kehadiran admin: list + update + delete ✅; **create manual admin** ❌ | Sedang |
-| C5 | `PUT` | `/lessons/attendances/:id` | 🟡 Partial | Update status ✅; field **note** belum ada di UI | Sedang |
-| C6 | `DELETE` | `/lessons/attendances/:id` | ✅ Selesai | Tab Kehadiran admin | — |
-| C7 | `GET` | `/lessons/attendances/my-history` | 🔴 Belum | Riwayat absensi siswa | Sedang |
-| C8 | `GET` | `/lessons/attendances/:id` | 🔴 Belum | Detail satu record absensi | Rendah |
 | C9 | `GET` | `/lessons/readings/lesson/:lesson_id` | 🔴 Belum | Admin/mentor lihat siapa sudah baca lesson | Sedang |
 | C10 | `GET` | `/lessons/readings/my-history` | 🔴 Belum | Service ada, route BE bermasalah (komentar di FE) | Rendah |
 | C11 | `GET` | `/courses/:uid/progress` | ✅ Selesai | `use-course-lesson-reading.ts` | — |
@@ -117,6 +109,9 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | C27 | `GET` | `/admin/courses/popular` | ✅ Selesai | `admin/Dashboard.tsx` (Fase 18) | — |
 | C28 | `GET` | `/mentor/dashboard/kpis` | ✅ Selesai | `mentor/Dashboard.tsx` (Fase 19) | — |
 | C29 | `GET` | `/mentor/dashboard/schedules` | ✅ Selesai | `mentor/Dashboard.tsx` (Fase 19) | — |
+| C30 | `POST` | `/courses/:uid/join` | ✅ Selesai | Checkout — enrollment sebelum bayar (Fase 20) | — |
+| C31 | `GET` | `/payment/method` | ✅ Selesai | Checkout — daftar metode bayar Tripay (Fase 20) | — |
+| C32 | `POST` | `/payment` | ✅ Selesai | Checkout — buat transaksi Tripay (Fase 20) | — |
 
 ---
 
@@ -131,7 +126,6 @@ Prioritas untuk tim FE. Endpoint diverifikasi dari `backend/internal/handler/rou
 | D5 | `GET /admin/transactions` + summary | Admin transactions mock | ✅ Selesai | Fase 18 |
 | D6 | `GET /admin/financial/summary` | Admin financial mock | ✅ Selesai | Fase 18 |
 | D7 | `GET /admin/dashboard/kpis` | Admin dashboard mock | ✅ Selesai | Fase 18 |
-| D8 | `attendance_*` di `GET /courses/:id/students` | Bar kehadiran tab Peserta salah | 🟡 Partial | BE kirim field; FE belum mapper |
 | D9 | Profil user penilai (`graded_by` object) di response submission | Profil feedback staff selalu lengkap | 🟡 Partial | BE kirim `graded_by` di list/get/grade submission; FE perlu wire mapper |
 | D10 | Forgot / reset password | Auth recovery mock | ⏳ Tunggu BE | `api-route-gaps.md` §9 |
 | D11 | Domain sertifikat | `student/Certificates` mock | ⏳ Tunggu BE | `api-route-gaps.md` §10 |
@@ -152,15 +146,12 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 - [ ] **E1** Wire `handleReplyReview` → `POST /courses/:uid/review/:id/reply` (B8, C13)
 - [ ] **E2** Form ganti password: kirim `old_password` di `PATCH /user/changePassword` (B23)
-- [ ] **E3** Tab Kehadiran: input **note** saat update status (C5)
-- [ ] **E4** Service + UI check-in siswa: `POST /lessons/attendances` (C2, C3)
 - [ ] **E5** Samakan `mentor/DetailCourse` dengan pola admin API (B16)
 
 ### Prioritas 2 — Setelah BE menyediakan endpoint
 
 - [x] **E6** Wire edit metadata kursus setelah `PUT /courses/:id` (B6, D1)
 - [x] **E7** Wire unassign mentor setelah endpoint unassign (B7, D2)
-- [ ] **E8** Tab Peserta: mapper `attendance_present/total` di students API (B24, D8)
 - [x] **E9** `student/Assignments` setelah aggregate API (B18, D4)
 - [ ] **E10** Refactor `mentor/CourseAssignments` atau deprecate ke tab detail course (B19, D3)
 - [x] **E21** `DELETE /courses/:id` — route, service, dialog hapus (D14, B28)
@@ -168,8 +159,6 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 ### Prioritas 3 — Enhancement tanpa blocker BE besar
 
-- [ ] **E11** Tab Kehadiran untuk **mentor** (saat ini `adminOnly`) (B15)
-- [ ] **E12** Admin manual create attendance untuk siswa yang belum check-in (C4)
 - [ ] **E13** Tampilkan detail file submission di halaman staff (download/preview)
 - [ ] **E14** GET submission by UID untuk refresh detail tanpa reload list (C1)
 - [ ] **E15** Halaman riwayat baca lesson untuk admin (`GET /lessons/readings/lesson/:id`) (C9)
@@ -179,13 +168,33 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 - [x] **E17** Admin transactions & financial (B20, D5, D6, D7) — Fase 18
 - [x] **E23** Mentor dashboard (B30, D16) — Fase 19
+- [x] **E24** Checkout join kursus (B31) — Fase 20
 - [ ] **E18** Forgot/reset password (B21, D10)
 - [ ] **E19** Sertifikat (B22, D11)
 - [ ] **E20** Reviews & Q&A moderation page (D12)
 
 ---
 
-## F. Known Issues / Debt Teknis
+## H. Kehadiran — Ditunda (Out of Scope Sementara)
+
+Fitur **kehadiran / attendance** sengaja **dikeluarkan dari tracking progress aktif** — menunggu keputusan selanjutnya. Item di bawah tetap tercatat agar requirement lama tidak hilang.
+
+| # | Requirement / Endpoint | Status | Catatan |
+|---|------------------------|--------|---------|
+| H1 | Tab **Kehadiran** di detail course (admin) | 🚫 Ditunda | Kode partial ada (`CourseDetailAttendanceTab`); tidak dilacak progress |
+| H2 | Tab peserta — bar kehadiran akurat | 🚫 Ditunda | Mapper `attendance_*` belum; menunggu keputusan produk |
+| H3 | `POST /lessons/attendances` — check-in siswa | 🚫 Ditunda | — |
+| H4 | `GET /lessons/attendances/check-status` | 🚫 Ditunda | — |
+| H5 | `GET/PUT/DELETE /lessons/attendances/*` | 🚫 Ditunda | Service + tab partial ada; tidak dilacak |
+| H6 | `GET /lessons/attendances/my-history` | 🚫 Ditunda | Riwayat absensi siswa |
+| H7 | Input **note** saat update status absen | 🚫 Ditunda | — |
+| H8 | Tab Kehadiran untuk **mentor** | 🚫 Ditunda | Saat ini `adminOnly` |
+| H9 | Admin manual create attendance | 🚫 Ditunda | — |
+| H10 | `attendance_*` di `GET /courses/:id/students` | 🚫 Ditunda | BE mungkin sudah kirim field; FE belum mapper |
+
+---
+
+## I. Known Issues / Debt Teknis
 
 | # | Issue | Status | Tindakan |
 |---|-------|--------|----------|
@@ -199,7 +208,7 @@ Urutan kerja setelah sesi tab Tugas — **tanpa menghapus item lama**.
 
 ---
 
-## G. Sinkronisasi Dokumen Terkait
+## J. Sinkronisasi Dokumen Terkait
 
 Saat menutup item di dokumen ini, update juga:
 

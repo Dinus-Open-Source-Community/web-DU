@@ -52,16 +52,23 @@ export function CourseDetailMobileActions({
           </Link>
         </Button>
 
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(manageDetailLayout.actionButton, 'w-full px-3')}
-            onClick={onEditClick}
-          >
-            <Pencil className="mr-1.5 size-4 opacity-70" aria-hidden />
-            Edit kursus
-          </Button>
+        <div
+          className={cn(
+            'grid gap-2',
+            isAdmin ? 'grid-cols-[1fr_1fr_auto]' : 'grid-cols-1',
+          )}
+        >
+          {isAdmin ? (
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(manageDetailLayout.actionButton, 'w-full px-3')}
+              onClick={onEditClick}
+            >
+              <Pencil className="mr-1.5 size-4 opacity-70" aria-hidden />
+              Edit kursus
+            </Button>
+          ) : null}
 
           <Button asChild variant="outline" className={cn(manageDetailLayout.actionButton, 'w-full px-3')}>
             <Link to={previewHref} target="_blank" rel="noreferrer">

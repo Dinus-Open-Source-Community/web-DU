@@ -94,15 +94,17 @@ export function HeaderActionButtons({
 }: HeaderActionButtonsProps) {
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        className={cn(manageDetailLayout.actionButton, compact && 'flex-1')}
-        onClick={onEditClick}
-      >
-        <Pencil className="mr-2 size-4 opacity-70" aria-hidden />
-        Edit kursus
-      </Button>
+      {isAdmin ? (
+        <Button
+          type="button"
+          variant="outline"
+          className={cn(manageDetailLayout.actionButton, compact && 'flex-1')}
+          onClick={onEditClick}
+        >
+          <Pencil className="mr-2 size-4 opacity-70" aria-hidden />
+          Edit kursus
+        </Button>
+      ) : null}
 
       <Button
         asChild

@@ -166,16 +166,18 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         onDeleteClick={isAdmin ? onDeleteClick : undefined}
       />
 
-      <EditCourseDialog
-        open={editOpen}
-        onOpenChange={onEditOpenChange}
-        course={course}
-        submitting={editDialogSubmitting}
-        onSubmitEdit={onEditCourseSubmit}
-        categories={formOptions.categories}
-        courseTypes={formOptions.courseTypes}
-        optionsLoading={formOptions.optionsLoading}
-      />
+      {isAdmin ? (
+        <EditCourseDialog
+          open={editOpen}
+          onOpenChange={onEditOpenChange}
+          course={course}
+          submitting={editDialogSubmitting}
+          onSubmitEdit={onEditCourseSubmit}
+          categories={formOptions.categories}
+          courseTypes={formOptions.courseTypes}
+          optionsLoading={formOptions.optionsLoading}
+        />
+      ) : null}
 
       {isConfirmOpen ? (
         <ConfirmDialog

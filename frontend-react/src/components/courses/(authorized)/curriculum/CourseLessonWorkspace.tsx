@@ -106,13 +106,13 @@ export function CourseLessonWorkspace({
         />
       </div>
 
-      <div className={cn(editorTab !== 'homework' && 'hidden')}>
+      {editorTab === 'homework' ? (
         <LessonHomeworkPanel
           lesson={activeLesson}
           isLoadingAssignment={isAssignmentLoading}
           onPatchAssignment={onPatchAssignment}
         />
-      </div>
+      ) : null}
     </PanelTransition>
   )
 }
