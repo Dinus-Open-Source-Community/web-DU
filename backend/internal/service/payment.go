@@ -58,6 +58,40 @@ func buildTripayURL(baseURL, path string) (string, error) {
 	return parsedURL.String(), nil
 }
 
+// getFrontendBaseURL returns the frontend base URL from env, falling back to
+// the common local Vite preview host used during QA.
+func getFrontendBaseURL() string {
+	if u := strings.TrimSpace(os.Getenv("FRONTEND_BASE_URL")); u != "" {
+		return strings.TrimRight(u, "/")
+	}
+	return "http://localhost:4173"
+}
+
+// buildPaymentReturnURL constructs the URL where the user is sent after
+// completing the payment on Tripay. When the frontend does not provide a
+// return_url, the backend must redirect back to the frontend payment-detail
+// page with the merchant_ref so the frontend can look up the transaction.
+// If the frontend supplies a return_url, we still ensure merchant_ref is
+// present as a query parameter, which helps the frontend identify the payment.
+func buildPaymentReturnURL(providedURL, merchantRef string) string {
+	if providedURL == "" {
+		return fmt.Sprintf("%s/student/transactions/payment?merchant_ref=%s", getFrontendBaseURL(), url.QueryEscape(merchantRef))
+	}
+
+	parsedURL, err := url.Parse(providedURL)
+	if err != nil {
+		return fmt.Sprintf("%s/student/transactions/payment?merchant_ref=%s", getFrontendBaseURL(), url.QueryEscape(merchantRef))
+	}
+
+	q := parsedURL.Query()
+	if q.Get("merchant_ref") == "" {
+		q.Set("merchant_ref", merchantRef)
+		parsedURL.RawQuery = q.Encode()
+	}
+
+	return parsedURL.String()
+}
+
 func buildTripayDetailURL(baseURL, path, reference, merchantRef string) (string, error) {
 	if reference == "" && merchantRef == "" {
 		return "", fmt.Errorf("reference or merchant_ref is required")
@@ -240,10 +274,7 @@ func CreatePayment(userUid uuid.UUID, req *dto.CreatePaymentRequest) (*dto.APIRe
 	}
 	callbackURL := baseURL + "/payment/callback"
 
-	returnURL := req.ReturnURL
-	if returnURL == "" {
-		returnURL = baseURL + "/payment/success"
-	}
+	returnURL := buildPaymentReturnURL(req.ReturnURL, merchantRef)
 
 	// Prepare Tripay request
 	tripayReq := map[string]any{
