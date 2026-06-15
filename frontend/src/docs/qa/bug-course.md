@@ -14,7 +14,7 @@
 
 | Backend Log 401 | Pratinjau cover tidak terload |
 |---|---|
-| ![Backend Log 401](frontend/src/docs/qa/assets/bug-course/10.png) | ![Pratinjau cover tidak terload](frontend/src/docs/qa/assets/bug-course/11.png) |
+| ![Backend Log 401](assets/bug-course/10.png) | ![Pratinjau cover tidak terload](assets/bug-course/11.png) |
 
 **Deskripsi Bug:**
 Saat membuka dialog *Edit detail kursus*, gambar cover tidak muncul (menampilkan teks alternatif). Dari log backend, terlihat bahwa request `GET /files/courses/...` mengembalikan status `401 Unauthorized`.
@@ -107,7 +107,7 @@ export function AuthenticatedImage({
 
 | Review tab — Total 0, Rating 0.0 | Informasi kursus — Rating 4.8 |
 |---|---|
-| ![Review tab 0.0](frontend/src/docs/qa/assets/bug-course/6.png) | ![Informasi kursus 4.8](frontend/src/docs/qa/assets/bug-course/9.png) |
+| ![Review tab 0.0](assets/bug-course/6.png) | ![Informasi kursus 4.8](assets/bug-course/9.png) |
 
 **Deskripsi Bug:**
 Pada panel *Informasi kursus*, kursus yang baru dibuat (belum memiliki review) menampilkan rating **4.8**. Namun di tab *Review* terlihat **0.0** yang lebih masuk akal untuk kursus baru.
@@ -148,7 +148,7 @@ Lakukan hal yang sama di komponen-komponen berikut:
 
 | 4 modul duplikat | Setelah dihapus — 1 modul |
 |---|---|
-| ![4 modul duplikat](frontend/src/docs/qa/assets/bug-course/8.png) | ![Setelah dihapus 1 modul](frontend/src/docs/qa/assets/bug-course/7.png) |
+| ![4 modul duplikat](assets/bug-course/8.png) | ![Setelah dihapus 1 modul](assets/bug-course/7.png) |
 
 **Deskripsi Bug:**
 Setelah membuat satu modul baru di kurikulum, daftar modul menampilkan **4 modul** dengan nama yang sama ("Minggu 1"). Setelah menghapus salah satu modul, jumlah modul kembali ke angka yang benar (1 modul).
@@ -197,7 +197,7 @@ Setelah `createPersistedModule` (baris 828), pastikan `queryClient.invalidateQue
 
 | Card kursus hanya menampilkan 1 mentor |
 |---|
-| ![Card 1 mentor](frontend/src/docs/qa/assets/bug-course/5.png) |
+| ![Card 1 mentor](assets/bug-course/5.png) |
 
 **Deskripsi Bug:**
 Di card kursus, bagian bawah hanya menampilkan satu mentor (Dimas Saputra) meskipun course tersebut memiliki lebih dari satu mentor.
@@ -258,7 +258,7 @@ export function resolveCourseProfiles(source: CourseProfileSource): CourseProfil
 
 | Sidebar "Courses" tidak aktif saat berada di `/mentor/courses/...` |
 |---|
-| ![Sidebar tidak aktif](frontend/src/docs/qa/assets/bug-course/4.png) |
+| ![Sidebar tidak aktif](assets/bug-course/4.png) |
 
 **Deskripsi Bug:**
 Saat mentor berada di halaman detail kursus (contoh: `/mentor/courses/ca294789`), item menu **Courses** di sidebar tidak menampilkan state aktif (tidak ada highlight).
@@ -310,7 +310,7 @@ Lihat panduan fix lengkap pada **Admin Poin 1** — *Course Image Tidak Terload*
 
 | Tombol "Enroll" pada card kursus |
 |---|
-| ![Tombol Enroll](frontend/src/docs/qa/assets/bug-course/3.png) |
+| ![Tombol Enroll](assets/bug-course/3.png) |
 
 **Deskripsi Bug:**
 Tombol aksi pada card kursus menampilkan teks **"Enroll"** yang merupakan bahasa Inggris. Sebaiknya diubah ke bahasa Indonesia agar konsisten dengan UI lainnya.
@@ -334,7 +334,7 @@ Ganti baris 87 dari `'Enroll'` menjadi `'Daftar'`. Tidak ada file lain yang meng
 
 | Card kursus menyentuh navbar |
 |---|
-| ![Card mepet navbar](frontend/src/docs/qa/assets/bug-course/2.png) |
+| ![Card mepet navbar](assets/bug-course/2.png) |
 
 **Deskripsi Bug:**
 Pada halaman *Katalog Kursus*, card kursus tampak terlalu mepet dengan area navbar/breadcrumb, tidak ada jarak (padding/margin) yang cukup.
@@ -383,7 +383,7 @@ Lihat panduan fix lengkap pada **Admin Poin 1**. Terapkan komponen `Authenticate
 
 | Logo React muncul di card ringkasan pembayaran |
 |---|
-| ![Logo React di pembayaran](frontend/src/docs/qa/assets/bug-course/1.png) |
+| ![Logo React di pembayaran](assets/bug-course/1.png) |
 
 **Deskripsi Bug:**
 Di card *Ringkasan Pesanan Anda*, ketika gambar kursus tidak tersedia, fallback yang ditampilkan adalah **logo React** (`<ReactIcon />`). Ini tidak sesuai untuk konteks produksi dan membingungkan pengguna.
