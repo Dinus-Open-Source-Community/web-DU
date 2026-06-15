@@ -1,0 +1,245 @@
+- generic [ref=e2]:
+  - main [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "Doscom University" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - button "Toggle menu" [ref=e7]:
+          - img [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "Course" [ref=e12] [cursor=pointer]:
+            - /url: /course
+          - link "Community" [ref=e13] [cursor=pointer]:
+            - /url: /community
+          - link "About" [ref=e14] [cursor=pointer]:
+            - /url: /about
+        - generic [ref=e15]:
+          - link "Daftar" [ref=e16] [cursor=pointer]:
+            - /url: /auth/register
+            - button "Daftar" [ref=e17]
+          - link "Masuk" [ref=e18] [cursor=pointer]:
+            - /url: /auth/login
+            - button "Masuk" [ref=e19]
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Explore Open Source Course" [level=1] [ref=e23]
+        - paragraph [ref=e24]: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+        - generic [ref=e25]:
+          - img
+          - searchbox "Search courses or mentors" [ref=e26]
+      - generic [ref=e27]:
+        - button "All" [ref=e28]:
+          - heading "All" [level=3] [ref=e29]
+        - button "Free" [ref=e30]:
+          - heading "Free" [level=3] [ref=e31]
+        - button "Premium" [ref=e32]:
+          - heading "Premium" [level=3] [ref=e33]
+        - button "Ongoing Event" [ref=e34]:
+          - heading "Ongoing Event" [level=3] [ref=e35]
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]: Categories
+          - combobox "Categories" [ref=e39]:
+            - generic: All Categories
+            - img
+        - generic [ref=e40]:
+          - heading "Available Course" [level=5] [ref=e41]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - img "DevOps Essentials" [ref=e45]
+              - generic [ref=e46]:
+                - generic [ref=e47]:
+                  - generic [ref=e48]: Premium
+                  - generic [ref=e49]: Lanjutan
+                - generic [ref=e54]:
+                  - heading "DevOps Essentials" [level=3] [ref=e55]
+                  - generic [ref=e56]:
+                    - paragraph [ref=e57]: Pelajari deployment, Docker, dan CI/CD pipeline untuk production
+                    - generic [ref=e58]:
+                      - generic [ref=e59]: Rp 329.000
+                      - generic [ref=e60]:
+                        - img [ref=e61]
+                        - generic [ref=e63]: "5.0"
+                        - generic [ref=e64]: (1)
+                - generic [ref=e65]:
+                  - generic [ref=e66]:
+                    - img "Rina Kurnia" [ref=e67]
+                    - paragraph [ref=e68]: Rina Kurnia
+                  - link "Enroll" [ref=e70] [cursor=pointer]:
+                    - /url: /course/7bde3ddb
+            - generic [ref=e71]:
+              - img "REST API Development" [ref=e73]
+              - generic [ref=e74]:
+                - generic [ref=e75]:
+                  - generic [ref=e76]: Premium
+                  - generic [ref=e77]: Menengah
+                - generic [ref=e82]:
+                  - heading "REST API Development" [level=3] [ref=e83]
+                  - generic [ref=e84]:
+                    - paragraph [ref=e85]: Buat REST API yang robust dan scalable menggunakan best practices
+                    - generic [ref=e86]:
+                      - generic [ref=e87]: Rp 299.000
+                      - generic [ref=e88]:
+                        - img [ref=e89]
+                        - generic [ref=e91]: "3.0"
+                        - generic [ref=e92]: (1)
+                - generic [ref=e93]:
+                  - generic [ref=e94]:
+                    - img "Rina Kurnia" [ref=e95]
+                    - paragraph [ref=e96]: Rina Kurnia
+                  - link "Enroll" [ref=e98] [cursor=pointer]:
+                    - /url: /course/492b8449
+            - generic [ref=e99]:
+              - img "Database Design dan SQL" [ref=e101]
+              - generic [ref=e102]:
+                - generic [ref=e103]:
+                  - generic [ref=e104]: Free
+                  - generic [ref=e105]: Pemula
+                - generic [ref=e110]:
+                  - heading "Database Design dan SQL" [level=3] [ref=e111]
+                  - generic [ref=e112]:
+                    - paragraph [ref=e113]: Desain database yang efisien dan kuasai SQL untuk berbagai kebutuhan
+                    - generic [ref=e114]:
+                      - generic [ref=e115]: Rp 279.000
+                      - generic [ref=e116]:
+                        - img [ref=e117]
+                        - generic [ref=e119]: "4.0"
+                        - generic [ref=e120]: (1)
+                - generic [ref=e121]:
+                  - generic [ref=e122]:
+                    - img "Rina Kurnia" [ref=e123]
+                    - paragraph [ref=e124]: Rina Kurnia
+                  - link "Enroll" [ref=e126] [cursor=pointer]:
+                    - /url: /course/1825f8a7
+            - generic [ref=e127]:
+              - img "Web Development dengan Next.js" [ref=e129]
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: Premium
+                  - generic [ref=e133]: Menengah
+                - generic [ref=e138]:
+                  - heading "Web Development dengan Next.js" [level=3] [ref=e139]
+                  - generic [ref=e140]:
+                    - paragraph [ref=e141]: Buat aplikasi web modern menggunakan Next.js dan React
+                    - generic [ref=e142]:
+                      - generic [ref=e143]: Rp 349.000
+                      - generic [ref=e144]:
+                        - img [ref=e145]
+                        - generic [ref=e147]: "5.0"
+                        - generic [ref=e148]: (2)
+                - generic [ref=e149]:
+                  - generic [ref=e150]:
+                    - img "Rina Kurnia" [ref=e151]
+                    - paragraph [ref=e152]: Rina Kurnia
+                  - link "Enroll" [ref=e154] [cursor=pointer]:
+                    - /url: /course/73985658
+            - generic [ref=e155]:
+              - img "Golang Fundamentals" [ref=e157]
+              - generic [ref=e158]:
+                - generic [ref=e159]:
+                  - generic [ref=e160]: Premium
+                  - generic [ref=e161]: Pemula
+                - generic [ref=e166]:
+                  - heading "Golang Fundamentals" [level=3] [ref=e167]
+                  - generic [ref=e168]:
+                    - paragraph [ref=e169]: Pelajari dasar-dasar bahasa pemrograman Go dari nol hingga mahir
+                    - generic [ref=e170]:
+                      - generic [ref=e171]: Rp 299.000
+                      - generic [ref=e172]:
+                        - img [ref=e173]
+                        - generic [ref=e175]: "4.5"
+                        - generic [ref=e176]: (2)
+                - generic [ref=e177]:
+                  - generic [ref=e178]:
+                    - img "Rina Kurnia" [ref=e179]
+                    - paragraph [ref=e180]: Rina Kurnia
+                  - link "Enroll" [ref=e182] [cursor=pointer]:
+                    - /url: /course/de705b82
+      - generic [ref=e185]:
+        - heading "Ready to Start Your Journey?" [level=3] [ref=e186]
+        - paragraph [ref=e187]: Join thousands of developers who are already learning and growing with Doscom University. Start with free courses today!
+        - generic [ref=e188]:
+          - link "Join Now - It’s Free" [ref=e189] [cursor=pointer]:
+            - /url: /auth/register
+          - button "Browse All Course" [ref=e190]
+    - generic [ref=e191]:
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - heading "Subscribe to our newsletter" [level=2] [ref=e196]
+          - paragraph [ref=e197]: Be the first receive update, tips, and more.
+        - generic [ref=e198]:
+          - textbox "Enter your email" [ref=e199]
+          - button "Subscribe" [ref=e200]
+      - generic [ref=e201]:
+        - generic [ref=e202]:
+          - generic [ref=e203]:
+            - link "Doscom University" [ref=e204] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=e205]: Doscom University is one of DOSCOM's open source intensive training programs (bootcamps).
+            - generic [ref=e206]:
+              - link "GitHub" [ref=e207] [cursor=pointer]:
+                - /url: https://github.com
+                - img [ref=e208]
+              - link "LinkedIn" [ref=e211] [cursor=pointer]:
+                - /url: https://linkedin.com
+                - img [ref=e212]
+              - link "Twitter" [ref=e215] [cursor=pointer]:
+                - /url: https://twitter.com
+                - img [ref=e216]
+              - link "Instagram" [ref=e219] [cursor=pointer]:
+                - /url: https://instagram.com
+                - img [ref=e220]
+              - link "Email" [ref=e223] [cursor=pointer]:
+                - /url: "mailto: "
+                - img [ref=e224]
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - heading "Product" [level=3] [ref=e229]
+              - list [ref=e230]:
+                - listitem [ref=e231]:
+                  - link "Course" [ref=e232] [cursor=pointer]:
+                    - /url: /course
+                - listitem [ref=e233]:
+                  - link "Community" [ref=e234] [cursor=pointer]:
+                    - /url: /community
+                - listitem [ref=e235]:
+                  - link "Pricing" [ref=e236] [cursor=pointer]:
+                    - /url: /pricing
+                - listitem [ref=e237]:
+                  - link "About" [ref=e238] [cursor=pointer]:
+                    - /url: /about
+            - generic [ref=e239]:
+              - heading "Company" [level=3] [ref=e240]
+              - list [ref=e241]:
+                - listitem [ref=e242]:
+                  - link "Blog" [ref=e243] [cursor=pointer]:
+                    - /url: /blog
+                - listitem [ref=e244]:
+                  - link "Careers" [ref=e245] [cursor=pointer]:
+                    - /url: /careers
+                - listitem [ref=e246]:
+                  - link "Press" [ref=e247] [cursor=pointer]:
+                    - /url: /press
+                - listitem [ref=e248]:
+                  - link "Contact" [ref=e249] [cursor=pointer]:
+                    - /url: /contact
+            - generic [ref=e250]:
+              - heading "Legal" [level=3] [ref=e251]
+              - list [ref=e252]:
+                - listitem [ref=e253]:
+                  - link "Privacy Policy" [ref=e254] [cursor=pointer]:
+                    - /url: /privacy
+                - listitem [ref=e255]:
+                  - link "Terms of Service" [ref=e256] [cursor=pointer]:
+                    - /url: /terms
+                - listitem [ref=e257]:
+                  - link "Cookie Policy" [ref=e258] [cursor=pointer]:
+                    - /url: /cookies
+                - listitem [ref=e259]:
+                  - link "Disclaimer" [ref=e260] [cursor=pointer]:
+                    - /url: /disclaimer
+        - paragraph [ref=e262]: © 2026 Doscom University. All rights reserved.
+  - region "Notifications alt+T"

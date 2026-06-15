@@ -1,0 +1,18 @@
+[     385ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/course-categories:0
+[     387ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/course-types:0
+[     387ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/courses:0
+[     727ms] [ERROR] Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format. @ http://localhost:4173/assets/index-DkxPw89Q.js:9
+[    1392ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/course-categories:0
+[    1393ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/course-types:0
+[    1395ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8080/courses:0
+[    1411ms] TypeError: Cannot read properties of undefined (reading 'map')
+    at w (http://localhost:4173/assets/Course-DMRfV0Fy.js:1:4117)
+    at So (http://localhost:4173/assets/index-DkxPw89Q.js:9:47528)
+    at hc (http://localhost:4173/assets/index-DkxPw89Q.js:9:70022)
+    at Mc (http://localhost:4173/assets/index-DkxPw89Q.js:9:80298)
+    at Mu (http://localhost:4173/assets/index-DkxPw89Q.js:9:115688)
+    at ku (http://localhost:4173/assets/index-DkxPw89Q.js:9:114769)
+    at Ou (http://localhost:4173/assets/index-DkxPw89Q.js:9:114607)
+    at gu (http://localhost:4173/assets/index-DkxPw89Q.js:9:111472)
+    at ld (http://localhost:4173/assets/index-DkxPw89Q.js:9:123116)
+    at id (http://localhost:4173/assets/index-DkxPw89Q.js:9:121681)

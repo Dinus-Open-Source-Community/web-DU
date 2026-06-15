@@ -13,6 +13,8 @@ func CORSMiddleware() gin.HandlerFunc {
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
 		"http://localhost:3001",
+		"http://localhost:4173",
+		"http://127.0.0.1:4173",
 		"http://localhost:5173",
 		"https://3gg4ww8n-5173.asse.devtunnels.ms",
 		"http://3gg4ww8n-5173.asse.devtunnels.ms",

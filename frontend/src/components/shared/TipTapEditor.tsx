@@ -1,5 +1,6 @@
 'use client'
 
+import type { Editor } from '@tiptap/core'
 import { useMemo } from 'react'
 import { Tiptap, useEditor, useTiptapState } from '@tiptap/react'
 import '@/styles/tiptap-editor.css'
@@ -46,7 +47,7 @@ export function TiptapEditor({
         class: cn('max-w-none focus:outline-none', variant === 'compact' && 'min-h-[160px]'),
       },
     },
-    onUpdate: ({ editor: ed }) => {
+    onUpdate: ({ editor: ed }: { editor: Editor }) => {
       onChange(ed.getHTML())
     },
   })
