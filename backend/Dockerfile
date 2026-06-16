@@ -9,6 +9,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o ./dist/backend main.go
 # Runtime stage
 FROM alpine:latest
 WORKDIR /app
-COPY --from=builder /app/backend .
+COPY --from=builder /app/dist/backend .
 EXPOSE 8080
-CMD ["./dist/backend"]
+CMD ["./backend"]
