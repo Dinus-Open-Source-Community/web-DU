@@ -1,4 +1,4 @@
-import type { LessonThemeMode } from '@/components/courses/module-viewer/utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 export const LESSON_THEME_STORAGE_KEY = 'course-module-viewer-theme'
 

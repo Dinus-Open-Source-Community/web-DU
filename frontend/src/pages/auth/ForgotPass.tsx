@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '../../components/ui/button'
 import { Link } from 'react-router-dom'
 import { GlobalInput } from '../../components/shared/Input'
 import { LogoDu } from '../../components/shared/icon'
 import AuthLayout from '../../components/layouts/AuthLayouts'
+import { forgotPasswordFormSchema, getValidationMessage } from '../../lib/validator'
 
 export function ForgotPasswordPages() {
   const [email, setEmail] = useState('')
@@ -12,7 +14,12 @@ export function ForgotPasswordPages() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (email.trim()) setSubmitted(true)
+    const validation = forgotPasswordFormSchema.safeParse({ email })
+    if (!validation.success) {
+      toast.error(getValidationMessage(validation.error, 'Email tidak valid'))
+      return
+    }
+    setSubmitted(true)
   }
 
   if (submitted) {

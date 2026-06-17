@@ -2,25 +2,15 @@ import { api } from './axios'
 import { unwrapApiResponse } from './api-error'
 import { API_ROUTES } from './api-path'
 import type { IResponse } from '@/lib/types/api'
-import type { AdminKpi } from '@/components/Admin/Dashboard/Kpi'
+import type {
+  AdminKpi,
+  DashboardPeriod,
+  FinancialSummary,
+  TransactionSummary,
+} from '@/lib/types/admin/dashboard'
 import type { IAdminTransaction } from '@/lib/types/transaction'
-import type { IChartDataPoint } from '@/lib/types/components/charts'
 
-export type DashboardPeriod = '7d' | '30d' | '90d' | '12m'
-
-export interface TransactionSummary {
-  grossRevenue: number
-  paidCount: number
-  pendingCount: number
-  failedCount: number
-}
-
-export interface FinancialSummary {
-  kpis: AdminKpi[]
-  monthlyRevenue: IChartDataPoint[]
-  revenueByCategory: IChartDataPoint[]
-  revenueSource: Array<IChartDataPoint & { color: string }>
-}
+export type { AdminKpi, DashboardPeriod, FinancialSummary, TransactionSummary }
 
 export async function fetchDashboardKpis(period: DashboardPeriod = '30d') {
   const response = await api.get<IResponse<AdminKpi[]>>(
@@ -49,4 +39,3 @@ export async function fetchFinancialSummary() {
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil ringkasan keuangan')
 }
-

@@ -1,35 +1,53 @@
-import { useState, type ReactNode } from 'react'
+import { lazy, Suspense, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+import { registerProtectedFileCacheCleanup } from '@/lib/files/protected-file-cache-cleanup'
+
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-query-devtools').then((module) => ({
+        default: module.ReactQueryDevtools,
+      })),
+    )
+  : null
+
+function QueryDevtoolsPanel() {
+  if (!ReactQueryDevtools) return null
+
+  return (
+    <Suspense fallback={null}>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </Suspense>
+  )
+}
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
-    () =>
-      new QueryClient({
+    () => {
+      const client = new QueryClient({
         defaultOptions: {
           queries: {
-            // Best practice: staleTime 1 minute to avoid excessive re-fetching
-            // but short enough to keep data relatively fresh.
-            // User had 15 mins, I'll keep it or adjust to a standard 5 mins.
-            // Let's stick closer to user's 15 mins if they prefer it, 
-            // but typically 5 mins is a good middle ground.
-            staleTime: 60 * 1000 * 5, 
+            staleTime: 60 * 1000 * 5,
             gcTime: 60 * 1000 * 30,
-            retry: 1, // Reduced from 2 to 1 for faster failure feedback
+            retry: 1,
             refetchOnWindowFocus: false,
-            refetchOnMount: false, // Changed to false to rely on staleTime
+            refetchOnMount: false,
           },
           mutations: {
-            retry: 0, // Mutations usually shouldn't retry by default
+            retry: 0,
           },
         },
-      }),
+      })
+
+      registerProtectedFileCacheCleanup(client)
+      return client
+    },
   )
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <QueryDevtoolsPanel />
     </QueryClientProvider>
   )
 }

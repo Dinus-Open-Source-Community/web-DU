@@ -20,7 +20,7 @@ import {
   ToolbarShell,
   toolbarIconSize,
 } from './tiptap/toolbar-primitives'
-import { useTiptapMediaDialog } from './tiptap/use-tiptap-media-dialog'
+import { useTiptapMediaDialog } from '@/hooks/tiptap/use-tiptap-media-dialog'
 
 type TipTapToolbarProps = {
   variant: TiptapEditorVariant

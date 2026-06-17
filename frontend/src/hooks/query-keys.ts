@@ -1,3 +1,4 @@
+import type { AdminTransactionsParams } from '@/services/admin-transactions'
 import type { ManagedUserListParams } from '@/lib/user-manage/types'
 import type { IQueryParamsPayload } from '@/services/api-path'
 
@@ -66,7 +67,7 @@ export const adminDashboardKeys = {
 
 export const adminTransactionsKeys = {
   all: ['admin-transactions'] as const,
-  list: (params?: Record<string, unknown>) =>
+  list: (params?: AdminTransactionsParams) =>
     ['admin-transactions', 'list', params] as const,
 }
 

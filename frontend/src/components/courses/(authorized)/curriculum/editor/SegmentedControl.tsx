@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../edit-layout'
-import { editMotion } from './edit-motion'
+import { editLayout } from '@/lib/course-edit/edit-layout'
+import { editMotion } from '@/lib/course-edit/edit-motion'
 
 export type SegmentedOption<T extends string> = {
   value: T

@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
-import { ReactIcon } from './icon'
+import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
+import { CourseCardProfiles } from './CourseCardProfiles'
 import type { ICardProps } from '../../lib/types/utils'
 import { Rating } from '../ui/rating'
-import { Profile } from '../ui/profile'
+import { hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
 import {
-  DEFAULT_COURSE_PROFILE_AVATAR,
-  resolveCourseProfile,
-  resolveCourseProfileAvatar,
+  resolveCourseProfiles,
 } from '@/lib/course-detail/course-profile'
 import { FormatRupiah } from '@/lib/func/func'
 import { isLearningProgressComplete } from '@/lib/learning/progress'
@@ -80,24 +79,35 @@ function CourseLevelSignal({ level }: { level?: string }) {
   )
 }
 
-const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: ICardProps }) => {
-  const profile = resolveCourseProfile(data)
+const CardCourse = ({
+  size = 'md',
+  data,
+  coverLoading = 'lazy',
+  coverFetchPriority,
+}: {
+  size?: 'sm' | 'md' | 'lg'
+  data: ICardProps
+  coverLoading?: 'lazy' | 'eager'
+  coverFetchPriority?: 'high' | 'low' | 'auto'
+}) => {
+  const profiles = resolveCourseProfiles(data)
   const isEnrolled =
     data.isEnrolled ?? (data.enrollment_status ? data.enrollment_status === 'active' || data.enrollment_status === 'completed' : data.progress !== undefined)
-  const actionLabel = isEnrolled ? 'Mulai' : 'Enroll'
+  const actionLabel = isEnrolled ? 'Mulai' : 'Daftar'
+  const showRating = hasPublishedCourseReviews(data.total_reviews)
 
   return (
     <div className={`flex h-full w-full ${sizes.container[size]} flex-col overflow-hidden drop-shadow-sm transition-all hover:drop-shadow-md duration-300`}>
       {/* Image Content*/}
-      <div className={`relative aspect-video w-full shrink-0 rounded-[10px] ${sizes.imageWrapper[size]}`}>
-        {data.cover_url ? (
-          <img src={data.cover_url} alt={data.title} loading="lazy" className="h-full w-full rounded-[10px] object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#D2E1ED] text-[#00D8FF]">
-            <ReactIcon />
-          </div>
-        )}
-      </div>
+      <CourseCardCoverFrame className={sizes.imageWrapper[size]}>
+        <CourseCardCover
+          src={data.cover_url}
+          alt={data.title}
+          fill
+          loading={coverLoading}
+          fetchPriority={coverFetchPriority}
+        />
+      </CourseCardCoverFrame>
 
       {/* Content description */}
       <div className={`relative z-10 flex grow flex-col rounded-xl bg-white border border-slate-100/50 ${sizes.contentWrapper[size]}`}>
@@ -114,10 +124,12 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
           {data.module && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{data.module}</p>}
           <div className="flex flex-col grow">
             {data.description && <p className={`line-clamp-2 text-sm font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{data.description}</p>}
-            {(data.price !== undefined || (data.rating !== undefined && data.total_reviews !== undefined)) && (
+            {(data.price !== undefined || showRating) && (
               <div className="mt-5 flex items-center justify-between gap-3">
                 {data.price !== undefined ? <span className="text-base font-semibold text-primary">{FormatRupiah(data.price)}</span> : <span />}
-                {data.rating !== undefined && data.total_reviews !== undefined && <Rating rating={data.rating} totalReviews={data.total_reviews} />}
+                {showRating && data.rating !== undefined && data.total_reviews !== undefined ? (
+                  <Rating rating={data.rating} totalReviews={data.total_reviews} />
+                ) : null}
               </div>
             )}
           </div>
@@ -125,14 +137,7 @@ const CardCourse = ({ size = 'md', data }: { size?: 'sm' | 'md' | 'lg'; data: IC
 
         {/* Bottom Section (Author & Action) */}
         <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-          {profile ? (
-            <Profile
-              image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
-              name={profile.name}
-            />
-          ) : (
-            <div />
-          )}
+          {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} /> : <div />}
 
           <div className="flex items-center gap-3">
             {data.progress !== undefined && isLearningProgressComplete(data.progress) ? (

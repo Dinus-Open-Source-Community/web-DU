@@ -22,8 +22,8 @@ import type { CourseEditNavigationActions } from "@/lib/course-edit/types";
 import type { IModulesData } from "@/lib/types/module";
 import { cn } from "@/lib/utils";
 
-import { editLayout, type CurriculumOutlineLayout } from "./edit-layout";
-import { editMotion } from "./editor/edit-motion";
+import { editLayout, type CurriculumOutlineLayout } from '@/lib/course-edit/edit-layout'
+import { editMotion } from '@/lib/course-edit/edit-motion'
 
 type CurriculumOutlineProps = Pick<
   CourseEditNavigationActions,

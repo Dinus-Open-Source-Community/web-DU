@@ -3,7 +3,7 @@ import { Award, Infinity as InfinityIcon } from 'lucide-react'
 
 import type { ICourseDetailItem, ICourseItem } from '@/lib/types/course'
 import { detailLayout } from '@/lib/course-detail/detail-layout'
-import { resolveCourseProfile } from '@/lib/course-detail/course-profile'
+import { resolveCourseProfiles } from '@/lib/course-detail/course-profile'
 import { buildDiscountLabel } from '@/lib/course-detail/pricing'
 import { FormatRupiah } from '@/lib/func/func'
 import { cn } from '@/lib/utils'
@@ -46,7 +46,7 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
   const discountLabel = buildDiscountLabel(data.price, data.price_strike)
   const includes = buildCourseIncludes()
   const totalReviews = data.totalReviews || data.reviews?.length || 0
-  const instructor = resolveCourseProfile(data)
+  const instructors = resolveCourseProfiles(data)
 
   return (
     <div className="flex flex-col pt-16">
@@ -86,14 +86,15 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
               </div>
             </section>
 
-            {instructor ? (
+            {instructors.map((instructor) => (
               <CourseInstructorCard
+                key={instructor.uid ?? instructor.name}
                 name={instructor.name}
                 role={instructor.role ?? 'Instruktur'}
                 avatar={instructor.avatar_url}
                 desc={instructor.description ?? ''}
               />
-            ) : null}
+            ))}
 
             <StudentFeedbackPanel course={data} />
 

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 
 import { AssignmentDeadlineTimer } from './AssignmentDeadlineTimer'
 import { AssignmentSubmissionHistorySection } from './AssignmentSubmissionHistorySection'
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonAssignmentOverviewProps = {
   lesson: LessonDetailItem

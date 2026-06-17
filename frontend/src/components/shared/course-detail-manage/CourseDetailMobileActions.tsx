@@ -8,12 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import type { CourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
 
 type CourseDetailMobileActionsProps = {
   curriculumEditHref: string
-  curriculumEditNavigationState?: unknown
+  curriculumEditNavigationState?: CourseEditNavigationState
   previewHref: string
   isAdmin: boolean
   isPublished: boolean

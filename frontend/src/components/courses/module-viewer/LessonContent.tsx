@@ -4,7 +4,7 @@ import type { LessonDetailItem } from '@/lib/types/course'
 import { parseLessonContent } from '@/lib/rich-text'
 import { cn } from '@/lib/utils'
 
-import { getEmbedUrl, type LessonThemeMode } from './utils'
+import { getEmbedUrl, type LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonContentProps = {
   lesson: LessonDetailItem | null

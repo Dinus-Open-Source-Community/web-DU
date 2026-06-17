@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 
 import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/hooks/use-user'
-import type { ProfileSectionViewModel } from '@/lib/profile/profile-section-view-model'
+import type { IUserData } from '@/lib/types/user'
 import { formatProfileLastUpdatedLabel } from '@/lib/profile/profile-formatters'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 import {
@@ -11,11 +11,11 @@ import {
   updateProfileSchema,
 } from '@/lib/validator'
 
-export type { ProfileSectionViewModel } from '@/lib/profile/profile-section-view-model'
+import type { ProfileSectionViewModel } from '@/lib/profile/profile-section-view-model'
 
 type UseProfileSectionViewOptions = {
   user: IAuthSessionUser
-  onAvatarUpdated?: () => Promise<unknown>
+  onAvatarUpdated?: () => Promise<IUserData | null | void>
   onValidationError?: (message: string) => void
 }
 
@@ -25,6 +25,7 @@ export function useProfileSectionView({
   onValidationError,
 }: UseProfileSectionViewOptions): ProfileSectionViewModel {
   const [displayName, setDisplayName] = useState(user.name)
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState('')
@@ -71,6 +72,7 @@ export function useProfileSectionView({
       if (isPasswordPending) return
 
       const validation = changePasswordFormSchema.safeParse({
+        old_password: currentPassword,
         new_password: newPassword,
         confirm_password: confirmPassword,
       })
@@ -80,12 +82,14 @@ export function useProfileSectionView({
       }
 
       await updatePassword({
+        old_password: validation.data.old_password,
         new_password: validation.data.new_password,
       })
+      setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     },
-    [confirmPassword, isPasswordPending, newPassword, onValidationError, updatePassword],
+    [confirmPassword, currentPassword, isPasswordPending, newPassword, onValidationError, updatePassword],
   )
 
   useEffect(() => {
@@ -100,6 +104,8 @@ export function useProfileSectionView({
     user,
     displayName,
     onDisplayNameChange: setDisplayName,
+    currentPassword,
+    onCurrentPasswordChange: setCurrentPassword,
     newPassword,
     onNewPasswordChange: setNewPassword,
     confirmPassword,

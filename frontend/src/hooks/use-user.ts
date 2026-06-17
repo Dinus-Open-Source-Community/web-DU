@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import { getApiErrorMessage } from '@/services/api-error'
 import { toast } from 'sonner'
 import type { IUpdatePasswordPayload, IUpdateProfilePayload } from '@/lib/types/user'
 import {
@@ -10,15 +10,7 @@ import {
 import { authKeys } from './query-keys'
 
 function getMutationErrorMessage(error: unknown, fallback: string) {
-  if (error instanceof AxiosError) {
-    return error.response?.data?.message ?? fallback
-  }
-
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return fallback
+  return getApiErrorMessage(error, fallback)
 }
 
 export function useUpdateProfilePhoto() {

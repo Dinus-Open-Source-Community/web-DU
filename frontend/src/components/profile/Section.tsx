@@ -10,6 +10,8 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
     user,
     displayName,
     onDisplayNameChange,
+    currentPassword,
+    onCurrentPasswordChange,
     newPassword,
     onNewPasswordChange,
     confirmPassword,
@@ -111,6 +113,17 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
           <h3 className="ml-1 text-xs font-bold uppercase tracking-wider text-primary/80">Ubah Password Akun</h3>
           <form onSubmit={onSubmitPassword} className="flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <label className="ml-1 text-sm font-medium text-slate-700">Password Saat Ini</label>
+                <Input
+                  type="password"
+                  placeholder="Masukkan password saat ini"
+                  value={currentPassword}
+                  onChange={(event) => onCurrentPasswordChange(event.target.value)}
+                  autoComplete="current-password"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-sm font-medium text-slate-700">Password Baru</label>
                 <Input

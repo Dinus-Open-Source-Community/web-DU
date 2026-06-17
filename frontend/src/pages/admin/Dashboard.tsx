@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { AppSidebarProvider } from "../../components/shared/Sidebar";
 import { PageHeader } from "../../components/shared/Header";
 import { KpiGrid } from "../../components/Admin/Dashboard/Kpi";
@@ -5,11 +6,20 @@ import { RecentTransactions } from "../../components/Admin/Dashboard/RecentTrans
 import { PeriodSelector } from "../../components/Admin/Dashboard/PeriodSelector";
 import { DashboardError } from "../../components/Admin/Dashboard/DashboardError";
 import { ChartCard } from "../../components/shared/ChartCard";
-import { CategoryBarChart } from "../../components/shared/BarChart";
-import { TransactionRatioChart } from "../../components/shared/RatioChart";
 import { useSidebarUser } from "@/hooks/use-sidebar-user";
 import { useAdminDashboard } from "@/hooks/use-admin-dashboard";
 import { CurrencyCompact } from "@/lib/func/func";
+
+const CategoryBarChart = lazy(() =>
+  import("../../components/shared/BarChart").then((module) => ({
+    default: module.CategoryBarChart,
+  })),
+);
+const TransactionRatioChart = lazy(() =>
+  import("../../components/shared/RatioChart").then((module) => ({
+    default: module.TransactionRatioChart,
+  })),
+);
 
 const SKELETON_BAR_HEIGHTS = [55, 72, 40, 85, 63, 48, 78, 36];
 
@@ -92,12 +102,14 @@ export default function Dashboard() {
             ) : financialCharts.isLoading ? (
               <ChartSkeleton />
             ) : (
-              <CategoryBarChart
-                data={financialCharts.data?.monthlyRevenue ?? []}
-                orientation="vertical"
-                height={280}
-                valueFormatter={CurrencyCompact}
-              />
+              <Suspense fallback={<ChartSkeleton />}>
+                <CategoryBarChart
+                  data={financialCharts.data?.monthlyRevenue ?? []}
+                  orientation="vertical"
+                  height={280}
+                  valueFormatter={CurrencyCompact}
+                />
+              </Suspense>
             )}
           </ChartCard>
 
@@ -116,10 +128,12 @@ export default function Dashboard() {
             ) : transactionSummary.isLoading ? (
               <DonutSkeleton />
             ) : (
-              <TransactionRatioChart
-                data={transactionStatusRatio}
-                height={280}
-              />
+              <Suspense fallback={<DonutSkeleton />}>
+                <TransactionRatioChart
+                  data={transactionStatusRatio}
+                  height={280}
+                />
+              </Suspense>
             )}
           </ChartCard>
         </section>
@@ -138,12 +152,14 @@ export default function Dashboard() {
           ) : financialCharts.isLoading ? (
             <ChartSkeleton height={240} />
           ) : (
-            <CategoryBarChart
-              data={financialCharts.data?.revenueByCategory ?? []}
-              orientation="horizontal"
-              height={240}
-              valueFormatter={CurrencyCompact}
-            />
+            <Suspense fallback={<ChartSkeleton height={240} />}>
+              <CategoryBarChart
+                data={financialCharts.data?.revenueByCategory ?? []}
+                orientation="horizontal"
+                height={240}
+                valueFormatter={CurrencyCompact}
+              />
+            </Suspense>
           )}
         </ChartCard>
 

@@ -2,7 +2,7 @@ import { parseLessonContent } from '@/lib/rich-text'
 import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentTextSubmissionViewProps = {
   submission: LessonAssignmentSubmissionRecord

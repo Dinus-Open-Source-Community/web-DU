@@ -1,37 +1,21 @@
 import type { LessonReadingRecord, LessonReadingStatus } from './types'
+import type {
+  LessonReadingRecordApi,
+  LessonReadingStatusApi,
+} from './api-types'
 
-type LessonReadingStatusApi = {
-  is_read?: boolean
-  reading?: {
-    read_at?: string
-    created_at?: string
-  } | null
-}
-
-type LessonReadingRecordApi = {
-  uid?: string
-  lesson_uid?: string
-  enrollment_uid?: string
-  read_at?: string
-  created_at?: string
-}
-
-export function mapLessonReadingStatus(raw: unknown): LessonReadingStatus {
-  const data = (raw ?? {}) as LessonReadingStatusApi
-  const reading = data.reading
+export function mapLessonReadingStatus(raw: LessonReadingStatusApi): LessonReadingStatus {
+  const reading = raw.reading
 
   return {
-    isRead: Boolean(data.is_read),
+    isRead: Boolean(raw.is_read),
     readAt: reading?.read_at ?? reading?.created_at ?? null,
   }
 }
 
-export function mapLessonReadingHistory(raw: unknown): LessonReadingRecord[] {
-  if (!Array.isArray(raw)) return []
-
+export function mapLessonReadingHistory(raw: LessonReadingRecordApi[]): LessonReadingRecord[] {
   return raw
-    .map((item) => {
-      const record = item as LessonReadingRecordApi
+    .map((record) => {
       const lessonUid = record.lesson_uid?.trim()
       if (!lessonUid) return null
 

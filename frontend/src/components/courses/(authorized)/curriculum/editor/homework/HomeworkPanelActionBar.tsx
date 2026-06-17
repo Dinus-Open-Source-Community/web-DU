@@ -1,6 +1,6 @@
 import type { LessonAssignmentStatus } from "@/lib/types/lesson";
 
-import { editLayout } from "../../edit-layout";
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type HomeworkPanelActionBarProps = {
   status: LessonAssignmentStatus;

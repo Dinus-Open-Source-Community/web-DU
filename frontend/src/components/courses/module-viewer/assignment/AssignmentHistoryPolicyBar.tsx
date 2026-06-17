@@ -1,7 +1,7 @@
 import type { AssignmentHistoryPolicyViewModel } from '@/lib/lesson-assignment/submission-history'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentPolicyMetaProps = {
   policy: AssignmentHistoryPolicyViewModel
@@ -60,6 +60,3 @@ export function AssignmentPolicyMeta({ policy, theme }: AssignmentPolicyMetaProp
     </div>
   )
 }
-
-/** @deprecated Use AssignmentPolicyMeta */
-export const AssignmentHistoryPolicyBar = AssignmentPolicyMeta

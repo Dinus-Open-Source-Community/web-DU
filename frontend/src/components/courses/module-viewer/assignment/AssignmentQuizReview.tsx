@@ -4,7 +4,7 @@ import { AssignmentQuizPrompt } from './AssignmentQuizPrompt'
 import type { QuizReviewSummary } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentQuizReviewProps = {
   review: QuizReviewSummary

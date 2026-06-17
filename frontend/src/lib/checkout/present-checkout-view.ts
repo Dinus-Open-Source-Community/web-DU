@@ -1,4 +1,4 @@
-import type { PaymentMethodItem, TripayFee } from '@/services/payment'
+import type { PaymentMethodItem, TripayFee } from '@/lib/types/checkout/payment-method'
 
 const currencyFormatter = new Intl.NumberFormat('id-ID', {
   style: 'currency',

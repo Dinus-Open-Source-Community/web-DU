@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, Pencil } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { editLayout } from '@/components/courses/(authorized)/curriculum/edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 import { LessonTitleRenameField } from '@/components/courses/(authorized)/curriculum/editor/LessonTitleRenameField'
 
 type CourseEditCompactHeaderProps = {

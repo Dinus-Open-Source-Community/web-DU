@@ -10,7 +10,7 @@ import { LessonContentPanel } from './editor/LessonContentPanel'
 import { LessonEditorHeader } from './editor/LessonEditorHeader'
 import { LessonHomeworkPanel } from './editor/LessonHomeworkPanel'
 import { PanelTransition } from './editor/PanelTransition'
-import { editLayout } from './edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type CourseLessonWorkspaceProps = {
   activeLesson: EditableLesson | null

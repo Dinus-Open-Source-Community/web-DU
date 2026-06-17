@@ -82,6 +82,45 @@ export function UserManagePanel({
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchForm
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              if (value === '') onSearch('')
+            }}
+            onSubmit={() => onSearch(search)}
+            placeholder={config.searchPlaceholder}
+            submitLabel="Cari"
+            className="min-w-[240px] flex-1"
+          />
+
+          {config.promote && onPromote ? (
+            <UserPromoteDialog
+              triggerLabel={config.promote.triggerLabel}
+              triggerIcon={UserPlus}
+              title={config.promote.dialogTitle}
+              description={config.promote.dialogDescription}
+              confirmLabel={config.promote.confirmLabel}
+              searchPlaceholder={config.promote.searchPlaceholder}
+              emptyTitle={config.promote.emptyTitle}
+              emptyDescription={config.promote.emptyDescription}
+              footerHint={config.promote.footerHint}
+              candidates={promoteCandidates}
+              onConfirm={onPromote}
+            />
+          ) : null}
+        </div>
+
+        {totalUsers != null ? (
+          <span className="shrink-0 text-sm leading-none text-slate-500">
+            Total <span className="font-semibold tabular-nums text-slate-800">{totalUsers}</span>{' '}
+            {config.navLabel.toLowerCase()}
+          </span>
+        ) : null}
+      </div>
+
       <AdminDataTable
         columns={columns}
         data={rows}
@@ -89,44 +128,6 @@ export function UserManagePanel({
         page={page}
         totalPages={totalPages}
         onPageChange={onPageChange}
-        toolbar={
-          <>
-            <SearchForm
-              value={search}
-              onChange={(value) => {
-                setSearch(value)
-                if (value === '') onSearch('')
-              }}
-              onSubmit={() => onSearch(search)}
-              placeholder={config.searchPlaceholder}
-              submitLabel="Cari"
-              className="min-w-[240px] flex-1"
-            />
-
-            {config.promote && onPromote ? (
-              <UserPromoteDialog
-                triggerLabel={config.promote.triggerLabel}
-                triggerIcon={UserPlus}
-                title={config.promote.dialogTitle}
-                description={config.promote.dialogDescription}
-                confirmLabel={config.promote.confirmLabel}
-                searchPlaceholder={config.promote.searchPlaceholder}
-                emptyTitle={config.promote.emptyTitle}
-                emptyDescription={config.promote.emptyDescription}
-                footerHint={config.promote.footerHint}
-                candidates={promoteCandidates}
-                onConfirm={onPromote}
-              />
-            ) : null}
-
-            {totalUsers != null ? (
-              <p className="ml-auto text-sm text-slate-500">
-                Total <span className="font-semibold tabular-nums text-slate-800">{totalUsers}</span>{' '}
-                {config.navLabel.toLowerCase()}
-              </p>
-            ) : null}
-          </>
-        }
         emptyState={
           isLoading ? (
             <p className="text-sm text-slate-500">Memuat data...</p>

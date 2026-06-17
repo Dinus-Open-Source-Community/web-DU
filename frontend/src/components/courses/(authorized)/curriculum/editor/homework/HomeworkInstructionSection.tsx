@@ -9,7 +9,7 @@ import type {
   LessonAssignmentInstructionAttachment,
 } from '@/lib/types/lesson'
 
-import { editLayout } from '../../edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 import { InstructionAttachmentsField } from './InstructionAttachmentsField'
 import { PanelTransition } from '../PanelTransition'
 import { SegmentedControl } from '../SegmentedControl'

@@ -6,6 +6,8 @@ export type ProfileSectionViewModel = {
   user: IAuthSessionUser
   displayName: string
   onDisplayNameChange: (value: string) => void
+  currentPassword: string
+  onCurrentPasswordChange: (value: string) => void
   newPassword: string
   onNewPasswordChange: (value: string) => void
   confirmPassword: string

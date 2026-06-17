@@ -22,7 +22,7 @@ import { CourseEditStickySaveBar } from './compact/CourseEditStickySaveBar'
 import { CourseEditToolbar } from './CourseEditChrome'
 import { CourseLessonWorkspace } from './CourseLessonWorkspace'
 import { CurriculumOutline } from './CurriculumOutline'
-import { editLayout } from './edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 import { UnsavedEditorTabDialog } from './UnsavedEditorTabDialog'
 
 type CourseEditShellProps = CourseEditNavigationActions & {

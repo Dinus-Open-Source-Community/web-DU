@@ -1,14 +1,28 @@
-import type { AxiosError } from 'axios'
+import { isAxiosError, type AxiosError } from 'axios'
 import type { IResponse } from '@/lib/types/api'
 
 export function getApiErrorMessage(error: unknown, fallback: string): string {
-  const axiosError = error as AxiosError<IResponse<unknown>>
-  return (
-    axiosError.response?.data?.message ||
-    axiosError.response?.data?.error ||
-    axiosError.message ||
-    fallback
-  )
+  if (isAxiosError<IResponse<never>>(error)) {
+    return (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      fallback
+    )
+  }
+
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return fallback
+}
+
+export function isNotFoundApiError(error: unknown): boolean {
+  if (isAxiosError(error)) {
+    return error.response?.status === 404
+  }
+  return false
 }
 
 export function unwrapApiResponse<T>(response: IResponse<T>, fallbackMessage: string): T {
@@ -33,3 +47,5 @@ export async function withApiErrorHandling<T>(
     throw new Error(getApiErrorMessage(error, fallbackMessage), { cause: error })
   }
 }
+
+export type { AxiosError }

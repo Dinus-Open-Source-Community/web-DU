@@ -1,5 +1,7 @@
 import type { CourseAssignmentBulkItem } from '@/lib/course-detail/assignment-overview-types'
+import type { CourseAssignmentsListApiRaw } from '@/lib/course-detail/course-assignments-api-types'
 import { mapCourseAssignmentBulkList } from '@/lib/course-detail/map-course-assignment-bulk'
+import type { IPaginationMeta } from '@/lib/types/common/pagination'
 import type { IQueryParamsPayload } from './api-path'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
@@ -16,24 +18,21 @@ export type CourseAssignmentsListResponse = {
   }
 }
 
-function mapPaginationMeta(raw: unknown): CourseAssignmentsListResponse['meta'] {
-  const meta = (raw ?? {}) as Record<string, unknown>
-
+function mapPaginationMeta(raw: Partial<IPaginationMeta> | undefined): CourseAssignmentsListResponse['meta'] {
   return {
-    total: typeof meta.total === 'number' ? meta.total : 0,
-    per_page: typeof meta.per_page === 'number' ? meta.per_page : 50,
-    current_page: typeof meta.current_page === 'number' ? meta.current_page : 1,
-    total_pages: typeof meta.total_pages === 'number' ? meta.total_pages : 0,
+    total: raw?.total ?? 0,
+    per_page: raw?.per_page ?? 50,
+    current_page: raw?.current_page ?? 1,
+    total_pages: raw?.total_pages ?? 0,
   }
 }
 
-function mapCourseAssignmentsResponse(raw: unknown): CourseAssignmentsListResponse {
+function mapCourseAssignmentsResponse(raw: CourseAssignmentsListApiRaw): CourseAssignmentsListResponse {
   const assignments = mapCourseAssignmentBulkList(raw)
-  const data = (raw ?? {}) as Record<string, unknown>
 
   return {
     assignments,
-    meta: mapPaginationMeta(data.meta),
+    meta: mapPaginationMeta(raw.meta),
   }
 }
 
@@ -42,7 +41,7 @@ export async function fetchCourseAssignments(
   params?: IQueryParamsPayload,
 ): Promise<CourseAssignmentsListResponse> {
   return withApiErrorHandling(async () => {
-    const response = await api.get<IResponse<unknown>>(
+    const response = await api.get<IResponse<CourseAssignmentsListApiRaw>>(
       API_ROUTES.courses.assignments.getAllByCourseUid(courseUid, params),
     )
     const data = unwrapApiResponse(response.data, 'Gagal mengambil daftar tugas kursus')

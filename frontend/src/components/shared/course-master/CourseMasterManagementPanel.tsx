@@ -165,6 +165,33 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SearchForm
+          value={search}
+          onChange={(value) => {
+            setSearch(value)
+            if (value === '') {
+              setCommittedSearch('')
+              setPage(1)
+            }
+          }}
+          onSubmit={() => {
+            setCommittedSearch(search)
+            setPage(1)
+          }}
+          placeholder={`Cari ${labels.singular.toLowerCase()}...`}
+          submitLabel="Cari"
+        />
+        <Button
+          type="button"
+          className="rounded-xl px-4"
+          onClick={() => setDialogState({ mode: 'create' })}
+        >
+          <Plus className="mr-2 size-4" aria-hidden />
+          {labels.createButton}
+        </Button>
+      </div>
+
       <AdminDataTable
         columns={columns}
         data={items}
@@ -172,34 +199,6 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         page={page}
         totalPages={totalPages}
         onPageChange={setPage}
-        toolbar={
-          <>
-            <SearchForm
-              value={search}
-              onChange={(value) => {
-                setSearch(value)
-                if (value === '') {
-                  setCommittedSearch('')
-                  setPage(1)
-                }
-              }}
-              onSubmit={() => {
-                setCommittedSearch(search)
-                setPage(1)
-              }}
-              placeholder={`Cari ${labels.singular.toLowerCase()}...`}
-              submitLabel="Cari"
-            />
-            <Button
-              type="button"
-              className="ml-auto rounded-xl px-4"
-              onClick={() => setDialogState({ mode: 'create' })}
-            >
-              <Plus className="mr-2 size-4" aria-hidden />
-              {labels.createButton}
-            </Button>
-          </>
-        }
         emptyState={
           isLoading ? (
             <p className="text-sm text-slate-500">Memuat data...</p>

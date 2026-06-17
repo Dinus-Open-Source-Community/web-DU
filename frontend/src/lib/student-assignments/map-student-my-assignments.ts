@@ -1,3 +1,4 @@
+import type { StudentMyAssignmentApiRaw } from '@/lib/student-assignments/api-types'
 import type {
   IMentorAssignmentSubmission,
   IMentorCourseAssignment,
@@ -27,7 +28,7 @@ function normalizeTaskType(taskType: string): MentorAssignmentTaskType {
   return taskType === 'quiz' ? 'quiz' : 'text'
 }
 
-function resolveMaxAttempts(assignment: Record<string, unknown>): number | undefined {
+function resolveMaxAttempts(assignment: StudentMyAssignmentApiRaw): number | undefined {
   const allowResubmit = Boolean(assignment.allow_resubmit)
   if (!allowResubmit) return 1
 
@@ -38,10 +39,7 @@ function resolveMaxAttempts(assignment: Record<string, unknown>): number | undef
   return 1 + maxResubmitCount
 }
 
-function mapAssignment(
-  raw: Record<string, unknown>,
-  courseUid: string,
-): IMentorCourseAssignment {
+function mapAssignment(raw: StudentMyAssignmentApiRaw, courseUid: string): IMentorCourseAssignment {
   const lessonTitle = String(raw.lesson_title ?? 'Pelajaran')
   const moduleTitle = String(raw.module_title ?? 'Modul')
   const lessonOrderIndex =
@@ -105,18 +103,18 @@ function mapListItem(
   student: Pick<IUserData, 'uid' | 'name' | 'avatar_url'>,
 ): StudentAssignmentSectionItem | null {
   const assignmentRaw = item.assignment
-  if (!assignmentRaw || typeof assignmentRaw !== 'object') return null
+  if (!assignmentRaw) return null
 
-  const assignment = mapAssignment(assignmentRaw as Record<string, unknown>, item.course_uid)
+  const assignment = mapAssignment(assignmentRaw, item.course_uid)
   if (!assignment.uid) return null
 
-  const lessonUid = String((assignmentRaw as Record<string, unknown>).lesson_uid ?? '')
+  const lessonUid = String(assignmentRaw.lesson_uid ?? '')
 
   return {
     courseTitle: item.course_title,
     lessonUid,
-    lessonTitle: String((assignmentRaw as Record<string, unknown>).lesson_title ?? ''),
-    moduleTitle: String((assignmentRaw as Record<string, unknown>).module_title ?? ''),
+    lessonTitle: String(assignmentRaw.lesson_title ?? ''),
+    moduleTitle: String(assignmentRaw.module_title ?? ''),
     assignment,
     latestSubmission: item.latest_submission
       ? mapLatestSubmission(item.latest_submission, assignment.uid, item.course_uid, student)
@@ -125,15 +123,12 @@ function mapListItem(
 }
 
 export function mapStudentMyAssignmentsResponse(
-  raw: unknown,
+  raw: IStudentMyAssignmentsResponse,
   student: Pick<IUserData, 'uid' | 'name' | 'avatar_url'>,
 ): StudentAssignmentSectionItem[] {
-  if (!raw || typeof raw !== 'object') return []
+  if (!Array.isArray(raw.assignments)) return []
 
-  const data = raw as IStudentMyAssignmentsResponse
-  if (!Array.isArray(data.assignments)) return []
-
-  return data.assignments
+  return raw.assignments
     .map((item) => mapListItem(item, student))
     .filter((item): item is StudentAssignmentSectionItem => item !== null)
 }

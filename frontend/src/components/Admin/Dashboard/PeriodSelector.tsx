@@ -1,5 +1,5 @@
 import { cn } from '../../../lib/utils'
-import type { DashboardPeriod } from '@/services/admin-dashboard'
+import type { DashboardPeriod } from '@/lib/types/admin/dashboard'
 
 interface PeriodOption {
   value: DashboardPeriod

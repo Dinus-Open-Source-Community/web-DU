@@ -1,4 +1,5 @@
 import type { EnrollmentStatus, PaymentStatus } from '@/lib/types/common/domain'
+import type { IEnrollmentInvoice } from '@/lib/types/user'
 
 export type ManagedUserDetailApiCourseRef = {
   uid: string
@@ -105,7 +106,7 @@ export type ManagedUserDetailApiResponse = {
     completed: number
     cancelled: number
   }
-  enrollment_invoices: unknown[]
+  enrollment_invoices: IEnrollmentInvoice[]
   mentored_courses: ManagedUserDetailApiMentoredCourse[]
   transaction_history: ManagedUserDetailApiTransaction[]
 }

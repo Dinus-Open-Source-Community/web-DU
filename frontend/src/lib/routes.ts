@@ -108,6 +108,10 @@ export const routeGroups: Record<string, RouteItem[]> = {
       path: ROUTES.admin.transactions,
     },
     {
+      name: 'Reviews & Q&A',
+      path: ROUTES.admin.reviewsAndQaPath,
+    },
+    {
       name: 'Financial Reports',
       path: ROUTES.admin.financial,
     },

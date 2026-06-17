@@ -26,11 +26,11 @@ export type CourseEditBackTarget =
   | { type: 'fallback'; path: string }
 
 export function resolveCourseEditBackTarget(
-  state: unknown,
+  state: CourseEditNavigationState | null | undefined,
   currentPath: string,
   fallbackPath: string,
 ): CourseEditBackTarget {
-  const from = (state as CourseEditNavigationState | null)?.from
+  const from = state?.from
   if (typeof from === 'string' && isSafeBackPath(from, currentPath)) {
     return { type: 'path', path: from }
   }

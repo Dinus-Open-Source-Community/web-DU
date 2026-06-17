@@ -9,7 +9,7 @@ import type { CourseEditorTab } from "@/lib/course-edit/types";
 import type { ICourseDetailItem } from "@/lib/types/course";
 import type { CompactPane } from "@/lib/course-edit/viewport";
 
-import { editLayout } from "./edit-layout";
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type CourseEditToolbarProps = {
   course: Partial<ICourseDetailItem>;

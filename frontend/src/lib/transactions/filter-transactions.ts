@@ -4,6 +4,21 @@ export type TransactionStatusFilter = 'ALL' | PaymentStatus
 
 const normalizeText = (value: string) => value.toLowerCase().trim()
 
+const STATUS_ALIASES: Record<string, PaymentStatus> = {
+  pending: 'pending',
+  unpaid: 'pending',
+  awaiting_payment: 'pending',
+  success: 'success',
+  paid: 'success',
+  failed: 'failed',
+  expired: 'failed',
+}
+
+function normalizePaymentStatus(value?: string | null): PaymentStatus | null {
+  if (!value) return null
+  return STATUS_ALIASES[normalizeText(value)] ?? null
+}
+
 export function filterTransactions(
   transactions: TransactionHistory[],
   searchQuery: string,
@@ -12,8 +27,11 @@ export function filterTransactions(
   const keyword = normalizeText(searchQuery)
 
   return transactions.filter((transaction) => {
+    const normalizedStatus = normalizePaymentStatus(transaction.payment_status)
     const matchesStatus =
-      statusFilter === 'ALL' || transaction.payment_status === statusFilter
+      statusFilter === 'ALL' ||
+      normalizedStatus === statusFilter ||
+      normalizeText(transaction.payment_status ?? '') === statusFilter
 
     const matchesSearch =
       !keyword ||

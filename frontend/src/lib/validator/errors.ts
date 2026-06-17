@@ -8,7 +8,11 @@ export function getValidationMessage(error: unknown, fallback = 'Data tidak vali
   return fallback
 }
 
-export function parseWithValidationMessage<TSchema extends z.ZodType>(schema: TSchema, data: unknown, fallback?: string): z.infer<TSchema> {
+export function parseWithValidationMessage<TSchema extends z.ZodType>(
+  schema: TSchema,
+  data: z.input<TSchema>,
+  fallback?: string,
+): z.infer<TSchema> {
   const result = schema.safeParse(data)
 
   if (!result.success) {

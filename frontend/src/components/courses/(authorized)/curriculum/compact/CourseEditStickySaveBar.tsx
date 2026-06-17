@@ -4,7 +4,7 @@ import { Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import type { CourseEditorTab } from '@/lib/course-edit/types'
-import { editLayout } from '@/components/courses/(authorized)/curriculum/edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type CourseEditStickySaveBarProps = {
   editorTab: CourseEditorTab

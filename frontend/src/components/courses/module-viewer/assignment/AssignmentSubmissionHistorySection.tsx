@@ -12,7 +12,7 @@ import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/t
 import { cn } from '@/lib/utils'
 
 import { AssignmentSubmissionHistoryTable } from './AssignmentSubmissionHistoryTable'
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentSubmissionHistorySectionProps = {
   assignment: LessonDetailAssignment

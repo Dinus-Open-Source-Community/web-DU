@@ -73,34 +73,25 @@ export function findLesson(
 }
 
 export function toMentorCourse(course: ICourseDetailItem): Partial<ICourseDetailItem> {
-  const category = course.category as { name?: unknown } | undefined
-  const courseType = course.course_type as { name?: unknown } | undefined
+  const category = course.category
+  const courseType = course.course_type
 
   return {
-    uid: (course.uid as string) ?? '',
-    title: (course.title as string) ?? '',
-    subtitle: (course.subtitle as string) ?? '',
-    description: (course.description as string) ?? '',
-    cover_url: (course.cover_url as string) ?? (course.thumbnail_url as string) ?? '',
-    status: (course.status as string) ?? '',
+    uid: course.uid ?? '',
+    title: course.title ?? '',
+    subtitle: course.subtitle ?? '',
+    description: course.description ?? '',
+    cover_url: course.cover_url ?? course.thumbnail_url ?? '',
+    status: course.status ?? '',
     is_published: isCoursePublished(course),
-    updated_at: (course.updated_at as string) ?? '',
-    category:
-      typeof category?.name === 'string'
-        ? (category as ICourseDetailItem['category'])
-        : undefined,
-    level: (course.level as ICourseDetailItem['level']) ?? undefined,
-    course_type:
-      typeof courseType?.name === 'string'
-        ? (courseType as ICourseDetailItem['course_type'])
-        : undefined,
+    updated_at: course.updated_at ?? '',
+    category: category?.name ? category : undefined,
+    level: course.level ?? undefined,
+    course_type: courseType?.name ? courseType : undefined,
     price: typeof course.price === 'number' ? course.price : undefined,
-    price_strike:
-      typeof course.price_strike === 'number' ? course.price_strike : undefined,
+    price_strike: typeof course.price_strike === 'number' ? course.price_strike : undefined,
     what_you_learn: Array.isArray(course.what_you_learn)
-      ? (course.what_you_learn as unknown[]).filter(
-          (item): item is string => typeof item === 'string',
-        )
+      ? course.what_you_learn.filter((item): item is string => typeof item === 'string')
       : undefined,
   }
 }

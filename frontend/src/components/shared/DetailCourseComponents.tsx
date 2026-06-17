@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
+import { useCourseDetailTab } from '@/hooks/course-detail/use-course-detail-tab'
 import { useCourseDetailAttendanceView } from '@/hooks/course-detail/use-course-detail-attendance-view'
 import { useCourseMentorManagement } from '@/hooks/course-detail/use-course-mentor-management'
 import { CourseDetailAssignmentsTabPanel } from '@/components/shared/course-detail-manage/CourseDetailAssignmentsTabPanel'
@@ -19,7 +17,6 @@ import { CourseDetailManageHeader } from './course-detail-manage/CourseDetailMan
 import { CourseDetailMobileActions } from './course-detail-manage/CourseDetailMobileActions'
 import {
   CourseDetailNavTabs,
-  type CourseDetailTabValue,
 } from './course-detail-manage/CourseDetailNavTabs'
 import { CourseDetailAttendanceTab } from './course-detail-manage/CourseDetailAttendanceTab'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
@@ -58,17 +55,7 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     assignMentorDialog,
   } = view
 
-  const [searchParams] = useSearchParams()
-  const tabFromQuery = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState<CourseDetailTabValue>(
-    tabFromQuery === 'assignments' ? 'assignments' : 'overview',
-  )
-
-  useEffect(() => {
-    if (tabFromQuery === 'assignments') {
-      setActiveTab('assignments')
-    }
-  }, [tabFromQuery])
+  const { activeTab, setActiveTab } = useCourseDetailTab({ isAdmin })
 
   const attendanceView = useCourseDetailAttendanceView({
     modules,
@@ -96,7 +83,7 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as CourseDetailTabValue)}
+        onValueChange={(value) => setActiveTab(value as typeof activeTab)}
         className="w-full gap-4 sm:gap-6"
       >
         <CourseDetailNavTabs isAdmin={isAdmin} />

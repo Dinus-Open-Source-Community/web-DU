@@ -1,8 +1,10 @@
+import type { RawStaffSubmission, StaffSubmissionsListApiRaw } from '@/lib/course-detail/staff-submission-mapper'
 import type {
   ICourseStaffSubmission,
   IGradeStaffSubmissionPayload,
 } from '@/lib/types/features/course-detail-assignments'
 import type { ILessonDetailAssignment } from '@/lib/types/lesson'
+import type { LessonAssignmentApiRaw } from '@/lib/lesson-assignment/api-types'
 import { mapLessonDetailAssignment } from '@/lib/lesson-assignment/assignment-mapper'
 import {
   parseGradeStaffSubmissionPayload,
@@ -15,14 +17,8 @@ import {
 } from '@/lib/course-detail/staff-submission-mapper'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
-import { unwrapApiResponse, withApiErrorHandling } from './api-error'
+import { isNotFoundApiError, unwrapApiResponse, withApiErrorHandling } from './api-error'
 import type { IResponse } from '@/lib/types/api'
-import type { AxiosError } from 'axios'
-
-function isNotFoundError(error: unknown) {
-  const axiosError = error as AxiosError
-  return axiosError.response?.status === 404
-}
 
 export async function fetchLessonAssignmentSubmissions(
   lessonUid: string,
@@ -35,7 +31,7 @@ export async function fetchLessonAssignmentSubmissions(
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     try {
-      const response = await api.get<IResponse<unknown>>(
+      const response = await api.get<IResponse<StaffSubmissionsListApiRaw>>(
         API_ROUTES.lessons.assignment.submissions.getAllByLessonUid(validatedLessonUid),
       )
       const data = unwrapApiResponse(response.data, 'Gagal mengambil kiriman tugas')
@@ -46,7 +42,7 @@ export async function fetchLessonAssignmentSubmissions(
         assignment: context.assignment,
       })
     } catch (error) {
-      if (isNotFoundError(error)) return []
+      if (isNotFoundApiError(error)) return []
       throw error
     }
   }, 'Gagal mengambil kiriman tugas')
@@ -66,7 +62,7 @@ export async function gradeLessonAssignmentSubmission(
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     const validatedSubmissionUid = parseSubmissionUidParam(submissionUid)
     const validatedPayload = parseGradeStaffSubmissionPayload(payload)
-    const response = await api.put<IResponse<unknown>>(
+    const response = await api.put<IResponse<RawStaffSubmission>>(
       API_ROUTES.lessons.assignment.submissions.gradeByUid(
         validatedLessonUid,
         validatedSubmissionUid,
@@ -87,6 +83,6 @@ export async function gradeLessonAssignmentSubmission(
   }, 'Gagal menyimpan penilaian')
 }
 
-export function mapAssignmentFromResponse(raw: unknown): ILessonDetailAssignment | null {
+export function mapAssignmentFromResponse(raw: LessonAssignmentApiRaw): ILessonDetailAssignment | null {
   return mapLessonDetailAssignment(raw)
 }

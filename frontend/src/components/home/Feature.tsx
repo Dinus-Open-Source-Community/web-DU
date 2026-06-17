@@ -44,9 +44,11 @@ export default function Feature({ courses, isLoading = false }: FeatureProps) {
           )}
 
           {!isLoading &&
-            courses.map((course) => (
+            courses.map((course, index) => (
               <CardCourse
                 key={course.uid}
+                coverLoading={index === 0 ? 'eager' : 'lazy'}
+                coverFetchPriority={index === 0 ? 'high' : undefined}
                 data={{
                   ...course,
                   detailHref: ROUTES.courseDetail(course.uid),

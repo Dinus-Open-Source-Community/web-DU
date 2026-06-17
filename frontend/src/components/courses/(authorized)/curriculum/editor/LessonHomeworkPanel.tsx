@@ -8,7 +8,7 @@ import { AssignmentRulesSection } from './AssignmentRulesSection'
 import { HomeworkInstructionSection } from './homework/HomeworkInstructionSection'
 import { HomeworkPanelActionBar } from './homework/HomeworkPanelActionBar'
 import { HomeworkSectionNav } from './homework/HomeworkSectionNav'
-import type { HomeworkPanelSection } from './homework/homework-panel.constants'
+import type { HomeworkPanelSection } from '@/lib/course-edit/homework-panel.constants'
 import { PanelTransition } from './PanelTransition'
 
 type LessonHomeworkPanelProps = {

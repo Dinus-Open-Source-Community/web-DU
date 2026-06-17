@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../../edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 import {
   HOMEWORK_PANEL_SECTIONS,
   type HomeworkPanelSection,
-} from './homework-panel.constants'
+} from '@/lib/course-edit/homework-panel.constants'
 
 type HomeworkSectionNavProps = {
   activeSection: HomeworkPanelSection

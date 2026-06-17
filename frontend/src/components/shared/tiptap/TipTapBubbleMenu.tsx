@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils'
 
 import { TipTapBlockTypeSelect } from './TipTapBlockTypeSelect'
 import { ToolbarDivider, ToolbarGroup, ToolbarIconButton } from './toolbar-primitives'
-import { useTiptapMediaDialog } from './use-tiptap-media-dialog'
+import { useTiptapMediaDialog } from '@/hooks/tiptap/use-tiptap-media-dialog'
 
 export function TipTapBubbleMenu() {
   const { editor } = useTiptap()

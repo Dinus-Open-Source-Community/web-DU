@@ -4,15 +4,13 @@ import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { ICourseItem } from '@/lib/types/course'
-import { Profile } from '../ui/profile'
+import { CourseCardProfiles } from './CourseCardProfiles'
 import {
-  DEFAULT_COURSE_PROFILE_AVATAR,
-  resolveCourseProfile,
-  resolveCourseProfileAvatar,
+  resolveCourseProfiles,
 } from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
+import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
 import type { CourseApiLevel } from '@/lib/types/user'
-import { ReactIcon } from './icon'
 
 interface CardMentorProps {
   data: ICourseItem
@@ -21,21 +19,20 @@ interface CardMentorProps {
 }
 
 const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
-  const profile = resolveCourseProfile(data)
+  const profiles = resolveCourseProfiles(data)
   const isPublished = isCoursePublished(data)
   const image = data.thumbnail_url || data.cover_url
 
   return (
     <div className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm">
       {/* 1. Course Image */}
-      <div className="relative aspect-auto w-full shrink-0 overflow-hidden bg-slate-50">
-        {image ? (
-          <img src={image} alt={data.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-slate-200">
-            <ReactIcon />
-          </div>
-        )}
+      <CourseCardCoverFrame>
+        <CourseCardCover
+          src={image}
+          alt={data.title}
+          fill
+          imgClassName="transition-transform duration-500 group-hover:scale-[1.02]"
+        />
 
         {/* Status Badge Overlay */}
         <div className="absolute top-3 right-3">
@@ -45,7 +42,7 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
             {isPublished ? 'Terbit' : 'Draft'}
           </Badge>
         </div>
-      </div>
+      </CourseCardCoverFrame>
 
       {/* 2. Content Body */}
       <div className="flex flex-1 flex-col p-5 ">
@@ -75,12 +72,8 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
           </div>
 
           <div className="flex justify-between items-center gap-2 pt-1">
-            {profile ? (
-              <Profile
-                image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
-                name={profile.name}
-                key={profile.uid}
-              />
+            {profiles.length > 0 ? (
+              <CourseCardProfiles profiles={profiles} />
             ) : null}
             {detailHref && (
               <Button variant="default" size="sm" className="rounded-xl px-3 py-2">

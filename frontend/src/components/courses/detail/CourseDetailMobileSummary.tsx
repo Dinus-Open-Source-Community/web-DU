@@ -1,4 +1,10 @@
-import { Play, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
+
+import {
+  CourseCardCover,
+  CourseCardCoverCompactFrame,
+} from '@/components/shared/CourseCardCover'
+import { hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
 
 import { detailLayout } from '@/lib/course-detail/detail-layout'
 import { cn } from '@/lib/utils'
@@ -30,20 +36,15 @@ export function CourseDetailMobileSummary({
         className,
       )}
     >
-      <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:w-36">
-        {previewImage ? (
-          <img
-            src={previewImage}
-            alt="Pratinjau kursus"
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-sky-50 to-slate-100 text-slate-300">
-            <Play className="h-8 w-8" aria-hidden />
-          </div>
-        )}
-      </div>
+      <CourseCardCoverCompactFrame className="w-28 rounded-xl sm:w-36">
+        <CourseCardCover
+          src={previewImage}
+          alt="Pratinjau kursus"
+          fill
+          className="rounded-xl"
+          imgClassName="rounded-xl"
+        />
+      </CourseCardCoverCompactFrame>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -53,11 +54,13 @@ export function CourseDetailMobileSummary({
 
         {discountLabel ? <p className={detailLayout.discount}>{discountLabel}</p> : null}
 
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
-          <span className="font-semibold text-slate-700">{rating.toFixed(1)}</span>
-          <span>({totalReviews.toLocaleString('id-ID')} ulasan)</span>
-        </div>
+        {hasPublishedCourseReviews(totalReviews) ? (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+            <span className="font-semibold text-slate-700">{rating.toFixed(1)}</span>
+            <span>({totalReviews.toLocaleString('id-ID')} ulasan)</span>
+          </div>
+        ) : null}
       </div>
     </section>
   )

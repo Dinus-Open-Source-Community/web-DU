@@ -64,7 +64,7 @@ const CourseEditAdmin = React.lazy(
 const CourseEditMentor = React.lazy(
   () => import("./pages/mentor/CourseEdit.tsx"),
 );
-// const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
+const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
 const MentorDashboard = React.lazy(
   () => import("./pages/mentor/Dashboard.tsx"),
@@ -289,6 +289,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.admin.financial,
     element: <Financial />,
+    public: false,
+    lazy: true,
+    roles: ["admin"],
+  },
+  {
+    path: ROUTES.admin.reviewsAndQaPath,
+    element: <ReviewsQa />,
     public: false,
     lazy: true,
     roles: ["admin"],

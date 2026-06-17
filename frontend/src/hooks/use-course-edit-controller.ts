@@ -202,7 +202,12 @@ export function useCourseEditController({
       return;
     }
 
-    const nextModules = sourceModules.map((module, index) =>
+    const uniqueModules = sourceModules.filter(
+      (module, index, modules) =>
+        modules.findIndex((candidate) => candidate.uid === module.uid) === index,
+    )
+
+    const nextModules = uniqueModules.map((module, index) =>
       toModuleShell(module, index + 1),
     );
 
@@ -219,7 +224,7 @@ export function useCourseEditController({
     setIsInitialized(true);
 
     persistedModuleUidsRef.current = new Set(
-      sourceModules.map((module) => module.uid).filter(Boolean),
+      uniqueModules.map((module) => module.uid).filter(Boolean),
     );
     setPersistedLessonUids(new Set());
     initialLessonModuleMapRef.current = new Map();

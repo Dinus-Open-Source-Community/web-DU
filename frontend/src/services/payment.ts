@@ -5,32 +5,22 @@ import type {
 import { mapTripayPaymentDetail } from "@/lib/transactions/map-tripay-payment-detail";
 import type { PaymentDetail } from "@/lib/transactions/payment-types";
 import { unwrapTripayPaymentResponse } from "@/lib/transactions/unwrap-tripay-response";
+import type { PaymentMethodItem } from "@/lib/types/checkout/payment-method";
+import {
+  parseCreatePaymentRequest,
+  parsePaymentTripayQuery,
+} from "@/lib/validator/payment";
+import type { z } from "zod";
+import { createPaymentRequestSchema } from "@/lib/validator/payment.schema";
 
 import { api } from "./axios";
 import { API_ROUTES, type IQueryParamsPayload } from "./api-path";
 import { withApiErrorHandling } from "./api-error";
 import type { IResponse } from "@/lib/types/api";
 
-export interface TripayFee {
-  flat: number;
-  percent: number;
-}
+export type { PaymentMethodItem, TripayFee } from "@/lib/types/checkout/payment-method";
 
-export interface PaymentMethodItem {
-  group: string;
-  code: string;
-  name: string;
-  type: 'direct' | 'redirect';
-  fee_merchant: TripayFee;
-  fee_customer: TripayFee;
-  total_fee: TripayFee;
-  minimum_fee: number;
-  maximum_fee: number;
-  minimum_amount: number;
-  maximum_amount: number;
-  icon_url: string;
-  active: boolean;
-}
+type CreatePaymentRequestInput = z.input<typeof createPaymentRequestSchema>;
 
 export async function fetchPaymentMethods(): Promise<PaymentMethodItem[]> {
   const response = await api.get<IResponse<PaymentMethodItem[]>>(
@@ -49,11 +39,16 @@ export async function fetchPayments(params?: IQueryParamsPayload) {
 export async function fetchTripayPaymentDetail(
   query: PaymentDetailQuery,
 ): Promise<PaymentDetail> {
+  const validatedQuery = parsePaymentTripayQuery({
+    reference: query.reference,
+    merchantRef: query.merchantRef,
+  })
+
   return withApiErrorHandling(async () => {
     const response = await api.get<TripayPaymentApiEnvelope>(
       API_ROUTES.payment.tripay({
-        ...(query.reference ? { reference: query.reference } : {}),
-        ...(query.merchantRef ? { merchant_ref: query.merchantRef } : {}),
+        ...(validatedQuery.reference ? { reference: validatedQuery.reference } : {}),
+        ...(validatedQuery.merchant_ref ? { merchant_ref: validatedQuery.merchant_ref } : {}),
       }),
     );
 
@@ -66,7 +61,8 @@ export async function fetchTripayPaymentDetail(
   }, "Gagal mengambil detail pembayaran Tripay");
 }
 
-export async function createPayment(paymentData: unknown) {
-  const response = await api.post(API_ROUTES.payment.create, paymentData);
+export async function createPayment(paymentData: CreatePaymentRequestInput) {
+  const validated = parseCreatePaymentRequest(paymentData)
+  const response = await api.post(API_ROUTES.payment.create, validated);
   return response.data;
 }

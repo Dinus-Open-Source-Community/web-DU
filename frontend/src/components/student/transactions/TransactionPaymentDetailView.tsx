@@ -12,7 +12,7 @@ import { PaymentMethodCard } from './payment-detail/PaymentMethodCard'
 import { PaymentProgressNavigation } from './payment-detail/PaymentProgressNavigation'
 import { PaymentStatusHero } from './payment-detail/PaymentStatusHero'
 import { PaymentSummaryCard } from './payment-detail/PaymentSummaryCard'
-import { useCopyToClipboard } from './payment-detail/use-copy-to-clipboard'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 
 type TransactionPaymentDetailViewProps = {
   backHref?: string

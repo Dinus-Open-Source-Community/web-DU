@@ -3,10 +3,9 @@ import { cn } from '../../lib/utils'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Pagination } from './Pagination'
 
-export function AdminDataTable<T>({ columns, data, keyField, toolbar, page, totalPages, onPageChange, emptyState, tableClassName, wrapperClassName, compact, onRowClick }: AdminDataTableProps<T>) {
+export function AdminDataTable<T>({ columns, data, keyField, page, totalPages, onPageChange, emptyState, tableClassName, wrapperClassName, compact, onRowClick }: AdminDataTableProps<T>) {
   return (
     <section className={cn('flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]', wrapperClassName)}>
-      {toolbar && <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">{toolbar}</div>}
       <div className="overflow-x-auto">
         <Table className={cn(compact ? 'text-[13px]' : 'text-sm', tableClassName)}>
           <TableHeader className="bg-slate-50/70">
@@ -40,7 +39,10 @@ export function AdminDataTable<T>({ columns, data, keyField, toolbar, page, tota
               data.map((row) => (
                 <tr
                   key={keyField(row)}
-                  className={cn('border-b border-slate-100 transition-colors last:border-b-0', onRowClick ? 'cursor-pointer hover:bg-slate-50/80' : 'hover:bg-slate-50/50')}
+                  className={cn(
+                    'border-b border-slate-100 transition-colors last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:0_56px]',
+                    onRowClick ? 'cursor-pointer hover:bg-slate-50/80' : 'hover:bg-slate-50/50',
+                  )}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}>
                   {columns.map((col) => (
                     <td key={col.id} className={cn('px-5 py-3.5 align-middle text-slate-700', col.align === 'right' && 'text-right', col.align === 'center' && 'text-center', col.className)}>

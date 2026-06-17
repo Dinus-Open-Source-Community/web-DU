@@ -5,7 +5,7 @@ import { useCourses } from '@/hooks/use-course'
 
 export function useFeaturedCourses() {
   const query = useCourses({
-    per_page: 100,
+    per_page: 12,
     status: 'ACTIVE',
     sort_by: 'created_at',
     sort_order: 'desc',

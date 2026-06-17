@@ -14,32 +14,53 @@ import type {
 
 export type { ParsedRichTextContent, RichTextContentFormat, RichTextEnvelope }
 
+export type LessonContentRaw = string | RichTextEnvelopePartial | null | undefined
+
+type RichTextEnvelopePartial = {
+  contentHtml?: string
+  content_html?: string
+  html?: string
+  version?: number
+  contentType?: string
+  content_type?: string
+}
+
 const EMPTY_CONTENT: ParsedRichTextContent = {
   contentHtml: '',
   contentFormat: 'tiptap',
   version: RICH_TEXT_CONTENT_VERSION,
 }
 
-function normalizeContentFormat(value: unknown): RichTextContentFormat {
-  if (typeof value !== 'string') return 'tiptap'
+function normalizeContentFormat(value: string | undefined): RichTextContentFormat {
+  if (!value) return 'tiptap'
   const normalized = value.trim().toLowerCase()
   return normalized === 'html' ? 'html' : 'tiptap'
 }
 
-function extractContentHtml(obj: Record<string, unknown>): string {
+function extractContentHtml(obj: RichTextEnvelopePartial): string {
   if (typeof obj.contentHtml === 'string') return obj.contentHtml
   if (typeof obj.content_html === 'string') return obj.content_html
   if (typeof obj.html === 'string') return obj.html
   return ''
 }
 
-function extractVersion(obj: Record<string, unknown>): number {
+function extractVersion(obj: RichTextEnvelopePartial): number {
   const version = obj.version
   return typeof version === 'number' && version > 0 ? version : RICH_TEXT_CONTENT_VERSION
 }
 
+function parseLessonContentObject(obj: RichTextEnvelopePartial): ParsedRichTextContent {
+  const contentHtml = extractContentHtml(obj)
+  const envelopeType = obj.contentType ?? obj.content_type
+  return {
+    contentHtml,
+    contentFormat: normalizeContentFormat(envelopeType),
+    version: extractVersion(obj),
+  }
+}
+
 /** Parse field `content` dari response API lesson/assignment. */
-export function parseLessonContent(raw: unknown): ParsedRichTextContent {
+export function parseLessonContent(raw: LessonContentRaw): ParsedRichTextContent {
   if (raw == null) return EMPTY_CONTENT
 
   if (typeof raw === 'string') {
@@ -48,7 +69,8 @@ export function parseLessonContent(raw: unknown): ParsedRichTextContent {
 
     if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
       try {
-        return parseLessonContent(JSON.parse(trimmed) as unknown)
+        const parsed = JSON.parse(trimmed) as RichTextEnvelopePartial
+        return parseLessonContent(parsed)
       } catch {
         return { contentHtml: trimmed, contentFormat: 'html', version: RICH_TEXT_CONTENT_VERSION }
       }
@@ -57,18 +79,7 @@ export function parseLessonContent(raw: unknown): ParsedRichTextContent {
     return { contentHtml: trimmed, contentFormat: 'html', version: RICH_TEXT_CONTENT_VERSION }
   }
 
-  if (typeof raw === 'object') {
-    const obj = raw as Record<string, unknown>
-    const contentHtml = extractContentHtml(obj)
-    const envelopeType = obj.contentType ?? obj.content_type
-    return {
-      contentHtml,
-      contentFormat: normalizeContentFormat(envelopeType),
-      version: extractVersion(obj),
-    }
-  }
-
-  return EMPTY_CONTENT
+  return parseLessonContentObject(raw)
 }
 
 /** Bangun envelope rich text untuk field `content`. */

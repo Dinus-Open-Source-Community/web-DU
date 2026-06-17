@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { editMotion, panelSlideClass, type PanelSlideDirection } from './edit-motion'
+import { editMotion, panelSlideClass, type PanelSlideDirection } from '@/lib/course-edit/edit-motion'
 
 type PanelTransitionProps = {
   panelKey: string

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CourseLevelSignal } from '@/components/shared/CourseLevel'
+import type { CourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import type { JoinedCourse } from '@/lib/types/user'
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils'
 type CourseDetailManageHeaderProps = {
   course: ICourseDetailItem
   curriculumEditHref: string
-  curriculumEditNavigationState?: unknown
+  curriculumEditNavigationState?: CourseEditNavigationState
   previewHref: string
   isAdmin: boolean
   isPublished: boolean
@@ -71,7 +72,7 @@ export function CourseDetailManageHeader({
 
 type HeaderActionButtonsProps = {
   curriculumEditHref: string
-  curriculumEditNavigationState?: unknown
+  curriculumEditNavigationState?: CourseEditNavigationState
   previewHref: string
   isAdmin: boolean
   isPublished: boolean

@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 
 import type { LessonFooterNavAction } from '@/components/courses/module-viewer/LessonFooter'
-import type { LessonEntry, LessonThemeMode } from '@/components/courses/module-viewer/utils'
+import type { LessonEntry, LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 import type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
 import type { NormalizedQuiz } from '@/lib/lesson-assignment/quiz-payload'

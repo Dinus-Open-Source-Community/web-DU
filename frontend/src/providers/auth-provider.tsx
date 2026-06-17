@@ -4,7 +4,9 @@ import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAu
 import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services/axios'
 import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
+import type { JwtPayload } from '@/lib/types/auth/jwt-payload'
 import { ROUTES } from '@/lib/routes'
+import { useResolvedAuthProfile } from '@/hooks/files/use-resolved-auth-profile'
 
 export const AUTH_COOKIE_USER = 'du_auth_user'
 export const AUTH_COOKIE_ROLE = 'du_auth_role'
@@ -25,6 +27,7 @@ interface AuthContextValue {
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
+  isResolvingImages: boolean
   profile: IUserData | null
   signIn: (payload: ILoginPayload) => Promise<IAuthResult>
   signUp: (payload: IRegisterPayload) => Promise<IAuthResult>
@@ -63,12 +66,12 @@ const toSessionUser = (user: IUserData): IAuthSessionUser => ({
 
 const getDashboardPath = (role?: UserRole | null) => (role ? ROLE_DASHBOARD_PATH[role] : '/auth/login')
 
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
+function decodeJwtPayload(token: string): JwtPayload | null {
   try {
     const payload = token.split('.')[1]
     if (!payload) return null
     const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/')
-    return JSON.parse(window.atob(normalizedPayload)) as Record<string, unknown>
+    return JSON.parse(window.atob(normalizedPayload)) as JwtPayload
   } catch {
     return null
   }
@@ -147,14 +150,15 @@ function clearAuthSession() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IAuthSessionUser | null>(() => getAuthUser())
-  const [profile, setProfile] = useState<IUserData | null>(null)
+  const [rawProfile, setRawProfile] = useState<IUserData | null>(null)
+  const { profile: resolvedProfile, isResolvingImages } = useResolvedAuthProfile(rawProfile)
   const [token, setToken] = useState<string | null>(() => getAuthToken())
   const [isLoading, setIsLoading] = useState(true)
 
   const applySession = useCallback((sessionUser: IAuthSessionUser, fullProfile?: IUserData): IAuthResult => {
     setAuthUser(sessionUser)
     setUser(sessionUser)
-    if (fullProfile) setProfile(fullProfile)
+    if (fullProfile) setRawProfile(fullProfile)
     return {
       user: sessionUser,
       redirectPath: getDashboardPath(sessionUser.role),
@@ -164,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(() => {
     clearAuthSession()
     setUser(null)
-    setProfile(null)
+    setRawProfile(null)
     setToken(null)
   }, [])
 
@@ -174,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!currentToken || isAuthTokenExpired(currentToken)) {
       setUser(null)
-      setProfile(null)
+      setRawProfile(null)
       if (currentToken) clearAuthSession()
       return null
     }
@@ -231,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentToken = getAuthToken()
       setApiAuthToken(currentToken)
       setUser(getAuthUser())
-      if (!currentToken) setProfile(null)
+      if (!currentToken) setRawProfile(null)
       setToken(currentToken)
     }
 
@@ -244,9 +248,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       role: user?.role ?? null,
       token,
-      profile,
+      profile: resolvedProfile,
       isAuthenticated: Boolean(token && user),
       isLoading,
+      isResolvingImages,
       signIn,
       signUp,
       signInWithToken,
@@ -255,7 +260,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshProfile,
       startGoogleOAuth,
     }),
-    [isLoading, profile, refreshProfile, refreshUser, signIn, signInWithToken, signOut, signUp, token, user],
+    [
+      isLoading,
+      isResolvingImages,
+      refreshProfile,
+      refreshUser,
+      resolvedProfile,
+      signIn,
+      signInWithToken,
+      signOut,
+      signUp,
+      token,
+      user,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

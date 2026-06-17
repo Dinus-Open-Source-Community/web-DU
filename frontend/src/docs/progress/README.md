@@ -2,17 +2,21 @@
 
 Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`, mulai dari sesi integrasi awal hingga kondisi terkini.
 
-**Audiens:** PM · QA · Code Reviewer · Backend
+**Audiens:** PM · QA · Code Reviewer · Backend · **FE Junior/Senior**
 
 **Dokumen utama status FE↔BE:** [integration-status.md](./integration-status.md)  
+**Panduan revisi (developer):** [revision-guide.md](./revision-guide.md) · [files-to-revise.md](./files-to-revise.md)  
+**Status bug QA:** [../qa/qa-status-board.md](../qa/qa-status-board.md)  
 **Perubahan backend merge J-yriz:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)
 
 **Cara pakai dokumen ini:**
 
 | Peran | Mulai dari |
 |-------|------------|
+| **FE Junior** | [revision-guide.md](./revision-guide.md) → [files-to-revise.md](./files-to-revise.md) → [../qa/qa-status-board.md](../qa/qa-status-board.md) |
+| **FE Senior** | [integration-status.md](./integration-status.md) §7 → [architecture.md](./architecture.md) |
 | **PM** | [integration-status.md](./integration-status.md) §1–§7 → [implementation-log.md](./implementation-log.md) |
-| **QA** | [qa-checklist.md](./qa-checklist.md) → [workflows.md](./workflows.md) |
+| **QA** | [../qa/README.md](../qa/README.md) → [qa-checklist.md](./qa-checklist.md) |
 | **Reviewer** | [architecture.md](./architecture.md) → [files-changed.md](./files-changed.md) |
 | **Backend** | [integration-status.md](./integration-status.md) §3–§5 → backend-changes doc |
 
@@ -51,8 +55,9 @@ Dokumentasi kemajuan implementasi frontend pada branch `features/frontend-sapto`
 
 | Area | Status | Blocker |
 |------|--------|---------|
+| **Gambar terproteksi (401)** | 🔴 Open | `<img>` tanpa Bearer — lihat [revision-guide.md](./revision-guide.md) P0 |
 | Hapus kursus dari daftar (`ManageCourse` kartu) | 🟡 | Hapus hanya dari halaman detail; kartu belum punya aksi |
-| Mentor list & detail kursus | 🔴 Mock | `mentor/Courses.tsx`, `mentor/DetailCourse.tsx` masih hardcode |
+| Mentor list & detail kursus | ✅ Live | `mentor/Courses.tsx`, `DetailCourse.tsx` — API via `useMentorCourses` |
 | Halaman `mentor/.../assignments` (legacy) | 🔴 Mock | Tab Tugas di detail course sudah live |
 | Reviews & Q&A moderasi admin | 🔴 Mock | Route dikomentari |
 | Sertifikat, forgot password | 🔴 | Tidak ada domain BE |
@@ -66,6 +71,8 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 
 | File | Isi |
 |------|-----|
+| **[revision-guide.md](./revision-guide.md)** | **Panduan revisi** — prioritas, sudah vs belum, arah fix |
+| **[files-to-revise.md](./files-to-revise.md)** | **Peta file** — file mana diubah, task ID, status |
 | **[integration-status.md](./integration-status.md)** | **Status FE↔BE: fitur, API dipakai/belum, gap** |
 | [implementation-log.md](./implementation-log.md) | Kronologi pekerjaan per fase |
 | [workflows.md](./workflows.md) | Diagram alur fitur yang sudah di-wire ke API |
@@ -132,7 +139,8 @@ Detail lengkap: [integration-status.md](./integration-status.md)
 ✅  /course/:courseUid            (guest CTA login → kembali ke checkout — Fase 21)
 
 ✅  /mentor/dashboard            (KPI + jadwal — Fase 19)
-🔴 /mentor/courses|courses/:uid  (mock — edit & submissions route live)
+✅  /mentor/courses               (API live — useMentorCourses)
+✅  /mentor/courses/:uid          (detail live — tab Tugas + kurikulum)
 🔴 /mentor/courses/:uid/assignments       (legacy mock)
 ```
 

@@ -1,4 +1,4 @@
-export function parseTripayTimestamp(value: unknown): string | null {
+export function parseTripayTimestamp(value: string | number | null | undefined): string | null {
   if (value == null) return null
 
   if (typeof value === 'number' && value > 0) {

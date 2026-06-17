@@ -4,7 +4,7 @@ import { Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type LessonTitleRenameFieldProps = {
   lessonId: string

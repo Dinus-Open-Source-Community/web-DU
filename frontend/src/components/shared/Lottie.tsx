@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
+
+const DotLottieReact = lazy(() =>
+  import('@lottiefiles/dotlottie-react').then((mod) => ({ default: mod.DotLottieReact })),
+)
 
 interface ILottieProps {
   src: string
@@ -20,5 +23,9 @@ export function Lottie({ src, className, loop = true, autoplay = true }: ILottie
     return <div aria-hidden className={cn('h-full w-full animate-pulse rounded-xl bg-slate-200/70', className)} />
   }
 
-  return <DotLottieReact src={src} loop={loop} autoplay={autoplay} className={cn('h-full w-full', className)} />
+  return (
+    <Suspense fallback={<div aria-hidden className={cn('h-full w-full animate-pulse rounded-xl bg-slate-200/70', className)} />}>
+      <DotLottieReact src={src} loop={loop} autoplay={autoplay} className={cn('h-full w-full', className)} />
+    </Suspense>
+  )
 }

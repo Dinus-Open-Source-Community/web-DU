@@ -1,3 +1,4 @@
+import type { LessonAssignmentApiRaw } from '@/lib/lesson-assignment/api-types'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import type { LessonAssignmentUpsertPayload } from '@/lib/course-edit/homework-rules'
 import { mapLessonDetailAssignment } from '@/lib/lesson-assignment/assignment-mapper'
@@ -7,21 +8,15 @@ import {
 } from '@/lib/validator/lesson-assignment'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
-import { unwrapApiResponse, withApiErrorHandling } from './api-error'
+import { isNotFoundApiError, unwrapApiResponse, withApiErrorHandling } from './api-error'
 import type { IResponse } from '@/lib/types/api'
-import type { AxiosError } from 'axios'
 
-function mapAssignmentResponse(raw: unknown): LessonDetailAssignment {
+function mapAssignmentResponse(raw: LessonAssignmentApiRaw): LessonDetailAssignment {
   const mapped = mapLessonDetailAssignment(raw)
   if (!mapped) {
     throw new Error('Respons assignment tidak valid')
   }
   return mapped
-}
-
-function isNotFoundError(error: unknown) {
-  const axiosError = error as AxiosError
-  return axiosError.response?.status === 404
 }
 
 export async function fetchLessonAssignment(
@@ -30,13 +25,13 @@ export async function fetchLessonAssignment(
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     try {
-      const response = await api.get<IResponse<unknown>>(
+      const response = await api.get<IResponse<LessonAssignmentApiRaw>>(
         API_ROUTES.lessons.assignment.getByLessonUid(validatedLessonUid),
       )
       const data = unwrapApiResponse(response.data, 'Gagal mengambil konfigurasi tugas')
       return mapAssignmentResponse(data)
     } catch (error) {
-      if (isNotFoundError(error)) return null
+      if (isNotFoundApiError(error)) return null
       throw error
     }
   }, 'Gagal mengambil konfigurasi tugas')
@@ -49,7 +44,7 @@ export async function createLessonAssignment(
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     const validatedPayload = parseLessonAssignmentUpsertRequest(payload)
-    const response = await api.post<IResponse<unknown>>(
+    const response = await api.post<IResponse<LessonAssignmentApiRaw>>(
       API_ROUTES.lessons.assignment.createByLessonUid(validatedLessonUid),
       validatedPayload,
     )
@@ -65,7 +60,7 @@ export async function updateLessonAssignment(
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     const validatedPayload = parseLessonAssignmentUpsertRequest(payload)
-    const response = await api.put<IResponse<unknown>>(
+    const response = await api.put<IResponse<LessonAssignmentApiRaw>>(
       API_ROUTES.lessons.assignment.updateByLessonUid(validatedLessonUid),
       validatedPayload,
     )
@@ -77,7 +72,7 @@ export async function updateLessonAssignment(
 export async function deleteLessonAssignment(lessonUid: string): Promise<void> {
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
-    await api.delete<IResponse<unknown>>(
+    await api.delete<IResponse<null>>(
       API_ROUTES.lessons.assignment.deleteByLessonUid(validatedLessonUid),
     )
   }, 'Gagal menghapus tugas')

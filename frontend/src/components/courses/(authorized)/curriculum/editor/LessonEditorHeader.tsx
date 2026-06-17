@@ -6,8 +6,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { CourseEditorTab } from '@/lib/course-edit/types'
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../edit-layout'
-import { editMotion } from './edit-motion'
+import { editLayout } from '@/lib/course-edit/edit-layout'
+import { editMotion } from '@/lib/course-edit/edit-motion'
 import { LessonTitleRenameField } from './LessonTitleRenameField'
 
 type LessonEditorHeaderProps = {

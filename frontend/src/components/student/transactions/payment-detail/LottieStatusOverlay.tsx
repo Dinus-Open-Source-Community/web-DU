@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import {
   PAYMENT_LOTTIE_ASSETS,
   PAYMENT_OVERLAY_TIMING,
-} from "./payment-motion";
+} from '@/lib/transactions/payment-motion';
 
 type LottieStatusOverlayProps = {
   onComplete: () => void;

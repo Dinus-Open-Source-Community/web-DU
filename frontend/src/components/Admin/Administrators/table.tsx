@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Shield, UserPlus } from 'lucide-react'
 
 import { UserManageActions } from '@/components/Admin/shared/UserManageActions'
-import type { ManagedUsersTableControls } from '@/components/Admin/shared/managed-users-table-props'
+import type { ManagedUsersTableControls } from '@/lib/types/components/managed-users-table-props'
 import { SearchForm } from '../../shared/SearchForm'
 import { EmptyState } from '../../shared/EmptyState'
 import { cn } from '../../../lib/utils'

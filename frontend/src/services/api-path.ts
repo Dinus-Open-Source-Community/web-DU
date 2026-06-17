@@ -61,6 +61,7 @@ export const API_ROUTES = {
   files: {
     getByBucketAndObject: (bucket: string, object: string) =>
       `/files/${bucket}/${object}`,
+    batchByBucket: (bucket: string) => `/files/${bucket}/batch`,
   },
   user: {
     updateProfile: `/user/profile`,
@@ -203,6 +204,14 @@ export const API_ROUTES = {
     },
     financial: {
       summary: `/admin/financial/summary`,
+    },
+    moderation: {
+      reviews: (params?: IQueryParamsPayload & { courseUid?: string }) =>
+        withQuery(`/admin/reviews`, params),
+      replyReview: (reviewUid: Uid) => `/admin/reviews/${reviewUid}/reply`,
+      qna: (params?: IQueryParamsPayload & { courseUid?: string; status?: string }) =>
+        withQuery(`/admin/qna`, params),
+      replyQna: (threadUid: Uid) => `/admin/qna/${threadUid}/replies`,
     },
   },
   payment: {

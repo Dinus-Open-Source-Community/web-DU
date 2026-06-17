@@ -16,7 +16,8 @@ import {
   type CheckoutCourseViewModel,
   type PaymentMethodCardViewModel,
 } from '@/lib/checkout/present-checkout-view'
-import type { PaymentMethodItem } from '@/services/payment'
+import type { PaymentMethodItem } from '@/lib/types/checkout/payment-method'
+import type { CreatePaymentRequestValidated } from '@/lib/validator/payment.schema'
 
 // ---------------------------------------------------------------------------
 // Loading Skeleton
@@ -120,8 +121,8 @@ function MethodGroupSection({
   onSelect,
 }: {
   group: PaymentMethodGroup
-  selectedCode: string | null
-  onSelect: (code: string) => void
+  selectedCode: CreatePaymentRequestValidated['method'] | null
+  onSelect: (code: CreatePaymentRequestValidated['method']) => void
 }) {
   const viewModels = useMemo(
     () => group.methods.map(presentPaymentMethod),
@@ -139,7 +140,7 @@ function MethodGroupSection({
             key={vm.code}
             vm={vm}
             selected={selectedCode === vm.code}
-            onSelect={() => onSelect(vm.code)}
+            onSelect={() => onSelect(vm.code as CreatePaymentRequestValidated['method'])}
           />
         ))}
       </div>

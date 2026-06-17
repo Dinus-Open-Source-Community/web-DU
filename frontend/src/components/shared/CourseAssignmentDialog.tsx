@@ -25,21 +25,7 @@ function datetimeLocalToIso(value: string): string | null {
   return d.toISOString()
 }
 
-function getCourseMeetingCount(course: ICourseDetailItem): number {
-  const c = course as ICourseDetailItem & { meetingCount?: number; meetings?: unknown[] }
-  const directCount = c.meetingCount
-  if (typeof directCount === 'number' && Number.isFinite(directCount) && directCount >= 1) {
-    return Math.floor(directCount)
-  }
-
-  const meetings = c.meetings
-  if (Array.isArray(meetings) && meetings.length > 0) {
-    return meetings.length
-  }
-
-  return 1
-}
-
+import { getCourseMeetingCount } from '@/lib/course-detail/course-meeting-count'
 type CourseAssignmentDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void

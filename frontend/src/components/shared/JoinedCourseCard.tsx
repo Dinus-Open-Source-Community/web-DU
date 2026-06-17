@@ -1,15 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
-import { ReactIcon } from './icon'
+import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
+import { CourseCardProfiles } from './CourseCardProfiles'
 import type { JoinedCourse } from '@/lib/types/user'
-import { Profile } from '../ui/profile'
 import { Check } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
 import {
-  DEFAULT_COURSE_PROFILE_AVATAR,
-  resolveCourseProfile,
-  resolveCourseProfileAvatar,
+  resolveCourseProfiles,
 } from '@/lib/course-detail/course-profile'
 import { CourseLevelSignal } from './CourseLevel'
 import {
@@ -68,27 +66,21 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
   const showProgress = isResume || isComplete
   const image = data.cover_url || data.thumbnail_url
   const actionLabel = isComplete ? 'Belajar lagi' : isResume ? 'Lanjut' : 'Mulai'
-  const profile = resolveCourseProfile(data)
+  const profiles = resolveCourseProfiles(data)
 
   return (
     <div
       className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md`}>
-      <div className={`relative aspect-video w-full shrink-0 overflow-hidden rounded-[10px] ${sizes.imageWrapper[size]}`}>
-        {image ? (
-          <img
-            src={image}
-            alt={data.title}
-            loading="lazy"
-            className="h-full w-full rounded-[10px] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 100vw, 384px"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#D2E1ED] text-[#00D8FF]">
-            <ReactIcon />
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-slate-950/45 to-transparent" />
-      </div>
+      <CourseCardCoverFrame className={sizes.imageWrapper[size]}>
+        <CourseCardCover
+          src={image}
+          alt={data.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 384px"
+          imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-slate-950/45 to-transparent" />
+      </CourseCardCoverFrame>
 
       <div className={`relative z-10 flex grow flex-col rounded-xl border border-slate-100/70 bg-white shadow-[0_-8px_24px_rgba(15,23,42,0.04)] ${sizes.contentWrapper[size]}`}>
         <div className="mb-5 flex flex-col">
@@ -121,12 +113,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
         <div className="mt-auto border-t border-slate-100 pt-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              {profile ? (
-                <Profile
-                  image={resolveCourseProfileAvatar(profile, DEFAULT_COURSE_PROFILE_AVATAR)}
-                  name={profile.name}
-                />
-              ) : null}
+              {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} /> : null}
             </div>
 
             <Button

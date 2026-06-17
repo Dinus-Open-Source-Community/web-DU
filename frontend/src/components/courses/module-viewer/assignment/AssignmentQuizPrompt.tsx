@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentQuizPromptProps = {
   index: number

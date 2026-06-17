@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { normalizeYoutubeWatchUrl } from '@/lib/tiptap-media'
+import { beResolvableUidSchema, lessonTitleSchema } from '../common'
 import { richTextContentFormatSchema, richTextEnvelopeSchema } from './rich-text.schema'
 
 /** Selaras `backend/internal/service/lessons.go` — youtubeURLRegex */
@@ -9,18 +10,7 @@ export const lessonDeliveryTypeSchema = z.enum(['text', 'video'], {
   message: 'content_type harus text atau video',
 })
 
-export const uidSchema = z
-  .string({ message: 'UID wajib diisi' })
-  .trim()
-  .min(8, 'UID tidak valid')
-  .max(36, 'UID tidak valid')
-  .refine((value) => /^[0-9a-fA-F-]{8,36}$/.test(value), 'Format UID tidak valid')
-
-export const lessonTitleSchema = z
-  .string({ message: 'Judul lesson wajib diisi' })
-  .trim()
-  .min(1, 'Judul lesson wajib diisi')
-  .max(255, 'Judul lesson maksimal 255 karakter')
+export const uidSchema = beResolvableUidSchema
 
 export const orderIndexSchema = z
   .number({ message: 'Urutan lesson wajib diisi' })

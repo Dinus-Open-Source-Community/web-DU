@@ -1,6 +1,6 @@
 import type { NavbarSearchItem } from '@/providers/navbar-search-provider'
 
-import { getLessonIcon, type LessonEntry } from '@/components/courses/module-viewer/utils'
+import { getLessonIcon, type LessonEntry } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 export function buildLessonSearchItems(
   lessonEntries: LessonEntry[],

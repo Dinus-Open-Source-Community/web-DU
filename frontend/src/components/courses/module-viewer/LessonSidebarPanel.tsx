@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import type { IModulesDetail } from '@/lib/types/course'
 import { formatLearningProgress } from '@/lib/learning/progress'
 
-import { getLessonIcon, isModuleComplete, type LessonEntry, type LessonThemeMode, moduleProgress } from './utils'
+import { getLessonIcon, isModuleComplete, type LessonEntry, type LessonThemeMode, moduleProgress } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonSidebarPanelProps = {
   modules: IModulesDetail[]

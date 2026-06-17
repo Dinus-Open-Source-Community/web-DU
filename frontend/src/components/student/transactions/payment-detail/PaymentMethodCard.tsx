@@ -2,7 +2,7 @@ import { QrCode } from 'lucide-react'
 
 import type { PaymentInvoiceViewModel } from '@/lib/transactions/present-payment-invoice-view'
 import { CopyPaymentValueButton } from './CopyPaymentValueButton'
-import type { CopyablePaymentProps } from './payment-detail-types'
+import type { CopyablePaymentProps } from '@/lib/transactions/payment-detail-types'
 
 type PaymentMethodCardProps = CopyablePaymentProps & {
   invoice: PaymentInvoiceViewModel

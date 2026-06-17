@@ -4,7 +4,7 @@ Dokumen ini merangkum **gap integrasi** antara halaman di `frontend-react/src/pa
 
 **Audiens:** Backend engineer, PM, dan frontend engineer yang mengerjakan integrasi berikutnya.
 
-**Terakhir diperbarui:** 9 Juni 2026 (branch `features/frontend-sapto`)
+**Terakhir diperbarui:** 17 Juni 2026 (branch `features/frontend-sapto`)
 
 ---
 
@@ -27,12 +27,35 @@ Setiap gap punya:
 
 ## Daftar Isi
 
-### Progress & implementasi (PM · QA · Reviewer)
+### Progress & implementasi (PM · QA · Reviewer · FE)
 
 | Dokumen | Isi |
 |---------|-----|
+| [**progress/revision-guide.md**](./progress/revision-guide.md) | **Panduan revisi** — prioritas P0–P3, sudah vs belum, arah fix |
+| [**progress/files-to-revise.md**](./progress/files-to-revise.md) | **Peta file** — file yang perlu diubah + task ID + status |
 | [**progress/integration-status.md**](./progress/integration-status.md) | **Status FE↔BE** — fitur, API dipakai/belum, gap |
 | [**progress/README.md**](./progress/README.md) | Ringkasan kemajuan & indeks progress |
+| [**qa/README.md**](./qa/README.md) | **Indeks QA** — cara baca temuan, lapor bug baru |
+| [**qa/qa-status-board.md**](./qa/qa-status-board.md) | **Papan status bug** — Open / Fixed / Verified |
+
+### Performance (FE audit)
+
+| Dokumen | Isi |
+|---------|-----|
+| [**performance/README.md**](./performance/README.md) | **Indeks audit performa** — ringkasan score & halaman kritis |
+| [performance/audit-report.md](./performance/audit-report.md) | Budget bundle, CRP, gambar, font, caching, Core Web Vitals |
+| [performance/react-review.md](./performance/react-review.md) | Code splitting, hooks gambar, memo, list, anti-pattern React |
+| [performance/action-backlog.md](./performance/action-backlog.md) | Backlog PERF-01…21 prioritas P0–P3 |
+
+### Security (FE audit)
+
+| Dokumen | Isi |
+|---------|-----|
+| [**security/README.md**](./security/README.md) | **Indeks audit keamanan** — ringkasan OWASP & halaman kritis |
+| [security/pages-security-matrix.md](./security/pages-security-matrix.md) | Matriks keamanan per halaman di `pages/` |
+| [security/audit-report.md](./security/audit-report.md) | Temuan SEC-01…18: XSS, auth, IDOR, payment |
+| [security/action-backlog.md](./security/action-backlog.md) | Backlog SEC-01…18 prioritas P1–P3 + checklist verifikasi |
+
 | [backend-changes-j-yriz-merge.md](./backend-changes-j-yriz-merge.md) | Perubahan BE merge J-yriz + kontrak endpoint |
 | [progress/implementation-log.md](./progress/implementation-log.md) | Kronologi fase kerja dari awal sesi |
 | [progress/workflows.md](./progress/workflows.md) | Diagram alur fitur yang sudah di-wire |
@@ -41,6 +64,16 @@ Setiap gap punya:
 | [progress/qa-checklist.md](./progress/qa-checklist.md) | Skenario uji manual fitur live |
 | [progress/todo-backlog.md](./progress/todo-backlog.md) | **TODO & kekurangan FE vs BE** (requirement lama + baru) |
 | [progress/assignment-staff-session.md](./progress/assignment-staff-session.md) | Sesi tab Tugas staff, roster, penilaian |
+
+### Dokumen QA per fitur
+
+| Dokumen | Isi |
+|---------|-----|
+| [qa/qa-course.md](./qa/qa-course.md) | Bug course — gambar 401, payment, assignments |
+| [qa/qa-module.md](./qa/qa-module.md) | Modul duplikat |
+| [qa/qa-category.md](./qa/qa-category.md) | UX kategori |
+| [qa/qa-couse-type.md](./qa/qa-couse-type.md) | UX tipe kursus |
+| [qa/request.md](./qa/request.md) | Permintaan enhancement (nuqs, dll.) |
 
 ### Gap & backlog (PM · BE)
 

@@ -11,9 +11,11 @@ import {
   JobIcons,
 } from '@/components/shared/icon'
 import { useFeaturedCourses } from '@/hooks/landing/use-featured-courses'
+import { useLandingCommunityStats } from '@/hooks/landing/use-landing-community-stats'
 
 export default function Home() {
   const { courses: featuredCourses, isLoading: isFeaturedCoursesLoading } = useFeaturedCourses()
+  const { stats: communityStats, isLoading: isCommunityStatsLoading } = useLandingCommunityStats()
 
   const featureIconMap: Record<string, React.ReactNode> = {
     book: <BookIcons />,
@@ -54,7 +56,7 @@ export default function Home() {
         <Hero />
         <Feature courses={featuredCourses} isLoading={isFeaturedCoursesLoading} />
         <Benefit DataFeatures={programFeatures} />
-        <Community />
+        <Community stats={communityStats} isLoading={isCommunityStatsLoading} />
       </section>
     </GuestLayout>
   );

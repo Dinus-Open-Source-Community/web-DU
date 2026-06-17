@@ -1,5 +1,5 @@
 import type { ICategoryItem, ICourseItem } from "@/lib/types/course";
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { SearchForm } from "../shared/SearchForm";
 import { FilterCheckboxPanel } from "../shared/FilterCheckbox";
 import CardCourse from "../shared/CardCourse";
@@ -20,28 +20,32 @@ export default function Section({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, searchQuery]);
+  }, [selectedCategories, deferredSearchQuery]);
 
   const categories = [
     ...new Set(dataCategories.map((c) => c.name).filter(Boolean)),
   ] as string[];
 
-  const filteredCourses = dataCourses.filter((course) => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      !q ||
-      course.title.toLowerCase().includes(q) ||
-      course.description.toLowerCase().includes(q);
-    const categoryHit =
-      selectedCategories.length === 0 ||
-      (course.category_uid &&
-        selectedCategories.includes(
-          dataCategories.find((c) => c.uid === course.category_uid)?.name || "",
-        ));
-    return matchesSearch && categoryHit;
-  });
+  const filteredCourses = useMemo(() => {
+    return dataCourses.filter((course) => {
+      const q = deferredSearchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        course.title.toLowerCase().includes(q) ||
+        course.description.toLowerCase().includes(q);
+      const categoryHit =
+        selectedCategories.length === 0 ||
+        (course.category_uid &&
+          selectedCategories.includes(
+            dataCategories.find((c) => c.uid === course.category_uid)?.name || "",
+          ));
+      return matchesSearch && categoryHit;
+    });
+  }, [dataCategories, dataCourses, deferredSearchQuery, selectedCategories]);
 
   const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
   const paginatedCourses = filteredCourses.slice(
@@ -56,7 +60,7 @@ export default function Section({
   };
 
   return (
-    <section className="flex w-full flex-col gap-10">
+    <section className="flex w-full flex-col gap-10 pt-4">
       <div className="flex flex-col justify-between gap-6 border-b border-slate-100 pb-6">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">

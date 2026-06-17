@@ -1,3 +1,4 @@
+import type { LessonAssignmentSubmissionBundleApiRaw, LessonAssignmentSubmissionJsonBody } from '@/lib/lesson-assignment/api-types'
 import {
   mapLessonAssignmentSubmissionBundle,
   mapLessonAssignmentSubmissionResponse,
@@ -12,9 +13,8 @@ import {
 } from '@/lib/validator/lesson-assignment'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
-import { getApiErrorMessage, unwrapApiResponse, withApiErrorHandling } from './api-error'
+import { getApiErrorMessage, isNotFoundApiError, unwrapApiResponse, withApiErrorHandling } from './api-error'
 import type { IResponse } from '@/lib/types/api'
-import type { AxiosError } from 'axios'
 
 export type SubmitLessonAssignmentInput = SubmitLessonAssignmentPayload
 
@@ -22,11 +22,6 @@ export type SubmitLessonAssignmentOptions = {
   assignment: LessonDetailAssignment
   priorFileUrl?: string | null
   hasExistingSubmission: boolean
-}
-
-function isNotFoundError(error: unknown) {
-  const axiosError = error as AxiosError
-  return axiosError.response?.status === 404
 }
 
 function isAlreadySubmittedError(error: unknown) {
@@ -40,13 +35,13 @@ export async function fetchMyLessonAssignmentSubmission(
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid)
     try {
-      const response = await api.get<IResponse<unknown>>(
+      const response = await api.get<IResponse<LessonAssignmentSubmissionBundleApiRaw>>(
         API_ROUTES.lessons.assignment.submission.getByLessonUid(validatedLessonUid),
       )
       const data = unwrapApiResponse(response.data, 'Gagal mengambil submission tugas')
       return mapLessonAssignmentSubmissionBundle(data)
     } catch (error) {
-      if (isNotFoundError(error)) return null
+      if (isNotFoundApiError(error)) return null
       throw error
     }
   }, 'Gagal mengambil submission tugas')
@@ -68,11 +63,11 @@ function buildSubmissionFormData(input: SubmitLessonAssignmentInput) {
   return formData
 }
 
-function buildSubmissionJsonBody(input: SubmitLessonAssignmentInput) {
-  const body: Record<string, unknown> = { remove_file: false }
+function buildSubmissionJsonBody(input: SubmitLessonAssignmentInput): LessonAssignmentSubmissionJsonBody {
+  const body: LessonAssignmentSubmissionJsonBody = { remove_file: false }
 
   if (input.plainText !== undefined) body.plain_text = input.plainText
-  if (input.richText !== undefined) body.rich_text = input.richText
+  if (input.richText != null) body.rich_text = input.richText
   if (input.fileDescription !== undefined) body.file_description = input.fileDescription
   if (input.quizAnswers !== undefined) body.quiz_answers = input.quizAnswers
 
@@ -83,7 +78,7 @@ async function postSubmission(lessonUid: string, input: SubmitLessonAssignmentIn
   const useMultipart = Boolean(input.file)
 
   if (useMultipart) {
-    const response = await api.post<IResponse<unknown>>(
+    const response = await api.post<IResponse<LessonAssignmentSubmissionBundleApiRaw>>(
       API_ROUTES.lessons.assignment.submission.createByLessonUid(lessonUid),
       buildSubmissionFormData(input),
     )
@@ -91,7 +86,7 @@ async function postSubmission(lessonUid: string, input: SubmitLessonAssignmentIn
     return mapLessonAssignmentSubmissionResponse(data)
   }
 
-  const response = await api.post<IResponse<unknown>>(
+  const response = await api.post<IResponse<LessonAssignmentSubmissionBundleApiRaw>>(
     API_ROUTES.lessons.assignment.submission.createByLessonUid(lessonUid),
     buildSubmissionJsonBody(input),
   )
@@ -103,7 +98,7 @@ async function putSubmission(lessonUid: string, input: SubmitLessonAssignmentInp
   const useMultipart = Boolean(input.file)
 
   if (useMultipart) {
-    const response = await api.put<IResponse<unknown>>(
+    const response = await api.put<IResponse<LessonAssignmentSubmissionBundleApiRaw>>(
       API_ROUTES.lessons.assignment.submission.updateByLessonUid(lessonUid),
       buildSubmissionFormData(input),
     )
@@ -111,7 +106,7 @@ async function putSubmission(lessonUid: string, input: SubmitLessonAssignmentInp
     return mapLessonAssignmentSubmissionResponse(data)
   }
 
-  const response = await api.put<IResponse<unknown>>(
+  const response = await api.put<IResponse<LessonAssignmentSubmissionBundleApiRaw>>(
     API_ROUTES.lessons.assignment.submission.updateByLessonUid(lessonUid),
     buildSubmissionJsonBody(input),
   )

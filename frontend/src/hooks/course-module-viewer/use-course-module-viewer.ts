@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   flattenLessons,
   type LessonEntry,
-} from '@/components/courses/module-viewer/utils'
+} from '@/lib/course-module-viewer/lesson-viewer-utils'
 import { useCourseLessonReading } from '@/hooks/use-course-lesson-reading'
 import { useLessonAssignment } from '@/hooks/use-lesson-assignment'
 import { useLessonByUid } from '@/hooks/use-lessons'

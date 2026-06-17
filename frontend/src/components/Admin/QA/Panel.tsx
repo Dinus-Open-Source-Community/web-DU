@@ -1,24 +1,40 @@
 import { useState } from 'react'
-import { Star, MessageCircle } from 'lucide-react'
+import { Loader2, MessageCircle, Star } from 'lucide-react'
+
+import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
-import { EmptyState } from '@/components/shared/EmptyState'
+import { useReplyAdminReview } from '@/hooks/use-admin-moderation'
 import type { AdminReview } from '@/lib/types/course'
+import { cn } from '@/lib/utils'
 
 type ReviewsPanelProps = {
-  courseUid: string
-  dataAdminReviews: AdminReview[]
+  courseUid?: string
+  reviews: AdminReview[]
+  isLoading?: boolean
 }
 
-export function ReviewsPanel({ courseUid, dataAdminReviews }: ReviewsPanelProps) {
-  if (dataAdminReviews.length === 0) {
+export function ReviewsPanel({ courseUid, reviews, isLoading = false }: ReviewsPanelProps) {
+  if (isLoading) {
+    return (
+      <div className="flex min-h-48 items-center justify-center rounded-2xl border border-slate-200/80 bg-white">
+        <Loader2 className="size-6 animate-spin text-slate-400" aria-hidden />
+      </div>
+    )
+  }
+
+  if (reviews.length === 0) {
     return (
       <EmptyState
         icon={<Star className="h-5 w-5" />}
         title={courseUid ? 'Belum ada review untuk course ini' : 'Belum ada review'}
-        description={courseUid ? 'Review siswa untuk course yang dipilih akan tampil di sini.' : 'Review siswa akan tampil di sini setelah mereka menyelesaikan course.'}
+        description={
+          courseUid
+            ? 'Review siswa untuk course yang dipilih akan tampil di sini.'
+            : 'Review siswa akan tampil di sini setelah mereka menyelesaikan course.'
+        }
       />
     )
   }
@@ -38,7 +54,7 @@ export function ReviewsPanel({ courseUid, dataAdminReviews }: ReviewsPanelProps)
             </tr>
           </thead>
           <tbody>
-            {dataAdminReviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewRow key={review.uid} review={review} />
             ))}
           </tbody>
@@ -49,26 +65,25 @@ export function ReviewsPanel({ courseUid, dataAdminReviews }: ReviewsPanelProps)
 }
 
 function ReviewRow({ review }: { review: AdminReview }) {
+  const replyMutation = useReplyAdminReview()
   const [showReply, setShowReply] = useState(false)
   const [reply, setReply] = useState('')
-  const [localReply, setLocalReply] = useState<AdminReview['reply'] | null>(null)
+  const isSubmitting = replyMutation.isPending
 
-  const activeReply = localReply ?? review.reply
+  const handleSendReply = async () => {
+    const comment = reply.trim()
+    if (comment.length < 3 || isSubmitting) return
 
-  const handleSendReply = () => {
-    if (reply.trim().length < 3) return
-
-    setLocalReply({
-      author: 'Admin',
-      comment: reply.trim(),
-      createdAt: new Date().toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }),
-    })
-    setReply('')
-    setShowReply(false)
+    try {
+      await replyMutation.mutateAsync({
+        reviewUid: review.uid,
+        comment,
+      })
+      setReply('')
+      setShowReply(false)
+    } catch {
+      // Toast ditangani mutation hook.
+    }
   }
 
   return (
@@ -76,9 +91,12 @@ function ReviewRow({ review }: { review: AdminReview }) {
       <tr className="border-b border-slate-200/70 align-top text-sm text-slate-700">
         <td className="px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-100">
-              <img src={review.studentAvatar} alt={review.studentName} className="object-cover" sizes="36px" />
-            </div>
+            <UserAvatarImage
+              src={review.studentAvatar}
+              alt={review.studentName}
+              size={36}
+              className="ring-1 ring-slate-100"
+            />
             <p className="max-w-45 truncate font-semibold text-slate-900">{review.studentName}</p>
           </div>
         </td>
@@ -87,8 +105,15 @@ function ReviewRow({ review }: { review: AdminReview }) {
         </td>
         <td className="px-4 py-4">
           <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className={cn('h-3.5 w-3.5', i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300')} aria-hidden />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star
+                key={index}
+                className={cn(
+                  'h-3.5 w-3.5',
+                  index < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300',
+                )}
+                aria-hidden
+              />
             ))}
           </div>
         </td>
@@ -97,19 +122,20 @@ function ReviewRow({ review }: { review: AdminReview }) {
         </td>
         <td className="px-4 py-4 text-xs text-slate-500">{review.createdAt}</td>
         <td className="px-4 py-4">
-          {activeReply ? (
+          {review.reply ? (
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
               <p className="text-xs font-semibold text-primary">
-                Balasan dari {activeReply.author} • {activeReply.createdAt}
+                Balasan dari {review.reply.author} • {review.reply.createdAt}
               </p>
-              <p className="mt-1 text-sm text-slate-700">{activeReply.comment}</p>
+              <p className="mt-1 text-sm text-slate-700">{review.reply.comment}</p>
             </div>
           ) : (
             <Button
               variant="outline"
               size="sm"
               className="h-8 w-fit gap-1.5 rounded-lg border-slate-200 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
-              onClick={() => setShowReply(true)}>
+              onClick={() => setShowReply(true)}
+            >
               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
               Balas review
             </Button>
@@ -121,19 +147,33 @@ function ReviewRow({ review }: { review: AdminReview }) {
         <tr className="border-b border-slate-200/70 bg-slate-50/50">
           <td className="px-4 py-4" colSpan={6}>
             <div className="flex max-w-3xl flex-col gap-2 rounded-xl border border-slate-200/80 bg-white p-3">
-              <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Tulis balasan kepada siswa..." className="min-h-22.5 resize-none bg-white text-sm" />
+              <Textarea
+                value={reply}
+                onChange={(event) => setReply(event.target.value)}
+                placeholder="Tulis balasan kepada siswa..."
+                disabled={isSubmitting}
+                className="min-h-22.5 resize-none bg-white text-sm"
+              />
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   className="h-8 rounded-lg border-slate-200"
+                  disabled={isSubmitting}
                   onClick={() => {
                     setShowReply(false)
                     setReply('')
-                  }}>
+                  }}
+                >
                   Batal
                 </Button>
-                <Button size="sm" className="h-8 rounded-lg" disabled={reply.trim().length < 3} onClick={handleSendReply}>
+                <Button
+                  size="sm"
+                  className="h-8 rounded-lg"
+                  disabled={reply.trim().length < 3 || isSubmitting}
+                  onClick={() => void handleSendReply()}
+                >
+                  {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
                   Kirim balasan
                 </Button>
               </div>

@@ -3,6 +3,15 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import type { IQueryParamsPayload } from '@/services/api-path'
 import type { LessonDetailItem } from '@/lib/types/course'
 import {
+  applyResolvedImagesToCourseDetail,
+  applyResolvedImagesToCourseItem,
+  applyResolvedImagesToCourseStudents,
+  collectCourseDetailImageReferences,
+  collectCourseListImageReferences,
+  collectCourseStudentsImageReferences,
+} from '@/lib/files'
+import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
+import {
   fetchCourseByUid,
   fetchCourseCategories,
   fetchCourseCategoryByUid,
@@ -24,19 +33,64 @@ export function useCourses(
   params?: IQueryParamsPayload,
   options: UseCoursesOptions = {},
 ) {
-  return useQuery({
+  const query = useQuery({
     queryKey: courseKeys.list(params),
     queryFn: () => fetchCourses(params),
     enabled: options.enabled,
   })
+
+  const imageReferences = useMemo(
+    () => collectCourseListImageReferences(query.data?.courses),
+    [query.data?.courses],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return {
+      ...query.data,
+      courses: query.data.courses.map((course) =>
+        applyResolvedImagesToCourseItem(course, fileMap.getDisplayUrl),
+      ),
+    }
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
 }
 
 export function useCourseDetail(uid: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: courseKeys.detail(uid),
     enabled: !!uid,
     queryFn: () => fetchCourseByUid(uid),
   })
+
+  const imageReferences = useMemo(
+    () => collectCourseDetailImageReferences(query.data),
+    [query.data],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return applyResolvedImagesToCourseDetail(query.data, fileMap.getDisplayUrl)
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
 }
 
 export function useCourseCategories(params?: IQueryParamsPayload) {
@@ -62,11 +116,31 @@ export function useCourseTypes(params?: IQueryParamsPayload) {
 }
 
 export function useCourseStudents(courseUid: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: courseKeys.students(courseUid),
     enabled: !!courseUid,
     queryFn: () => fetchCourseStudents(courseUid),
   })
+
+  const imageReferences = useMemo(
+    () => collectCourseStudentsImageReferences(query.data),
+    [query.data],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return applyResolvedImagesToCourseStudents(query.data, fileMap.getDisplayUrl)
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
 }
 
 export function useCourseProgress(courseUid: string, enabled = true) {

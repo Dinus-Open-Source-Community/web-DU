@@ -1,3 +1,8 @@
+import type {
+  LessonAssignmentGradingApiRaw,
+  LessonAssignmentSubmissionApiRaw,
+  LessonAssignmentSubmissionBundleApiRaw,
+} from '@/lib/lesson-assignment/api-types'
 import type { IRichTextEnvelope } from '@/lib/types/rich-text'
 import type {
   LessonAssignmentGrading,
@@ -6,20 +11,18 @@ import type {
   QuizAnswersMap,
 } from './types'
 
-function parseRichTextValue(raw: unknown): IRichTextEnvelope | string | null {
+function parseRichTextValue(raw: IRichTextEnvelope | string | null | undefined): IRichTextEnvelope | string | null {
   if (raw == null) return null
   if (typeof raw === 'string') return raw
-  if (typeof raw === 'object' && 'contentHtml' in raw && typeof (raw as IRichTextEnvelope).contentHtml === 'string') {
-    return raw as IRichTextEnvelope
-  }
+  if (typeof raw.contentHtml === 'string') return raw
   return null
 }
 
-function parseQuizAnswers(raw: unknown): QuizAnswersMap {
+function parseQuizAnswers(raw: QuizAnswersMap | undefined): QuizAnswersMap {
   if (!raw || typeof raw !== 'object') return {}
 
   const answers: QuizAnswersMap = {}
-  for (const [questionId, value] of Object.entries(raw as Record<string, unknown>)) {
+  for (const [questionId, value] of Object.entries(raw)) {
     if (typeof value === 'string' && value.trim()) {
       answers[questionId] = value.trim()
     }
@@ -28,8 +31,11 @@ function parseQuizAnswers(raw: unknown): QuizAnswersMap {
   return answers
 }
 
-function mapGrading(raw: unknown, submissionRaw?: Record<string, unknown>): LessonAssignmentGrading {
-  const grading = (raw ?? {}) as Record<string, unknown>
+function mapGrading(
+  raw: LessonAssignmentGradingApiRaw | undefined,
+  submissionRaw?: LessonAssignmentSubmissionApiRaw,
+): LessonAssignmentGrading {
+  const grading = raw ?? {}
   const submission = submissionRaw ?? {}
 
   const scorePercent =
@@ -92,7 +98,7 @@ function mapGrading(raw: unknown, submissionRaw?: Record<string, unknown>): Less
 }
 
 function mapSubmissionEntity(
-  submission: Record<string, unknown>,
+  submission: LessonAssignmentSubmissionApiRaw,
   options?: { attemptNumber?: number; submittedAt?: string },
 ): LessonAssignmentSubmissionRecord {
   const attemptCount =
@@ -128,7 +134,7 @@ function mapSubmissionEntity(
 }
 
 function mapSubmissionAttemptItem(
-  attempt: Record<string, unknown>,
+  attempt: LessonAssignmentSubmissionApiRaw,
   submissionUid: string,
 ): LessonAssignmentSubmissionRecord {
   const attemptNumber =
@@ -153,18 +159,20 @@ function mapSubmissionAttemptItem(
   )
 }
 
-function mapSingleSubmissionPayload(raw: unknown): LessonAssignmentSubmissionRecord {
-  const payload = (raw ?? {}) as Record<string, unknown>
-  const submission = (payload.submission ?? payload) as Record<string, unknown>
+function mapSingleSubmissionPayload(raw: LessonAssignmentSubmissionBundleApiRaw): LessonAssignmentSubmissionRecord {
+  const submission: LessonAssignmentSubmissionApiRaw = raw.submission ?? {
+    uid: raw.submission_uid,
+    attempt_count: raw.latest_attempt_number,
+  }
   return mapSubmissionEntity(submission)
 }
 
-export function mapLessonAssignmentSubmissionBundle(raw: unknown): LessonAssignmentSubmissionBundle {
-  const payload = (raw ?? {}) as Record<string, unknown>
-
-  if (Array.isArray(payload.submissions) && payload.submissions.length > 0) {
-    const submissionUid = String(payload.submission_uid ?? '')
-    const attempts = (payload.submissions as Record<string, unknown>[]).map((item) =>
+export function mapLessonAssignmentSubmissionBundle(
+  raw: LessonAssignmentSubmissionBundleApiRaw,
+): LessonAssignmentSubmissionBundle {
+  if (Array.isArray(raw.submissions) && raw.submissions.length > 0) {
+    const submissionUid = String(raw.submission_uid ?? '')
+    const attempts = raw.submissions.map((item) =>
       mapSubmissionAttemptItem(item, submissionUid),
     )
     const latest = attempts[attempts.length - 1]
@@ -172,18 +180,18 @@ export function mapLessonAssignmentSubmissionBundle(raw: unknown): LessonAssignm
     return {
       submissionUid,
       latestAttemptNumber:
-        typeof payload.latest_attempt_number === 'number'
-          ? payload.latest_attempt_number
+        typeof raw.latest_attempt_number === 'number'
+          ? raw.latest_attempt_number
           : latest.attemptCount,
-      maxAttempts: typeof payload.max_attempts === 'number' ? payload.max_attempts : null,
+      maxAttempts: typeof raw.max_attempts === 'number' ? raw.max_attempts : null,
       totalAttempts:
-        typeof payload.total_attempts === 'number' ? payload.total_attempts : attempts.length,
+        typeof raw.total_attempts === 'number' ? raw.total_attempts : attempts.length,
       latest,
       attempts,
     }
   }
 
-  const latest = mapSingleSubmissionPayload(payload)
+  const latest = mapSingleSubmissionPayload(raw)
 
   return {
     submissionUid: latest.uid,
@@ -195,6 +203,8 @@ export function mapLessonAssignmentSubmissionBundle(raw: unknown): LessonAssignm
   }
 }
 
-export function mapLessonAssignmentSubmissionResponse(raw: unknown): LessonAssignmentSubmissionRecord {
+export function mapLessonAssignmentSubmissionResponse(
+  raw: LessonAssignmentSubmissionBundleApiRaw,
+): LessonAssignmentSubmissionRecord {
   return mapLessonAssignmentSubmissionBundle(raw).latest
 }

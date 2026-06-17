@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { isValidInstructionAttachmentUrl } from '@/lib/course-edit/instruction-attachments'
 import type { LessonAssignmentInstructionAttachment } from '@/lib/types/lesson'
 
-import { editLayout } from '../../edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type InstructionAttachmentsFieldProps = {
   attachments: LessonAssignmentInstructionAttachment[]

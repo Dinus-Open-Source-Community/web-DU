@@ -7,7 +7,7 @@ import { getLessonKey } from "@/lib/course-edit/mappers";
 import type { EditableLesson } from "@/lib/course-edit/types";
 import type { LessonDeliveryType } from "@/lib/types/lesson";
 
-import { editLayout } from "../edit-layout";
+import { editLayout } from '@/lib/course-edit/edit-layout'
 import { PanelTransition } from "./PanelTransition";
 import { SegmentedControl } from "./SegmentedControl";
 

@@ -8,6 +8,7 @@ import { LogoDu } from '../../components/shared/icon'
 import { GlobalInput } from '../../components/shared/Input'
 import { PasswordStrengthIndicator } from '../../components/auth/PasswordStrength'
 import AuthLayout from '../../components/layouts/AuthLayouts'
+import { resetPasswordFormSchema } from '../../lib/validator'
 
 export function FormResetPassword() {
   const [searchParams] = useSearchParams()
@@ -23,7 +24,17 @@ export function FormResetPassword() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (passwordMismatch || !password) return
+    if (passwordMismatch || !password || !token) return
+
+    const validation = resetPasswordFormSchema.safeParse({
+      token,
+      password,
+      confirmPassword,
+    })
+    if (!validation.success) {
+      return
+    }
+
     setSubmitted(true)
   }
 

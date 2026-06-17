@@ -11,7 +11,7 @@ import { SearchForm } from '../../shared/SearchForm'
 import { FilterSelect } from '../../shared/FilterSelect'
 import type { IChartRatioPoint } from '../../../lib/types/components/charts'
 import { FormatDateTime, FormatRupiah } from '@/lib/func/func'
-import type { TransactionSummary } from '@/services/admin-dashboard'
+import type { TransactionSummary } from '@/lib/types/admin/dashboard'
 import type { DailyTransactionStat } from '@/hooks/use-admin-transactions'
 
 type StatusFilter = 'all' | PaymentStatus
@@ -273,6 +273,31 @@ export function TransactionsDashboard({
         <p className="text-xs text-slate-500">Semua transaksi platform. Filter untuk menemukan transaksi spesifik.</p>
       </div>
 
+      <div className="flex flex-1 flex-wrap items-center gap-3">
+        <SearchForm
+          value={search}
+          onChange={onSearchChange}
+          onSubmit={onSearchSubmit}
+          placeholder="Cari transaksi, siswa, atau kursus..."
+          submitLabel="Cari"
+          className="min-w-[240px] flex-1"
+        />
+        <FilterSelect<StatusFilter>
+          id="tx-status"
+          label="Status"
+          value={statusFilter}
+          onChange={onStatusChange}
+          options={statusOptions}
+        />
+        <FilterSelect<MethodFilter>
+          id="tx-method"
+          label="Metode"
+          value={methodFilter}
+          onChange={onMethodChange}
+          options={methodOptions}
+        />
+      </div>
+
       <AdminDataTable
         data={transactions}
         columns={columns}
@@ -280,32 +305,6 @@ export function TransactionsDashboard({
         page={page}
         totalPages={totalPages}
         onPageChange={onPageChange}
-        toolbar={
-          <div className="flex flex-1 flex-wrap items-center gap-3">
-            <SearchForm
-              value={search}
-              onChange={onSearchChange}
-              onSubmit={onSearchSubmit}
-              placeholder="Cari transaksi, siswa, atau kursus..."
-              submitLabel="Cari"
-              className="flex-1 min-w-[240px]"
-            />
-            <FilterSelect<StatusFilter>
-              id="tx-status"
-              label="Status"
-              value={statusFilter}
-              onChange={onStatusChange}
-              options={statusOptions}
-            />
-            <FilterSelect<MethodFilter>
-              id="tx-method"
-              label="Metode"
-              value={methodFilter}
-              onChange={onMethodChange}
-              options={methodOptions}
-            />
-          </div>
-        }
       />
     </section>
   )

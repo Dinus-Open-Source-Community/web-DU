@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import type { IModulesDetail } from '@/lib/types/course'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 
-import { type LessonEntry, type LessonThemeMode } from './utils'
+import { type LessonEntry, type LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 import { LessonSidebarPanel } from './LessonSidebarPanel'
 
 type LessonSidebarProps = {
@@ -65,7 +65,7 @@ export function LessonSidebar({
     <>
       <aside
         className={cn(
-          'fixed right-0 top-16 z-30 hidden h-[calc(100dvh-4rem)] w-[348px] border-l transition-transform duration-200 ease-out lg:block',
+          'fixed right-0 top-16 z-30 hidden h-[calc(100dvh-4rem)] w-[348px] flex-col overflow-hidden border-l transition-transform duration-200 ease-out lg:block',
           isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
           !isOpen && 'translate-x-full',
         )}>
@@ -96,7 +96,7 @@ export function LessonSidebar({
         <SheetContent
           side="right"
           className={cn(
-            'flex h-dvh w-full max-w-[348px] flex-col gap-0 border-l p-0 sm:max-w-[348px] lg:hidden',
+            'flex h-dvh w-full max-w-[348px] flex-col gap-0 overflow-hidden border-l p-0 sm:max-w-[348px] lg:hidden',
             isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
           )}>
           <LessonSidebarPanel {...panelProps} />

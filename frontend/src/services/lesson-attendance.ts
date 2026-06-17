@@ -1,3 +1,4 @@
+import type { LessonAttendanceApiRaw } from '@/lib/course-detail/attendance-api-types'
 import type {
   ILessonAttendanceRecord,
   IUpdateAttendancePayload,
@@ -12,12 +13,10 @@ import { unwrapApiResponse, withApiErrorHandling } from "./api-error";
 import type { IResponse } from "@/lib/types/api";
 import { parseLessonUidParam } from "@/lib/validator";
 
-function mapAttendanceRecord(raw: unknown): ILessonAttendanceRecord | null {
-  if (!raw || typeof raw !== "object") return null;
-  const data = raw as Record<string, unknown>;
-  if (!data.uid || !data.lesson_uid || !data.enrollment_uid) return null;
+function mapAttendanceRecord(raw: LessonAttendanceApiRaw): ILessonAttendanceRecord | null {
+  if (!raw.uid || !raw.lesson_uid || !raw.enrollment_uid) return null;
 
-  const status = String(data.status ?? "present");
+  const status = String(raw.status ?? "present");
   const normalizedStatus =
     status === "present" ||
     status === "late" ||
@@ -27,14 +26,14 @@ function mapAttendanceRecord(raw: unknown): ILessonAttendanceRecord | null {
       : "present";
 
   return {
-    uid: String(data.uid),
-    lesson_uid: String(data.lesson_uid),
-    enrollment_uid: String(data.enrollment_uid),
-    checked_in_at: String(data.checked_in_at ?? ""),
+    uid: String(raw.uid),
+    lesson_uid: String(raw.lesson_uid),
+    enrollment_uid: String(raw.enrollment_uid),
+    checked_in_at: String(raw.checked_in_at ?? ""),
     status: normalizedStatus,
-    note: String(data.note ?? ""),
-    created_at: String(data.created_at ?? ""),
-    updated_at: String(data.updated_at ?? ""),
+    note: String(raw.note ?? ""),
+    created_at: String(raw.created_at ?? ""),
+    updated_at: String(raw.updated_at ?? ""),
   };
 }
 
@@ -43,7 +42,7 @@ export async function fetchLessonAttendances(
 ): Promise<ILessonAttendanceRecord[]> {
   return withApiErrorHandling(async () => {
     const validatedLessonUid = parseLessonUidParam(lessonUid);
-    const response = await api.get<IResponse<unknown>>(
+    const response = await api.get<IResponse<LessonAttendanceApiRaw[]>>(
       API_ROUTES.lessons.attendances.getByLessonUid(validatedLessonUid),
     );
     const data = unwrapApiResponse(
@@ -64,7 +63,7 @@ export async function updateLessonAttendance(
   return withApiErrorHandling(async () => {
     const validatedAttendanceUid = parseAttendanceUidParam(attendanceUid);
     const validatedPayload = parseUpdateAttendancePayload(payload);
-    const response = await api.put<IResponse<unknown>>(
+    const response = await api.put<IResponse<LessonAttendanceApiRaw>>(
       API_ROUTES.lessons.attendances.updateByUid(validatedAttendanceUid),
       validatedPayload,
     );
@@ -85,7 +84,7 @@ export async function deleteLessonAttendance(
 ): Promise<void> {
   return withApiErrorHandling(async () => {
     const validatedAttendanceUid = parseAttendanceUidParam(attendanceUid);
-    await api.delete<IResponse<unknown>>(
+    await api.delete<IResponse<null>>(
       API_ROUTES.lessons.attendances.deleteByUid(validatedAttendanceUid),
     );
   }, "Gagal menghapus kehadiran");

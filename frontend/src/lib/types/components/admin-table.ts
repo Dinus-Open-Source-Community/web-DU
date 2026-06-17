@@ -13,7 +13,6 @@ export interface IAdminDataTableProps<T> {
   columns: IAdminDataTableColumn<T>[]
   data: T[]
   keyField: (row: T) => string
-  toolbar?: ReactNode
   page?: number
   totalPages?: number
   onPageChange?: (page: number) => void

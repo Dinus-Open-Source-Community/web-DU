@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { AssignmentPassStatusBadge } from './AssignmentPassStatusBadge'
 import { AssignmentQuizReview } from './AssignmentQuizReview'
 import { AssignmentTextSubmissionView } from './AssignmentTextSubmissionView'
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonAssignmentDetailPageProps = {
   assignment: LessonDetailAssignment

@@ -18,7 +18,7 @@ import {
 } from '@/lib/course-edit/datetime-local'
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../../edit-layout'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type AssignmentDeadlinePickerProps = {
   id?: string

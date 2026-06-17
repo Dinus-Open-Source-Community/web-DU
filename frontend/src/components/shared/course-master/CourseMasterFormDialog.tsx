@@ -24,7 +24,7 @@ import type {
 } from '@/lib/course-master/types'
 import { COURSE_MASTER_LABELS, EMPTY_COURSE_MASTER_FORM } from '@/lib/course-master/types'
 import { validateCourseMasterForm } from '@/lib/course-master/validation'
-import { courseMasterLayout } from './course-master-layout'
+import { courseMasterLayout } from '@/lib/course-master/layout'
 
 type CourseMasterFormDialogProps = {
   open: boolean

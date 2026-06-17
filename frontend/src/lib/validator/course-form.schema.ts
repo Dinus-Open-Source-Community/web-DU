@@ -58,6 +58,7 @@ export const whatYouLearnItemSchema = z
 
 export const whatYouLearnSchema = z
   .array(whatYouLearnItemSchema)
+  .min(1, 'Minimal satu poin pembelajaran harus diisi')
   .max(50, 'Maksimal 50 poin pembelajaran')
 
 const courseFormFieldsSchema = z.object({

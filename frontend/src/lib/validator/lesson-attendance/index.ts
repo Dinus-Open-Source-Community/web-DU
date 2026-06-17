@@ -1,3 +1,4 @@
+import type { z } from 'zod'
 import type { IUpdateAttendancePayload } from '@/lib/types/features/course-detail-assignments'
 import { beResolvableUidSchema } from '../common'
 import { parseWithValidationMessage } from '../errors'
@@ -18,7 +19,7 @@ export function parseUpdateAttendancePayload(
 }
 
 export function parseCreateAttendancePayload(
-  payload: unknown,
+  payload: z.input<typeof createAttendancePayloadSchema>,
   fallback = 'Payload kehadiran tidak valid',
 ): CreateAttendancePayloadValidated {
   return parseWithValidationMessage(createAttendancePayloadSchema, payload, fallback)

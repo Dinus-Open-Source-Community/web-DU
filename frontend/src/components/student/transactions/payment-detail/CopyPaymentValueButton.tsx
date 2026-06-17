@@ -1,6 +1,6 @@
 import { Check, Copy } from 'lucide-react'
 
-import type { CopyablePaymentProps } from './payment-detail-types'
+import type { CopyablePaymentProps } from '@/lib/transactions/payment-detail-types'
 
 type CopyPaymentValueButtonProps = CopyablePaymentProps & {
   copyKey: string

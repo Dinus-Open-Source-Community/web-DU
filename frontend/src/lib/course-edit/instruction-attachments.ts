@@ -1,15 +1,13 @@
+import type { InstructionAttachmentApiRaw } from '@/lib/lesson-assignment/api-types'
 import type { LessonAssignmentInstructionAttachment } from '@/lib/types/lesson'
 
-type RawInstructionAttachment = Record<string, unknown>
-
 export function normalizeInstructionAttachment(
-  raw: unknown,
+  raw: InstructionAttachmentApiRaw | null | undefined,
 ): LessonAssignmentInstructionAttachment | null {
-  if (!raw || typeof raw !== 'object') return null
+  if (!raw) return null
 
-  const item = raw as RawInstructionAttachment
-  const url = String(item.url ?? item.link ?? '').trim()
-  const name = String(item.name ?? item.fileName ?? item.filename ?? '').trim()
+  const url = String(raw.url ?? raw.link ?? '').trim()
+  const name = String(raw.name ?? raw.fileName ?? raw.filename ?? '').trim()
 
   if (!url && !name) return null
 
@@ -20,7 +18,7 @@ export function normalizeInstructionAttachment(
 }
 
 export function normalizeInstructionAttachments(
-  raw: unknown,
+  raw: InstructionAttachmentApiRaw[] | null | undefined,
 ): LessonAssignmentInstructionAttachment[] {
   if (!Array.isArray(raw)) return []
 

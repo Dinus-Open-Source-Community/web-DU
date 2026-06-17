@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { SafeLottie } from "@/components/ui/lottie";
 import type { PaymentInvoiceViewModel } from "@/lib/transactions/present-payment-invoice-view";
 import { cn } from "@/lib/utils";
-import { PAYMENT_LOTTIE_ASSETS } from "./payment-motion";
+import { PAYMENT_LOTTIE_ASSETS } from '@/lib/transactions/payment-motion';
 
 type PaymentStatusHeroProps = {
   invoice: PaymentInvoiceViewModel;

@@ -39,6 +39,7 @@ import {
   parseCourseReviewReplyParams,
   parseCreateCourseReviewReplyPayload,
 } from '@/lib/validator/course-review'
+import { parseCourseListParams, parseJoinCourseUidParam } from '@/lib/validator/query'
 
 export type { CreateCoursePayload, UpdateCoursePayload, UpdateCourseStatusRequest }
 import type {
@@ -50,8 +51,9 @@ import { fetchLessonsByModuleUid } from './lessons'
 import { fetchModulesByCourseUid } from './module'
 
 export async function fetchCourses(params?: IQueryParamsPayload) {
+  const validatedParams = parseCourseListParams(params)
   const response = await api.get<IResponse<ICourseListResponse>>(
-    API_ROUTES.courses.getAll(params),
+    API_ROUTES.courses.getAll(validatedParams),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil daftar kursus')
 }
@@ -144,8 +146,9 @@ export interface JoinCourseResponse {
 }
 
 export async function joinCourse(courseUid: string) {
+  const validatedUid = parseJoinCourseUidParam(courseUid)
   const response = await api.post<IResponse<JoinCourseResponse>>(
-    API_ROUTES.courses.joinByUid(courseUid),
+    API_ROUTES.courses.joinByUid(validatedUid),
   )
   return unwrapApiResponse(response.data, 'Gagal mendaftar kursus')
 }

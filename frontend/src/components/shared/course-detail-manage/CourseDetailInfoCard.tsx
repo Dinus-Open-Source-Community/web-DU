@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Banknote, Layers3, Layout, Star, Tag } from 'lucide-react'
 
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { formatCourseRatingLabel, hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
 import { FormatRupiah } from '@/lib/func/func'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { cn } from '@/lib/utils'
@@ -71,7 +72,11 @@ export function CourseDetailInfoCard({ course, className }: CourseDetailInfoCard
         <InfoRow
           icon={<Star className="size-3.5 text-amber-400" />}
           label="Rating"
-          value={course.rating || '4.8'}
+          value={
+            hasPublishedCourseReviews(course.total_reviews)
+              ? formatCourseRatingLabel(course.rating)
+              : 'Belum ada ulasan'
+          }
         />
       </div>
     </aside>

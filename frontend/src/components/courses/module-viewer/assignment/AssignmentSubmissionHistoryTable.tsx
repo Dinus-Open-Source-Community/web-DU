@@ -8,7 +8,7 @@ import type {
 import { cn } from '@/lib/utils'
 
 import { AssignmentPassStatusBadge } from './AssignmentPassStatusBadge'
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentSubmissionHistoryTableProps = {
   rows: SubmissionHistoryRowViewModel[]

@@ -10,7 +10,10 @@ import type { TransactionStatusFilter } from '@/lib/transactions/filter-transact
 import { FormatRupiah } from '@/lib/func/func'
 import type { IUserData } from '@/lib/types/user'
 import { PaymentBadge } from '@/components/ui/badge'
-import { ReactIcon } from '@/components/shared/icon'
+import {
+  CourseCardCover,
+  CourseCardCoverCompactFrame,
+} from '@/components/shared/CourseCardCover'
 import {
   Table,
   TableBody,
@@ -92,18 +95,15 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
                 {viewModel.paginatedTransactions.map((item) => (
                   <TableRow key={item.uid} className="hover:bg-slate-50/70">
                     <TableCell>
-                      <div className="h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                        {item.course?.uid && courseImagesByUid.get(item.course.uid) ? (
-                          <img
-                            src={courseImagesByUid.get(item.course.uid)}
-                            alt={item.course.title ?? 'Kursus'}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <ReactIcon />
-                        )}
-                      </div>
+                      <CourseCardCoverCompactFrame className="w-16 rounded-xl">
+                        <CourseCardCover
+                          src={item.course?.uid ? courseImagesByUid.get(item.course.uid) : undefined}
+                          alt={item.course?.title ?? 'Kursus'}
+                          fill
+                          className="rounded-xl"
+                          imgClassName="rounded-xl"
+                        />
+                      </CourseCardCoverCompactFrame>
                     </TableCell>
                     <TableCell>
                       <span className="line-clamp-2 font-semibold whitespace-normal text-slate-900">

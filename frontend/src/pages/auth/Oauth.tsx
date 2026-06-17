@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { getApiErrorMessage } from '@/services/api-error'
 import { SafeLottie } from '../../components/ui/lottie'
 import { useAuth } from '../../providers/auth-provider'
 
@@ -33,8 +34,8 @@ export default function OAuthCallbackPage() {
         navigate(redirectPath)
         toast.success('Login berhasil')
       })
-      .catch((err: unknown) => {
-        toast.error(err instanceof Error ? err.message : 'OAuth login gagal')
+      .catch((err) => {
+        toast.error(getApiErrorMessage(err, 'OAuth login gagal'))
         navigate('/auth/login')
       })
   }, [navigate, searchParams, signInWithToken])

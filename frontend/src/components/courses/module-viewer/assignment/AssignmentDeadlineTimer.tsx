@@ -4,7 +4,7 @@ import { useAssignmentDeadlineTimer } from '@/hooks/use-assignment-deadline-time
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentDeadlineTimerProps = {
   deadlineAt: string

@@ -28,7 +28,7 @@ import type { CourseFormMode, CourseFormValues } from '@/lib/course-form/types'
 import { EMPTY_COURSE_FORM_VALUES } from '@/lib/course-form/types'
 import type { CourseLevel, ICourseDetailItem } from '@/lib/types/course'
 import { getCourseFormValidationMessage } from '@/lib/validator/course-form'
-import { courseFormLayout } from './course-form-layout'
+import { courseFormLayout } from '@/lib/course-form/layout'
 
 type CourseFormDialogProps = CourseFormOptionsViewModel & {
   open: boolean

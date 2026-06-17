@@ -3,7 +3,7 @@ import { FileText, Search, X } from 'lucide-react'
 import type { NavbarSearchItem } from '@/providers/navbar-search-provider'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from './utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonSearchDialogProps = {
   open: boolean

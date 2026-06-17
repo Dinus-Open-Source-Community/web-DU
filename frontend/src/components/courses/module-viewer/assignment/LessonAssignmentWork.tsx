@@ -26,7 +26,7 @@ import { AssignmentDeadlineTimer } from "./AssignmentDeadlineTimer";
 import { AssignmentFileUploadField } from "./AssignmentFileUploadField";
 import { AssignmentQuizPrompt } from "./AssignmentQuizPrompt";
 import { AssignmentWorkInstructions } from "./AssignmentWorkInstructions";
-import type { LessonThemeMode } from "../utils";
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonAssignmentWorkProps = {
   lesson: LessonDetailItem;

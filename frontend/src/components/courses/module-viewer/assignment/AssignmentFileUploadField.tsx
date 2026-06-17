@@ -10,7 +10,7 @@ import {
 } from '@/lib/lesson-assignment/submission-file-preview'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentFileUploadFieldProps = {
   file: File | null

@@ -1,5 +1,5 @@
 import type { LessonFooterNavAction } from '@/components/courses/module-viewer/LessonFooter'
-import type { LessonEntry } from '@/components/courses/module-viewer/utils'
+import type { LessonEntry } from '@/lib/course-module-viewer/lesson-viewer-utils'
 import { shouldOpenAssignmentAfterLesson } from '@/lib/lesson-assignment/navigation'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
 import type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'

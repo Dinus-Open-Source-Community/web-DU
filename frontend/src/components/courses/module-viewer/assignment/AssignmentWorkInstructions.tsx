@@ -4,7 +4,7 @@ import { parseLessonContent } from '@/lib/rich-text'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentWorkInstructionsProps = {
   assignment: LessonDetailAssignment

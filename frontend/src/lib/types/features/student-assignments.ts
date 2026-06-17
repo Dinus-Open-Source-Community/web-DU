@@ -1,6 +1,8 @@
 import type { IMentorAssignmentSubmission, IMentorCourseAssignment } from '../data/course'
 import type { IPaginationMeta } from '../common/pagination'
 
+import type { StudentMyAssignmentApiRaw } from '@/lib/student-assignments/api-types'
+
 export type StudentAssignmentFeedCategory = 'all' | 'todo' | 'pending_review' | 'done' | 'late'
 export type StudentAssignmentRowKind = 'not_submitted' | 'pending_review' | 'graded' | 'returned'
 
@@ -26,7 +28,7 @@ export interface IStudentMyAssignmentLatestSubmission {
 export interface IStudentMyAssignmentListItem {
   course_uid: string
   course_title: string
-  assignment: Record<string, unknown>
+  assignment: StudentMyAssignmentApiRaw
   latest_submission: IStudentMyAssignmentLatestSubmission | null
 }
 

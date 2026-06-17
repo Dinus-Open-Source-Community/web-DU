@@ -1,7 +1,7 @@
 import type { SubmissionPassOutcome } from '@/lib/lesson-assignment/submission-history'
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from '../utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type AssignmentPassStatusBadgeProps = {
   outcome: SubmissionPassOutcome

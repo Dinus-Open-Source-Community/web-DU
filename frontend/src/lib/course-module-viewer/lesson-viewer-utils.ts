@@ -77,4 +77,3 @@ export function isModuleComplete(mod: IModulesDetail, readLessonIds: ReadonlySet
   const { completedCount, totalCount } = moduleProgress(mod, readLessonIds)
   return totalCount > 0 && completedCount === totalCount
 }
-

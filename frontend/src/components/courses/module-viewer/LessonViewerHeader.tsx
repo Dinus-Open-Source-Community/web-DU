@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 
-import type { LessonThemeMode } from './utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
 type LessonViewerHeaderProps = {
   backHref: string

@@ -2,7 +2,7 @@ import { PaymentBadge } from '@/components/ui/badge'
 import type { PaymentInvoiceViewModel } from '@/lib/transactions/present-payment-invoice-view'
 import { CopyPaymentValueButton } from './CopyPaymentValueButton'
 import { PaymentDetailField } from './PaymentDetailField'
-import type { CopyablePaymentProps } from './payment-detail-types'
+import type { CopyablePaymentProps } from '@/lib/transactions/payment-detail-types'
 
 type PaymentDetailsCardProps = CopyablePaymentProps & {
   invoice: PaymentInvoiceViewModel

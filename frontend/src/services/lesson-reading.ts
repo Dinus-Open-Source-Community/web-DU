@@ -1,4 +1,8 @@
 import type { LessonReadingRecord, LessonReadingStatus } from '@/lib/lesson-reading/types'
+import type {
+  LessonReadingRecordApi,
+  LessonReadingStatusApi,
+} from '@/lib/lesson-reading/api-types'
 import {
   mapLessonReadingHistory,
   mapLessonReadingStatus,
@@ -9,7 +13,7 @@ import { api } from './axios'
 import type { IResponse } from '@/lib/types/api'
 
 export async function fetchLessonReadingStatus(lessonUid: string): Promise<LessonReadingStatus> {
-  const response = await api.get<IResponse<unknown>>(
+  const response = await api.get<IResponse<LessonReadingStatusApi>>(
     API_ROUTES.lessons.read.getStatusByLessonUid(lessonUid),
   )
   const data = unwrapApiResponse(response.data, 'Gagal mengambil status baca lesson')
@@ -20,7 +24,7 @@ export async function fetchLessonReadingStatus(lessonUid: string): Promise<Lesso
 export async function fetchMyLessonReadingHistory(
   params?: IQueryParamsPayload,
 ): Promise<LessonReadingRecord[]> {
-  const response = await api.get<IResponse<unknown>>(
+  const response = await api.get<IResponse<LessonReadingRecordApi[]>>(
     API_ROUTES.lessons.readings.getMyHistory(params),
   )
   const data = unwrapApiResponse(response.data, 'Gagal mengambil riwayat baca lesson')
@@ -28,7 +32,7 @@ export async function fetchMyLessonReadingHistory(
 }
 
 export async function markLessonAsRead(lessonUid: string): Promise<LessonReadingRecord | null> {
-  const response = await api.post<IResponse<unknown>>(
+  const response = await api.post<IResponse<LessonReadingRecordApi>>(
     API_ROUTES.lessons.read.markByLessonUid(lessonUid),
   )
 

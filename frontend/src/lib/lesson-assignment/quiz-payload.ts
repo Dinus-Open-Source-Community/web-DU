@@ -1,5 +1,5 @@
-import { parseLessonContent } from '@/lib/rich-text'
 import type { IQuiz, IQuizOption } from '@/lib/types/lesson'
+import { parseLessonContent, type LessonContentRaw } from '@/lib/rich-text'
 
 export type NormalizedQuizQuestion = {
   id: string
@@ -14,7 +14,7 @@ export type NormalizedQuiz = {
   passingScore?: number
 }
 
-function normalizeQuizPrompt(raw: unknown): string {
+function normalizeQuizPrompt(raw: string | LessonContentRaw): string {
   if (typeof raw === 'string') return raw.trim()
   return parseLessonContent(raw).contentHtml
 }

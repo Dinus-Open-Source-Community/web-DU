@@ -1,9 +1,12 @@
-import { ReactIcon } from '@/components/shared/icon'
+import {
+  CourseCardCover,
+  CourseCardCoverCompactFrame,
+} from '@/components/shared/CourseCardCover'
 import { FormatRupiah } from '@/lib/func/func'
 import type { PaymentInvoiceViewModel } from '@/lib/transactions/present-payment-invoice-view'
 import { CopyPaymentValueButton } from './CopyPaymentValueButton'
 import { PaymentActions } from './PaymentActions'
-import type { CopyablePaymentProps, InvoiceDownloadParams } from './payment-detail-types'
+import type { CopyablePaymentProps, InvoiceDownloadParams } from '@/lib/transactions/payment-detail-types'
 
 type PaymentSummaryCardProps = CopyablePaymentProps & {
   downloadParams: InvoiceDownloadParams
@@ -29,17 +32,15 @@ export function PaymentSummaryCard({
       </div>
 
       <div className="flex gap-4 border-b border-slate-100 p-5">
-        <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100">
-          {invoice.courseImageUrl ? (
-            <img
-              src={invoice.courseImageUrl}
-              alt={invoice.courseTitle}
-              className="size-full object-cover"
-            />
-          ) : (
-            <ReactIcon className="size-8 text-slate-400" />
-          )}
-        </div>
+        <CourseCardCoverCompactFrame className="w-28 rounded-2xl">
+          <CourseCardCover
+            src={invoice.courseImageUrl}
+            alt={invoice.courseTitle}
+            fill
+            className="rounded-2xl"
+            imgClassName="rounded-2xl"
+          />
+        </CourseCardCoverCompactFrame>
         <div className="min-w-0">
           <p className="line-clamp-2 text-sm leading-6 font-bold text-slate-950">
             {invoice.courseTitle}

@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import type { PaymentInvoiceViewModel } from '@/lib/transactions/present-payment-invoice-view'
 import { ROUTES } from '@/lib/routes'
-import type { InvoiceDownloadParams } from './payment-detail-types'
-import { useInvoiceDownload } from './use-invoice-download'
+import type { InvoiceDownloadParams } from '@/lib/transactions/payment-detail-types'
+import { useInvoiceDownload } from '@/hooks/transactions/use-invoice-download'
 
 type PaymentActionsProps = {
   downloadParams: InvoiceDownloadParams

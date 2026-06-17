@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
-import { Play, Monitor, Infinity as InfinityIcon, Award } from 'lucide-react'
+import { Monitor, Infinity as InfinityIcon, Award } from 'lucide-react'
+
+import { CourseCardCover, CourseCardCoverFrame } from '@/components/shared/CourseCardCover'
 
 import { detailLayout } from '@/lib/course-detail/detail-layout'
 import { Separator } from '@/components/ui/separator'
@@ -40,21 +42,14 @@ export function CourseDetailSidebar({
 }: CourseDetailSidebarProps) {
   return (
     <aside className={cn(detailLayout.sectionCard, 'overflow-hidden', className)}>
-      <div className="relative aspect-video w-full bg-slate-100">
-        {previewImage ? (
-          <img
-            src={previewImage}
-            alt="Pratinjau kursus"
-            loading="lazy"
-            className="h-full w-full object-cover"
-            sizes="(max-width: 1024px) 100vw, 380px"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-sky-50 to-slate-100 text-slate-300">
-            <Play className="h-12 w-12" aria-hidden />
-          </div>
-        )}
-      </div>
+      <CourseCardCoverFrame className="rounded-none">
+        <CourseCardCover
+          src={previewImage}
+          alt="Pratinjau kursus"
+          fill
+          sizes="(max-width: 1024px) 100vw, 380px"
+        />
+      </CourseCardCoverFrame>
 
       <div className="flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex flex-col gap-1">

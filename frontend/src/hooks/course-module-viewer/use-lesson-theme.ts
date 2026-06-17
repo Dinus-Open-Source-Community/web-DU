@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import type { LessonThemeMode } from '@/components/courses/module-viewer/utils'
+import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 import {
   hasStoredLessonTheme,
   persistLessonTheme,

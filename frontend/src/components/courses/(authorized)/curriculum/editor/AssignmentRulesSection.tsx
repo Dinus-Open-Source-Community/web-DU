@@ -15,8 +15,8 @@ import { formatHomeworkRulesSummary } from '@/lib/course-edit/homework-rules'
 import type { HomeworkTaskType, LessonAssignmentStatus } from '@/lib/types/lesson'
 import { cn } from '@/lib/utils'
 
-import { editLayout } from '../edit-layout'
-import { ASSIGNMENT_STATUS_META } from './homework/homework-panel.constants'
+import { editLayout } from '@/lib/course-edit/edit-layout'
+import { ASSIGNMENT_STATUS_META } from '@/lib/course-edit/homework-panel.constants'
 import { AssignmentDeadlinePicker } from './homework/AssignmentDeadlinePicker'
 
 const STATUS_OPTIONS: { value: LessonAssignmentStatus; label: string; hint: string }[] = [

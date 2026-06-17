@@ -1,16 +1,9 @@
 import { DollarSign, Users2, CreditCard, TrendingUp, type LucideIcon } from 'lucide-react'
-import { StatCard } from '../../shared/StatCard'
-import { cn } from '../../../lib/utils'
 
-export interface AdminKpi {
-  id: string
-  label: string
-  value: string
-  trendValue: number
-  trendDirection: 'up' | 'down' | 'neutral'
-  trendLabel: string
-  iconName: 'revenue' | 'users' | 'transactions' | 'conversion' | 'ticket' | 'paid' | 'pending' | 'failed'
-}
+import type { AdminKpi } from '@/lib/types/admin/dashboard'
+import { cn } from '@/lib/utils'
+
+import { StatCard } from '../../shared/StatCard'
 
 const iconMap: Record<AdminKpi['iconName'], LucideIcon> = {
   revenue: DollarSign,

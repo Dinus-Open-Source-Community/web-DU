@@ -1,12 +1,18 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { fetchCourseByUid, joinCourse } from '@/services/course'
-import { fetchPaymentMethods, createPayment, type PaymentMethodItem } from '@/services/payment'
-import { courseKeys, paymentKeys } from '@/hooks/query-keys'
+import { useCourseDetail } from '@/hooks/use-course'
+import { getApiErrorMessage } from '@/services/api-error'
+import { joinCourse } from '@/services/course'
+import { createPayment, fetchPaymentMethods } from '@/services/payment'
+import type { PaymentMethodItem } from '@/lib/types/checkout/payment-method'
+import { paymentKeys } from '@/hooks/query-keys'
 import { ROUTES } from '@/lib/routes'
+import { parseCourseUidParam } from '@/lib/validator/course-form'
+import { parseCreatePaymentRequest } from '@/lib/validator/payment'
+import type { CreatePaymentRequestValidated } from '@/lib/validator/payment.schema'
 
 export type PaymentMethodGroup = {
   name: string
@@ -26,13 +32,9 @@ function groupByCategory(methods: PaymentMethodItem[]): PaymentMethodGroup[] {
 export function useCheckout() {
   const { courseUid } = useParams<{ courseUid: string }>()
   const navigate = useNavigate()
-  const [selectedCode, setSelectedCode] = useState<string | null>(null)
+  const [selectedCode, setSelectedCode] = useState<CreatePaymentRequestValidated['method'] | null>(null)
 
-  const courseQuery = useQuery({
-    queryKey: courseKeys.detail(courseUid ?? ''),
-    queryFn: () => fetchCourseByUid(courseUid!),
-    enabled: !!courseUid,
-  })
+  const courseQuery = useCourseDetail(courseUid ?? '')
 
   const methodsQuery = useQuery({
     queryKey: [...paymentKeys.all, 'methods'],
@@ -53,34 +55,40 @@ export function useCheckout() {
     [methods, selectedCode],
   )
 
-  const isLoading = courseQuery.isLoading || methodsQuery.isLoading
+  const isLoading =
+    courseQuery.isLoading || courseQuery.isResolvingImages || methodsQuery.isLoading
   const isProcessing = joinMutation.isPending || paymentMutation.isPending
   const canSubmit = !!selectedCode && !isProcessing
 
-  const selectMethod = useCallback((code: string) => {
+  const selectMethod = useCallback((code: CreatePaymentRequestValidated['method']) => {
     setSelectedCode(code)
   }, [])
 
   const submit = useCallback(async () => {
     if (!courseUid || !selectedCode || !course) return
 
-    try {
-      const { enrollment } = await joinMutation.mutateAsync(courseUid)
+    const validatedCourseUid = parseCourseUidParam(courseUid)
+    const paymentAmount = Math.max(1, Math.round(price))
 
-      const result = await paymentMutation.mutateAsync({
+    try {
+      const { enrollment } = await joinMutation.mutateAsync(validatedCourseUid)
+
+      const paymentPayload = parseCreatePaymentRequest({
         enrollment_uid: enrollment.uid,
         method: selectedCode,
-        amount: price,
+        amount: paymentAmount,
         order_items: [{
-          sku: courseUid,
+          sku: validatedCourseUid,
           name: course.title,
-          price,
+          price: paymentAmount,
           quantity: 1,
           product_url: '',
           image_url: course.cover_url ?? '',
         }],
         return_url: `${window.location.origin}${ROUTES.student.transactions}`,
       })
+
+      const result = await paymentMutation.mutateAsync(paymentPayload)
 
       const ref = result?.data?.reference
       const merchantRef = result?.data?.merchant_ref
@@ -91,8 +99,8 @@ export function useCheckout() {
         toast.success('Pembayaran berhasil dibuat')
         navigate(ROUTES.student.transactions)
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Gagal memproses pembayaran')
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Gagal memproses pembayaran'))
     }
   }, [courseUid, selectedCode, course, price, joinMutation, paymentMutation, navigate])
 

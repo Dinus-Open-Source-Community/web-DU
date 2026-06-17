@@ -88,7 +88,7 @@ function SidebarSubItem({ child, index, total }: { child: NavChildItem; index: n
 function SidebarNavItem({ item }: { item: NavItem }) {
   const { pathname } = useLocation()
   const { setOpenMobile } = useSidebar()
-  const isActive = pathname === item.path
+  const isActive = isActivePath(pathname, item.path)
   const Icon = item.icon
 
   if (!item.path) return null
@@ -112,7 +112,7 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 function SidebarNavGroup({ item }: { item: NavItem }) {
   const { pathname } = useLocation()
   const isChildActive = item.children?.some((child) => isActivePath(pathname, child.path)) ?? false
-  const isParentActive = item.path ? pathname === item.path : false
+  const isParentActive = item.path ? isActivePath(pathname, item.path) : false
   const [isOpen, setIsOpen] = useState(isChildActive)
   const Icon = item.icon
 
