@@ -5,6 +5,7 @@ import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
@@ -429,15 +430,17 @@ function renderRouteElement(route: RouteConfig) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {routeConfig.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={renderRouteElement(route)}
-          />
-        ))}
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          {routeConfig.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={renderRouteElement(route)}
+            />
+          ))}
+        </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

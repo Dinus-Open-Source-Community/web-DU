@@ -1,0 +1,2 @@
+[     447ms] [ERROR] Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format. @ http://localhost:3000/assets/index-qwqICGlr.js:9
+[     485ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/auth/login:0

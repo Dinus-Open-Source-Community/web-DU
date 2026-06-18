@@ -9,15 +9,15 @@ import {
 
 export function courseDetailToFormValues(course: ICourseDetailItem): CourseFormValues {
   return {
-    title: course.title,
-    subtitle: course.subtitle,
-    description: course.description,
-    categoryUid: course.category.uid,
-    courseTypeUid: course.course_type.uid,
+    title: course.title ?? '',
+    subtitle: course.subtitle ?? '',
+    description: course.description ?? '',
+    categoryUid: course.category?.uid ?? '',
+    courseTypeUid: course.course_type?.uid ?? '',
     level: normalizeApiLevel(course.level),
-    price: course.price,
+    price: course.price ?? 0,
     strikePrice: course.price_strike > 0 ? course.price_strike : '',
-    whatYouLearn: course.what_you_learn ?? [],
+    whatYouLearn: Array.isArray(course.what_you_learn) ? course.what_you_learn : [],
     slot: course.slot > 0 ? course.slot : '',
     coverFile: null,
     coverPreviewUrl: course.cover_url || course.thumbnail_url || undefined,
