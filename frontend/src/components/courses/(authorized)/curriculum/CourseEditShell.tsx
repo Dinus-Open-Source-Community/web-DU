@@ -9,6 +9,7 @@ import type { ICourseDetailItem } from '@/lib/types/course'
 import type { IModulesData } from '@/lib/types/module'
 import { getLessonKey } from '@/lib/course-edit/mappers'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
+import { resolveCourseProfiles } from '@/lib/course-detail/course-profile'
 import {
   shouldShowEditorPane,
   shouldShowOutlinePane,
@@ -271,6 +272,7 @@ export function CourseEditShell({
           canSaveAssignment={canSaveAssignment}
           isAdmin={isAdmin}
           isPublished={isCoursePublished(course)}
+          hasMentor={resolveCourseProfiles(course).length > 0}
           onSaveLesson={() => void onSaveLesson()}
           onSaveAssignment={() => void onSaveAssignment()}
           onPublish={onPublish}

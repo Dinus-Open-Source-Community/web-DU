@@ -1,4 +1,4 @@
-import { BookOpen, Users, Star } from 'lucide-react'
+import { BookOpen, Users, Star, UserX } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
@@ -74,7 +74,12 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
           <div className="flex justify-between items-center gap-2 pt-1">
             {profiles.length > 0 ? (
               <CourseCardProfiles profiles={profiles} />
-            ) : null}
+            ) : (
+              <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
+                <UserX className="size-3.5" />
+                <span>Belum ada mentor</span>
+              </div>
+            )}
             {detailHref && (
               <Button variant="default" size="sm" className="rounded-xl px-3 py-2">
                 <Link to={detailHref}>Kelola Kursus</Link>

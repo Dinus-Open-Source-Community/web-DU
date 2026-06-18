@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isCoursePublished } from "@/lib/course-detail/publish-state";
+import { resolveCourseProfiles } from "@/lib/course-detail/course-profile";
 import type { CourseEditorTab } from "@/lib/course-edit/types";
 import type { ICourseDetailItem } from "@/lib/types/course";
 import type { CompactPane } from "@/lib/course-edit/viewport";
@@ -60,6 +61,7 @@ export function CourseEditToolbar({
   const saveDisabled = isHomeworkTab
     ? isSaving || !hasUnsavedAssignment || !canSaveAssignment
     : isSaving || !hasUnsavedLesson;
+  const hasMentor = resolveCourseProfiles(course).length > 0;
 
   const handleSave = () => {
     if (isHomeworkTab) {
@@ -156,8 +158,9 @@ export function CourseEditToolbar({
               variant="outline"
               size="sm"
               className={`${editLayout.control} w-full sm:w-auto`}
-              disabled={isSaving || isPublishing}
+              disabled={isSaving || isPublishing || !hasMentor}
               onClick={onPublish}
+              title={!hasMentor ? "Tambahkan mentor terlebih dahulu sebelum menerbitkan kursus" : undefined}
             >
               {isPublishing ? "Memproses..." : "Terbit"}
             </Button>

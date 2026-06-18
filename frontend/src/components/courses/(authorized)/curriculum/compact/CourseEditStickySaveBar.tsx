@@ -15,6 +15,7 @@ type CourseEditStickySaveBarProps = {
   canSaveAssignment: boolean
   isAdmin: boolean
   isPublished: boolean
+  hasMentor: boolean
   onSaveLesson: () => void
   onSaveAssignment: () => void
   onPublish: () => void
@@ -31,6 +32,7 @@ export function CourseEditStickySaveBar({
   canSaveAssignment,
   isAdmin,
   isPublished,
+  hasMentor,
   onSaveLesson,
   onSaveAssignment,
   onPublish,
@@ -78,8 +80,9 @@ export function CourseEditStickySaveBar({
                 variant="outline"
                 size="sm"
                 className={editLayout.control}
-                disabled={isSaving || isPublishing}
+                disabled={isSaving || isPublishing || !hasMentor}
                 onClick={onPublish}
+                title={!hasMentor ? 'Tambahkan mentor terlebih dahulu sebelum menerbitkan kursus' : undefined}
               >
                 {isPublishing ? 'Memproses...' : 'Terbit'}
               </Button>
