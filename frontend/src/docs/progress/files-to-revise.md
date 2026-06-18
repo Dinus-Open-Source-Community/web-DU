@@ -143,6 +143,5 @@ Saat menutup task, perbarui juga:
 | Dokumen | Path |
 |---------|------|
 | Panduan revisi | [revision-guide.md](./revision-guide.md) |
-| TODO backlog | [todo-backlog.md](./todo-backlog.md) |
 | Integration status | [integration-status.md](./integration-status.md) |
 | QA status board | [../qa/qa-status-board.md](../qa/qa-status-board.md) |

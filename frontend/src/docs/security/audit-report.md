@@ -38,7 +38,7 @@ Item di bawah **tidak diimplementasikan di FE** sampai BE merge kontrak yang ter
 | File proxy | `services/file-proxy.ts`, `lib/files/parse-protected-file-reference.ts`, `lib/files/download-protected-file.ts` |
 | Admin | `pages/admin/ReviewsQA.tsx`, `services/admin-moderation.ts` |
 | Profile | `pages/profile/Profile.tsx`, `lib/validator/profile.schema.ts` |
-| Matriks | Semua 43 file di `pages/` (via `page-coverage.md` + spot-check) |
+| Matriks | Semua file di `pages/` (via `integration-status.md` + spot-check) |
 
 ### Checklist OWASP per file
 

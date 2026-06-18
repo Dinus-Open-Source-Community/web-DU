@@ -263,5 +263,5 @@ services/
 | `mentor/Dashboard.tsx` | ✅ Live (Fase 19) |
 | `mentor/DetailCourse.tsx` mock | Belum masuk scope — backlog B16 |
 | `mentor/Courses.tsx` mock | Belum masuk scope — backlog B17 |
-| `profile` password tanpa `old_password` | Bug/ gap terdokumentasi di payload-gaps |
+| `profile` password tanpa `old_password` | ✅ Fixed — lihat QA-ADM-02 di status board |
 | `services/invoice.ts` dihapus (kosong) | Digantikan `fetchTripayPaymentDetail` di `payment.ts` |

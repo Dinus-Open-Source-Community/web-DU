@@ -140,7 +140,7 @@ components/shared/   → AuthenticatedImage / AuthenticatedAvatar
 
 ## Prioritas P3 — Enhancement
 
-- **nuqs / URL tab** — permintaan QA di [request.md](../qa/request.md) §1
+- **nuqs / URL tab** — sudah diimplementasikan (REQ-01 di [qa-status-board](../qa/qa-status-board.md))
 - **Q&A per course (student)** — endpoint BE ada, UI belum
 - **Landing `Home.tsx`** — masih mock
 
@@ -164,8 +164,7 @@ components/shared/   → AuthenticatedImage / AuthenticatedAvatar
 2. Baca detail bug di `src/docs/qa/qa-*.md`.
 3. Implementasi mengikuti [architecture.md](./architecture.md) (service → hook → komponen).
 4. Update status di [qa-status-board.md](../qa/qa-status-board.md).
-5. Centang item terkait di [todo-backlog.md](./todo-backlog.md) jika selesai.
-6. Jalankan `npm run build` sebelum PR.
+5. Jalankan `npm run build` sebelum PR.
 
 ---
 
@@ -175,10 +174,8 @@ components/shared/   → AuthenticatedImage / AuthenticatedAvatar
 |---------|------|
 | Status integrasi lengkap | [integration-status.md](./integration-status.md) |
 | Peta file per task | [files-to-revise.md](./files-to-revise.md) |
-| TODO & backlog | [todo-backlog.md](./todo-backlog.md) |
 | Checklist uji manual | [qa-checklist.md](./qa-checklist.md) |
 | Status bug QA | [../qa/qa-status-board.md](../qa/qa-status-board.md) |
-| Perubahan BE merge | [../backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md) |
 
 ---
 

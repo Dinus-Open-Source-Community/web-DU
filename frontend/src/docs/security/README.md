@@ -80,7 +80,7 @@ Living document hasil audit keamanan halaman di `src/pages/` dan infrastruktur a
 
 | Dokumen terkait | Path |
 |-----------------|------|
-| Matriks halaman (integrasi) | [../page-coverage.md](../page-coverage.md) |
+| Matriks halaman (integrasi) | [../progress/integration-status.md](../progress/integration-status.md) |
 | QA status | [../qa/qa-status-board.md](../qa/qa-status-board.md) |
 | Performance audit | [../performance/README.md](../performance/README.md) |
 | Revisi file | [../progress/files-to-revise.md](../progress/files-to-revise.md) |

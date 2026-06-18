@@ -3,7 +3,7 @@
 Dokumen **living status** untuk branch `features/frontend-sapto`.  
 Memetakan apa yang sudah diimplementasikan, apa yang belum, API mana yang dipakai FE, dan gap FE↔BE.
 
-**Referensi backend:** [backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md)  
+**Referensi backend:** `backend/internal/handler/routes/` (kontrak API)  
 **Terakhir diperbarui:** 14 Juni 2026 (Fase 21: katalog enrollment-aware + redesign detail pembayaran)
 
 ---
@@ -193,9 +193,9 @@ Route sudah dideklarasikan tapi **tidak ada** pemanggilan di `services/*.ts`.
 
 ---
 
-## 6. Delta vs `backend-changes-j-yriz-merge.md`
+## 6. Catatan Historis Integrasi
 
-Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu diingat saat baca doc lama):
+Ringkasan delta dari merge awal — **status FE saat ini** (Juni 2026):
 
 | Item di doc backend-changes | Status doc lama | Status FE sekarang |
 |----------------------------|-----------------|-------------------|
@@ -252,7 +252,7 @@ Dokumen backend-changes ditulis saat merge awal. **Status FE sekarang** (perlu d
 
 ### P4 — Ditunda (kehadiran)
 
-Fitur **kehadiran / attendance** sengaja **dikeluarkan dari tracking progress** — menunggu keputusan selanjutnya. Kode partial (tab admin, validator, service) tetap ada di repo; lihat catatan historis di `assignment-staff-session.md` jika diperlukan.
+Fitur **kehadiran / attendance** sengaja **dikeluarkan dari tracking progress** — menunggu keputusan selanjutnya. Kode partial (tab admin, validator, service) tetap ada di repo.
 
 ---
 
@@ -263,12 +263,9 @@ Saat menutup item di dokumen ini, perbarui juga:
 | Dokumen | Path |
 |---------|------|
 | Progress README | [README.md](./README.md) |
-| TODO backlog | [todo-backlog.md](./todo-backlog.md) |
-| Implementation log | [implementation-log.md](./implementation-log.md) |
-| Page coverage | [../page-coverage.md](../page-coverage.md) |
-| API route gaps | [../api-route-gaps.md](../api-route-gaps.md) |
-| Backend changes | [../backend-changes-j-yriz-merge.md](../backend-changes-j-yriz-merge.md) § Ringkasan Cepat |
-| Admin Transaksi & Financial spec | [admin-financial-transactions-spec.md](./admin-financial-transactions-spec.md) |
+| Panduan revisi | [revision-guide.md](./revision-guide.md) |
+| Peta file | [files-to-revise.md](./files-to-revise.md) |
+| QA status board | [../qa/qa-status-board.md](../qa/qa-status-board.md) |
 
 ---
 

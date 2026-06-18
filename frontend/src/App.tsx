@@ -4,6 +4,7 @@ import { ROUTES } from "./lib/routes.ts";
 import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
+import { LottieOverlay } from "./components/shared/Loader.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary.tsx";
 import type { UserRole } from "./lib/types/user.ts";
@@ -425,7 +426,11 @@ function renderRouteElement(route: RouteConfig) {
   ) : (
     <RouteGuard allowedRoles={route.roles}>{route.element}</RouteGuard>
   );
-  return route.lazy ? <Suspense fallback={null}>{element}</Suspense> : element;
+  return route.lazy ? (
+    <Suspense fallback={<LottieOverlay visible message="Memuat halaman..." />}>
+      {element}
+    </Suspense>
+  ) : element;
 }
 
 function App() {

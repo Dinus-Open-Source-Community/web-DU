@@ -143,4 +143,4 @@ Audit attack surface per halaman di `src/pages/` — Juni 2026, branch `features
 
 ---
 
-*Matriks ini melengkapi [page-coverage.md](../page-coverage.md) (status integrasi) dengan lensa keamanan.*
+*Matriks ini melengkapi [integration-status.md](../progress/integration-status.md) (status integrasi) dengan lensa keamanan.*

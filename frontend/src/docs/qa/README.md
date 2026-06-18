@@ -3,7 +3,7 @@
 Indeks temuan QA, status perbaikan, dan cara melaporkan bug baru.
 
 **Branch:** `features/frontend-sapto`  
-**Terakhir diperbarui:** 17 Juni 2026
+**Terakhir diperbarui:** 18 Juni 2026
 
 ---
 
@@ -24,11 +24,8 @@ Indeks temuan QA, status perbaikan, dan cara melaporkan bug baru.
 qa/
 ├── README.md              ← Anda di sini (indeks)
 ├── qa-status-board.md     ← Papan status semua bug (living doc)
-├── qa-course.md           ← Bug & fix course (admin/mentor/student)
-├── qa-module.md           ← Bug modul duplikat
-├── qa-category.md         ← UX kategori kursus
-├── qa-couse-type.md       ← UX tipe kursus
-├── request.md             ← Permintaan enhancement (nuqs, dll.)
+├── qa-global.md           ← Bug global (revalidate data, dll.)
+├── qa-course.md           ← Bug course student (sesi QA terbaru)
 └── assets/                ← Screenshot QA
 ```
 
@@ -40,13 +37,14 @@ Lihat **[qa-status-board.md](./qa-status-board.md)** untuk tabel lengkap.
 
 | Kategori | Open | Fixed | Verified |
 |----------|------|-------|----------|
-| Gambar / file 401 | 2 | 0 | 0 |
-| Course UX | 4 | 0 | 0 |
-| Student / payment | 3 | 2 | 0 |
-| Admin master data UX | 2 | 0 | 0 |
-| Enhancement | 3 | 0 | 0 |
+| Gambar / file 401 | 0 | 2 | 0 |
+| Course & student | 0 | 4 | 0 |
+| Global revalidate | 0 | 1 | 0 |
+| Student / payment (retest) | 0 | 4 | 0 |
+| Admin UX | 0 | 4 | 0 |
+| Enhancement | 0 | 4 | 0 |
 
-> Angka perkiraan — update di status board saat ada progress.
+> Angka sinkron dengan [qa-status-board.md](./qa-status-board.md) — sesi 5, 18 Jun 2026.
 
 ---
 
@@ -74,10 +72,10 @@ Lihat **[qa-status-board.md](./qa-status-board.md)** untuk tabel lengkap.
 
 | ID | Temuan | Alasan |
 |----|--------|--------|
-| QA-C-08 | Redirect setelah pembayaran salah | Checkout + Tripay Fase 20–21 |
-| QA-C-09 | Transaksi pending tidak tampil | Refactor `TransactionsSection` |
-| QA-C-10 | Halaman tugas student kosong | `GET /students/me/assignments` live |
-| QA-C-06 | Return URL payment | `GET /payment/tripay` + polling |
+| QA-C-09 | Transaksi pending tidak tampil | Normalisasi status di `filter-transactions.ts` |
+| QA-C-12 | Redirect setelah pembayaran salah | Checkout + Tripay Fase 20–21 |
+
+**Regresi (18 Jun 2026):** QA-C-10 (assignments kosong) dan QA-C-13 (placeholder payment) dibuka kembali — lihat QA-C-15/16/17 di status board.
 
 **Tindakan QA:** Retest di environment staging; jika OK, ubah status ke `✅ Verified` di status board.
 
@@ -131,11 +129,10 @@ Untuk regression test fitur yang sudah diimplementasikan, gunakan:
 
 | File | Isi | Role utama |
 |------|-----|------------|
-| [qa-course.md](./qa-course.md) | Gambar 401, rating, mentor, payment, assignments, scroll | Admin, Mentor, Student |
-| [qa-module.md](./qa-module.md) | Modul duplikat saat simpan | Admin |
-| [qa-category.md](./qa-category.md) | Tombol tambah di dalam tabel | Admin |
-| [qa-couse-type.md](./qa-couse-type.md) | Tombol tambah di dalam tabel | Admin |
-| [request.md](./request.md) | nuqs, enhancement navigasi | Semua |
+| [qa-global.md](./qa-global.md) | Revalidate otomatis setelah update data | Semua |
+| [qa-course.md](./qa-course.md) | Kursus populer, payment placeholder, assignments learning | Student |
+
+> Temuan lama (gambar 401, modul duplikat, kategori, nuqs, dll.) tetap tercatat di [qa-status-board.md](./qa-status-board.md).
 
 ---
 

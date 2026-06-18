@@ -483,8 +483,6 @@ Urutan cepat untuk regression smoke:
 15. Hapus kursus test (opsional, staging only) → logout
 ```
 
-**Checklist TODO lengkap:** [todo-backlog.md](./todo-backlog.md)
-
 ---
 
 ## Pelaporan Bug
@@ -495,4 +493,4 @@ Saat menemukan bug, sertakan:
 2. Request network (method, path, body) dari DevTools
 3. Response status + message BE
 4. Screenshot UI
-5. Apakah sudah tercatat di [payload-gaps.md](../payload-gaps.md) atau [api-route-gaps.md](../api-route-gaps.md)
+5. Tambahkan baris baru di [qa-status-board.md](../qa/qa-status-board.md)
