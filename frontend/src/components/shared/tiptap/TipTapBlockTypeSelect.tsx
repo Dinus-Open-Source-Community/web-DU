@@ -17,21 +17,24 @@ import {
   TIPTAP_BLOCK_TYPE_LABELS,
   type TiptapToolbarState,
 } from '@/lib/tiptap-toolbar-state'
+import type { TiptapEditorTheme } from '@/lib/types/rich-text'
 import { cn } from '@/lib/utils'
 
 import type { ToolbarControlSize } from './toolbar-primitives'
 
 type TipTapBlockTypeSelectProps = {
   size?: ToolbarControlSize
+  theme?: TiptapEditorTheme
 }
 
 function preventEditorBlur(event: MouseEvent) {
   event.preventDefault()
 }
 
-export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelectProps) {
+export function TipTapBlockTypeSelect({ size = 'default', theme = 'light' }: TipTapBlockTypeSelectProps) {
   const { editor } = useTiptap()
   const { blockType } = useTiptapState(selectTiptapToolbarState)
+  const isDark = theme === 'dark'
 
   const label =
     size === 'bubble'
@@ -49,7 +52,10 @@ export function TipTapBlockTypeSelect({ size = 'default' }: TipTapBlockTypeSelec
           size="sm"
           onMouseDown={preventEditorBlur}
           className={cn(
-            'w-full justify-between gap-2 rounded-full border-slate-200/90 bg-slate-50/80 font-medium text-slate-700 shadow-none hover:bg-slate-100/90 data-[state=open]:bg-slate-100',
+            'w-full justify-between gap-2 rounded-full border font-medium shadow-none',
+            isDark
+              ? 'border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 data-[state=open]:bg-zinc-800'
+              : 'border-slate-200/90 bg-slate-50/80 text-slate-700 hover:bg-slate-100/90 data-[state=open]:bg-slate-100',
             size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs',
             size === 'compact' && 'h-8 min-w-[8.5rem] max-w-[10rem] px-3 text-xs',
             size === 'default' && 'h-9 min-w-[9rem] max-w-[11rem] px-3.5 text-sm',

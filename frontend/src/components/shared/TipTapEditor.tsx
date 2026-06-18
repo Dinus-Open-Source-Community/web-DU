@@ -10,7 +10,7 @@ import type { TiptapEditorProps } from '../../lib/types/rich-text'
 import { TipTapToolbar } from './TipTapToolbar'
 import { TipTapBubbleMenu } from './tiptap/TipTapBubbleMenu'
 
-function TiptapCharacterCount() {
+function TiptapCharacterCount({ isDark }: { isDark: boolean }) {
   const { characters, words } = useTiptapState((ctx) => {
     const storage = ctx.editor.storage.characterCount as { characters?: () => number; words?: () => number } | undefined
     return {
@@ -20,7 +20,12 @@ function TiptapCharacterCount() {
   })
 
   return (
-    <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/40 px-4 py-2 text-xs text-slate-400">
+    <div
+      className={cn(
+        'tiptap-character-count flex items-center justify-end gap-3 border-t px-4 py-2 text-xs',
+        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-500' : 'border-slate-100 bg-slate-50/40 text-slate-400',
+      )}
+    >
       <span>{words} kata</span>
       <span aria-hidden>·</span>
       <span>{characters} karakter</span>
@@ -35,7 +40,9 @@ export function TiptapEditor({
   onChange,
   placeholder = 'Mulai menulis materi lesson di sini…',
   variant = 'default',
+  theme = 'light',
 }: TiptapEditorProps) {
+  const isDark = theme === 'dark'
   const extensions = useMemo(() => createTiptapExtensions(placeholder), [placeholder])
 
   const editor = useEditor({
@@ -53,26 +60,36 @@ export function TiptapEditor({
   })
 
   if (!editor) {
-    return <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">Memuat editor…</div>
+    return (
+      <div
+        className={cn(
+          'rounded-xl border p-10 text-center text-sm',
+          isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-400' : 'border-slate-200 bg-white text-slate-500',
+        )}
+      >
+        Memuat editor…
+      </div>
+    )
   }
 
-  const shell =
-    variant === 'compact'
-      ? 'rounded-xl border border-slate-200 bg-white shadow-sm'
-      : 'rounded-xl border border-slate-200 bg-white shadow-sm'
-
   return (
-    <div className={cn('tiptap-editor-root overflow-hidden', shell, variant === 'compact' && 'tiptap-editor-root--compact')}>
+    <div
+      className={cn(
+        'tiptap-editor-root overflow-hidden rounded-xl border shadow-sm',
+        isDark ? 'tiptap-editor-root--dark border-zinc-800 bg-zinc-950' : 'border-slate-200 bg-white',
+        variant === 'compact' && 'tiptap-editor-root--compact',
+      )}
+    >
       <Tiptap editor={editor}>
-        <TipTapToolbar variant={variant} />
+        <TipTapToolbar variant={variant} theme={theme} />
         <Tiptap.Content
           className={cn(
-            'bg-white',
             variant === 'compact' ? 'min-h-[200px]' : 'min-h-[360px]',
+            isDark ? 'bg-zinc-950' : 'bg-white',
           )}
         />
         <TipTapBubbleMenu />
-        <TiptapCharacterCount />
+        <TiptapCharacterCount isDark={isDark} />
       </Tiptap>
     </div>
   )

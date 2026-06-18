@@ -5,7 +5,7 @@ import { Braces, List, ListOrdered, ListTodo, Quote, Redo2, Undo2 } from 'lucide
 
 import { TipTapMediaDialog } from '@/components/shared/TipTapMediaDialog'
 import { selectTiptapToolbarState } from '@/lib/tiptap-toolbar-state'
-import type { TiptapEditorVariant } from '@/lib/types/rich-text'
+import type { TiptapEditorTheme, TiptapEditorVariant } from '@/lib/types/rich-text'
 import { cn } from '@/lib/utils'
 
 import { TipTapBlockTypeSelect } from './tiptap/TipTapBlockTypeSelect'
@@ -24,34 +24,38 @@ import { useTiptapMediaDialog } from '@/hooks/tiptap/use-tiptap-media-dialog'
 
 type TipTapToolbarProps = {
   variant: TiptapEditorVariant
+  theme?: TiptapEditorTheme
 }
 
-export function TipTapToolbar({ variant }: TipTapToolbarProps) {
+export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) {
   const { editor } = useTiptap()
   const toolbar = useTiptapState(selectTiptapToolbarState)
   const media = useTiptapMediaDialog(editor)
   const compact = variant === 'compact'
+  const isDark = theme === 'dark'
   const controlSize = compact ? 'compact' : 'default'
   const iconClass = toolbarIconSize(controlSize)
 
   return (
     <>
-      <ToolbarShell>
+      <ToolbarShell theme={theme}>
         <ToolbarRow
           className={cn(
-            'justify-between gap-3 border-b border-slate-100 bg-slate-50/40',
+            'justify-between gap-3 border-b',
+            isDark ? 'border-zinc-800' : 'border-slate-100',
             compact ? 'py-1.5' : 'py-2',
           )}
         >
           <div className="min-w-0 flex-1 sm:flex-none sm:max-w-[12rem]">
-            <TipTapBlockTypeSelect size={controlSize} />
+            <TipTapBlockTypeSelect size={controlSize} theme={theme} />
           </div>
 
-          <ToolbarGroup surface>
+          <ToolbarGroup surface theme={theme}>
             <ToolbarIconButton
               label="Urungkan"
               disabled={!toolbar.canUndo}
               size={controlSize}
+              theme={theme}
               onClick={() => editor.chain().focus().undo().run()}
             >
               <Undo2 className={iconClass} />
@@ -60,6 +64,7 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
               label="Ulangi"
               disabled={!toolbar.canRedo}
               size={controlSize}
+              theme={theme}
               onClick={() => editor.chain().focus().redo().run()}
             >
               <Redo2 className={iconClass} />
@@ -73,10 +78,11 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             compact ? 'py-1.5' : 'py-2',
           )}
         >
-          <ToolbarGroup surface>
+          <ToolbarGroup surface theme={theme}>
             <ToolbarIconButton
               label="Daftar bullet"
               size={controlSize}
+              theme={theme}
               active={toolbar.isBulletList}
               onClick={() => editor.chain().focus().toggleBulletList().run()}
             >
@@ -85,6 +91,7 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             <ToolbarIconButton
               label="Daftar bernomor"
               size={controlSize}
+              theme={theme}
               active={toolbar.isOrderedList}
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
             >
@@ -93,6 +100,7 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             <ToolbarIconButton
               label="Daftar checklist"
               size={controlSize}
+              theme={theme}
               active={toolbar.isTaskList}
               onClick={() => editor.chain().focus().toggleTaskList().run()}
             >
@@ -100,12 +108,13 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             </ToolbarIconButton>
           </ToolbarGroup>
 
-          <ToolbarDivider />
+          <ToolbarDivider theme={theme} />
 
-          <ToolbarGroup surface>
+          <ToolbarGroup surface theme={theme}>
             <ToolbarIconButton
               label="Kutipan"
               size={controlSize}
+              theme={theme}
               active={toolbar.isBlockquote}
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
             >
@@ -114,6 +123,7 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             <ToolbarIconButton
               label="Blok kode"
               size={controlSize}
+              theme={theme}
               active={toolbar.isCodeBlock}
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             >
@@ -121,12 +131,13 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             </ToolbarIconButton>
           </ToolbarGroup>
 
-          <ToolbarDivider />
+          <ToolbarDivider theme={theme} />
 
-          <ToolbarGroup surface>
+          <ToolbarGroup surface theme={theme}>
             <TipTapInsertMenu
               editor={editor}
               size={controlSize}
+              theme={theme}
               onCaptureSelection={media.captureSelectionForMediaDialog}
               onInsertLink={() => media.openMediaDialog('link')}
               onInsertImage={() => media.openMediaDialog('image')}
@@ -136,17 +147,17 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
 
           {toolbar.isTable ? (
             <>
-              <ToolbarDivider />
-              <ToolbarGroup surface>
-                <TipTapTableControls size={controlSize} />
+              <ToolbarDivider theme={theme} />
+              <ToolbarGroup surface theme={theme}>
+                <TipTapTableControls size={controlSize} theme={theme} />
               </ToolbarGroup>
             </>
           ) : null}
 
-          <ToolbarDivider />
+          <ToolbarDivider theme={theme} />
 
-          <ToolbarGroup surface>
-            <TipTapMoreMenu editor={editor} size={controlSize} />
+          <ToolbarGroup surface theme={theme}>
+            <TipTapMoreMenu editor={editor} size={controlSize} theme={theme} />
           </ToolbarGroup>
         </ToolbarRow>
       </ToolbarShell>

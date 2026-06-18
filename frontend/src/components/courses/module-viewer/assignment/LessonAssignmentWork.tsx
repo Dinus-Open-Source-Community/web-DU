@@ -259,6 +259,7 @@ export function LessonAssignmentWork({
                   onChange={setRichTextHtml}
                   placeholder="Tulis jawaban tugas di sini..."
                   variant="compact"
+                  theme={theme}
                 />
               </div>
             ) : null}
@@ -281,7 +282,11 @@ export function LessonAssignmentWork({
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="rounded-[10px] px-5"
+            className={cn(
+              'rounded-[10px] px-5',
+              isDark &&
+                'border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-900 hover:text-zinc-50',
+            )}
           >
             Kembali
           </Button>

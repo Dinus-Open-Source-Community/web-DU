@@ -166,7 +166,11 @@ export function AssignmentFileUploadField({
             value={fileDescription}
             onChange={(event) => onDescriptionChange(event.target.value)}
             placeholder="Jelaskan isi lampiran"
-            className="rounded-lg"
+            className={cn(
+              'rounded-lg',
+              isDark &&
+                'border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-700',
+            )}
           />
         </div>
       ) : null}
