@@ -1,0 +1,57 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="16" fill="white"/>
+  <rect x="16" y="16" width="224" height="224" rx="10" fill="white" stroke="#E2E8F0" stroke-width="2"/>
+  <rect x="28" y="28" width="56" height="56" fill="#0F172A"/>
+  <rect x="36" y="36" width="40" height="40" fill="white"/>
+  <rect x="44" y="44" width="24" height="24" fill="#0F172A"/>
+  <rect x="172" y="28" width="56" height="56" fill="#0F172A"/>
+  <rect x="180" y="36" width="40" height="40" fill="white"/>
+  <rect x="188" y="44" width="24" height="24" fill="#0F172A"/>
+  <rect x="28" y="172" width="56" height="56" fill="#0F172A"/>
+  <rect x="36" y="180" width="40" height="40" fill="white"/>
+  <rect x="44" y="188" width="24" height="24" fill="#0F172A"/>
+  <rect x="112" y="28" width="8" height="8" fill="#0F172A"/>
+  <rect x="128" y="28" width="8" height="8" fill="#0F172A"/>
+  <rect x="136" y="36" width="8" height="8" fill="#0F172A"/>
+  <rect x="120" y="44" width="8" height="8" fill="#0F172A"/>
+  <rect x="136" y="52" width="8" height="8" fill="#0F172A"/>
+  <rect x="104" y="60" width="8" height="8" fill="#0F172A"/>
+  <rect x="120" y="68" width="8" height="8" fill="#0F172A"/>
+  <rect x="104" y="84" width="8" height="8" fill="#0F172A"/>
+  <rect x="112" y="100" width="8" height="8" fill="#0F172A"/>
+  <rect x="128" y="92" width="8" height="8" fill="#0F172A"/>
+  <rect x="136" y="108" width="8" height="8" fill="#0F172A"/>
+  <rect x="152" y="84" width="8" height="8" fill="#0F172A"/>
+  <rect x="160" y="100" width="8" height="8" fill="#0F172A"/>
+  <rect x="176" y="92" width="8" height="8" fill="#0F172A"/>
+  <rect x="192" y="84" width="8" height="8" fill="#0F172A"/>
+  <rect x="200" y="100" width="8" height="8" fill="#0F172A"/>
+  <rect x="96" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="112" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="136" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="152" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="176" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="200" y="124" width="8" height="8" fill="#0F172A"/>
+  <rect x="96" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="128" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="144" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="160" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="184" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="208" y="140" width="8" height="8" fill="#0F172A"/>
+  <rect x="96" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="112" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="120" y="164" width="8" height="8" fill="#0F172A"/>
+  <rect x="136" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="160" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="176" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="192" y="156" width="8" height="8" fill="#0F172A"/>
+  <rect x="200" y="172" width="8" height="8" fill="#0F172A"/>
+  <rect x="96" y="180" width="8" height="8" fill="#0F172A"/>
+  <rect x="120" y="180" width="8" height="8" fill="#0F172A"/>
+  <rect x="144" y="180" width="8" height="8" fill="#0F172A"/>
+  <rect x="152" y="196" width="8" height="8" fill="#0F172A"/>
+  <rect x="176" y="188" width="8" height="8" fill="#0F172A"/>
+  <rect x="192" y="196" width="8" height="8" fill="#0F172A"/>
+  <rect x="208" y="188" width="8" height="8" fill="#0F172A"/>
+  <text x="128" y="246" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">QRIS</text>
+</svg>
