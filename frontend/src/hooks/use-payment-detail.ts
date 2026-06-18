@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { paymentKeys } from '@/hooks/query-keys'
+import { authKeys, paymentKeys } from '@/hooks/query-keys'
+import { PAYMENT_DETAIL_REALTIME } from '@/lib/transactions/payment-realtime'
 import type { PaymentDetailQuery } from '@/lib/transactions/payment-api-types'
 import type { PaymentStatus } from '@/lib/types/common/domain'
 import { isForbiddenFromError } from '@/services/api-error'
 import { fetchTripayPaymentDetail } from '@/services/payment'
 
-const POLL_INTERVAL_MS = 5_000
-
 function hasPaymentQuery(query: PaymentDetailQuery | null): query is PaymentDetailQuery {
   return Boolean(query?.reference || query?.merchantRef)
 }
 
+function isTerminalStatus(status: PaymentStatus | null | undefined): status is 'success' | 'failed' {
+  return status === 'success' || status === 'failed'
+}
+
 export function usePaymentDetail(query: PaymentDetailQuery | null) {
+  const queryClient = useQueryClient()
   const [statusTransition, setStatusTransition] = useState<'success' | 'failed' | null>(null)
   const prevStatusRef = useRef<PaymentStatus | null>(null)
 
@@ -21,11 +25,15 @@ export function usePaymentDetail(query: PaymentDetailQuery | null) {
     queryKey: paymentKeys.tripayDetail(query?.reference ?? '', query?.merchantRef ?? ''),
     queryFn: () => fetchTripayPaymentDetail(query!),
     enabled: hasPaymentQuery(query),
-    staleTime: 10_000,
+    staleTime: PAYMENT_DETAIL_REALTIME.staleTimeMs,
     retry: false,
-    refetchInterval: (query) => {
-      const status = query.state.data?.paymentStatus
-      return status === 'pending' ? POLL_INTERVAL_MS : false
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: PAYMENT_DETAIL_REALTIME.refetchInBackground,
+    refetchInterval: (queryState) => {
+      const status = queryState.state.data?.paymentStatus
+      return status === 'pending' ? PAYMENT_DETAIL_REALTIME.pollIntervalMs : false
     },
   })
 
@@ -33,12 +41,17 @@ export function usePaymentDetail(query: PaymentDetailQuery | null) {
     const current = result.data?.paymentStatus ?? null
     const prev = prevStatusRef.current
 
-    if (prev === 'pending' && (current === 'success' || current === 'failed')) {
-      setStatusTransition(current)
+    if (prev !== null && current !== null && prev !== current) {
+      if (isTerminalStatus(current)) {
+        setStatusTransition(current)
+      }
+
+      void queryClient.invalidateQueries({ queryKey: paymentKeys.all })
+      void queryClient.invalidateQueries({ queryKey: authKeys.session })
     }
 
     prevStatusRef.current = current
-  }, [result.data?.paymentStatus])
+  }, [queryClient, result.data?.paymentStatus])
 
   const clearTransition = useCallback(() => setStatusTransition(null), [])
 

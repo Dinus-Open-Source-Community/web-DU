@@ -3,11 +3,12 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+
+import { SafeLottie } from '@/components/ui/lottie'
 import { getOAuthErrorMessage } from '@/lib/security/oauth-errors'
 import { Message, resolveApiActionError } from '@/lib/Message'
 import { parseOAuthCallbackParams } from '@/lib/validator/auth'
-import { SafeLottie } from '../../components/ui/lottie'
-import { useAuth } from '../../providers/auth-provider'
+import { useAuth } from '@/providers/auth-provider'
 
 function stripSensitiveQueryParams() {
   window.history.replaceState({}, document.title, window.location.pathname)
@@ -74,8 +75,13 @@ export default function OAuthCallbackPage() {
   }, [navigate, searchParams, signInWithToken])
 
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4">
-      <SafeLottie src="/Book-loading.lottie" className="size-36" />
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-background px-6">
+      <div className="flex size-32 items-center justify-center rounded-[28px] border border-border/70 bg-card shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:size-36">
+        <SafeLottie src="/Book-loading.lottie" className="size-24 sm:size-28" />
+      </div>
+      <p className="text-sm font-medium text-muted-foreground" role="status" aria-live="polite">
+        Memverifikasi akun Google...
+      </p>
     </main>
   )
 }

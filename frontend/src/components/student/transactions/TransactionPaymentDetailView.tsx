@@ -1,4 +1,4 @@
-import { useCallback, useRef, type RefObject } from 'react'
+import { useCallback } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -17,18 +17,14 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 type TransactionPaymentDetailViewProps = {
   backHref?: string
   detail: TransactionPaymentDetailViewModel
-  lottieTargetRef?: RefObject<HTMLDivElement | null>
 }
 
 export function TransactionPaymentDetailView({
   backHref,
   detail,
-  lottieTargetRef,
 }: TransactionPaymentDetailViewProps) {
   const invoice = presentPaymentInvoiceView(detail)
   const { copiedKey, copy } = useCopyToClipboard()
-  const fallbackTargetRef = useRef<HTMLDivElement>(null)
-  const statusTargetRef = lottieTargetRef ?? fallbackTargetRef
   const onCopy = useCallback((key: string, value: string) => void copy(key, value), [copy])
   const isPending = invoice.paymentStatus === 'pending'
 
@@ -47,7 +43,7 @@ export function TransactionPaymentDetailView({
       </div>
 
       <div className="space-y-6">
-        <PaymentStatusHero invoice={invoice} lottieTargetRef={statusTargetRef} />
+        <PaymentStatusHero invoice={invoice} />
 
         <section className="rounded-[24px] border border-slate-200/80 bg-white px-4 py-5 shadow-sm sm:px-8">
           <PaymentProgressNavigation status={invoice.paymentStatus} />

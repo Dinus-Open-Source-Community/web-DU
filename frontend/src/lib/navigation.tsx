@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, BookMarked, Layers, Globe, Trophy, ArrowRightLeft, LayoutGrid, Mail, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, BookMarked, Layers, Globe, ArrowRightLeft, LayoutGrid, Mail, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/utils'
 
@@ -69,7 +69,6 @@ export const Navigation: Record<string, NavItem[]> = {
       ],
     },
     { name: 'Browse Courses', icon: Globe, path: ROUTES.student.browse },
-    { name: 'Certificates', icon: Trophy, path: ROUTES.student.certificates },
     { name: 'Transactions', icon: ArrowRightLeft, path: ROUTES.student.transactions },
   ],
 }

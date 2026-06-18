@@ -1,6 +1,7 @@
 import { ImageIcon, Loader2 } from 'lucide-react'
 
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
+import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { initialsFromName } from '@/lib/profile/profile-formatters'
 import type { ProfileSectionShellProps } from '@/lib/profile/profile-section-view-model'
 import { Input } from '../ui/input'
@@ -36,11 +37,14 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
         <div className="flex items-center gap-6">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
             <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-50">
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-2xl font-bold text-emerald-800">{initialsFromName(user.name)}</span>
-              )}
+              <UserAvatarImage
+                src={user.avatar_url}
+                alt={user.name}
+                size={88}
+                className="h-full w-full rounded-xl bg-emerald-50"
+                fallbackInitial={initialsFromName(user.name)}
+                fallbackClassName="text-2xl font-bold text-emerald-800"
+              />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">

@@ -6,7 +6,7 @@ import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
 import { LottieOverlay } from "./components/shared/Loader.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
-import { ErrorBoundary } from "./components/shared/ErrorBoundary.tsx";
+import { ErrorBoundary } from "./components/shared/Error.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
@@ -90,16 +90,10 @@ const StudentAssignments = React.lazy(
 const StudentBrowse = React.lazy(
   () => import("./pages/student/BrowseCourse.tsx"),
 );
-const StudentCertificates = React.lazy(
-  () => import("./pages/student/Certificates.tsx"),
-);
 const StudentTransactions = React.lazy(
   () => import("./pages/student/Transactions.tsx"),
 );
-const StudentTransactionPayment = React.lazy(
-  () => import("./pages/student/TransactionPayment.tsx"),
-);
-const CheckoutPage = React.lazy(() => import("./pages/checkout/Checkout.tsx"));
+import StudentTransactionPayment from "./pages/student/TransactionPayment.tsx";
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
 
 type RouteConfig = {
@@ -135,13 +129,6 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin"],
-  },
-  {
-    path: ROUTES.checkout(":courseUid"),
-    element: <CheckoutPage />,
-    public: false,
-    lazy: true,
-    roles: ["student"],
   },
   {
     path: ROUTES.login,
@@ -392,17 +379,10 @@ const routeConfig: RouteConfig[] = [
     roles: ["student"],
   },
   {
-    path: ROUTES.student.certificates,
-    element: <StudentCertificates />,
-    public: false,
-    lazy: true,
-    roles: ["student"],
-  },
-  {
     path: ROUTES.student.transactionPaymentPath,
     element: <StudentTransactionPayment />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["student"],
   },
   {

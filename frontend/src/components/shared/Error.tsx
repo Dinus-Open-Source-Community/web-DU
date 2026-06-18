@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+
 import { SafeLottie } from '../ui/lottie'
 import { Button } from '../ui/button'
 
@@ -24,8 +25,8 @@ export function NotFoundContent({
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-500 w-full h-screen justify-center">
-      <div className="w-full max-w-sm aspect-square">
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-6 text-center duration-500 animate-in fade-in">
+      <div className="aspect-square w-full max-w-sm">
         <SafeLottie src={LOTTIE_404} className="size-full" />
       </div>
 
@@ -35,14 +36,73 @@ export function NotFoundContent({
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
-        {showBackButton && (
+        {showBackButton ? (
           <Button variant="outline" onClick={() => navigate(-1)} className="gap-2 rounded-xl shadow-none">
             <ArrowLeft className="size-4" />
             Kembali
           </Button>
-        )}
+        ) : null}
         {actions}
       </div>
     </div>
   )
+}
+
+type ErrorFallbackContentProps = {
+  onRetry: () => void
+}
+
+function ErrorFallbackContent({ onRetry }: ErrorFallbackContentProps) {
+  return (
+    <NotFoundContent
+      title="Terjadi kesalahan"
+      description="Aplikasi mengalami gangguan sementara. Coba lagi atau kembali ke beranda."
+      showBackButton={false}
+      actions={
+        <>
+          <Button variant="outline" onClick={onRetry} className="rounded-xl shadow-none">
+            Coba lagi
+          </Button>
+          <Button asChild className="rounded-xl">
+            <Link to="/">Ke beranda</Link>
+          </Button>
+        </>
+      }
+    />
+  )
+}
+
+type ErrorBoundaryProps = {
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+type ErrorBoundaryState = {
+  hasError: boolean
+}
+
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo)
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false })
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? <ErrorFallbackContent onRetry={this.handleRetry} />
+    }
+    return this.props.children
+  }
 }

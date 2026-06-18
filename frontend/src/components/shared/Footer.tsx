@@ -8,7 +8,7 @@ export default function Footer() {
   const [email, setEmail] = useState('')
   const { pathname } = useLocation()
 
-  const isFooterHidden = (pathname?.startsWith('/course/') && pathname !== '/course') || pathname.startsWith('/checkout/')
+  const isFooterHidden = pathname?.startsWith('/course/') && pathname !== '/course'
 
   const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()

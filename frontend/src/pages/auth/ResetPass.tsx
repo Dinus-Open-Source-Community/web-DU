@@ -1,16 +1,20 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { Eye, EyeOff, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+
+import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
+import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
+import { AuthPasswordToggleButton } from '@/components/auth/AuthPasswordToggleButton'
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
+import { authInputClassName, authSubmitButtonClassName } from '@/components/auth/constants'
+import { GlobalInput } from '@/components/shared/Input'
+import { Button } from '@/components/ui/button'
+import AuthLayout from '@/components/layouts/AuthLayouts'
 import { Message, resolveActionError } from '@/lib/Message'
-import { Button } from '../../components/ui/button'
-import { LogoDu } from '../../components/shared/icon'
-import { GlobalInput } from '../../components/shared/Input'
-import { PasswordStrengthIndicator } from '../../components/auth/PasswordStrength'
-import AuthLayout from '../../components/layouts/AuthLayouts'
-import { parseResetPasswordForm } from '../../lib/validator/auth'
+import { parseResetPasswordForm } from '@/lib/validator/auth'
 
 export function FormResetPassword() {
   const [searchParams] = useSearchParams()
@@ -22,7 +26,8 @@ export function FormResetPassword() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
+  const passwordMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -37,7 +42,12 @@ export function FormResetPassword() {
       })
       toast.error(Message.auth.resetPasswordUnavailable)
     } catch (err) {
-      toast.error(resolveActionError(err instanceof Error ? err : null, Message.auth.resetPasswordInvalid))
+      toast.error(
+        resolveActionError(
+          err instanceof Error ? err : null,
+          Message.auth.resetPasswordInvalid,
+        ),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -46,80 +56,96 @@ export function FormResetPassword() {
   if (!token) {
     return (
       <AuthLayout>
-        <div className="flex flex-col items-center gap-6 text-center">
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-amber-50">
-            <AlertTriangle className="size-8 text-amber-500" />
+        <AuthFormPanel>
+          <div className="flex flex-col items-center gap-6 py-2 text-center">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-amber-50">
+              <AlertTriangle className="size-8 text-amber-500" aria-hidden />
+            </div>
+            <AuthPageHeader
+              title="Link tidak valid"
+              description="Link reset password ini tidak valid atau sudah kadaluarsa. Silakan minta link baru."
+            />
+            <Button asChild className={authSubmitButtonClassName}>
+              <Link to="/auth/forgot-password">Minta link baru</Link>
+            </Button>
           </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Link Tidak Valid</h1>
-            <p className="text-sm leading-relaxed text-slate-500">Link reset password ini tidak valid atau sudah kadaluarsa. Silakan minta link baru.</p>
-          </div>
-          <Button asChild className="h-11 rounded-xl text-sm font-bold">
-            <Link to="/auth/forgot-password">Minta Link Baru</Link>
-          </Button>
-        </div>
+        </AuthFormPanel>
       </AuthLayout>
     )
   }
 
   return (
-    <AuthLayout>
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col items-center gap-3 lg:items-start">
-          <Link to="/" className="mb-2 flex items-center gap-2 lg:hidden">
-            <LogoDu className="size-8 text-primary" />
-            <span className="text-lg font-bold tracking-tight text-primary">Doscom University</span>
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Buat Password Baru</h1>
-          <p className="text-sm leading-relaxed text-slate-500">
-            Password baru harus berbeda dari password sebelumnya. Reset akan aktif setelah endpoint backend tersedia.
-          </p>
-        </div>
+    <AuthLayout
+      heading="Password baru"
+      subheading="Buat password baru yang kuat untuk melindungi akunmu."
+    >
+      <AuthFormPanel>
+        <AuthPageHeader
+          title="Buat password baru"
+          description="Password baru harus berbeda dari password sebelumnya. Reset akan aktif setelah endpoint backend tersedia."
+          backHref="/auth/login"
+          backLabel="Kembali ke login"
+        />
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-3">
             <GlobalInput
-              label="Password Baru"
+              label="Password baru"
               placeholder="Masukkan password baru"
               type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
+              required
+              className={`${authInputClassName} pr-12`}
               rightIcon={
-                <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
-                  {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
-                </button>
+                <AuthPasswordToggleButton
+                  visible={showPassword}
+                  disabled={isSubmitting}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                />
               }
             />
-            <PasswordStrengthIndicator password={password} className="mt-3" />
+            <PasswordStrengthIndicator password={password} />
           </div>
 
           <div>
             <GlobalInput
-              label="Konfirmasi Password"
+              label="Konfirmasi password"
               placeholder="Ulangi password baru"
               type={showConfirm ? 'text' : 'password'}
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isSubmitting}
+              required
+              className={`${authInputClassName} pr-12`}
               rightIcon={
-                <button type="button" onClick={() => setShowConfirm((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
-                  {showConfirm ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
-                </button>
+                <AuthPasswordToggleButton
+                  visible={showConfirm}
+                  disabled={isSubmitting}
+                  onClick={() => setShowConfirm((prev) => !prev)}
+                />
               }
             />
-            {passwordMismatch && <p className="mt-1.5 text-xs font-medium text-rose-500">Password tidak cocok</p>}
+            {passwordMismatch ? (
+              <p className="mt-2 text-xs font-medium text-destructive">
+                Password tidak cocok
+              </p>
+            ) : null}
           </div>
 
           <Button
             type="submit"
-            className="h-12 rounded-xl text-sm font-bold"
+            className={authSubmitButtonClassName}
             disabled={passwordMismatch || !password || isSubmitting}
+            aria-busy={isSubmitting}
           >
-            Reset Password
+            Reset password
           </Button>
         </form>
-      </div>
+      </AuthFormPanel>
     </AuthLayout>
   )
 }

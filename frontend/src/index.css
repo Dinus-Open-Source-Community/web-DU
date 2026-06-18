@@ -72,6 +72,8 @@
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 
   --container-8xl: 88rem;
+
+  --animate-payment-float: payment-float 3.2s ease-in-out infinite;
 }
 
 :root {
@@ -194,5 +196,16 @@
     @apply bg-background text-foreground font-sans;
     letter-spacing: var(--tracking-normal);
     font-family: var(--font-sans);
+  }
+}
+
+@keyframes payment-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -10px, 0);
   }
 }

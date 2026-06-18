@@ -39,6 +39,7 @@ export type PaymentInvoiceViewModel = {
   statusMessage: string
   paidDateLabel: string | null
   expiredDateLabel: string | null
+  expiredAt: string | null
   references: PaymentInvoiceReferenceField[]
   instructions: PaymentInstruction[]
   payCode: string
@@ -194,6 +195,7 @@ export function presentPaymentInvoiceView(
     statusMessage,
     paidDateLabel: formatInvoiceDate(payment.paidAt),
     expiredDateLabel: isPending ? formatInvoiceDate(payment.expiredAt) : null,
+    expiredAt: isPending ? payment.expiredAt : null,
     createdDateLabel: formatInvoiceDate(payment.paidAt) ?? formatInvoiceDate(payment.expiredAt),
     references,
     instructions: payment.instructions,

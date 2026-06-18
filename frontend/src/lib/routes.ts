@@ -13,7 +13,6 @@ export const ROUTES = {
   home: '/',
   profile: '/profile',
   courses: '/course',
-  checkout: (courseUid: string) => `/checkout/${courseUid}`,
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',
@@ -69,6 +68,7 @@ export const ROUTES = {
     learningCourse: (courseUid: string) => `/student/learning/course/${courseUid}`,
     assignments: '/student/assignments',
     browse: '/student/browse',
+    /** Hidden until certificate API is available */
     certificates: '/student/certificates',
     transactions: '/student/transactions',
     transactionPaymentPath: '/student/transactions/payment',
@@ -133,7 +133,6 @@ export const routeGroups: Record<string, RouteItem[]> = {
       ],
     },
     { name: 'Browse Courses', path: ROUTES.student.browse },
-    { name: 'Certificates', path: ROUTES.student.certificates },
     { name: 'Transactions', path: ROUTES.student.transactions },
   ],
 }

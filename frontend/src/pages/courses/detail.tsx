@@ -1,6 +1,8 @@
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { CourseDetailLayout } from '@/components/courses/DetailCourse'
+import { CheckoutDialog } from '@/components/checkout/CheckoutDialog'
 import GuestLayout from '@/components/layouts/GuestLayouts'
 import { LottieOverlay } from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
@@ -10,8 +12,23 @@ import { useAuth } from '@/providers/auth-provider'
 
 export default function PublicCourseDetailPage() {
   const { courseUid } = useParams()
+  const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
   const { courseCategories, courseDetail, popularCourses, isLoading } = useCourseDetailWithCategories(courseUid ?? '')
+
+  const handleEnrollClick = useCallback(() => {
+    if (!courseDetail.data) return
+
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, {
+        state: { from: { pathname: ROUTES.courseDetail(courseDetail.data.uid) } },
+      })
+      return
+    }
+
+    setCheckoutOpen(true)
+  }, [courseDetail.data, isAuthenticated, navigate])
 
   if (isLoading) {
     return <LottieOverlay visible={isLoading} />
@@ -31,6 +48,16 @@ export default function PublicCourseDetailPage() {
 
   const course = courseDetail.data
 
+  const enrollButton = (
+    <Button
+      type="button"
+      className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+      onClick={handleEnrollClick}
+    >
+      Daftar sekarang
+    </Button>
+  )
+
   return (
     <GuestLayout>
       <main className="min-h-[100dvh] bg-[#f5f5f5]">
@@ -49,22 +76,15 @@ export default function PublicCourseDetailPage() {
             totalReviews: course.total_reviews ?? 0,
             backHref: ROUTES.courses,
             backLabel: 'Kembali ke kursus',
-            sidebarCta: (
-              <Button asChild className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white">
-                <Link
-                  to={isAuthenticated ? ROUTES.checkout(course.uid) : ROUTES.login}
-                  state={
-                    isAuthenticated
-                      ? undefined
-                      : { from: { pathname: ROUTES.checkout(course.uid) } }
-                  }
-                >
-                  Daftar sekarang
-                </Link>
-              </Button>
-            ),
+            sidebarCta: enrollButton,
             PopularCourse: popularCourses.data?.courses ?? [],
           }}
+        />
+
+        <CheckoutDialog
+          open={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+          courseUid={course.uid}
         />
       </main>
     </GuestLayout>
