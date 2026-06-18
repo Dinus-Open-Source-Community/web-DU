@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useMinimumDuration } from '@/hooks/use-minimum-duration'
 import {
@@ -22,8 +22,8 @@ export function usePaymentMotionOverlay({
   statusTransition,
 }: UsePaymentMotionOverlayOptions) {
   const [dismissed, setDismissed] = useState(false)
-  const shownPendingRef = useRef(false)
-  const shownTerminalRef = useRef(false)
+  const [shownPending, setShownPending] = useState(false)
+  const [shownTerminal, setShownTerminal] = useState(false)
   const showLoader = useMinimumDuration(Boolean(enabled && isLoading), PAYMENT_MOTION_MIN_LOADER_MS)
 
   useEffect(() => {
@@ -38,11 +38,11 @@ export function usePaymentMotionOverlay({
 
     if (statusTransition) return statusTransition
 
-    if (status === 'pending' && !shownPendingRef.current) return 'pending'
-    if ((status === 'success' || status === 'failed') && !shownTerminalRef.current) return status
+    if (status === 'pending' && !shownPending) return 'pending'
+    if ((status === 'success' || status === 'failed') && !shownTerminal) return status
 
     return null
-  }, [enabled, showLoader, status, statusTransition])
+  }, [enabled, showLoader, shownPending, shownTerminal, status, statusTransition])
 
   const overlayMode = useMemo<PaymentMotionOverlayMode | null>(() => {
     if (!enabled) return null
@@ -55,11 +55,11 @@ export function usePaymentMotionOverlay({
     if (overlayMode !== 'status' || !overlayStatus) return
 
     if (overlayStatus === 'pending') {
-      shownPendingRef.current = true
+      setShownPending(true)
       return
     }
 
-    shownTerminalRef.current = true
+    setShownTerminal(true)
   }, [overlayMode, overlayStatus])
 
   const dismissOverlay = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { PaymentMotionLottie } from '@/components/student/transactions/payment-detail/PaymentMotionLottie'
 import {
@@ -28,8 +28,6 @@ export function PaymentMotionPageLoader() {
 
 export function PaymentMotionOverlay({ mode, status, onDismiss }: PaymentMotionOverlayProps) {
   const [phase, setPhase] = useState<'hold' | 'exit'>('hold')
-  const phaseRef = useRef(phase)
-  phaseRef.current = phase
   const isLoading = mode === 'loading'
   const theme = PAYMENT_MOTION_THEME[isLoading ? 'pending' : status]
   const copy = isLoading ? PAYMENT_MOTION_LOADER_COPY : PAYMENT_MOTION_COPY[status]
@@ -41,7 +39,7 @@ export function PaymentMotionOverlay({ mode, status, onDismiss }: PaymentMotionO
   }, [isLoading])
 
   useEffect(() => {
-    if (phaseRef.current === 'exit') return
+    if (phase === 'exit') return
 
     if (mode === 'loading') {
       setPhase('hold')
@@ -53,7 +51,7 @@ export function PaymentMotionOverlay({ mode, status, onDismiss }: PaymentMotionO
     const holdTimer = window.setTimeout(beginExit, getPaymentMotionDisplayMs(status))
 
     return () => window.clearTimeout(holdTimer)
-  }, [beginExit, mode, status])
+  }, [beginExit, mode, phase, status])
 
   useEffect(() => {
     if (phase !== 'exit') return
