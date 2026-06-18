@@ -1,3 +1,4 @@
+import { gridCardsClassName } from "@/lib/layout/page-layout";
 import type { ICategoryItem, ICourseItem } from "@/lib/types/course";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { SearchForm } from "../shared/SearchForm";
@@ -79,7 +80,7 @@ export default function Section({
         />
       </div>
 
-      <div className="flex flex-col items-start gap-10 lg:flex-row">
+      <div className="flex flex-col items-start gap-10 xl:flex-row">
         <FilterCheckboxPanel
           title="Kategori"
           options={categories}
@@ -90,7 +91,7 @@ export default function Section({
         <div className="min-w-0 flex-1">
           {filteredCourses.length > 0 ? (
             <div className="flex flex-col gap-10">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
+              <div className={gridCardsClassName}>
                 {paginatedCourses.map((course) => (
                   <CardCourse
                     key={course.uid}

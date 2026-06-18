@@ -81,7 +81,7 @@ export function applyResolvedImagesToCourseStudents(
 ): ICourseStudentListResponse {
   return {
     ...students,
-    enrollments: students.enrollments.map((student) => ({
+    enrollments: (students.enrollments ?? []).map((student) => ({
       ...student,
       student_avatar_url: resolveReference(getDisplayUrl, student.student_avatar_url),
     })),

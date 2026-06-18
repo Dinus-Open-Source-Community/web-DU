@@ -8,6 +8,7 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { NotFoundContent } from '@/components/shared/Error'
 import { CourseEditClient } from '@/components/courses/(authorized)/editCourse'
 import { AppNavbarProvider } from '../../components/shared/Sidebar'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
 
 const CourseEdit = () => {
   const { courseUid } = useParams()
@@ -37,7 +38,7 @@ const CourseEdit = () => {
     <AppNavbarProvider
       role="admin"
       user={sidebarUser}
-      contentClassName="flex w-full flex-1 flex-col gap-6 px-4 py-4 sm:px-6 lg:px-8">
+      contentClassName={`${appPageContentClassName} flex-1 gap-6 py-4 lg:py-6`}
       <AdminCourseEditContent
         courseData={courseDetail.data as ICourseDetailItem}
         modules={modules}

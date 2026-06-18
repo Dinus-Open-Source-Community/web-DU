@@ -140,7 +140,7 @@ export interface IMentorCourseStudent {
 }
 
 export interface ICourseStudentListResponse {
-  enrollments: IMentorCourseStudent[]
+  enrollments?: IMentorCourseStudent[] | null
   meta: IPaginationMeta
 }
 

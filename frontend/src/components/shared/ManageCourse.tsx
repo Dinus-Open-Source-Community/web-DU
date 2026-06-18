@@ -62,7 +62,7 @@ export default function ManageCourseSection({
         <div className="flex flex-col gap-5">
           <PageHeader title="Courses" subtitle={isAdmin ? 'Kelola kursus platform: buat, atur, dan hapus kursus.' : 'Kelola konten modul, lesson, dan peserta kursus.'} />
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <SegmentedFilter<CourseFilter>
               items={filters.map((f) => ({ value: f, label: f }))}
               value={activeFilter}

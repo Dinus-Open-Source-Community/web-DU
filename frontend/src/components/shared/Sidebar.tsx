@@ -22,6 +22,7 @@ import { cn } from '../../lib/utils'
 import type { UserRole } from '../../lib/types/user'
 import { NavbarSearchProvider } from '../../providers/navbar-search-provider'
 import { useAppTopNavbarAuth } from '@/hooks/layout/use-navbar-auth'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
 import { AppTopNavbar } from './AppTopNavbar'
 
 export type SidebarUser = {
@@ -186,7 +187,7 @@ function AppSidebar({ role }: { role: UserRole }) {
         <SidebarBrand />
       </SidebarHeader>
 
-      <SidebarContent className="flex-1 gap-0 overflow-y-auto px-4 py-5 md:py-4 md:px-3">
+      <SidebarContent className="flex-1 gap-0 overflow-y-auto px-4 py-5 lg:px-5 lg:py-6 xl:px-4 xl:py-5">
         <SidebarGroup className="p-0">
           <SidebarGroupContent>
             <SidebarMenu className="gap-0 space-y-2.5">
@@ -234,7 +235,7 @@ export function AppNavbarProvider({
         <main
           className={cn(
             'flex w-full flex-1 flex-col',
-            contentClassName ?? 'gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10',
+            contentClassName ?? appPageContentClassName,
           )}>
           {children}
         </main>
@@ -255,8 +256,6 @@ export function AppSidebarProvider({
   return (
     <NavbarSearchProvider>
       <SidebarProvider
-        open
-        onOpenChange={() => undefined}
         style={
           {
             '--sidebar-width': '16rem',
@@ -270,7 +269,7 @@ export function AppSidebarProvider({
           <div
             className={cn(
               'flex w-full min-w-0 flex-col',
-              contentClassName ?? 'gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10',
+              contentClassName ?? appPageContentClassName,
             )}>
             {children}
           </div>

@@ -1,4 +1,6 @@
+import { gridStatsClassName, gridCardsClassName } from "@/lib/layout/page-layout";
 import { StatCard } from "@/components/shared/StatCard";
+import { cn } from "@/lib/utils";
 import { Calendar, MessageSquare, PlayCircle } from "lucide-react";
 import ResumeCard from "@/components/shared/ResumeCard";
 import FeedbackCard from "@/components/shared/Feedback";
@@ -47,7 +49,7 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
         </p>
       </div>
 
-      <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className={cn("mb-10", gridStatsClassName)}>
         {Data?.enrollment_summary ? (
           Object.entries(Data.enrollment_summary).map(([label, value]) => {
             const Icon = iconMap[label];
@@ -73,7 +75,7 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
           <PlayCircle className="text-primary" size={24} />
           Lanjutkan Belajar
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className={gridCardsClassName}>
           {resumeCourses.length > 0 ? (
             resumeCourses.map((course) => (
               <ResumeCard key={course.uid} data={course} />
@@ -86,8 +88,8 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
+        <div className="xl:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-headline flex items-center gap-2 text-xl font-bold">
               <Calendar className="text-error" size={24} />

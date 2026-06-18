@@ -192,13 +192,13 @@ export function AppTopNavbar({
     <>
       <header
         className={cn(
-          'sticky top-0 z-30 grid h-16 shrink-0 items-center gap-3 border-b border-slate-100 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:px-6',
+          'sticky top-0 z-30 grid h-16 shrink-0 items-center gap-3 border-b border-slate-100 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:px-5 lg:px-6 xl:px-8',
           showSidebarTrigger
-            ? 'grid-cols-[auto_1fr_auto] md:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_minmax(280px,560px)_minmax(0,1fr)]'
+            ? 'grid-cols-[auto_1fr_auto] md:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_minmax(280px,560px)_minmax(0,1fr)]'
             : 'grid-cols-[1fr_auto] md:grid-cols-[minmax(0,1fr)_minmax(280px,560px)_minmax(0,1fr)]',
         )}>
         {showSidebarTrigger ? (
-          <SidebarTrigger className="size-10 rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95 lg:hidden">
+          <SidebarTrigger className="size-10 rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95">
             <Menu className="size-5" />
           </SidebarTrigger>
         ) : null}
@@ -233,7 +233,7 @@ export function AppTopNavbar({
           className={cn(
             'relative w-full justify-self-center',
             showSidebarTrigger
-              ? 'col-start-2 md:col-start-3 lg:col-start-2'
+              ? 'col-start-2 md:col-start-3 xl:col-start-2'
               : 'col-start-1 md:col-start-2',
           )}>
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
@@ -260,7 +260,7 @@ export function AppTopNavbar({
           className={cn(
             'flex shrink-0 items-center justify-end gap-2',
             showSidebarTrigger
-              ? 'col-start-3 md:col-start-4 lg:col-start-3'
+              ? 'col-start-3 md:col-start-4 xl:col-start-3'
               : 'col-start-2 md:col-start-3',
           )}>
           <Button type="button" variant="ghost" size="sm" onClick={handleLogout} className="h-10 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600">
@@ -272,7 +272,7 @@ export function AppTopNavbar({
               {profileImage ? <AvatarImage src={profileImage} alt={user.name} /> : null}
               <AvatarFallback className="bg-primary text-sm font-bold text-white">{getUserInitial(user)}</AvatarFallback>
             </Avatar>
-            <span className="hidden min-w-0 text-left lg:block">
+            <span className="hidden min-w-0 text-left xl:block">
               <span className="block max-w-36 truncate text-sm font-semibold leading-5 text-slate-900">{user.name}</span>
               <span className="block text-xs font-medium leading-4 text-slate-400">{roleLabel[role]}</span>
             </span>

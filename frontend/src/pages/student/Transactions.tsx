@@ -1,3 +1,4 @@
+import { appPageContentCenteredClassName } from '@/lib/layout/page-layout'
 import { AppSidebarProvider } from "@/components/shared/Sidebar";
 import TransactionsList from "@/components/student/TransactionsSection";
 import { useSidebarUser } from "@/hooks/use-sidebar-user";
@@ -12,7 +13,7 @@ const Transactions = () => {
     <AppSidebarProvider
       role="student"
       user={sidebarUser}
-      contentClassName="mx-auto w-full gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
+      contentClassName={appPageContentCenteredClassName}
     >
       <TransactionsList Data={profile as IUserData | null} />
     </AppSidebarProvider>

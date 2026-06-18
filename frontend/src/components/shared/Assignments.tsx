@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { appPageContentClassName, gridStatsClassName } from '@/lib/layout/page-layout'
 import {
   assignmentLifecycleBadgeVariant,
   deadlineUrgencyBadgeVariant,
@@ -119,13 +120,13 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
   } = view
 
   return (
-    <section className="flex w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <section className={appPageContentClassName}>
       <PageHeader
         title="Kelola tugas"
         subtitle={`${courseData.title} — ${meetingMax} pertemuan. Buat dan sunting tugas, atur tenggat, tinjau kiriman, dan beri feedback.`}
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className={gridStatsClassName}>
         <StatCard
           variant="compact"
           className="shadow-none"
@@ -223,7 +224,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
           Filter lalu buka review untuk melihat teks, file, gambar, video, dan tautan.
         </p>
 
-        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+        <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-end">
           <div className="flex min-w-[180px] flex-1 flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tugas</label>
             <select
@@ -363,7 +364,7 @@ export function MentorCourseAssignmentsNotFound({
   backHref = ROUTES.mentor.courses,
 }: MentorCourseAssignmentsNotFoundProps) {
   return (
-    <section className="flex flex-col gap-4 px-4 py-10 sm:px-6 lg:px-8">
+    <section className={appPageContentClassName}>
       <p className="text-slate-600">Kursus tidak ditemukan.</p>
       <Button asChild variant="outline" className="w-fit rounded-xl shadow-none">
         <Link to={backHref}>Kembali ke daftar</Link>

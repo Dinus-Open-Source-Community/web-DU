@@ -23,7 +23,7 @@ export default function Footer() {
   return (
     <footer className="bg-secondary-foreground text-popover w-full">
       {/* Newsletter Section */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-5 lg:px-6 xl:px-8">
         <div className="bg-card rounded-xl border border-blue-500/20 px-8 py-12 backdrop-blur-sm sm:px-12">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="text-center md:text-left">
@@ -48,7 +48,7 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-5 lg:px-6 xl:px-8">
         <div className="flex flex-col gap-8 md:flex-row md:justify-between">
           {/* Brand Section */}
           <div className="shrink-0 md:max-w-xs">

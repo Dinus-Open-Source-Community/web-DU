@@ -1,20 +1,60 @@
-import * as React from "react"
+import * as React from 'react'
 
-/** Selaras dengan breakpoint `lg` Tailwind (sidebar + navbar trigger). */
-const MOBILE_BREAKPOINT = 1024
+import {
+  getLayoutTier,
+  isSidebarSheetViewport,
+  type LayoutTier,
+} from '@/lib/layout/breakpoints'
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+function readViewportWidth() {
+  return typeof window !== 'undefined' ? window.innerWidth : LAYOUT_FALLBACK_WIDTH
+}
+
+const LAYOUT_FALLBACK_WIDTH = 1280
+
+export function useLayoutTier(): LayoutTier {
+  const [tier, setTier] = React.useState<LayoutTier>(() =>
+    getLayoutTier(readViewportWidth()),
+  )
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    const xlQuery = window.matchMedia(`(min-width: ${1280}px)`)
+    const lgQuery = window.matchMedia(`(min-width: ${1024}px)`)
+
+    const update = () => {
+      setTier(getLayoutTier(window.innerWidth))
     }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
+
+    xlQuery.addEventListener('change', update)
+    lgQuery.addEventListener('change', update)
+    update()
+
+    return () => {
+      xlQuery.removeEventListener('change', update)
+      lgQuery.removeEventListener('change', update)
+    }
   }, [])
 
-  return !!isMobile
+  return tier
+}
+
+/** Sheet sidebar below xl; fixed sidebar at xl+. */
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(() =>
+    isSidebarSheetViewport(readViewportWidth()),
+  )
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${1279}px)`)
+    const onChange = () => {
+      setIsMobile(isSidebarSheetViewport(window.innerWidth))
+    }
+
+    mql.addEventListener('change', onChange)
+    onChange()
+
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return isMobile
 }

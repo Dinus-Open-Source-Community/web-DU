@@ -1,4 +1,5 @@
 import type { IMentorStats } from '@/lib/types/utils'
+import { gridStatsClassName } from '@/lib/layout/page-layout'
 import { BarChart3, HelpCircle, Users, BookOpen } from 'lucide-react'
 import { StatCard } from './StatCard'
 
@@ -15,7 +16,7 @@ export default function QuickStats({ stats }: QuickStatsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className={gridStatsClassName}>
       {statsData.map((stat) => (
         <StatCard key={stat.label} variant="compact" label={stat.label} value={stat.value} icon={stat.icon} colorClass="text-primary" bgClass="bg-primary/10" />
       ))}

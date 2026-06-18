@@ -151,7 +151,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-      <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid min-h-[220px] gap-0 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -193,7 +193,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
           </div>
         </div>
 
-        <aside className="flex flex-col justify-between gap-4 border-t border-slate-100 bg-slate-50/60 p-5 sm:p-6 lg:border-l lg:border-t-0">
+        <aside className="flex flex-col justify-between gap-4 border-t border-slate-100 bg-slate-50/60 p-5 sm:p-6 xl:border-l xl:border-t-0">
           <div className={cn('rounded-xl border px-4 py-3.5', urgency.border, urgency.bg)}>
             <div className="flex items-center gap-2">
               <CalendarClock className={cn('h-4 w-4', urgency.text)} aria-hidden />

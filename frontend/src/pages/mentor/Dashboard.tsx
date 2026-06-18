@@ -1,4 +1,5 @@
 import CalendarView from "@/components/shared/Calendar/View";
+import { gridStatsClassName } from "@/lib/layout/page-layout";
 import { TimelineAreaChart } from "@/components/shared/AreaChart";
 import { ChartCard } from "@/components/shared/ChartCard";
 import { PageHeader } from "@/components/shared/Header";
@@ -16,7 +17,7 @@ const SCHEDULE_CHART_SERIES: TimelineSeries[] = [
 
 function QuickStatsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className={gridStatsClassName}>
       {Array.from({ length: 4 }, (_, index) => (
         <div
           key={index}

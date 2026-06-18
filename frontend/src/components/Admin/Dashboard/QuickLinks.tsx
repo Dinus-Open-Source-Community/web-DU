@@ -38,7 +38,7 @@ const QUICK_LINKS: QuickLinkItem[] = [
 
 export function QuickLinks() {
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <section className="grid grid-cols-2 gap-3 lg:grid-cols-2 xl:grid-cols-4">
       {QUICK_LINKS.map((link) => (
         <Link
           key={link.href}

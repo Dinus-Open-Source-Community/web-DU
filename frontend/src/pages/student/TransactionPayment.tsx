@@ -8,6 +8,7 @@ import { LottieStatusOverlay } from '@/components/student/transactions/payment-d
 import { TransactionPaymentNotFound } from '@/components/student/transactions/payment-detail/TransactionPaymentNotFound'
 import { PaymentDetailSkeleton } from '@/components/student/transactions/PaymentDetailSkeleton'
 import { AppNavbarProvider } from '@/components/shared/Sidebar'
+import { appPageContentCenteredClassName } from '@/lib/layout/page-layout'
 import { usePaymentDetail } from '@/hooks/use-payment-detail'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { buildPaymentDetailQuery } from '@/lib/transactions/build-payment-detail-query'
@@ -67,7 +68,7 @@ export default function StudentTransactionPaymentPage() {
   const showStatusOverlay = overlayPhase === 'status' && isTerminal
 
   return (
-    <AppNavbarProvider role="student" user={sidebarUser} contentClassName="mx-auto w-full max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <AppNavbarProvider role="student" user={sidebarUser} contentClassName={`${appPageContentCenteredClassName} max-w-7xl`}>
       <Suspense fallback={<PaymentDetailSkeleton />}>
         {showStatusOverlay && (
           <LottieStatusOverlay
