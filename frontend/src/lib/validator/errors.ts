@@ -1,18 +1,14 @@
 import { z } from 'zod'
 
-export function getValidationMessage(error: unknown, fallback = 'Data tidak valid') {
-  if (error instanceof z.ZodError) {
-    return error.issues[0]?.message ?? fallback
-  }
-
-  return fallback
+export function getValidationMessage(error: z.ZodError, fallback = 'Data tidak valid') {
+  return error.issues[0]?.message ?? fallback
 }
 
-export function parseWithValidationMessage<TSchema extends z.ZodType>(
-  schema: TSchema,
-  data: z.input<TSchema>,
+export function parseWithValidationMessage<Output, Input>(
+  schema: z.ZodType<Output, Input>,
+  data: Input,
   fallback?: string,
-): z.infer<TSchema> {
+): Output {
   const result = schema.safeParse(data)
 
   if (!result.success) {

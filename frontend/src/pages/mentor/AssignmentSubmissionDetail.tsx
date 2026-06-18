@@ -7,7 +7,7 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { useCourseAssignmentSubmissionDetailPage } from '@/hooks/course-detail/use-course-assignment-submission-detail-page'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
-import type { IModulesData } from '@/lib/types/course'
+import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function MentorAssignmentSubmissionDetailPage() {
   const { courseUid, lessonUid, submissionUid } = useParams()
@@ -60,9 +60,7 @@ type MentorAssignmentSubmissionDetailContentProps = {
   submissionUid: string
   courseTitle: string
   modules: IModulesData[]
-  students: NonNullable<
-    ReturnType<typeof useCourseDetailAdminAndMentor>['userCourse']['data']
-  >['enrollments']
+  students: IMentorCourseStudent[]
 }
 
 function MentorAssignmentSubmissionDetailContent({

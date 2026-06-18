@@ -131,8 +131,9 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.viewModuleAndLessons(":courseUid"),
     element: <ViewModuleAndLessons />,
-    public: true,
+    public: false,
     lazy: true,
+    roles: ["student", "mentor", "admin"],
   },
   {
     path: ROUTES.checkout(":courseUid"),

@@ -88,8 +88,8 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-headline flex items-center gap-2 text-xl font-bold">
               <Calendar className="text-error" size={24} />

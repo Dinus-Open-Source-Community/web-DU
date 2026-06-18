@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
+import { Message, resolveActionError } from '@/lib/Message'
 import { LogoDu } from '../../components/shared/icon'
 import { Button } from '../../components/ui/button'
 import OauthButton from '../../components/shared/OauthButton'
@@ -30,12 +31,12 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const payload = parseWithValidationMessage(registerFormSchema, { name, email, password, confirmPassword }, 'Data registrasi tidak valid')
+      const payload = parseWithValidationMessage(registerFormSchema, { name, email, password, confirmPassword }, Message.common.validationFailed)
       const { redirectPath } = await signUp(payload)
       navigate(redirectPath)
-      toast.success('Registrasi berhasil')
+      toast.success(Message.auth.registerSuccess)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Registrasi gagal')
+      toast.error(resolveActionError(err instanceof Error ? err : null, Message.auth.registerFailed))
     } finally {
       setIsSubmitting(false)
     }

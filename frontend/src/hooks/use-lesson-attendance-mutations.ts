@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import { attendanceKeys } from '@/hooks/query-keys'
 import type { IUpdateAttendancePayload } from '@/lib/types/features/course-detail-assignments'
+import { Message, resolveActionError } from '@/lib/Message'
 import { deleteLessonAttendance, updateLessonAttendance } from '@/services/lesson-attendance'
 
 export function useUpdateLessonAttendance(lessonUid: string | null) {
@@ -20,10 +21,10 @@ export function useUpdateLessonAttendance(lessonUid: string | null) {
       if (lessonUid) {
         await queryClient.invalidateQueries({ queryKey: attendanceKeys.byLesson(lessonUid) })
       }
-      toast.success('Kehadiran diperbarui')
+      toast.success(Message.attendance.updated)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui kehadiran')
+      toast.error(resolveActionError(error, Message.attendance.updateFailed))
     },
   })
 }
@@ -37,10 +38,10 @@ export function useDeleteLessonAttendance(lessonUid: string | null) {
       if (lessonUid) {
         await queryClient.invalidateQueries({ queryKey: attendanceKeys.byLesson(lessonUid) })
       }
-      toast.success('Catatan kehadiran dihapus')
+      toast.success(Message.attendance.noteDeleted)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghapus kehadiran')
+      toast.error(resolveActionError(error, Message.attendance.noteDeleteFailed))
     },
   })
 }

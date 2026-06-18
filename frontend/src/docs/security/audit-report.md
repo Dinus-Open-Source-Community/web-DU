@@ -3,8 +3,24 @@
 Temuan audit keamanan frontend berdasarkan OWASP Top 10 dan checklist `security-review`.
 
 **Scope:** `frontend/src/pages/`, providers auth/route-guard, services auth/payment/file-proxy, komponen render HTML  
-**Branch:** `features/frontend-sapto` · **Tanggal:** 17 Juni 2026  
-**Reviewer:** Static analysis (find-bugs + security-review skills)
+**Branch:** `features/frontend-sapto` · **Tanggal:** 18 Juni 2026  
+**Update:** Sprint 1 FE fixes ✅ · Sprint 2+ dokumentasi handoff BE → [be-coordination.md](./be-coordination.md)
+
+---
+
+## Temuan terbuka — delegasi BE
+
+Item di bawah **tidak diimplementasikan di FE** sampai BE merge kontrak yang tercantum di [be-coordination.md](./be-coordination.md). Analisis as-is BE (read-only):
+
+| ID | Gap BE terkonfirmasi |
+|----|---------------------|
+| SEC-06 | `CreatePayment` memakai `req.Amount` client; enrollment ownership tidak dicek vs JWT |
+| SEC-07 | `GetPaymentTripayFunc` proxy Tripay tanpa ownership check JWT |
+| SEC-03 | `CallbackHandler` return JSON — **tidak selaras** FE yang expect `?token=` redirect |
+| SEC-01 | Login return token di JSON body, bukan httpOnly cookie |
+| SEC-08 | `/invoices/url` masih wajib `user_id` query (authorization sudah cek JWT vs enrollment) |
+| SEC-13 | Tidak ada endpoint forgot/reset password |
+| SEC-05 | BE `canReadCourseByRole` sudah ada — perlu regression test saja |
 
 ---
 

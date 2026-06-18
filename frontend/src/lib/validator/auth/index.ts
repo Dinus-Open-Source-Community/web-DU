@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { parseWithValidationMessage } from '../errors'
 import {
   forgotPasswordFormSchema,
@@ -15,7 +16,10 @@ import {
 
 export * from '../auth.schema'
 
-export function parseLoginPayload(payload: LoginFormValues, fallback = 'Data login tidak valid') {
+export function parseLoginPayload(
+  payload: z.input<typeof loginSchema>,
+  fallback = 'Data login tidak valid',
+): LoginFormValues {
   return parseWithValidationMessage(loginSchema, payload, fallback)
 }
 

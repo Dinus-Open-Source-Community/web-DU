@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { Message } from '@/lib/Message'
 import type { IMentorAssignmentSubmission } from '@/lib/types/course'
 import { SubmissionContentView } from './SubmissionContent'
 import { ConfirmDialog } from './ConfirmDialog'
@@ -55,10 +56,10 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
       }
       saveSubmissionReview(submission.uid, patch)
       onSaved({ ...submission, ...patch })
-      toast.success('Review disimpan.')
+      toast.success(Message.assignment.reviewSaved)
       handleClose()
     } catch {
-      toast.error('Gagal menyimpan review.')
+      toast.error(Message.assignment.reviewSaveFailed)
     } finally {
       setSaving(false)
     }

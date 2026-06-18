@@ -99,6 +99,7 @@ export function TipTapBubbleMenu() {
               label="Tautan"
               size="bubble"
               active={toolbar.isLink}
+              actionOnMouseDown
               onClick={() => media.openMediaDialog('link')}
             >
               <Link2 className="size-3.5" />
@@ -120,16 +121,17 @@ export function TipTapBubbleMenu() {
                     'ring-2 ring-primary ring-offset-1',
                 )}
                 style={{ backgroundColor: color.value }}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() =>
+                onMouseDown={(event) => {
+                  event.preventDefault()
                   editor.chain().focus().toggleHighlight({ color: color.value }).run()
-                }
+                }}
               />
             ))}
             <ToolbarIconButton
               label="Hapus sorotan"
               size="bubble"
               active={toolbar.isHighlight}
+              actionOnMouseDown
               onClick={() => editor.chain().focus().unsetHighlight().run()}
             >
               <Highlighter className="size-3.5" />

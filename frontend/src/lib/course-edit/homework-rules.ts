@@ -1,4 +1,5 @@
 import { toRichTextEnvelope } from '@/lib/rich-text'
+import { Message } from '@/lib/Message'
 import {
   sanitizeInstructionAttachmentsForPayload,
   validateInstructionAttachments,
@@ -109,7 +110,7 @@ function stripHtml(html: string): string {
 
 export function validateHomeworkForSave(lesson: EditableLesson): string | null {
   const title = (lesson.homeworkTitle ?? lesson.title).trim()
-  if (!title) return 'Judul tugas wajib diisi.'
+  if (!title) return Message.assignment.titleRequired
 
   const taskType = lesson.homeworkType ?? 'text'
   const rules = ensureHomeworkRules(lesson)
@@ -119,35 +120,35 @@ export function validateHomeworkForSave(lesson: EditableLesson): string | null {
     !rules.allowPlainTextSubmission &&
     !rules.allowRichTextSubmission
   ) {
-    return 'Aktifkan minimal satu metode pengumpulan jawaban.'
+    return Message.assignment.submitMethodRequired
   }
 
   if (rules.requireFileDescription && !rules.allowFileSubmission) {
-    return 'Deskripsi file hanya bisa wajib jika unggah file diaktifkan.'
+    return Message.assignment.fileDescriptionRequiresUpload
   }
 
   if (rules.allowResubmit) {
     if (rules.maxResubmitCount == null || rules.maxResubmitCount < 1) {
-      return 'Jumlah pengumpulan ulang wajib diisi (minimal 1) jika resubmit diaktifkan.'
+      return Message.assignment.resubmitCountRequired
     }
   }
 
   const deadlineMs = new Date(rules.deadlineAt).getTime()
   if (Number.isNaN(deadlineMs)) {
-    return 'Tenggat waktu tidak valid.'
+    return Message.assignment.deadlineInvalid
   }
 
   if (taskType === 'text') {
     const description = lesson.homeworkDescriptionHtml ?? ''
     if (!stripHtml(description)) {
-      return 'Deskripsi tugas teks wajib diisi.'
+      return Message.assignment.textDescriptionRequired
     }
   }
 
   if (taskType === 'quiz') {
     const questionCount = lesson.homeworkQuiz?.questions.length ?? 0
     if (questionCount === 0) {
-      return 'Tambahkan minimal satu soal quiz.'
+      return Message.assignment.quizQuestionRequired
     }
   }
 

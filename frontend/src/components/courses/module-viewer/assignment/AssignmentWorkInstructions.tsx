@@ -1,5 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import { parseLessonContent } from '@/lib/rich-text'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import { cn } from '@/lib/utils'
@@ -27,7 +29,7 @@ export function AssignmentWorkInstructions({ assignment, theme }: AssignmentWork
       {instruction?.contentHtml ? (
         <div className={cn('lesson-reader text-sm leading-7', isDark ? 'lesson-reader--dark' : 'lesson-reader--light')}>
           <div className="tiptap-editor-root tiptap-preview">
-            <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: instruction.contentHtml }} />
+            <SanitizedHtml html={instruction.contentHtml} className="ProseMirror" />
           </div>
         </div>
       ) : null}
@@ -36,10 +38,8 @@ export function AssignmentWorkInstructions({ assignment, theme }: AssignmentWork
         <ul className="space-y-2">
           {attachments.map((attachment, index) => (
             <li key={`${attachment.url}-${index}`}>
-              <a
+              <SafeExternalLink
                 href={attachment.url}
-                target="_blank"
-                rel="noreferrer noopener"
                 className={cn(
                   'inline-flex items-center gap-1.5 text-sm font-medium hover:underline',
                   isDark ? 'text-sky-300' : 'text-primary',
@@ -47,7 +47,7 @@ export function AssignmentWorkInstructions({ assignment, theme }: AssignmentWork
               >
                 <ExternalLink className="size-3.5" aria-hidden />
                 {attachment.name || attachment.url}
-              </a>
+              </SafeExternalLink>
             </li>
           ))}
         </ul>

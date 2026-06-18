@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Paperclip, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { Message } from '@/lib/Message'
 import type { ICourseDetailItem } from '../../lib/types/course'
 import type { IMentorCourseAssignment, IQuiz, MentorAssignmentInput, MentorAssignmentLifecycleStatus, MentorAssignmentTaskType } from '../../lib/types/course'
 import { TiptapEditor } from './TipTapEditor'
@@ -10,6 +11,7 @@ import { Checkbox } from '../ui/checkbox'
 import { Button } from '../ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
 import { LessonQuizEditor } from './LessonQuizEditor'
+import { createMentorAssignment, updateMentorAssignment } from '@/lib/func/fungsi'
 import { ToPreviewHtmlFragment } from '../../lib/func/func'
 
 function isoToDatetimeLocalValue(iso: string): string {
@@ -178,18 +180,18 @@ export function CourseAssignmentDialog({
       e.preventDefault()
       const t = title.trim()
       if (!t) {
-        toast.error('Judul wajib diisi.')
+        toast.error(Message.assignment.titleRequired)
         return
       }
       const iso = datetimeLocalToIso(deadlineLocal)
       if (!iso) {
-        toast.error('Tenggat wajib diisi dengan valid.')
+        toast.error(Message.assignment.deadlineRequired)
         return
       }
       setIsConfirm(true)
       const mn = Math.min(Math.max(1, meetingNumber), maxMeetings)
       if (!allowFileSubmit && !allowPlainTextSubmit && !allowRichTextSubmit) {
-        toast.error('Aktifkan minimal satu tipe submit untuk student.')
+        toast.error(Message.assignment.submitTypeRequired)
         return
       }
       let maxA: number | undefined
@@ -217,19 +219,16 @@ export function CourseAssignmentDialog({
         instructionAttachments: instructionAttachments.length ? instructionAttachments : undefined,
       }
 
-      console.log('DEBUG submit assignment input:', input)
-      console.log('DEBUG editing assignment:', courseUid, editing)
-
       if (mode === 'create') {
-        //logic create
-        toast.success('Tugas berhasil dibuat.')
+        createMentorAssignment(courseUid, input)
+        toast.success(Message.assignment.created)
       } else if (editing) {
-        //logic update
-        // if (!updated) {
-        //   toast.error('Tidak dapat memperbarui tugas ini.')
-        //   return
-        // }
-        toast.success('Tugas berhasil diperbarui.')
+        const updated = updateMentorAssignment(editing.uid, input)
+        if (!updated) {
+          toast.error(Message.assignment.updateNotAllowed)
+          return
+        }
+        toast.success(Message.assignment.updated)
       } else {
         return
       }

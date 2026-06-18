@@ -1,6 +1,8 @@
 import { ClipboardList, ExternalLink } from 'lucide-react'
 import { useMemo } from 'react'
 
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
 import { getAssignmentDeadlineAt } from '@/lib/lesson-assignment/assignment-rules'
 import { formatAssignmentDeadlineLabel } from '@/lib/lesson-assignment/deadline-format'
 import { parseLessonContent } from '@/lib/rich-text'
@@ -46,7 +48,7 @@ export function LessonAssignmentOverview({
   )
 
   return (
-    <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 xl:px-10">
+    <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-3xl space-y-8">
         <header className="space-y-3">
           <div className="flex items-center justify-between gap-3">
@@ -102,7 +104,7 @@ export function LessonAssignmentOverview({
                 )}
               >
                 <div className="tiptap-editor-root tiptap-preview">
-                  <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: instruction.contentHtml }} />
+                  <SanitizedHtml html={instruction.contentHtml} className="ProseMirror" />
                 </div>
               </div>
             ) : null}
@@ -110,10 +112,8 @@ export function LessonAssignmentOverview({
               <ul className="space-y-2">
                 {instructionAttachments.map((attachment, index) => (
                   <li key={`${attachment.url}-${index}`}>
-                    <a
+                    <SafeExternalLink
                       href={attachment.url}
-                      target="_blank"
-                      rel="noreferrer noopener"
                       className={cn(
                         'inline-flex items-center gap-1.5 text-sm font-medium hover:underline',
                         isDark ? 'text-sky-300' : 'text-primary',
@@ -121,7 +121,7 @@ export function LessonAssignmentOverview({
                     >
                       <ExternalLink className="size-3.5" aria-hidden />
                       {attachment.name || attachment.url}
-                    </a>
+                    </SafeExternalLink>
                   </li>
                 ))}
               </ul>

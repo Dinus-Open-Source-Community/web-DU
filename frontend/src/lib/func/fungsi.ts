@@ -225,7 +225,7 @@ export function getSubmissionsForStudent(studentUid: string): IMentorAssignmentS
 }
 
 export function findAssignmentByUid(assignmentUid: string): IMentorCourseAssignment | null {
-  console.log('Looking for assignment with UID:', assignmentUid)
+  void assignmentUid
   // for (const c of getMergedMentorCourses()) {
   //   const list = getAssignmentsForCourse(c.uid)
   //   const found = list.find((a) => a.uid === assignmentUid)

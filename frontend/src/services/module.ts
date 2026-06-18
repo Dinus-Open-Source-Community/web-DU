@@ -72,6 +72,9 @@ export async function deleteModule(uid: string): Promise<void> {
   try {
     await api.delete<IResponse<null>>(API_ROUTES.modules.deleteByUid(validatedUid))
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, 'Gagal menghapus modul'), { cause: error })
+    if (error instanceof Error) {
+      throw new Error(getApiErrorMessage(error, 'Gagal menghapus modul'), { cause: error })
+    }
+    throw new Error('Gagal menghapus modul', { cause: error })
   }
 }

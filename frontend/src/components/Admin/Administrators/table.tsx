@@ -103,7 +103,7 @@ export function AdministratorsTable({
       ) : dataAdmin.length === 0 ? (
         <EmptyState icon={<Shield className="h-5 w-5" />} title="Belum ada administrator" description="Promosikan user untuk mulai mengelola sistem." />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {dataAdmin.map((admin) => (
             <article key={admin.uid} className={cn('flex h-full flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs')}>
               <div className="flex items-start gap-3">

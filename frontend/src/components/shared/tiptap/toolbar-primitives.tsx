@@ -70,6 +70,8 @@ type ToolbarIconButtonProps = {
   active?: boolean
   disabled?: boolean
   onClick: () => void
+  /** Run the action on mouse down so the editor keeps its text selection. */
+  actionOnMouseDown?: boolean
   children: ReactNode
   size?: ToolbarControlSize
 }
@@ -79,6 +81,7 @@ export function ToolbarIconButton({
   active,
   disabled,
   onClick,
+  actionOnMouseDown = false,
   children,
   size = 'default',
 }: ToolbarIconButtonProps) {
@@ -90,8 +93,13 @@ export function ToolbarIconButton({
       disabled={disabled}
       aria-label={label}
       aria-pressed={active}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        if (actionOnMouseDown) onClick()
+      }}
+      onClick={() => {
+        if (!actionOnMouseDown) onClick()
+      }}
       className={cn(
         'shrink-0 rounded-lg p-0 shadow-none transition-colors active:scale-[0.97]',
         size === 'bubble' && 'size-8',

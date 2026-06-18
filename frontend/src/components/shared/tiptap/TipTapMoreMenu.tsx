@@ -1,6 +1,7 @@
 'use client'
 
 import type { Editor } from '@tiptap/core'
+import { useRef } from 'react'
 import { useTiptapState } from '@tiptap/react'
 import {
   AlignCenter,
@@ -17,6 +18,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { TIPTAP_FONT_FAMILIES, TIPTAP_HIGHLIGHT_COLORS } from '@/lib/tiptap-extensions'
+import {
+  getSavedTextSelection,
+  runTiptapCommandWithSelection,
+  type SavedTextSelection,
+} from '@/lib/tiptap-selection'
 import { selectTiptapToolbarState } from '@/lib/tiptap-toolbar-state'
 import { cn } from '@/lib/utils'
 
@@ -34,9 +40,24 @@ type TipTapMoreMenuProps = {
 
 export function TipTapMoreMenu({ editor, size = 'default' }: TipTapMoreMenuProps) {
   const toolbar = useTiptapState(selectTiptapToolbarState)
+  const savedSelectionRef = useRef<SavedTextSelection | null>(null)
+
+  const rememberSelection = () => {
+    const current = getSavedTextSelection(editor)
+    if (current) savedSelectionRef.current = current
+  }
+
+  const runWithSavedSelection = (command: () => boolean) => {
+    runTiptapCommandWithSelection(editor, savedSelectionRef.current, command)
+  }
 
   return (
-    <Popover modal={false}>
+    <Popover
+      modal={false}
+      onOpenChange={(open) => {
+        if (open) savedSelectionRef.current = getSavedTextSelection(editor)
+      }}
+    >
       <PopoverTrigger asChild>
         <ToolbarMenuButton
           label="Lainnya"
@@ -101,14 +122,22 @@ export function TipTapMoreMenu({ editor, size = 'default' }: TipTapMoreMenuProps
                 type="color"
                 className="size-9 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5"
                 aria-label="Warna teks"
-                onChange={(event) => editor.chain().focus().setColor(event.target.value).run()}
+                onMouseDown={rememberSelection}
+                onChange={(event) =>
+                  runWithSavedSelection(() =>
+                    editor.chain().focus().setColor(event.target.value).run(),
+                  )
+                }
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="h-9 gap-1.5 px-2.5 text-xs"
-                onClick={() => editor.chain().focus().unsetColor().run()}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  runWithSavedSelection(() => editor.chain().focus().unsetColor().run())
+                }}
               >
                 <Eraser className="size-3.5" />
                 Reset warna
@@ -127,16 +156,20 @@ export function TipTapMoreMenu({ editor, size = 'default' }: TipTapMoreMenuProps
                       'ring-2 ring-primary ring-offset-1',
                   )}
                   style={{ backgroundColor: color.value }}
-                  onClick={() =>
-                    editor.chain().focus().toggleHighlight({ color: color.value }).run()
-                  }
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                    runWithSavedSelection(() =>
+                      editor.chain().focus().toggleHighlight({ color: color.value }).run(),
+                    )
+                  }}
                 />
               ))}
               <ToolbarIconButton
                 label="Hapus sorotan"
                 active={toolbar.isHighlight}
                 size="compact"
-                onClick={() => editor.chain().focus().unsetHighlight().run()}
+                actionOnMouseDown
+                onClick={() => runWithSavedSelection(() => editor.chain().focus().unsetHighlight().run())}
               >
                 <RemoveFormatting className="size-3.5" />
               </ToolbarIconButton>

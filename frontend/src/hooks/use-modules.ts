@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { IQueryParamsPayload } from '@/services/api-path'
+import { Message, resolveActionError } from '@/lib/Message'
 import {
   createModule,
   fetchModulesByCourseUid,
@@ -24,10 +25,10 @@ export function useCreateModule() {
     mutationFn: createModule,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: moduleKeys.all })
-      toast.success('Modul berhasil dibuat')
+      toast.success(Message.module.created)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal membuat modul')
+      toast.error(resolveActionError(error, Message.module.createFailed))
     },
   })
 }
@@ -40,10 +41,10 @@ export function useUpdateModule() {
       updateModule(uid, payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: moduleKeys.all })
-      toast.success('Modul berhasil diperbarui')
+      toast.success(Message.module.renamed)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui modul')
+      toast.error(resolveActionError(error, Message.module.renameFailed))
     },
   })
 }

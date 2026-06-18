@@ -28,7 +28,7 @@ export function CourseAssignmentSubmissionStudentSidebar({
   isLoading = false,
 }: CourseAssignmentSubmissionStudentSidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col lg:w-80 xl:w-96">
+    <aside className="flex h-full min-h-0 w-full flex-col md:w-80 lg:w-96">
       <div className="space-y-2 border-b border-slate-200 px-4 py-4">
         <p className="text-sm font-semibold text-slate-900">Daftar siswa</p>
         <Label htmlFor="submission-sidebar-search" className="sr-only">

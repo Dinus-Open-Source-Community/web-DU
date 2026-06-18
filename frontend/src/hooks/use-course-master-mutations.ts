@@ -8,6 +8,15 @@ import type {
   UpdateCourseMasterPayload,
 } from '@/lib/course-master/types'
 import {
+  messageCourseMasterAdded,
+  messageCourseMasterAddFailed,
+  messageCourseMasterDeleted,
+  messageCourseMasterDeleteFailed,
+  messageCourseMasterUpdated,
+  messageCourseMasterUpdateFailed,
+  resolveActionError,
+} from '@/lib/Message'
+import {
   createCourseCategory,
   createCourseType,
   deleteCourseCategory,
@@ -39,10 +48,10 @@ export function useCreateCourseMaster(kind: CourseMasterKind) {
       kind === 'category' ? createCourseCategory(payload) : createCourseType(payload),
     onSuccess: () => {
       invalidateCourseMasterQueries(queryClient, kind)
-      toast.success(`${label} berhasil ditambahkan`)
+      toast.success(messageCourseMasterAdded(label))
     },
     onError: (error: Error) => {
-      toast.error(error.message || `Gagal menambahkan ${label.toLowerCase()}`)
+      toast.error(resolveActionError(error, messageCourseMasterAddFailed(label)))
     },
   })
 }
@@ -58,10 +67,10 @@ export function useUpdateCourseMaster(kind: CourseMasterKind) {
         : updateCourseType(uid, payload),
     onSuccess: () => {
       invalidateCourseMasterQueries(queryClient, kind)
-      toast.success(`${label} berhasil diperbarui`)
+      toast.success(messageCourseMasterUpdated(label))
     },
     onError: (error: Error) => {
-      toast.error(error.message || `Gagal memperbarui ${label.toLowerCase()}`)
+      toast.error(resolveActionError(error, messageCourseMasterUpdateFailed(label)))
     },
   })
 }
@@ -75,10 +84,10 @@ export function useDeleteCourseMaster(kind: CourseMasterKind) {
       kind === 'category' ? deleteCourseCategory(uid) : deleteCourseType(uid),
     onSuccess: () => {
       invalidateCourseMasterQueries(queryClient, kind)
-      toast.success(`${label} berhasil dihapus`)
+      toast.success(messageCourseMasterDeleted(label))
     },
     onError: (error: Error) => {
-      toast.error(error.message || `Gagal menghapus ${label.toLowerCase()}`)
+      toast.error(resolveActionError(error, messageCourseMasterDeleteFailed(label)))
     },
   })
 }

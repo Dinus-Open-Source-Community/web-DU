@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import type { AssignableUserRole, UpdateUserRolePayload } from '@/lib/user-manage/types'
+import { Message, messageUserRoleChanged, resolveActionError } from '@/lib/Message'
 import { deleteManagedUser, updateManagedUserRole } from '@/services/user-manage'
 import { authKeys, userManageKeys } from './query-keys'
 
@@ -30,10 +31,10 @@ export function useUpdateManagedUserRole() {
       updateManagedUserRole(uid, payload),
     onSuccess: (_data, variables) => {
       invalidateManagedUserQueries(queryClient, variables.uid)
-      toast.success(`Role diubah menjadi ${ROLE_LABELS[variables.payload.role]}`)
+      toast.success(messageUserRoleChanged(ROLE_LABELS[variables.payload.role]))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui role user')
+      toast.error(resolveActionError(error, Message.userManage.roleUpdateFailed))
     },
   })
 }
@@ -45,10 +46,10 @@ export function useDeleteManagedUser() {
     mutationFn: (uid: string) => deleteManagedUser(uid),
     onSuccess: () => {
       invalidateManagedUserQueries(queryClient)
-      toast.success('User berhasil dihapus')
+      toast.success(Message.userManage.deleted)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghapus user')
+      toast.error(resolveActionError(error, Message.userManage.deleteFailed))
     },
   })
 }

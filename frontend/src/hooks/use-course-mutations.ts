@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import { Message, resolveActionError } from '@/lib/Message'
 import { courseKeys } from './query-keys'
 import type { AssignMentorsToCoursePayload } from '@/lib/course-mentor/types'
 import type { CreateCourseReviewReplyPayload } from '@/lib/course-review/types'
@@ -24,10 +25,10 @@ export function useCreateCourse() {
     mutationFn: (payload: CreateCoursePayload) => createCourse(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
-      toast.success('Kursus dibuat sebagai draf. Terbit lewat tombol Terbit.')
+      toast.success(Message.course.createdDraft)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal membuat kursus')
+      toast.error(resolveActionError(error, Message.course.createFailed))
     },
   })
 }
@@ -41,10 +42,10 @@ export function useUpdateCourse() {
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(variables.uid) })
-      toast.success('Detail kursus berhasil diperbarui')
+      toast.success(Message.course.updated)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui kursus')
+      toast.error(resolveActionError(error, Message.course.updateFailed))
     },
   })
 }
@@ -57,10 +58,10 @@ export function useUpdateCourseStatus() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-      toast.success('Kursus berhasil terbit')
+      toast.success(Message.course.published)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui status kursus')
+      toast.error(resolveActionError(error, Message.course.publishFailed))
     },
   })
 }
@@ -80,10 +81,10 @@ export function useReplyCourseReview() {
     }) => replyToCourseReview(courseUid, reviewUid, payload),
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-      toast.success('Balasan review berhasil dikirim')
+      toast.success(Message.review.replySent)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal mengirim balasan review')
+      toast.error(resolveActionError(error, Message.review.replyFailed))
     },
   })
 }
@@ -102,10 +103,10 @@ export function useAssignMentorsToCourse() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-      toast.success('Mentor berhasil ditugaskan ke kursus')
+      toast.success(Message.course.mentorAssigned)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menugaskan mentor')
+      toast.error(resolveActionError(error, Message.course.mentorAssignFailed))
     },
   })
 }
@@ -118,10 +119,10 @@ export function useDeleteCourse() {
     onSuccess: (_data, uid) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.removeQueries({ queryKey: courseKeys.detail(uid) })
-      toast.success('Kursus berhasil dinonaktifkan')
+      toast.success(Message.course.deactivated)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghapus kursus')
+      toast.error(resolveActionError(error, Message.course.deactivateFailed))
     },
   })
 }
@@ -140,10 +141,10 @@ export function useUnassignMentorsFromCourse() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
-      toast.success('Mentor berhasil dilepas dari kursus')
+      toast.success(Message.course.mentorUnassigned)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal melepas mentor')
+      toast.error(resolveActionError(error, Message.course.mentorUnassignFailed))
     },
   })
 }

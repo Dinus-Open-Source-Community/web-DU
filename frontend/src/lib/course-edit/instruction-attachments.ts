@@ -1,5 +1,11 @@
 import type { InstructionAttachmentApiRaw } from '@/lib/lesson-assignment/api-types'
 import type { LessonAssignmentInstructionAttachment } from '@/lib/types/lesson'
+import { resolveSafeExternalHref } from '@/lib/security/safe-external-url'
+import {
+  messageInstructionAttachmentLinkInvalid,
+  messageInstructionAttachmentLinkRequired,
+  messageInstructionAttachmentNameRequired,
+} from '@/lib/Message'
 
 export function normalizeInstructionAttachment(
   raw: InstructionAttachmentApiRaw | null | undefined,
@@ -39,34 +45,25 @@ export function sanitizeInstructionAttachmentsForPayload(
 }
 
 export function isValidInstructionAttachmentUrl(url: string): boolean {
-  const trimmed = url.trim()
-  if (!trimmed) return false
-  if (trimmed.startsWith('/files/')) return true
-
-  try {
-    const parsed = new URL(trimmed)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
+  return resolveSafeExternalHref(url.trim()) !== null
 }
 
 export function validateInstructionAttachments(
   attachments: LessonAssignmentInstructionAttachment[],
 ): string | null {
   for (const [index, item] of attachments.entries()) {
-    const label = `#${index + 1}`
+    const label = index + 1
 
     if (!item.name.trim()) {
-      return `Nama lampiran instruksi ${label} wajib diisi.`
+      return messageInstructionAttachmentNameRequired(label)
     }
 
     if (!item.url.trim()) {
-      return `URL lampiran instruksi ${label} wajib diisi.`
+      return messageInstructionAttachmentLinkRequired(label)
     }
 
     if (!isValidInstructionAttachmentUrl(item.url)) {
-      return `URL lampiran instruksi ${label} harus berupa link http(s) atau path /files/...`
+      return messageInstructionAttachmentLinkInvalid(label)
     }
   }
 

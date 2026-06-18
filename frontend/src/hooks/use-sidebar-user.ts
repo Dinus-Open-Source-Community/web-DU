@@ -9,12 +9,13 @@ const SIDEBAR_USER_FALLBACK: Record<UserRole, Pick<SidebarUser, 'name' | 'email'
 }
 
 export function useSidebarUser(role: UserRole): SidebarUser {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const fallback = SIDEBAR_USER_FALLBACK[role]
 
   return {
-    name: user?.name ?? fallback.name,
-    email: user?.email ?? fallback.email,
+    name: profile?.name ?? user?.name ?? fallback.name,
+    email: profile?.email ?? user?.email ?? fallback.email,
+    // Raw reference from session — resolved in UI via GET /files/{bucket}/{object}
     avatar_url: user?.avatar_url,
   }
 }

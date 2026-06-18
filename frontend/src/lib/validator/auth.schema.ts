@@ -43,9 +43,9 @@ export const resetPasswordFormSchema = z
 /** Query OAuth callback — selaras redirect BE ke `/auth/oauth/callback`. */
 export const oauthCallbackParamsSchema = z
   .object({
-    token: z.string().trim().min(1).optional(),
-    expires_at: z.string().trim().optional(),
-    error: z.string().trim().optional(),
+    token: z.string().trim().min(1, 'Token OAuth tidak valid').max(4096, 'Token OAuth terlalu panjang').optional(),
+    expires_at: z.string().trim().max(64, 'Expires at terlalu panjang').optional(),
+    error: z.string().trim().max(128, 'Error OAuth terlalu panjang').optional(),
   })
   .refine((data) => Boolean(data.token) || Boolean(data.error), {
     message: 'Token OAuth atau error wajib ada',

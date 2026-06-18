@@ -126,7 +126,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
           {/*Card Course*/}
           <div className="relative h-full w-full">
             <h5 className="align-middle text-2xl leading-[1.3] font-semibold">Available Course</h5>
-            <div className="mt-3 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8 xl:grid-cols-3">
+            <div className="mt-3 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {filteredCourses.length > 0 ? (
                 filteredCourses.map((data) => (
                   <CardCourse
@@ -168,8 +168,8 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
 
         {/**/}
         <div className="relative mt-16 h-full w-full py-8 sm:mt-20 sm:p-10 lg:mt-30 lg:p-15">
-          <div className="from-primary to-muted mx-auto flex h-full w-full rounded-[20px] bg-linear-to-r from-10% to-75% px-6 py-10 sm:px-10 lg:px-16 lg:py-16 xl:px-25 xl:py-21 2xl:max-w-7xl">
-            <div className="relative z-10 max-w-2xl gap-5 xl:pr-12">
+          <div className="from-primary to-muted mx-auto flex h-full w-full max-w-7xl rounded-[20px] bg-linear-to-r from-10% to-75% px-6 py-10 sm:px-10 md:px-16 md:py-16 lg:px-25 lg:py-21">
+            <div className="relative z-10 max-w-2xl gap-5 lg:pr-12">
               <h3 className="mb-4 align-middle text-3xl leading-[1.3] font-bold sm:text-4xl">Ready to Start Your Journey?</h3>
               <p className="text-base leading-[1.5] font-normal sm:text-xl sm:leading-[1.3]">
                 Join thousands of developers who are already learning and growing with Doscom University. Start with free courses today!
@@ -184,7 +184,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
               </div>
             </div>
           </div>
-          <LogoDuBig className="absolute top-2 right-0 hidden xl:block" />
+          <LogoDuBig className="absolute top-2 right-0 hidden lg:block" />
         </div>
       </div>
     </section>

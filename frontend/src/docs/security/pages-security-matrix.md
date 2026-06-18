@@ -13,7 +13,7 @@ Audit attack surface per halaman di `src/pages/` — Juni 2026, branch `features
 | `/` | `landing/Home.tsx` | Public | — | Featured courses API | Rendah — read-only |
 | `/course` | `landing/Course.tsx` | Public | Search, filter kategori | `GET /courses` | Rendah |
 | `/course/:courseUid` | `courses/detail.tsx` | Public | Tab query (`nuqs`) | `GET /courses/:uid` | Rendah — konten publik katalog |
-| `/course/:courseUid/view` | `courses/view.tsx` | **Public** | `?lesson=`, `?pane=` | Course + modules + lessons | **Medium** — konten lesson HTML; akses tanpa enrollment jika BE tidak enforce |
+| `/course/:courseUid/view` | `courses/view.tsx` | **Role: student, mentor, admin** | `?lesson=`, `?pane=` | Course + modules + lessons | **Medium** — konten lesson HTML; BE wajib enforce enrollment |
 
 ---
 
@@ -21,9 +21,9 @@ Audit attack surface per halaman di `src/pages/` — Juni 2026, branch `features
 
 | Route | Page | Guard | User Input | API / External | Risiko Utama |
 |-------|------|-------|------------|----------------|--------------|
-| `/auth/login` | `auth/Login.tsx` | Public | email, password | `POST /login` | **Medium** — open redirect `state.from` |
+| `/auth/login` | `auth/Login.tsx` | Public | email, password | `POST /login` | Rendah — redirect divalidasi `isSafeInternalPath()` |
 | `/auth/register` | `auth/Register.tsx` | Public | name, email, password | `POST /register` | Rendah — Zod validation |
-| `/auth/oauth/callback` | `auth/Oauth.tsx` | Public | `?token=`, `?expires_at=`, `?error=` | `GET /user/data` | **High** — JWT di URL query |
+| `/auth/oauth/callback` | `auth/Oauth.tsx` | Public | `?token=`, `?expires_at=`, `?error=` | `GET /user/data` | **High** — JWT di URL query (partial: query di-strip FE; full fix butuh BE) |
 | `/auth/forgot-password` | `auth/ForgotPass.tsx` | Public | email | **Tidak ada API** | **Medium** — UX palsu (success tanpa kirim email) |
 | `/auth/reset-password` | `auth/ResetPass.tsx` | Public | password, `?token=` | **Tidak ada API** | **Medium** — reset tidak fungsional; token tidak divalidasi |
 
@@ -106,7 +106,7 @@ Audit attack surface per halaman di `src/pages/` — Juni 2026, branch `features
 |----------|------|---------|
 | Parse URL | `lib/files/parse-protected-file-reference.ts` | Whitelist origin backend ✅ |
 | Batch fetch | `services/file-proxy.ts` | Max 50 objek ✅ |
-| Download | `lib/files/download-protected-file.ts` | Fallback raw URL ⚠️ |
+| Download | `lib/files/download-protected-file.ts` | Reject jika parse null ✅ |
 | Invoice | `use-invoice-download.ts` | `user_id` di query params |
 
 ### Rich content (XSS surface)
@@ -118,6 +118,7 @@ Audit attack surface per halaman di `src/pages/` — Juni 2026, branch `features
 | Submission view | `SubmissionContent.tsx`, `AssignmentTextSubmissionView.tsx` |
 | Payment steps | `PaymentInstructions.tsx` |
 | Course overview | `CourseDetailOverviewTab.tsx` |
+| Sanitizer | `lib/security/sanitize-html.ts`, `components/shared/SanitizedHtml.tsx` |
 
 ---
 

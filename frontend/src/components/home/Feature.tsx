@@ -10,7 +10,7 @@ type FeatureProps = {
 export default function Feature({ courses, isLoading = false }: FeatureProps) {
   return (
     <section className="relative z-10 h-full w-full bg-muted">
-      <div className="container mx-auto pt-25 pb-15 2xl:px-0">
+      <div className="container mx-auto px-0 pt-25 pb-15">
         <div className="mx-auto h-full w-full max-w-3xl">
           <h2 className="text-center text-5xl leading-[1.3] font-bold">Featured Courses</h2>
           <p className="mt-4 text-center text-xl leading-[1.3] font-normal text-[#383838]">

@@ -2,7 +2,7 @@
 
 Backlog prioritas hasil audit keamanan halaman & infrastruktur auth. Format mengikuti `performance/action-backlog.md`.
 
-**Branch:** `features/frontend-sapto` · **Review date:** 17 Juni 2026
+**Branch:** `features/frontend-sapto` · **Review date:** 18 Juni 2026
 
 ---
 
@@ -11,8 +11,8 @@ Backlog prioritas hasil audit keamanan halaman & infrastruktur auth. Format meng
 | Severity | Count | Target |
 |----------|-------|--------|
 | 🔴 P0 Critical | 0 | 0 |
-| 🟠 P1 High | 5 | 0 open |
-| 🟡 P2 Medium | 8 | ≤ 3 |
+| 🟠 P1 High | 3 | 0 open |
+| 🟡 P2 Medium | 6 | ≤ 3 |
 | 🟢 P3 Low | 5 | Backlog |
 
 ---
@@ -22,10 +22,10 @@ Backlog prioritas hasil audit keamanan halaman & infrastruktur auth. Format meng
 | ID | Task | Temuan | Aksi | Owner | Status |
 |----|------|--------|------|-------|--------|
 | SEC-01 | httpOnly session cookie | JWT di `js-cookie` | BE set cookie httpOnly; FE hapus `Cookies.set(TOKEN)` | BE + FE | 🔴 Open |
-| SEC-02 | Sanitize rich HTML | XSS stored di lesson/submission | `DOMPurify` helper + pakai di 7 komponen | FE | 🔴 Open |
-| SEC-03 | OAuth token di URL | `?token=` di callback | Authorization code flow atau hash fragment | BE + FE | 🔴 Open |
+| SEC-02 | Sanitize rich HTML | XSS stored di lesson/submission | `DOMPurify` helper + pakai di 8 komponen | FE | 🟢 Done |
+| SEC-03 | OAuth token di URL | `?token=` di callback | Authorization code flow atau hash fragment | BE + FE | 🟡 Partial — FE strip query via `history.replaceState` |
 | SEC-06 | Payment amount client-side | `use-checkout` kirim amount | BE validate; FE kirim minimal payload | BE + FE | 🔴 Open |
-| SEC-09 | Download URL fallback | Bearer ke URL arbitrary | Reject jika parse null | FE | 🔴 Open |
+| SEC-09 | Download URL fallback | Bearer ke URL arbitrary | Reject jika parse null | FE | 🟢 Done |
 
 ---
 
@@ -33,13 +33,13 @@ Backlog prioritas hasil audit keamanan halaman & infrastruktur auth. Format meng
 
 | ID | Task | Temuan | Aksi | Owner | Status |
 |----|------|--------|------|-------|--------|
-| SEC-04 | Payment instructions HTML | Tripay steps XSS | Sanitize atau plain text | FE | 🔴 Open |
-| SEC-05 | Public module viewer | Route tanpa guard | Protected route + verify BE 403 | FE + BE | 🔴 Open |
+| SEC-04 | Payment instructions HTML | Tripay steps XSS | Sanitize atau plain text | FE | 🟢 Done |
+| SEC-05 | Public module viewer | Route tanpa guard | Protected route + verify BE 403 | FE + BE | 🟢 Done (FE) — BE verify masih wajib |
 | SEC-07 | Payment IDOR | `?reference=` arbitrer | BE enforce ownership; FE 403 UX | BE | 🔴 Open |
 | SEC-08 | Invoice user_id param | Query user_id | BE derive from JWT | BE | 🔴 Open |
-| SEC-10 | Open redirect login | `state.from` unvalidated | `isSafeInternalPath()` helper | FE | 🔴 Open |
+| SEC-10 | Open redirect login | `state.from` unvalidated | `isSafeInternalPath()` helper | FE | 🟢 Done |
 | SEC-11 | Role cookie terpisah | syncAuthState tanpa API | Role dari JWT/API only | FE | 🔴 Open |
-| SEC-12 | super_admin → student | normalizeRole | Map super_admin → admin | FE | 🔴 Open |
+| SEC-12 | super_admin → student | normalizeRole | Map super_admin → admin | FE | 🟢 Done |
 | SEC-13 | Reset password mock | Success UI palsu | Wire API atau disable route | BE + FE | 🔴 Open |
 
 ---
@@ -48,8 +48,8 @@ Backlog prioritas hasil audit keamanan halaman & infrastruktur auth. Format meng
 
 | ID | Task | Temuan | Aksi | Owner | Status |
 |----|------|--------|------|-------|--------|
-| SEC-14 | OAuth error reflection | Raw error in toast | Static error map | FE | 🔴 Open |
-| SEC-15 | Payment payload schema | `unknown` type | Zod schema createPayment | FE | 🔴 Open |
+| SEC-14 | OAuth error reflection | Raw error in toast | Static error map | FE | 🟢 Done |
+| SEC-15 | Payment payload schema | `unknown` type | Zod schema createPayment | FE | 🟢 Done (`createPaymentRequestSchema`) |
 | SEC-16 | SameSite Strict | Lax cookies | Strict jika OAuth OK | BE + FE | 🔴 Open |
 | SEC-17 | CSP headers | Tidak ada di FE build | nginx/CDN CSP policy | DevOps | 🔴 Open |
 | SEC-18 | Admin on mentor routes | Broad role access | Konfirmasi product + audit log | PM + FE | 🔴 Open |
@@ -62,29 +62,32 @@ Centang setelah fix + retest manual:
 
 ```markdown
 - [ ] SEC-01: document.cookie tidak expose du_access_token (httpOnly)
-- [ ] SEC-02: Payload XSS `<script>alert(1)</script>` tidak dieksekusi di lesson viewer
-- [ ] SEC-03: Network tab OAuth callback — token tidak di query string
+- [x] SEC-02: Payload XSS `<script>alert(1)</script>` tidak dieksekusi di lesson viewer
+- [ ] SEC-03: Network tab OAuth callback — token tidak di query string (full fix butuh BE code flow)
 - [ ] SEC-06: Tamper amount di DevTools → BE reject
-- [ ] SEC-09: invoice_url eksternal → FE error, no request ke host luar
-- [ ] SEC-05: Guest /course/:uid/view → 403 atau login redirect
+- [x] SEC-09: invoice_url eksternal → FE error, no request ke host luar
+- [x] SEC-05: Guest /course/:uid/view → login redirect (RouteGuard)
 - [ ] SEC-07: Student B tidak bisa lihat reference student A
-- [ ] SEC-10: Login redirect //evil.com → blocked
-- [ ] SEC-12: super_admin login → akses /admin/dashboard OK
+- [x] SEC-10: Login redirect //evil.com → blocked
+- [x] SEC-12: super_admin login → akses /admin/dashboard OK
 ```
 
 ---
 
 ## Koordinasi FE ↔ BE
 
-| ID | FE | BE |
-|----|----|----|
+**Dokumen handoff lengkap:** [be-coordination.md](./be-coordination.md)  
+**Rencana FE setelah BE:** [fe-readiness.md](./fe-readiness.md)
+
+| ID | FE (setelah BE) | BE (implementasi) |
+|----|-----------------|-------------------|
 | SEC-01 | Hapus js-cookie token | Set-Cookie httpOnly on login/OAuth |
-| SEC-03 | Tukar code, bukan token URL | OAuth code endpoint |
-| SEC-06 | Hapus amount dari payload (optional) | Recalculate price server-side |
-| SEC-07 | Handle 403 UI | Filter payment by auth user |
+| SEC-03 | POST code exchange | OAuth redirect + `/auth/oauth/exchange` |
+| SEC-06 | Slim payload checkout | Recalculate price server-side + enrollment ownership |
+| SEC-07 | 403 UX payment page | Filter payment by auth user di `/payment/tripay` |
 | SEC-08 | Hapus user_id dari query | Derive from JWT |
-| SEC-05 | RouteGuard on viewer | 403 on lesson without enrollment |
-| SEC-13 | POST forgot/reset | Implement endpoints |
+| SEC-05 | — (RouteGuard ✅) | Regression test lesson 403 |
+| SEC-13 | Wire forgot/reset forms | Implement endpoints |
 
 ---
 
@@ -101,9 +104,9 @@ Centang setelah fix + retest manual:
 
 ## Sprint Rekomendasi
 
-**Sprint 1 (1 minggu):** SEC-09, SEC-02, SEC-10 — pure FE, high impact  
-**Sprint 2 (2 minggu):** SEC-01, SEC-03, SEC-06 — butuh BE  
-**Sprint 3:** SEC-05, SEC-07, SEC-08, SEC-13 — access control end-to-end
+**Sprint 1 (1 minggu):** SEC-09, SEC-02, SEC-10 — pure FE, high impact ✅ **Done (18 Jun 2026)**  
+**Sprint 2 (2 minggu):** SEC-01, SEC-03, SEC-06, SEC-07 — **[be-coordination.md](./be-coordination.md)** handoff ke BE  
+**Sprint 3:** SEC-08, SEC-13, SEC-05 verify — FE follow-up via [fe-readiness.md](./fe-readiness.md)
 
 ---
 

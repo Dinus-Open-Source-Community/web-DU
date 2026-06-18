@@ -81,7 +81,6 @@ export function TransactionPaymentDetailView({
               onCopy={onCopy}
               downloadParams={{
                 enrollmentUid: detail.payment.enrollmentUid,
-                userUid: detail.userUid,
                 courseUid: detail.courseUid,
               }}
             />

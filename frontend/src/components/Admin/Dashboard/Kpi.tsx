@@ -37,7 +37,7 @@ function KpiSkeleton() {
 export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLoading?: boolean }) {
   if (isLoading) {
     return (
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <KpiSkeleton key={i} />
         ))}
@@ -46,7 +46,7 @@ export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLo
   }
 
   return (
-    <section className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4')}>
+    <section className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4')}>
       {adminKpis?.map((k) => {
         const Icon = iconMap[k.iconName]
         return (

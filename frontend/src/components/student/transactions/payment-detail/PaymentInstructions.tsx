@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
 import type { PaymentInstruction } from '@/lib/transactions/payment-types'
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import { cn } from '@/lib/utils'
 
 export function PaymentInstructions({
@@ -53,7 +54,7 @@ export function PaymentInstructions({
                         <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {stepIndex + 1}
                         </span>
-                        <span dangerouslySetInnerHTML={{ __html: step }} />
+                        <SanitizedHtml html={step} variant="inline" className="inline" />
                       </li>
                     ))}
                   </ol>

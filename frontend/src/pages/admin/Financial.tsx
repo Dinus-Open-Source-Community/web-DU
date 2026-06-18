@@ -8,6 +8,7 @@ import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useAdminFinancial } from '@/hooks/use-admin-financial'
 import { CurrencyCompact } from '../../lib/func/func'
+import { gridDashboardChartsClassName } from '@/lib/layout/page-layout'
 
 const SKELETON_BAR_HEIGHTS = [55, 72, 40, 85, 63, 48, 78, 36, 60, 45, 70, 50]
 
@@ -71,8 +72,8 @@ export default function AdminFinancialAnalyticsPage() {
           )}
         </ChartCard>
 
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <ChartCard title="Revenue by Category" subtitle="Kontribusi kategori terhadap total pendapatan." className="xl:col-span-2">
+        <section className={gridDashboardChartsClassName}>
+          <ChartCard title="Revenue by Category" subtitle="Kontribusi kategori terhadap total pendapatan." className="lg:col-span-2">
             {isError ? (
               <DashboardError
                 message={error?.message ?? 'Gagal memuat data kategori'}

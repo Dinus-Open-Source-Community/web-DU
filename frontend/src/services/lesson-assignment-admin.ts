@@ -31,7 +31,7 @@ export async function fetchLessonAssignment(
       const data = unwrapApiResponse(response.data, 'Gagal mengambil konfigurasi tugas')
       return mapAssignmentResponse(data)
     } catch (error) {
-      if (isNotFoundApiError(error)) return null
+      if (error instanceof Error && isNotFoundApiError(error)) return null
       throw error
     }
   }, 'Gagal mengambil konfigurasi tugas')

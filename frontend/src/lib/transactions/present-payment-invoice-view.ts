@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 
 import { formatPaymentMethodLabel } from './format-payment-method'
+import { resolveSafeExternalHref, resolveSafeImageSrc } from '@/lib/security/safe-external-url'
 import type { PaymentInstruction } from './payment-types'
 import type { TransactionPaymentDetailViewModel } from './payment-types'
 
@@ -168,6 +169,9 @@ export function presentPaymentInvoiceView(
   const itemCount = payment.orderItems.length > 0
     ? payment.orderItems.reduce((sum, item) => sum + item.quantity, 0)
     : 1
+  const safeCheckoutUrl = resolveSafeExternalHref(payment.checkoutUrl) ?? ''
+  const safeQrUrl = resolveSafeImageSrc(payment.qrUrl) ?? ''
+  const safeCourseImageUrl = courseImageUrl ? resolveSafeImageSrc(courseImageUrl) : null
 
   const statusMessage = buildStatusMessage(
     payment.paymentStatus,
@@ -178,7 +182,7 @@ export function presentPaymentInvoiceView(
   return {
     invoiceTitle: 'Invoice Pembayaran',
     courseTitle,
-    courseImageUrl,
+    courseImageUrl: safeCourseImageUrl,
     statusLabel: STATUS_LABELS[payment.paymentStatus],
     paymentStatus: payment.paymentStatus,
     lineItems,
@@ -194,10 +198,10 @@ export function presentPaymentInvoiceView(
     references,
     instructions: payment.instructions,
     payCode: payment.payCode,
-    qrUrl: payment.qrUrl,
+    qrUrl: safeQrUrl,
     isQris: qris,
-    canContinuePayment: isPending && Boolean(payment.checkoutUrl),
-    checkoutUrl: payment.checkoutUrl,
+    canContinuePayment: isPending && Boolean(safeCheckoutUrl),
+    checkoutUrl: safeCheckoutUrl,
     trackingSteps: buildTrackingSteps(payment.paymentStatus, payment.paidAt, payment.expiredAt),
     itemCount,
     reference: payment.reference,

@@ -17,6 +17,7 @@ export * from './module'
 export * from './admin-moderation'
 export * from './file-proxy'
 export * from './invoice'
+export * from './security.schema'
 export * from './query'
 
 export { beUidParamSchema as parseUidSchema, beResolvableUidSchema } from './common'

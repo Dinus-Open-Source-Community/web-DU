@@ -77,7 +77,7 @@ export function TableManagementUsers({
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {studentData.map((student) => (
             <article key={student.uid} className={cn('flex h-full flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs')}>
               <div className="flex items-start gap-3">

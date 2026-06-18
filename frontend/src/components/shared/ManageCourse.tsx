@@ -62,7 +62,7 @@ export default function ManageCourseSection({
         <div className="flex flex-col gap-5">
           <PageHeader title="Courses" subtitle={isAdmin ? 'Kelola kursus platform: buat, atur, dan hapus kursus.' : 'Kelola konten modul, lesson, dan peserta kursus.'} />
 
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <SegmentedFilter<CourseFilter>
               items={filters.map((f) => ({ value: f, label: f }))}
               value={activeFilter}
@@ -80,7 +80,7 @@ export default function ManageCourseSection({
 
         {filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-10">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {paginatedCourses.map((c) => (
                 <CardMentor
                   key={c.uid}

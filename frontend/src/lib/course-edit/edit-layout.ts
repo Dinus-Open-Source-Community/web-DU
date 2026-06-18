@@ -3,14 +3,14 @@ export const editLayout = {
   page: 'mx-auto flex w-full flex-col gap-6 pb-10 lg:pb-10',
   pageCompact: 'gap-4 pb-28 lg:gap-6 lg:pb-10',
   shell:
-    'grid gap-6 xl:grid-cols-[minmax(15rem,17.5rem)_minmax(0,1fr)] xl:gap-0 xl:divide-x xl:divide-slate-200',
+    'grid gap-6 lg:grid-cols-[minmax(15rem,17.5rem)_minmax(0,1fr)] lg:gap-0 lg:divide-x lg:divide-slate-200',
   shellCompactOutline: 'flex min-h-0 flex-1 flex-col',
   shellCompactEditor: 'flex min-h-0 flex-1 flex-col',
   outlinePanel:
-    'flex min-h-0 flex-col xl:sticky xl:top-4 xl:max-h-[calc(100dvh-7rem)] xl:pr-6',
+    'flex min-h-0 flex-col lg:sticky lg:top-4 lg:max-h-[calc(100dvh-7rem)] lg:pr-6',
   outlinePanelFull:
-    'flex min-h-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white p-4 sm:p-5 xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0',
-  editorPanel: 'min-w-0 xl:pl-8',
+    'flex min-h-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0',
+  editorPanel: 'min-w-0 lg:pl-8',
   editorPanelCompact: 'min-w-0 flex-1 px-0 sm:px-1',
   divider: 'border-b border-slate-200',
   pageTitle: 'text-lg font-semibold tracking-tight text-slate-900 sm:text-xl',

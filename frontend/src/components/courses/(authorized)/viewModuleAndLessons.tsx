@@ -87,7 +87,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         ) : null}
 
         {isAssignmentLoading ? (
-          <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 xl:px-10">
+          <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 lg:px-10">
             <div className="mx-auto w-full max-w-3xl">
               <p className={cn('text-sm', theme === 'dark' ? 'text-zinc-400' : 'text-slate-500')}>
                 Memuat data tugas...

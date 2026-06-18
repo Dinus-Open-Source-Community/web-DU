@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import { Message, resolveActionError } from '@/lib/Message'
 import {
   applyResolvedImagesToAdminQnaThread,
   applyResolvedImagesToAdminReview,
@@ -99,10 +100,10 @@ export function useReplyAdminReview() {
     }) => replyAdminReview(reviewUid, { comment }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminModerationKeys.all })
-      toast.success('Balasan review berhasil dikirim')
+      toast.success(Message.review.replySent)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal mengirim balasan review')
+      toast.error(resolveActionError(error, Message.review.replyFailed))
     },
   })
 }
@@ -120,10 +121,10 @@ export function useReplyAdminQnaThread() {
     }) => replyAdminQnaThread(threadUid, { body }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminModerationKeys.all })
-      toast.success('Balasan Q&A berhasil dikirim')
+      toast.success(Message.qa.replySent)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal mengirim balasan Q&A')
+      toast.error(resolveActionError(error, Message.qa.replyFailed))
     },
   })
 }

@@ -9,6 +9,8 @@ type UserAvatarImageProps = {
   alt: string
   className?: string
   iconClassName?: string
+  fallbackInitial?: string
+  fallbackClassName?: string
   size?: number
 }
 
@@ -21,6 +23,8 @@ export function UserAvatarImage({
   alt,
   className,
   iconClassName,
+  fallbackInitial,
+  fallbackClassName,
   size = 28,
 }: UserAvatarImageProps) {
   const [hasError, setHasError] = useState(false)
@@ -50,6 +54,10 @@ export function UserAvatarImage({
           className="absolute inset-0 h-full w-full object-cover object-center"
           onError={() => setHasError(true)}
         />
+      ) : fallbackInitial ? (
+        <span className={cn('text-sm font-bold uppercase', fallbackClassName)} aria-hidden>
+          {fallbackInitial}
+        </span>
       ) : (
         <UserRound className={cn('size-4', iconClassName)} aria-hidden />
       )}

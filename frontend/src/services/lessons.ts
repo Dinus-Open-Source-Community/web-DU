@@ -121,7 +121,10 @@ export async function deleteLesson(uid: string): Promise<void> {
   try {
     await api.delete<IResponse<null>>(API_ROUTES.lessons.deleteByUid(uid))
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, 'Gagal menghapus lesson'), { cause: error })
+    if (error instanceof Error) {
+      throw new Error(getApiErrorMessage(error, 'Gagal menghapus lesson'), { cause: error })
+    }
+    throw new Error('Gagal menghapus lesson', { cause: error })
   }
 }
 

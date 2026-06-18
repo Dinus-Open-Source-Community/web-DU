@@ -218,7 +218,7 @@ export function TransactionsDashboard({
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiSparkCard
           label="Gross Revenue"
           value={String(FormatRupiah(grossRevenue))}
@@ -258,8 +258,8 @@ export function TransactionsDashboard({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <ChartCard title="Rasio Status" subtitle="Proporsi status transaksi." className="xl:col-span-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <ChartCard title="Rasio Status" subtitle="Proporsi status transaksi." className="lg:col-span-3">
           <TransactionRatioChart data={ratioData} height={280} />
         </ChartCard>
       </div>

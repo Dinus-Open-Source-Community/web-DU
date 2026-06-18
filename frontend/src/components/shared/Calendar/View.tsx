@@ -57,8 +57,8 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
     <section className="space-y-6">
       <CalendarToolbar classFilter={classFilter} setClassFilter={setClassFilter} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
           {/* Calendar Controls (Unified Navigation & View Options) - Moved here to be in the same section as the calendar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm">
             {/* Date Selection Dropdowns and Navigation */}

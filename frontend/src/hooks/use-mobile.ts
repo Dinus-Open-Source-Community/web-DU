@@ -3,6 +3,8 @@ import * as React from 'react'
 import {
   getLayoutTier,
   isSidebarSheetViewport,
+  LAYOUT_BREAKPOINTS,
+  SIDEBAR_SHEET_MAX_WIDTH,
   type LayoutTier,
 } from '@/lib/layout/breakpoints'
 
@@ -10,42 +12,43 @@ function readViewportWidth() {
   return typeof window !== 'undefined' ? window.innerWidth : LAYOUT_FALLBACK_WIDTH
 }
 
-const LAYOUT_FALLBACK_WIDTH = 1280
+const LAYOUT_FALLBACK_WIDTH = LAYOUT_BREAKPOINTS.lg
 
+/** Sheet sidebar below lg; fixed sidebar at lg+. */
 export function useLayoutTier(): LayoutTier {
   const [tier, setTier] = React.useState<LayoutTier>(() =>
     getLayoutTier(readViewportWidth()),
   )
 
   React.useEffect(() => {
-    const xlQuery = window.matchMedia(`(min-width: ${1280}px)`)
-    const lgQuery = window.matchMedia(`(min-width: ${1024}px)`)
+    const lgQuery = window.matchMedia(`(min-width: ${LAYOUT_BREAKPOINTS.lg}px)`)
+    const mdQuery = window.matchMedia(`(min-width: ${LAYOUT_BREAKPOINTS.md}px)`)
 
     const update = () => {
       setTier(getLayoutTier(window.innerWidth))
     }
 
-    xlQuery.addEventListener('change', update)
     lgQuery.addEventListener('change', update)
+    mdQuery.addEventListener('change', update)
     update()
 
     return () => {
-      xlQuery.removeEventListener('change', update)
       lgQuery.removeEventListener('change', update)
+      mdQuery.removeEventListener('change', update)
     }
   }, [])
 
   return tier
 }
 
-/** Sheet sidebar below xl; fixed sidebar at xl+. */
+/** Sheet sidebar below lg; fixed sidebar at lg+. */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState(() =>
     isSidebarSheetViewport(readViewportWidth()),
   )
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${1279}px)`)
+    const mql = window.matchMedia(`(max-width: ${SIDEBAR_SHEET_MAX_WIDTH}px)`)
     const onChange = () => {
       setIsMobile(isSidebarSheetViewport(window.innerWidth))
     }

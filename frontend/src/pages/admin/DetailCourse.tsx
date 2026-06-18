@@ -7,7 +7,7 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
-import type { IModulesData } from '@/lib/types/course'
+import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function AdminCourseDetailPage() {
   const { courseUid } = useParams()
@@ -45,7 +45,7 @@ export default function AdminCourseDetailPage() {
 type AdminCourseDetailContentProps = {
   courseUid: string
   dataCourse: NonNullable<ReturnType<typeof useCourseDetailAdminAndMentor>['courseDetail']['data']>
-  dataStudents: NonNullable<ReturnType<typeof useCourseDetailAdminAndMentor>['userCourse']['data']>['enrollments']
+  dataStudents: IMentorCourseStudent[]
   dataModules?: IModulesData[]
 }
 

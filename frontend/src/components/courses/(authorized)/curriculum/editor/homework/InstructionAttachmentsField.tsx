@@ -1,5 +1,6 @@
 import { ExternalLink, Plus, Trash2 } from 'lucide-react'
 
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { isValidInstructionAttachmentUrl } from '@/lib/course-edit/instruction-attachments'
@@ -114,15 +115,13 @@ export function InstructionAttachmentsField({
                   </div>
 
                   {previewHref ? (
-                    <a
+                    <SafeExternalLink
                       href={previewHref}
-                      target="_blank"
-                      rel="noreferrer noopener"
                       className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                     >
                       <ExternalLink className="size-3.5" aria-hidden />
                       Pratinjau link
-                    </a>
+                    </SafeExternalLink>
                   ) : null}
                 </div>
               </li>

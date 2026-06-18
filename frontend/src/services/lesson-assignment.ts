@@ -13,7 +13,7 @@ import {
 } from '@/lib/validator/lesson-assignment'
 import { API_ROUTES } from './api-path'
 import { api } from './axios'
-import { getApiErrorMessage, isNotFoundApiError, unwrapApiResponse, withApiErrorHandling } from './api-error'
+import { getApiErrorMessage, isNotFoundApiError, unwrapApiResponse, withApiErrorHandling, type AppErrorSource } from './api-error'
 import type { IResponse } from '@/lib/types/api'
 
 export type SubmitLessonAssignmentInput = SubmitLessonAssignmentPayload
@@ -24,7 +24,7 @@ export type SubmitLessonAssignmentOptions = {
   hasExistingSubmission: boolean
 }
 
-function isAlreadySubmittedError(error: unknown) {
+function isAlreadySubmittedError(error: AppErrorSource) {
   const message = getApiErrorMessage(error, '').toLowerCase()
   return message.includes('already submitted')
 }
@@ -41,7 +41,7 @@ export async function fetchMyLessonAssignmentSubmission(
       const data = unwrapApiResponse(response.data, 'Gagal mengambil submission tugas')
       return mapLessonAssignmentSubmissionBundle(data)
     } catch (error) {
-      if (isNotFoundApiError(error)) return null
+      if (error instanceof Error && isNotFoundApiError(error)) return null
       throw error
     }
   }, 'Gagal mengambil submission tugas')
@@ -133,7 +133,7 @@ export async function submitLessonAssignment(
     try {
       return await postSubmission(validatedLessonUid, validatedInput)
     } catch (error) {
-      if (isAlreadySubmittedError(error)) {
+      if (error instanceof Error && isAlreadySubmittedError(error)) {
         return putSubmission(validatedLessonUid, validatedInput)
       }
       throw error

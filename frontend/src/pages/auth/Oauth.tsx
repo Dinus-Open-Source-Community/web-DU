@@ -3,9 +3,15 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { getApiErrorMessage } from '@/services/api-error'
+import { getOAuthErrorMessage } from '@/lib/security/oauth-errors'
+import { Message, resolveApiActionError } from '@/lib/Message'
+import { parseOAuthCallbackParams } from '@/lib/validator/auth'
 import { SafeLottie } from '../../components/ui/lottie'
 import { useAuth } from '../../providers/auth-provider'
+
+function stripSensitiveQueryParams() {
+  window.history.replaceState({}, document.title, window.location.pathname)
+}
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate()
@@ -13,29 +19,56 @@ export default function OAuthCallbackPage() {
   const { signInWithToken } = useAuth()
 
   useEffect(() => {
-    const token = searchParams.get('token')
-    const expiresAt = searchParams.get('expires_at') ?? undefined
     const error = searchParams.get('error')
 
     if (error) {
-      toast.error(decodeURIComponent(error))
+      stripSensitiveQueryParams()
+      toast.error(getOAuthErrorMessage(error))
       navigate('/auth/login')
       return
     }
 
+    let callbackParams: ReturnType<typeof parseOAuthCallbackParams>
+    try {
+      callbackParams = parseOAuthCallbackParams({
+        token: searchParams.get('token'),
+        expires_at: searchParams.get('expires_at'),
+        error: searchParams.get('error'),
+      })
+    } catch (err) {
+      stripSensitiveQueryParams()
+      toast.error(
+        resolveApiActionError(
+          err instanceof Error ? err : new Error(Message.auth.googleLoginFailed),
+          Message.auth.googleLoginFailed,
+        ),
+      )
+      navigate('/auth/login')
+      return
+    }
+
+    const token = callbackParams.token
     if (!token) {
-      toast.error('Token OAuth tidak ditemukan')
+      stripSensitiveQueryParams()
+      toast.error(Message.auth.googleLoginFailed)
       navigate('/auth/login')
       return
     }
 
-    void signInWithToken(token, expiresAt)
+    stripSensitiveQueryParams()
+
+    void signInWithToken(token, callbackParams.expires_at)
       .then(({ redirectPath }) => {
         navigate(redirectPath)
-        toast.success('Login berhasil')
+        toast.success(Message.auth.loginSuccess)
       })
       .catch((err) => {
-        toast.error(getApiErrorMessage(err, 'OAuth login gagal'))
+        toast.error(
+          resolveApiActionError(
+            err instanceof Error ? err : new Error(Message.auth.googleLoginFailed),
+            Message.auth.googleLoginFailed,
+          ),
+        )
         navigate('/auth/login')
       })
   }, [navigate, searchParams, signInWithToken])

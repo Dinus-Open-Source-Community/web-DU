@@ -9,7 +9,6 @@ import { ROUTES } from '@/lib/routes'
 import { useResolvedAuthProfile } from '@/hooks/files/use-resolved-auth-profile'
 
 export const AUTH_COOKIE_USER = 'du_auth_user'
-export const AUTH_COOKIE_ROLE = 'du_auth_role'
 export const AUTH_COOKIE_EXPIRES_AT = 'du_auth_expires_at'
 
 const DEFAULT_SESSION_DAYS = 1
@@ -52,6 +51,7 @@ const getTokenExpires = (expiresAt?: string) => {
 }
 
 const normalizeRole = (role: string): UserRole => {
+  if (role === 'super_admin') return 'admin'
   if (role === 'admin' || role === 'mentor' || role === 'student') return role
   return 'student'
 }
@@ -96,12 +96,14 @@ function setAuthToken(token: string, expiresAt?: string) {
   const cookieExpires = getTokenExpires(expiresAt)
   Cookies.set(AUTH_COOKIE_TOKEN, token, {
     expires: cookieExpires,
-    sameSite: 'lax',
+    sameSite: 'strict',
+    secure: window.location.protocol === 'https:',
   })
   if (expiresAt) {
     Cookies.set(AUTH_COOKIE_EXPIRES_AT, expiresAt, {
       expires: cookieExpires,
-      sameSite: 'lax',
+      sameSite: 'strict',
+      secure: window.location.protocol === 'https:',
     })
   }
   setApiAuthToken(token)
@@ -115,11 +117,8 @@ function getAuthToken() {
 function setAuthUser(user: IAuthSessionUser) {
   Cookies.set(AUTH_COOKIE_USER, JSON.stringify(user), {
     expires: DEFAULT_SESSION_DAYS,
-    sameSite: 'lax',
-  })
-  Cookies.set(AUTH_COOKIE_ROLE, user.role, {
-    expires: DEFAULT_SESSION_DAYS,
-    sameSite: 'lax',
+    sameSite: 'strict',
+    secure: window.location.protocol === 'https:',
   })
   emitAuthChange()
 }
@@ -142,7 +141,6 @@ function getAuthUser(): IAuthSessionUser | null {
 function clearAuthSession() {
   Cookies.remove(AUTH_COOKIE_TOKEN)
   Cookies.remove(AUTH_COOKIE_USER)
-  Cookies.remove(AUTH_COOKIE_ROLE)
   Cookies.remove(AUTH_COOKIE_EXPIRES_AT)
   setApiAuthToken(null)
   emitAuthChange()

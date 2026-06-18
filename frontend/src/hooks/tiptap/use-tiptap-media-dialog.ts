@@ -1,7 +1,14 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
 
-import { normalizeYoutubeWatchUrl, type TiptapMediaKind } from '@/lib/tiptap-media'
+import {
+  insertTiptapImage,
+  insertTiptapLink,
+  insertTiptapYoutube,
+  normalizeTiptapMediaUrl,
+  type TiptapMediaKind,
+} from '@/lib/tiptap-media'
+import { getSavedTextSelection, type SavedTextSelection } from '@/lib/tiptap-selection'
 
 type MediaDialogState = {
   open: boolean
@@ -19,9 +26,18 @@ const CLOSED_STATE: MediaDialogState = {
 
 export function useTiptapMediaDialog(editor: Editor) {
   const [mediaDialog, setMediaDialog] = useState<MediaDialogState>(CLOSED_STATE)
+  const savedSelectionRef = useRef<SavedTextSelection | null>(null)
+
+  const captureSelectionForMediaDialog = useCallback(() => {
+    const current = getSavedTextSelection(editor)
+    if (current) savedSelectionRef.current = current
+  }, [editor])
 
   const openMediaDialog = useCallback(
     (kind: TiptapMediaKind) => {
+      const current = getSavedTextSelection(editor)
+      savedSelectionRef.current = current ?? savedSelectionRef.current
+
       if (kind === 'link') {
         setMediaDialog({
           open: true,
@@ -38,35 +54,53 @@ export function useTiptapMediaDialog(editor: Editor) {
   )
 
   const closeMediaDialog = useCallback((open: boolean) => {
+    if (!open) {
+      savedSelectionRef.current = null
+    }
     setMediaDialog((prev) => ({ ...prev, open }))
   }, [])
 
   const confirmMediaDialog = useCallback(
     (url: string) => {
+      const normalized = normalizeTiptapMediaUrl(url)
+      const savedSelection = savedSelectionRef.current
+      let inserted = false
+
       switch (mediaDialog.kind) {
         case 'link':
-          editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+          inserted = insertTiptapLink(editor, normalized, savedSelection)
           break
         case 'image':
-          editor.chain().focus().setImage({ src: url }).run()
+          inserted = insertTiptapImage(editor, normalized)
           break
-        case 'youtube': {
-          const normalized = normalizeYoutubeWatchUrl(url)
-          if (normalized) editor.chain().focus().setYoutubeVideo({ src: normalized }).run()
+        case 'youtube':
+          inserted = insertTiptapYoutube(editor, normalized)
           break
-        }
       }
+
+      if (inserted) {
+        savedSelectionRef.current = null
+        setMediaDialog(CLOSED_STATE)
+      }
+
+      return inserted
     },
     [editor, mediaDialog.kind],
   )
 
   const removeLink = useCallback(() => {
+    const savedSelection = savedSelectionRef.current
+    if (savedSelection) {
+      editor.chain().focus().setTextSelection(savedSelection).run()
+    }
     editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    savedSelectionRef.current = null
   }, [editor])
 
   return {
     mediaDialog,
     openMediaDialog,
+    captureSelectionForMediaDialog,
     closeMediaDialog,
     confirmMediaDialog,
     removeLink,

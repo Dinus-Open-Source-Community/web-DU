@@ -1,3 +1,5 @@
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import { parseLessonContent } from '@/lib/rich-text'
 import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
@@ -24,20 +26,19 @@ export function AssignmentTextSubmissionView({ submission, theme }: AssignmentTe
       {richContent?.contentHtml ? (
         <div className={cn('lesson-reader', isDark ? 'lesson-reader--dark' : 'lesson-reader--light')}>
           <div className="tiptap-editor-root tiptap-preview">
-            <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: richContent.contentHtml }} />
+            <SanitizedHtml html={richContent.contentHtml} className="ProseMirror" />
           </div>
         </div>
       ) : null}
 
       {submission.fileUrl ? (
         <div className="space-y-1.5">
-          <a
+          <SafeExternalLink
             href={submission.fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center rounded-xl border px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5">
+            className="inline-flex items-center rounded-xl border px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5"
+          >
             {submission.fileOriginalFilename || 'Unduh lampiran'}
-          </a>
+          </SafeExternalLink>
           {submission.fileDescription ? (
             <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>{submission.fileDescription}</p>
           ) : null}

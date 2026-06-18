@@ -63,7 +63,7 @@ const CertificatesSection = () => {
         <div className="min-w-0 flex-1">
           {filteredCertificates.length > 0 ? (
             <div className="flex flex-col gap-10">
-              <div key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+              <div key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {paginatedCertificates.map((cert) => (
                   <div key={cert.uid} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-colors hover:border-slate-300">
                     <div className="relative flex aspect-[4/3] w-full items-center justify-center border-b border-slate-100 bg-slate-50 p-6">

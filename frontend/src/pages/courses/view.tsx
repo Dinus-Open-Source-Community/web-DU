@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
+import { Message } from '@/lib/Message'
 import { CourseModulePreview } from '@/components/courses/(authorized)/viewModuleAndLessons'
 import { LottieOverlay } from '@/components/shared/Loader'
 import { NotFoundContent } from '@/components/shared/Error'
@@ -79,7 +80,7 @@ function CourseViewPageContent({
   initialViewerPane,
 }: CourseViewPageContentProps) {
   const handleSubmitAssignmentSuccess = useCallback(() => {
-    toast.success('Tugas berhasil dikumpulkan.')
+    toast.success(Message.assignment.submitted)
   }, [])
 
   const handleSubmitAssignmentError = useCallback((message: string) => {

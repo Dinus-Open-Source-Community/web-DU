@@ -2,13 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, ImageIcon, Link2, Video } from 'lucide-react'
+
+import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
+import { useProtectedFile } from '@/hooks/files/use-protected-file'
+import { isResolvableProtectedFileReference } from '@/lib/files/parse-protected-file-reference'
 import {
-  getYoutubeEmbedUrl,
+  normalizeTiptapMediaUrl,
   type TiptapMediaKind,
   validateMediaUrl,
-} from '../../lib/tiptap-media'
-import { cn } from '../../lib/utils'
-import { Button } from '../ui/button'
+} from '@/lib/tiptap-media'
+import { resolveSafeEmbedUrl, resolveSafeImageSrc } from '@/lib/security/safe-external-url'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +22,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog'
-import { Input } from '../ui/input'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 
 const DIALOG_META: Record<
   TiptapMediaKind,
@@ -31,8 +37,8 @@ const DIALOG_META: Record<
   },
   image: {
     title: 'Sisipkan gambar',
-    description: 'Gunakan URL gambar (https). Pratinjau ditampilkan di bawah.',
-    placeholder: 'https://example.com/gambar.jpg',
+    description: 'URL https atau path /files/{bucket}/{object} dari storage.',
+    placeholder: 'https://example.com/gambar.jpg atau /files/bucket/object',
     icon: ImageIcon,
   },
   youtube: {
@@ -49,7 +55,7 @@ type TipTapMediaDialogProps = {
   initialUrl?: string
   allowRemove?: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (url: string) => void
+  onConfirm: (url: string) => boolean | void
   onRemove?: () => void
 }
 
@@ -76,8 +82,17 @@ export function TipTapMediaDialog({
     setImageStatus('idle')
   }, [open, initialUrl, kind])
 
-  const youtubeEmbed = useMemo(() => (kind === 'youtube' ? getYoutubeEmbedUrl(url) : null), [kind, url])
-  const canPreviewImage = kind === 'image' && url.trim().length > 0 && !validateMediaUrl('image', url)
+  const trimmedUrl = normalizeTiptapMediaUrl(url)
+  const protectedFile = useProtectedFile(kind === 'image' ? trimmedUrl : null)
+  const publicPreviewSrc = kind === 'image' ? resolveSafeImageSrc(trimmedUrl) : null
+  const previewImageSrc = protectedFile.displayUrl ?? publicPreviewSrc
+  const youtubeEmbed = useMemo(
+    () => (kind === 'youtube' ? resolveSafeEmbedUrl(trimmedUrl) : null),
+    [kind, trimmedUrl],
+  )
+  const canPreviewImage = Boolean(
+    previewImageSrc || isResolvableProtectedFileReference(trimmedUrl),
+  )
 
   useEffect(() => {
     if (!canPreviewImage) {
@@ -85,7 +100,7 @@ export function TipTapMediaDialog({
       return
     }
     setImageStatus('loading')
-  }, [canPreviewImage, url])
+  }, [canPreviewImage, trimmedUrl])
 
   function handleConfirm() {
     const validationError = validateMediaUrl(kind, url)
@@ -93,7 +108,11 @@ export function TipTapMediaDialog({
       setError(validationError)
       return
     }
-    onConfirm(url.trim())
+    const inserted = onConfirm(trimmedUrl)
+    if (inserted === false) {
+      setError('Gagal menyisipkan ke editor. Pastikan kursor aktif di area teks.')
+      return
+    }
     onOpenChange(false)
   }
 
@@ -134,15 +153,15 @@ export function TipTapMediaDialog({
 
             {kind === 'link' && (
               <div className="min-h-[72px] rounded-lg border border-dashed border-slate-200 bg-white p-3">
-                {url.trim() ? (
-                  <a
-                    href={url.trim()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 break-all text-sm font-medium text-primary underline underline-offset-2">
+                {trimmedUrl ? (
+                  <SafeExternalLink
+                    href={trimmedUrl}
+                    className="inline-flex items-center gap-2 break-all text-sm font-medium text-primary underline underline-offset-2"
+                    fallback={<p className="text-sm text-amber-700">URL tautan tidak valid.</p>}
+                  >
                     <ExternalLink className="h-4 w-4 shrink-0" />
-                    {url.trim()}
-                  </a>
+                    {trimmedUrl}
+                  </SafeExternalLink>
                 ) : (
                   <p className="text-sm text-slate-400">Tautan akan tampil di sini.</p>
                 )}
@@ -151,20 +170,28 @@ export function TipTapMediaDialog({
 
             {kind === 'image' && (
               <div className="flex min-h-[160px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-200 bg-white">
-                {canPreviewImage ? (
+                {canPreviewImage && previewImageSrc ? (
                   <>
-                    {imageStatus === 'loading' && <p className="text-sm text-slate-400">Memuat gambar…</p>}
-                    {imageStatus === 'error' && <p className="text-sm text-amber-700">Gambar tidak dapat dimuat dari URL ini.</p>}
+                    {(imageStatus === 'loading' || protectedFile.isLoading) && (
+                      <p className="text-sm text-slate-400">Memuat gambar…</p>
+                    )}
+                    {imageStatus === 'error' && !protectedFile.isLoading && (
+                      <p className="text-sm text-amber-700">Gambar tidak dapat dimuat dari URL ini.</p>
+                    )}
                     <img
-                      src={url.trim()}
+                      src={previewImageSrc}
                       alt="Pratinjau gambar"
                       className={cn('max-h-56 w-full object-contain', imageStatus !== 'loaded' && 'hidden')}
                       onLoad={() => setImageStatus('loaded')}
                       onError={() => setImageStatus('error')}
                     />
                   </>
+                ) : canPreviewImage && protectedFile.isLoading ? (
+                  <p className="text-sm text-slate-400">Memuat gambar…</p>
                 ) : (
-                  <p className="text-sm text-slate-400">Pratinjau gambar akan tampil di sini.</p>
+                  <p className="px-4 text-center text-sm text-slate-400">
+                    Pratinjau gambar akan tampil di sini. Path `/files/...` didukung.
+                  </p>
                 )}
               </div>
             )}
@@ -172,14 +199,8 @@ export function TipTapMediaDialog({
             {kind === 'youtube' && (
               <div className="overflow-hidden rounded-lg border border-dashed border-slate-200 bg-black">
                 {youtubeEmbed ? (
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                    <iframe
-                      src={youtubeEmbed}
-                      title="Pratinjau YouTube"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="absolute inset-0 h-full w-full"
-                    />
+                  <div className="relative aspect-video w-full">
+                    <SafeEmbedFrame embedUrl={trimmedUrl} title="Pratinjau YouTube" className="absolute inset-0" />
                   </div>
                 ) : (
                   <div className="flex min-h-[160px] items-center justify-center bg-white">

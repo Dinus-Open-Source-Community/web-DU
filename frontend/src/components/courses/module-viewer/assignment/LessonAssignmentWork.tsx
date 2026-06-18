@@ -98,7 +98,7 @@ export function LessonAssignmentWork({
   }
 
   return (
-    <main className="min-h-dvh px-4 pt-20 pb-28 sm:px-6 sm:pt-24 md:px-8 xl:px-10">
+    <main className="min-h-dvh px-4 pt-20 pb-28 sm:px-6 sm:pt-24 md:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <header className="space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

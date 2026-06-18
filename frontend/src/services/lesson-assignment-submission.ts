@@ -42,7 +42,7 @@ export async function fetchLessonAssignmentSubmissions(
         assignment: context.assignment,
       })
     } catch (error) {
-      if (isNotFoundApiError(error)) return []
+      if (error instanceof Error && isNotFoundApiError(error)) return []
       throw error
     }
   }, 'Gagal mengambil kiriman tugas')

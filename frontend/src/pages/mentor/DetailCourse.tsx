@@ -7,7 +7,7 @@ import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
-import type { IModulesData } from '@/lib/types/course'
+import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function MentorCourseDetailPage() {
   const { courseUid } = useParams()
@@ -46,9 +46,7 @@ type MentorCourseDetailContentProps = {
   dataCourse: NonNullable<
     ReturnType<typeof useCourseDetailAdminAndMentor>['courseDetail']['data']
   >
-  dataStudents: NonNullable<
-    ReturnType<typeof useCourseDetailAdminAndMentor>['userCourse']['data']
-  >['enrollments']
+  dataStudents: IMentorCourseStudent[]
   dataModules?: IModulesData[]
 }
 

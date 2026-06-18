@@ -87,7 +87,7 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
 
       {filteredCourses.length > 0 ? (
         <div className="flex flex-col gap-10">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {paginatedCourses.map((course) => {
               const isInProgress = isLearningProgressInProgress(
                 course.progress,

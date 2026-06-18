@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import { Message } from '@/lib/Message'
 import { useCourseDetail } from '@/hooks/use-course'
 import { getApiErrorMessage } from '@/services/api-error'
 import { joinCourse } from '@/services/course'
@@ -96,11 +97,15 @@ export function useCheckout() {
       if (ref || merchantRef) {
         navigate(ROUTES.student.transactionPayment({ reference: ref, merchantRef }))
       } else {
-        toast.success('Pembayaran berhasil dibuat')
+        toast.success(Message.payment.created)
         navigate(ROUTES.student.transactions)
       }
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Gagal memproses pembayaran'))
+      toast.error(
+        err instanceof Error
+          ? getApiErrorMessage(err, Message.payment.processFailed)
+          : Message.payment.processFailed,
+      )
     }
   }, [courseUid, selectedCode, course, price, joinMutation, paymentMutation, navigate])
 

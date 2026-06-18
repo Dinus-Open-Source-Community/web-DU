@@ -187,7 +187,7 @@ function AppSidebar({ role }: { role: UserRole }) {
         <SidebarBrand />
       </SidebarHeader>
 
-      <SidebarContent className="flex-1 gap-0 overflow-y-auto px-4 py-5 lg:px-5 lg:py-6 xl:px-4 xl:py-5">
+      <SidebarContent className="flex-1 gap-0 overflow-y-auto px-4 py-5 md:px-5 md:py-6 lg:px-4 lg:py-5">
         <SidebarGroup className="p-0">
           <SidebarGroupContent>
             <SidebarMenu className="gap-0 space-y-2.5">

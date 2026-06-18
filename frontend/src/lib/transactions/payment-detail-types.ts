@@ -9,7 +9,6 @@ export type CopyablePaymentProps = {
 
 export type InvoiceDownloadParams = {
   enrollmentUid: string | null
-  userUid: string | null
   courseUid: string | null
 }
 

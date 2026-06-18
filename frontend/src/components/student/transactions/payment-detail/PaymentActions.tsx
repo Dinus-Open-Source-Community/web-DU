@@ -2,6 +2,7 @@ import { Download, ExternalLink, History } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
 import type { PaymentInvoiceViewModel } from '@/lib/transactions/present-payment-invoice-view'
 import { ROUTES } from '@/lib/routes'
 import type { InvoiceDownloadParams } from '@/lib/transactions/payment-detail-types'
@@ -20,18 +21,19 @@ export function PaymentActions({
   const canDownload =
     invoice.paymentStatus === 'success' &&
     downloadParams.enrollmentUid &&
-    downloadParams.userUid &&
     downloadParams.courseUid
+  const checkoutHref = invoice.checkoutUrl
 
   return (
     <div className="grid gap-2.5">
-      {invoice.canContinuePayment ? (
-        <Button asChild size="lg" className="min-h-12 w-full text-sm font-bold shadow-lg shadow-primary/15">
-          <a href={invoice.checkoutUrl} target="_blank" rel="noopener noreferrer">
-            Lanjutkan pembayaran
-            <ExternalLink className="size-4" aria-hidden data-icon="inline-end" />
-          </a>
-        </Button>
+      {invoice.canContinuePayment && checkoutHref ? (
+        <SafeExternalLink
+          href={checkoutHref}
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/15 transition-colors hover:bg-primary/90"
+        >
+          Lanjutkan pembayaran
+          <ExternalLink className="size-4" aria-hidden />
+        </SafeExternalLink>
       ) : null}
 
       {canDownload ? (
@@ -44,7 +46,6 @@ export function PaymentActions({
           onClick={() =>
             downloadInvoice(
               downloadParams.enrollmentUid!,
-              downloadParams.userUid!,
               downloadParams.courseUid!,
             )
           }

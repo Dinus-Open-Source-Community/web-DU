@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { Eye, EyeOff, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { Message, resolveActionError } from '@/lib/Message'
 import { Button } from '../../components/ui/button'
 import { LogoDu } from '../../components/shared/icon'
 import { GlobalInput } from '../../components/shared/Input'
 import { PasswordStrengthIndicator } from '../../components/auth/PasswordStrength'
 import AuthLayout from '../../components/layouts/AuthLayouts'
-import { resetPasswordFormSchema } from '../../lib/validator'
+import { parseResetPasswordForm } from '../../lib/validator/auth'
 
 export function FormResetPassword() {
   const [searchParams] = useSearchParams()
@@ -18,24 +20,27 @@ export function FormResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (passwordMismatch || !password || !token) return
+    if (passwordMismatch || !password || !token || isSubmitting) return
 
-    const validation = resetPasswordFormSchema.safeParse({
-      token,
-      password,
-      confirmPassword,
-    })
-    if (!validation.success) {
-      return
+    setIsSubmitting(true)
+    try {
+      parseResetPasswordForm({
+        token,
+        password,
+        confirmPassword,
+      })
+      toast.error(Message.auth.resetPasswordUnavailable)
+    } catch (err) {
+      toast.error(resolveActionError(err instanceof Error ? err : null, Message.auth.resetPasswordInvalid))
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setSubmitted(true)
   }
 
   if (!token) {
@@ -57,25 +62,6 @@ export function FormResetPassword() {
     )
   }
 
-  if (submitted) {
-    return (
-      <AuthLayout>
-        <div className="flex flex-col items-center gap-6 text-center">
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-emerald-50">
-            <CheckCircle2 className="size-8 text-emerald-500" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Password Berhasil Direset</h1>
-            <p className="text-sm leading-relaxed text-slate-500">Password kamu telah berhasil diubah. Silakan masuk dengan password baru.</p>
-          </div>
-          <Button asChild className="h-11 rounded-xl text-sm font-bold">
-            <Link to="/auth/login">Masuk Sekarang</Link>
-          </Button>
-        </div>
-      </AuthLayout>
-    )
-  }
-
   return (
     <AuthLayout>
       <div className="flex flex-col gap-8">
@@ -85,7 +71,9 @@ export function FormResetPassword() {
             <span className="text-lg font-bold tracking-tight text-primary">Doscom University</span>
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Buat Password Baru</h1>
-          <p className="text-sm leading-relaxed text-slate-500">Password baru harus berbeda dari password sebelumnya.</p>
+          <p className="text-sm leading-relaxed text-slate-500">
+            Password baru harus berbeda dari password sebelumnya. Reset akan aktif setelah endpoint backend tersedia.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -96,6 +84,7 @@ export function FormResetPassword() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
               rightIcon={
                 <button type="button" onClick={() => setShowPassword((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
                   {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
@@ -112,6 +101,7 @@ export function FormResetPassword() {
               type={showConfirm ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={isSubmitting}
               rightIcon={
                 <button type="button" onClick={() => setShowConfirm((p) => !p)} className="text-slate-400 transition-colors hover:text-slate-600">
                   {showConfirm ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
@@ -121,7 +111,11 @@ export function FormResetPassword() {
             {passwordMismatch && <p className="mt-1.5 text-xs font-medium text-rose-500">Password tidak cocok</p>}
           </div>
 
-          <Button type="submit" className="h-12 rounded-xl text-sm font-bold" disabled={passwordMismatch || !password}>
+          <Button
+            type="submit"
+            className="h-12 rounded-xl text-sm font-bold"
+            disabled={passwordMismatch || !password || isSubmitting}
+          >
             Reset Password
           </Button>
         </form>

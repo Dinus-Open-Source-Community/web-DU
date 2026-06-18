@@ -1,5 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Film } from 'lucide-react'
+
+import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
+import { resolveSafeEmbedUrl } from '@/lib/security/safe-external-url'
 
 type LessonVideoEditorProps = {
   videoUrl: string
@@ -8,27 +11,9 @@ type LessonVideoEditorProps = {
   onDescriptionChange: (html: string) => void
 }
 
-function getEmbedUrl(url: string): string | null {
-  if (!url) return null
-  try {
-    const u = new URL(url)
-    if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
-      const videoId = u.hostname.includes('youtu.be') ? u.pathname.slice(1) : u.searchParams.get('v')
-      if (videoId) return `https://www.youtube.com/embed/${videoId}`
-    }
-    if (u.hostname.includes('vimeo.com')) {
-      const match = u.pathname.match(/\/(\d+)/)
-      if (match) return `https://player.vimeo.com/video/${match[1]}`
-    }
-  } catch {
-    // not a valid URL
-  }
-  return null
-}
-
 export function LessonVideoEditor({ videoUrl, description, onVideoUrlChange, onDescriptionChange }: LessonVideoEditorProps) {
   const [localUrl, setLocalUrl] = useState(videoUrl)
-  const embedUrl = useMemo(() => getEmbedUrl(localUrl), [localUrl])
+  const hasSafeEmbed = Boolean(localUrl.trim() && resolveSafeEmbedUrl(localUrl))
 
   const handleBlur = () => {
     onVideoUrlChange(localUrl)
@@ -48,16 +33,10 @@ export function LessonVideoEditor({ videoUrl, description, onVideoUrlChange, onD
         />
       </div>
 
-      {embedUrl ? (
+      {hasSafeEmbed ? (
         <div className="overflow-hidden rounded-xl border border-slate-200">
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-            <iframe
-              src={embedUrl}
-              title="Video preview"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
+          <div className="relative aspect-video w-full">
+            <SafeEmbedFrame embedUrl={localUrl} title="Video preview" className="absolute inset-0" />
           </div>
         </div>
       ) : localUrl ? (

@@ -27,6 +27,7 @@ import {
 type TipTapInsertMenuProps = {
   editor: Editor
   size?: ToolbarControlSize
+  onCaptureSelection?: () => void
   onInsertLink: () => void
   onInsertImage: () => void
   onInsertYoutube: () => void
@@ -35,12 +36,21 @@ type TipTapInsertMenuProps = {
 export function TipTapInsertMenu({
   editor,
   size = 'default',
+  onCaptureSelection,
   onInsertLink,
   onInsertImage,
   onInsertYoutube,
 }: TipTapInsertMenuProps) {
+  const openAfterMenuClose = (action: () => void) => {
+    window.setTimeout(action, 0)
+  }
+
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (open) onCaptureSelection?.()
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <ToolbarMenuButton
           label="Sisipkan"
@@ -52,15 +62,15 @@ export function TipTapInsertMenu({
         <DropdownMenuLabel className="text-xs font-normal text-slate-500">
           Media & elemen
         </DropdownMenuLabel>
-        <DropdownMenuItem onClick={onInsertLink}>
+        <DropdownMenuItem onSelect={() => openAfterMenuClose(onInsertLink)}>
           <Link2 className="size-4" />
           Tautan
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onInsertImage}>
+        <DropdownMenuItem onSelect={() => openAfterMenuClose(onInsertImage)}>
           <ImagePlus className="size-4" />
           Gambar
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onInsertYoutube}>
+        <DropdownMenuItem onSelect={() => openAfterMenuClose(onInsertYoutube)}>
           <Video className="size-4" />
           Video YouTube
         </DropdownMenuItem>

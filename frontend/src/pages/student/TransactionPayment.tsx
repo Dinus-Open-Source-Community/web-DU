@@ -6,6 +6,7 @@ import {
 } from '@/components/student/transactions/TransactionPaymentDetailView'
 import { LottieStatusOverlay } from '@/components/student/transactions/payment-detail/LottieStatusOverlay'
 import { TransactionPaymentNotFound } from '@/components/student/transactions/payment-detail/TransactionPaymentNotFound'
+import { TransactionPaymentForbidden } from '@/components/student/transactions/payment-detail/TransactionPaymentForbidden'
 import { PaymentDetailSkeleton } from '@/components/student/transactions/PaymentDetailSkeleton'
 import { AppNavbarProvider } from '@/components/shared/Sidebar'
 import { appPageContentCenteredClassName } from '@/lib/layout/page-layout'
@@ -27,7 +28,7 @@ export default function StudentTransactionPaymentPage() {
     [searchParams],
   )
 
-  const { data, isLoading, isError, statusTransition, clearTransition } = usePaymentDetail(paymentQuery$)
+  const { data, isLoading, isError, isForbidden, statusTransition, clearTransition } = usePaymentDetail(paymentQuery$)
 
   const detail = useMemo(() => {
     if (!data) return null
@@ -80,7 +81,11 @@ export default function StudentTransactionPaymentPage() {
 
         {!paymentQuery$ ? (
           <TransactionPaymentNotFound />
-        ) : isLoading ? <PaymentDetailSkeleton /> : isError ? (
+        ) : isLoading ? (
+          <PaymentDetailSkeleton />
+        ) : isForbidden ? (
+          <TransactionPaymentForbidden />
+        ) : isError ? (
           <TransactionPaymentNotFound />
         ) : detail ? (
           <TransactionPaymentDetailView

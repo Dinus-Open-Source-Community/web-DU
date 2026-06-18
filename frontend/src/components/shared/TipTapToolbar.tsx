@@ -127,6 +127,7 @@ export function TipTapToolbar({ variant }: TipTapToolbarProps) {
             <TipTapInsertMenu
               editor={editor}
               size={controlSize}
+              onCaptureSelection={media.captureSelectionForMediaDialog}
               onInsertLink={() => media.openMediaDialog('link')}
               onInsertImage={() => media.openMediaDialog('image')}
               onInsertYoutube={() => media.openMediaDialog('youtube')}

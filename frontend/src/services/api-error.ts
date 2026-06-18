@@ -1,7 +1,35 @@
 import { isAxiosError, type AxiosError } from 'axios'
 import type { IResponse } from '@/lib/types/api'
 
-export function getApiErrorMessage(error: unknown, fallback: string): string {
+export type AppErrorSource = AxiosError<IResponse<never>> | Error
+
+export function coerceAppError(error: AppErrorSource | null | undefined): AppErrorSource | null {
+  if (!error) return null
+  if (isAxiosError(error) || error instanceof Error) return error
+  return null
+}
+
+export function resolveAppErrorSource(error: Error | null | undefined): AppErrorSource | null {
+  if (!error) return null
+
+  const cause = error.cause
+  if (isAxiosError(cause) || cause instanceof Error) {
+    return cause
+  }
+
+  if (isAxiosError(error) || error instanceof Error) {
+    return error
+  }
+
+  return null
+}
+
+export function isForbiddenFromError(error: Error | null | undefined): boolean {
+  const source = resolveAppErrorSource(error)
+  return source ? isForbiddenApiError(source) : false
+}
+
+export function getApiErrorMessage(error: AppErrorSource, fallback: string): string {
   if (isAxiosError<IResponse<never>>(error)) {
     return (
       error.response?.data?.message ||
@@ -11,16 +39,19 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
     )
   }
 
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return fallback
+  return error.message || fallback
 }
 
-export function isNotFoundApiError(error: unknown): boolean {
+export function isNotFoundApiError(error: AppErrorSource): boolean {
   if (isAxiosError(error)) {
     return error.response?.status === 404
+  }
+  return false
+}
+
+export function isForbiddenApiError(error: AppErrorSource): boolean {
+  if (isAxiosError(error)) {
+    return error.response?.status === 403
   }
   return false
 }
@@ -44,7 +75,9 @@ export async function withApiErrorHandling<T>(
   try {
     return await operation()
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, fallbackMessage), { cause: error })
+    const source = isAxiosError(error) || error instanceof Error ? error : null
+    const message = source ? getApiErrorMessage(source, fallbackMessage) : fallbackMessage
+    throw new Error(message, { cause: error })
   }
 }
 

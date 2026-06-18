@@ -80,7 +80,7 @@ export default function Section({
         />
       </div>
 
-      <div className="flex flex-col items-start gap-10 xl:flex-row">
+      <div className="flex flex-col items-start gap-10 lg:flex-row">
         <FilterCheckboxPanel
           title="Kategori"
           options={categories}

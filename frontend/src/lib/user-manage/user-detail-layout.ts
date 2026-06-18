@@ -19,7 +19,7 @@ export const userDetailLayout = {
   fieldValue: 'mt-1 text-sm font-medium text-slate-900',
   fieldValueMuted: 'mt-1 text-sm leading-relaxed text-slate-700',
   statsGrid:
-    'grid grid-cols-2 gap-x-6 gap-y-4 border-b border-slate-200 pb-5 sm:grid-cols-3 xl:grid-cols-5',
+    'grid grid-cols-2 gap-x-6 gap-y-4 border-b border-slate-200 pb-5 sm:grid-cols-3 lg:grid-cols-5',
   statLabel: 'text-xs font-medium text-slate-500',
   statValue: 'mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900',
   list: 'flex flex-col gap-4',

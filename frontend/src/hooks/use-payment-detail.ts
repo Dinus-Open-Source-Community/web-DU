@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { paymentKeys } from '@/hooks/query-keys'
 import type { PaymentDetailQuery } from '@/lib/transactions/payment-api-types'
 import type { PaymentStatus } from '@/lib/types/common/domain'
+import { isForbiddenFromError } from '@/services/api-error'
 import { fetchTripayPaymentDetail } from '@/services/payment'
 
 const POLL_INTERVAL_MS = 5_000
@@ -41,8 +42,11 @@ export function usePaymentDetail(query: PaymentDetailQuery | null) {
 
   const clearTransition = useCallback(() => setStatusTransition(null), [])
 
+  const isForbidden = isForbiddenFromError(result.error)
+
   return {
     ...result,
+    isForbidden,
     statusTransition,
     clearTransition,
   }

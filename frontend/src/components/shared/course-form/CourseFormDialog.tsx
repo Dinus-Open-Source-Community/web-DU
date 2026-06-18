@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormE
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { Message } from '@/lib/Message'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -107,7 +108,7 @@ export function CourseFormDialog({
   const handleCoverChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file || !file.type.startsWith('image/')) {
-      toast.error('Pilih file gambar (JPG, PNG, WebP).')
+      toast.error(Message.course.coverInvalidType)
       return
     }
 

@@ -1,17 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { getApiErrorMessage } from '@/services/api-error'
 import { toast } from 'sonner'
 import type { IUpdatePasswordPayload, IUpdateProfilePayload } from '@/lib/types/user'
+import { Message, resolveApiActionError } from '@/lib/Message'
 import {
   updateUserPassword,
   updateUserProfile,
   uploadProfilePhoto,
 } from '@/services/user'
 import { authKeys } from './query-keys'
-
-function getMutationErrorMessage(error: unknown, fallback: string) {
-  return getApiErrorMessage(error, fallback)
-}
 
 export function useUpdateProfilePhoto() {
   const queryClient = useQueryClient()
@@ -20,10 +16,10 @@ export function useUpdateProfilePhoto() {
     mutationFn: uploadProfilePhoto,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: authKeys.session })
-      toast.success('Foto profil berhasil diubah')
+      toast.success(Message.profile.photoUpdated)
     },
     onError: (error) => {
-      toast.error(getMutationErrorMessage(error, 'Gagal mengubah foto profil'))
+      toast.error(resolveApiActionError(error, Message.profile.photoUpdateFailed))
     },
   })
 }
@@ -35,10 +31,10 @@ export function useUpdateProfile() {
     mutationFn: (payload: IUpdateProfilePayload) => updateUserProfile(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: authKeys.session })
-      toast.success('Profil berhasil diperbarui')
+      toast.success(Message.profile.updated)
     },
     onError: (error) => {
-      toast.error(getMutationErrorMessage(error, 'Gagal memperbarui profil'))
+      toast.error(resolveApiActionError(error, Message.profile.updateFailed))
     },
   })
 }
@@ -50,10 +46,10 @@ export function useUpdatePassword() {
     mutationFn: (payload: IUpdatePasswordPayload) => updateUserPassword(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: authKeys.session })
-      toast.success('Password berhasil diubah')
+      toast.success(Message.profile.passwordUpdated)
     },
     onError: (error) => {
-      toast.error(getMutationErrorMessage(error, 'Gagal mengubah password'))
+      toast.error(resolveApiActionError(error, Message.profile.passwordUpdateFailed))
     },
   })
 }

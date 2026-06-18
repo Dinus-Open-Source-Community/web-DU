@@ -15,7 +15,10 @@ function triggerBlobDownload(blob: Blob, filename: string) {
 
 export async function downloadProtectedFile(fileReference: string, filename: string) {
   const parsed = parseProtectedFileReference(fileReference)
-  const requestPath = parsed?.requestPath ?? fileReference
-  const blob = await fetchProtectedFileBlob(requestPath)
+  if (!parsed?.requestPath) {
+    throw new Error('Referensi file tidak valid atau tidak diizinkan')
+  }
+
+  const blob = await fetchProtectedFileBlob(parsed.requestPath)
   triggerBlobDownload(blob, filename)
 }

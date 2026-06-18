@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { lessonAssignmentKeys } from '@/hooks/query-keys'
 import type { IGradeStaffSubmissionPayload } from '@/lib/types/features/course-detail-assignments'
 import type { ILessonDetailAssignment } from '@/lib/types/lesson'
+import { Message, resolveActionError } from '@/lib/Message'
 import { gradeLessonAssignmentSubmission } from '@/services/lesson-assignment-submission'
 
 type GradeSubmissionInput = {
@@ -38,10 +39,10 @@ export function useGradeLessonSubmission() {
           queryKey: lessonAssignmentKeys.overviewSubmissions(variables.lessonUid),
         }),
       ])
-      toast.success(variables.successMessage ?? 'Penilaian disimpan')
+      toast.success(variables.successMessage ?? Message.grade.saved)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menyimpan penilaian')
+      toast.error(resolveActionError(error, Message.grade.saveFailed))
     },
   })
 }

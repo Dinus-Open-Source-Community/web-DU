@@ -2,12 +2,14 @@ import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Message, resolveActionError } from '@/lib/Message'
 import { Button } from '../../components/ui/button'
 import { GlobalInput } from '../../components/shared/Input'
 import AuthLayout from '../../components/layouts/AuthLayouts'
 import OauthButton from '../../components/shared/OauthButton'
 import { useAuth } from '../../providers/auth-provider'
-import { loginSchema, parseWithValidationMessage } from '../../lib/validator'
+import { parseLoginPayload } from '../../lib/validator/auth'
+import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -24,20 +26,12 @@ export default function LoginPage() {
 
     setIsSubmitting(true)
     try {
-      const payload = parseWithValidationMessage(loginSchema, { email, password }, 'Data login tidak valid')
+      const payload = parseLoginPayload({ email, password }, Message.common.validationFailed)
       const { redirectPath } = await signIn(payload)
-      const requestedPath = location.state?.from
-      navigate(
-        typeof requestedPath === 'string'
-          ? requestedPath
-          : requestedPath?.pathname
-            ? `${requestedPath.pathname}${requestedPath.search ?? ''}${requestedPath.hash ?? ''}`
-            : redirectPath,
-        { replace: true },
-      )
-      toast.success('Login berhasil')
+      navigate(resolveSafeRedirectPath(location.state?.from, redirectPath), { replace: true })
+      toast.success(Message.auth.loginSuccess)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Login gagal')
+      toast.error(resolveActionError(err instanceof Error ? err : null, Message.auth.loginFailed))
     } finally {
       setIsSubmitting(false)
     }

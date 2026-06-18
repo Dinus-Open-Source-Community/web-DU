@@ -1,4 +1,9 @@
 import type { SubmissionContentBlock } from '@/lib/types/course'
+import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
+import { SafeExternalImage } from '@/components/shared/SafeExternalImage'
+import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
+import { resolveSafeExternalHref, resolveSafeImageSrc } from '@/lib/security/safe-external-url'
 import '@/styles/tiptap-editor.css'
 
 type SubmissionContentViewProps = {
@@ -15,7 +20,7 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
             case 'html':
               return (
                 <div key={i} className="tiptap-editor-root tiptap-preview text-slate-800">
-                  <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: b.html }} />
+                  <SanitizedHtml html={b.html} className="ProseMirror" />
                 </div>
               )
             case 'text':
@@ -24,39 +29,57 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
                   {b.text}
                 </p>
               )
-            case 'image':
+            case 'image': {
+              const imageSrc = resolveSafeImageSrc(b.url)
+              if (!imageSrc) return null
+
               return (
                 <figure key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50">
-                  <img src={b.url} width={320} height={200} loading="lazy" alt={b.alt ?? 'Lampiran gambar'} className="max-h-72 w-full object-contain" />
+                  <SafeExternalImage
+                    src={imageSrc}
+                    width={320}
+                    height={200}
+                    loading="lazy"
+                    alt={b.alt ?? 'Lampiran gambar'}
+                    className="max-h-72 w-full object-contain"
+                  />
                 </figure>
               )
-            case 'file':
+            }
+            case 'file': {
+              const fileHref = resolveSafeExternalHref(b.url)
+              if (!fileHref) return null
+
               return (
                 <div key={i} className="space-y-1.5">
-                  <a
-                    href={b.url}
+                  <SafeExternalLink
+                    href={fileHref}
                     download={b.fileName}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-slate-50">
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-slate-50"
+                  >
                     Unduh {b.fileName}
-                  </a>
+                  </SafeExternalLink>
                   {b.description && <p className="text-xs text-slate-500">{b.description}</p>}
                 </div>
               )
+            }
             case 'videoEmbed':
               return (
                 <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-black/5">
                   <div className="aspect-video w-full">
-                    <iframe title={b.title ?? 'Video'} src={b.embedUrl} className="h-full w-full" allowFullScreen />
+                    <SafeEmbedFrame embedUrl={b.embedUrl} title={b.title ?? 'Video'} />
                   </div>
                 </div>
               )
             case 'link':
               return (
-                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer" className="break-all text-sm font-medium text-primary underline-offset-2 hover:underline">
+                <SafeExternalLink
+                  key={i}
+                  href={b.url}
+                  className="break-all text-sm font-medium text-primary underline-offset-2 hover:underline"
+                >
                   {b.label ?? b.url}
-                </a>
+                </SafeExternalLink>
               )
             case 'quiz':
               return (

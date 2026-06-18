@@ -1,6 +1,7 @@
 import { FileText, Layers3, UsersRound } from 'lucide-react'
 
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import type { ICourseDetailItem, IMentorCourseStudent } from '@/lib/types/course'
 import { cn } from '@/lib/utils'
 
@@ -42,13 +43,9 @@ export function CourseDetailOverviewTab({ course, students }: CourseDetailOvervi
             <FileText className="size-4 text-slate-400" aria-hidden />
             Tentang kursus
           </h3>
-          <div
+          <SanitizedHtml
+            html={course.description || '<p class="italic text-slate-400">Belum ada deskripsi.</p>'}
             className={cn(manageDetailLayout.body, 'prose prose-slate max-w-none')}
-            dangerouslySetInnerHTML={{
-              __html:
-                course.description ||
-                '<p class="italic text-slate-400">Belum ada deskripsi.</p>',
-            }}
           />
         </article>
       </div>

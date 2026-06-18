@@ -1,3 +1,4 @@
+import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import { cn } from '@/lib/utils'
 
 import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
@@ -19,7 +20,7 @@ export function AssignmentQuizPrompt({ index, promptHtml, theme, className }: As
       </p>
       <div className={cn('lesson-reader text-sm leading-6', isDark ? 'lesson-reader--dark text-zinc-100' : 'lesson-reader--light text-slate-900')}>
         <div className="tiptap-editor-root tiptap-preview">
-          <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: promptHtml }} />
+          <SanitizedHtml html={promptHtml} className="ProseMirror" />
         </div>
       </div>
     </div>

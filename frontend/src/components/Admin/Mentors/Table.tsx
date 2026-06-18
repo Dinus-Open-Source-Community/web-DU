@@ -84,7 +84,7 @@ export function MentorsTable({
       ) : dataMentors.length === 0 ? (
         <EmptyState icon={<UsersRound className="h-5 w-5" />} title="Belum ada mentor" description="Tidak ada mentor yang cocok dengan filter saat ini." />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {dataMentors.map((mentor) => (
             <article key={mentor.uid} className="flex h-full flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
               <div className="flex items-start gap-3">

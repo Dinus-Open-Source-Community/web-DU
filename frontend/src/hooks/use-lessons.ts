@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { IQueryParamsPayload } from '@/services/api-path'
+import { Message, resolveActionError } from '@/lib/Message'
 import {
   createLesson,
   deleteLesson,
@@ -36,10 +37,10 @@ export function useCreateLesson() {
     mutationFn: (input: CreateLessonInput) => createLesson(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: lessonKeys.all })
-      toast.success('Lesson berhasil dibuat')
+      toast.success(Message.lesson.created)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal membuat lesson')
+      toast.error(resolveActionError(error, Message.lesson.createFailed))
     },
   })
 }
@@ -52,10 +53,10 @@ export function useUpdateLesson(uid: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: lessonKeys.all })
       void queryClient.invalidateQueries({ queryKey: lessonKeys.detail(uid) })
-      toast.success('Lesson berhasil diperbarui')
+      toast.success(Message.lesson.updated)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui lesson')
+      toast.error(resolveActionError(error, Message.lesson.updateFailed))
     },
   })
 }
@@ -68,10 +69,10 @@ export function useDeleteLesson(uid: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: lessonKeys.all })
       void queryClient.invalidateQueries({ queryKey: lessonKeys.detail(uid) })
-      toast.success('Lesson berhasil dihapus')
+      toast.success(Message.lesson.deleted)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghapus lesson')
+      toast.error(resolveActionError(error, Message.lesson.deleteFailed))
     },
   })
 }

@@ -13,7 +13,7 @@ export default function Community({ stats, isLoading = false }: CommunityProps) 
           <h3 className="mb-3 text-[44px] leading-[1.3] font-semibold text-white">
             Dampak Nyata untuk Komunitas IT.
           </h3>
-          <p className="text-opacity-90 text-base font-normal text-white 2xl:text-lg">
+          <p className="text-opacity-90 text-base font-normal text-white lg:text-lg">
             Ribuan mahasiswa telah bergabung untuk meningkatkan keahlian teknis mereka. Kami bangga
             menjadi bagian dari perjalanan karier talenta digital Indonesia.
           </p>
@@ -41,7 +41,7 @@ export default function Community({ stats, isLoading = false }: CommunityProps) 
             width={650}
             height={550}
             loading="lazy"
-            className="bg-neutral-[#D9D9D9] h-full w-full rounded-[12px] object-cover 2xl:h-[550px] 2xl:w-[650px]"
+            className="bg-neutral-[#D9D9D9] h-[550px] w-[650px] max-w-full rounded-[12px] object-cover sm:h-full sm:w-full lg:h-[550px] lg:w-[650px]"
           />
           <img
             src="/pinguin.png"

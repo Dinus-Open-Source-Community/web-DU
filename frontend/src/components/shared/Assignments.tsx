@@ -224,7 +224,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
           Filter lalu buka review untuk melihat teks, file, gambar, video, dan tautan.
         </p>
 
-        <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-end">
+        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
           <div className="flex min-w-[180px] flex-1 flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tugas</label>
             <select

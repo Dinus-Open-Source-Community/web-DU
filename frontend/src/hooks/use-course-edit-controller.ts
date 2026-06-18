@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { Message, resolveActionError } from "@/lib/Message";
 import {
   addLesson,
   findModuleByLessonId,
@@ -537,11 +538,11 @@ export function useCourseEditController({
           }),
         ])
 
-        if (!opts?.silent) toast.success("Lesson berhasil disimpan.");
+        if (!opts?.silent) toast.success(Message.lesson.saved);
         return true;
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Gagal menyimpan lesson.",
+          resolveActionError(error instanceof Error ? error : null, Message.lesson.saveFailed),
         );
         throw error;
       } finally {
@@ -655,7 +656,7 @@ export function useCourseEditController({
 
     const persistedLessonUid = activeLesson.uid ?? null;
     if (!persistedLessonUid) {
-      toast.error("Simpan lesson terlebih dahulu sebelum menyimpan tugas.");
+      toast.error(Message.assignment.saveLessonFirst);
       return;
     }
 
@@ -702,12 +703,12 @@ export function useCourseEditController({
 
       toast.success(
         result.assignmentUid
-          ? "Tugas berhasil disimpan."
-          : "Tugas dihapus dari server.",
+          ? Message.assignment.saved
+          : Message.assignment.removedFromServer,
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Gagal menyimpan tugas.",
+        resolveActionError(error instanceof Error ? error : null, Message.assignment.saveFailed),
       );
       throw error;
     }
@@ -745,10 +746,10 @@ export function useCourseEditController({
 
       lastHydratedAssignmentRef.current = null;
 
-      toast.success("Tugas dihapus dari lesson ini.");
+      toast.success(Message.assignment.removedFromLesson);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Gagal menghapus tugas.",
+        resolveActionError(error instanceof Error ? error : null, Message.assignment.deleteFailed),
       );
       throw error;
     }
@@ -774,7 +775,7 @@ export function useCourseEditController({
       }
 
       setPendingNavigation(null);
-      toast.success("Perubahan disimpan. Melanjutkan navigasi.");
+      toast.success(Message.courseEdit.saveAndContinue);
     } catch {
       // Error toast already shown in save handlers.
     }
@@ -795,7 +796,7 @@ export function useCourseEditController({
 
       const courseUid = courseData.uid;
       if (!courseUid) {
-        toast.error("UID kursus tidak ditemukan.");
+        toast.error(Message.module.courseNotFound);
         return;
       }
 
@@ -831,11 +832,11 @@ export function useCourseEditController({
         }
 
         await invalidateModuleQueries(courseUid, createdModule.uid);
-        toast.success("Modul berhasil dibuat.");
+        toast.success(Message.module.created);
         proceedSelectModule(createdModule.uid!);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Gagal membuat modul.",
+          resolveActionError(error instanceof Error ? error : null, Message.module.createFailed),
         );
         throw error;
       } finally {
@@ -890,15 +891,13 @@ export function useCourseEditController({
           await invalidateModuleQueries(courseUid, moduleId);
         }
 
-        toast.success("Nama modul berhasil diperbarui.");
+        toast.success(Message.module.renamed);
       } catch (error) {
         applyOutlineUpdate((current) =>
           renameModule(current, moduleId, previousTitle),
         );
         toast.error(
-          error instanceof Error
-            ? error.message
-            : "Gagal memperbarui nama modul.",
+          resolveActionError(error instanceof Error ? error : null, Message.module.renameFailed),
         );
         throw error;
       } finally {
@@ -911,9 +910,7 @@ export function useCourseEditController({
   const handleRequestDeleteModule = useCallback(
     (moduleId: string) => {
       if (moduleHasUnsavedLessons(moduleId)) {
-        toast.error(
-          "Simpan semua perubahan lesson di modul ini sebelum menghapus.",
-        );
+        toast.error(Message.module.deleteBlockedUnsavedLessons);
         return;
       }
 
@@ -922,9 +919,7 @@ export function useCourseEditController({
         modifiedLessons.has(activeLessonId) &&
         findModuleForLesson(modules, activeLessonId)?.uid === moduleId
       ) {
-        toast.error(
-          "Simpan lesson yang sedang diedit sebelum menghapus modul.",
-        );
+        toast.error(Message.module.deleteBlockedActiveLesson);
         return;
       }
 
@@ -1001,10 +996,10 @@ export function useCourseEditController({
       }
 
       setDeleteModuleId(null);
-      toast.success("Modul berhasil dihapus.");
+      toast.success(Message.module.deleted);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Gagal menghapus modul.",
+        resolveActionError(error instanceof Error ? error : null, Message.module.deleteFailed),
       );
       throw error;
     } finally {
@@ -1084,7 +1079,7 @@ export function useCourseEditController({
               queryKey: lessonKeys.detail(lessonId),
             }),
           ]);
-          toast.success("Nama lesson diperbarui.");
+          toast.success(Message.lesson.renamed);
           return;
         }
 
@@ -1092,7 +1087,7 @@ export function useCourseEditController({
           silent: true,
           lesson: { ...currentLesson, title: trimmed },
         });
-        toast.success("Nama lesson diperbarui.");
+        toast.success(Message.lesson.renamed);
       } catch (error) {
         setModules((previous) =>
           previous.map((module) => ({
@@ -1105,7 +1100,7 @@ export function useCourseEditController({
           })),
         );
         toast.error(
-          error instanceof Error ? error.message : "Gagal memperbarui nama lesson.",
+          resolveActionError(error instanceof Error ? error : null, Message.lesson.renameFailed),
         );
         throw error;
       }
@@ -1123,9 +1118,7 @@ export function useCourseEditController({
   const handleDeleteLesson = useCallback(
     async (lessonId: string) => {
       if (activeLessonId === lessonId && modifiedLessons.has(lessonId)) {
-        toast.error(
-          "Simpan atau batalkan perubahan lesson ini sebelum menghapus.",
-        );
+        toast.error(Message.lesson.deleteBlockedUnsaved);
         return;
       }
 
@@ -1150,7 +1143,7 @@ export function useCourseEditController({
           initialLessonModuleMapRef.current.delete(lessonId);
         } catch (error) {
           toast.error(
-            error instanceof Error ? error.message : "Gagal menghapus lesson.",
+            resolveActionError(error instanceof Error ? error : null, Message.lesson.deleteFailed),
           );
           return;
         }

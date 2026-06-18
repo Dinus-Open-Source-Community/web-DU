@@ -23,6 +23,8 @@ import Typography from '@tiptap/extension-typography'
 import CharacterCount from '@tiptap/extension-character-count'
 import type { Extensions } from '@tiptap/core'
 
+import { resolveSafeExternalHref } from '@/lib/security/safe-external-url'
+
 const DEFAULT_PLACEHOLDER =
   'Tulis modul dan konten kursus di sini. Gunakan toolbar untuk format dan sisipkan video YouTube.'
 
@@ -53,6 +55,10 @@ export function createTiptapExtensions(placeholder = DEFAULT_PLACEHOLDER): Exten
         openOnClick: false,
         autolink: true,
         defaultProtocol: 'https',
+        isAllowedUri: (url, ctx) => {
+          if (resolveSafeExternalHref(url) !== null) return true
+          return ctx.defaultValidate(url)
+        },
         HTMLAttributes: {
           rel: 'noopener noreferrer',
           class: 'tiptap-link',

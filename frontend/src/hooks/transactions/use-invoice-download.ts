@@ -1,20 +1,28 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Message } from '@/lib/Message'
 import { downloadProtectedFile } from '@/lib/files/download-protected-file'
 import { parseGetInvoiceUrlQuery } from '@/lib/validator/invoice'
 import { fetchInvoiceUrl } from '@/services/invoice'
+import { useAuth } from '@/providers/auth-provider'
 
 export function useInvoiceDownload() {
+  const { user } = useAuth()
   const [isDownloading, setIsDownloading] = useState(false)
 
   const downloadInvoice = useCallback(
-    async (enrollmentUid: string, userUid: string, courseUid: string) => {
+    async (enrollmentUid: string, courseUid: string) => {
+      if (!user?.uid) {
+        toast.error(Message.invoice.loginRequired)
+        return
+      }
+
       setIsDownloading(true)
       try {
         const query = parseGetInvoiceUrlQuery({
           enrollment_id: enrollmentUid,
-          user_id: userUid,
+          user_id: user.uid,
           course_id: courseUid,
         })
         const invoiceUrl = await fetchInvoiceUrl({
@@ -24,14 +32,14 @@ export function useInvoiceDownload() {
         })
 
         await downloadProtectedFile(invoiceUrl, `invoice-${courseUid}.pdf`)
-        toast.success('Invoice berhasil diunduh')
+        toast.success(Message.invoice.downloadSuccess)
       } catch {
-        toast.error('Gagal mengunduh invoice')
+        toast.error(Message.invoice.downloadFailed)
       } finally {
         setIsDownloading(false)
       }
     },
-    [],
+    [user],
   )
 
   return { isDownloading, downloadInvoice }

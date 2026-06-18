@@ -39,6 +39,7 @@ const CourseEdit = () => {
       role="admin"
       user={sidebarUser}
       contentClassName={`${appPageContentClassName} flex-1 gap-6 py-4 lg:py-6`}
+    >
       <AdminCourseEditContent
         courseData={courseDetail.data as ICourseDetailItem}
         modules={modules}

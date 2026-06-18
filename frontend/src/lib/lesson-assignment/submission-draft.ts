@@ -1,3 +1,4 @@
+import { Message } from '@/lib/Message'
 import { toRichTextEnvelope } from '@/lib/rich-text'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
@@ -65,18 +66,18 @@ export function validateAssignmentSubmissionDraft(
     )
 
     if (unansweredCount > 0) {
-      return { ok: false, message: 'Jawab semua pertanyaan sebelum mengumpulkan.' }
+      return { ok: false, message: Message.assignment.answerAllQuizQuestions }
     }
 
     if (draft.file) {
-      return { ok: false, message: 'Unggahan file tidak diizinkan untuk kuis.' }
+      return { ok: false, message: Message.assignment.fileNotAllowedForQuiz }
     }
 
     return { ok: true, payload: { quizAnswers: answers } }
   }
 
   if (!capabilities.hasAnyMethod) {
-    return { ok: false, message: 'Tugas ini belum memiliki metode pengumpulan yang aktif.' }
+    return { ok: false, message: Message.assignment.noActiveSubmitMethod }
   }
 
   const plainText = capabilities.allowPlainText ? (draft.plainText?.trim() ?? '') : ''
@@ -89,19 +90,19 @@ export function validateAssignmentSubmissionDraft(
   const hasFile = file != null
 
   if (hasPlain && !capabilities.allowPlainText) {
-    return { ok: false, message: 'Jawaban teks biasa tidak diizinkan untuk tugas ini.' }
+    return { ok: false, message: Message.assignment.plainTextNotAllowed }
   }
 
   if (hasRich && !capabilities.allowRichText) {
-    return { ok: false, message: 'Jawaban rich text tidak diizinkan untuk tugas ini.' }
+    return { ok: false, message: Message.assignment.richTextNotAllowed }
   }
 
   if (hasFile && !capabilities.allowFile) {
-    return { ok: false, message: 'Unggahan file tidak diizinkan untuk tugas ini.' }
+    return { ok: false, message: Message.assignment.fileUploadNotAllowed }
   }
 
   if (assignment.require_file_description && hasFile && !fileDescription) {
-    return { ok: false, message: 'Deskripsi file wajib diisi.' }
+    return { ok: false, message: Message.assignment.fileDescriptionRequired }
   }
 
   const hasAllowedPlain = hasPlain && capabilities.allowPlainText
@@ -109,7 +110,7 @@ export function validateAssignmentSubmissionDraft(
   const hasAllowedFile = hasFile && capabilities.allowFile
 
   if (!hasAllowedPlain && !hasAllowedRich && !hasAllowedFile) {
-    return { ok: false, message: 'Isi jawaban atau unggah file terlebih dahulu.' }
+    return { ok: false, message: Message.assignment.answerOrFileRequired }
   }
 
   return {

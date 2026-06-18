@@ -1,3 +1,4 @@
+import { Message } from '@/lib/Message'
 import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
 import type { LessonAssignmentSubmissionRecord } from './types'
@@ -90,27 +91,27 @@ export function getAssignmentSubmissionBlockReason(
   now = new Date(),
 ): string | null {
   if (assignment.status === 'DITUTUP') {
-    return 'Tugas sudah ditutup.'
+    return Message.assignment.closed
   }
 
   if (assignment.status !== 'TERBIT') {
-    return 'Tugas belum diterbitkan.'
+    return Message.assignment.notPublished
   }
 
   if (isAssignmentDeadlinePassed(assignment, now)) {
-    return 'Batas waktu pengumpulan sudah lewat.'
+    return Message.assignment.deadlinePassed
   }
 
   if (submission && !hasRemainingSubmissionAttempts(assignment, submission)) {
-    return 'Batas percobaan pengumpulan sudah habis.'
+    return Message.assignment.attemptsExhausted
   }
 
   if (submission && !assignment.allow_resubmit) {
-    return 'Pengumpulan ulang tidak diizinkan untuk tugas ini.'
+    return Message.assignment.resubmitNotAllowed
   }
 
   if (assignment.task_type === 'text' && !hasAssignmentSubmissionMethods(assignment)) {
-    return 'Tugas ini belum memiliki metode pengumpulan yang aktif.'
+    return Message.assignment.noActiveSubmitMethod
   }
 
   return null

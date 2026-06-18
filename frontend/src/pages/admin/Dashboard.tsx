@@ -9,6 +9,7 @@ import { ChartCard } from "../../components/shared/ChartCard";
 import { useSidebarUser } from "@/hooks/use-sidebar-user";
 import { useAdminDashboard } from "@/hooks/use-admin-dashboard";
 import { CurrencyCompact } from "@/lib/func/func";
+import { gridDashboardChartsClassName } from "@/lib/layout/page-layout";
 
 const CategoryBarChart = lazy(() =>
   import("../../components/shared/BarChart").then((module) => ({
@@ -86,11 +87,11 @@ export default function Dashboard() {
         ) : (
           <KpiGrid adminKpis={kpis.data} isLoading={kpis.isLoading} />
         )}
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <section className={gridDashboardChartsClassName}>
           <ChartCard
             title="Tren Revenue Bulanan"
             subtitle="Pendapatan kotor 12 bulan terakhir"
-            className="xl:col-span-2"
+            className="lg:col-span-2"
           >
             {financialCharts.isError ? (
               <DashboardError

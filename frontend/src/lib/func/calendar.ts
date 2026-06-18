@@ -15,7 +15,7 @@ export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // Keep this fixed so aside height remains stable while content scrolls.
-export const UPCOMING_PANEL_HEIGHT_CLASS = 'xl:h-[700px]'
+export const UPCOMING_PANEL_HEIGHT_CLASS = 'lg:h-[700px]'
 
 export interface MentorCalendarEvent {
   id: string

@@ -28,14 +28,14 @@ export default function Hero() {
 
         {/* Hero Image */}
         <div className="pointer-events-none select-none">
-          <SquareIcon className="absolute right-30 bottom-0 z-10 2xl:right-100" />
+          <SquareIcon className="absolute right-30 bottom-0 z-10 lg:right-100" />
           <img
             src="/pinguin.png"
             loading="lazy"
             width={800}
             height={800}
             alt="Doscom Mascot"
-            className="absolute right-10 bottom-0 z-10 -mb-39.5 object-cover 2xl:right-80"
+            className="absolute right-10 bottom-0 z-10 -mb-39.5 object-cover lg:right-80"
           />
         </div>
 
