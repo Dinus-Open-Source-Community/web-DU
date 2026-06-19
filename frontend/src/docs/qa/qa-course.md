@@ -6,98 +6,97 @@
 
 ## Role: Student
 
-### 1. Section Kursus Populer Menampilkan Course yang Sama di Halaman Detail
+### 1. Course dengan Status DRAFT Masih Bisa Diakses Student
 
-> **Komentar QA:** *Saat student mencari course dan klik detail course, pada section kursus populer masih menampilkan course yang sedang dibuka.*
-
-**Deskripsi Bug:**
-Ketika student mencari course dan membuka halaman detail course tertentu, pada bagian "Kursus Populer" (atau section serupa) masih menampilkan course yang sedang dilihat oleh student. Seharusnya section tersebut menampilkan course lain yang berbeda dari course detail yang sedang dibuka.
-
-**Behavior Saat Ini:**
-- Student mencari "React"
-- Student mengklik salah satu course React
-- Di halaman detail course tersebut, section "Kursus Populer" masih menampilkan course yang sama
-
-**Behavior yang Diharapkan:**
-- Section "Kursus Populer" harus menampilkan course yang berbeda dari course detail yang sedang dibuka
-- Hindari duplikasi atau menampilkan course yang sedang aktif
-
----
-
-### 2. Halaman Checkout (Payment) Menampilkan Placeholder Image React dan Text "Kursus"
-
-> **Komentar QA:** *Saat masuk ke halaman checkout `http://localhost:3000/student/transactions/payment?reference=DEV-T37673378999AEEIK&merchant_ref=INV13`, pada ringkasan pesanan masih terdapat image react dan text "Kursus". Jika di-refresh baru muncul detail nama kursus dan metode pembayaran.*
+> **Komentar QA:** *Fatal — Course yang masih berstatus draft seharusnya tidak bisa diakses atau didaftarkan oleh student.*
 
 **Screenshots:**
 
-| Halaman payment sebelum refresh | Halaman payment setelah refresh |
-|--------------------------------|--------------------------------|
-| ![Payment sebelum refresh](assets/qa-course/1.png) | ![Ringkasan pesanan](assets/qa-course/2.png) |
-
-> **Catatan:** Untuk tombol "Unduh Invoice" itu dikarenkana malas untuk memberikan contoh lebih jelas.
+| Dashboard Admin/Mentor (Status Draft) | Dashboard Student (Bisa Mendaftar) |
+|--------------------------------------|-----------------------------------|
+| ![Course draft di admin](assets/qa-course/3.png) | ![Course draft di student](assets/qa-course/4.png) |
 
 **Deskripsi Bug:**
-Pada halaman checkout/payment (`/student/transactions/payment`), ringkasan pesanan menampilkan placeholder berupa image React dan text "Kursus" yang tidak informatif. Data nama kursus dan metode pembayaran baru muncul setelah halaman di-refresh manual.
+Course yang masih memiliki status "DRAFT" masih bisa diakses oleh student. Student bahkan dapat melihat course tersebut di katalog dan mendaftarnya.
 
 **Behavior Saat Ini:**
-- Student membuka halaman payment
-- Ringkasan pesanan menampilkan: image React + text "Kursus" (placeholder)
-- Data detail tidak termuat saat pertama kali load
+- Admin/Mentor membuat course dengan status "DRAFT"
+- Course tersebut tetap muncul di katalog student
+- Student bisa klik "Daftar" pada course draft
+- Course draft bisa diakses untuk pembelajaran
 
 **Behavior yang Diharapkan:**
-- Ringkasan pesanan langsung menampilkan nama kursus dan detail dengan benar saat halaman pertama kali load
-- Tidak perlu refresh manual untuk melihat data
+- Course dengan status "DRAFT" tidak boleh muncul di katalog student
+- Student tidak bisa mendaftar course yang masih draft
+- Hanya course dengan status "PUBLISH" yang boleh terlihat student
 
 **Analisis Teknis:**
-- Kemungkinan penyebab: race condition saat mengambil data transaction/order
-- Data course detail mungkin belum tersedia saat komponen di-render
-- Perlu memastikan data di-fetch dan di-resolve sebelum rendering
+- Filter status publish mungkin belum diterapkan pada endpoint list course untuk student
+- Perlu menambahkan condition: `WHERE status = 'PUBLISH'` pada query student
+- Atau tambahkan middleware/guard untuk cek status sebelum render di frontend
 
 ---
 
-### 3. Tugas dari Lesson 2 Tidak Tampil di Halaman Learning Course
+### 2. Tugas dari Lesson 2 Tidak Tampil di Halaman Learning Course
 
-> **Komentar QA:** *Saat masuk ke course untuk belajar, tugas dari lessons 2 tidak ter-show. Studi kasus: modul 1 memiliki 2 lesson, dimana satu lesson memiliki satu tugas. Pada saat membaca di `http://localhost:3000/student/learning/course/{id}`, tugas yang ter-show hanya milik lesson 1 dan untuk lesson 2 tidak tampil (hanya materinya saja yang shown).*
+> **Komentar QA:** *Fatal — Saat student membaca lesson pada module, tugas yang ditampilkan tidak semua. Pada gambar admin terlihat ada 2 tugas (lesson 1 dan lesson 2), namun saat student membaca materi hanya tugas dari lesson 1 yang muncul.*
+
+**Screenshots:**
+
+| Tab Tugas di Admin (2 Tugas) | Student di Lesson 1 | Student di Lesson 2 |
+|------------------------------|---------------------|---------------------|
+| ![Tugas admin](assets/qa-course/5.png) | ![Student lesson 1](assets/qa-course/6.png) | ![Student lesson 2](assets/qa-course/7.png) |
 
 **Deskripsi Bug:**
-Pada halaman learning course (`/student/learning/course/{id}`), hanya tugas dari lesson 1 yang ditampilkan. Tugas dari lesson 2 tidak muncul meskipun lesson tersebut memiliki tugas.
+Pada halaman `/student/learning/course/{id}`, hanya tugas dari lesson 1 yang ditampilkan. Tugas yang seharusnya ada di lesson 2 tidak muncul.
 
 **Behavior Saat Ini:**
-- Student membuka course dengan modul yang memiliki 2 lessons
-- Lesson 1 memiliki tugas → tugas tampil
-- Lesson 2 memiliki tugas → tugas TIDAK tampil (hanya materi yang shown)
+- Admin membuat 2 tugas: "Coba Tugas L1" (lesson 1) dan "Coba Tugas L2" (lesson 2)
+- Saat student membaca lesson 1 → tugas L1 muncul
+- Saat student membaca lesson 2 → tugas L2 TIDAK muncul (hanya text materi "Ae")
 
 **Behavior yang Diharapkan:**
-- Semua tugas dari setiap lesson harus tampil di halaman learning course
-- Task dari lesson 2 harus terlihat dan bisa diakses
+- Setiap lesson menampilkan tugas yang关联 dengan lesson tersebut
+- Lesson 2 harus menampilkan tugas "Coba Tugas L2"
+- Semua tugas dari semua lesson harus bisa dibaca student
 
 **Analisis Teknis:**
-- Kemungkinan penyebab: filtering atau mapping data tugas yang hanya mengambil tugas dari lesson pertama
-- Perlu dicek bagaimana data assignment di-fetch dan di-group per lesson
-- Mungkin ada issue dengan indexing atau key yang duplikat
+- Kemungkinan query tugas hanya mengambil tugas dari lesson pertama (lesson_id pertama)
+- Perlu dicek logika fetch assignment di halaman learning
+- Filter assignment berdasarkan `lesson_id` yang sesuai dengan lesson yang sedang dibaca
 
 ---
 
-### 4. Halaman Assignments Tidak Menampilkan Tugas yang Ada
+### 3. Halaman Assignments Tidak Menampilkan List Tugas
 
-> **Komentar QA:** *Untuk halaman `http://localhost:3000/student/assignments`, tugas masih tidak muncul padahal lesson 2 masih memiliki tugas dan belum expired.*
+> **Komentar QA:** *Fatal — Untuk halaman `/student/assignments`, list tugas dari semua course yang ada belum muncul sama sekali.*
+
+**Screenshots:**
+
+| Halaman Assignments |
+|--------------------|
+| ![Assignments kosong](assets/qa-course/8.png) |
 
 **Deskripsi Bug:**
-Di halaman daftar tugas student (`/student/assignments`), tugas yang seharusnya masih aktif dan belum expired tidak ditampilkan sama sekali.
+Di halaman daftar tugas student (`/student/assignments`), tidak ada tugas yang ditampilkan sama sekali. Semua card statistik menunjukkan angka 0.
 
 **Behavior Saat Ini:**
 - Student membuka halaman `/student/assignments`
-- Daftar tugas kosong/tidak ada yang tampil
-- Padahal student masih memiliki tugas aktif dari lesson 2
+- Card "Total tugas" menunjukkan 0
+- Card "Perlu aksi" menunjukkan 0
+- Card "Menunggu review" menunjukkan 0
+- Card "Mendesak" menunjukkan 0
+- Pesan: "Belum ada tugas yang bisa ditampilkan"
 
 **Behavior yang Diharapkan:**
-- Halaman assignments menampilkan semua tugas student yang masih aktif dan belum expired
-- Tugas dari lesson 2 yang belum expired harus terlihat
+- Halaman menampilkan semua tugas dari course yang telah student enroll
+- Statistik sesuai dengan jumlah tugas yang ada
+- Student bisa melihat dan mengerjakan tugas
 
 **Analisis Teknis:**
-- Kemungkinan penyebab: query assignments yang salah atau filter yang terlalu strict
-- Perlu dicek apakah API query sudah benar
-- Mungkin ada issue dengan filtering berdasarkan `course_id` atau `lesson_id`
+- Query assignments student mungkin mengembalikan array kosong
+- Perlu dicek apakah relasi antara student dan assignment sudah benar
+- Filter atau join query mungkin bermasalah
 
 ---
 
@@ -105,44 +104,32 @@ Di halaman daftar tugas student (`/student/assignments`), tugas yang seharusnya 
 
 | No | Lokasi | Deskripsi | Prioritas |
 |----|--------|-----------|-----------|
-| 1 | Halaman Detail Course | Kursus Populer menampilkan course yang sama | Medium |
-| 2 | Halaman Payment | Placeholder image/text sebelum refresh | High |
-| 3 | Halaman Learning Course | Tugas lesson 2 tidak tampil | High |
-| 4 | Halaman Assignments | Daftar tugas kosong | High |
+| 1 | Katalog Course | Course draft bisa diakses student | Fatal |
+| 2 | Halaman Learning | Tugas lesson 2 tidak tampil | Fatal |
+| 3 | Halaman Assignments | Daftar tugas kosong | Fatal |
 
 ---
 
 ## File yang Perlu Diperiksa
 
-### Bug #1 - Kursus Populer
-- Komponen yang menampilkan section kursus populer di halaman detail course
-- Logika filtering untuk menampilkan course berbeda
+### Bug #1 - Course Draft
+- Endpoint API list course untuk student
+- Filter status publish pada query
+- Middleware/guard di frontend
 
-### Bug #2 - Halaman Payment
-- Endpoint/API yang mengambil data transaction
-- Komponen ringkasan pesanan di halaman payment
-- Handling loading state
-
-### Bug #3 - Learning Course
+### Bug #2 - Tugas Lesson 2
 - `frontend/src/pages/student/learning/...`
-- Logika fetch dan render tugas per lesson
+- Logika fetch assignment per lesson
+- Mapping tugas dengan lesson_id
 
-### Bug #4 - Halaman Assignments
+### Bug #3 - Halaman Assignments
 - `frontend/src/pages/student/assignments/...`
-- Query/fetch assignments student
-- Filter dan validasi data tugas
+- Query assignments student
+- Relasi student-course-assignment
 
 ---
 
 ## Pertanyaan
 
-### 1. Tempat Meletakkan Reviews
-- Dimanakah letak user dapat meletakkan sebuah reviews?
-
----
-
-## Perintah
-
-### 1. Tampilan Balasan Review dari Admin/Mentor
-- Berikan tampilan untuk balasan review dari admin/mentor untuk review yang diberikan user
-
+### 1. Tempat Memberikan Review
+- Belum jelas dimanakah letak student dapat memberikan sebuah review untuk course yang telah didaftarkan/enroll
