@@ -1082,7 +1082,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 }
 
 // @Summary      Join a course (Student Only)
-// @Description  Allow authenticated students to enroll in a course. Creates an enrollment record.
+// @Description  Allow authenticated students to enroll in a course. Creates an enrollment record. Course must be in ACTIVE status.
 // @Tags         Course
 // @Accept       json
 // @Produce      json
@@ -1091,7 +1091,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 // @Success      201  {object}  map[string]any  "Successfully enrolled in course"
 // @Failure      400  {object}  map[string]any  "Already enrolled in this course"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Access denied: Students only"
+// @Failure      403  {object}  map[string]any  "Access denied: Students only or course not available"
 // @Failure      404  {object}  map[string]any  "Course or user not found"
 // @Failure      500  {object}  map[string]any  "Failed to join course"
 // @Router       /courses/{id}/join [post]
@@ -1131,6 +1131,17 @@ func JoinCourseFunc(c *gin.Context) {
 			"message": "Course not found",
 			"data":    nil,
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Reject enrollment for courses that are not published (DRAFT or TIDAK ACTIVE)
+	if course.Status != entity.CourseStatusActive {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Course is not available for enrollment",
+			"data":    nil,
+			"error":   nil,
 		})
 		return
 	}

@@ -7,3 +7,4 @@
 !/backend/public/uploads/avatars/*.txt
 # Environment variables
 .env
+/.playwright-mcp/
