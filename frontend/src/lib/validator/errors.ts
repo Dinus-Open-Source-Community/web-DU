@@ -4,11 +4,11 @@ export function getValidationMessage(error: z.ZodError, fallback = 'Data tidak v
   return error.issues[0]?.message ?? fallback
 }
 
-export function parseWithValidationMessage<Output, Input>(
-  schema: z.ZodType<Output, Input>,
-  data: Input,
+export function parseWithValidationMessage<S extends z.ZodType>(
+  schema: S,
+  data: z.input<S>,
   fallback?: string,
-): Output {
+): z.output<S> {
   const result = schema.safeParse(data)
 
   if (!result.success) {

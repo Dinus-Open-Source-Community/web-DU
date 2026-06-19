@@ -3,7 +3,7 @@
 Indeks temuan QA, status perbaikan, dan cara melaporkan bug baru.
 
 **Branch:** `features/frontend-sapto`  
-**Terakhir diperbarui:** 18 Juni 2026
+**Terakhir diperbarui:** 19 Juni 2026
 
 ---
 
@@ -38,13 +38,13 @@ Lihat **[qa-status-board.md](./qa-status-board.md)** untuk tabel lengkap.
 | Kategori | Open | Fixed | Verified |
 |----------|------|-------|----------|
 | Gambar / file 401 | 0 | 2 | 0 |
-| Course & student | 0 | 4 | 0 |
+| Course & student | 0 | 5 | 0 |
 | Global revalidate | 0 | 1 | 0 |
 | Student / payment (retest) | 0 | 4 | 0 |
 | Admin UX | 0 | 4 | 0 |
 | Enhancement | 0 | 4 | 0 |
 
-> Angka sinkron dengan [qa-status-board.md](./qa-status-board.md) — sesi 5, 18 Jun 2026.
+> Angka sinkron dengan [qa-status-board.md](./qa-status-board.md) — sesi 6, 19 Jun 2026.
 
 ---
 
@@ -130,7 +130,7 @@ Untuk regression test fitur yang sudah diimplementasikan, gunakan:
 | File | Isi | Role utama |
 |------|-----|------------|
 | [qa-global.md](./qa-global.md) | Revalidate otomatis setelah update data | Semua |
-| [qa-course.md](./qa-course.md) | Kursus populer, payment placeholder, assignments learning | Student |
+| [qa-course.md](./qa-course.md) | Course draft, kursus populer, payment placeholder, assignments learning | Student |
 
 > Temuan lama (gambar 401, modul duplikat, kategori, nuqs, dll.) tetap tercatat di [qa-status-board.md](./qa-status-board.md).
 

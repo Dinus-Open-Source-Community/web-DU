@@ -2,12 +2,27 @@ import { useQuery } from '@tanstack/react-query'
 
 import { studentAssignmentKeys } from '@/hooks/query-keys'
 import type { IQueryParamsPayload } from '@/services/api-path'
-import { fetchStudentMyAssignments } from '@/services/student-assignments'
+import {
+  fetchAllStudentMyAssignments,
+  fetchStudentMyAssignments,
+} from '@/services/student-assignments'
 
-export function useStudentMyAssignments(params?: IQueryParamsPayload) {
+type UseStudentMyAssignmentsOptions = {
+  fetchAll?: boolean
+}
+
+export function useStudentMyAssignments(
+  params?: IQueryParamsPayload,
+  options: UseStudentMyAssignmentsOptions = {},
+) {
+  const { fetchAll = false } = options
+
   return useQuery({
-    queryKey: studentAssignmentKeys.myList(params),
-    queryFn: () => fetchStudentMyAssignments(params),
+    queryKey: fetchAll
+      ? [...studentAssignmentKeys.myList(params), 'all']
+      : studentAssignmentKeys.myList(params),
+    queryFn: () =>
+      fetchAll ? fetchAllStudentMyAssignments() : fetchStudentMyAssignments(params),
     staleTime: 30_000,
   })
 }

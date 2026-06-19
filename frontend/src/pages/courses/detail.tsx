@@ -7,6 +7,8 @@ import GuestLayout from '@/components/layouts/GuestLayouts'
 import { LottieOverlay } from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
 import { useCourseDetailWithCategories } from '@/hooks/use-course'
+import { filterPublishedCourses } from '@/lib/course-catalog/available-courses'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { ROUTES } from '@/lib/routes'
 import { useAuth } from '@/providers/auth-provider'
 
@@ -34,7 +36,7 @@ export default function PublicCourseDetailPage() {
     return <LottieOverlay visible={isLoading} />
   }
 
-  if (!courseDetail.data) {
+  if (!courseDetail.data || !isCoursePublished(courseDetail.data)) {
     return (
       <GuestLayout>
         <main className="min-h-[100dvh] bg-[#f5f5f5]">
@@ -47,6 +49,7 @@ export default function PublicCourseDetailPage() {
   }
 
   const course = courseDetail.data
+  const publishedPopularCourses = filterPublishedCourses(popularCourses.data?.courses ?? [])
 
   const enrollButton = (
     <Button
@@ -77,7 +80,7 @@ export default function PublicCourseDetailPage() {
             backHref: ROUTES.courses,
             backLabel: 'Kembali ke kursus',
             sidebarCta: enrollButton,
-            PopularCourse: popularCourses.data?.courses ?? [],
+            PopularCourse: publishedPopularCourses,
           }}
         />
 

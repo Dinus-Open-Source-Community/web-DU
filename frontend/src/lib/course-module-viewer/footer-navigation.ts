@@ -8,6 +8,7 @@ import type { LessonDetailItem } from '@/lib/types/lesson'
 type FooterNavigationHandlers = {
   setViewerPane: (pane: CourseViewerPane) => void
   navigateToLessonEntry: (entry: LessonEntry) => void
+  navigateToLearningHome?: () => void
 }
 
 export function buildFooterPreviousAction(
@@ -79,6 +80,14 @@ export function buildFooterNextAction(
       label: 'Selanjutnya',
       title: nextEntry.lesson.title,
       onClick: () => handlers.navigateToLessonEntry(nextEntry),
+    }
+  }
+
+  if (variant === 'student' && handlers.navigateToLearningHome) {
+    return {
+      label: 'Selanjutnya',
+      title: 'Kembali ke Learning',
+      onClick: handlers.navigateToLearningHome,
     }
   }
 

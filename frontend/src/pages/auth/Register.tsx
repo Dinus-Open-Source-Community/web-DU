@@ -17,7 +17,7 @@ import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
 import { Message, resolveActionError } from '@/lib/Message'
-import { parseWithValidationMessage, registerFormSchema } from '@/lib/validator'
+import { parseRegisterFormValues } from '@/lib/validator/auth'
 import { useAuth } from '@/providers/auth-provider'
 
 export default function RegisterPage() {
@@ -40,8 +40,7 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const payload = parseWithValidationMessage(
-        registerFormSchema,
+      const payload = parseRegisterFormValues(
         { name, email, password, confirmPassword },
         Message.common.validationFailed,
       )

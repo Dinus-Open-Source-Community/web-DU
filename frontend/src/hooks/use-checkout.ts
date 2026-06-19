@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { Message } from '@/lib/Message'
 import { useCourseDetail } from '@/hooks/use-course'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { getApiErrorMessage } from '@/services/api-error'
 import { joinCourse } from '@/services/course'
 import { createPayment, fetchPaymentMethods } from '@/services/payment'
 import type { PaymentMethodItem } from '@/lib/types/checkout/payment-method'
-import { paymentKeys } from '@/hooks/query-keys'
+import { courseKeys, paymentKeys } from '@/hooks/query-keys'
 import { ROUTES } from '@/lib/routes'
 import { parseCourseUidParam } from '@/lib/validator/course-form'
 import { parseCreatePaymentRequest } from '@/lib/validator/payment'
 import type { CreatePaymentRequestValidated } from '@/lib/validator/payment.schema'
+import { useAuth } from '@/providers/auth-provider'
 
 export type PaymentMethodGroup = {
   name: string
@@ -38,6 +40,8 @@ function groupByCategory(methods: PaymentMethodItem[]): PaymentMethodGroup[] {
 export function useCheckout(courseUid: string, options: UseCheckoutOptions = {}) {
   const { enabled = true, onPaymentStarted } = options
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { refreshProfile } = useAuth()
   const [selectedCode, setSelectedCode] = useState<CreatePaymentRequestValidated['method'] | null>(null)
 
   const courseQuery = useCourseDetail(courseUid)
@@ -85,6 +89,11 @@ export function useCheckout(courseUid: string, options: UseCheckoutOptions = {})
   const submit = useCallback(async () => {
     if (!courseUid || !selectedCode || !course) return
 
+    if (!isCoursePublished(course)) {
+      toast.error('Kursus ini belum tersedia untuk pendaftaran.')
+      return
+    }
+
     const validatedCourseUid = parseCourseUidParam(courseUid)
     const paymentAmount = Math.max(1, Math.round(price))
 
@@ -107,6 +116,12 @@ export function useCheckout(courseUid: string, options: UseCheckoutOptions = {})
       })
 
       const result = await paymentMutation.mutateAsync(paymentPayload)
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: courseKeys.all }),
+        queryClient.invalidateQueries({ queryKey: paymentKeys.all }),
+        refreshProfile(),
+      ])
 
       const ref = result?.data?.reference
       const merchantRef = result?.data?.merchant_ref
@@ -135,6 +150,8 @@ export function useCheckout(courseUid: string, options: UseCheckoutOptions = {})
     paymentMutation,
     navigate,
     onPaymentStarted,
+    queryClient,
+    refreshProfile,
   ])
 
   return {

@@ -158,6 +158,7 @@ export function useCourseDetailWithCategories(uid: string) {
   const popularCourses = useCourses({
     course_category_id: categoryUid,
     per_page: 5,
+    status: 'ACTIVE',
   })
 
   const isLoading =

@@ -8,6 +8,7 @@ import { LottieOverlay } from '@/components/shared/Loader'
 import { NotFoundContent } from '@/components/shared/Error'
 import { useCourseModuleViewer } from '@/hooks/course-module-viewer/use-course-module-viewer'
 import { useCourseEditData } from '@/hooks/use-course'
+import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
 import type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 import { useAuth } from '@/providers/auth-provider'
@@ -47,6 +48,11 @@ export default function CourseViewPage() {
   }
 
   if (!courseUid || !courseWithModules) {
+    return <NotFoundContent />
+  }
+
+  const isStudent = user?.role === 'student'
+  if (isStudent && !isCoursePublished(courseWithModules)) {
     return <NotFoundContent />
   }
 

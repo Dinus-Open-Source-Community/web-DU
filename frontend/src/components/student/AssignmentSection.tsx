@@ -5,17 +5,9 @@ import { SearchForm } from '../shared/SearchForm'
 import { SegmentedFilter } from '../shared/SegemntedFilter'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
-import {
-  AlertTriangle,
-  CalendarClock,
-  ChevronRight,
-  ClipboardList,
-  Clock3,
-  FileCheck2,
-  Lock,
-} from 'lucide-react'
+import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
 import { Pagination } from '../shared/Pagination'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
 import type { StudentAssignmentFeedCategory, StudentAssignmentRowKind } from '@/lib/types/student-assignments'
 import type { DeadlineUrgency } from '@/lib/types/utils'
@@ -81,30 +73,6 @@ function TaskBadges({ row }: { row: StudentAssignmentRow }) {
   )
 }
 
-function StatPill({
-  label,
-  value,
-  icon: Icon,
-  tone,
-}: {
-  label: string
-  value: number
-  icon: typeof ClipboardList
-  tone: string
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', tone)}>
-        <Icon className="h-5 w-5" aria-hidden />
-      </span>
-      <div className="min-w-0">
-        <p className="text-2xl font-bold leading-none text-slate-900">{value}</p>
-        <p className="mt-1 truncate text-xs font-semibold text-slate-500">{label}</p>
-      </div>
-    </div>
-  )
-}
-
 function AssignmentListSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-hidden>
@@ -120,7 +88,7 @@ function AssignmentListSkeleton() {
 
 function AssignmentEmptyState({ hasAnyItems }: { hasAnyItems: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200/90 bg-slate-50/40 px-6 py-14 text-center">
+    <div className="flex flex-col items-center gap-4 px-6 py-14 text-center">
       <div className="h-28 w-28">
         <SafeLottie src="/transaction-not-found.lottie" />
       </div>
@@ -131,11 +99,29 @@ function AssignmentEmptyState({ hasAnyItems }: { hasAnyItems: boolean }) {
         <p className="text-sm leading-6 text-slate-500">
           {hasAnyItems
             ? 'Coba ubah filter atau kata kunci pencarian.'
-            : 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah Anda mengumpulkan atau mengerjakan tugas pertama.'}
+            : 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah mentor menerbitkan tugas di kursus tersebut.'}
         </p>
       </div>
     </div>
   )
+}
+
+function formatAssignmentDeadlineLabel(deadlineAt: string): string {
+  if (!deadlineAt.trim()) return 'Belum diatur'
+
+  const deadline = new Date(deadlineAt)
+  if (!isValid(deadline)) return 'Belum diatur'
+
+  return format(deadline, 'd MMM yyyy - HH:mm', { locale: id })
+}
+
+function buildAssignmentRowKey(row: StudentAssignmentRow, index: number): string {
+  return [
+    row.assignment.courseId,
+    row.lessonUid ?? 'no-lesson',
+    row.assignment.uid,
+    index,
+  ].join(':')
 }
 
 function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date }) {
@@ -148,6 +134,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   })
   const urgency = urgencyTone[row.deadlineUrgency]
   const plainDescription = row.assignment.description.replace(/<[^>]*>/g, '')
+  const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
@@ -202,9 +189,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
             <p className={cn('mt-2 text-base font-bold leading-snug', urgency.text)}>
               {formatAssignmentDeadlineRelative(row.assignment.deadlineAt, now, row.deadlineUrgency)}
             </p>
-            <p className="mt-1 text-xs tabular-nums text-slate-500">
-              {format(new Date(row.assignment.deadlineAt), 'd MMM yyyy - HH:mm', { locale: id })}
-            </p>
+            <p className="mt-1 text-xs tabular-nums text-slate-500">{deadlineLabel}</p>
           </div>
 
           {canOpen ? (
@@ -245,7 +230,6 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
     searchInput,
     onSearchInputChange,
     onSearchSubmit,
-    stats,
     paginatedRows,
     scopedCount,
     hasVisibleRows,
@@ -274,35 +258,21 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatPill label="Total tugas" value={stats.total} icon={ClipboardList} tone="bg-primary/10 text-primary" />
-        <StatPill label="Perlu aksi" value={stats.todo} icon={Clock3} tone="bg-sky-50 text-sky-700" />
-        <StatPill
-          label="Menunggu review"
-          value={stats.review}
-          icon={FileCheck2}
-          tone="bg-amber-50 text-amber-800"
+      <div className="flex flex-col gap-4">
+        <SearchForm
+          value={searchInput}
+          onChange={onSearchInputChange}
+          onSubmit={onSearchSubmit}
+          placeholder="Cari judul atau nama kursus..."
+          className="md:max-w-none"
         />
-        <StatPill label="Mendesak" value={stats.urgent} icon={AlertTriangle} tone="bg-rose-50 text-rose-700" />
-      </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-4">
-          <SearchForm
-            value={searchInput}
-            onChange={onSearchInputChange}
-            onSubmit={onSearchSubmit}
-            placeholder="Cari judul atau nama kursus..."
-            className="md:max-w-none"
-          />
-
-          <SegmentedFilter
-            items={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
-            value={category}
-            onChange={onCategoryChange}
-            variant="wrap"
-          />
-        </div>
+        <SegmentedFilter
+          items={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
+          value={category}
+          onChange={onCategoryChange}
+          variant="wrap"
+        />
       </div>
 
       {isLoading ? (
@@ -310,8 +280,12 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
       ) : hasVisibleRows ? (
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
-            {paginatedRows.map((row) => (
-              <AssignmentRowCard key={row.assignment.uid} row={row} now={now} />
+            {paginatedRows.map((row, index) => (
+              <AssignmentRowCard
+                key={buildAssignmentRowKey(row, index)}
+                row={row}
+                now={now}
+              />
             ))}
           </div>
 

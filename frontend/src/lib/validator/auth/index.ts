@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ILoginPayload, IRegisterPayload } from '@/lib/types/auth'
 import { parseWithValidationMessage } from '../errors'
 import {
   forgotPasswordFormSchema,
@@ -8,8 +9,6 @@ import {
   registerPayloadSchema,
   resetPasswordFormSchema,
   type ForgotPasswordFormValues,
-  type LoginFormValues,
-  type RegisterFormValues,
   type RegisterPayloadValues,
   type ResetPasswordFormValues,
 } from '../auth.schema'
@@ -19,21 +18,21 @@ export * from '../auth.schema'
 export function parseLoginPayload(
   payload: z.input<typeof loginSchema>,
   fallback = 'Data login tidak valid',
-): LoginFormValues {
+): ILoginPayload {
   return parseWithValidationMessage(loginSchema, payload, fallback)
 }
 
 export function parseRegisterPayload(
-  payload: RegisterPayloadValues,
+  payload: z.input<typeof registerPayloadSchema>,
   fallback = 'Data registrasi tidak valid',
-) {
+): RegisterPayloadValues {
   return parseWithValidationMessage(registerPayloadSchema, payload, fallback)
 }
 
 export function parseRegisterFormValues(
-  payload: RegisterFormValues,
+  payload: z.input<typeof registerFormSchema>,
   fallback = 'Form registrasi tidak valid',
-) {
+): IRegisterPayload {
   return parseWithValidationMessage(registerFormSchema, payload, fallback)
 }
 

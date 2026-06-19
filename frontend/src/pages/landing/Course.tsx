@@ -9,14 +9,11 @@ import { useAuth } from '@/providers/auth-provider'
 import { filterAvailableCourses } from '@/lib/course-catalog/available-courses'
 
 export default function CoursePage() {
-  const { isAuthenticated, isLoading: isAuthLoading, profile } = useAuth()
+  const { isLoading: isAuthLoading, profile } = useAuth()
   const { courses, courseCategories, isLoading } = useCombinedCourseCategoriesAndTypes()
   const availableCourses = useMemo(
-    () =>
-      isAuthenticated
-        ? filterAvailableCourses(courses?.courses ?? [], profile?.joined_courses)
-        : courses?.courses ?? [],
-    [courses?.courses, isAuthenticated, profile?.joined_courses],
+    () => filterAvailableCourses(courses?.courses ?? [], profile?.joined_courses),
+    [courses?.courses, profile?.joined_courses],
   )
 
   if (isLoading || isAuthLoading) {

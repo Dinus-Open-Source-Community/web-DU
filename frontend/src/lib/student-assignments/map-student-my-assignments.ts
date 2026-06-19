@@ -14,6 +14,13 @@ import type {
 } from '@/lib/types/student-assignments'
 import type { IUserData } from '@/lib/types/user'
 
+function coerceRecordId(value: unknown): string {
+  if (value == null) return ''
+  if (typeof value === 'string') return value.trim()
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return String(value).trim()
+}
+
 function normalizeAssignmentStatus(status: string): MentorAssignmentLifecycleStatus {
   const value = status.trim().toUpperCase()
 
@@ -21,7 +28,8 @@ function normalizeAssignmentStatus(status: string): MentorAssignmentLifecycleSta
   if (value === 'TERBIT' || value === 'PUBLISHED') return 'published'
   if (value === 'DITUTUP' || value === 'CLOSED') return 'closed'
 
-  return 'draft'
+  // Endpoint student hanya mengembalikan tugas terbit; status tak dikenal tetap ditampilkan.
+  return 'published'
 }
 
 function normalizeTaskType(taskType: string): MentorAssignmentTaskType {
@@ -46,8 +54,8 @@ function mapAssignment(raw: StudentMyAssignmentApiRaw, courseUid: string): IMent
     typeof raw.lesson_order_index === 'number' ? raw.lesson_order_index : 0
 
   return {
-    uid: String(raw.uid ?? ''),
-    courseId: String(raw.course_uid ?? courseUid),
+    uid: coerceRecordId(raw.uid),
+    courseId: coerceRecordId(raw.course_uid ?? courseUid),
     meetingNumber:
       typeof raw.meeting_number === 'number' ? raw.meeting_number : lessonOrderIndex + 1,
     title: String(raw.title ?? 'Tugas'),
@@ -106,12 +114,15 @@ function mapListItem(
   if (!assignmentRaw) return null
 
   const assignment = mapAssignment(assignmentRaw, item.course_uid)
-  if (!assignment.uid) return null
+  const assignmentUid = coerceRecordId(assignment.uid)
+  if (!assignmentUid) return null
 
-  const lessonUid = String(assignmentRaw.lesson_uid ?? '')
+  assignment.uid = assignmentUid
+
+  const lessonUid = coerceRecordId(assignmentRaw.lesson_uid)
 
   return {
-    courseTitle: item.course_title,
+    courseTitle: item.course_title.trim() || 'Kursus',
     lessonUid,
     lessonTitle: String(assignmentRaw.lesson_title ?? ''),
     moduleTitle: String(assignmentRaw.module_title ?? ''),
@@ -131,4 +142,17 @@ export function mapStudentMyAssignmentsResponse(
   return raw.assignments
     .map((item) => mapListItem(item, student))
     .filter((item): item is StudentAssignmentSectionItem => item !== null)
+}
+
+const FALLBACK_STUDENT: Pick<IUserData, 'uid' | 'name' | 'avatar_url'> = {
+  uid: '',
+  name: 'Student',
+  avatar_url: '',
+}
+
+export function mapStudentMyAssignmentsForView(
+  raw: IStudentMyAssignmentsResponse,
+  student?: Pick<IUserData, 'uid' | 'name' | 'avatar_url'> | null,
+): StudentAssignmentSectionItem[] {
+  return mapStudentMyAssignmentsResponse(raw, student ?? FALLBACK_STUDENT)
 }

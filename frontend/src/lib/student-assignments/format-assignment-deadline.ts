@@ -1,14 +1,22 @@
 import type { DeadlineUrgency } from '@/lib/types/utils'
 
+function parseDeadlineTimestamp(deadlineAt: string): number | null {
+  if (!deadlineAt.trim()) return null
+
+  const timestamp = new Date(deadlineAt).getTime()
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
 export function formatAssignmentDeadlineRelative(
   deadlineAt: string,
   now: Date,
   urgency: DeadlineUrgency,
 ): string {
-  const deadline = new Date(deadlineAt).getTime()
+  const deadline = parseDeadlineTimestamp(deadlineAt)
+  if (deadline == null) return 'Belum diatur'
+
   const current = now.getTime()
   const diff = deadline - current
-
   if (urgency === 'closed') return 'Ditutup'
 
   if (diff > 0) {

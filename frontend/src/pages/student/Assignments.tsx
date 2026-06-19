@@ -19,12 +19,14 @@ const Assignments = () => {
     items: assignmentItems,
     courseUidFilter,
   })
-  const isLoading = isAuthLoading || isAssignmentsLoading
 
   return (
     <AppSidebarProvider role="student" user={sidebarUser}>
-      <LottieOverlay visible={isLoading && !profile} message="Memuat daftar tugas..." />
-      <StudentAssignmentsSection view={assignmentListView} isLoading={isLoading && !profile} />
+      <LottieOverlay visible={isAuthLoading && !profile} message="Memuat daftar tugas..." />
+      <StudentAssignmentsSection
+        view={assignmentListView}
+        isLoading={isAuthLoading || isAssignmentsLoading}
+      />
     </AppSidebarProvider>
   )
 }

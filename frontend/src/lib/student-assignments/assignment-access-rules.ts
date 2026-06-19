@@ -3,7 +3,10 @@ import { getEffectiveAssignmentStatus, type StudentAssignmentRow } from './assig
 export function canOpenStudentAssignment(row: StudentAssignmentRow, now: Date): boolean {
   if (row.rowKind === 'pending_review') return false
 
-  const isPastDeadline = new Date(row.assignment.deadlineAt).getTime() < now.getTime()
+  const isPastDeadline = (() => {
+    const deadline = new Date(row.assignment.deadlineAt).getTime()
+    return Number.isFinite(deadline) && deadline < now.getTime()
+  })()
   if (isPastDeadline && row.rowKind === 'not_submitted') return false
 
   const effective = getEffectiveAssignmentStatus(row.assignment, now)
@@ -21,7 +24,10 @@ export function getStudentAssignmentAccessDeniedReason(row: StudentAssignmentRow
     return 'Kiriman Anda sedang ditinjau mentor. Halaman pengumpulan tidak dapat dibuka untuk sementara.'
   }
 
-  const isPastDeadline = new Date(row.assignment.deadlineAt).getTime() < now.getTime()
+  const isPastDeadline = (() => {
+    const deadline = new Date(row.assignment.deadlineAt).getTime()
+    return Number.isFinite(deadline) && deadline < now.getTime()
+  })()
   if (isPastDeadline && row.rowKind === 'not_submitted') {
     return 'Tenggat sudah lewat dan Anda belum mengumpulkan. Akses halaman tugas dinonaktifkan.'
   }

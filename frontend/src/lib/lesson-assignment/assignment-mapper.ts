@@ -16,8 +16,18 @@ function parseAssignmentBoolean(value: boolean | number | string | undefined): b
 }
 
 function normalizeAssignmentStatus(value: string | undefined): LessonAssignmentStatus {
-  if (value === 'TERBIT' || value === 'DITUTUP') return value
-  return 'DRAFT'
+  const normalized = (value ?? '').trim().toUpperCase()
+
+  if (normalized === 'DRAFT') return 'DRAFT'
+  if (normalized === 'TERBIT' || normalized === 'PUBLISHED') return 'TERBIT'
+  if (normalized === 'DITUTUP' || normalized === 'CLOSED') return 'DITUTUP'
+
+  // Detail lesson dari BE seharusnya sudah terfilter; status kosong/tak dikenal tetap ditampilkan ke student.
+  return 'TERBIT'
+}
+
+export function normalizeLessonAssignmentStatus(value: string | undefined): LessonAssignmentStatus {
+  return normalizeAssignmentStatus(value)
 }
 
 export function mapLessonDetailAssignment(raw: LessonAssignmentApiRaw | null | undefined): LessonDetailAssignment | null {

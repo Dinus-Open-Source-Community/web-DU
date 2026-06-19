@@ -8,6 +8,8 @@
 
 ### 1. Course dengan Status DRAFT Masih Bisa Diakses Student
 
+> **Status FE:** 🟢 Fixed (QA-C-18, sesi 6 — 19 Jun 2026) · **Tunggu retest QA**
+
 > **Komentar QA:** *Fatal — Course yang masih berstatus draft seharusnya tidak bisa diakses atau didaftarkan oleh student.*
 
 **Screenshots:**
@@ -39,6 +41,8 @@ Course yang masih memiliki status "DRAFT" masih bisa diakses oleh student. Stude
 
 ### 2. Tugas dari Lesson 2 Tidak Tampil di Halaman Learning Course
 
+> **Status FE:** 🟢 Fixed (QA-C-16, sesi 5 — 19 Jun 2026) · **Tunggu retest QA**
+
 > **Komentar QA:** *Fatal — Saat student membaca lesson pada module, tugas yang ditampilkan tidak semua. Pada gambar admin terlihat ada 2 tugas (lesson 1 dan lesson 2), namun saat student membaca materi hanya tugas dari lesson 1 yang muncul.*
 
 **Screenshots:**
@@ -48,26 +52,49 @@ Course yang masih memiliki status "DRAFT" masih bisa diakses oleh student. Stude
 | ![Tugas admin](assets/qa-course/5.png) | ![Student lesson 1](assets/qa-course/6.png) | ![Student lesson 2](assets/qa-course/7.png) |
 
 **Deskripsi Bug:**
-Pada halaman `/student/learning/course/{id}`, hanya tugas dari lesson 1 yang ditampilkan. Tugas yang seharusnya ada di lesson 2 tidak muncul.
+Pada halaman `/student/learning/course/{courseUid}`, hanya tugas dari lesson 1 yang ditampilkan. Tugas yang seharusnya ada di lesson 2 tidak muncul.
 
-**Behavior Saat Ini:**
+**Behavior Saat Ini (sebelum fix):**
 - Admin membuat 2 tugas: "Coba Tugas L1" (lesson 1) dan "Coba Tugas L2" (lesson 2)
 - Saat student membaca lesson 1 → tugas L1 muncul
-- Saat student membaca lesson 2 → tugas L2 TIDAK muncul (hanya text materi "Ae")
+- Saat student membaca lesson 2 → tugas L2 TIDAK muncul (hanya konten materi)
 
 **Behavior yang Diharapkan:**
-- Setiap lesson menampilkan tugas yang关联 dengan lesson tersebut
+- Setiap lesson menampilkan tugas yang terkait dengan lesson tersebut
 - Lesson 2 harus menampilkan tugas "Coba Tugas L2"
 - Semua tugas dari semua lesson harus bisa dibaca student
 
-**Analisis Teknis:**
-- Kemungkinan query tugas hanya mengambil tugas dari lesson pertama (lesson_id pertama)
-- Perlu dicek logika fetch assignment di halaman learning
-- Filter assignment berdasarkan `lesson_id` yang sesuai dengan lesson yang sedang dibaca
+**Analisis Teknis (akar masalah):**
+- Backend **sengaja mengosongkan** field `assignment` pada `GET /lessons` (list lesson per modul)
+- Data tugas lengkap **hanya ada** di `GET /lessons/:uid` (detail lesson)
+- FE sebelumnya memakai data dari list lesson sebagai fallback → lesson 2+ tidak punya info tugas
+- Normalisasi status assignment case-sensitive: status selain `'TERBIT'` / `'DITUTUP'` persis bisa di-map ke `DRAFT` dan disembunyikan dari student
+
+**Perbaikan FE (QA-C-16):**
+- Prefetch detail **semua lesson** saat student membuka halaman learning (`use-student-lesson-details.ts` → `GET /lessons/:uid` per lesson)
+- **Student tidak lagi fallback** ke data list lesson (tanpa assignment) — resolver menunggu detail lesson (`resolve-active-lesson.ts`, `allowListFallback: false`)
+- Jika detail lesson aktif belum ada di cache prefetch, fetch on-demand `GET /lessons/:uid` via `useLessonByUid` (dedupe React Query)
+- State loading lesson/tugas menunggu detail lesson selesai (`isActiveLessonDetailPending`)
+- Normalisasi status assignment case-insensitive; status kosong/tak dikenal tidak lagi di-map ke `DRAFT` (`assignment-mapper.ts`)
+
+**File terkait:**
+- `frontend/src/hooks/course-module-viewer/use-student-lesson-details.ts`
+- `frontend/src/lib/course-module-viewer/resolve-active-lesson.ts`
+- `frontend/src/hooks/course-module-viewer/use-course-module-viewer.ts`
+- `frontend/src/lib/lesson-assignment/assignment-mapper.ts`
+
+**Checklist retest QA:**
+1. Login sebagai student yang sudah enroll course dengan ≥2 lesson ber-tugas terbit
+2. Buka `/student/learning/course/{courseUid}`
+3. Pilih lesson 1 → panel tugas muncul sesuai lesson 1
+4. Pindah ke lesson 2 → panel tugas lesson 2 muncul (bukan kosong / hanya materi)
+5. Ulangi untuk lesson berikutnya jika ada
 
 ---
 
 ### 3. Halaman Assignments Tidak Menampilkan List Tugas
+
+> **Status FE:** 🟢 Fixed (QA-C-17, sesi 5) · **Tunggu retest QA**
 
 > **Komentar QA:** *Fatal — Untuk halaman `/student/assignments`, list tugas dari semua course yang ada belum muncul sama sekali.*
 
@@ -102,11 +129,11 @@ Di halaman daftar tugas student (`/student/assignments`), tidak ada tugas yang d
 
 ## Ringkasan Bug
 
-| No | Lokasi | Deskripsi | Prioritas |
-|----|--------|-----------|-----------|
-| 1 | Katalog Course | Course draft bisa diakses student | Fatal |
-| 2 | Halaman Learning | Tugas lesson 2 tidak tampil | Fatal |
-| 3 | Halaman Assignments | Daftar tugas kosong | Fatal |
+| No | Lokasi | Deskripsi | Prioritas | ID Board | Status |
+|----|--------|-----------|-----------|----------|--------|
+| 1 | Katalog Course | Course draft bisa diakses student | Fatal | QA-C-18 | 🟢 Fixed |
+| 2 | Halaman Learning | Tugas lesson 2 tidak tampil | Fatal | QA-C-16 | 🟢 Fixed |
+| 3 | Halaman Assignments | Daftar tugas kosong | Fatal | QA-C-17 | 🟢 Fixed |
 
 ---
 

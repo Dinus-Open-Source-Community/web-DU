@@ -3,7 +3,7 @@
 Papan status bug dan enhancement — **living document**.  
 Update kolom **Status** dan **Owner** setiap ada progress.
 
-**Terakhir diperbarui:** 18 Juni 2026 (sesi 5) · **Branch:** `features/frontend-sapto`
+**Terakhir diperbarui:** 19 Juni 2026 (sesi 6) · **Branch:** `features/frontend-sapto`
 
 ---
 
@@ -41,6 +41,7 @@ Update kolom **Status** dan **Owner** setiap ada progress.
 | QA-C-15 | Payment ringkasan placeholder sebelum refresh | Student | FE | 🟢 Fixed | `present-transaction-payment-detail.ts`, `TransactionPayment.tsx` | Fallback `orderItems` + `refreshProfile` saat mount |
 | QA-C-16 | Tugas lesson 2 tidak tampil di learning | Student | FE | 🟢 Fixed | `assignment-mapper.ts`, `use-course-module-viewer.ts` | Normalisasi status case-insensitive + refetch lesson detail per lesson |
 | QA-C-17 | Halaman assignments kosong | Student | FE | 🟢 Fixed | `use-student-assignment-items.ts`, `map-student-my-assignments.ts` | Tampilkan data API tanpa tunggu profile; default status `TERBIT` |
+| QA-C-18 | Course draft bisa diakses & didaftarkan student | Student | FE | 🟢 Fixed | `available-courses.ts`, `detail.tsx`, `view.tsx`, `use-checkout.ts`, `Course.tsx` | Filter `isCoursePublished()` di katalog; guard detail/learning/checkout |
 | QA-G-01 | Revalidate otomatis setelah update data | Semua | FE | 🟢 Fixed | `query-providers.tsx`, `use-checkout.ts` | `refetchOnMount: true` + invalidate auth/payment/assignments setelah checkout |
 | QA-M-01 | Sidebar tidak aktif di kelola kursus | Mentor | FE | 🟢 Fixed | `Sidebar.tsx` | Prefix match pada `SidebarNavItem` |
 | QA-M-02 | Legacy assignments masih mock | Mentor | FE | 🟢 Fixed | `mentor/CourseAssignments.tsx` | Redirect ke `?tab=assignments` |
@@ -95,12 +96,12 @@ Update kolom **Status** dan **Owner** setiap ada progress.
 | Prioritas | Total | Open | Fixed | Verified |
 |-----------|-------|------|-------|----------|
 | P0 | 2 | 0 | 2 | 0 |
-| P1 | 14 | 0 | 14 | 0 |
+| P1 | 15 | 0 | 15 | 0 |
 | Retest | 4 | 0 | 4 | 0 |
 | P2 | 4 | 0 | 4 | 0 |
 | P3 | 4 | 0 | 4 | 0 |
 
-**Total item:** 28 · **Open:** 0 · **Fixed (tunggu retest):** 28 · **Verified:** 0
+**Total item:** 29 · **Open:** 0 · **Fixed (tunggu retest):** 29 · **Verified:** 0
 
 ---
 
@@ -113,6 +114,18 @@ Update kolom **Status** dan **Owner** setiap ada progress.
 | 17 Jun 2026 | Sesi 3: QA-ADM-01/02, REQ-01/02/03, QA-C-09 filter pending → 🟢 Fixed; build ✅ |
 | 18 Jun 2026 | Sesi 4: temuan baru dari [qa-course.md](./qa-course.md) & [qa-global.md](./qa-global.md) — QA-C-14/15/16/17, QA-G-01, REQ-04 → 🔴 Open; QA-C-10/13 regresi |
 | 18 Jun 2026 | Sesi 5: QA-C-10/13/14/15/16/17, QA-G-01, REQ-04 → 🟢 Fixed; build ✅ |
+| 19 Jun 2026 | Sesi 6: sinkron [qa-course.md](./qa-course.md) §1 → **QA-C-18** (course draft student) → 🟢 Fixed; build ✅ |
+
+---
+
+## Mapping Dokumen QA → ID Board
+
+| Dokumen | § / No | ID Board | Status |
+|---------|--------|----------|--------|
+| [qa-course.md](./qa-course.md) | §1 Course draft student | QA-C-18 | 🟢 Fixed |
+| [qa-course.md](./qa-course.md) | §2 Tugas lesson 2 learning | QA-C-16 | 🟢 Fixed |
+| [qa-course.md](./qa-course.md) | §3 Halaman assignments kosong | QA-C-17 | 🟢 Fixed |
+| [qa-global.md](./qa-global.md) | §1 Revalidate otomatis | QA-G-01 | 🟢 Fixed |
 
 ---
 
@@ -131,7 +144,7 @@ Update kolom **Status** dan **Owner** setiap ada progress.
 | Butuh | Dokumen |
 |-------|---------|
 | Bug global (revalidate) | [qa-global.md](./qa-global.md) |
-| Bug course student (baru) | [qa-course.md](./qa-course.md) |
+| Bug course student (draft, learning, assignments) | [qa-course.md](./qa-course.md) |
 | File mana yang diubah | [files-to-revise.md](../progress/files-to-revise.md) |
 | Prioritas & arsitektur fix gambar | [revision-guide.md](../progress/revision-guide.md) |
 | Skenario uji regression | [qa-checklist.md](../progress/qa-checklist.md) |

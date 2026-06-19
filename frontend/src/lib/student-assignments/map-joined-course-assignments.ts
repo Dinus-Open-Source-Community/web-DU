@@ -16,7 +16,11 @@ function normalizeAssignmentStatus(status: string): MentorAssignmentLifecycleSta
   if (value === 'TERBIT' || value === 'PUBLISHED') return 'published'
   if (value === 'DITUTUP' || value === 'CLOSED') return 'closed'
 
-  return 'draft'
+  return 'published'
+}
+
+function hasSubmission(entry: JoinedCourseAssignmentEntry): boolean {
+  return Boolean(entry.submission_uid?.trim() && entry.submitted_at?.trim())
 }
 
 function normalizeTaskType(taskType: string): MentorAssignmentTaskType {
@@ -85,7 +89,7 @@ function mapCourseAssignmentEntry(
     lessonTitle: entry.lesson.title,
     moduleTitle: entry.module.title,
     assignment: mapAssignment(entry, courseUid),
-    latestSubmission: mapSubmission(entry, courseUid, student),
+    latestSubmission: hasSubmission(entry) ? mapSubmission(entry, courseUid, student) : null,
   }
 }
 
@@ -101,6 +105,8 @@ export function mapJoinedCourseAssignments(profile: IUserData | null | undefined
   return (profile.joined_courses ?? []).flatMap((course) => {
     const assignments = (course.assignments ?? []) as JoinedCourseAssignmentEntry[]
 
-    return assignments.map((entry) => mapCourseAssignmentEntry(entry, course.title, course.uid, student))
+    return assignments
+      .filter((entry) => normalizeAssignmentStatus(entry.assignment.status) !== 'draft')
+      .map((entry) => mapCourseAssignmentEntry(entry, course.title, course.uid, student))
   })
 }

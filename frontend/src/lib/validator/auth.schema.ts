@@ -51,8 +51,8 @@ export const oauthCallbackParamsSchema = z
     message: 'Token OAuth atau error wajib ada',
   })
 
-export type LoginFormValues = z.infer<typeof loginSchema>
-export type RegisterPayloadValues = z.infer<typeof registerPayloadSchema>
-export type RegisterFormValues = z.infer<typeof registerFormSchema>
-export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordFormSchema>
-export type ResetPasswordFormValues = z.infer<typeof resetPasswordFormSchema>
+export type LoginFormValues = z.output<typeof loginSchema>
+export type RegisterPayloadValues = z.output<typeof registerPayloadSchema>
+export type RegisterFormValues = z.output<typeof registerFormSchema>
+export type ForgotPasswordFormValues = z.output<typeof forgotPasswordFormSchema>
+export type ResetPasswordFormValues = z.output<typeof resetPasswordFormSchema>
