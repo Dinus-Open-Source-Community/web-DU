@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { BookOpen, Check, Loader2 } from 'lucide-react'
+import { BookOpen, Check, CheckCircle2, Loader2 } from 'lucide-react'
 
 import { useCheckout, type PaymentMethodGroup } from '@/hooks/use-checkout'
 import {
@@ -10,10 +10,8 @@ import {
   type CheckoutCourseViewModel,
   type PaymentMethodCardViewModel,
 } from '@/lib/checkout/present-checkout-view'
-import { CHECKOUT_LOTTIE_SRC } from '@/lib/transactions/payment-motion'
 import type { PaymentMethodItem } from '@/lib/types/checkout/payment-method'
 import type { CreatePaymentRequestValidated } from '@/lib/validator/payment.schema'
-import { SafeLottie } from '@/components/ui/lottie'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -237,13 +235,8 @@ export function CheckoutDialog({ open, onOpenChange, courseUid }: CheckoutDialog
         className="flex max-h-[min(92dvh,820px)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
       >
         <div className="flex flex-col items-center px-6 pt-6 pb-5 text-center">
-          <div className="mx-auto flex h-44 w-44 shrink-0 items-center justify-center sm:h-48 sm:w-48 [&_canvas]:h-full [&_canvas]:w-full [&_svg]:h-full [&_svg]:w-full">
-            <SafeLottie
-              src={CHECKOUT_LOTTIE_SRC}
-              className="h-full w-full"
-              loop
-              autoplay
-            />
+          <div className="mx-auto flex h-44 w-44 shrink-0 items-center justify-center rounded-full bg-emerald-50 sm:h-48 sm:w-48">
+            <CheckCircle2 className="h-24 w-24 text-emerald-500 sm:h-28 sm:w-28" aria-hidden />
           </div>
           <DialogTitle className="mt-3 text-lg font-bold tracking-tight text-slate-900 sm:text-xl">
             Selesaikan Pendaftaran

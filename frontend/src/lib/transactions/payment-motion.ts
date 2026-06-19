@@ -8,8 +8,6 @@ export const PAYMENT_LOTTIE_ASSETS: Record<PaymentMotionStatus, string> = {
   failed: '/Payment-Failed.lottie',
 }
 
-export const CHECKOUT_LOTTIE_SRC = '/Payment-Successful.lottie'
-
 export const PAYMENT_MOTION_DURATION_MS = 1000
 
 export const PAYMENT_MOTION_MIN_LOADER_MS = 900

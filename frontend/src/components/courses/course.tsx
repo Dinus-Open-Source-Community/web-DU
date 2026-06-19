@@ -4,7 +4,7 @@ import CardCourse from '../shared/CardCourse'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
 import { LogoDuBig } from '../shared/icon'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { CourseCategoryFilter } from '../shared/CourseCategoryFilter'
 import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 
 const filter = [{ name: 'All' }, { name: 'Free' }, { name: 'Premium' }, { name: 'Ongoing Event' }]
@@ -13,8 +13,6 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
   const [isActiveFilter, setIsActiveFilter] = useState<string>('All')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
-
-  const selectedCategoryValue = selectedCategories.length === 1 ? selectedCategories[0] : 'all'
 
   const filteredCourses = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase()
@@ -36,12 +34,8 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
     })
   }, [Data, isActiveFilter, searchQuery, selectedCategories])
 
-  const handleCategorySelect = (value: string) => {
-    setSelectedCategories(value === 'all' ? [] : [value])
-  }
-
-  const handleCategoryToggle = (categoryUid: string) => {
-    setSelectedCategories((current) => (current.includes(categoryUid) ? [] : [categoryUid]))
+  const handleCategoryChange = (value: string[]) => {
+    setSelectedCategories(value)
   }
 
   return (
@@ -79,50 +73,12 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
 
         {/*course and side filtering*/}
         <div className="mt-8 flex h-full w-full flex-col gap-6 lg:mt-12 lg:flex-row lg:items-start">
-          {/*Mobile Category Filter*/}
-          <div className="rounded-xl bg-white p-5 lg:hidden">
-            <label htmlFor="course-category-filter" className="mb-3 block text-xl font-semibold tracking-tight text-black">
-              Categories
-            </label>
-            <Select value={selectedCategoryValue} onValueChange={handleCategorySelect}>
-              <SelectTrigger id="course-category-filter" className="w-full rounded-sm" aria-label="Categories">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {Categories.map((category) => (
-                    <SelectItem key={category.uid} value={category.uid}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+          <CourseCategoryFilter
+            categories={Categories}
+            selected={selectedCategories}
+            onChange={handleCategoryChange}
+          />
 
-          {/*Side Filter*/}
-          <div className="hidden h-full w-full rounded-xl bg-white p-5 sm:p-6 lg:sticky lg:top-24 lg:block lg:max-w-[280px] lg:shrink-0 lg:p-8">
-            <h2 className="mb-5 text-2xl font-semibold tracking-tight text-black sm:mb-7 sm:text-[28px]">Categories</h2>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-5">
-              {Categories.map((category) => (
-                <label key={category.uid} className="group flex min-h-11 items-center gap-4">
-                  <div className="relative flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center">
-                    <input type="checkbox" checked={selectedCategories.includes(category.uid)} onChange={() => handleCategoryToggle(category.uid)} className="peer sr-only" />
-
-                    <div className="absolute inset-0 rounded-[6px] border-[2.5px] border-black bg-transparent"></div>
-
-                    <svg className="absolute opacity-0 transition-opacity peer-checked:opacity-100" width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1.5 5.5L5 9L12.5 1.5" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-
-                  <span className="text-base leading-[1.3] font-normal">{category.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
           {/*Card Course*/}
           <div className="relative h-full w-full">
             <h5 className="align-middle text-2xl leading-[1.3] font-semibold">Available Course</h5>
