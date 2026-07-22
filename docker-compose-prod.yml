@@ -10,20 +10,6 @@ networks:
 # SERVICES
 services:
   frontend:
-<<<<<<< Updated upstream
-    build:
-      context: ./frontend
-      target: dev
-    ports:
-      - "3000:3000"
-    environment:
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-=======
     build: ./frontend
     expose:
       - "3000"
@@ -62,45 +48,10 @@ services:
       - "traefik.http.routers.du-fe.service=du-fe-svc"
       - "traefik.http.routers.du-fe-sec.service=du-fe-svc"
       - "traefik.http.services.du-fe-svc.loadbalancer.server.port=3000"
->>>>>>> Stashed changes
 
   backend:
     build: ./backend
     ports:
-<<<<<<< Updated upstream
-      - "8080:8080"
-    environment:
-      - BASE_URL=${BASE_URL}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_SSLMODE=${DB_SSLMODE}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - AES_KEY=${AES_KEY}
-      - HMAC_KEY=${HMAC_KEY}
-      - TRIPAY_API_KEY=${TRIPAY_API_KEY}
-      - TRIPAY_PRIVATE_KEY=${TRIPAY_PRIVATE_KEY}
-      - TRIPAY_MERCHANT_CODE=${TRIPAY_MERCHANT_CODE}
-      - TRIPAY_BASE_URL=${TRIPAY_BASE_URL}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_USE_SSL=${MINIO_USE_SSL}
-      - MINIO_BUCKET_AVATARS=${MINIO_BUCKET_AVATARS}
-      - MINIO_BUCKET_COURSES=${MINIO_BUCKET_COURSES}
-      - MINIO_BUCKET_INVOICES=${MINIO_BUCKET_INVOICES}
-      - MINIO_BUCKET_ASSIGNMENTS=${MINIO_BUCKET_ASSIGNMENTS}
-      - SEED=${SEED} # HAPUS SAJA PADA SAAT PRODUCTION
-    depends_on:
-      db:
-        condition: service_healthy
-      minio:
-        condition: service_started
-=======
       - "8080:8080" # Biarkan ports jika butuh diakses via IP langsung untuk testing
     env_file:
       - ./backend/.env
@@ -112,7 +63,6 @@ services:
     networks:
       - proxy
       - du-network
->>>>>>> Stashed changes
 
   db:
     image: postgres:15
@@ -122,16 +72,8 @@ services:
       - "5430:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-<<<<<<< Updated upstream
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-=======
     networks:
       - du-network
->>>>>>> Stashed changes
 
   adminer:
     image: adminer
