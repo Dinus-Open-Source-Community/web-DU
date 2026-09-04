@@ -697,6 +697,77 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/sso/callback": {
+            "get": {
+                "description": "Menerima redirect balik dari SSO, menukar code dengan token, membuat/memperbarui user lokal, menerbitkan JWT lokal 24 jam, lalu redirect ke frontend (token pada URL fragment).",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Callback DOSCOM SSO (Public)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization code dari SSO",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "State anti-CSRF yang dikirim saat login",
+                        "name": "state",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirect ke frontend (token pada URL fragment, error pada query ?error=)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sso/login": {
+            "get": {
+                "description": "Titik awal alur OAuth2 Authorization Code + PKCE. Redirect browser ke halaman login SSO. Parameter ?next= opsional menentukan tujuan akhir di frontend.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login via DOSCOM SSO (Public)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tujuan akhir di frontend (path relatif atau URL penuh yang origin-nya diizinkan)",
+                        "name": "next",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirect ke halaman login SSO",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Gagal membuat state/PKCE",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/avatar": {
             "post": {
                 "security": [
@@ -1963,7 +2034,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Allow authenticated students to enroll in a course. Creates an enrollment record.",
+                "description": "Allow authenticated students to enroll in a course. Creates an enrollment record. Course must be in ACTIVE status.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2006,7 +2077,7 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Access denied: Students only",
+                        "description": "Access denied: Students only or course not available",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2768,150 +2839,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to retrieve students",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/files/{bucket}/batch": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches multiple objects from the same MinIO bucket, decrypts each one, and returns them as base64-encoded file data in JSON. Intended for displaying images and other inline content on the web (e.g. img src via data URLs). Requires Bearer JWT; all authenticated roles are allowed. Maximum 50 objects per request.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "File"
-                ],
-                "summary": "Fetch multiple encrypted MinIO files for web display (All Roles)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "MinIO bucket name",
-                        "name": "bucket",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Object keys to fetch",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/service.multiFileBatchRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "JSON with files array (object, content_type, data as base64)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid parameters",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized — missing or invalid token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "One or more objects not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to decrypt or read objects",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/files/{bucket}/{object}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Decrypts objects stored as ciphertext in MinIO and streams plaintext bytes to the client with the original content type. Replaces direct MinIO access for file URLs (avatars, course covers, lesson assignment attachments, invoice PDFs, etc.). Requires Bearer JWT; all authenticated roles are allowed. Backward compatible with legacy plaintext objects.",
-                "produces": [
-                    "application/octet-stream"
-                ],
-                "tags": [
-                    "File"
-                ],
-                "summary": "Serve encrypted MinIO file (All Roles)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "MinIO bucket name",
-                        "name": "bucket",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Object key (may contain slashes)",
-                        "name": "object",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File bytes (decrypted when stored encrypted)",
-                        "schema": {
-                            "type": "file"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid parameters",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized — missing or invalid token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Object not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to decrypt or read object",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -4925,62 +4852,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/login": {
-            "post": {
-                "description": "Authenticate user with email and password, returns JWT token valid for 24 hours",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "User login (Public)",
-                "parameters": [
-                    {
-                        "description": "Login credentials (email and password)",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.LoginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User logged in successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid credentials",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to generate token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/mentor/all": {
             "get": {
                 "description": "Public endpoint to retrieve all mentor users with teaching summaries. Optional ` + "`" + `name` + "`" + ` filters by mentor display name (decrypted, case-insensitive, in-memory).",
@@ -5808,62 +5679,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Payment not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/register": {
-            "post": {
-                "description": "Register a new user with name, email, and password. Returns JWT token on success.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Register new user (Public)",
-                "parameters": [
-                    {
-                        "description": "Register payload",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User registered successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "409": {
-                        "description": "Email already registered",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -6909,23 +6724,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "StrongPassword123"
-                }
-            }
-        },
         "dto.OrderItem": {
             "type": "object",
             "required": [
@@ -6991,28 +6789,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "User DU"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "StrongPassword123"
                 }
             }
         },
@@ -7086,17 +6862,6 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "mentor"
-                }
-            }
-        },
-        "service.multiFileBatchRequest": {
-            "type": "object",
-            "properties": {
-                "objects": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         }

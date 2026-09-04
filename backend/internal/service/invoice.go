@@ -184,19 +184,19 @@ func CreateAndUploadInvoice(enrollment *entity.Enrollment) (string, string, erro
 
 // uploadInvoiceWithCustomFilename mengunggah invoice dengan nama file spesifik
 // (bukan UUID acak). Dipakai supaya invoice dari enrollment yang sama selalu
-// menulis ke object key yang deterministik. Konten di-enkripsi sama seperti
-// upload file lainnya melalui PutEncryptedObject sebelum disimpan ke MinIO.
+// menulis ke object key yang deterministik. Konten disimpan apa adanya
+// (tanpa enkripsi) melalui PutObject.
 func uploadInvoiceWithCustomFilename(reader io.Reader, _ int64, bucket, filename string) (string, error) {
 	if utils.MinioClient == nil {
 		return "", fmt.Errorf("MinIO client is not initialized")
 	}
 
-	plaintext, err := io.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return "", fmt.Errorf("failed to read invoice bytes: %w", err)
 	}
 
-	if err := utils.PutEncryptedObject(context.Background(), bucket, filename, plaintext, "application/pdf", filename); err != nil {
+	if err := utils.PutObject(context.Background(), bucket, filename, data, "application/pdf", filename); err != nil {
 		return "", err
 	}
 

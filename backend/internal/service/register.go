@@ -13,17 +13,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// @Summary      Register new user (Public)
-// @Description  Register a new user with name, email, and password. Returns JWT token on success.
-// @Tags         Auth
-// @Accept       application/json
-// @Produce      json
-// @Param        request  body  dto.RegisterRequest  true  "Register payload"
-// @Success      200  {object}  map[string]any  "User registered successfully"
-// @Failure      400  {object}  map[string]any  "Invalid request data"
-// @Failure      409  {object}  map[string]any  "Email already registered"
-// @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /register [post]
 func PostRegisterFunc(c *gin.Context) {
 	var req dto.RegisterRequest // <-- KITA GUNAKAN MODEL YANG SUDAH DIPERBAIKI
 

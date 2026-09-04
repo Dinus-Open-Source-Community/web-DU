@@ -13,17 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// @Summary      User login (Public)
-// @Description  Authenticate user with email and password, returns JWT token valid for 24 hours
-// @Tags         Auth
-// @Accept       json
-// @Produce      json
-// @Param        request  body      dto.LoginRequest  true  "Login credentials (email and password)"
-// @Success      200  {object}  map[string]any  "User logged in successfully"
-// @Failure      400  {object}  map[string]any  "Invalid request data"
-// @Failure      401  {object}  map[string]any  "Invalid credentials"
-// @Failure      500  {object}  map[string]any  "Failed to generate token"
-// @Router       /login [post]
 func PostLoginFunc(c *gin.Context) {
 	var req dto.LoginRequest
 

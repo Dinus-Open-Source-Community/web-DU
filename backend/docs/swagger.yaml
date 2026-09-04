@@ -327,18 +327,6 @@ definitions:
       video_url:
         type: string
     type: object
-  dto.LoginRequest:
-    properties:
-      email:
-        example: user@example.com
-        type: string
-      password:
-        example: StrongPassword123
-        type: string
-    required:
-    - email
-    - password
-    type: object
   dto.OrderItem:
     properties:
       image_url:
@@ -383,22 +371,6 @@ definitions:
         type: array
       title:
         type: string
-    type: object
-  dto.RegisterRequest:
-    properties:
-      email:
-        example: user@example.com
-        type: string
-      name:
-        example: User DU
-        type: string
-      password:
-        example: StrongPassword123
-        type: string
-    required:
-    - email
-    - name
-    - password
     type: object
   dto.UpdateClassTypeRequest:
     properties:
@@ -449,13 +421,6 @@ definitions:
         type: string
     required:
     - role
-    type: object
-  service.multiFileBatchRequest:
-    properties:
-      objects:
-        items:
-          type: string
-        type: array
     type: object
 host: localhost:8080
 info:
@@ -917,6 +882,59 @@ paths:
       tags:
       - Admin
       - Admin
+  /auth/sso/callback:
+    get:
+      description: Menerima redirect balik dari SSO, menukar code dengan token, membuat/memperbarui
+        user lokal, menerbitkan JWT lokal 24 jam, lalu redirect ke frontend (token
+        pada URL fragment).
+      parameters:
+      - description: Authorization code dari SSO
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: State anti-CSRF yang dikirim saat login
+        in: query
+        name: state
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "307":
+          description: Redirect ke frontend (token pada URL fragment, error pada query
+            ?error=)
+          schema:
+            type: string
+      summary: Callback DOSCOM SSO (Public)
+      tags:
+      - Auth
+  /auth/sso/login:
+    get:
+      description: Titik awal alur OAuth2 Authorization Code + PKCE. Redirect browser
+        ke halaman login SSO. Parameter ?next= opsional menentukan tujuan akhir di
+        frontend.
+      parameters:
+      - description: Tujuan akhir di frontend (path relatif atau URL penuh yang origin-nya
+          diizinkan)
+        in: query
+        name: next
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "307":
+          description: Redirect ke halaman login SSO
+          schema:
+            type: string
+        "500":
+          description: Gagal membuat state/PKCE
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login via DOSCOM SSO (Public)
+      tags:
+      - Auth
   /avatar:
     post:
       consumes:
@@ -1781,7 +1799,7 @@ paths:
       consumes:
       - application/json
       description: Allow authenticated students to enroll in a course. Creates an
-        enrollment record.
+        enrollment record. Course must be in ACTIVE status.
       parameters:
       - description: Course UID to enroll in
         in: path
@@ -1807,7 +1825,7 @@ paths:
             additionalProperties: true
             type: object
         "403":
-          description: 'Access denied: Students only'
+          description: 'Access denied: Students only or course not available'
           schema:
             additionalProperties: true
             type: object
@@ -2333,109 +2351,6 @@ paths:
       summary: Get all enrolled students in a course (Public)
       tags:
       - Course
-  /files/{bucket}/{object}:
-    get:
-      description: Decrypts objects stored as ciphertext in MinIO and streams plaintext
-        bytes to the client with the original content type. Replaces direct MinIO
-        access for file URLs (avatars, course covers, lesson assignment attachments,
-        invoice PDFs, etc.). Requires Bearer JWT; all authenticated roles are allowed.
-        Backward compatible with legacy plaintext objects.
-      parameters:
-      - description: MinIO bucket name
-        in: path
-        name: bucket
-        required: true
-        type: string
-      - description: Object key (may contain slashes)
-        in: path
-        name: object
-        required: true
-        type: string
-      produces:
-      - application/octet-stream
-      responses:
-        "200":
-          description: File bytes (decrypted when stored encrypted)
-          schema:
-            type: file
-        "400":
-          description: Invalid parameters
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized — missing or invalid token
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Object not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to decrypt or read object
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Serve encrypted MinIO file (All Roles)
-      tags:
-      - File
-  /files/{bucket}/batch:
-    post:
-      consumes:
-      - application/json
-      description: Fetches multiple objects from the same MinIO bucket, decrypts each
-        one, and returns them as base64-encoded file data in JSON. Intended for displaying
-        images and other inline content on the web (e.g. img src via data URLs). Requires
-        Bearer JWT; all authenticated roles are allowed. Maximum 50 objects per request.
-      parameters:
-      - description: MinIO bucket name
-        in: path
-        name: bucket
-        required: true
-        type: string
-      - description: Object keys to fetch
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.multiFileBatchRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: JSON with files array (object, content_type, data as base64)
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid parameters
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized — missing or invalid token
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: One or more objects not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to decrypt or read objects
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Fetch multiple encrypted MinIO files for web display (All Roles)
-      tags:
-      - File
   /invoices/{enrollment_id}:
     get:
       consumes:
@@ -3802,45 +3717,6 @@ paths:
       summary: Get my lesson reading history (Enrolled Student)
       tags:
       - Lesson Reading
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticate user with email and password, returns JWT token valid
-        for 24 hours
-      parameters:
-      - description: Login credentials (email and password)
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User logged in successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Invalid credentials
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to generate token
-          schema:
-            additionalProperties: true
-            type: object
-      summary: User login (Public)
-      tags:
-      - Auth
   /mentor/{id}:
     get:
       consumes:
@@ -4410,45 +4286,6 @@ paths:
       summary: Get Payment (Tripay)
       tags:
       - Payment
-  /register:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user with name, email, and password. Returns JWT
-        token on success.
-      parameters:
-      - description: Register payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RegisterRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User registered successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties: true
-            type: object
-        "409":
-          description: Email already registered
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Register new user (Public)
-      tags:
-      - Auth
   /students/me/assignments:
     get:
       description: Retrieve all published assignments across courses the authenticated

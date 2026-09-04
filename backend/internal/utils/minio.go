@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -14,21 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-)
-
-// Konstanta metadata MinIO yang dipakai sistem enkripsi-at-rest. Saat upload
-// kita simpan content-type asli + nama file asli sebagai user metadata sehingga
-// proxy unduh dapat me-restore kedua atribut tersebut tanpa harus menyimpan
-// state tambahan di database.
-const (
-	minioMetaOriginalContentType = "Original-Content-Type"
-	minioMetaOriginalFilename    = "Original-Filename"
-	minioMetaEncrypted           = "Doscom-Encrypted"
-
-	// minioStoredContentType selalu dipakai sebagai Content-Type saat menulis
-	// object terenkripsi ke MinIO; bytes tersimpan adalah ciphertext biner
-	// sehingga tidak punya MIME type yang bermakna.
-	minioStoredContentType = "application/octet-stream"
 )
 
 var MinioClient *minio.Client
@@ -102,12 +88,10 @@ func InitMinio() error {
 	return nil
 }
 
-// UploadFile mengunggah file dari multipart upload ke MinIO dalam bentuk
-// terenkripsi (AES-GCM via EncryptBytes). Content-type asli + nama file asli
-// disimpan sebagai user metadata sehingga proxy unduh bisa mengembalikannya
-// ketika file diakses kembali. URL yang dikembalikan adalah URL proxy
-// backend, BUKAN URL langsung ke MinIO, karena bytes pada object adalah
-// ciphertext yang tidak dapat dibaca langsung oleh browser.
+// UploadFile mengunggah file dari multipart upload ke MinIO apa adanya
+// (tanpa enkripsi). Content-type asli dipertahankan agar browser dapat
+// menampilkan file secara inline. URL yang dikembalikan adalah URL langsung
+// ke MinIO sehingga frontend dapat mengakses file tanpa melewati backend.
 func UploadFile(file *multipart.FileHeader, bucket string) (string, error) {
 	if MinioClient == nil {
 		return "", fmt.Errorf("MinIO client is not initialized")
@@ -119,39 +103,27 @@ func UploadFile(file *multipart.FileHeader, bucket string) (string, error) {
 	}
 	defer src.Close()
 
-	plaintext, err := io.ReadAll(src)
-	if err != nil {
-		return "", fmt.Errorf("failed to read file: %w", err)
-	}
-
-	originalContentType := file.Header.Get("Content-Type")
-	if originalContentType == "" {
-		originalContentType = "application/octet-stream"
+	contentType := file.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
 	}
 
 	extension := strings.ToLower(filepath.Ext(file.Filename))
 	objectName := uuid.New().String() + extension
 
-	if err := putEncryptedObject(context.Background(), bucket, objectName, plaintext, originalContentType, file.Filename); err != nil {
+	if err := putObject(context.Background(), bucket, objectName, src, file.Size, contentType); err != nil {
 		return "", err
 	}
 
-	return BuildFileProxyURL(bucket, objectName), nil
+	return GetPublicURL(bucket, objectName), nil
 }
 
-// UploadFileFromReader sama seperti UploadFile tetapi menerima io.Reader.
-// Konten dibaca penuh ke memory karena AES-GCM membutuhkan seluruh plaintext
-// untuk menghasilkan auth tag; tidak cocok untuk stream berukuran sangat besar.
+// UploadFileFromReader sama seperti UploadFile tetapi menerima io.Reader dan
+// men-stream konten langsung ke MinIO tanpa membuffer seluruh bytes di memory.
 func UploadFileFromReader(reader io.Reader, size int64, bucket, filename, contentType string) (string, error) {
 	if MinioClient == nil {
 		return "", fmt.Errorf("MinIO client is not initialized")
 	}
-
-	plaintext, err := io.ReadAll(reader)
-	if err != nil {
-		return "", fmt.Errorf("failed to read input stream: %w", err)
-	}
-	_ = size // ukuran asli tidak relevan setelah bytes ada di memory
 
 	if contentType == "" {
 		contentType = "application/octet-stream"
@@ -160,105 +132,36 @@ func UploadFileFromReader(reader io.Reader, size int64, bucket, filename, conten
 	extension := strings.ToLower(filepath.Ext(filename))
 	objectName := uuid.New().String() + extension
 
-	if err := putEncryptedObject(context.Background(), bucket, objectName, plaintext, contentType, filename); err != nil {
+	if err := putObject(context.Background(), bucket, objectName, reader, size, contentType); err != nil {
 		return "", err
 	}
 
-	return BuildFileProxyURL(bucket, objectName), nil
+	return GetPublicURL(bucket, objectName), nil
 }
 
-// PutEncryptedObject mengunggah plaintext sebagai object terenkripsi dengan
-// objectName eksplisit (bukan UUID acak). Berguna untuk kasus seperti invoice
-// yang nama filenya disusun dari kombinasi enrollment/user/course UID.
-func PutEncryptedObject(ctx context.Context, bucket, objectName string, plaintext []byte, originalContentType, originalFilename string) error {
-	return putEncryptedObject(ctx, bucket, objectName, plaintext, originalContentType, originalFilename)
+// PutObject mengunggah plaintext sebagai object MinIO apa adanya (tanpa
+// enkripsi) dengan objectName eksplisit (bukan UUID acak). Berguna untuk kasus
+// seperti invoice yang nama filenya disusun dari kombinasi enrollment/user/
+// course UID.
+func PutObject(ctx context.Context, bucket, objectName string, data []byte, contentType, _ string) error {
+	return putObject(ctx, bucket, objectName, bytes.NewReader(data), int64(len(data)), contentType)
 }
 
-func putEncryptedObject(ctx context.Context, bucket, objectName string, plaintext []byte, originalContentType, originalFilename string) error {
+func putObject(ctx context.Context, bucket, objectName string, reader io.Reader, size int64, contentType string) error {
 	if MinioClient == nil {
 		return fmt.Errorf("MinIO client is not initialized")
 	}
 
-	ciphertext, err := EncryptBytes(plaintext)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt file: %w", err)
+	if contentType == "" {
+		contentType = "application/octet-stream"
 	}
 
-	if originalContentType == "" {
-		originalContentType = "application/octet-stream"
-	}
+	opts := minio.PutObjectOptions{ContentType: contentType}
 
-	opts := minio.PutObjectOptions{
-		ContentType: minioStoredContentType,
-		UserMetadata: map[string]string{
-			minioMetaOriginalContentType: originalContentType,
-			minioMetaOriginalFilename:    originalFilename,
-			minioMetaEncrypted:           "1",
-		},
-	}
-
-	if _, err := MinioClient.PutObject(ctx, bucket, objectName, strings.NewReader(string(ciphertext)), int64(len(ciphertext)), opts); err != nil {
+	if _, err := MinioClient.PutObject(ctx, bucket, objectName, reader, size, opts); err != nil {
 		return fmt.Errorf("failed to upload file to MinIO: %w", err)
 	}
 	return nil
-}
-
-// FetchAndDecryptObject mengambil object dari MinIO dan mendekripsinya bila
-// merupakan file terenkripsi (mengandung magic header). File plaintext lawas
-// dikembalikan apa adanya untuk menjaga backward compatibility.
-//
-// Mengembalikan: bytes plaintext, content-type asli (dari user metadata atau
-// fallback ke content-type object), nama file asli (untuk Content-Disposition),
-// dan error.
-func FetchAndDecryptObject(ctx context.Context, bucket, objectKey string) (data []byte, contentType string, originalFilename string, err error) {
-	if MinioClient == nil {
-		return nil, "", "", fmt.Errorf("MinIO client is not initialized")
-	}
-
-	obj, err := MinioClient.GetObject(ctx, bucket, objectKey, minio.GetObjectOptions{})
-	if err != nil {
-		return nil, "", "", fmt.Errorf("failed to fetch object: %w", err)
-	}
-	defer obj.Close()
-
-	stat, err := obj.Stat()
-	if err != nil {
-		return nil, "", "", err
-	}
-
-	raw, err := io.ReadAll(obj)
-	if err != nil {
-		return nil, "", "", fmt.Errorf("failed to read object: %w", err)
-	}
-
-	plaintext, err := DecryptBytes(raw)
-	if err != nil {
-		return nil, "", "", fmt.Errorf("failed to decrypt object: %w", err)
-	}
-
-	originalContentType := stat.UserMetadata[minioMetaOriginalContentType]
-	if originalContentType == "" {
-		originalContentType = stat.ContentType
-	}
-	if originalContentType == "" || originalContentType == minioStoredContentType {
-		originalContentType = "application/octet-stream"
-	}
-
-	return plaintext, originalContentType, stat.UserMetadata[minioMetaOriginalFilename], nil
-}
-
-// BuildFileProxyURL menyusun URL proxy backend untuk mengakses object yang
-// tersimpan dalam bentuk terenkripsi. Format: {BASE_URL}/files/{bucket}/{key}.
-// Frontend harus selalu memakai URL ini, bukan URL langsung ke MinIO.
-func BuildFileProxyURL(bucket, objectName string) string {
-	base := strings.TrimRight(os.Getenv("BASE_URL"), "/")
-	if base == "" {
-		// Fallback aman jika BASE_URL belum dikonfigurasi: tetap berikan path
-		// relatif sehingga frontend yang di-host satu domain dengan API tetap
-		// dapat mengakses file.
-		return fmt.Sprintf("/files/%s/%s", bucket, objectName)
-	}
-	return fmt.Sprintf("%s/files/%s/%s", base, bucket, objectName)
 }
 
 // DeleteFile deletes a file from MinIO
@@ -276,19 +179,23 @@ func DeleteFile(bucket, objectName string) error {
 	return nil
 }
 
-// GetPublicURL mengembalikan URL publik untuk sebuah object. Sejak adanya
-// enkripsi-at-rest, URL yang dikembalikan adalah URL proxy backend agar
-// browser menerima bytes yang sudah didekripsi (object langsung di MinIO
-// berisi ciphertext).
+// GetPublicURL mengembalikan URL publik untuk sebuah object. Object disimpan
+// dalam bentuk plaintext dengan policy bucket public-read, sehingga URL yang
+// dikembalikan adalah URL langsung ke MinIO dan dapat diakses frontend
+// tanpa melewati backend.
 func GetPublicURL(bucket, objectName string) string {
-	return BuildFileProxyURL(bucket, objectName)
+	return GetDirectMinioURL(bucket, objectName)
 }
 
-// GetDirectMinioURL mengembalikan URL langsung ke MinIO (tanpa melalui proxy).
-// Dipakai oleh kode internal yang tidak membutuhkan dekripsi (misalnya saat
-// hanya ingin parsing bucket+key dari URL legacy).
+// GetDirectMinioURL mengembalikan URL langsung ke MinIO (tanpa melalui proxy
+// backend). Endpoint yang dipakai adalah MINIO_PUBLIC_ENDPOINT (endpoint yang
+// dapat dijangkau browser/frontend); bila tidak di-set, fallback ke
+// MINIO_ENDPOINT yang dipakai koneksi internal backend.
 func GetDirectMinioURL(bucket, objectName string) string {
-	endpoint := os.Getenv("MINIO_ENDPOINT")
+	endpoint := os.Getenv("MINIO_PUBLIC_ENDPOINT")
+	if endpoint == "" {
+		endpoint = os.Getenv("MINIO_ENDPOINT")
+	}
 	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
 	protocol := "http"
 	if useSSL {
@@ -325,8 +232,9 @@ func GetBucketPaymentMethods() string {
 // BucketAndObjectFromPublicURL mem-parse URL object MinIO yang dihasilkan
 // UploadFile / UploadFileFromReader / GetPublicURL. Mendukung dua format URL:
 //
-//  1. Proxy backend: {BASE_URL}/files/{bucket}/{objectKey} (format baru)
-//  2. Direct MinIO: {protocol}://{endpoint}/{bucket}/{objectKey} (legacy)
+//  1. Direct MinIO: {protocol}://{endpoint}/{bucket}/{objectKey} (format aktif)
+//  2. Proxy backend: {BASE_URL}/files/{bucket}/{objectKey} (legacy, saat file
+//     masih dienkripsi; tetap didukung agar cleanup data lama tetap bekerja)
 //
 // Jika path kosong atau URL relatif, parsing tetap dicoba berdasarkan segmen
 // path. Berguna untuk operasi cleanup (DeleteFile) yang menerima URL apa adanya.
