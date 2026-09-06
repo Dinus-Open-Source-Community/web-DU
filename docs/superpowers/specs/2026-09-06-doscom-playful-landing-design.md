@@ -27,6 +27,7 @@ Tanggal: 2026-09-06 · Approach: **A — Token-first, bertahap** · Scope: **glo
 | 12 | **(Revisi 1) Anti AI-slop** — daftar larangan konkret copy + desain (§9); ditegakkan otomatis via gate `rg` (plan T21) |
 | 13 | **(Revisi 1) Ikon secukupnya** — budget ikon per section (§9); ikon hanya bila fungsional (navigasi, rating, identitas teknologi, kontak). `CursorDoodle` **dihapus total** (gimmick), sticky notes hero **tanpa ikon**, `MentorCard` **tanpa ikon** |
 | 14 | **(Revisi 2) Pengganti whiteboard = Terminal interaktif** — jendela terminal statis (perintah preset yang bisa diklik/diketik + efek stagger) di slot Product Preview antara Course dan HowItWorks; suara lowercase kering, nol ikon |
+| 15 | **(Revisi 3) Paket maksimal**: splash preloader + hero playground + ilustrasi penuh + galeri horizontal + cerita bercabang. Magnetik/tilt, kapsul, PR sim, dinding, slider, bedah kode, peta, FAQ, tap sprint, 404/favicon masuk backlog |
 
 ---
 
@@ -111,8 +112,8 @@ Biru elektrik = aksen interaksi (CTA primer, active nav, underline, link). **Buk
 ## §7. Inventaris komponen
 
 **Baru (`components/landing/` + `components/playful/`):**
-`StickyNote` (draggable opsional, ikon opsional — hero tanpa ikon), `HandUnderline` (SVG), `DoodleArrow` (3 varian path), `SectionHeader` (eyebrow+title+copy), `Reveal` (motion whileInView + stagger), `PenguinMascot` (SVG geometris + stroke ink), `MentorCard` (tanpa ikon — avatar inisial + teks), `StaticCourseCard` (cover pastel + numeral display, tanpa gambar), section: `Hero`, `StackSection`, `MentorsSection`, `CourseSection`, `TerminalSection` (pengganti whiteboard — terminal statis interaktif), `HowItWorksSection`, `GallerySection`, `TestimonialSection`, `FinalCTASection` (gabung Get in Touch).
-**Data statis (`lib/landing/`):** `copy.ts` (seluruh copy landing — satu sumber), `stack.ts`, `mentors.ts` (array statis + helper inisial), `courses.ts` (array statis + tipe), `terminal.ts` (peta perintah + output), `gallery.ts`, `contact.ts`, `testimonial.ts`.
+`StickyNote` (draggable opsional, ikon opsional — hero tanpa ikon), `HandUnderline` (SVG + prop `draw` untuk path-draw on scroll), `DoodleArrow` (3 varian path), `SectionHeader` (eyebrow+title+copy), `Reveal` (motion whileInView + stagger), `PenguinMascot` (SVG geometris + stroke ink), `TickerTape` (marquee CSS, konten diduplikasi + aria-hidden), `DoodleDivider` (squiggle antar-section), `Stickers` (set doodle resmi: Star/Sparkle/Squiggle/CircleScribble/Tape/Pin + varian twinkle), `Footprints` (jejak pinguin SVG), `SplashScreen` (overlay ≤1s, sekali per sesi), `MentorCard` (tanpa ikon — avatar inisial + teks), `StaticCourseCard` (cover pastel + numeral display, tanpa gambar), section: `Hero` (playground: parallax + drag + draw + easter egg), `StackSection`, `MentorsSection`, `CourseSection`, `TerminalSection` (pengganti whiteboard — terminal statis interaktif), `StorySection` (cerita bercabang 9 node, 3 ending), `HowItWorksSection`, `GallerySection` (grid now, horizontal-scroll saat foto ada), `TestimonialSection`, `FinalCTASection` (gabung Get in Touch).
+**Data statis (`lib/landing/`):** `copy.ts` (seluruh copy landing — satu sumber, termasuk item ticker), `stack.ts`, `mentors.ts` (array statis + helper inisial), `courses.ts` (array statis + tipe), `terminal.ts` (peta perintah + output), `story.ts` (9 node + 3 ending), `gallery.ts`, `contact.ts`, `testimonial.ts`.
 **Provider:** `providers/motion-provider.tsx` (`ReactLenis root` + sync ScrollTrigger + `ScrollManager` reset per route + hash scroll).
 **Dirombak:** `pages/landing/Home.tsx` (tanpa hook), `components/shared/Navbar.tsx`, `components/shared/Footer.tsx`, `components/ui/button.tsx` (varian playful), `index.css`, `index.html`.
 **Reuse tanpa ubah:** `navLinks` (ditambah anchor), `socialLinks` (dipindah ke `contact.ts`), logika subscribe Footer, auth dropdown Navbar. (`CardCourse`, `useFeaturedCourses`, `useLandingCommunityStats` **tidak dipakai** landing baru — dua hook dihapus.)
@@ -122,9 +123,9 @@ Biru elektrik = aksen interaksi (CTA primer, active nav, underline, link). **Buk
 
 ## §8. Susunan section & ritme
 
-Navbar (paper, fixed, 88px) → **Hero** (paper, center stack) → **Our Stack** (dark navy grid) → **Our Mentors** (paper, statis) → **Course** (panel tipis, statis) → **Terminal** (paper, interaktif — pengganti whiteboard) → **How It Works** (dark, pin desktop) → **Gallery** (paper) → **Testimonial** (dark + kartu paper) → **Final CTA + Get in Touch** (paper, digabung agar tidak ada dua CTA kertas berurutan) → Footer (ink-800, newsletter dipertahankan).
+Splash overlay (sekali per sesi, ≤1s, skippable) → Navbar (paper, fixed, 88px) → **Hero** (paper, playground: parallax + drag + draw + easter egg) → **TickerTape** (marquee) → **Our Stack** (dark navy grid) → **Our Mentors** (paper, statis) → **Footprints** → **Course** (panel tipis, statis) → **Terminal** (paper, interaktif — pengganti whiteboard) → **Story** (panel, naratif interaktif) → **How It Works** (dark, pin desktop) → **Gallery** (paper; grid now, horizontal-scroll saat foto ada) → **Testimonial** (dark + kartu paper) → **Final CTA + Get in Touch** (paper, digabung agar tidak ada dua CTA kertas berurutan) → Footer (ink-800, newsletter dipertahankan). Grain overlay menutupi seluruh landing (statis, 6%).
 
-Pemetaan konten: Stack = React 19, TypeScript, Tailwind CSS, Go (Gin), PostgreSQL, MinIO, Docker (faktual dari repo). Mentors = array statis (`mentors.ts`; sampel bertanda, gate §14). Course = array statis (`courses.ts`; 3 kartu + link `/course` ke katalog dinamis). Terminal = perintah preset + output statis (`terminal.ts`; detail §9.4). HowItWorks = 01 Gabung & daftar → 02 Sprint belajar bareng mentor → 03 Kontribusi OSS & portofolio. Gallery = bingkai doodle + empty state "dokumentasi segera hadir" (tanpa picsum — picsum mati bersama section lama). Testimonial = 1 kutipan sampel (launch gate §14). Get in Touch = kartu kontak dari `contact.ts` (nilai awal = `socialLinks` existing apa adanya).
+Pemetaan konten: Stack = React 19, TypeScript, Tailwind CSS, Go (Gin), PostgreSQL, MinIO, Docker (faktual dari repo). Mentors = array statis (`mentors.ts`; sampel bertanda, gate §14). Course = array statis (`courses.ts`; 3 kartu + link `/course` ke katalog dinamis). Terminal = perintah preset + output statis (`terminal.ts`; detail §9.4). Story = 9 node bercabang, 3 ending ke `/#kursus` (`story.ts`; detail §9.5). HowItWorks = 01 Gabung & daftar → 02 Sprint belajar bareng mentor → 03 Kontribusi OSS & portofolio. Splash = wordmark + bar doodle + "menyiapkan kertas dan tinta…" (teks kecil, bukan janji fitur). Gallery = bingkai doodle + empty state "dokumentasi segera hadir" (tanpa picsum — picsum mati bersama section lama). Testimonial = 1 kutipan sampel (launch gate §14). Get in Touch = kartu kontak dari `contact.ts` (nilai awal = `socialLinks` existing apa adanya).
 
 Nav anchor: `#stack #mentor #kursus #galeri #kontak` (format `/#stack` agar work dari `/course`), plus link `Course /course`, CTA Daftar/Masuk. Scroll hash ditangani `ScrollManager`.
 
@@ -165,12 +166,13 @@ Sticky notes hero (tanpa ikon): "Proyek OSS Nyata", "Mentor Praktisi", "Sprint &
 | Mentors | 0 | inisial avatar + teks cukup |
 | Course | 1 ArrowRight "Lihat semua" | arah aksi |
 | Terminal | 0 | titik header = lingkaran CSS, sisanya teks |
+| Story | 1 ArrowRight ending | arah aksi |
 | HowItWorks | 0 | numeral display cukup |
 | Gallery empty | 1 ImagePlus | ilustrasi empty state |
 | Testimonial | 5 Star | rating (fungsional) |
 | FinalCTA | 1 ArrowRight + 5 glyph kontak | aksi + rekognisi sosial |
 | Footer | socials existing | rekognisi (existing) |
-| **Total baru** | **±16, semua fungsional** | **nol ikon dekoratif** |
+| **Total baru** | **±22, semua fungsional** | **nol ikon dekoratif** |
 
 ### 9.4 Terminal: suara + perintah (draf)
 
@@ -188,6 +190,14 @@ Suara terminal: lowercase, kering, akrab — beda dari copy marketing (disengaja
 
 Boot (sekali saat masuk viewport): "doscomOS v2.0 — terminal komunitas." + "ketik 'help' atau klik perintah di bawah." Output `role="log"` + `aria-live="polite"`; area output tinggi tetap + scroll internal + auto-scroll ke bawah.
 
+### 9.5 Cerita bercabang: struktur + suara (naskah lengkap di plan)
+
+"Hari Pertamamu di DOSCOM" — mini visual-novel orang kedua, present tense, konkret (nama tempat, benda, rasa). 9 node: `mulai → {kumpul, laptop} → {repo, tanya, sprint} → {ending-oss, ending-jelajah, ending-web}`. Node tengah (repo/tanya/sprint) memakai satu ketukan "Lanjutkan →" yang jujur (transisi beat, bukan pilihan palsu). Setiap ending: judul + 2 kalimat + CTA ke `/#kursus` ("Lihat jalur kontribusi" / "Lihat jalur web" / "Lihat semua kursus") + tombol "Ulangi cerita" + recap pilihan sebagai chips. Suara sama dengan copy utama (akrab kampus, tanpa jargon startup); satu-satunya fiksi yang diizinkan adalah bingkai "hari pertama" — semua janji (sprint, review, repo) faktual.
+
+### 9.6 Splash + ticker (copy)
+
+Splash: wordmark "DOSCOM" (DynaPuff) + bar doodle + teks kecil "menyiapkan kertas dan tinta…". Ticker (sumber `copy.ts`, dipisah `✦`): open source · sprint · code review · mentoring · portofolio · komunitas udinus · ngoding bareng.
+
 ---
 
 ## §10. Arsitektur motion (versi terverifikasi Context7, Sept 2026)
@@ -198,8 +208,12 @@ Boot (sekali saat masuk viewport): "doscomOS v2.0 — terminal komunitas." + "ke
 | `motion@13.2.0` (`import from "motion/react"`) | interaksi komponen | `Reveal` (whileInView+stagger), sticky-note **drag** (`drag`, `dragConstraints`, `dragElastic`), hover/tap fisik, mobile menu, `useReducedMotion` gate |
 | `gsap@3.15.0` + `@gsap/react@2.1.2` | showpiece selektif | **satu** pin desktop (HowItWorks ≥1024px); selalu via `useGSAP({scope})`, `gsap.registerPlugin(ScrollTrigger)` |
 | `lenis@1.3.26` (`lenis/react`, `<ReactLenis root>`) | smooth scroll | lerp default; `respectReducedMotion` default true (jangan dioverride); sinkron `lenis.on('scroll', ScrollTrigger.update)`; `ScrollTrigger.refresh()` setelah `document.fonts.ready` + tiap ganti route; **dilarang** ScrollSmoother (konflik) |
+| CSS `marquee` + `twinkle` | ambient | ticker (translateX −50%, 22s linear, pause on hover, konten diduplikasi + aria-hidden); twinkle bintang (opacity, 2–3s) |
+| `motion` `pathLength` | draw | underline/headline/divider ke-draw sekali via `whileInView` (0.9s); fallback statis saat reduced-motion |
+| `motion` values + spring | parallax hero | dekor 2 lapis ikut mouse (±20px/±12px, stiffness 60); hanya `pointer:fine`, mati saat reduced-motion/touch |
+| React state + `AnimatePresence` | splash/easter/story | splash ≤1s + klik-skip + sekali per sesi (`sessionStorage`) + absen total saat reduced-motion; easter egg klik-5x → spin + bubble `role="status"`; story = state machine node + recap |
 
-Batasan keras: hanya properti `transform`/`opacity` yang dianimasikan; efek terminal = stagger per baris (120ms, instan saat reduced-motion), bukan per karakter; pin hanya desktop; drag notes jadi float statis di touch/reduced-motion; konten tidak boleh bergantung pada animasi (konten langsung visible — apalagi kini statis, tanpa skeleton).
+Batasan keras: hanya properti `transform`/`opacity` yang dianimasikan; efek terminal = stagger per baris (120ms, instan saat reduced-motion), bukan per karakter; pin hanya desktop (HowItWorks + Galeri, koordinasi refresh sudah di provider); splash tidak boleh menunda konten (render di bawah overlay, dismiss on load atau 1200ms); parallax/easter kosong saat reduced-motion; grain statis (bukan animasi) sehingga selalu aman; drag notes jadi float statis di touch/reduced-motion; konten tidak boleh bergantung pada animasi (konten langsung visible — apalagi kini statis, tanpa skeleton).
 
 ---
 
@@ -242,7 +256,7 @@ Re-point semantik (§4.1) otomatis mengubah dashboard — itu **tujuan**, bukan 
 
 Visual: nav paper + active blue; hero DynaPuff dominan + 5 notes tanpa ikon + penguin sekali + arrows; section gelap grid 24px subtil; kartu taktil (border ink + offset shadow); CTA primer selalu obvious; nol gambar eksternal; pastel deterministik.
 Motion: loops ambient jalan; reveal+stagger; drag notes desktop; pin HowItWorks desktop; tanpa layout shift; reduced-motion mematikan semua dekorasi (Lenis otomatis, sisanya gate manual).
-UX: CTA ganda tidak berebut (primer > sekunder); anchor dari `/course` mendarat benar; menu mobile; form newsletter tetap fungsi; footer disembunyikan di `/course/:uid` (perilaku lama); tanpa skeleton di landing; empty state hanya galeri; terminal: chips menjalankan perintah, perintah tak dikenal + `sudo` punya respons, boot sekali, `aria-live` polite, riwayat panah jalan.
+UX: CTA ganda tidak berebut (primer > sekunder); anchor dari `/course` mendarat benar; menu mobile; form newsletter tetap fungsi; footer disembunyikan di `/course/:uid` (perilaku lama); tanpa skeleton di landing; empty state hanya galeri; terminal: chips menjalankan perintah, perintah tak dikenal + `sudo` punya respons, boot sekali, `aria-live` polite, riwayat panah jalan; splash ≤1s + skippable + absen saat reduced-motion + sekali per sesi; marquee duplikat aria-hidden + pause on hover; horizontal hanya desktop + ada foto + reduced-motion mati; story: semua ending tercapai dari start, restart + recap jalan; easter egg: 5 klik → spin + bubble, bisa diulang.
 Teknis: `npm run build` + `lint` hijau; nol `dark:` tersisa; nol Lottie di landing baru; nol import Poppins/next-themes; **nol import `@/hooks`/`@/services` di layer landing**; gate frasa generik bersih; budget ikon dipatuhi.
 
 ---
@@ -257,3 +271,4 @@ Teknis: `npm run build` + `lint` hijau; nol `dark:` tersisa; nol Lottie di landi
 6. Penghapusan CursorDoodle + ikon di notes/MentorCard disetujui? (Budget §9.3.)
 7. Daftar mentor + kursus asli: kirim sekarang (langsung masuk dokumen) atau tetap sampel bertanda + launch gate?
 8. Setuju daftar perintah + output terminal (§9.4)?
+9. Setuju paket maksimal + naskah cerita (lengkap di plan)? Yang tak dipilih resmi jadi backlog.
