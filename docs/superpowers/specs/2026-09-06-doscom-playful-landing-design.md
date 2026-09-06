@@ -1,14 +1,15 @@
 # DOSCOM University — Playful Landing Redesign (Spec)
 
-> Status: **DRAFT — menunggu review & revisi kamu sebelum eksekusi.**
+> Status: **DRAFT Revisi 1 — menunggu review & revisi kamu sebelum eksekusi.**
 > Cara review: baca §16 (pertanyaan review), tulis revisi per nomor bagian (§1–§15).
 > Pendamping: `frontend/src/docs/design/design.md` + `canvas-design-tokens.json` (referensi visual, bukan source of truth untuk konten).
+> Riwayat: draf awal 2026-09-06 → Revisi 1 2026-09-06 (konten statis penuh, anti-slop, budget ikon).
 
 Tanggal: 2026-09-06 · Approach: **A — Token-first, bertahap** · Scope: **global (seluruh aplikasi)**
 
 ---
 
-## §1. Keputusan terkunci (hasil grill, 10 butir)
+## §1. Keputusan terkunci (hasil grill + revisi)
 
 | # | Keputusan |
 |---|---|
@@ -22,18 +23,23 @@ Tanggal: 2026-09-06 · Approach: **A — Token-first, bertahap** · Scope: **glo
 | 8 | Dwi-audiens (maba Udinus + publik umum), CTA ganda |
 | 9 | **Dark mode dihapus**, single light playful theme |
 | 10 | Maskot = **SVG doodle di kode** (bukan file gambar) |
+| 11 | **(Revisi 1) Konten landing statis penuh** — "statis" artinya DATA (tanpa fetch API/hook/react-query di layer landing); motion/interaksi tetap jalan. Alasan: deterministik, tahan后端 mati, cepat, dan anti skeleton-loading yang murahan |
+| 12 | **(Revisi 1) Anti AI-slop** — daftar larangan konkret copy + desain (§9); ditegakkan otomatis via gate `rg` (plan T21) |
+| 13 | **(Revisi 1) Ikon secukupnya** — budget ikon per section (§9); ikon hanya bila fungsional (navigasi, rating, identitas teknologi, kontak). `CursorDoodle` **dihapus total** (gimmick), sticky notes hero **tanpa ikon**, `MentorCard` **tanpa ikon** |
+| 14 | **(Revisi 2) Pengganti whiteboard = Terminal interaktif** — jendela terminal statis (perintah preset yang bisa diklik/diketik + efek stagger) di slot Product Preview antara Course dan HowItWorks; suara lowercase kering, nol ikon |
 
 ---
 
 ## §2. Goal & non-goal
 
-**Goal (satu kalimat):** Mengganti fondasi design token menjadi sistem playful ala Canvas (kertas, tinta, electric blue, pastel, grid navy) dan membangun ulang landing page sebagai SPA satu halaman yang hidup dan interaktif tanpa merusak dashboard yang sudah berjalan.
+**Goal (satu kalimat):** Mengganti fondasi design token menjadi sistem playful ala Canvas (kertas, tinta, electric blue, pastel, grid navy) dan membangun ulang landing page sebagai SPA satu halaman yang **statis, hidup, dan interaktif** tanpa merusak dashboard yang sudah berjalan.
 
 **Non-goal (tegas di luar scope):**
 - Membuat halaman baru (`/community`, `/about`, `/pricing`, `/blog`, dll. yang link-nya mati hari ini) — link mati dipetakan ulang ke rute/anchor yang ada (§8, §13).
 - Mengubah skema API/backend, auth flow, atau logika bisnis dashboard.
 - Menghapus Lottie dari dashboard/auth (tetap dipakai di sana; larangan Lottie hanya untuk dekorasi landing baru).
 - Menambah test runner baru (repo tidak punya; verifikasi = `tsc` + `eslint` + `vite build` + QA visual).
+- **(Revisi 1)** Menghubungkan landing ke API — landing tidak import apa pun dari `@/hooks` atau `@/services`. Data kursus/mentor/testimoni/galeri/kontak hidup di `lib/landing/*.ts`.
 
 ---
 
@@ -42,6 +48,7 @@ Tanggal: 2026-09-06 · Approach: **A — Token-first, bertahap** · Scope: **glo
 **Struktur dibangun ulang:** `/` (Home + 9 section baru), Navbar + Footer (dipakai juga oleh `/course`).
 **Hanya ikut token (tanpa perubahan struktur):** `/course`, `/course/:uid`, semua `/auth/*`, seluruh dashboard student/mentor/admin, `/profile`.
 **Disentuh untuk migrasi:** `index.css`, `ui/sonner.tsx` (cabut next-themes), 19 file bervarian `dark:` (strip saja), `index.html` (lang/judul/meta).
+**(Revisi 1) Dihapus karena tak terpakai lagi:** `hooks/landing/use-featured-courses.ts`, `hooks/landing/use-landing-community-stats.ts` (landing baru statis; diverifikasi tak diimport tempat lain sebelum hapus).
 
 ---
 
@@ -104,34 +111,82 @@ Biru elektrik = aksen interaksi (CTA primer, active nav, underline, link). **Buk
 ## §7. Inventaris komponen
 
 **Baru (`components/landing/` + `components/playful/`):**
-`StickyNote` (draggable opsional), `HandUnderline` (SVG), `DoodleArrow` (3 varian path), `SectionHeader` (eyebrow+title+copy), `Reveal` (motion whileInView + stagger), `PenguinMascot` (SVG geometris + stroke ink), `MentorCard`, section: `Hero`, `StackSection`, `MentorsSection`, `CourseSection`, `HowItWorksSection`, `GallerySection`, `TestimonialSection`, `FinalCTASection` (gabung Get in Touch).
-**Data (`lib/landing/`):** `copy.ts` (seluruh copy landing — satu sumber), `stack.ts`, `mentors.ts` (derivasi), `gallery.ts`, `contact.ts`, `testimonial.ts`.
+`StickyNote` (draggable opsional, ikon opsional — hero tanpa ikon), `HandUnderline` (SVG), `DoodleArrow` (3 varian path), `SectionHeader` (eyebrow+title+copy), `Reveal` (motion whileInView + stagger), `PenguinMascot` (SVG geometris + stroke ink), `MentorCard` (tanpa ikon — avatar inisial + teks), `StaticCourseCard` (cover pastel + numeral display, tanpa gambar), section: `Hero`, `StackSection`, `MentorsSection`, `CourseSection`, `TerminalSection` (pengganti whiteboard — terminal statis interaktif), `HowItWorksSection`, `GallerySection`, `TestimonialSection`, `FinalCTASection` (gabung Get in Touch).
+**Data statis (`lib/landing/`):** `copy.ts` (seluruh copy landing — satu sumber), `stack.ts`, `mentors.ts` (array statis + helper inisial), `courses.ts` (array statis + tipe), `terminal.ts` (peta perintah + output), `gallery.ts`, `contact.ts`, `testimonial.ts`.
 **Provider:** `providers/motion-provider.tsx` (`ReactLenis root` + sync ScrollTrigger + `ScrollManager` reset per route + hash scroll).
-**Dirombak:** `pages/landing/Home.tsx`, `components/shared/Navbar.tsx`, `components/shared/Footer.tsx`, `components/ui/button.tsx` (varian playful), `index.css`, `index.html`.
-**Reuse tanpa ubah:** `CardCourse`, `useFeaturedCourses`, `useLandingCommunityStats`, `navLinks` (ditambah anchor), `socialLinks` (dipindah ke `contact.ts`), logika subscribe Footer, auth dropdown Navbar.
+**Dirombak:** `pages/landing/Home.tsx` (tanpa hook), `components/shared/Navbar.tsx`, `components/shared/Footer.tsx`, `components/ui/button.tsx` (varian playful), `index.css`, `index.html`.
+**Reuse tanpa ubah:** `navLinks` (ditambah anchor), `socialLinks` (dipindah ke `contact.ts`), logika subscribe Footer, auth dropdown Navbar. (`CardCourse`, `useFeaturedCourses`, `useLandingCommunityStats` **tidak dipakai** landing baru — dua hook dihapus.)
+**Dihapus dari rencana (Revisi 1):** `CursorDoodle` — gimmick follower menambah noise tanpa fungsi; playfulness sudah dibawa notes/drag/doodle/pin.
 
 ---
 
 ## §8. Susunan section & ritme
 
-Navbar (paper, fixed, 88px) → **Hero** (paper, center stack) → **Our Stack** (dark navy grid) → **Our Mentors** (paper) → **Course** (panel tipis) → **How It Works** (dark, pin desktop) → **Gallery** (paper) → **Testimonial** (dark + kartu paper) → **Final CTA + Get in Touch** (paper, digabung agar tidak ada dua CTA kertas berurutan) → Footer (ink-800, newsletter dipertahankan).
+Navbar (paper, fixed, 88px) → **Hero** (paper, center stack) → **Our Stack** (dark navy grid) → **Our Mentors** (paper, statis) → **Course** (panel tipis, statis) → **Terminal** (paper, interaktif — pengganti whiteboard) → **How It Works** (dark, pin desktop) → **Gallery** (paper) → **Testimonial** (dark + kartu paper) → **Final CTA + Get in Touch** (paper, digabung agar tidak ada dua CTA kertas berurutan) → Footer (ink-800, newsletter dipertahankan).
 
-Pemetaan konten: Stack = React 19, TypeScript, Tailwind v4, Go (Gin), PostgreSQL, MinIO, Docker (faktual dari repo). Mentors = dedupe `course.mentors` (nama, role, jumlah kursus, avatar inisial pastel). Course = `useFeaturedCourses` + `CardCourse` + link `/course`. HowItWorks = 01 Gabung & daftar → 02 Sprint belajar bareng mentor → 03 Kontribusi OSS & portofolio. Gallery = bingkai doodle + empty state "dokumentasi segera hadir". Testimonial = 1 kutipan sampel (launch gate §14). Get in Touch = kartu kontak dari `contact.ts` (nilai awal = `socialLinks` existing apa adanya).
+Pemetaan konten: Stack = React 19, TypeScript, Tailwind CSS, Go (Gin), PostgreSQL, MinIO, Docker (faktual dari repo). Mentors = array statis (`mentors.ts`; sampel bertanda, gate §14). Course = array statis (`courses.ts`; 3 kartu + link `/course` ke katalog dinamis). Terminal = perintah preset + output statis (`terminal.ts`; detail §9.4). HowItWorks = 01 Gabung & daftar → 02 Sprint belajar bareng mentor → 03 Kontribusi OSS & portofolio. Gallery = bingkai doodle + empty state "dokumentasi segera hadir" (tanpa picsum — picsum mati bersama section lama). Testimonial = 1 kutipan sampel (launch gate §14). Get in Touch = kartu kontak dari `contact.ts` (nilai awal = `socialLinks` existing apa adanya).
 
 Nav anchor: `#stack #mentor #kursus #galeri #kontak` (format `/#stack` agar work dari `/course`), plus link `Course /course`, CTA Daftar/Masuk. Scroll hash ditangani `ScrollManager`.
 
 ---
 
-## §9. Arah copy (draf — pilih/sunting saat review)
+## §9. Arah copy + anti-slop + budget ikon (draf — pilih/sunting saat review)
 
-Bahasa Indonesia, dwi-audiens, hierarki CTA: primer **Gabung Komunitas** (`/auth/register`), sekunder **Jelajahi Kursus** (`/course`). Aturan anti-slop: angka harus dari `useLandingCommunityStats`, kata benda konkret (sprint, code review, repo, sertifikat), larangan frasa generik ("jelajahi dunia", "unlock your potential", "cutting-edge") dan emoji di copy.
+Bahasa Indonesia, dwi-audiens, hierarki CTA: primer **Gabung Komunitas** (`/auth/register`), sekunder **Jelajahi Kursus** (`/course`).
+
+### 9.1 Aturan anti-slop copy (mengikat, gate otomatis plan T21)
+
+- Angka hanya bila terverifikasi (tidak ada angka klaim di landing statis — tidak ada stats hook).
+- Kata benda konkret (sprint, code review, repo, sertifikat, Udinus). Larangan frasa generik — daftar pasti (case-insensitive): `jelajahi dunia`, `unlock`, `cutting-edge`, `revolution`, `delve`, `vibrant`, `seamless`, `elevate`, `supercharge`, `gateway`, `game-changer`, `Lorem`, `cutting edge`, `dunia digital tanpa batas`, `membuka potensi`.
+- Tanpa emoji di copy. Tanpa testimoni/nama/angka palsu yang tidak bertanda SAMPEL.
+- Satu suara: akrab kampus, kalimat pendek, tanpa jargon startup.
 
 Draf hook hero (pilih satu):
 - **A.** Eyebrow: `KOMUNITAS OPEN SOURCE UDINUS` · H1: "Ngoding sendirian itu sepi." · Sub: "Belajar bareng komunitas, dibimbing mentor praktisi, pulang bawa portofolio open source."
 - **B.** H1: "Teori dari kampus. Pengalaman dari sini." · Sub: sama pola A.
 - **C.** H1: "Belajar IT yang pulangnya bawa portofolio." · Sub: sama pola A.
 
-Sticky notes hero: "Proyek OSS Nyata", "Mentor Praktisi", "Sprint & Code Review", "Sertifikat", "Komunitas Udinus".
+Sticky notes hero (tanpa ikon): "Proyek OSS Nyata", "Mentor Praktisi", "Sprint & Code Review", "Sertifikat", "Komunitas Udinus".
+
+### 9.2 Aturan anti-slop desain (mengikat)
+
+- Tanpa gradient dekoratif (satu-satunya gradient = grid 24px subtil). Tanpa gambar stok/eksternal di landing baru (nol `picsum`, nol `unsplash`).
+- Pastel deterministik per index (array tetap, bukan random render). Maksimal satu keluarga doodle per viewport (arrow + underline + tape = satu bahasa, bukan tiga gaya).
+- Skeleton loading **dilarang** di landing (konten statis = langsung render). Empty state hanya untuk galeri (konten foto memang belum ada).
+- Maskot muncul tepat sekali (hero). Testimoni satu kartu, bukan carousel.
+
+### 9.3 Budget ikon (maksimal, mengikat — semua ikon lucide, stroke ink, tanpa gradient)
+
+| Section | Ikon | Fungsi |
+|---|---|---|
+| Navbar | Menu, ChevronDown, + ikon akun existing | navigasi (existing, dipertahankan) |
+| Hero | 1 ArrowRight di CTA primer | arah aksi |
+| Stack | 7 chip teknologi | identitas teknologi (ini kontennya) |
+| Mentors | 0 | inisial avatar + teks cukup |
+| Course | 1 ArrowRight "Lihat semua" | arah aksi |
+| Terminal | 0 | titik header = lingkaran CSS, sisanya teks |
+| HowItWorks | 0 | numeral display cukup |
+| Gallery empty | 1 ImagePlus | ilustrasi empty state |
+| Testimonial | 5 Star | rating (fungsional) |
+| FinalCTA | 1 ArrowRight + 5 glyph kontak | aksi + rekognisi sosial |
+| Footer | socials existing | rekognisi (existing) |
+| **Total baru** | **±16, semua fungsional** | **nol ikon dekoratif** |
+
+### 9.4 Terminal: suara + perintah (draf)
+
+Suara terminal: lowercase, kering, akrab — beda dari copy marketing (disengaja: ini "mesin", bukan brosur). Perintah preset (klik chip atau ketik + Enter, riwayat dengan ArrowUp/Down):
+
+| Perintah | Respons |
+|---|---|
+| `help` | daftar perintah + deskripsi satu baris |
+| `whoami` | "calon kontributor open source. status: belum merge PR pertama." |
+| `join` | 3 langkah gabung + tombol "Daftar sekarang" → `/auth/register` |
+| `sprint` | "belajar → build → review → launch." + satu baris mentor/review |
+| `stack` | "react 19 · typescript · tailwind · go + gin · postgresql · minio · docker" |
+| tak dikenal | "'x': perintah tidak dikenal. coba 'help'." |
+| `sudo ...` | "kamu belum jadi maintainer. ikut sprint dulu." |
+
+Boot (sekali saat masuk viewport): "doscomOS v2.0 — terminal komunitas." + "ketik 'help' atau klik perintah di bawah." Output `role="log"` + `aria-live="polite"`; area output tinggi tetap + scroll internal + auto-scroll ke bawah.
 
 ---
 
@@ -141,16 +196,16 @@ Sticky notes hero: "Proyek OSS Nyata", "Mentor Praktisi", "Sprint & Code Review"
 |---|---|---|
 | CSS keyframes | — | float/wiggle/drift/bob, transisi hover/tap |
 | `motion@13.2.0` (`import from "motion/react"`) | interaksi komponen | `Reveal` (whileInView+stagger), sticky-note **drag** (`drag`, `dragConstraints`, `dragElastic`), hover/tap fisik, mobile menu, `useReducedMotion` gate |
-| `gsap@3.15.0` + `@gsap/react@2.1.2` | showpiece selektif | **satu** pin desktop (HowItWorks ≥1024px) + SVG path-draw; selalu via `useGSAP({scope})`, `gsap.registerPlugin(ScrollTrigger)` |
+| `gsap@3.15.0` + `@gsap/react@2.1.2` | showpiece selektif | **satu** pin desktop (HowItWorks ≥1024px); selalu via `useGSAP({scope})`, `gsap.registerPlugin(ScrollTrigger)` |
 | `lenis@1.3.26` (`lenis/react`, `<ReactLenis root>`) | smooth scroll | lerp default; `respectReducedMotion` default true (jangan dioverride); sinkron `lenis.on('scroll', ScrollTrigger.update)`; `ScrollTrigger.refresh()` setelah `document.fonts.ready` + tiap ganti route; **dilarang** ScrollSmoother (konflik) |
 
-Batasan keras: hanya properti `transform`/`opacity` yang dianimasikan; pin hanya desktop; drag notes jadi float statis di touch/reduced-motion; cursor-doodle follower **hanya** di hero, hanya `pointer:fine`, mati saat reduced-motion; konten tidak boleh bergantung pada animasi (konten langsung visible, animasi progresif).
+Batasan keras: hanya properti `transform`/`opacity` yang dianimasikan; efek terminal = stagger per baris (120ms, instan saat reduced-motion), bukan per karakter; pin hanya desktop; drag notes jadi float statis di touch/reduced-motion; konten tidak boleh bergantung pada animasi (konten langsung visible — apalagi kini statis, tanpa skeleton).
 
 ---
 
 ## §11. Responsif
 
-≥1024: penuh (3 kolom grid, pin aktif, notes lengkap). 768–1023: 2 kolom, pin mati, notes dikurangi. <768: 1 kolom, nav hamburger (logika existing), CTA stack, notes max 2 + kecil, preview/gallery horizontal scroll snap, heading DynaPuff mengecil via clamp. Dekorasi tidak boleh menutupi teks/CTA di layar 360px.
+≥1024: penuh (3 kolom grid, pin aktif, notes lengkap). 768–1023: 2 kolom, pin mati, notes dikurangi. <768: 1 kolom, nav hamburger (logika existing), CTA stack, notes max 2 + kecil, gallery horizontal scroll snap, heading DynaPuff mengecil via clamp. Dekorasi tidak boleh menutupi teks/CTA di layar 360px.
 
 ---
 
@@ -158,16 +213,17 @@ Batasan keras: hanya properti `transform`/`opacity` yang dianimasikan; pin hanya
 
 1. Lottie tetap untuk loader/empty-state/payment/auth lama (cabut total = risiko tanpa nilai).
 2. Mono tetap JetBrains Mono; `--radius` tetap `1rem` (stabilitas shadcn).
-3. Section Templates → Course (DOSCOM bukan whiteboard tool); Product Preview → tidak ada (diganti HowItWorks pin + Gallery).
+3. Section Templates → Course statis (DOSCOM bukan whiteboard tool); Product Preview → tidak ada (diganti HowItWorks pin + Gallery).
 4. Copy Indonesia + section pesanan user (Stack/Mentors/Gallery/GetInTouch).
 5. Footer newsletter + footerLinks dipertahankan (href mati dipetakan ulang, halaman baru tidak dibuat).
-6. Cursor follower dibatasi (§10).
+6. Cursor follower tidak diimplementasikan (gimmick melanggar budget ikon).
+7. **(Revisi 1)** Landing statis penuh — design.md berasumsi konten dinamis; di sini determinisme + kecepatan + anti-slop lebih penting.
 
 ---
 
 ## §13. Migrasi global (ringkas; detail di plan)
 
-Re-point semantik (§4.1) otomatis mengubah dashboard — itu **tujuan**, bukan efek samping. Strip `dark:` (19 file), `sonner.tsx` hardcode `theme="light"`, `npm remove next-themes`. Hardcoded `slate-*` (mis. CardMentor) tidak tersentuh token — dibiarkan kecuali kontras jebol (regression pass). `/course` ikut token tanpa refactor struktur.
+Re-point semantik (§4.1) otomatis mengubah dashboard — itu **tujuan**, bukan efek samping. Strip `dark:` (19 file), `sonner.tsx` hardcode `theme="light"`, `npm remove next-themes`. Hardcoded `slate-*` (mis. CardMentor) tidak tersentuh token — dibiarkan kecuali kontras jebol (regression pass). `/course` ikut token tanpa refactor struktur. **(Revisi 1)** Hapus `use-featured-courses.ts` + `use-landing-community-stats.ts` setelah verifikasi tak diimport (landing baru statis).
 
 ---
 
@@ -178,12 +234,16 @@ Re-point semantik (§4.1) otomatis mengubah dashboard — itu **tujuan**, bukan 
 3. Kutipan testimoni asli (ganti 1 sampel).
 4. Pilih hook A/B/C (§9) + konfirmasi list stack (§8).
 5. Putuskan pemetaan footer link mati (usulan di plan).
+6. **(Revisi 1)** Daftar mentor asli (nama + peran, ganti 4 sampel di `mentors.ts`) + daftar kursus unggulan asli (judul + deskripsi + level, ganti 3 sampel di `courses.ts`). Kirim sebagai teks biasa — penggantian 5 menit karena terisolasi di data file.
 
 ---
 
 ## §15. Acceptance checklist
 
-Visual: nav paper + active blue; hero DynaPuff dominan + 5 notes + penguin + arrows; section gelap grid 24px subtil; kartu taktil (border ink + offset shadow); CTA primer selalu obvious. Motion: loops ambient jalan; reveal+stagger; drag notes desktop; pin HowItWorks desktop; tanpa layout shift; reduced-motion mematikan semua dekorasi (Lenis otomatis, sisanya gate manual). UX: CTA ganda tidak berebut (primer > sekunder); anchor dari `/course` mendarat benar; menu mobile; form newsletter tetap fungsi; footer disembunyikan di `/course/:uid` (perilaku lama). Teknis: `npm run build` + `lint` hijau; nol `dark:` tersisa; nol Lottie di landing baru; nol import Poppins/next-themes.
+Visual: nav paper + active blue; hero DynaPuff dominan + 5 notes tanpa ikon + penguin sekali + arrows; section gelap grid 24px subtil; kartu taktil (border ink + offset shadow); CTA primer selalu obvious; nol gambar eksternal; pastel deterministik.
+Motion: loops ambient jalan; reveal+stagger; drag notes desktop; pin HowItWorks desktop; tanpa layout shift; reduced-motion mematikan semua dekorasi (Lenis otomatis, sisanya gate manual).
+UX: CTA ganda tidak berebut (primer > sekunder); anchor dari `/course` mendarat benar; menu mobile; form newsletter tetap fungsi; footer disembunyikan di `/course/:uid` (perilaku lama); tanpa skeleton di landing; empty state hanya galeri; terminal: chips menjalankan perintah, perintah tak dikenal + `sudo` punya respons, boot sekali, `aria-live` polite, riwayat panah jalan.
+Teknis: `npm run build` + `lint` hijau; nol `dark:` tersisa; nol Lottie di landing baru; nol import Poppins/next-themes; **nol import `@/hooks`/`@/services` di layer landing**; gate frasa generik bersih; budget ikon dipatuhi.
 
 ---
 
@@ -194,4 +254,6 @@ Visual: nav paper + active blue; hero DynaPuff dominan + 5 notes + penguin + arr
 3. Pin GSAP di HowItWorks (usulanku) atau di Hero?
 4. Testimoni sampel + gallery empty-state boleh tampil sementara?
 5. Pemetaan footer link mati (detail di plan Task 9) disetujui?
-6. Cursor-doodle hero: pertahankan versi terbatas, atau buang sekalian?
+6. Penghapusan CursorDoodle + ikon di notes/MentorCard disetujui? (Budget §9.3.)
+7. Daftar mentor + kursus asli: kirim sekarang (langsung masuk dokumen) atau tetap sampel bertanda + launch gate?
+8. Setuju daftar perintah + output terminal (§9.4)?
