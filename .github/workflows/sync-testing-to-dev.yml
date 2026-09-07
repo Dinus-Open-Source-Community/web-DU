@@ -1,0 +1,73 @@
+name: Sync testing into dev-* branches
+
+# Keeps every dev-* branch up to date with testing.
+# Team flow: each developer works on their own dev-<name> branch and pushes it.
+# auto-merge-to-testing.yml merges it into testing, then this workflow merges
+# testing back into every dev-* branch. Before continuing work, each developer
+# only needs: git checkout dev-<name> && git pull origin dev-<name>
+
+on:
+  push:
+    branches:
+      - testing
+
+permissions:
+  contents: write
+
+# Serialize sync runs so concurrent testing pushes never race each other.
+concurrency:
+  group: sync-testing-to-dev
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge testing into all dev-* branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: testing
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync testing into each dev-* branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+
+          FAILED=""
+          for br in $(git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/dev-*' | sed 's|^origin/||'); do
+            echo "--- Syncing testing into $br ---"
+            git checkout -B "$br" "origin/$br"
+            if git merge --no-ff origin/testing -m "chore: sync testing into $br"; then
+              if git push origin "$br"; then
+                echo "Synced $br."
+              else
+                echo "::warning::Push rejected for $br (concurrent update). It will retry on the next run."
+                FAILED="$FAILED $br(push-rejected)"
+              fi
+            else
+              echo "::error::Merge conflict syncing testing into $br. Resolve it manually."
+              git merge --abort
+              FAILED="$FAILED $br(conflict)"
+            fi
+          done
+
+          {
+            echo "### Sync testing into dev-* result"
+            echo "- Source: \`testing\` @ \`${{ github.sha }}\`"
+            echo "- Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -n "$FAILED" ]; then
+            echo "::error::Branches needing manual attention:$FAILED"
+            exit 1
+          fi
+          echo "All dev-* branches in sync with testing."
+
+      - name: Summary on failure
+        if: failure()
+        run: |
+          echo "One or more dev-* branches need manual conflict resolution." >> "$GITHUB_STEP_SUMMARY"
