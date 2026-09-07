@@ -19,11 +19,11 @@ export const LANDING_COPY = {
     'ngoding bareng',
   ],
   notes: [
-    { title: 'Proyek OSS Nyata', copy: 'Kontribusi repo komunitas' },
-    { title: 'Mentor Praktisi', copy: 'Dibimbing yang sudah kerja' },
-    { title: 'Sprint & Code Review', copy: 'Simulasi tim sungguhan' },
-    { title: 'Sertifikat', copy: 'Bukti capstone resmi' },
-    { title: 'Komunitas Udinus', copy: 'Teman seperjuangan' },
+    { title: 'Real OSS Projects', copy: 'Contribute to community repos' },
+    { title: 'Industry Mentors', copy: 'Learn from practitioners' },
+    { title: 'Sprints & Code Review', copy: 'Team-based building' },
+    { title: 'Certificates', copy: 'Proof of your capstone' },
+    { title: 'Udinus Community', copy: 'Find your crew' },
   ],
   stack: {
     eyebrow: 'Our Stack',

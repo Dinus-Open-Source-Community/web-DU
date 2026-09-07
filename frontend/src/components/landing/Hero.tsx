@@ -67,8 +67,8 @@ function HeroNote({ title, icon, index, className }: HeroNoteProps) {
         className="absolute -top-2.5 left-1/2 h-[18px] w-[62px] -translate-x-1/2 -rotate-3 bg-[rgba(111,119,128,0.28)]"
       />
       <div className="flex items-center gap-2 text-ink-900">
-        <span className="shrink-0 [&_svg]:size-4">{icon}</span>
-        <p className="text-sm leading-snug font-extrabold">{title}</p>
+        <span className="shrink-0 [&_svg]:size-6">{icon}</span>
+        <p className="text-lg leading-snug font-extrabold">{title}</p>
       </div>
     </motion.div>
   )
@@ -191,12 +191,7 @@ export default function Hero() {
       if (!entrancePlayed.current) {
         entrancePlayed.current = true
         const tl = gsap.timeline()
-        tl.from('[data-hero-eyebrow]', { y: -16, opacity: 0, duration: 0.5, ease: 'power2.out' })
-          .from(
-            '[data-hero-title]',
-            { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' },
-            '-=0.2',
-          )
+        tl.from('[data-hero-title]', { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' })
           .from(
             '[data-hero-sub]',
             { y: 18, opacity: 0, duration: 0.5, ease: 'power2.out' },
@@ -281,18 +276,11 @@ export default function Hero() {
         }}
       />
 
-      {/* Konten center editorial (referensi CANVAS): eyebrow, wordmark, sub, CTA */}
+      {/* Konten center editorial (referensi CANVAS): wordmark, sub, CTA */}
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-        <p
-          data-hero-eyebrow
-          className="text-ink-500 text-xs font-extrabold tracking-[0.3em] uppercase"
-        >
-          {hero.eyebrow}
-        </p>
-
         <h1
           data-hero-title
-          className="font-display mt-5 text-[clamp(3.2rem,8vw,8.5rem)] leading-[0.88] font-bold text-ink-900 [text-wrap:balance]"
+          className="font-display text-[clamp(3.2rem,8vw,8.5rem)] leading-[0.88] font-bold text-ink-900 [text-wrap:balance]"
         >
           {hero.titleA}{' '}
           <span className="relative inline-block whitespace-nowrap">
