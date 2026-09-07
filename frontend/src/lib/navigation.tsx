@@ -74,23 +74,17 @@ export const Navigation: Record<string, NavItem[]> = {
 }
 
 export const footerLinks = {
-  Product: [
-    { label: 'Course', href: '/course' },
-    { label: 'Community', href: '/community' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'About', href: '/about' },
+  Jelajah: [
+    { label: 'Kursus', href: '/course' },
+    { label: 'Mentor', href: '/#mentor' },
+    { label: 'Cara Kerja', href: '/#cara-kerja' },
+    { label: 'Galeri', href: '/#galeri' },
   ],
-  Company: [
-    { label: 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Press', href: '/press' },
-    { label: 'Contact', href: '/contact' },
-  ],
-  Legal: [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-    { label: 'Disclaimer', href: '/disclaimer' },
+  Mulai: [
+    { label: 'Daftar', href: '/auth/register' },
+    { label: 'Masuk', href: '/auth/login' },
+    { label: 'Beranda', href: '/#top' },
+    { label: 'Kontak', href: '/#kontak' },
   ],
 }
 
@@ -103,8 +97,10 @@ export const socialLinks = [
 ]
 
 export const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Course', href: '/course' },
-  { label: 'Community', href: '/community' },
-  { label: 'About', href: '/about' },
+  { label: 'Beranda', href: '/#top' },
+  { label: 'Stack', href: '/#stack' },
+  { label: 'Mentor', href: '/#mentor' },
+  { label: 'Kursus', href: '/course' },
+  { label: 'Galeri', href: '/#galeri' },
+  { label: 'Kontak', href: '/#kontak' },
 ]
