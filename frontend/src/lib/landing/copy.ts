@@ -56,13 +56,13 @@ export const LANDING_COPY = {
     copy: "Click a command or type your own — nothing here can break.",
   },
   gallery: {
-    eyebrow: 'Galeri Kegiatan',
-    title: 'Suasana belajar yang hidup.',
-    copy: 'Dari kelas UI/UX sampai sprint web & DevOps — kumpul, ngoding, dan dokumentasi bareng.',
+    eyebrow: "Gallery",
+    title: "What learning actually looks like.",
+    copy: "From UI/UX classes to web & DevOps sprints — hanging out, coding, and documenting it all.",
   },
   testimonial: {
     eyebrow: "Reviews",
-    title: "Kata mereka yang udah jalan duluan.",
-    copy: "Cerita asli peserta, bukan brosur — dari yang mulai nol sampai akhirnya bisa bikin sendiri.",
+    title: "Word from those who started before you.",
+    copy: "Real stories from participants, not a brochure — from starting at zero to building on your own.",
   },
 } as const;
