@@ -4,7 +4,6 @@ import {
   useMotionValue,
   useReducedMotion,
   useScroll,
-  useSpring,
   useTransform,
   useVelocity,
 } from 'motion/react'
@@ -97,16 +96,22 @@ function VelocityTape({ items, baseVelocity = 60, className }: ScrollVelocityTap
   const baseX = useMotionValue(0)
   const { scrollY } = useScroll()
   const scrollVelocity = useVelocity(scrollY)
-  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 })
-  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 3], { clamp: false })
+  // Reaksi instan (~tanpa lag): mapping scroll velocity → faktor percepatan.
+  // Positif = scroll ke bawah, negatif = scroll ke atas (di-extrapolasi).
+  const velocityFactor = useTransform(scrollVelocity, [0, 1000], [0, 2.5], { clamp: false })
+  // Arah "sticky": ditentukan scroll terakhir; idle tetap melaju ke arah itu
+  // sampai user scroll berlawanan (scroll atas → kiri terus, scroll bawah → kanan).
+  const dirRef = useRef<1 | -1>(1)
 
   useAnimationFrame((_t, delta) => {
     if (copyWidth <= 0) return
-    let moveBy = baseVelocity * (delta / 1000)
     const factor = velocityFactor.get()
-    if (factor !== 0) moveBy *= factor
-    // Arah: scroll bawah (velocity positif) → maju; scroll atas → mundur.
-    baseX.set(baseX.get() + moveBy)
+    if (factor > 0.1) dirRef.current = 1
+    else if (factor < -0.1) dirRef.current = -1
+    // Idle: melaju pelan (baseVelocity) ke arah terakhir. Saat scroll: makin
+    // kencang, langsung turun ke idle begitu scroll berhenti (~satu frame).
+    const speed = baseVelocity * (1 + Math.min(Math.abs(factor), 4))
+    baseX.set(baseX.get() + dirRef.current * speed * (delta / 1000))
   })
 
   const x = useTransform(baseX, (v) => wrap(-copyWidth, 0, v))
