@@ -3,6 +3,7 @@ import Benefit from '../../components/home/Benefit'
 import Community from '../../components/home/Community'
 import Feature from '../../components/home/Feature'
 import Hero from '../../components/landing/Hero'
+import CourseSection from '../../components/landing/CourseSection'
 import MentorsSection from '../../components/landing/MentorsSection'
 import StackSection from '../../components/landing/StackSection'
 import GuestLayout from '../../components/layouts/GuestLayouts'
@@ -58,6 +59,7 @@ export default function Home() {
         <Hero />
         <StackSection />
         <MentorsSection />
+        <CourseSection />
         <Feature courses={featuredCourses} isLoading={isFeaturedCoursesLoading} />
         <Benefit DataFeatures={programFeatures} />
         <Community stats={communityStats} isLoading={isCommunityStatsLoading} />
