@@ -77,15 +77,12 @@ export const Navigation: Record<string, NavItem[]> = {
 export const footerLinks = {
   Jelajah: [
     { label: 'Kursus', href: '/course' },
-    { label: 'Mentor', href: '/#mentor' },
-    { label: 'Cara Kerja', href: '/#cara-kerja' },
     { label: 'Galeri', href: '/#galeri' },
   ],
   Mulai: [
     { label: 'Daftar', href: '/auth/register' },
     { label: 'Masuk', href: '/auth/login' },
     { label: 'Beranda', href: '/#top' },
-    { label: 'Kontak', href: '/#kontak' },
   ],
 }
 
@@ -133,12 +130,11 @@ export const socialLinks: BrandSocialLink[] = [
   { label: 'Email', href: '#', icon: Mail },
 ]
 
-/** Anchor navigasi landing. Terminal & Cerita diprioritaskan karena paling khas DOSCOM. */
+/** Anchor navigasi landing. Terminal diprioritaskan karena paling khas DOSCOM. */
 export const navLinks = [
   { label: 'Beranda', href: '/#top' },
   { label: 'Mentor', href: '/#mentor' },
   { label: 'Terminal', href: '/#terminal' },
-  { label: 'Cerita', href: '/#cerita' },
   { label: 'Kursus', href: '/course' },
-  { label: 'Kontak', href: '/#kontak' },
+  { label: 'Galeri', href: '/#galeri' },
 ]

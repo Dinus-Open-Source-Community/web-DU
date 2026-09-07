@@ -109,11 +109,19 @@ export default function Footer() {
               {socialLinks.map((social) => {
                 const Icon = social.icon
                 const isPlaceholder = social.href === '#'
-                return (
+                return isPlaceholder ? (
+                  <span
+                    key={social.label}
+                    aria-disabled="true"
+                    title={`${social.label} — segera hadir`}
+                    className="grid size-11 cursor-not-allowed place-items-center rounded-full border-2 border-dashed border-paper-white/25 bg-paper-white/10 text-paper-white/40"
+                  >
+                    <Icon className="size-5" />
+                  </span>
+                ) : (
                   <a
                     key={social.label}
                     href={social.href}
-                    aria-disabled={isPlaceholder || undefined}
                     aria-label={social.label}
                     className="text-ink-900 hover:text-brand-blue shadow-button hover:shadow-button-hover grid size-11 place-items-center rounded-full border-2 border-ink-900 bg-paper-white outline-none transition hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-paper-white/80">
                     <Icon className="size-5" />

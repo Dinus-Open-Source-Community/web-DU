@@ -34,14 +34,56 @@ type NavbarProps = {
 
 export default function Navbar({ auth }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<string>('')
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, userName, userEmail, userRole, userAvatar, onSignOut } = auth
 
+  // Scrollspy: tandai section yang sedang dikunjungi. Saat user scroll melewati
+  // sebuah section (id anchor di halaman home), link navbar-nya jadi aktif —
+  // mencerminkan posisi baca, bukan sekadar hash URL.
+  useEffect(() => {
+    const ids = navLinks
+      .map((l) => l.href)
+      .filter((h) => h.includes('#'))
+      .map((h) => h.slice(h.indexOf('#') + 1))
+      .filter((id) => document.getElementById(id))
+
+    if (ids.length === 0) return
+
+    const visible = new Map<string, number>()
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio)
+          else visible.delete(entry.target.id)
+        }
+        // Section dengan rasio paling besar = paling "sedang dibaca".
+        let best: string | null = null
+        let bestRatio = 0
+        for (const [id, ratio] of visible) {
+          if (ratio > bestRatio) {
+            best = id
+            bestRatio = ratio
+          }
+        }
+        setActiveSection(best ?? '')
+      },
+      { rootMargin: '-20% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] },
+    )
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) io.observe(el)
+    }
+    return () => io.disconnect()
+  }, [pathname])
+
   const isActive = (href: string): boolean => {
     const hashIndex = href.indexOf('#')
     if (hashIndex === -1) return pathname === href
-    return pathname === (href.slice(0, hashIndex) || '/') && hash === href.slice(hashIndex)
+    const id = href.slice(hashIndex + 1)
+    // Section aktif hasil scrollspy menang atas hash URL saat sedang dibaca.
+    return pathname === (href.slice(0, hashIndex) || '/') && activeSection === id
   }
 
   useEffect(() => {
@@ -155,14 +197,14 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex gap-3">
-              <Link to="/auth/register">
+              <Link to="/">
                 <Button variant="outline" className="px-7">
-                  Daftar
+                  Beranda
                 </Button>
               </Link>
-              <Link to="/auth/login">
+              <Link to="/">
                 <Button variant="default" className="px-7">
-                  Masuk
+                  Jelajahi
                 </Button>
               </Link>
             </div>
@@ -232,14 +274,14 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-3 pt-2">
-              <Link to="/auth/register" onClick={closeMenu}>
+              <Link to="/" onClick={closeMenu}>
                 <Button variant="outline" className="w-full">
-                  Daftar
+                  Beranda
                 </Button>
               </Link>
-              <Link to="/auth/login" onClick={closeMenu}>
+              <Link to="/" onClick={closeMenu}>
                 <Button variant="default" className="w-full">
-                  Masuk
+                  Jelajahi
                 </Button>
               </Link>
             </div>

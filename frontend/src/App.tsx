@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "./lib/routes.ts";
 import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
@@ -104,6 +104,13 @@ type RouteConfig = {
   lazy: boolean;
   roles?: UserRole[];
 };
+
+/**
+ * Lockdown landing: saat true, HANYA halaman home ("/") yang bisa diakses.
+ * Semua route lain di-redirect balik ke home. Ubah ke false untuk membuka
+ * kembali seluruh aplikasi (login/register/kursus/dashboard/admin/mentor).
+ */
+const LOCKDOWN_HOME_ONLY = true;
 
 const routeConfig: RouteConfig[] = [
   {
@@ -424,7 +431,17 @@ function App() {
             <Route
               key={route.path}
               path={route.path}
-              element={renderRouteElement(route)}
+              element={
+                // Lockdown: hanya landing ("/") yang bisa diakses. Semua route
+                // lain (login/register/kursus/dashboard/...) otomatis di-redirect
+                // balik ke home. Route tetap tersimpan di routeConfig — matikan
+                // flag LOCKDOWN_HOME_ONLY untuk membuka kembali seluruh app.
+                LOCKDOWN_HOME_ONLY && route.path !== ROUTES.home ? (
+                  <Navigate to={ROUTES.home} replace />
+                ) : (
+                  renderRouteElement(route)
+                )
+              }
             />
           ))}
         </Routes>
