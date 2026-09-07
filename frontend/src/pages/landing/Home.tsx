@@ -2,7 +2,7 @@ import type { IProgramFeatures } from '../../lib/types/utils'
 import Benefit from '../../components/home/Benefit'
 import Community from '../../components/home/Community'
 import Feature from '../../components/home/Feature'
-import Hero from '../../components/home/Hero'
+import Hero from '../../components/landing/Hero'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import {
   BookIcons,
