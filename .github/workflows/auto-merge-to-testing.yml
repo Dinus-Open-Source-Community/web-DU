@@ -1,0 +1,64 @@
+name: Auto Merge dev-* to testing
+
+# Automatically merges every push to a dev-* branch into the testing branch.
+# Convention: feature work happens on branches named dev-<name>, testing is the
+# integration branch, main stays production-only (see promote-to-production.yml).
+
+on:
+  push:
+    branches:
+      - 'dev-*'
+
+permissions:
+  contents: write
+
+# Serialize merges so two dev-* pushes racing each other never hit a
+# non-fast-forward push rejection on testing.
+concurrency:
+  group: auto-merge-testing
+  cancel-in-progress: false
+
+jobs:
+  merge-to-testing:
+    name: Merge ${{ github.ref_name }} into testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge branch into testing
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+
+          # Ensure the testing branch exists (create from main on first run).
+          if git ls-remote --exit-code --heads origin testing >/dev/null 2>&1; then
+            git checkout -B testing origin/testing
+          else
+            git checkout -b testing origin/main
+            git push -u origin testing
+          fi
+
+          echo "Merging origin/${{ github.ref_name }} into testing..."
+          if git merge --no-ff "origin/${{ github.ref_name }}" -m "chore: auto-merge ${{ github.ref_name }} into testing"; then
+            git push origin testing
+            echo "Merged and pushed successfully."
+          else
+            echo "::error::Merge conflict while merging ${{ github.ref_name }} into testing. Resolve it manually."
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Auto-merge result"
+            echo "- Source: \`${{ github.ref_name }}\` @ \`${{ github.sha }}\`"
+            echo "- Target: \`testing\`"
+            echo "- Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"

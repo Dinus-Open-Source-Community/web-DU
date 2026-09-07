@@ -1,0 +1,69 @@
+name: Promote testing to production (main)
+
+# Manually promotes the testing branch to main (production) once testing is stable.
+# Run it from the Actions tab via "Run workflow" and type PROMOTE to confirm.
+# Convention: main is production-only, never push feature branches to it directly.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type PROMOTE to confirm merging testing into main (production)'
+        required: true
+        default: 'PROMOTE'
+
+permissions:
+  contents: write
+
+# Serialize promotions; a second run waits instead of racing the first one.
+concurrency:
+  group: promote-to-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Merge testing into main
+    runs-on: ubuntu-latest
+    # Maps to the "production" environment in repo Settings > Environments.
+    # GitHub creates it on first run; add required reviewers there for extra safety.
+    environment: production
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "PROMOTE" ]; then
+            echo "::error::Confirmation mismatch. Type PROMOTE to proceed."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge testing into main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git checkout -B main origin/main
+
+          echo "Merging origin/testing into main..."
+          if git merge --no-ff origin/testing -m "chore: promote testing to production (main)"; then
+            git push origin main
+            echo "Promoted successfully."
+          else
+            echo "::error::Merge conflict while promoting testing to main. Resolve it manually."
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Promote to production result"
+            echo "- Source: \`testing\`"
+            echo "- Target: \`main\` (production)"
+            echo "- Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
