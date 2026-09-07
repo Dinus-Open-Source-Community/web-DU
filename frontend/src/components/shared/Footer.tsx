@@ -39,7 +39,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-ink-800 text-paper-white w-full overflow-hidden">
+    <footer className="bg-ink-800 text-paper-white sticky bottom-0 z-0 -mt-20 w-full overflow-hidden md:-mt-24">
       <TickerTape items={TICKER_ITEMS} />
 
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-12 sm:px-6 lg:px-8">

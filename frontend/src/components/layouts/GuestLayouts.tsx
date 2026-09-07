@@ -10,7 +10,7 @@ const GuestLayout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <Navbar auth={auth} />
-      {children}
+      <div className="relative z-10 bg-background">{children}</div>
       <Footer />
     </>
   )
