@@ -28,12 +28,10 @@ export default function MentorsSection() {
           className="mx-auto max-w-3xl"
         />
 
-        {/* Panggung mentor: 4 kartu, offset vertikal bergantian (imperfect, tidak
-            rata sempurna) — kartu di posisi genap sedikit lebih rendah. Offset di
-            wrapper luar supaya tidak konflik dgn transform Reveal di MentorCard. */}
-        <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Panggung mentor: 4 kartu kapsul foto, grid rapi 1→2→4. */}
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {LANDING_MENTORS.map((mentor, i) => (
-            <div key={mentor.name} className={i % 2 === 1 ? 'lg:translate-y-4' : undefined}>
+            <div key={mentor.name} className="h-[440px]">
               <MentorCard mentor={mentor} index={i} />
             </div>
           ))}

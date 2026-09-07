@@ -1,25 +1,51 @@
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
-import { mentorInitials, type LandingMentor } from '@/lib/landing/mentors'
+import type { LandingMentor } from '@/lib/landing/mentors'
 
-const AVATAR_BG = ['bg-note-yellow', 'bg-note-mint', 'bg-note-peach', 'bg-note-pink', 'bg-note-sky', 'bg-note-lavender'] as const
+/**
+ * Foto mentor yang tersedia di public/images (3 foto kegiatan DOSCOM).
+ * 4 mentor → dipetakan berurutan dengan modulo; foto landscape di-card portrait
+ * di-crop object-cover (fokus tengah-atas).
+ */
+const MENTOR_PHOTOS = [
+  '/images/_BW08644.JPG',
+  '/images/_BW08702.JPG',
+  '/images/_BW08640.JPG',
+] as const
+
+/** Latar fallback di belakang foto (terlihat saat gambar lambat/gagal). */
+const FALLBACK_BG = ['bg-note-yellow', 'bg-note-mint', 'bg-note-peach', 'bg-note-pink'] as const
 
 type MentorCardProps = { mentor: LandingMentor; index?: number; className?: string }
 
 export default function MentorCard({ mentor, index = 0, className }: MentorCardProps) {
+  const photo = MENTOR_PHOTOS[index % MENTOR_PHOTOS.length]
   return (
-    <Reveal delay={(index % 4) * 0.1} className={className}>
-      <article className="flex h-full flex-col items-center rounded-[20px] border-2 border-ink-900 bg-paper-white px-6 py-8 text-center shadow-paper transition-transform hover:-translate-y-1">
+    <Reveal delay={(index % 4) * 0.1} className={cn('h-full', className)}>
+      <article className="group relative h-full overflow-hidden rounded-[36px] border-2 border-ink-900 shadow-paper transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+        {/* Foto full-bleed; fallback pastel di belakangnya */}
+        <div className={cn('absolute inset-0', FALLBACK_BG[index % FALLBACK_BG.length])} />
+        <img
+          src={photo}
+          alt={mentor.name}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover object-[center_22%] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+        />
+
+        {/* Overlay gelap di bawah untuk keterbacaan teks putih (satu-satunya
+            gradient — fungsional, bukan dekoratif) */}
         <div
-          className={cn(
-            'flex size-20 items-center justify-center rounded-full border-2 border-ink-900 font-display text-2xl font-bold text-ink-900',
-            AVATAR_BG[index % AVATAR_BG.length],
-          )}
-        >
-          {mentorInitials(mentor.name)}
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent"
+        />
+
+        {/* Nama + role di atas overlay */}
+        <div className="absolute inset-x-0 bottom-0 p-6">
+          <h3 className="font-display text-2xl leading-tight font-bold text-paper-white">
+            {mentor.name}
+          </h3>
+          <p className="mt-1 text-sm font-bold text-paper-white/70">{mentor.role}</p>
         </div>
-        <h3 className="mt-4 font-display text-xl font-bold text-ink-900">{mentor.name}</h3>
-        <p className="mt-1 text-sm font-bold text-brand-ink">{mentor.role}</p>
       </article>
     </Reveal>
   )
