@@ -7,8 +7,8 @@ type DoodleArrowProps = {
 
 const PATHS: Record<NonNullable<DoodleArrowProps['variant']>, { body: string; head: string }> = {
   right: {
-    body: 'M6 32 C 44 6, 82 6, 106 24',
-    head: 'M94 15 L107 25 L93 33',
+    body: 'M10 70 C 28 32, 70 10, 108 32',
+    head: 'M 92 22 L108 32 L 95 48',
   },
   down: {
     body: 'M20 6 C 30 44, 30 82, 22 106',
