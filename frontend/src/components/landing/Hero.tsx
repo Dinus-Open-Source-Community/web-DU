@@ -11,7 +11,6 @@ import { useState, type MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import DoodleArrow from '@/components/playful/DoodleArrow'
 import HandUnderline from '@/components/playful/HandUnderline'
 import PenguinMascot from '@/components/playful/PenguinMascot'
 import Reveal from '@/components/playful/Reveal'
@@ -122,17 +121,56 @@ export default function Hero() {
         </div>
       </motion.div>
 
-      {/* Lapisan B: doodle arrows (parallax arah berlawanan) */}
+      {/* Lapisan B: doodle arrows custom (parallax arah berlawanan) */}
       <motion.div
         aria-hidden
         style={parallaxOn ? { x: layerBx, y: layerBy } : undefined}
         className="pointer-events-none absolute inset-0 z-0 hidden lg:block"
       >
-        <DoodleArrow variant="right" className="absolute top-[46%] left-[6%] w-20 -rotate-12" />
-        <DoodleArrow
-          variant="loop"
-          className="absolute top-[30%] right-[12%] w-20 rotate-12 text-brand-ink"
-        />
+        {/* custom path 1 — lengkung C turun kiri (sesuai referensi) */}
+        <svg
+          aria-hidden
+          viewBox="0 0 120 120"
+          className="absolute top-[42%] left-[7%] w-[92px] -rotate-6 animate-wiggle text-ink-900"
+          fill="none"
+        >
+          <path
+            d="M 88 8 C 118 24, 118 78, 48 108"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="hero-arrow-path"
+          />
+          <path
+            d="M 34 90 L 44 112 L 64 96"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {/* custom path 2 — loop kecil kanan */}
+        <svg
+          aria-hidden
+          viewBox="0 0 120 120"
+          className="absolute top-[28%] right-[11%] w-[84px] rotate-12 animate-wiggle text-brand-ink"
+          fill="none"
+        >
+          <path
+            d="M 12 58 C 18 18, 92 14, 98 52 C 102 74, 72 86, 54 70"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 44 58 L 54 72 L 66 60"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </motion.div>
 
       {/* Pinguin + easter egg */}
