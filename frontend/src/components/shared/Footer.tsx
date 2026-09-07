@@ -3,20 +3,9 @@ import { Link, useLocation } from 'react-router-dom'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { footerLinks, socialLinks } from '../../lib/navigation'
-import TickerTape from '../playful/TickerTape'
 import PenguinMascot from '../playful/PenguinMascot'
 import Reveal from '../playful/Reveal'
-import { StickerStar, StickerSparkle, StickerTape } from '../playful/Stickers'
-
-const TICKER_ITEMS: string[] = [
-  'open source',
-  'sprint',
-  'code review',
-  'mentoring',
-  'portofolio',
-  'komunitas udinus',
-  'ngoding bareng',
-]
+import { StickerTape } from '../playful/Stickers'
 
 const LINK_NOTE_PALETTE = [
   { bg: 'bg-note-mint', tilt: '-rotate-1 lg:-translate-x-2' },
@@ -40,9 +29,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-ink-800 text-paper-white sticky bottom-0 z-0 -mt-20 w-full overflow-hidden md:-mt-24">
-      <TickerTape items={TICKER_ITEMS} />
-
-      <div className="mx-auto max-w-7xl px-4 pt-16 pb-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 lg:px-8">
         {/* Papan pengumuman + kolom jelajah */}
         <div className="grid gap-x-12 gap-y-20 lg:grid-cols-12">
           <Reveal className="lg:col-span-7">
@@ -143,8 +130,6 @@ export default function Footer() {
 
         {/* Cap DOSCOM */}
         <div aria-hidden className="pointer-events-none relative mt-2 flex items-end justify-center overflow-hidden select-none">
-          <StickerSparkle twinkle className="absolute top-4 left-[6%] size-6 text-brand-blue/60 sm:size-8" />
-          <StickerStar className="absolute right-[8%] bottom-6 size-5 text-paper-white/25 sm:size-7" />
           <span className="font-display text-paper-white/20 text-[clamp(3.5rem,14vw,13rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap">
             DOSCOM
           </span>
