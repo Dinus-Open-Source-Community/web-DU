@@ -56,7 +56,7 @@ export default function TestimonialSection() {
                   <div className="relative size-11 shrink-0 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel shadow-button sm:size-12">
                     <img
                       src={item.photo}
-                      alt={`Foto ${item.name}`}
+                      alt={`${item.name} — ${item.role}`}
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
                     />

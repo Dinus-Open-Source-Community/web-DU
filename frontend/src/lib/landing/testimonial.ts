@@ -7,29 +7,30 @@ export type Testimonial = {
 }
 
 /**
- * Testimoni mentor DOSCOM — nama sama dengan roster mentor supaya konsisten.
- * Kutipan ditulis wajar: pengalaman belajar, komunitas, dan open source.
+ * Testimoni mentor DOSCOM — nama sama dengan roster mentor supaya konsisten
+ * (alfi/nafan/jariz). Kutipan ditulis wajar: pengalaman belajar, komunitas,
+ * dan open source.
  */
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      'Dulu saya juga mulai dari nol dan malu nanya. Yang bikin beda di DOSCOM: setiap PR di-review dengan sabar, jadi saya belajar dari kesalahan yang sama hanya sekali.',
-    name: 'jar',
-    role: 'Mentor Web Development',
-    photo: '/images/_BW08644.JPG',
+      'Aku mulai dari nol dan malu nanya. Yang bikin beda di DOSCOM: tiap PR di-review dengan sabar, jadi aku belajar dari kesalahan yang sama hanya sekali.',
+    name: 'alfi',
+    role: 'Next.js Developer',
+    photo: '/images/alfi.webp',
   },
   {
     quote:
-      'Waktu masih peserta, sprint pertama saya berantakan — deadline molor, model nggak jalan. Dari situ justru saya belajar kalau error itu bagian dari proses, bukan tanda buat berhenti.',
-    name: 'zapp',
-    role: 'Mentor Machine Learning',
-    photo: '/images/_BW08702.JPG',
+      'Sprint pertamaku berantakan — deadline molor, kode nggak jalan. Dari situ justru aku belajar: error itu bagian dari proses, bukan tanda buat berhenti.',
+    name: 'nafan',
+    role: 'Laravel Developer',
+    photo: '/images/nafan.webp',
   },
   {
     quote:
-      'Kontribusi pertama saya cuma benerin typo di dokumentasi. Kecil, tapi di-merge. Enam bulan kemudian saya maintainer. DOSCOM mengajarkan: mulai saja, sisanya nyusul.',
-    name: 'naf',
-    role: 'Mentor Open Source',
-    photo: '/images/_BW08640.JPG',
+      'Kontribusi pertamaku cuma benerin typo di dokumentasi. Kecil, tapi di-merge. Enam bulan kemudian aku maintainer. DOSCOM ngajarin: mulai aja, sisanya nyusul.',
+    name: 'jariz',
+    role: 'Next.js Developer',
+    photo: '/images/jariz.webp',
   },
 ]

@@ -5,12 +5,12 @@ import type { LandingMentor } from '@/lib/landing/mentors'
 
 /**
  * Foto mentor — 3 mentor, 3 foto, urutannya sengaja disamakan dengan
- * TESTIMONIALS (jar/zapp/naf) supaya wajah sama di dua tempat.
+ * TESTIMONIALS (alfi/nafan/jariz) supaya wajah sama di dua tempat.
  */
 const MENTOR_PHOTOS = [
-  '/images/_BW08644.JPG',
-  '/images/_BW08702.JPG',
-  '/images/_BW08640.JPG',
+  '/images/alfi.webp',
+  '/images/nafan.webp',
+  '/images/jariz.webp',
 ] as const
 
 /** Latar fallback di belakang foto (terlihat saat gambar lambat/gagal). */
@@ -38,7 +38,7 @@ export default function MentorCard({ mentor, index = 0, active = false, classNam
         <div className={cn('absolute inset-0', FALLBACK_BG[index % FALLBACK_BG.length])} />
         <img
           src={photo}
-          alt={`Foto ${mentor.name} — ${mentor.role}`}
+          alt={`${mentor.name} — ${mentor.role}`}
           loading="lazy"
           className={cn(
             'absolute inset-0 h-full w-full object-cover object-[center_30%] transition-all duration-700 ease-out',

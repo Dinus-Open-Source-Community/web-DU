@@ -47,11 +47,11 @@ export default function MentorsSection() {
               03
             </p>
             <p className="text-ink-400 mt-2 text-right text-xs font-extrabold tracking-[0.2em] uppercase">
-              mentor aktif · tiga jalur belajar
+              active mentors · next.js & laravel
             </p>
           </div>
           <p className="text-ink-400 mt-3 text-xs font-extrabold tracking-[0.2em] uppercase lg:hidden">
-            mentor aktif · tiga jalur belajar
+            active mentors · next.js & laravel
           </p>
         </div>
 
