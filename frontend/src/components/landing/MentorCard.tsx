@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
-import { StickerTape } from '@/components/playful/Stickers'
 import type { LandingMentor } from '@/lib/landing/mentors'
 
 /**
@@ -52,14 +51,6 @@ export default function MentorCard({ mentor, index = 0, active = false, classNam
           className={cn(
             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition-opacity duration-500',
             active ? 'h-2/3 opacity-100' : 'h-2/3 opacity-60',
-          )}
-        />
-
-        {/* Tape pojok — hanya mencolok saat kartu aktif */}
-        <StickerTape
-          className={cn(
-            'absolute top-3 left-1/2 -translate-x-1/2 transition-opacity duration-300',
-            active ? 'opacity-100' : 'opacity-0',
           )}
         />
 

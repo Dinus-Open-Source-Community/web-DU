@@ -4,78 +4,62 @@ export type GalleryImage = {
   alt: string
   /** Caption cerita yang tampil di kartu (bukan duplikat alt panjang). */
   caption: string
+  /** Override varian kulit kartu (0..5). Jika kosong → dipakai `globalIdx % 6`. */
+  variant?: 0 | 1 | 2 | 3 | 4 | 5
 }
 
 /**
- * Foto kegiatan DOSCOM dari public/images (3 file, dipakai bergantian).
- * LAUNCH GATE: ganti/rapikan saat kurasi foto asli tersedia. Caption bervariasi
- * per entri agar tiap kartu scrapbook punya cerita sendiri.
+ * Galeri DOSCOM — 9 foto kegiatan terbaru.
+ * Semua foto dari public/images yang sebelumnya uncommitted kini masuk galeri
+ * (jariz & alfi dihapus sesuai permintaan — sisa 9). awward.webp di posisi
+ * terakhir sebagai penutup.
+ * Alt ringkas, caption bercerita dengan nada komunitas — bukan AI slop.
  */
-const SRC = {
-  a: '/images/_BW08644.JPG',
-  b: '/images/_BW08702.JPG',
-  c: '/images/_BW08640.JPG',
-} as const
-
 export const GALLERY_IMAGES: GalleryImage[] = [
   {
-    src: SRC.a,
-    alt: 'Peserta kumpul melingkar di sekretariat',
-    caption: 'Kumpul perdana — laptop terbuka, obrolan nyambung.',
+    src: '/images/panit1.webp',
+    alt: 'Panitia DOSCOM berfoto bersama di depan backdrop kegiatan',
+    caption: 'Tim di balik layar — yang bikin acara jalan tanpa drama.',
+    variant: 3,
   },
   {
-    src: SRC.b,
-    alt: 'Mentor mendampingi peserta memperbaiki kode',
-    caption: 'Sesi mentoring: error yang tadi bikin pusing, beres bareng.',
+    src: '/images/crevmed1.webp',
+    alt: 'Peserta kelas UI/UX merancang wireframe di Figma',
+    caption: 'Kelas UI/UX: dari coretan kertas sampai wireframe yang klikable.',
   },
   {
-    src: SRC.c,
-    alt: 'Peserta menunjuk layar saat demo proyek',
-    caption: 'Demo hasil sprint — dari ide jadi barang yang bisa diklik.',
+    src: '/images/crevmed2.webp',
+    alt: 'Diskusi desain antarmuka di depan layar Figma',
+    caption: 'Revisi desain ke-7 — yang penting user nggak bingung.',
   },
   {
-    src: SRC.a,
-    alt: 'Suasana ruang sekretariat saat kumpul',
-    caption: 'Sticky notes di dinding, tawa di pojok ruangan.',
+    src: '/images/crevmed3.webp',
+    alt: 'Peserta mempresentasikan prototipe UI di depan kelas',
+    caption: 'Prototipe dipresentasikan, feedback langsung — bukan tebak-tebakan.',
   },
   {
-    src: SRC.b,
-    alt: 'Layar laptop dengan kode saat mentoring',
-    caption: 'Code review pertama: menegangkan, lalu nagih.',
+    src: '/images/web.JPG',
+    alt: 'Peserta kelas web development di depan layar kode',
+    caption: 'Kelas web: dari HTML sampai deploy — bareng-bareng.',
   },
   {
-    src: SRC.c,
-    alt: 'Peserta antusias saat presentasi',
-    caption: 'PR pertama di-merge — rasanya seperti menang lomba.',
+    src: '/images/random.webp',
+    alt: 'Momen candid peserta tertawa bersama di sela kegiatan',
+    caption: 'Random tapi ngena — tawa paling jujur setelah sprint.',
   },
   {
-    src: SRC.a,
-    alt: 'Peserta belajar bareng di meja panjang',
-    caption: 'Belajar bareng: yang bisa, ngajarin yang baru mulai.',
+    src: '/images/random2.webp',
+    alt: 'Suasana santai peserta setelah sesi kelas',
+    caption: 'Selesai sprint, waktunya ngobrol santai dan tukeran cerita.',
   },
   {
-    src: SRC.b,
-    alt: 'Mentor menjelaskan di samping peserta',
-    caption: 'Pertanyaan "kalau gini gimana?" — selalu ada jawabannya.',
+    src: '/images/closed.webp',
+    alt: 'Foto bersama penutupan kegiatan DOSCOM',
+    caption: 'Penutupan bukan perpisahan — sampai jumpa di sprint berikutnya.',
   },
   {
-    src: SRC.c,
-    alt: 'Demo proyek di depan layar besar',
-    caption: 'Sprint dua minggu, hasilnya dipamerin ke semua.',
-  },
-  {
-    src: SRC.a,
-    alt: 'Kegiatan komunitas di sekretariat DOSCOM',
-    caption: 'Ruang ini tempat banyak cerita dimulai.',
-  },
-  {
-    src: SRC.b,
-    alt: 'Peserta fokus di depan laptop',
-    caption: 'Mode fokus: headset, kopi, dan satu masalah yang harus takluk.',
-  },
-  {
-    src: SRC.c,
-    alt: 'Sorak peserta setelah demo sukses',
-    caption: 'Launch! Yang tadinya cuma rencana, sekarang live.',
+    src: '/images/awward.webp',
+    alt: 'Momen penerimaan penghargaan peserta terbaik DOSCOM di atas panggung',
+    caption: 'Peserta terbaik — yang paling konsisten dari sprint pertama sampai akhir, akhirnya dipanggil ke panggung penghargaan.',
   },
 ]

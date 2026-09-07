@@ -21,17 +21,19 @@ export const LANDING_COPY = {
     "learn by building real things",
   ],
   notes: [
-    { title: "Proyek OSS asli", copy: "Kontribusi ke repo komunitas beneran." },
+    { title: "Real OSS Projects", copy: "Contribute to real community repos." },
     {
-      title: "Mentor praktisi",
-      copy: "Belajar dari yang tiap hari di lapangan.",
+      title: "Mentor Practitioners",
+      copy: "Learn from people who ship every day.",
     },
     {
-      title: "Sprint & code review",
-      copy: "Kode kamu dibaca, bukan cuma dinilai.",
+      title: "Sprints & Code Review",
+      copy: "Your code gets read, not just graded.",
     },
-    { title: "Sertifikat capstone", copy: "Bukti nyata di akhir program." },
-    { title: "Komunitas Udinus", copy: "Temukan kru ngodingmu." },
+    {
+      title: "Capstone Certificate",
+      copy: "Tangible proof at the end of the program.",
+    },
   ],
   stack: {
     eyebrow: "Our Stack",

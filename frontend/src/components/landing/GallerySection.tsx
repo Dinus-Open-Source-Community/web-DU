@@ -214,10 +214,10 @@ function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
       <div aria-hidden className="absolute inset-x-0 top-0 z-10 flex justify-center">
         <div className="h-[7px] w-full border-y-2 border-dashed border-[#8A6A45]/50" />
       </div>
-      {/* Foto kecil "digantung" */}
-      <div className="mx-auto mt-5 w-4/5 overflow-hidden rounded-full border-[3px] border-paper-white shadow-paper sm:mt-7">
+      {/* Foto "digantung" — kotak, bukan bulat */}
+      <div className="mx-auto mt-5 w-4/5 overflow-hidden rounded-[12px] border-[3px] border-paper-white shadow-paper sm:mt-7">
         <div className="overflow-hidden">
-          <Photo img={img} aspect="aspect-square" mobileAspect={mobileAspect ?? 'aspect-[4/3]'} />
+          <Photo img={img} aspect="aspect-[4/3]" mobileAspect={mobileAspect ?? 'aspect-[4/3]'} />
         </div>
       </div>
       <figcaption className="flex flex-1 items-end px-3 pt-2 pb-3 sm:pt-3">
@@ -271,7 +271,7 @@ function ScrapbookCard({
   aspect: string
   mobileAspect?: string
 }) {
-  const variant = globalIdx % 6
+  const variant = img.variant ?? globalIdx % 6
   if (variant === 0) return <TornPaperCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
   if (variant === 1) return <NotebookCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
   if (variant === 2) return <PolaroidColorCard img={img} aspect={aspect} idx={globalIdx} mobileAspect={mobileAspect} />
