@@ -263,7 +263,7 @@ export default function Hero() {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className="relative overflow-hidden bg-paper-white pt-28 pb-24 md:pt-40 md:pb-36"
+      className="relative overflow-hidden bg-paper-white pt-24 pb-24 sm:pt-28 lg:pt-40 lg:pb-36"
     >
       {/* Latar: grid kertas grafik halus */}
       <div
@@ -290,7 +290,7 @@ export default function Hero() {
         </h1>
 
         <div data-hero-sub className="mx-auto mt-6 max-w-2xl sm:mt-8">
-          <p className="text-base leading-relaxed text-ink-600 sm:text-lg md:text-xl">{hero.sub}</p>
+          <p className="text-base leading-relaxed text-ink-600 sm:text-lg lg:text-xl">{hero.sub}</p>
           <Footprints className="mt-4 justify-center opacity-60 [&_svg]:w-4" />
         </div>
 
@@ -352,11 +352,12 @@ export default function Hero() {
         })}
       </div>
 
-      {/* Pinguin — mengintip kanan-bawah */}
+      {/* Pinguin — mengintip kanan-bawah (desktop lg+). Tablet memakai blok
+          mengalir di bawah (lihat blok ajakan) supaya tidak menutupi CTA. */}
       <div
         className={cn(
           'pointer-events-none absolute inset-x-0 bottom-0 z-10',
-          'hidden justify-end pr-[5%] md:flex',
+          'hidden justify-end pr-[5%] lg:flex',
         )}
       >
         <div className="pointer-events-auto relative">
@@ -371,7 +372,7 @@ export default function Hero() {
               whileHover={!reduceMotion ? { rotate: -3, scale: 1.04 } : undefined}
               whileTap={!reduceMotion ? { scale: 0.94 } : undefined}
             >
-              <PenguinMascot className="w-32 -rotate-2 md:w-40" />
+              <PenguinMascot className="w-32 -rotate-2 lg:w-40" />
             </motion.div>
           </button>
           <AnimatePresence>
@@ -391,17 +392,18 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Ajakan mobile: pinguin + teks */}
-      <div className="relative z-10 mx-auto mt-10 max-w-md px-6 text-center sm:mt-12 md:hidden">
+      {/* Ajakan pinguin — mobile & tablet (lg+ memakai pinguin absolute kanan).
+          Mengalir di bawah konten → tidak pernah menutupi CTA. */}
+      <div className="relative z-10 mx-auto mt-10 max-w-md px-6 text-center sm:mt-12 lg:hidden">
         <button
           type="button"
           onClick={boop}
           aria-label="Sapa pinguin"
           className="mx-auto block cursor-pointer bg-transparent"
         >
-          <PenguinMascot className="w-24 -rotate-3 sm:w-28" />
+          <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
         </button>
-        <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase">
+        <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase md:text-xs">
           ketuk pinguin 5x — ada rahasia
         </p>
       </div>
