@@ -2,14 +2,13 @@ import {
   AnimatePresence,
   motion,
   useAnimation,
-  useMotionValue,
   useReducedMotion,
-  useSpring,
-  useTransform,
 } from 'motion/react'
-import { useState, type MouseEvent } from 'react'
+import { useState, type MouseEvent, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useGSAP } from '@gsap/react'
+import { gsap } from 'gsap'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import Footprints from '@/components/playful/Footprints'
@@ -18,6 +17,8 @@ import PenguinMascot from '@/components/playful/PenguinMascot'
 import Reveal from '@/components/playful/Reveal'
 import { StickerStar, StickerTape } from '@/components/playful/Stickers'
 import { LANDING_COPY } from '@/lib/landing/copy'
+
+gsap.registerPlugin(useGSAP)
 
 const EGG_CLICKS = 5
 
@@ -34,7 +35,6 @@ type HeroNoteProps = {
   title: string
   copy: string
   index: number
-  floatDelay: string
   className?: string
 }
 
@@ -42,45 +42,35 @@ type HeroNoteProps = {
  * Sticky note hero — versi lokal (bukan StickyNote bawaan) supaya drag
  * benar-benar bebas: snap kembali ke asal, elastis, bisa "dilempar".
  *
- * Tiga lapis transform yang tidak saling konflik:
- *  - parent .animate-float (CSS, idle melayang lambat)
- *  - motion drag (inline transform saat digeser)
- * Lapisan parallax ada di grandparent (motion layer x/y).
+ * Transform berlapis tanpa konflik (tiap lapis elemen berbeda):
+ *  - data-hero-note (div, GSAP loop): "kertas bernapas" translate/rotate mikro
+ *  - div absolute (ref wrap): parallax mouse (gsap.to)
+ *  - HeroNote motion.div (child): drag elastis + hover lift
  */
-function HeroNote({ title, copy, index, floatDelay, className }: HeroNoteProps) {
+function HeroNote({ title, copy, index, className }: HeroNoteProps) {
   const reduceMotion = useReducedMotion()
   const slot = index % NOTE_BG.length
   return (
-    <div
+    <motion.div
+      drag={!reduceMotion}
+      dragSnapToOrigin
+      dragElastic={0.55}
+      whileDrag={!reduceMotion ? { scale: 1.08, rotate: 0, cursor: 'grabbing' } : undefined}
+      whileHover={!reduceMotion ? { scale: 1.05, rotate: 0 } : undefined}
+      whileTap={!reduceMotion ? { scale: 0.95 } : undefined}
       className={cn(
-        !reduceMotion && 'animate-float',
+        'relative min-w-40 cursor-grab touch-none rounded-sm px-5 pt-6 pb-4 shadow-paper select-none',
+        NOTE_BG[slot],
         className,
       )}
-      style={!reduceMotion ? { animationDelay: floatDelay, animationDuration: '5.5s' } : undefined}
     >
-      <motion.div
-        drag={!reduceMotion}
-        dragSnapToOrigin
-        dragElastic={0.55}
-        whileDrag={!reduceMotion ? { scale: 1.08, rotate: 0, cursor: 'grabbing' } : undefined}
-        whileHover={!reduceMotion ? { scale: 1.05, rotate: 0 } : undefined}
-        whileTap={!reduceMotion ? { scale: 0.95 } : undefined}
-        initial={!reduceMotion ? { opacity: 0, y: 24, rotate: 6 } : undefined}
-        animate={!reduceMotion ? { opacity: 1, y: 0, rotate: 0 } : undefined}
-        transition={{ type: 'spring', stiffness: 220, damping: 22 }}
-        className={cn(
-          'relative min-w-40 cursor-grab touch-none rounded-sm px-5 pt-6 pb-4 shadow-paper select-none',
-          NOTE_BG[slot],
-        )}
-      >
-        <span
-          aria-hidden
-          className="absolute -top-2.5 left-1/2 h-[18px] w-[62px] -translate-x-1/2 -rotate-3 bg-[rgba(111,119,128,0.28)]"
-        />
-        <p className="text-sm leading-snug font-extrabold text-ink-900">{title}</p>
-        {copy ? <p className="mt-1 text-xs leading-snug text-ink-900/80">{copy}</p> : null}
-      </motion.div>
-    </div>
+      <span
+        aria-hidden
+        className="absolute -top-2.5 left-1/2 h-[18px] w-[62px] -translate-x-1/2 -rotate-3 bg-[rgba(111,119,128,0.28)]"
+      />
+      <p className="text-sm leading-snug font-extrabold text-ink-900">{title}</p>
+      {copy ? <p className="mt-1 text-xs leading-snug text-ink-900/80">{copy}</p> : null}
+    </motion.div>
   )
 }
 
@@ -88,41 +78,41 @@ type HeroNotePlacement = {
   noteIndex: number
   wrapClass: string
   tiltClass: string
-  floatDelay: string
+  /** Amplitudo gerak GSAP (px / deg / scale) — beda tiap note agar tak sinkron. */
+  float: { y: number; rot: number }
 }
 
 const NOTE_PLACEMENTS: HeroNotePlacement[] = [
-  // Gugusan organik di dalam kolom kanan (kolom hanya muncul di lg+),
-  // jadi semua note bisa tampil bersama tanpa tabrakan teks.
+  // Gugusan organik di kolom kanan; fase & amplitudo beda → "kertas bernapas" tak serempak.
   {
     noteIndex: 0,
     wrapClass: 'top-[4%] left-[8%]',
     tiltClass: '-rotate-3',
-    floatDelay: '0s',
+    float: { y: -9, rot: 2.5 },
   },
   {
     noteIndex: 1,
     wrapClass: 'top-[30%] right-[2%]',
     tiltClass: 'rotate-2',
-    floatDelay: '0.8s',
+    float: { y: 7, rot: -2 },
   },
   {
     noteIndex: 2,
     wrapClass: 'top-[56%] left-[2%]',
     tiltClass: '-rotate-2',
-    floatDelay: '1.6s',
+    float: { y: -6, rot: 3 },
   },
   {
     noteIndex: 3,
     wrapClass: 'bottom-[20%] right-[2%]',
     tiltClass: 'rotate-3',
-    floatDelay: '2.4s',
+    float: { y: 9, rot: -2.5 },
   },
   {
     noteIndex: 4,
     wrapClass: 'bottom-[10%] left-[30%]',
     tiltClass: 'rotate-1',
-    floatDelay: '3.2s',
+    float: { y: -8, rot: 2 },
   },
 ]
 
@@ -132,13 +122,8 @@ export default function Hero() {
   const finePointer =
     typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
   const parallaxOn = !reduceMotion && finePointer
-
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const sx = useSpring(mx, { stiffness: 60, damping: 20 })
-  const sy = useSpring(my, { stiffness: 60, damping: 20 })
-  const layerAx = useTransform(sx, (v) => v * 14)
-  const layerAy = useTransform(sy, (v) => v * 10)
+  const sectionRef = useRef<HTMLElement>(null)
+  const noteWrapRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const [boops, setBoops] = useState(0)
   const [eggOn, setEggOn] = useState(false)
@@ -147,8 +132,26 @@ export default function Hero() {
   const onMouseMove = (e: MouseEvent<HTMLElement>): void => {
     if (!parallaxOn) return
     const rect = e.currentTarget.getBoundingClientRect()
-    mx.set(((e.clientX - rect.left) / rect.width - 0.5) * 2)
-    my.set(((e.clientY - rect.top) / rect.height - 0.5) * 2)
+    const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+    const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2
+    const wraps = noteWrapRefs.current.filter((el): el is HTMLDivElement => el !== null)
+    gsap.to(wraps, {
+      x: nx * 14,
+      y: ny * 10,
+      duration: 0.6,
+      ease: 'power2.out',
+      overwrite: 'auto',
+    })
+  }
+
+  const onMouseLeave = (): void => {
+    if (!parallaxOn) return
+    gsap.to(noteWrapRefs.current.filter((el): el is HTMLDivElement => el !== null), {
+      x: 0,
+      y: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+    })
   }
 
   const boop = (): void => {
@@ -164,10 +167,47 @@ export default function Hero() {
     }
   }
 
+  // Loop GSAP utama: "kertas bernapas" — tiap note orbit mikro dengan fase beda.
+  // Mati total saat reduced-motion. Hanya transform/opacity.
+  useGSAP(
+    () => {
+      if (reduceMotion) return
+      const wraps = noteWrapRefs.current.filter((el): el is HTMLDivElement => el !== null)
+      if (wraps.length === 0) return
+
+      const tl = gsap.timeline({ repeat: -1, yoyo: true })
+      wraps.forEach((wrap, i) => {
+        const amp = NOTE_PLACEMENTS[i % NOTE_PLACEMENTS.length].float
+        const noteEl = wrap.querySelector('[data-hero-note]')
+        if (!noteEl) return
+        tl.to(
+          noteEl,
+          {
+            y: amp.y,
+            rotate: amp.rot,
+            duration: 2.2,
+            ease: 'sine.inOut',
+            delay: i * 0.4,
+          },
+          0,
+        )
+      })
+      // denyut sangat halus pada headline "itu sepi." — tidak pernah >0.8deg
+      tl.to(
+        '[data-hero-titleb]',
+        { rotate: 0.7, duration: 3.6, ease: 'sine.inOut' },
+        0,
+      )
+    },
+    { scope: sectionRef },
+  )
+
   return (
     <section
       id="top"
+      ref={sectionRef}
       onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       className="relative overflow-hidden bg-paper-white pt-32 pb-32 md:pt-44 md:pb-40"
     >
       {/* Latar: grid kertas grafik halus */}
@@ -199,7 +239,10 @@ export default function Hero() {
                 <span className="inline-block transition-transform duration-300 ease-out hover:-rotate-1">
                   {hero.titleA}
                 </span>{' '}
-                <span className="relative inline-block transition-transform duration-300 ease-out hover:rotate-1">
+                <span
+                  data-hero-titleb
+                  className="relative inline-block transition-transform duration-300 ease-out hover:rotate-1"
+                >
                   {hero.titleB}
                   <HandUnderline draw className="absolute -bottom-3 left-0" />
                 </span>
@@ -228,12 +271,8 @@ export default function Hero() {
             </Reveal>
           </div>
 
-          {/* Kolom kanan: panggung notes — parallax halus, tiap note melayang + bisa digeser */}
-          <motion.div
-            aria-hidden
-            style={parallaxOn ? { x: layerAx, y: layerAy } : undefined}
-            className="relative hidden h-full min-h-[520px] lg:block"
-          >
+          {/* Kolom kanan: panggung notes — GSAP loop + parallax mouse + drag */}
+          <div className="relative hidden h-full min-h-[520px] lg:block">
             <StickerStar className="absolute top-[18%] right-[4%] size-6 animate-twinkle text-brand-blue/40" />
             <StickerStar className="absolute bottom-[30%] left-[4%] size-4 animate-twinkle text-ink-900/20" />
             {NOTE_PLACEMENTS.map((placement) => {
@@ -241,19 +280,24 @@ export default function Hero() {
               return (
                 <div
                   key={placement.noteIndex}
+                  ref={(el) => {
+                    noteWrapRefs.current[placement.noteIndex] = el
+                  }}
                   className={cn('pointer-events-auto absolute', placement.wrapClass)}
                 >
-                  <HeroNote
-                    title={note.title}
-                    copy={note.copy}
-                    index={placement.noteIndex}
-                    floatDelay={placement.floatDelay}
-                    className={placement.tiltClass}
-                  />
+                  {/* Lapisan GSAP loop — menerima translate/rotate mikro tanpa ganggu drag child */}
+                  <div data-hero-note={placement.noteIndex}>
+                    <HeroNote
+                      title={note.title}
+                      copy={note.copy}
+                      index={placement.noteIndex}
+                      className={placement.tiltClass}
+                    />
+                  </div>
                 </div>
               )
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
 
