@@ -2,19 +2,23 @@ import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
 import { StickerTape } from '@/components/playful/Stickers'
-import { GALLERY_IMAGES } from '@/lib/landing/gallery'
+import { GALLERY_IMAGES, type GalleryImage } from '@/lib/landing/gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
- * GallerySection — papan tempel bento asimetris ("scrapbook"). Tiap BARIS grid
- * 12 kolom diisi penuh (7+5, 4+4+4, …) sehingga N foto apa pun tersusun tanpa
- * lubang. Foto 16:9, rotasi & tape selang-seling; satu jangkar besar di awal.
+ * GallerySection — papan tempel bento ala scrapbook sungguhan. Tiga "kulit"
+ * kartu berputar (Polaroid → Jahitan → Lipatan → …) agar tidak monoton:
+ *  1. Polaroid — foto + area putih tebal di bawah, tape di tepi atas foto.
+ *  2. Jahitan  — kertas dengan border jahitan (dashed) + binder clip di atas.
+ *  3. Lipatan  — pojok terlipat (hard-stop dua warna) + coretan kecil.
+ * Struktur baris bento & ukuran (aspect) dipertahankan; hanya kulit kartu yang
+ * berganti mengikuti indeks foto global.
  *
- * Aksesibilitas: img.alt ringkas (dibaca sekali); caption cerita tampil sebagai
- * figcaption tanpa menduplikasi alt — tidak dibaca dua kali.
+ * Aksesibilitas: img.alt ringkas (dibaca sekali); caption tampil sebagai
+ * figcaption tanpa menduplikasi alt.
  */
 
-type RowSlot = { cols: string; aspect: string; tilt: string; tape: boolean }
+type RowSlot = { cols: string; aspect: string; tilt: string }
 
 /** Peta kelas col-span (literal — Tailwind JIT butuh string lengkap). */
 const COL_SPANS = {
@@ -27,28 +31,24 @@ const COL_SPANS = {
 
 /** Baris bento: tiap sub-array = komposisi kolom yang totalnya 12 (md). */
 const BENTO_ROWS: RowSlot[][] = [
-  // Baris 1: jangkar besar + satu medium.
   [
-    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1', tape: true },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1', tape: false },
+    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1' },
   ],
-  // Baris 2: tiga kartu sama besar.
   [
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', tape: true },
-    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1', tape: false },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2', tape: true },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1' },
+    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2' },
   ],
-  // Baris 3: medium-lebar + dua kartu.
   [
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2', tape: true },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2', tape: false },
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1', tape: true },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2' },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1' },
   ],
-  // Baris 4: kebalikan baris 3.
   [
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1', tape: false },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', tape: true },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1', tape: true },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1' },
   ],
 ]
 
@@ -66,13 +66,126 @@ function chunkRows<T>(items: T[], rowSizes: number[]): T[][] {
   return rows
 }
 
+/* ============================== 3 varian kulit ============================== */
+
+type PhotoProps = {
+  img: GalleryImage
+  aspect: string
+}
+
+function Photo({ img, aspect }: PhotoProps) {
+  return (
+    <img
+      src={img.src}
+      alt={img.alt}
+      loading="lazy"
+      className={cn(
+        'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
+        aspect,
+      )}
+    />
+  )
+}
+
+/** 1 — POLAROID: foto + area putih tebal bawah utk caption "tulisan tangan". */
+function PolaroidCard({ img, aspect }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/40 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Tape kecil di tepi atas foto */}
+      <StickerTape className="absolute top-5 left-1/2 z-10 -translate-x-1/2 -rotate-3" />
+      <div className="overflow-hidden border border-ink-900/30 bg-paper-panel">
+        <Photo img={img} aspect={aspect} />
+      </div>
+      {/* Area putih bawah — seperti tulisan tangan di polaroid */}
+      <figcaption className="flex flex-1 items-end px-1 pt-4">
+        <p className="font-display text-ink-800 w-full text-center text-sm leading-snug font-semibold">
+          {img.caption}
+        </p>
+      </figcaption>
+    </figure>
+  )
+}
+
+/** 2 — JAHITAN: border dashed halus + binder clip di tepi atas. */
+function StitchedCard({ img, aspect }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col rounded-[6px] border border-ink-900/30 bg-paper-white p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Jahitan: garis dashed mengikuti tepi dalam */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-1.5 rounded-[3px] border border-dashed border-ink-900/40"
+      />
+      {/* Binder clip di tepi atas */}
+      <div aria-hidden className="absolute -top-1 left-1/2 z-10 -translate-x-1/2">
+        <div className="mx-auto h-2.5 w-6 rounded-t-sm border-2 border-b-0 border-ink-900/70 bg-paper-panel" />
+        <div className="mx-auto h-0.5 w-7 bg-ink-900/50" />
+      </div>
+      <div className="overflow-hidden border border-ink-900/20 bg-paper-panel">
+        <Photo img={img} aspect={aspect} />
+      </div>
+      <figcaption className="px-1 pt-2.5 pb-0.5">
+        <p className="text-ink-600 text-[11px] leading-snug font-bold tracking-wide uppercase">
+          {img.caption}
+        </p>
+      </figcaption>
+    </figure>
+  )
+}
+
+/** 3 — LIPATAN: pojok terlipat (hard-stop) + lingkaran coret kecil. */
+function FoldedCard({ img, aspect }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col rounded-[4px] bg-paper-white shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Pojok terlipat kanan-atas: segitiga kertas lebih gelap (hard-stop) */}
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[4px]"
+        style={{
+          background:
+            'linear-gradient(135deg, #DDE1E6 0 20px, #EDEFF2 20px 22px, transparent 22px)',
+        }}
+      />
+      {/* Coretan doodle kecil */}
+      <div
+        aria-hidden
+        className="absolute top-2 left-2 size-7 rounded-full border-2 border-brand-ink/40"
+      />
+      <div className="relative overflow-hidden bg-paper-panel">
+        <Photo img={img} aspect={aspect} />
+      </div>
+      <figcaption className="relative px-3 pt-2 pb-3">
+        <p className="text-ink-600 text-xs leading-snug font-semibold italic">{img.caption}</p>
+      </figcaption>
+    </figure>
+  )
+}
+
+/** Pilih kulit kartu berdasarkan indeks foto global (putar 3 varian). */
+function ScrapbookCard({ img, globalIdx, aspect }: { img: GalleryImage; globalIdx: number; aspect: string }) {
+  const variant = globalIdx % 3
+  if (variant === 0) return <PolaroidCard img={img} aspect={aspect} />
+  if (variant === 1) return <StitchedCard img={img} aspect={aspect} />
+  return <FoldedCard img={img} aspect={aspect} />
+}
+
+/* ============================== Section ============================== */
+
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
   const photos = GALLERY_IMAGES
-
-  // Ukuran baris mengikuti BENTO_ROWS (2,3,3,3 → rata untuk sisa).
   const rowSizes = BENTO_ROWS.map((r) => r.length)
   const rows = chunkRows(photos, rowSizes)
+
+  // Offsets baris: indeks global foto pertama tiap baris (varian & rotasi
+  // konsisten lintas baris). Dihitung dengan loop murni (tanpa side-effect).
+  const rowStartIdx: number[] = []
+  {
+    let acc = 0
+    for (const row of rows) {
+      rowStartIdx.push(acc)
+      acc += row.length
+    }
+  }
 
   return (
     <section id="galeri" className="relative overflow-hidden bg-paper-white">
@@ -89,24 +202,23 @@ export default function GallerySection() {
             Dokumentasi segera hadir.
           </p>
         ) : (
-          <div className="mt-16 flex flex-col gap-6">
+          <div className="mt-16 flex flex-col gap-8 md:gap-10">
             {rows.map((rowPhotos, rowIdx) => {
               const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
               return (
                 <div
                   key={rowIdx}
-                  className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 md:grid-cols-12 md:gap-6"
+                  className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 md:grid-cols-12 md:gap-7"
                 >
                   {rowPhotos.map((img, i) => {
-                    // 1 foto sisa di baris terakhir → bentang penuh sebagai penutup.
+                    const gIdx = rowStartIdx[rowIdx] + i
                     const slot: RowSlot =
                       rowPhotos.length === 1
-                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', tape: true }
+                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1' }
                         : (slotDefs[i % slotDefs.length] ?? {
                             cols: COL_SPANS[4],
                             aspect: 'aspect-[4/3]',
                             tilt: 'rotate-1',
-                            tape: false,
                           })
                     const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
                     return (
@@ -119,37 +231,10 @@ export default function GallerySection() {
                           slot.cols,
                         )}
                       >
-                        <figure
-                          className={cn(
-                            'group relative flex h-full flex-col rounded-[20px] border-2 border-ink-900 bg-paper-white p-2.5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover',
-                            slot.tilt,
-                          )}
-                        >
-                          {slot.tape ? (
-                            <StickerTape
-                              className={cn(
-                                'absolute -top-2.5 z-10',
-                                (rowIdx + i) % 2 === 0 ? 'left-6 -rotate-6' : 'right-6 rotate-6',
-                              )}
-                            />
-                          ) : null}
-                          <div className="overflow-hidden rounded-[14px] border-2 border-ink-900">
-                            <img
-                              src={img.src}
-                              alt={img.alt}
-                              loading="lazy"
-                              className={cn(
-                                'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
-                                slot.aspect,
-                              )}
-                            />
-                          </div>
-                          <figcaption className="px-2 pt-2.5 pb-1">
-                            <p className="text-ink-600 text-xs leading-snug font-semibold italic">
-                              {img.caption}
-                            </p>
-                          </figcaption>
-                        </figure>
+                        {/* Rotasi di luar (kulit) — scrapbook miring halus */}
+                        <div className={cn('h-full', slot.tilt)}>
+                          <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} />
+                        </div>
                       </Reveal>
                     )
                   })}
