@@ -92,7 +92,7 @@ export function LessonAssignmentOverview({
         </header>
 
         {instruction?.contentHtml || instructionAttachments.length > 0 ? (
-          <section className="space-y-3 border-t border-slate-200/80 pt-5 dark:border-zinc-800/80">
+          <section className="space-y-3 border-t border-slate-200/80 pt-5">
             <h2 className={cn('text-sm font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
               Instruksi
             </h2>

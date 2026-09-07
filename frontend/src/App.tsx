@@ -7,6 +7,7 @@ import { NotFoundContent } from "./components/shared/Error.tsx";
 import { LottieOverlay } from "./components/shared/Loader.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
 import { ErrorBoundary } from "./components/shared/Error.tsx";
+import ScrollManager from "./components/shared/ScrollManager.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
@@ -416,6 +417,7 @@ function renderRouteElement(route: RouteConfig) {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollManager />
       <ErrorBoundary>
         <Routes>
           {routeConfig.map((route) => (

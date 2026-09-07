@@ -2,7 +2,7 @@
 FROM node:latest AS dev
 WORKDIR /app
 ENV NODE_ENV=development
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
 EXPOSE 3000
@@ -13,7 +13,7 @@ FROM node:latest AS builder
 WORKDIR /app
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
 RUN npm run build
