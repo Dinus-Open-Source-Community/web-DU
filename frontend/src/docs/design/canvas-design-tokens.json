@@ -1,0 +1,363 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "meta": {
+    "name": "DOSCOM University — Playful Landing",
+    "version": "2.0.0",
+    "source": "Adapted from Canvas visual language for DOSCOM University (web-DU)",
+    "notes": [
+      "Light-only contract: there is no dark theme. The .dark block and dark: variants were removed app-wide.",
+      "Display font is DynaPuff (weights 400-700 only; display uses 700). Body/UI font is Plus Jakarta Sans.",
+      "Landing layer is fully static: no hooks/services imports. Maximal package: splash, hero playground, full illustration system, horizontal gallery, branching story. Locked 2026-09-06."
+    ]
+  },
+  "color": {
+    "brand": {
+      "blue": "#13A8FF",
+      "blueHover": "#0798EE",
+      "blueSoft": "#BCEEFF",
+      "blueInk": "#008EFF"
+    },
+    "ink": {
+      "900": "#050914",
+      "800": "#07111F",
+      "700": "#102039",
+      "600": "#2B3C55",
+      "500": "#56657A",
+      "400": "#7E8998"
+    },
+    "surface": {
+      "white": "#FFFFFF",
+      "offWhite": "#FBFCFD",
+      "paper": "#F6F7F8",
+      "panel": "#F1F3F5",
+      "dark": "#07111F",
+      "darkAlt": "#0A1424"
+    },
+    "line": {
+      "light": "#E5E8EC",
+      "medium": "#CBD2DA",
+      "dark": "#101318",
+      "gridOnDark": "rgba(255,255,255,0.055)",
+      "gridOnLight": "rgba(12,28,48,0.065)"
+    },
+    "accent": {
+      "mint": "#A8EFCF",
+      "mintStrong": "#63DDAE",
+      "yellow": "#FFEF9D",
+      "peach": "#FFC4A6",
+      "pink": "#F4A6CD",
+      "pinkSoft": "#FFC6D7",
+      "lavender": "#D7CBFF",
+      "lavenderStrong": "#A991FF",
+      "sky": "#BCEEFF",
+      "green": "#B8F5D9",
+      "orange": "#FFB36A"
+    },
+    "semantic": {
+      "success": "#25B978",
+      "warning": "#F2A900",
+      "danger": "#E34D59",
+      "info": "#13A8FF"
+    },
+    "tape": {
+      "gray": "rgba(111,119,128,0.28)"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "'DynaPuff', 'Comic Sans MS', cursive",
+      "body": "'Plus Jakarta Sans', system-ui, sans-serif",
+      "mono": "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+      "ui": "'Plus Jakarta Sans', system-ui, sans-serif"
+    },
+    "roles": {
+      "displayHero": {
+        "fontFamily": "display",
+        "fontSize": "clamp(4rem, 8vw, 9.5rem)",
+        "fontWeight": 700,
+        "lineHeight": 0.84,
+        "letterSpacing": "-0.02em"
+      },
+      "displaySection": {
+        "fontFamily": "display",
+        "fontSize": "clamp(3rem, 5vw, 6.2rem)",
+        "fontWeight": 700,
+        "lineHeight": 0.9,
+        "letterSpacing": "-0.015em"
+      },
+      "displayCard": {
+        "fontFamily": "display",
+        "fontSize": "1.35rem",
+        "fontWeight": 700,
+        "lineHeight": 1.0,
+        "letterSpacing": "-0.025em"
+      },
+      "eyebrow": {
+        "fontFamily": "ui",
+        "fontSize": "0.9rem",
+        "fontWeight": 800,
+        "lineHeight": 1.1,
+        "letterSpacing": "0.03em",
+        "textTransform": "uppercase",
+        "fontStyle": "italic"
+      },
+      "bodyLarge": {
+        "fontFamily": "body",
+        "fontSize": "1.25rem",
+        "fontWeight": 500,
+        "lineHeight": 1.35,
+        "letterSpacing": "-0.015em"
+      },
+      "body": {
+        "fontFamily": "body",
+        "fontSize": "1rem",
+        "fontWeight": 500,
+        "lineHeight": 1.45,
+        "letterSpacing": "-0.01em"
+      },
+      "small": {
+        "fontFamily": "body",
+        "fontSize": "0.875rem",
+        "fontWeight": 500,
+        "lineHeight": 1.35
+      },
+      "nav": {
+        "fontFamily": "ui",
+        "fontSize": "0.95rem",
+        "fontWeight": 800,
+        "lineHeight": 1
+      },
+      "button": {
+        "fontFamily": "ui",
+        "fontSize": "0.95rem",
+        "fontWeight": 800,
+        "lineHeight": 1
+      },
+      "caption": {
+        "fontFamily": "body",
+        "fontSize": "0.75rem",
+        "fontWeight": 600,
+        "lineHeight": 1.25
+      }
+    }
+  },
+  "spacing": {
+    "0": "0",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px",
+    "16": "64px",
+    "20": "80px",
+    "24": "96px",
+    "32": "128px",
+    "40": "160px",
+    "sectionY": "clamp(96px, 10vw, 180px)"
+  },
+  "layout": {
+    "pageMaxWidth": "1240px",
+    "wideMaxWidth": "1440px",
+    "contentGutter": "clamp(20px, 4vw, 64px)",
+    "navHeight": "88px",
+    "heroMinHeight": "calc(100svh - 88px)",
+    "gridColumnsDesktop": 3,
+    "gridGap": "24px",
+    "cardGap": "24px",
+    "mobileBreakpoint": "768px",
+    "tabletBreakpoint": "1024px"
+  },
+  "radius": {
+    "none": "0",
+    "xs": "6px",
+    "sm": "10px",
+    "md": "14px",
+    "lg": "20px",
+    "xl": "28px",
+    "pill": "999px"
+  },
+  "border": {
+    "hairline": "1px",
+    "standard": "1px",
+    "strong": "2px",
+    "ink": "2px solid #101318",
+    "blue": "2px solid #13A8FF",
+    "soft": "1px solid #E5E8EC"
+  },
+  "shadow": {
+    "none": "none",
+    "soft": "0 8px 28px rgba(5,9,20,0.08)",
+    "card": "0 10px 30px rgba(5,9,20,0.10)",
+    "floating": "0 16px 36px rgba(5,9,20,0.14)",
+    "nav": "0 5px 18px rgba(5,9,20,0.08)",
+    "button": "0 3px 0 #0B1018",
+    "buttonHover": "0 5px 0 #0B1018"
+  },
+  "opacity": {
+    "disabled": 0.45,
+    "muted": 0.7,
+    "tape": 0.28,
+    "grid": 0.055,
+    "overlay": 0.72
+  },
+  "effects": {
+    "grid": {
+      "size": "24px",
+      "line": "rgba(12,28,48,0.065)",
+      "darkLine": "rgba(255,255,255,0.055)",
+      "lineWidth": "1px"
+    },
+    "underline": {
+      "color": "#13A8FF",
+      "height": "4px",
+      "offset": "5px",
+      "skew": "-2deg"
+    },
+    "tape": {
+      "width": "62px",
+      "height": "18px",
+      "rotation": "-3deg",
+      "background": "rgba(111,119,128,0.28)",
+      "blend": "multiply"
+    },
+    "paperRotation": {
+      "min": "-2deg",
+      "max": "2deg"
+    }
+  },
+  "component": {
+    "button": {
+      "height": "56px",
+      "paddingX": "20px",
+      "radius": "4px",
+      "border": "2px solid #101318",
+      "primaryBackground": "#13A8FF",
+      "primaryText": "#050914",
+      "secondaryBackground": "#FFFFFF",
+      "hoverTranslateY": "-2px"
+    },
+    "nav": {
+      "itemHeight": "88px",
+      "activeBackground": "#13A8FF",
+      "activeText": "#050914",
+      "border": "1px solid #E5E8EC",
+      "logoSize": "52px",
+      "logoRadius": "50%"
+    },
+    "stickyNote": {
+      "minWidth": "170px",
+      "padding": "16px 20px",
+      "tapeHeight": "18px",
+      "shadow": "0 12px 26px rgba(5,9,20,0.10)",
+      "rotation": "1.5deg"
+    },
+    "featureCard": {
+      "background": "#F1F3F5",
+      "border": "2px solid #FFFFFF",
+      "radius": "20px",
+      "padding": "20px",
+      "shadow": "0 10px 30px rgba(5,9,20,0.10)"
+    },
+    "templateCard": {
+      "background": "#FFFFFF",
+      "border": "1px solid #E5E8EC",
+      "radius": "16px",
+      "padding": "14px",
+      "thumbnailRadius": "10px"
+    },
+    "productPreview": {
+      "border": "2px solid #101318",
+      "radius": "10px",
+      "shadow": "0 8px 0 rgba(7,17,31,0.14)"
+    },
+    "testimonial": {
+      "background": "#F6F7F8",
+      "border": "2px solid #101318",
+      "radius": "28px",
+      "shadow": "0 8px 0 #07111F"
+    }
+  },
+  "iconography": {
+    "style": "simple filled/outline icons with hand-drawn visual treatment",
+    "sizeSm": "18px",
+    "sizeMd": "22px",
+    "sizeLg": "28px",
+    "stroke": "2px",
+    "cornerStyle": "rounded where possible"
+  },
+  "motion": {
+    "principles": [
+      "Motion should feel tactile and hand-drawn, not glossy or futuristic.",
+      "Prefer transform and opacity; avoid animating layout-heavy properties.",
+      "Use small rotation, translation, and scale variation to preserve the imperfect paper aesthetic.",
+      "Respect prefers-reduced-motion."
+    ],
+    "easing": {
+      "standard": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "snappy": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "linear": "linear",
+      "spring": "stiffness ~300, damping ~24"
+    },
+    "duration": {
+      "micro": "120ms",
+      "fast": "220ms",
+      "normal": "450ms",
+      "slow": "800ms",
+      "section": "1000–1400ms"
+    },
+    "loop": {
+      "stickyNoteFloat": {
+        "duration": "4.5s",
+        "iteration": "infinite",
+        "keyframes": "translateY(0) rotate(-1deg) → translateY(-7px) rotate(1deg) → translateY(0) rotate(-1deg)",
+        "easing": "ease-in-out"
+      },
+      "arrowWiggle": {
+        "duration": "2.8s",
+        "iteration": "infinite",
+        "keyframes": "rotate(0deg) translateX(0) → rotate(-4deg) translateX(4px) → rotate(0deg) translateX(0)",
+        "easing": "ease-in-out"
+      },
+      "underlineDrift": {
+        "duration": "3.6s",
+        "iteration": "infinite",
+        "keyframes": "translateX(0) scaleX(1) → translateX(3px) scaleX(1.04) → translateX(0) scaleX(1)",
+        "easing": "ease-in-out"
+      },
+      "cursorFloat": {
+        "duration": "3.2s",
+        "iteration": "infinite",
+        "keyframes": "translate(0,0) → translate(5px,-4px) → translate(0,0)",
+        "easing": "ease-in-out"
+      },
+      "accentBob": {
+        "duration": "5s",
+        "iteration": "infinite",
+        "keyframes": "translateY(0) rotate(0) → translateY(-10px) rotate(2deg) → translateY(0) rotate(0)",
+        "easing": "ease-in-out"
+      }
+    },
+    "scroll": {
+      "sectionReveal": {
+        "from": "opacity:0; transform: translateY(36px)",
+        "to": "opacity:1; transform: translateY(0)",
+        "duration": "700ms"
+      },
+      "stagger": "80–120ms",
+      "parallaxRange": "12–40px",
+      "scrub": "0.6–1.2s where applicable"
+    }
+  },
+  "zIndex": {
+    "base": 0,
+    "decor": 5,
+    "content": 10,
+    "floatingToolbar": 20,
+    "nav": 50,
+    "modal": 100
+  }
+}
