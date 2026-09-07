@@ -21,7 +21,7 @@ export function AssignmentWorkInstructions({ assignment, theme }: AssignmentWork
   if (!instruction?.contentHtml && attachments.length === 0) return null
 
   return (
-    <section className="space-y-4 border-t border-slate-200/80 pt-6 dark:border-zinc-800/80">
+    <section className="space-y-4 border-t border-slate-200/80 pt-6">
       <h2 className={cn('text-sm font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
         {assignment.task_type === 'quiz' ? 'Petunjuk kuis' : 'Instruksi tugas'}
       </h2>

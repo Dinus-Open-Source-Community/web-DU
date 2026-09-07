@@ -73,7 +73,7 @@ export function AssignmentFileUploadField({
             <img
               src={previewUrl}
               alt={fileMeta.name}
-              className="max-h-80 w-full rounded-lg object-contain bg-slate-50 dark:bg-zinc-950"
+              className="max-h-80 w-full rounded-lg object-contain bg-slate-50"
             />
           ) : null}
 
@@ -89,7 +89,7 @@ export function AssignmentFileUploadField({
             <iframe
               src={previewUrl}
               title={fileMeta.name}
-              className="h-80 w-full rounded-lg border border-slate-200 bg-white dark:border-zinc-800"
+              className="h-80 w-full rounded-lg border border-slate-200 bg-white"
             />
           ) : null}
 

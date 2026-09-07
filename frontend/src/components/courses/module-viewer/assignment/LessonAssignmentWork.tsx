@@ -132,7 +132,7 @@ export function LessonAssignmentWork({
         <AssignmentWorkInstructions assignment={assignment} theme={theme} />
 
         {isQuiz ? (
-          <section className="space-y-8 border-t border-slate-200/80 pt-6 dark:border-zinc-800/80">
+          <section className="space-y-8 border-t border-slate-200/80 pt-6">
             <h2
               className={cn(
                 "text-sm font-semibold",
@@ -147,7 +147,7 @@ export function LessonAssignmentWork({
                 {quiz.questions.map((question, index) => (
                   <div
                     key={question.id}
-                    className="space-y-4 border-b border-slate-200/80 pb-8 last:border-b-0 last:pb-0 dark:border-zinc-800/80"
+                    className="space-y-4 border-b border-slate-200/80 pb-8 last:border-b-0 last:pb-0"
                   >
                     <AssignmentQuizPrompt
                       index={index}
@@ -204,7 +204,7 @@ export function LessonAssignmentWork({
             )}
           </section>
         ) : !hasSubmissionMethods ? (
-          <section className="border-t border-slate-200/80 pt-6 dark:border-zinc-800/80">
+          <section className="border-t border-slate-200/80 pt-6">
             <p
               className={cn(
                 "text-sm",
@@ -216,7 +216,7 @@ export function LessonAssignmentWork({
             </p>
           </section>
         ) : (
-          <section className="space-y-6 border-t border-slate-200/80 pt-6 dark:border-zinc-800/80">
+          <section className="space-y-6 border-t border-slate-200/80 pt-6">
             {showPlainTextInput ? (
               <div className="space-y-2">
                 <label
@@ -277,7 +277,7 @@ export function LessonAssignmentWork({
           </section>
         )}
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200/80 pt-6 dark:border-zinc-800/80">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200/80 pt-6">
           <Button
             type="button"
             variant="outline"
