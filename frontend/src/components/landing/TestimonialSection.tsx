@@ -5,9 +5,8 @@ import { TESTIMONIALS } from '@/lib/landing/testimonial'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
- * TestimonialSection — tiga kartu kutipan bernama (foto mentor, 1:1 crop
- * dari foto kegiatan) di atas navy. Kartu kertas miring dengan tape,
- * bukan lagi satu kartu anonim.
+ * TestimonialSection — kartu review siswa (zapp & rico) di atas navy.
+ * Kartu kertas miring dengan pin pastel — bukan kartu mentor lagi.
  */
 
 const CARD_TILT = ['-rotate-1 lg:-translate-y-2', 'lg:translate-y-4', 'rotate-1 lg:-translate-y-1'] as const
@@ -30,7 +29,7 @@ export default function TestimonialSection() {
           className="mx-auto max-w-3xl"
         />
 
-        <div className="mt-10 grid grid-cols-1 gap-6 md:mt-16 md:grid-cols-3 md:gap-6 lg:gap-8">
+        <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 md:mt-16 md:grid-cols-2 md:gap-6 lg:gap-8">
           {TESTIMONIALS.map((item, i) => (
             <Reveal key={item.name} delay={(i % 3) * 0.12} className="h-full">
               <figure
@@ -56,7 +55,7 @@ export default function TestimonialSection() {
                   <div className="relative size-11 shrink-0 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel shadow-button sm:size-12">
                     <img
                       src={item.photo}
-                      alt={`Foto ${item.name}`}
+                      alt={`${item.name} — ${item.role}`}
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
                     />

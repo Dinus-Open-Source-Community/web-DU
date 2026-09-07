@@ -1,17 +1,22 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Container, Palette, type LucideIcon } from 'lucide-react'
+import type { ComponentType, SVGProps } from 'react'
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
 import { StickerTape } from '@/components/playful/Stickers'
-import type { StaticCourseAccent } from '@/lib/landing/courses'
+import type { StaticCourseAccent, StaticCourseIconKey } from '@/lib/landing/courses'
 import { LANDING_COURSES } from '@/lib/landing/courses'
 import { LANDING_COPY } from '@/lib/landing/copy'
+import { BrandLaravelIcon, BrandNextjsIcon } from '@/lib/navigation'
 
 /**
  * CourseSection — "daftar program": baris editorial (bukan kartu) di atas
- * lembar kertas lebar. Tiap baris = nomor stempel pastel + judul + level +
- * panah. Memecah irama 3-grid kartu berturut tanpa meninggalkan bahasa kertas.
+ * lembar kertas lebar. Tiap baris = stempel ikon program pastel + judul +
+ * level + panah. Memecah irama 3-grid kartu berturut tanpa meninggalkan
+ * bahasa kertas. Nomor urut dipertahankan sebagai label kecil di pojok.
  */
+
+type CourseIcon = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>
 
 const STAMP_BG: Record<StaticCourseAccent, string> = {
   yellow: 'bg-note-yellow',
@@ -20,6 +25,14 @@ const STAMP_BG: Record<StaticCourseAccent, string> = {
   pink: 'bg-note-pink',
   sky: 'bg-note-sky',
   lavender: 'bg-note-lavender',
+}
+
+/** iconKey → komponen: logo brand (Simple Icons) atau konsep lucide. */
+const COURSE_ICON: Record<StaticCourseIconKey, CourseIcon> = {
+  nextjs: BrandNextjsIcon,
+  laravel: BrandLaravelIcon,
+  palette: Palette,
+  container: Container,
 }
 
 export default function CourseSection() {
@@ -66,15 +79,27 @@ export default function CourseSection() {
                     to={course.allHref}
                     className="group flex items-center gap-4 rounded-2xl px-2 py-5 outline-none transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-brand-blue/40 sm:gap-7 sm:px-3 sm:py-6"
                   >
-                    {/* Stempel nomor pastel */}
+                    {/* Stempel ikon program pastel + nomor urut kecil */}
                     <span
                       aria-hidden
                       className={cn(
-                        'font-display inline-grid size-11 shrink-0 place-items-center rounded-2xl border-2 border-ink-900 text-lg font-bold text-ink-900 shadow-button transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:size-16 sm:text-2xl',
+                        'relative inline-grid size-14 shrink-0 place-items-center self-center rounded-2xl border-2 border-ink-900 text-ink-900 shadow-button transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:size-16',
                         STAMP_BG[item.accent],
                       )}
                     >
-                      {String(i + 1).padStart(2, '0')}
+                      {(() => {
+                        const CourseIcon = COURSE_ICON[item.icon]
+                        return (
+                          <CourseIcon
+                            aria-hidden
+                            className="size-6 sm:size-7"
+                            strokeWidth={2.4}
+                          />
+                        )
+                      })()}
+                      <span className="font-display absolute -top-1.5 -right-1.5 grid size-4.5 place-items-center rounded-md border border-ink-900 bg-paper-white text-[8px] leading-none font-bold sm:size-5 sm:text-[9px]">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
                     </span>
 
                     <span className="min-w-0 flex-1">
