@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, UserCircle } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, UserCircle, X } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { navLinks } from '../../lib/navigation'
 import type { GuestNavbarAuthProps } from '@/lib/layout/navbar-auth-view-model'
 import type { UserRole } from '../../lib/types/user'
 import { ROUTES } from '../../lib/routes'
+import { cn } from '../../lib/utils'
 
 function userInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -54,6 +55,23 @@ export default function Navbar({ auth }: NavbarProps) {
     }
   }, [isMenuOpen])
 
+  // Tutup menu mobile saat rute/hash berubah (setelah klik link navigasi).
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [pathname, hash])
+
+  // Kunci fokus di dalam menu saat terbuka (Esc untuk menutup).
+  useEffect(() => {
+    if (!isMenuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isMenuOpen])
+
+  const closeMenu = () => setIsMenuOpen(false)
+
   const handleLogout = () => {
     setIsMenuOpen(false)
     onSignOut()
@@ -98,7 +116,8 @@ export default function Navbar({ auth }: NavbarProps) {
                 <button
                   type="button"
                   className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3"
-                  aria-haspopup="menu">
+                  aria-haspopup="menu"
+                >
                   <Avatar className="size-9 ring-2 ring-ink-900/20">
                     {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
                     <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
@@ -110,7 +129,8 @@ export default function Navbar({ auth }: NavbarProps) {
 
               <div
                 role="menu"
-                className="pointer-events-none absolute right-0 top-full z-50 w-64 translate-y-1 opacity-0 transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                /* Tertutup: visibility-hidden → isi tidak focusable (bukan cuma opacity 0). */
+                className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 translate-y-1 opacity-0 transition-all duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2">
                   <div className="px-3 py-2.5">
                     <p className="truncate text-sm font-semibold">{userName}</p>
@@ -152,14 +172,22 @@ export default function Navbar({ auth }: NavbarProps) {
         <button
           type="button"
           className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
-          aria-label="Toggle menu"
+          aria-label={isMenuOpen ? 'Tutup menu' : 'Buka menu'}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
           onClick={() => setIsMenuOpen((prev) => !prev)}>
-          <Menu className="h-5 w-5" />
+          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+      {/* Mobile Menu — inert saat tertutup supaya link tidak focusable. */}
+      <div
+        id="mobile-menu"
+        inert={!isMenuOpen}
+        className={cn(
+          'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
+          isMenuOpen ? 'max-h-[calc(100dvh-88px)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
+        )}>
         <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pb-8">
           {isAuthenticated && (
             <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2">
@@ -178,10 +206,10 @@ export default function Navbar({ auth }: NavbarProps) {
               <Link
                 key={navLink.href}
                 to={navLink.href}
+                onClick={closeMenu}
                 className={`flex items-center rounded-2xl px-4 py-2.5 text-sm font-extrabold tracking-wider uppercase transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
                   isActive(navLink.href) ? 'bg-brand-blue text-ink-900 font-extrabold' : 'text-ink-900 hover:text-brand-ink'
-                }`}
-                onClick={() => setIsMenuOpen(false)}>
+                }`}>
                 {navLink.label}
               </Link>
             ))}
@@ -204,12 +232,12 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-3 pt-2">
-              <Link to="/auth/register" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/auth/register" onClick={closeMenu}>
                 <Button variant="outline" className="w-full">
                   Daftar
                 </Button>
               </Link>
-              <Link to="/auth/login" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/auth/login" onClick={closeMenu}>
                 <Button variant="default" className="w-full">
                   Masuk
                 </Button>

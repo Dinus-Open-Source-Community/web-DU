@@ -10,6 +10,8 @@ import StorySection from '../../components/landing/StorySection'
 import TerminalSection from '../../components/landing/TerminalSection'
 import TestimonialSection from '../../components/landing/TestimonialSection'
 import SplashScreen from '../../components/playful/SplashScreen'
+import TickerTape from '../../components/playful/TickerTape'
+import { LANDING_COPY } from '@/lib/landing/copy'
 
 export default function Home() {
   return (
@@ -18,6 +20,7 @@ export default function Home() {
       <main className="w-full bg-paper-white">
         <Hero />
         <StackSection />
+        <TickerTape items={LANDING_COPY.ticker} />
         <MentorsSection />
         <CourseSection />
         <TerminalSection />

@@ -1,12 +1,13 @@
-import { Globe, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
+import { BrandGithubIcon, BrandInstagramIcon, BrandLinkedinIcon, type BrandSocialLink } from '@/lib/navigation'
 
-export type ContactItem = { label: string; href: string; icon: typeof Globe }
+export type ContactItem = { label: string; href: string; icon: BrandSocialLink['icon'] }
 
-/** LAUNCH GATE: ganti href generik + mailto kosong dengan kontak DOSCOM asli. */
+/** Ikon brand asli. Href '#' = placeholder — hindari link generik yang menipu. */
 export const CONTACTS: ContactItem[] = [
-  { label: 'GitHub', href: 'https://github.com', icon: Globe },
-  { label: 'LinkedIn', href: 'https://linkedin.com', icon: Globe },
-  { label: 'Twitter', href: 'https://twitter.com', icon: Globe },
-  { label: 'Instagram', href: 'https://instagram.com', icon: Globe },
-  { label: 'Email', href: 'mailto: ', icon: Mail },
+  // TODO: isi akun resmi DOSCOM (github/linkedin/instagram + email organisasi) sebelum launch.
+  { label: 'GitHub', href: '#', icon: BrandGithubIcon },
+  { label: 'LinkedIn', href: '#', icon: BrandLinkedinIcon },
+  { label: 'Instagram', href: '#', icon: BrandInstagramIcon },
+  { label: 'Email', href: '#', icon: Mail },
 ]

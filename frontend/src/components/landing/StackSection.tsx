@@ -1,8 +1,6 @@
 import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
-import DoodleDivider from '@/components/playful/DoodleDivider'
-import { StickerSparkle } from '@/components/playful/Stickers'
 import { DOSCOM_STACK } from '@/lib/landing/stack'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
@@ -10,7 +8,8 @@ import { LANDING_COPY } from '@/lib/landing/copy'
  * "Tech deck" — kartu teknologi terasa seperti koleksi kartu, bukan grid fitur.
  * Bento asimetris (indeks 0 melintang 2 kolom; 1, 4, 5 pastel aksen), semua
  * ikon dari data DOSCOM_STACK. Hover: kartu terangkat + chip ikon membesar.
- * Di atas navy ink-800 dengan grid kertas halus + squiggle transisi ke bawah.
+ * Di atas navy ink-800 dengan grid kertas halus + noise. Twinkle dekoratif
+ * sengaja dilepas — biar fokus ke kartu, bukan ke gerak latar.
  */
 
 type StackLayout = {
@@ -44,7 +43,7 @@ export default function StackSection() {
 
   return (
     <section id="stack" className="relative overflow-hidden bg-ink-800">
-      {/* Grid kertas halus di atas navy */}
+      {/* Grid kertas halus + grain di atas navy — tekstur, bukan gerak */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.05]"
@@ -54,11 +53,7 @@ export default function StackSection() {
           backgroundSize: '24px 24px',
         }}
       />
-      {/* Aksen twinkle halus di pojok */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <StickerSparkle twinkle className="absolute top-[10%] left-[5%] size-6 text-brand-soft/40" />
-        <StickerSparkle twinkle className="absolute right-[7%] bottom-[16%] size-8 text-brand-soft/30" />
-      </div>
+      <div aria-hidden className="paper-noise pointer-events-none absolute inset-0 opacity-40 mix-blend-screen" />
 
       <div className="relative mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
         <SectionHeader
@@ -126,9 +121,6 @@ export default function StackSection() {
           })}
         </div>
       </div>
-
-      {/* Squiggle transisi navy → paper berikutnya */}
-      <DoodleDivider className="relative -mb-1 text-paper-white/25" />
     </section>
   )
 }

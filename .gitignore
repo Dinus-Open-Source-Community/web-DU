@@ -8,3 +8,5 @@
 # Environment variables
 .env
 /.playwright-mcp/
+/graphify-out/
+/.impeccable/

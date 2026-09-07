@@ -5,6 +5,7 @@ type SectionHeaderProps = {
   eyebrow: string
   title: string
   copy?: string
+  /** align='left' dipakai section yang komposisinya tidak sentris (variasi irama). */
   align?: 'center' | 'left'
   dark?: boolean
   className?: string

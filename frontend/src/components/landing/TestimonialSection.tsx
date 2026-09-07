@@ -1,87 +1,77 @@
-import { Star } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
-import { StickerSparkle, StickerTape } from '@/components/playful/Stickers'
 import { TESTIMONIALS } from '@/lib/landing/testimonial'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
- * TestimonialSection — "napas" setelah section interaktif: dark navy yang
- * tenang dengan satu kartu testimoni paper besar. Quote mark oversized sebagai
- * dekorasi tipografis (bukan ikon), 5 bintang amber.
+ * TestimonialSection — tiga kartu kutipan bernama (foto mentor, 1:1 crop
+ * dari foto kegiatan) di atas navy. Kartu kertas miring dengan tape,
+ * bukan lagi satu kartu anonim.
  */
 
-const RATING = [0, 1, 2, 3, 4] as const
+const CARD_TILT = ['-rotate-1 lg:-translate-y-2', 'lg:translate-y-4', 'rotate-1 lg:-translate-y-1'] as const
+const NOTE_PIN = ['bg-note-yellow', 'bg-note-mint', 'bg-note-peach'] as const
 
 export default function TestimonialSection() {
   const { testimonial } = LANDING_COPY
-  const item = TESTIMONIALS[0]
 
   return (
     <section id="testimoni" className="relative overflow-hidden bg-ink-800">
-      {/* Grid kertas halus di atas navy */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <StickerSparkle twinkle className="absolute top-[12%] right-[7%] size-7 text-brand-soft/30" />
-        <StickerSparkle twinkle className="absolute bottom-[14%] left-[5%] size-5 text-brand-soft/25" />
-      </div>
+      {/* Garis tepi atas paper — batas tegas sebelum area navy */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-2 bg-paper-white/10" />
 
-      <div className="relative mx-auto max-w-4xl px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-6xl px-6 py-24 md:px-10 md:py-32">
         <SectionHeader
           dark
           eyebrow={testimonial.eyebrow}
           title={testimonial.title}
+          copy={testimonial.copy}
           className="mx-auto max-w-3xl"
         />
 
-        <Reveal className="mt-16">
-          {item ? (
-            <figure className="relative rounded-[28px] border-2 border-ink-900 bg-paper-white px-6 py-12 text-center shadow-paper sm:px-14">
-              {/* Tape pojok */}
-              <StickerTape className="absolute top-0 left-10 -rotate-6" />
-              <StickerTape className="absolute top-0 right-10 rotate-6" />
-
-              {/* Quote mark oversized — dekorasi tipografis */}
-              <span
-                aria-hidden
-                className="font-display text-ink-900/10 absolute -top-7 left-6 text-[7rem] leading-none font-bold select-none"
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+          {TESTIMONIALS.map((item, i) => (
+            <Reveal key={item.name} delay={(i % 3) * 0.12} className="h-full">
+              <figure
+                className={cn(
+                  'relative flex h-full flex-col rounded-[24px] border-2 border-ink-900 bg-paper-white p-6 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:p-7',
+                  CARD_TILT[i % CARD_TILT.length],
+                )}
               >
-                &ldquo;
-              </span>
+                {/* Pin pastel di atas kartu */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute -top-3 left-1/2 size-4 -translate-x-1/2 rounded-full border-2 border-ink-900 shadow-button',
+                    NOTE_PIN[i % NOTE_PIN.length],
+                  )}
+                />
 
-              {/* Rating */}
-              <div className="flex justify-center gap-1" aria-label="Rating 5 dari 5">
-                {RATING.map((i) => (
-                  <Star
-                    key={i}
-                    aria-hidden
-                    className="size-5 fill-chart-3 text-chart-3"
-                    strokeWidth={1.5}
-                  />
-                ))}
-              </div>
+                <blockquote className="text-ink-900 flex-1 text-[15px] leading-relaxed font-medium sm:text-base">
+                  &ldquo;{item.quote}&rdquo;
+                </blockquote>
 
-              <blockquote className="text-ink-900 mx-auto mt-6 max-w-2xl text-xl leading-relaxed font-medium sm:text-2xl">
-                {item.quote}
-              </blockquote>
-
-              <figcaption className="mt-8">
-                <p className="font-display text-lg font-bold text-ink-900">{item.name}</p>
-                <p className="text-ink-500 mt-0.5 text-sm font-bold">{item.role}</p>
-              </figcaption>
-            </figure>
-          ) : (
-            <p className="text-paper-white/60 text-center">Testimoni segera hadir.</p>
-          )}
-        </Reveal>
+                <figcaption className="mt-6 flex items-center gap-3 border-t-2 border-dashed border-ink-900/15 pt-5">
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel shadow-button">
+                    <img
+                      src={item.photo}
+                      alt={`Foto ${item.name}`}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-display text-ink-900 truncate text-base leading-tight font-bold">
+                      {item.name}
+                    </p>
+                    <p className="text-ink-500 truncate text-xs font-bold">{item.role}</p>
+                  </div>
+                </figcaption>
+              </figure>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   )

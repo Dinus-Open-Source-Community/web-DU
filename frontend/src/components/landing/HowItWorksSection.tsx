@@ -4,7 +4,6 @@ import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionHeader from '@/components/playful/SectionHeader'
-import { StickerSparkle } from '@/components/playful/Stickers'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
@@ -84,11 +83,8 @@ export default function HowItWorksSection() {
           backgroundSize: '24px 24px',
         }}
       />
-      {/* Aksen twinkle halus */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
-        <StickerSparkle twinkle className="absolute top-[14%] left-[6%] size-7 text-brand-soft/30" />
-        <StickerSparkle twinkle className="absolute right-[8%] bottom-[18%] size-6 text-brand-soft/25" />
-      </div>
+      {/* Grain — tekstur senyap, twinkle dekoratif dilepas biar fokus ke alur */}
+      <div aria-hidden className="paper-noise pointer-events-none absolute inset-0 opacity-30 mix-blend-screen" />
 
       <div className="relative mx-auto max-w-6xl px-6 py-24 md:px-10 lg:flex lg:min-h-screen lg:flex-col lg:justify-center lg:py-0">
         <SectionHeader

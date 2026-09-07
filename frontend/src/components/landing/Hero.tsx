@@ -307,6 +307,23 @@ export default function Hero() {
         </div>
       </div>
 
+      {/* Petunjuk arah ke bawah: ada terminal, cerita, galeri — bukan CTA yang
+          menghilang di atas fold. Satu-satunya momen bob yang mengarah ke scroll. */}
+      <Link
+        to="/#terminal"
+        aria-label={hero.scrollTease}
+        className="group relative z-10 mx-auto mt-16 flex w-fit flex-col items-center gap-1.5 rounded-full px-5 py-2 outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50"
+      >
+        <span className="text-ink-500 text-xs font-extrabold tracking-[0.18em] uppercase">
+          {hero.scrollTease}
+        </span>
+        <span aria-hidden className="animate-bob-slow text-brand-blue transition-transform duration-300 group-hover:translate-y-0.5">
+          <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      </Link>
+
       {/* Gugusan notes mengelilingi konten (5 posisi referensi) — GSAP entrance+loop+parallax */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 hidden lg:block">
         {NOTE_ORBITS.map((orbit) => {

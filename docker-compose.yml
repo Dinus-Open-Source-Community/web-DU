@@ -4,7 +4,7 @@ services:
       context: ./frontend
       target: dev
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
     depends_on:
@@ -70,7 +70,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "8012:8080"
+      - "8013:8080"
 
   minio:
     image: minio/minio:latest

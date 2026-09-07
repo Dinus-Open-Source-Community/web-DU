@@ -108,12 +108,12 @@ export default function Footer() {
             <div className="flex flex-wrap items-center gap-3">
               {socialLinks.map((social) => {
                 const Icon = social.icon
+                const isPlaceholder = social.href === '#'
                 return (
                   <a
                     key={social.label}
                     href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    aria-disabled={isPlaceholder || undefined}
                     aria-label={social.label}
                     className="text-ink-900 hover:text-brand-blue shadow-button hover:shadow-button-hover grid size-11 place-items-center rounded-full border-2 border-ink-900 bg-paper-white outline-none transition hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-paper-white/80">
                     <Icon className="size-5" />
