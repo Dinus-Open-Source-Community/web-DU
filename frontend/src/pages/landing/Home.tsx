@@ -1,66 +1,21 @@
-import type { IProgramFeatures } from '../../lib/types/utils'
-import Benefit from '../../components/home/Benefit'
-import Community from '../../components/home/Community'
-import Feature from '../../components/home/Feature'
-import Hero from '../../components/landing/Hero'
+import GuestLayout from '../../components/layouts/GuestLayouts'
 import CourseSection from '../../components/landing/CourseSection'
-import TerminalSection from '../../components/landing/TerminalSection'
-import StorySection from '../../components/landing/StorySection'
-import HowItWorksSection from '../../components/landing/HowItWorksSection'
+import FinalCTASection from '../../components/landing/FinalCTASection'
 import GallerySection from '../../components/landing/GallerySection'
-import TestimonialSection from '../../components/landing/TestimonialSection'
+import Hero from '../../components/landing/Hero'
+import HowItWorksSection from '../../components/landing/HowItWorksSection'
 import MentorsSection from '../../components/landing/MentorsSection'
 import StackSection from '../../components/landing/StackSection'
-import GuestLayout from '../../components/layouts/GuestLayouts'
-import {
-  BookIcons,
-  CertificateIcons,
-  GlobeLearningIcon,
-  JobIcons,
-} from '@/components/shared/icon'
-import { useFeaturedCourses } from '@/hooks/landing/use-featured-courses'
-import { useLandingCommunityStats } from '@/hooks/landing/use-landing-community-stats'
+import StorySection from '../../components/landing/StorySection'
+import TerminalSection from '../../components/landing/TerminalSection'
+import TestimonialSection from '../../components/landing/TestimonialSection'
+import SplashScreen from '../../components/playful/SplashScreen'
 
 export default function Home() {
-  const { courses: featuredCourses, isLoading: isFeaturedCoursesLoading } = useFeaturedCourses()
-  const { stats: communityStats, isLoading: isCommunityStatsLoading } = useLandingCommunityStats()
-
-  const featureIconMap: Record<string, React.ReactNode> = {
-    book: <BookIcons />,
-    globe: <GlobeLearningIcon />,
-    job: <JobIcons />,
-    certificate: <CertificateIcons />,
-  };
-
-  const programFeatures: IProgramFeatures[] = [
-    {
-      title: "Materi OSS nyata",
-      description:
-        "Berlatih lewat proyek komunitas Doscom yang bisa kamu kontribusikan ke portofolio.",
-      icon: featureIconMap.book,
-    },
-    {
-      title: "Jaringan profesional",
-      description:
-        "Networking dengan mentor industri dan sesama kontributor open source.",
-      icon: featureIconMap.globe,
-    },
-    {
-      title: "Proyek kerja tim",
-      description:
-        "Simulasi sprint tim sekaligus code review untuk mirip lingkungan kerja.",
-      icon: featureIconMap.job,
-    },
-    {
-      title: "Sertifikat partisipasi",
-      description:
-        "Bukti pembelajaran resmi setelah menyelesai modul capstone.",
-      icon: featureIconMap.certificate,
-    },
-  ];
   return (
     <GuestLayout>
-      <section id="home" className="bg-muted w-full">
+      <SplashScreen />
+      <main className="w-full bg-paper-white">
         <Hero />
         <StackSection />
         <MentorsSection />
@@ -70,10 +25,8 @@ export default function Home() {
         <HowItWorksSection />
         <GallerySection />
         <TestimonialSection />
-        <Feature courses={featuredCourses} isLoading={isFeaturedCoursesLoading} />
-        <Benefit DataFeatures={programFeatures} />
-        <Community stats={communityStats} isLoading={isCommunityStatsLoading} />
-      </section>
+        <FinalCTASection />
+      </main>
     </GuestLayout>
-  );
+  )
 }
