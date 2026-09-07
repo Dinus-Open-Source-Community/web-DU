@@ -68,26 +68,39 @@ export default function FinalCTASection() {
                   const isPlaceholder = contact.href === '#'
                   return (
                     <li key={contact.label}>
-                      <a
-                        href={contact.href}
-                        aria-label={contact.label}
-                        aria-disabled={isPlaceholder || undefined}
-                        className="text-ink-900 hover:text-brand-ink focus-visible:ring-brand-blue/50 group flex items-center gap-4 rounded-2xl border-2 border-ink-900 bg-paper-white px-4 py-3 shadow-button outline-none transition-all duration-200 hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-4"
-                      >
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-ink-900 bg-note-yellow/60">
-                          <Icon className="size-5" strokeWidth={2} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-extrabold tracking-wide uppercase">
-                            {contact.label}
+                      {isPlaceholder ? (
+                        <span
+                          aria-disabled="true"
+                          className="text-ink-400 group flex items-center gap-4 rounded-2xl border-2 border-dashed border-ink-900/40 bg-paper-panel px-4 py-3"
+                        >
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-dashed border-ink-900/30 bg-note-yellow/40 opacity-70">
+                            <Icon className="size-5" strokeWidth={2} />
                           </span>
-                          {isPlaceholder ? (
-                            <span className="text-ink-400 block text-xs font-semibold italic">
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-extrabold tracking-wide uppercase opacity-70">
+                              {contact.label}
+                            </span>
+                            <span className="block text-xs font-semibold italic">
                               segera hadir
                             </span>
-                          ) : null}
+                          </span>
                         </span>
-                      </a>
+                      ) : (
+                        <a
+                          href={contact.href}
+                          aria-label={contact.label}
+                          className="text-ink-900 hover:text-brand-ink focus-visible:ring-brand-blue/50 group flex items-center gap-4 rounded-2xl border-2 border-ink-900 bg-paper-white px-4 py-3 shadow-button outline-none transition-all duration-200 hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-4"
+                        >
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-ink-900 bg-note-yellow/60">
+                            <Icon className="size-5" strokeWidth={2} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-extrabold tracking-wide uppercase">
+                              {contact.label}
+                            </span>
+                          </span>
+                        </a>
+                      )}
                     </li>
                   )
                 })}

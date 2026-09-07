@@ -222,6 +222,7 @@ export default function TerminalSection() {
                   key={name}
                   type="button"
                   onClick={() => run(name)}
+                  aria-label={`${name} — ${def.desc}`}
                   className="rounded-full border-2 border-ink-900 bg-paper-white px-3 py-1 font-mono text-xs font-bold text-ink-900 shadow-button transition outline-none hover:-translate-y-0.5 hover:bg-note-yellow hover:shadow-button-hover focus-visible:ring-4 focus-visible:ring-brand-blue/60"
                 >
                   {name}
