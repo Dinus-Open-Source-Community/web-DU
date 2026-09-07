@@ -1,18 +1,20 @@
 import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
-import { StickerTape } from '@/components/playful/Stickers'
 import { GALLERY_IMAGES, type GalleryImage } from '@/lib/landing/gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
- * GallerySection — papan tempel bento ala scrapbook sungguhan. Tiga "kulit"
- * kartu berputar (Polaroid → Jahitan → Lipatan → …) agar tidak monoton:
- *  1. Polaroid — foto + area putih tebal di bawah, tape di tepi atas foto.
- *  2. Jahitan  — kertas dengan border jahitan (dashed) + binder clip di atas.
- *  3. Lipatan  — pojok terlipat (hard-stop dua warna) + coretan kecil.
+ * GallerySection — papan tempel bento ala scrapbook sungguhan. Enam "kulit"
+ * kartu berputar (index % 6) agar tidak monoton:
+ *  0 KertasSobek    — potongan kertas majalah/kraft, tepi miring (clip-path).
+ *  1 NotebookPolos  — halaman buku tulis: garis horizontal + lubang jilid.
+ *  2 PolaroidWarna  — polaroid dgn washi tape warna pastel + caption font-hand.
+ *  3 PatchKertas    — kertas pastel solid, sudut terpotong, foto "dipaste".
+ *  4 LabelKraft     — label kraft + tali/benang + caption spidol.
+ *  5 KartuPos       — kartu pos krem: bingkai ganda + perangko + stempel.
  * Struktur baris bento & ukuran (aspect) dipertahankan; hanya kulit kartu yang
- * berganti mengikuti indeks foto global.
+ * berputar mengikuti indeks foto global.
  *
  * Aksesibilitas: img.alt ringkas (dibaca sekali); caption tampil sebagai
  * figcaption tanpa menduplikasi alt.
@@ -66,7 +68,7 @@ function chunkRows<T>(items: T[], rowSizes: number[]): T[][] {
   return rows
 }
 
-/* ============================== 3 varian kulit ============================== */
+/* ============================== 6 varian kulit ============================== */
 
 type PhotoProps = {
   img: GalleryImage
@@ -87,44 +89,80 @@ function Photo({ img, aspect }: PhotoProps) {
   )
 }
 
-/** 1 — POLAROID: foto + area putih tebal bawah utk caption "tulisan tangan". */
-function PolaroidCard({ img, aspect }: PhotoProps) {
+/** 0 — KERTAS SOBEK: potongan kertas dgn tepi miring/sobek (clip-path). */
+function TornPaperCard({ img, aspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/40 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
-      {/* Tape kecil di tepi atas foto */}
-      <StickerTape className="absolute top-5 left-1/2 z-10 -translate-x-1/2 -rotate-3" />
-      <div className="overflow-hidden border border-ink-900/30 bg-paper-panel">
+    <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out hover:-translate-y-1.5">
+      <div
+        className="flex h-full flex-col bg-paper-white p-3"
+        style={{
+          clipPath:
+            'polygon(0 4%, 96% 0, 100% 18%, 99% 84%, 94% 100%, 3% 97%, 0 82%)',
+          filter: 'drop-shadow(0 10px 14px rgba(5,9,20,0.16))',
+        }}
+      >
+        <div className="overflow-hidden border border-ink-900/25 bg-paper-panel">
+          <Photo img={img} aspect={aspect} />
+        </div>
+        <figcaption className="px-1 pt-2.5 pb-1">
+          <p className="font-marker text-ink-700 text-sm leading-snug -rotate-1">
+            {img.caption}
+          </p>
+        </figcaption>
+      </div>
+    </figure>
+  )
+}
+
+/** 1 — NOTEBOOK POLOS: halaman buku tulis (garis + margin merah + lubang jilid). */
+function NotebookCard({ img, aspect }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Garis horizontal halaman */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(transparent 0 26px, rgba(5,9,20,0.09) 26px 27px)',
+        }}
+      />
+      {/* Margin merah muda kiri (khas buku tulis) */}
+      <div aria-hidden className="absolute inset-y-0 left-4 w-px bg-note-pink/60" />
+      {/* Lubang jilid kiri */}
+      <div aria-hidden className="absolute top-1/2 left-1.5 flex -translate-y-1/2 flex-col gap-4">
+        {[0, 1, 2].map((h) => (
+          <span key={h} className="size-2 rounded-full border border-ink-900/20 bg-[#FDFBF3]" />
+        ))}
+      </div>
+      <div className="relative m-3 ml-7 overflow-hidden border border-ink-900/20 bg-paper-white shadow-[0_2px_6px_rgba(5,9,20,0.12)]">
         <Photo img={img} aspect={aspect} />
       </div>
-      {/* Area putih bawah — seperti tulisan tangan di polaroid */}
-      <figcaption className="flex flex-1 items-end px-1 pt-4">
-        <p className="font-display text-ink-800 w-full text-center text-sm leading-snug font-semibold">
-          {img.caption}
-        </p>
+      <figcaption className="relative px-3 pt-1.5 pb-3 pl-7">
+        <p className="font-hand text-ink-700 text-sm leading-snug font-medium">{img.caption}</p>
       </figcaption>
     </figure>
   )
 }
 
-/** 2 — JAHITAN: border dashed halus + binder clip di tepi atas. */
-function StitchedCard({ img, aspect }: PhotoProps) {
+/** 2 — POLAROID WARNA: washi tape warna pastel + area putih bawah. */
+function PolaroidColorCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
+  const tapeColors = ['bg-note-pink/80', 'bg-note-mint/80', 'bg-note-sky/80', 'bg-note-peach/80']
   return (
-    <figure className="group relative flex h-full flex-col rounded-[6px] border border-ink-900/30 bg-paper-white p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
-      {/* Jahitan: garis dashed mengikuti tepi dalam */}
-      <div
+    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Washi tape warna */}
+      <span
         aria-hidden
-        className="pointer-events-none absolute inset-1.5 rounded-[3px] border border-dashed border-ink-900/40"
+        className={cn(
+          'absolute top-4 left-1/2 z-10 h-[16px] w-16 -translate-x-1/2 -rotate-3 opacity-90',
+          tapeColors[idx % tapeColors.length],
+        )}
       />
-      {/* Binder clip di tepi atas */}
-      <div aria-hidden className="absolute -top-1 left-1/2 z-10 -translate-x-1/2">
-        <div className="mx-auto h-2.5 w-6 rounded-t-sm border-2 border-b-0 border-ink-900/70 bg-paper-panel" />
-        <div className="mx-auto h-0.5 w-7 bg-ink-900/50" />
-      </div>
       <div className="overflow-hidden border border-ink-900/20 bg-paper-panel">
         <Photo img={img} aspect={aspect} />
       </div>
-      <figcaption className="px-1 pt-2.5 pb-0.5">
-        <p className="text-ink-600 text-[11px] leading-snug font-bold tracking-wide uppercase">
+      <figcaption className="flex flex-1 items-end px-1 pt-4">
+        <p className="font-hand text-ink-800 w-full text-center text-sm leading-snug font-semibold">
           {img.caption}
         </p>
       </figcaption>
@@ -132,40 +170,109 @@ function StitchedCard({ img, aspect }: PhotoProps) {
   )
 }
 
-/** 3 — LIPATAN: pojok terlipat (hard-stop) + lingkaran coret kecil. */
-function FoldedCard({ img, aspect }: PhotoProps) {
+/** 3 — PATCH KERTAS WARNA: pastel solid, sudut terpotong, foto "dipaste". */
+function PatchCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
+  const patchBg = [
+    'bg-note-yellow',
+    'bg-note-mint',
+    'bg-note-peach',
+    'bg-note-pink',
+    'bg-note-sky',
+    'bg-note-lavender',
+  ]
   return (
-    <figure className="group relative flex h-full flex-col rounded-[4px] bg-paper-white shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
-      {/* Pojok terlipat kanan-atas: segitiga kertas lebih gelap (hard-stop) */}
-      <div
-        aria-hidden
-        className="absolute inset-0 rounded-[4px]"
-        style={{
-          background:
-            'linear-gradient(135deg, #DDE1E6 0 20px, #EDEFF2 20px 22px, transparent 22px)',
-        }}
-      />
-      {/* Coretan doodle kecil */}
-      <div
-        aria-hidden
-        className="absolute top-2 left-2 size-7 rounded-full border-2 border-brand-ink/40"
-      />
-      <div className="relative overflow-hidden bg-paper-panel">
+    <figure
+      className={cn(
+        'group relative flex h-full flex-col p-3.5 transition-transform duration-300 ease-out hover:-translate-y-1.5',
+        patchBg[idx % patchBg.length],
+      )}
+      style={{
+        clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)',
+        filter: 'drop-shadow(0 8px 12px rgba(5,9,20,0.14))',
+      }}
+    >
+      <div className="overflow-hidden border-2 border-paper-white bg-paper-white shadow-[0_3px_0_rgba(5,9,20,0.18)]">
         <Photo img={img} aspect={aspect} />
       </div>
-      <figcaption className="relative px-3 pt-2 pb-3">
-        <p className="text-ink-600 text-xs leading-snug font-semibold italic">{img.caption}</p>
+      <figcaption className="px-1 pt-2.5 pb-0.5">
+        <p className="font-marker text-ink-900 text-sm leading-snug -rotate-1">
+          {img.caption}
+        </p>
       </figcaption>
     </figure>
   )
 }
 
-/** Pilih kulit kartu berdasarkan indeks foto global (putar 3 varian). */
-function ScrapbookCard({ img, globalIdx, aspect }: { img: GalleryImage; globalIdx: number; aspect: string }) {
-  const variant = globalIdx % 3
-  if (variant === 0) return <PolaroidCard img={img} aspect={aspect} />
-  if (variant === 1) return <StitchedCard img={img} aspect={aspect} />
-  return <FoldedCard img={img} aspect={aspect} />
+/** 4 — LABEL KRAFT + TALI: kertas kraft, tali/benang di atas, caption spidol. */
+function KraftLabelCard({ img }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Tali/benang horizontal di atas */}
+      <div aria-hidden className="absolute inset-x-0 top-0 z-10 flex justify-center">
+        <div className="h-[7px] w-full border-y-2 border-dashed border-[#8A6A45]/50" />
+      </div>
+      {/* Foto kecil "digantung" */}
+      <div className="mx-auto mt-7 w-4/5 overflow-hidden rounded-full border-[3px] border-paper-white shadow-paper">
+        <div className="overflow-hidden">
+          <Photo img={img} aspect="aspect-square" />
+        </div>
+      </div>
+      <figcaption className="flex flex-1 items-end px-3 pt-3 pb-3">
+        <p className="font-marker text-[#4A3623] w-full text-center text-sm leading-snug -rotate-1">
+          {img.caption}
+        </p>
+      </figcaption>
+    </figure>
+  )
+}
+
+/** 5 — KARTU POS JADUL: krem, bingkai ganda, perangko, stempel. */
+function PostcardCard({ img, aspect }: PhotoProps) {
+  return (
+    <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+      {/* Bingkai dalam dashed */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-1.5 rounded-[3px] border border-dashed border-ink-900/25"
+      />
+      {/* Perangko pojok kanan-atas */}
+      <div
+        aria-hidden
+        className="absolute top-2.5 right-2.5 z-10 grid size-9 place-items-center rounded-[3px] border-2 border-dashed border-ink-900/60 bg-note-sky text-xs text-ink-900/70"
+      >
+        ✦
+      </div>
+      {/* Stempel miring pojok kiri-bawah */}
+      <div aria-hidden className="absolute bottom-8 left-2 z-10 -rotate-12 opacity-60">
+        <p className="font-marker text-brand-ink/70 text-[10px] leading-none">DOSCOM</p>
+      </div>
+      <div className="mt-4 overflow-hidden border border-ink-900/25 bg-paper-panel">
+        <Photo img={img} aspect={aspect} />
+      </div>
+      <figcaption className="px-1 pt-2.5 pb-1">
+        <p className="font-hand text-ink-700 text-sm leading-snug font-medium">{img.caption}</p>
+      </figcaption>
+    </figure>
+  )
+}
+
+/** Pilih kulit kartu berdasarkan indeks foto global (putar 6 varian). */
+function ScrapbookCard({
+  img,
+  globalIdx,
+  aspect,
+}: {
+  img: GalleryImage
+  globalIdx: number
+  aspect: string
+}) {
+  const variant = globalIdx % 6
+  if (variant === 0) return <TornPaperCard img={img} aspect={aspect} />
+  if (variant === 1) return <NotebookCard img={img} aspect={aspect} />
+  if (variant === 2) return <PolaroidColorCard img={img} aspect={aspect} idx={globalIdx} />
+  if (variant === 3) return <PatchCard img={img} aspect={aspect} idx={globalIdx} />
+  if (variant === 4) return <KraftLabelCard img={img} aspect={aspect} />
+  return <PostcardCard img={img} aspect={aspect} />
 }
 
 /* ============================== Section ============================== */
