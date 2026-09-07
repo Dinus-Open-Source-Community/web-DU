@@ -6,18 +6,73 @@ import { GALLERY_IMAGES } from '@/lib/landing/gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
- * GallerySection — "papan tempel" foto kegiatan DOSCOM. Foto sumber
- * berbentuk portrait, jadi bingkainya ikut portrait (3:4) — tidak dipaksa
- * 16:9. Komposisi: satu foto besar di kiri (jangkar), dua foto kecil
- * tumpang-tindih di kanan dengan rotasi beda — kesan scrapbook, bukan grid.
- * Sumber: GALLERY_IMAGES (public/images).
+ * GallerySection — papan tempel bento asimetris ("scrapbook"). Tiap BARIS grid
+ * 12 kolom diisi penuh (7+5, 4+4+4, …) sehingga N foto apa pun tersusun tanpa
+ * lubang. Foto 16:9, rotasi & tape selang-seling; satu jangkar besar di awal.
+ *
+ * Aksesibilitas: img.alt ringkas (dibaca sekali); caption cerita tampil sebagai
+ * figcaption tanpa menduplikasi alt — tidak dibaca dua kali.
  */
 
-const FEATURED_IMG = GALLERY_IMAGES[0]
-const SIDE_IMGS = GALLERY_IMAGES.slice(1)
+type RowSlot = { cols: string; aspect: string; tilt: string; tape: boolean }
+
+/** Peta kelas col-span (literal — Tailwind JIT butuh string lengkap). */
+const COL_SPANS = {
+  3: 'md:col-span-3',
+  4: 'md:col-span-4',
+  5: 'md:col-span-5',
+  7: 'md:col-span-7',
+  12: 'md:col-span-12',
+} as const
+
+/** Baris bento: tiap sub-array = komposisi kolom yang totalnya 12 (md). */
+const BENTO_ROWS: RowSlot[][] = [
+  // Baris 1: jangkar besar + satu medium.
+  [
+    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1', tape: true },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1', tape: false },
+  ],
+  // Baris 2: tiga kartu sama besar.
+  [
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', tape: true },
+    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1', tape: false },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2', tape: true },
+  ],
+  // Baris 3: medium-lebar + dua kartu.
+  [
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2', tape: true },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2', tape: false },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1', tape: true },
+  ],
+  // Baris 4: kebalikan baris 3.
+  [
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1', tape: false },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', tape: true },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1', tape: true },
+  ],
+]
+
+/** Potong foto menjadi baris-baris bento; baris terakhir menyesuaikan. */
+function chunkRows<T>(items: T[], rowSizes: number[]): T[][] {
+  const rows: T[][] = []
+  let idx = 0
+  let row = 0
+  while (idx < items.length) {
+    const size = Math.min(rowSizes[row % rowSizes.length], items.length - idx)
+    rows.push(items.slice(idx, idx + size))
+    idx += size
+    row += 1
+  }
+  return rows
+}
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
+  const photos = GALLERY_IMAGES
+
+  // Ukuran baris mengikuti BENTO_ROWS (2,3,3,3 → rata untuk sisa).
+  const rowSizes = BENTO_ROWS.map((r) => r.length)
+  const rows = chunkRows(photos, rowSizes)
 
   return (
     <section id="galeri" className="relative overflow-hidden bg-paper-white">
@@ -29,56 +84,78 @@ export default function GallerySection() {
           className="mx-auto max-w-3xl"
         />
 
-        {GALLERY_IMAGES.length === 0 ? null : (
-          <div className="mt-16 grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8">
-            {/* Foto jangkar besar (kiri) */}
-            <Reveal className="md:col-span-7">
-              <figure className="group relative -rotate-1 rounded-[24px] border-2 border-ink-900 bg-paper-white p-3 pb-0 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-button-hover">
-                <StickerTape className="absolute -top-3 left-8 -rotate-6" />
-                <StickerTape className="absolute -top-3 right-8 rotate-6" />
-                <div className="overflow-hidden rounded-[16px] border-2 border-ink-900">
-                  {FEATURED_IMG ? (
-                    <img
-                      src={FEATURED_IMG.src}
-                      alt={FEATURED_IMG.alt}
-                      loading="lazy"
-                      className="aspect-[3/4] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:aspect-[3/3.4]"
-                    />
-                  ) : null}
+        {rows.length === 0 ? (
+          <p className="text-ink-500 mt-16 text-center text-sm font-bold uppercase tracking-[0.2em]">
+            Dokumentasi segera hadir.
+          </p>
+        ) : (
+          <div className="mt-16 flex flex-col gap-6">
+            {rows.map((rowPhotos, rowIdx) => {
+              const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
+              return (
+                <div
+                  key={rowIdx}
+                  className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 md:grid-cols-12 md:gap-6"
+                >
+                  {rowPhotos.map((img, i) => {
+                    // 1 foto sisa di baris terakhir → bentang penuh sebagai penutup.
+                    const slot: RowSlot =
+                      rowPhotos.length === 1
+                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', tape: true }
+                        : (slotDefs[i % slotDefs.length] ?? {
+                            cols: COL_SPANS[4],
+                            aspect: 'aspect-[4/3]',
+                            tilt: 'rotate-1',
+                            tape: false,
+                          })
+                    const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
+                    return (
+                      <Reveal
+                        key={`${img.src}-${rowIdx}-${i}`}
+                        delay={(i % 3) * 0.08}
+                        className={cn(
+                          'h-full sm:col-span-1',
+                          isLastOdd && 'sm:col-span-2',
+                          slot.cols,
+                        )}
+                      >
+                        <figure
+                          className={cn(
+                            'group relative flex h-full flex-col rounded-[20px] border-2 border-ink-900 bg-paper-white p-2.5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover',
+                            slot.tilt,
+                          )}
+                        >
+                          {slot.tape ? (
+                            <StickerTape
+                              className={cn(
+                                'absolute -top-2.5 z-10',
+                                (rowIdx + i) % 2 === 0 ? 'left-6 -rotate-6' : 'right-6 rotate-6',
+                              )}
+                            />
+                          ) : null}
+                          <div className="overflow-hidden rounded-[14px] border-2 border-ink-900">
+                            <img
+                              src={img.src}
+                              alt={img.alt}
+                              loading="lazy"
+                              className={cn(
+                                'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
+                                slot.aspect,
+                              )}
+                            />
+                          </div>
+                          <figcaption className="px-2 pt-2.5 pb-1">
+                            <p className="text-ink-600 text-xs leading-snug font-semibold italic">
+                              {img.caption}
+                            </p>
+                          </figcaption>
+                        </figure>
+                      </Reveal>
+                    )
+                  })}
                 </div>
-                <figcaption className="px-2 py-3">
-                  <p className="text-ink-600 text-sm leading-snug font-semibold italic">
-                    {FEATURED_IMG?.alt}
-                  </p>
-                </figcaption>
-              </figure>
-            </Reveal>
-
-            {/* Dua foto kecil (kanan) — dirapel biar menempel */}
-            <div className="flex flex-col justify-center gap-10 md:col-span-5 md:gap-8">
-              {SIDE_IMGS.map((img, i) => (
-                <Reveal key={img.src} delay={(i + 1) * 0.1}>
-                  <figure
-                    className={cn(
-                      'group relative overflow-hidden rounded-[20px] border-2 border-ink-900 bg-paper-white p-2.5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover',
-                      i === 0 ? 'md:ml-6 md:rotate-2' : 'md:mr-4 md:-rotate-1',
-                    )}
-                  >
-                    <div className="overflow-hidden rounded-[14px] border-2 border-ink-900">
-                      <img
-                        src={img.src}
-                        alt={img.alt}
-                        loading="lazy"
-                        className="aspect-[3/4] w-full max-w-[420px] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                      />
-                    </div>
-                    <figcaption className="px-2 pt-2 pb-1">
-                      <p className="text-ink-600 text-xs leading-snug font-semibold italic">{img.alt}</p>
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              ))}
-            </div>
+              )
+            })}
           </div>
         )}
       </div>
