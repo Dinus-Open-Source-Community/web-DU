@@ -182,7 +182,7 @@ export default function TerminalSection() {
               ref={outputRef}
               role="log"
               aria-live="polite"
-              className="h-64 overflow-y-auto px-5 py-4 font-mono text-sm leading-relaxed text-paper-white/90"
+              className="h-80 overflow-hidden px-5 py-4 font-mono text-sm leading-relaxed text-paper-white/90 sm:h-72 lg:h-64"
             >
               {lines.map((line) => {
                 if (line.kind === 'cmd') {
