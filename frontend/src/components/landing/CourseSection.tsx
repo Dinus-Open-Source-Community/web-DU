@@ -30,17 +30,17 @@ export default function CourseSection() {
       {/* Garis tepi atas — lembar terpisah */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-2 bg-ink-900/90" />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         {/* Header + CTA tidak sentris (variasi dari header tengah) */}
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-8">
           <Reveal className="max-w-2xl">
-            <p className="text-brand-ink text-sm font-extrabold tracking-[0.2em] uppercase italic">
+            <p className="text-brand-ink text-xs font-extrabold tracking-[0.2em] uppercase italic sm:text-sm">
               {course.eyebrow}
             </p>
-            <h2 className="text-ink-900 mt-3 font-display text-5xl leading-[0.95] font-bold text-balance md:text-6xl">
+            <h2 className="text-ink-900 mt-3 font-display text-[clamp(2rem,7.5vw,3.75rem)] leading-[1] font-bold text-balance md:text-6xl">
               {course.title}
             </h2>
-            <p className="text-ink-600 mt-4 text-lg leading-relaxed">{course.copy}</p>
+            <p className="text-ink-600 mt-3 text-base leading-relaxed md:mt-4 md:text-lg">{course.copy}</p>
           </Reveal>
           <Reveal delay={0.1} className="shrink-0">
             <Link
@@ -54,8 +54,8 @@ export default function CourseSection() {
         </div>
 
         {/* Lembar kertas lebar berisi daftar program */}
-        <Reveal className="mt-14" delay={0.05}>
-          <div className="relative rounded-[28px] border-2 border-ink-900 bg-paper-white px-6 py-4 shadow-paper sm:px-10">
+        <Reveal className="mt-10 sm:mt-14 md:mt-14" delay={0.05}>
+          <div className="relative rounded-[28px] border-2 border-ink-900 bg-paper-white px-4 py-3 shadow-paper sm:px-10 sm:py-4">
             <StickerTape className="absolute -top-2.5 left-10 -rotate-3" />
             <StickerTape className="absolute -top-2.5 right-10 rotate-3" />
 
@@ -64,13 +64,13 @@ export default function CourseSection() {
                 <li key={item.title}>
                   <Link
                     to={course.allHref}
-                    className="group flex items-center gap-5 rounded-2xl px-2 py-6 outline-none transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-brand-blue/40 sm:gap-7 sm:px-3"
+                    className="group flex items-center gap-4 rounded-2xl px-2 py-5 outline-none transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-brand-blue/40 sm:gap-7 sm:px-3 sm:py-6"
                   >
                     {/* Stempel nomor pastel */}
                     <span
                       aria-hidden
                       className={cn(
-                        'font-display inline-grid size-14 shrink-0 place-items-center rounded-2xl border-2 border-ink-900 text-xl font-bold text-ink-900 shadow-button transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:size-16 sm:text-2xl',
+                        'font-display inline-grid size-11 shrink-0 place-items-center rounded-2xl border-2 border-ink-900 text-lg font-bold text-ink-900 shadow-button transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:size-16 sm:text-2xl',
                         STAMP_BG[item.accent],
                       )}
                     >
@@ -79,21 +79,21 @@ export default function CourseSection() {
 
                     <span className="min-w-0 flex-1">
                       <span className="block items-center gap-3">
-                        <span className="text-ink-900 font-display text-xl leading-tight font-bold sm:text-2xl">
+                        <span className="text-ink-900 font-display text-lg leading-tight font-bold sm:text-2xl">
                           {item.title}
                         </span>
                         <span className="text-brand-ink ml-3 hidden rounded-full border border-ink-900/20 bg-paper-panel px-2.5 py-0.5 text-[11px] font-extrabold tracking-wide uppercase sm:inline-block">
                           {item.level}
                         </span>
                       </span>
-                      <span className="text-ink-600 mt-1.5 block text-sm leading-relaxed sm:text-base">
+                      <span className="text-ink-600 mt-1 block text-sm leading-relaxed sm:text-base">
                         {item.desc}
                       </span>
                     </span>
 
                     <ArrowRight
                       aria-hidden
-                      className="text-ink-900/40 size-6 shrink-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-blue sm:size-7"
+                      className="text-ink-900/40 size-5 shrink-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-blue sm:size-7"
                     />
                   </Link>
                 </li>

@@ -29,7 +29,7 @@ export default function SectionHeader({
     >
       <p
         className={cn(
-          'text-sm font-extrabold tracking-[0.2em] uppercase italic',
+          'text-xs font-extrabold tracking-[0.2em] uppercase italic sm:text-sm',
           dark ? 'text-brand-soft' : 'text-brand-ink',
         )}
       >
@@ -37,14 +37,19 @@ export default function SectionHeader({
       </p>
       <h2
         className={cn(
-          'mt-3 font-display text-5xl leading-[0.95] font-bold text-balance md:text-6xl',
+          'mt-3 font-display text-[clamp(2rem,7.5vw,3.75rem)] leading-[1] font-bold text-balance md:text-6xl',
           dark ? 'text-paper-white' : 'text-ink-900',
         )}
       >
         {title}
       </h2>
       {copy ? (
-        <p className={cn('mt-4 text-lg leading-relaxed', dark ? 'text-paper-white/80' : 'text-ink-600')}>
+        <p
+          className={cn(
+            'mt-3 text-base leading-relaxed md:mt-4 md:text-lg',
+            dark ? 'text-paper-white/80' : 'text-ink-600',
+          )}
+        >
           {copy}
         </p>
       ) : null}

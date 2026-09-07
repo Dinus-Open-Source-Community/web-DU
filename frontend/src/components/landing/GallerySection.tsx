@@ -20,7 +20,7 @@ import { LANDING_COPY } from '@/lib/landing/copy'
  * figcaption tanpa menduplikasi alt.
  */
 
-type RowSlot = { cols: string; aspect: string; tilt: string }
+type RowSlot = { cols: string; aspect: string; tilt: string; mobileAspect?: string }
 
 /** Peta kelas col-span (literal — Tailwind JIT butuh string lengkap). */
 const COL_SPANS = {
@@ -34,23 +34,23 @@ const COL_SPANS = {
 /** Baris bento: tiap sub-array = komposisi kolom yang totalnya 12 (md). */
 const BENTO_ROWS: RowSlot[][] = [
   [
-    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1' },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1' },
+    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
   ],
   [
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1' },
-    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2', mobileAspect: 'aspect-square' },
   ],
   [
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2' },
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
   ],
   [
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1' },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1' },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-[4/3]' },
   ],
 ]
 
@@ -73,9 +73,12 @@ function chunkRows<T>(items: T[], rowSizes: number[]): T[][] {
 type PhotoProps = {
   img: GalleryImage
   aspect: string
+  /** Aspect lebih landai untuk layar < md (mobile hemat tinggi). */
+  mobileAspect?: string
 }
 
-function Photo({ img, aspect }: PhotoProps) {
+function Photo({ img, aspect, mobileAspect }: PhotoProps) {
+  const aspectCls = mobileAspect ? cn(mobileAspect, `md:${aspect}`) : aspect
   return (
     <img
       src={img.src}
@@ -83,14 +86,14 @@ function Photo({ img, aspect }: PhotoProps) {
       loading="lazy"
       className={cn(
         'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
-        aspect,
+        aspectCls,
       )}
     />
   )
 }
 
 /** 0 — KERTAS SOBEK: potongan kertas dgn tepi miring/sobek (clip-path). */
-function TornPaperCard({ img, aspect }: PhotoProps) {
+function TornPaperCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
     <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out hover:-translate-y-1.5">
       <div
@@ -102,7 +105,7 @@ function TornPaperCard({ img, aspect }: PhotoProps) {
         }}
       >
         <div className="overflow-hidden border border-ink-900/25 bg-paper-panel">
-          <Photo img={img} aspect={aspect} />
+          <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
         </div>
         <figcaption className="px-1 pt-2.5 pb-1">
           <p className="font-marker text-ink-700 text-sm leading-snug -rotate-1">
@@ -115,7 +118,7 @@ function TornPaperCard({ img, aspect }: PhotoProps) {
 }
 
 /** 1 — NOTEBOOK POLOS: halaman buku tulis (garis + margin merah + lubang jilid). */
-function NotebookCard({ img, aspect }: PhotoProps) {
+function NotebookCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
     <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
       {/* Garis horizontal halaman */}
@@ -136,7 +139,7 @@ function NotebookCard({ img, aspect }: PhotoProps) {
         ))}
       </div>
       <div className="relative m-3 ml-7 overflow-hidden border border-ink-900/20 bg-paper-white shadow-[0_2px_6px_rgba(5,9,20,0.12)]">
-        <Photo img={img} aspect={aspect} />
+        <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
       </div>
       <figcaption className="relative px-3 pt-1.5 pb-3 pl-7">
         <p className="font-hand text-ink-700 text-sm leading-snug font-medium">{img.caption}</p>
@@ -146,7 +149,7 @@ function NotebookCard({ img, aspect }: PhotoProps) {
 }
 
 /** 2 — POLAROID WARNA: washi tape warna pastel + area putih bawah. */
-function PolaroidColorCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
+function PolaroidColorCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: number }) {
   const tapeColors = ['bg-note-pink/80', 'bg-note-mint/80', 'bg-note-sky/80', 'bg-note-peach/80']
   return (
     <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
@@ -159,7 +162,7 @@ function PolaroidColorCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
         )}
       />
       <div className="overflow-hidden border border-ink-900/20 bg-paper-panel">
-        <Photo img={img} aspect={aspect} />
+        <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
       </div>
       <figcaption className="flex flex-1 items-end px-1 pt-4">
         <p className="font-hand text-ink-800 w-full text-center text-sm leading-snug font-semibold">
@@ -171,7 +174,7 @@ function PolaroidColorCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
 }
 
 /** 3 — PATCH KERTAS WARNA: pastel solid, sudut terpotong, foto "dipaste". */
-function PatchCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
+function PatchCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: number }) {
   const patchBg = [
     'bg-note-yellow',
     'bg-note-mint',
@@ -192,7 +195,7 @@ function PatchCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
       }}
     >
       <div className="overflow-hidden border-2 border-paper-white bg-paper-white shadow-[0_3px_0_rgba(5,9,20,0.18)]">
-        <Photo img={img} aspect={aspect} />
+        <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
       </div>
       <figcaption className="px-1 pt-2.5 pb-0.5">
         <p className="font-marker text-ink-900 text-sm leading-snug -rotate-1">
@@ -204,7 +207,7 @@ function PatchCard({ img, aspect, idx }: PhotoProps & { idx: number }) {
 }
 
 /** 4 — LABEL KRAFT + TALI: kertas kraft, tali/benang di atas, caption spidol. */
-function KraftLabelCard({ img }: PhotoProps) {
+function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
   return (
     <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
       {/* Tali/benang horizontal di atas */}
@@ -212,12 +215,12 @@ function KraftLabelCard({ img }: PhotoProps) {
         <div className="h-[7px] w-full border-y-2 border-dashed border-[#8A6A45]/50" />
       </div>
       {/* Foto kecil "digantung" */}
-      <div className="mx-auto mt-7 w-4/5 overflow-hidden rounded-full border-[3px] border-paper-white shadow-paper">
+      <div className="mx-auto mt-5 w-4/5 overflow-hidden rounded-full border-[3px] border-paper-white shadow-paper sm:mt-7">
         <div className="overflow-hidden">
-          <Photo img={img} aspect="aspect-square" />
+          <Photo img={img} aspect="aspect-square" mobileAspect={mobileAspect ?? 'aspect-[4/3]'} />
         </div>
       </div>
-      <figcaption className="flex flex-1 items-end px-3 pt-3 pb-3">
+      <figcaption className="flex flex-1 items-end px-3 pt-2 pb-3 sm:pt-3">
         <p className="font-marker text-[#4A3623] w-full text-center text-sm leading-snug -rotate-1">
           {img.caption}
         </p>
@@ -227,7 +230,7 @@ function KraftLabelCard({ img }: PhotoProps) {
 }
 
 /** 5 — KARTU POS JADUL: krem, bingkai ganda, perangko, stempel. */
-function PostcardCard({ img, aspect }: PhotoProps) {
+function PostcardCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
     <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
       {/* Bingkai dalam dashed */}
@@ -247,7 +250,7 @@ function PostcardCard({ img, aspect }: PhotoProps) {
         <p className="font-marker text-brand-ink/70 text-[10px] leading-none">DOSCOM</p>
       </div>
       <div className="mt-4 overflow-hidden border border-ink-900/25 bg-paper-panel">
-        <Photo img={img} aspect={aspect} />
+        <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
       </div>
       <figcaption className="px-1 pt-2.5 pb-1">
         <p className="font-hand text-ink-700 text-sm leading-snug font-medium">{img.caption}</p>
@@ -261,18 +264,20 @@ function ScrapbookCard({
   img,
   globalIdx,
   aspect,
+  mobileAspect,
 }: {
   img: GalleryImage
   globalIdx: number
   aspect: string
+  mobileAspect?: string
 }) {
   const variant = globalIdx % 6
-  if (variant === 0) return <TornPaperCard img={img} aspect={aspect} />
-  if (variant === 1) return <NotebookCard img={img} aspect={aspect} />
-  if (variant === 2) return <PolaroidColorCard img={img} aspect={aspect} idx={globalIdx} />
-  if (variant === 3) return <PatchCard img={img} aspect={aspect} idx={globalIdx} />
-  if (variant === 4) return <KraftLabelCard img={img} aspect={aspect} />
-  return <PostcardCard img={img} aspect={aspect} />
+  if (variant === 0) return <TornPaperCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
+  if (variant === 1) return <NotebookCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
+  if (variant === 2) return <PolaroidColorCard img={img} aspect={aspect} idx={globalIdx} mobileAspect={mobileAspect} />
+  if (variant === 3) return <PatchCard img={img} aspect={aspect} idx={globalIdx} mobileAspect={mobileAspect} />
+  if (variant === 4) return <KraftLabelCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
+  return <PostcardCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
 }
 
 /* ============================== Section ============================== */
@@ -296,7 +301,7 @@ export default function GallerySection() {
 
   return (
     <section id="galeri" className="relative overflow-hidden bg-paper-white">
-      <div className="relative mx-auto max-w-6xl px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         <SectionHeader
           eyebrow={gallery.eyebrow}
           title={gallery.title}
@@ -305,27 +310,28 @@ export default function GallerySection() {
         />
 
         {rows.length === 0 ? (
-          <p className="text-ink-500 mt-16 text-center text-sm font-bold uppercase tracking-[0.2em]">
+          <p className="text-ink-500 mt-10 text-center text-sm font-bold uppercase tracking-[0.2em] sm:mt-16">
             Dokumentasi segera hadir.
           </p>
         ) : (
-          <div className="mt-16 flex flex-col gap-8 md:gap-10">
+          <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
             {rows.map((rowPhotos, rowIdx) => {
               const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
               return (
                 <div
                   key={rowIdx}
-                  className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 md:grid-cols-12 md:gap-7"
+                  className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7"
                 >
                   {rowPhotos.map((img, i) => {
                     const gIdx = rowStartIdx[rowIdx] + i
                     const slot: RowSlot =
                       rowPhotos.length === 1
-                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1' }
+                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/9]' }
                         : (slotDefs[i % slotDefs.length] ?? {
                             cols: COL_SPANS[4],
                             aspect: 'aspect-[4/3]',
                             tilt: 'rotate-1',
+                            mobileAspect: 'aspect-square',
                           })
                     const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
                     return (
@@ -333,14 +339,14 @@ export default function GallerySection() {
                         key={`${img.src}-${rowIdx}-${i}`}
                         delay={(i % 3) * 0.08}
                         className={cn(
-                          'h-full sm:col-span-1',
-                          isLastOdd && 'sm:col-span-2',
+                          'h-full col-span-1',
+                          isLastOdd && 'col-span-2',
                           slot.cols,
                         )}
                       >
                         {/* Rotasi di luar (kulit) — scrapbook miring halus */}
                         <div className={cn('h-full', slot.tilt)}>
-                          <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} />
+                          <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} mobileAspect={slot.mobileAspect} />
                         </div>
                       </Reveal>
                     )

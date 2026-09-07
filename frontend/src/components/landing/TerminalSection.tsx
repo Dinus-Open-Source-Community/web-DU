@@ -156,7 +156,7 @@ export default function TerminalSection() {
 
   return (
     <section id="terminal" ref={sectionRef} className="relative overflow-hidden bg-paper-white">
-      <div className="mx-auto max-w-5xl px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto max-w-5xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         <SectionHeader
           eyebrow={terminal.eyebrow}
           title={terminal.title}
@@ -164,7 +164,7 @@ export default function TerminalSection() {
           className="mx-auto max-w-3xl"
         />
 
-        <Reveal className="mt-16">
+        <Reveal className="mt-10 sm:mt-14 md:mt-16">
           <div
             onClick={focusInput}
             className="group cursor-text overflow-hidden rounded-[20px] border-2 border-ink-900 bg-ink-900 shadow-paper transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-button-hover"
@@ -182,7 +182,7 @@ export default function TerminalSection() {
               ref={outputRef}
               role="log"
               aria-live="polite"
-              className="h-80 overflow-hidden px-5 py-4 font-mono text-sm leading-relaxed text-paper-white/90 sm:h-72 lg:h-64"
+              className="h-64 overflow-hidden px-4 py-3.5 font-mono text-sm leading-relaxed text-paper-white/90 sm:px-5 sm:py-4 lg:h-72"
             >
               {lines.map((line) => {
                 if (line.kind === 'cmd') {

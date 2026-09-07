@@ -263,7 +263,7 @@ export default function Hero() {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className="relative overflow-hidden bg-paper-white pt-36 pb-36 md:pt-44 md:pb-44"
+      className="relative overflow-hidden bg-paper-white pt-28 pb-24 md:pt-40 md:pb-36"
     >
       {/* Latar: grid kertas grafik halus */}
       <div
@@ -280,7 +280,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
         <h1
           data-hero-title
-          className="font-display text-[clamp(3.2rem,8vw,8.5rem)] leading-[0.88] font-bold text-ink-900 [text-wrap:balance]"
+          className="font-display text-[clamp(2.75rem,9.5vw,8.5rem)] leading-[0.88] font-bold text-ink-900 [text-wrap:balance]"
         >
           {hero.titleA}{' '}
           <span className="relative inline-block whitespace-nowrap">
@@ -289,12 +289,12 @@ export default function Hero() {
           </span>
         </h1>
 
-        <div data-hero-sub className="mx-auto mt-8 max-w-2xl">
-          <p className="text-lg leading-relaxed text-ink-600 md:text-xl">{hero.sub}</p>
-          <Footprints className="mt-5 justify-center opacity-60 [&_svg]:w-4" />
+        <div data-hero-sub className="mx-auto mt-6 max-w-2xl sm:mt-8">
+          <p className="text-base leading-relaxed text-ink-600 sm:text-lg md:text-xl">{hero.sub}</p>
+          <Footprints className="mt-4 justify-center opacity-60 [&_svg]:w-4" />
         </div>
 
-        <div data-hero-cta className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div data-hero-cta className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button asChild size="lg" className="group/button h-14 px-8 text-base">
             <Link to={hero.primaryCta.href}>
               {hero.primaryCta.label}
@@ -312,9 +312,9 @@ export default function Hero() {
       <Link
         to="/#terminal"
         aria-label={hero.scrollTease}
-        className="group relative z-10 mx-auto mt-16 flex w-fit flex-col items-center gap-1.5 rounded-full px-5 py-2 outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50"
+        className="group relative z-10 mx-auto mt-10 flex w-fit flex-col items-center gap-1.5 rounded-full px-5 py-2 outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50 sm:mt-14"
       >
-        <span className="text-ink-500 text-xs font-extrabold tracking-[0.18em] uppercase">
+        <span className="text-ink-500 text-[11px] font-extrabold tracking-[0.16em] uppercase sm:text-xs">
           {hero.scrollTease}
         </span>
         <span aria-hidden className="animate-bob-slow text-brand-blue transition-transform duration-300 group-hover:translate-y-0.5">
@@ -392,16 +392,16 @@ export default function Hero() {
       </div>
 
       {/* Ajakan mobile: pinguin + teks */}
-      <div className="relative z-10 mx-auto mt-16 max-w-md px-6 text-center md:hidden">
+      <div className="relative z-10 mx-auto mt-10 max-w-md px-6 text-center sm:mt-12 md:hidden">
         <button
           type="button"
           onClick={boop}
           aria-label="Sapa pinguin"
           className="mx-auto block cursor-pointer bg-transparent"
         >
-          <PenguinMascot className="w-28 -rotate-3" />
+          <PenguinMascot className="w-24 -rotate-3 sm:w-28" />
         </button>
-        <p className="text-ink-500 mt-2 text-xs font-bold tracking-wider uppercase">
+        <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase">
           ketuk pinguin 5x — ada rahasia
         </p>
       </div>

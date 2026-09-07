@@ -21,7 +21,7 @@ export default function TestimonialSection() {
       {/* Garis tepi atas paper — batas tegas sebelum area navy */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-2 bg-paper-white/10" />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         <SectionHeader
           dark
           eyebrow={testimonial.eyebrow}
@@ -30,12 +30,12 @@ export default function TestimonialSection() {
           className="mx-auto max-w-3xl"
         />
 
-        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+        <div className="mt-10 grid grid-cols-1 gap-6 md:mt-16 md:grid-cols-3 md:gap-6 lg:gap-8">
           {TESTIMONIALS.map((item, i) => (
             <Reveal key={item.name} delay={(i % 3) * 0.12} className="h-full">
               <figure
                 className={cn(
-                  'relative flex h-full flex-col rounded-[24px] border-2 border-ink-900 bg-paper-white p-6 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:p-7',
+                  'relative flex h-full flex-col rounded-[24px] border-2 border-ink-900 bg-paper-white p-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:p-7',
                   CARD_TILT[i % CARD_TILT.length],
                 )}
               >
@@ -52,8 +52,8 @@ export default function TestimonialSection() {
                   &ldquo;{item.quote}&rdquo;
                 </blockquote>
 
-                <figcaption className="mt-6 flex items-center gap-3 border-t-2 border-dashed border-ink-900/15 pt-5">
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel shadow-button">
+                <figcaption className="mt-5 flex items-center gap-3 border-t-2 border-dashed border-ink-900/15 pt-4 sm:mt-6 sm:pt-5">
+                  <div className="relative size-11 shrink-0 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel shadow-button sm:size-12">
                     <img
                       src={item.photo}
                       alt={`Foto ${item.name}`}
