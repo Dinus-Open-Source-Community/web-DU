@@ -61,8 +61,8 @@ export const LANDING_COPY = {
     copy: "Documentation of meetups, workshops, and community hangs.",
   },
   testimonial: {
-    eyebrow: "Testimonials",
-    title: "Once participants, now mentors.",
-    copy: "These three started at the same point you are now.",
+    eyebrow: "Reviews",
+    title: "Kata mereka yang sudah jalan duluan.",
+    copy: "Cerita asli peserta — bukan brosur. Dari yang mulai nol sampai akhirnya bisa bikin sendiri.",
   },
 } as const;
