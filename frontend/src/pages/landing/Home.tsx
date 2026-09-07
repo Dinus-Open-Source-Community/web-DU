@@ -5,6 +5,7 @@ import Feature from '../../components/home/Feature'
 import Hero from '../../components/landing/Hero'
 import CourseSection from '../../components/landing/CourseSection'
 import TerminalSection from '../../components/landing/TerminalSection'
+import StorySection from '../../components/landing/StorySection'
 import MentorsSection from '../../components/landing/MentorsSection'
 import StackSection from '../../components/landing/StackSection'
 import GuestLayout from '../../components/layouts/GuestLayouts'
@@ -62,6 +63,7 @@ export default function Home() {
         <MentorsSection />
         <CourseSection />
         <TerminalSection />
+        <StorySection />
         <Feature courses={featuredCourses} isLoading={isFeaturedCoursesLoading} />
         <Benefit DataFeatures={programFeatures} />
         <Community stats={communityStats} isLoading={isCommunityStatsLoading} />
