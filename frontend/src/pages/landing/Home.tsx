@@ -3,6 +3,8 @@ import Benefit from '../../components/home/Benefit'
 import Community from '../../components/home/Community'
 import Feature from '../../components/home/Feature'
 import Hero from '../../components/landing/Hero'
+import MentorsSection from '../../components/landing/MentorsSection'
+import StackSection from '../../components/landing/StackSection'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import {
   BookIcons,
@@ -54,6 +56,8 @@ export default function Home() {
     <GuestLayout>
       <section id="home" className="bg-muted w-full">
         <Hero />
+        <StackSection />
+        <MentorsSection />
         <Feature courses={featuredCourses} isLoading={isFeaturedCoursesLoading} />
         <Benefit DataFeatures={programFeatures} />
         <Community stats={communityStats} isLoading={isCommunityStatsLoading} />
