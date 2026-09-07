@@ -1,6 +1,5 @@
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import CourseSection from '../../components/landing/CourseSection'
-import FinalCTASection from '../../components/landing/FinalCTASection'
 import GallerySection from '../../components/landing/GallerySection'
 import Hero from '../../components/landing/Hero'
 import MentorsSection from '../../components/landing/MentorsSection'
@@ -22,10 +21,8 @@ export default function Home() {
         <MentorsSection />
         <CourseSection />
         <TerminalSection />
-        {/* [PlaygroundSection — arcade "sampai PR di-merge" menyusul di sini] */}
         <GallerySection />
         <TestimonialSection />
-        <FinalCTASection />
       </main>
     </GuestLayout>
   )
