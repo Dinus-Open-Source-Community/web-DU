@@ -12,8 +12,10 @@
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@fontsource/dynapuff": "^5.3.0",
+    "@fontsource/gloria-hallelujah": "^5.3.0",
     "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@fontsource/poppins": "^5.2.7",
+    "@fontsource/shantell-sans": "^5.3.0",
     "@gsap/react": "^2.1.2",
     "@lottiefiles/dotlottie-react": "^0.19.0",
     "@tailwindcss/vite": "^4.2.4",

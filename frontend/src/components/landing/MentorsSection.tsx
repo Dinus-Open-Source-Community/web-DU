@@ -28,9 +28,9 @@ export default function MentorsSection() {
 
   return (
     <section id="mentor" className="relative overflow-hidden bg-paper-white">
-      <div className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         {/* Header kiri + angka editorial — istirahat dari header sentris */}
-        <div className="grid items-end gap-10 lg:grid-cols-12">
+        <div className="grid items-end gap-8 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <SectionHeader
               eyebrow={mentors.eyebrow}
@@ -47,18 +47,18 @@ export default function MentorsSection() {
               03
             </p>
             <p className="text-ink-400 mt-2 text-right text-xs font-extrabold tracking-[0.2em] uppercase">
-              mentor aktif · tiga jalur belajar
+              active mentors · next.js & laravel
             </p>
           </div>
           <p className="text-ink-400 mt-3 text-xs font-extrabold tracking-[0.2em] uppercase lg:hidden">
-            mentor aktif · tiga jalur belajar
+            active mentors · next.js & laravel
           </p>
         </div>
 
         {isLg ? (
           /* Accordion horizontal: kartu aktif (hover/focus) melebar, sisanya menyempit. */
           <div
-            className="mx-auto mt-16 flex h-[540px] max-w-7xl items-stretch gap-3"
+            className="mx-auto mt-14 flex h-[540px] max-w-7xl items-stretch gap-3"
             onMouseLeave={() => setActiveIndex(null)}
           >
             {LANDING_MENTORS.map((mentor, i) => {
@@ -84,9 +84,9 @@ export default function MentorsSection() {
           </div>
         ) : (
           /* Grid normal (mobile/tablet): semua kartu menampilkan nama+role+tagline. */
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-6">
             {LANDING_MENTORS.map((mentor, i) => (
-              <div key={mentor.name} className="h-[480px]">
+              <div key={mentor.name} className="h-72 sm:h-80">
                 <MentorCard mentor={mentor} index={i} active />
               </div>
             ))}

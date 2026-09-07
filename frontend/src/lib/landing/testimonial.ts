@@ -7,29 +7,22 @@ export type Testimonial = {
 }
 
 /**
- * Testimoni mentor DOSCOM — nama sama dengan roster mentor supaya konsisten.
- * Kutipan ditulis wajar: pengalaman belajar, komunitas, dan open source.
+ * Review siswa DOSCOM — bukan kutipan mentor. Bahasa wajar ala anak kelas:
+ * nggak kaku, nggak teknis banget. Nama & foto: zapp, rico.
  */
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      'Dulu saya juga mulai dari nol dan malu nanya. Yang bikin beda di DOSCOM: setiap PR di-review dengan sabar, jadi saya belajar dari kesalahan yang sama hanya sekali.',
-    name: 'jar',
-    role: 'Mentor Web Development',
-    photo: '/images/_BW08644.JPG',
-  },
-  {
-    quote:
-      'Waktu masih peserta, sprint pertama saya berantakan — deadline molor, model nggak jalan. Dari situ justru saya belajar kalau error itu bagian dari proses, bukan tanda buat berhenti.',
+      'Awalnya takut banget ikut karena nol banget. Tapi mentornya sabar, dari install sampai bikin halaman pertama dibimbing pelan-pelan. Sekarang aku udah bisa bikin web sendiri buat tugas kuliah, rasanya kaya dapet skill rahasia.',
     name: 'zapp',
-    role: 'Mentor Machine Learning',
-    photo: '/images/_BW08702.JPG',
+    role: 'Peserta Web (Next.js)',
+    photo: '/images/zapp.webp',
   },
   {
     quote:
-      'Kontribusi pertama saya cuma benerin typo di dokumentasi. Kecil, tapi di-merge. Enam bulan kemudian saya maintainer. DOSCOM mengajarkan: mulai saja, sisanya nyusul.',
-    name: 'naf',
-    role: 'Mentor Open Source',
-    photo: '/images/_BW08640.JPG',
+      'Yang paling berkesan bukan cuma belajarnya, tapi temen-temennya. Deadline bareng, error bareng, terus lega bareng kalau udah jalan. Belajar di sini tuh nggak kerasa kayak sekolah — lebih kayak ikut proyek beneran.',
+    name: 'rico',
+    role: 'Peserta Web (Laravel)',
+    photo: '/images/rico.webp',
   },
 ]

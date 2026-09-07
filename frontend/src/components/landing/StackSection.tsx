@@ -55,7 +55,7 @@ export default function StackSection() {
       />
       <div aria-hidden className="paper-noise pointer-events-none absolute inset-0 opacity-40 mix-blend-screen" />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         <SectionHeader
           dark
           eyebrow={stack.eyebrow}
@@ -64,44 +64,51 @@ export default function StackSection() {
           className="mx-auto max-w-3xl"
         />
 
-        {/* Tech deck bento asimetris */}
-        <div className="mt-16 grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Tech deck bento asimetris — 2 kolom di layar kecil, 4 di desktop */}
+        <div className="mt-10 grid auto-rows-fr grid-cols-2 gap-3 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:mt-16 lg:grid-cols-4">
           {DOSCOM_STACK.map((item, i) => {
             const Icon = item.icon
             const layout = STACK_LAYOUTS[i % STACK_LAYOUTS.length]
             const isBig = i === 0
             return (
-              <Reveal key={item.name} delay={(i % 4) * 0.07} className={cn('h-full', layout.cell)}>
+              <Reveal
+                key={item.name}
+                delay={(i % 4) * 0.07}
+                className={cn('h-full col-span-1', isBig && 'col-span-2', layout.cell)}
+              >
                 <article
                   className={cn(
-                    'group relative flex h-full flex-col justify-between rounded-[20px] border-2 border-ink-900 p-6 shadow-paper transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover',
+                    'group relative flex h-full flex-col justify-between rounded-[18px] border-2 border-ink-900 shadow-paper transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:rounded-[20px]',
                     layout.bg,
-                    isBig ? 'p-7' : 'p-6',
+                    isBig ? 'p-5 sm:p-7' : 'p-4 sm:p-6',
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-2">
                     <span
                       className={cn(
-                        'inline-grid place-items-center rounded-[14px] border-2 border-ink-900 bg-paper-white text-ink-900 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6',
-                        isBig ? 'size-14' : 'size-11',
+                        'inline-grid place-items-center rounded-[12px] border-2 border-ink-900 bg-paper-white text-ink-900 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6 sm:rounded-[14px]',
+                        isBig ? 'size-11 sm:size-14' : 'size-9 sm:size-11',
                       )}
                     >
-                      <Icon className={isBig ? 'size-7' : 'size-5'} strokeWidth={2.2} />
+                      <Icon
+                        className={isBig ? 'size-6 sm:size-7' : 'size-4 sm:size-5'}
+                        strokeWidth={2.2}
+                      />
                     </span>
                     <span
                       className={cn(
                         'font-display leading-none font-bold text-ink-900/10',
-                        isBig ? 'text-5xl' : 'text-3xl',
+                        isBig ? 'text-3xl sm:text-5xl' : 'text-xl sm:text-3xl',
                       )}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <div className={cn(isBig ? 'mt-6' : 'mt-4')}>
+                  <div className={cn(isBig ? 'mt-4 sm:mt-6' : 'mt-3 sm:mt-4')}>
                     <h3
                       className={cn(
                         'font-display font-bold text-ink-900',
-                        layout.title,
+                        isBig ? 'text-2xl sm:text-3xl' : 'text-base leading-tight sm:text-2xl',
                       )}
                     >
                       {item.name}
@@ -109,7 +116,9 @@ export default function StackSection() {
                     <p
                       className={cn(
                         'font-medium',
-                        isBig ? 'text-ink-600 mt-1.5 text-base' : 'text-ink-600 mt-1 text-sm',
+                        isBig
+                          ? 'text-ink-600 mt-1 text-sm sm:text-base'
+                          : 'text-ink-600 mt-1 text-xs leading-snug sm:text-sm',
                       )}
                     >
                       {item.detail}
