@@ -111,7 +111,7 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="bg-paper-white relative overflow-hidden pt-24 pb-24 sm:pt-28 lg:pt-40 lg:pb-36"
+      className="bg-paper-white relative overflow-hidden pt-36 pb-24 sm:pt-32 lg:pt-40 lg:pb-36"
     >
       {/* Latar: grid kertas grafik halus */}
       <div
@@ -251,7 +251,7 @@ export default function Hero() {
               animate={eggControls}
               whileTap={!reduceMotion ? { scale: 0.9, rotate: -2 } : undefined}
               whileHover={!reduceMotion ? { scale: 1.05 } : undefined}
-              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+              transition={{ type: "spring", stiffness: 500, damping: 20 }}
             >
               <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
             </motion.div>
@@ -263,7 +263,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 8, scale: 0.8 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
                 className="border-ink-900 bg-note-yellow text-ink-900 shadow-paper absolute -top-12 left-1/2 -translate-x-1/2 -rotate-3 rounded-xl border-2 px-3 py-1 text-sm font-extrabold whitespace-nowrap"
               >
                 wark!
@@ -272,7 +272,7 @@ export default function Hero() {
           </AnimatePresence>
         </div>
         <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase md:text-xs">
-          ketuk pinguin 5x — ada rahasia
+          Coba ketuk pinguin 5x
         </p>
       </div>
     </section>
