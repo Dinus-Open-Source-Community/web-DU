@@ -29,7 +29,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-ink-800 text-paper-white sticky bottom-0 z-0 -mt-20 w-full overflow-hidden md:-mt-24">
-      <div className="mx-auto max-w-7xl px-4 pt-10 pb-6 max-sm:pt-5 max-sm:pb-4 sm:px-6 sm:pt-16 sm:pb-10 lg:px-8 lg:pt-24 lg:pb-12">
+      <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 max-sm:pt-5 max-sm:pb-2 sm:px-6 sm:pt-16 sm:pb-8 lg:px-8 lg:pt-24 lg:pb-12">
         {/* Papan pengumuman + kolom jelajah */}
         <div className="grid gap-x-12 gap-y-8 max-sm:gap-y-6 sm:gap-y-16 lg:grid-cols-12 lg:gap-y-20">
           <Reveal className="lg:col-span-7">
@@ -136,9 +136,10 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Cap DOSCOM */}
-        <div aria-hidden className="pointer-events-none relative mt-2 flex items-end justify-center overflow-hidden select-none">
-          <span className="font-display text-paper-white/20 text-[clamp(2.25rem,12vw,6rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap max-sm:text-[clamp(1.75rem,9.5vw,4rem)] md:text-[clamp(3.25rem,13vw,11rem)] lg:text-[clamp(3.5rem,14vw,13rem)]">
+        {/* Cap DOSCOM — tetap mengalir setelah copyright (bukan didorong ke dasar);
+            ukuran teks lebih besar & tegas di mobile. */}
+        <div aria-hidden className="pointer-events-none relative mt-3 mb-1 flex items-end justify-center overflow-hidden select-none max-sm:mb-0.5 lg:mb-2">
+          <span className="font-display text-paper-white/20 text-[clamp(2.25rem,12vw,6rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap max-sm:text-[clamp(2.25rem,12vw,5rem)] md:text-[clamp(3.25rem,13vw,11rem)] lg:text-[clamp(3.5rem,14vw,13rem)]">
             DOSCOM
           </span>
         </div>
