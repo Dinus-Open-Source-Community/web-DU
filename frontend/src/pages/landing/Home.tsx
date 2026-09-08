@@ -4,7 +4,6 @@ import GallerySection from '../../components/landing/GallerySection'
 import Hero from '../../components/landing/Hero'
 import MentorsSection from '../../components/landing/MentorsSection'
 import StackSection from '../../components/landing/StackSection'
-import TerminalSection from '../../components/landing/TerminalSection'
 import TestimonialSection from '../../components/landing/TestimonialSection'
 import SplashScreen from '../../components/playful/SplashScreen'
 import ScrollVelocityTape from '../../components/playful/ScrollVelocityTape'
@@ -20,7 +19,6 @@ export default function Home() {
         <ScrollVelocityTape items={LANDING_COPY.ticker} />
         <MentorsSection />
         <CourseSection />
-        <TerminalSection />
         <GallerySection />
         <TestimonialSection />
       </main>

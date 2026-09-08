@@ -52,11 +52,6 @@ export const LANDING_COPY = {
     allHref: ROUTES.courses,
     allLabel: "See all classes",
   },
-  terminal: {
-    eyebrow: "Terminal",
-    title: "Try typing around.",
-    copy: "Click a command or type your own — nothing here can break.",
-  },
   gallery: {
     eyebrow: "Gallery",
     title: "What learning actually looks like.",

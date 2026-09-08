@@ -138,11 +138,12 @@ export const socialLinks: BrandSocialLink[] = [
   { label: 'Email', href: '#', icon: Mail },
 ]
 
-/** Anchor navigasi landing. Terminal diprioritaskan karena paling khas DOSCOM. */
+/** Anchor navigasi landing — semua menuju section di halaman home. */
 export const navLinks = [
   { label: 'Beranda', href: '/#top' },
+  { label: 'Stack', href: '/#stack' },
   { label: 'Mentor', href: '/#mentor' },
-  { label: 'Terminal', href: '/#terminal' },
-  { label: 'Kursus', href: '/course' },
+  { label: 'Course', href: '/#kursus' },
   { label: 'Galeri', href: '/#galeri' },
+  { label: 'Review', href: '/#testimoni' },
 ]
