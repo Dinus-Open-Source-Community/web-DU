@@ -111,7 +111,7 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="bg-paper-white relative overflow-hidden pt-36 pb-24 sm:pt-32 lg:pt-40 lg:pb-36"
+      className="bg-paper-white relative overflow-hidden pt-32 pb-24 sm:pt-32 lg:pt-40 lg:pb-36"
     >
       {/* Latar: grid kertas grafik halus */}
       <div
