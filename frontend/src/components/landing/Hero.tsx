@@ -240,21 +240,37 @@ export default function Hero() {
       {/* Ajakan pinguin — mobile & tablet (lg+ memakai pinguin absolute kanan).
           Mengalir di bawah konten → tidak pernah menutupi CTA. */}
       <div className="relative z-10 mx-auto mt-10 max-w-md px-6 text-center sm:mt-12 lg:hidden">
-        <button
-          type="button"
-          onClick={boop}
-          aria-label="Sapa pinguin"
-          className="group relative mx-auto block cursor-pointer bg-transparent outline-none"
-        >
-          <motion.div
-            animate={eggControls}
-            whileTap={!reduceMotion ? { scale: 0.9, rotate: -2 } : undefined}
-            whileHover={!reduceMotion ? { scale: 1.05 } : undefined}
-            transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+        <div className="relative inline-block">
+          <button
+            type="button"
+            onClick={boop}
+            aria-label="Sapa pinguin"
+            className="group relative mx-auto block cursor-pointer bg-transparent outline-none"
           >
-            <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
-          </motion.div>
-        </button>
+            <motion.div
+              animate={eggControls}
+              whileTap={!reduceMotion ? { scale: 0.9, rotate: -2 } : undefined}
+              whileHover={!reduceMotion ? { scale: 1.05 } : undefined}
+              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+            >
+              <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
+            </motion.div>
+          </button>
+          <AnimatePresence>
+            {eggOn && (
+              <motion.p
+                role="status"
+                initial={{ opacity: 0, y: 8, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                className="border-ink-900 bg-note-yellow text-ink-900 shadow-paper absolute -top-12 left-1/2 -translate-x-1/2 -rotate-3 rounded-xl border-2 px-3 py-1 text-sm font-extrabold whitespace-nowrap"
+              >
+                wark!
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
         <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase md:text-xs">
           ketuk pinguin 5x — ada rahasia
         </p>
