@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import Footprints from "@/components/playful/Footprints";
 import HandUnderline from "@/components/playful/HandUnderline";
 import PenguinMascot from "@/components/playful/PenguinMascot";
+import Reveal from "@/components/playful/Reveal";
 import { LANDING_COPY } from "@/lib/landing/copy";
 
 const EGG_CLICKS = 5;
@@ -124,49 +125,56 @@ export default function Hero() {
         }}
       />
 
-      {/* Konten center editorial (referensi CANVAS): wordmark, sub, CTA */}
+      {/* Konten center editorial (referensi CANVAS): wordmark, sub, CTA.
+          Dibungkus Reveal (in/out viewport) agar saat scroll balik ke hero,
+          konten "masuk" lagi — konsisten dgn section lain. */}
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-        <h1
-          data-hero-title
-          className="font-display text-ink-900 text-[clamp(2.75rem,9.5vw,8.5rem)] leading-[0.88] font-bold [text-wrap:balance]"
-        >
-          {hero.titleA}{" "}
-          <span className="relative inline-block whitespace-nowrap">
-            {hero.titleB}
-            <HandUnderline draw className="absolute -bottom-3 left-0" />
-          </span>
-        </h1>
-
-        <div data-hero-sub className="mx-auto mt-6 max-w-2xl sm:mt-8">
-          <p className="text-ink-600 text-base leading-relaxed sm:text-lg lg:text-xl">
-            {hero.sub}
-          </p>
-          <Footprints className="mt-4 justify-center opacity-60 [&_svg]:w-4" />
-        </div>
-
-        <div
-          data-hero-cta
-          className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"
-        >
-          <Button
-            asChild
-            size="lg"
-            className="group/button h-14 px-8 text-base"
+        <Reveal>
+          <h1
+            className="font-display text-ink-900 text-[clamp(2.75rem,9.5vw,8.5rem)] leading-[0.88] font-bold [text-wrap:balance]"
           >
-            <Link to={hero.primaryCta.href}>
-              {hero.primaryCta.label}
-              <ArrowRight className="size-5 transition-transform duration-300 group-hover/button:translate-x-1" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="h-14 px-8 text-base"
+            {hero.titleA}{" "}
+            <span className="relative inline-block whitespace-nowrap">
+              {hero.titleB}
+              <HandUnderline draw className="absolute -bottom-3 left-0" />
+            </span>
+          </h1>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <div data-hero-sub className="mx-auto mt-6 max-w-2xl sm:mt-8">
+            <p className="text-ink-600 text-base leading-relaxed sm:text-lg lg:text-xl">
+              {hero.sub}
+            </p>
+            <Footprints className="mt-4 justify-center opacity-60 [&_svg]:w-4" />
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.16}>
+          <div
+            data-hero-cta
+            className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <Link to={hero.secondaryCta.href}>{hero.secondaryCta.label}</Link>
-          </Button>
-        </div>
+            <Button
+              asChild
+              size="lg"
+              className="group/button h-14 px-8 text-base"
+            >
+              <Link to={hero.primaryCta.href}>
+                {hero.primaryCta.label}
+                <ArrowRight className="size-5 transition-transform duration-300 group-hover/button:translate-x-1" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-14 px-8 text-base"
+            >
+              <Link to={hero.secondaryCta.href}>{hero.secondaryCta.label}</Link>
+            </Button>
+          </div>
+        </Reveal>
       </div>
 
       {/* Gugusan notes — statis (diam) */}
