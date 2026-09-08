@@ -33,16 +33,16 @@ export default function Footer() {
         {/* Papan pengumuman + kolom jelajah */}
         <div className="grid gap-x-12 gap-y-8 max-sm:gap-y-6 sm:gap-y-16 lg:grid-cols-12 lg:gap-y-20">
           <Reveal className="lg:col-span-7">
-            <div className="relative rounded-3xl border-2 border-ink-900 bg-paper-white px-4 py-4 max-sm:px-3 max-sm:py-3 shadow-paper sm:px-6 sm:py-6 lg:px-10 lg:py-10">
+            <div className="relative rounded-3xl border-2 border-ink-900 bg-paper-white px-4 py-4 max-sm:px-2.5 max-sm:py-2.5 shadow-paper sm:px-6 sm:py-6 lg:px-10 lg:py-10">
               <StickerTape className="absolute -top-3 left-8 -rotate-6" />
               <StickerTape className="absolute -top-3 right-8 rotate-6" />
-              <div className="flex flex-col gap-4 max-sm:gap-3 sm:flex-row sm:items-center sm:gap-6 lg:gap-10">
+              <div className="flex flex-col gap-4 max-sm:gap-2 sm:flex-row sm:items-center sm:gap-6 lg:gap-10">
                 <div className="max-w-sm">
-                  <p className="text-ink-500 text-xs font-extrabold tracking-[0.2em] uppercase">Buletin doscom</p>
-                  <h2 className="text-ink-900 font-display mt-2 text-xl leading-[1.04] font-bold tracking-tight max-sm:mt-1.5 max-sm:text-lg sm:text-2xl lg:text-4xl">
+                  <p className="text-ink-500 text-xs font-extrabold tracking-[0.2em] uppercase max-sm:text-[10px]">Buletin doscom</p>
+                  <h2 className="text-ink-900 font-display mt-2 text-xl leading-[1.04] font-bold tracking-tight max-sm:mt-1 max-sm:text-base sm:text-2xl lg:text-4xl">
                     Jangan sampai kelewat
                   </h2>
-                  <p className="text-ink-600 mt-3 max-w-xs text-sm leading-relaxed max-sm:mt-2 max-sm:text-[13px] lg:text-base">
+                  <p className="text-ink-600 mt-3 max-w-xs text-sm leading-relaxed max-sm:mt-1.5 max-sm:text-xs lg:text-base">
                     Satu email per bulan: info program, jadwal mentoring, dan kisah kontributor DOSCOM.
                   </p>
                 </div>
@@ -72,15 +72,15 @@ export default function Footer() {
             {Object.entries(footerLinks).map(([category, links], i) => {
               const palette = LINK_NOTE_PALETTE[i % LINK_NOTE_PALETTE.length]
               return (
-                <div key={category} className={`relative rounded-2xl border-2 border-ink-900 px-4 pt-4 pb-3 max-sm:px-3.5 max-sm:pt-2.5 max-sm:pb-2 shadow-paper sm:px-5 sm:pt-6 sm:pb-4 lg:px-6 lg:pt-8 lg:pb-5 ${palette.bg} ${palette.tilt}`}>
+                <div key={category} className={`relative rounded-2xl border-2 border-ink-900 px-4 pt-4 pb-3 max-sm:px-3 max-sm:pt-2 max-sm:pb-1.5 shadow-paper sm:px-5 sm:pt-6 sm:pb-4 lg:px-6 lg:pt-8 lg:pb-5 ${palette.bg} ${palette.tilt}`}>
                   <StickerTape className="absolute -top-2.5 left-1/2 -translate-x-1/2" />
-                  <h3 className="font-display text-ink-900 text-base font-bold max-sm:text-sm lg:text-xl">{category}</h3>
-                  <ul className="mt-3 space-y-1 max-sm:mt-2 lg:mt-3 lg:space-y-2">
+                  <h3 className="font-display text-ink-900 text-base font-bold max-sm:text-[13px] lg:text-xl">{category}</h3>
+                  <ul className="mt-3 space-y-1 max-sm:mt-1.5 max-sm:space-y-0.5 lg:mt-3 lg:space-y-2">
                     {links.map((link) => (
                       <li key={link.href}>
                         <Link
                           to={link.href}
-                          className="text-ink-900/80 hover:text-ink-900 -mx-1 inline-block rounded-md px-1 text-xs font-semibold transition-transform outline-none hover:translate-x-1 focus-visible:ring-2 focus-visible:ring-ink-900/60 sm:text-sm lg:text-[15px]">
+                          className="text-ink-900/80 hover:text-ink-900 -mx-1 inline-block rounded-md px-1 text-xs font-semibold transition-transform outline-none hover:translate-x-1 focus-visible:ring-2 focus-visible:ring-ink-900/60 max-sm:text-[11px] sm:text-sm lg:text-[15px]">
                           {link.label}
                         </Link>
                       </li>
