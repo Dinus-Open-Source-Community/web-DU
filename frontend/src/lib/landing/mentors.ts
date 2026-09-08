@@ -9,17 +9,17 @@ export const LANDING_MENTORS: LandingMentor[] = [
   {
     name: 'alfi',
     role: 'Next.js Developer',
-    tagline: 'React & Next.js — komponen yang rapi, data yang jelas.',
+    tagline: 'Suka ngulik Next.js bareng — dari error hydration sampai halaman jadi.',
   },
   {
     name: 'nafan',
     role: 'Laravel Developer',
-    tagline: 'Laravel dari route sampai query — backend yang tidak bikin pusing.',
+    tagline: 'Ngulik Eloquent & Blade bareng — biar query nggak bikin pusing.',
   },
   {
     name: 'jariz',
     role: 'Next.js Developer',
-    tagline: 'Next.js & JavaScript — dari ide jadi halaman yang benar-benar dipakai.',
+    tagline: 'Senang lihat kode berantakan jadi komponen yang rapi dan kepake.',
   },
 ]
 
