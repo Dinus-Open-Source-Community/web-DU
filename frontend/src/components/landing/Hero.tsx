@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Footprints from "@/components/playful/Footprints";
-import HandUnderline from "@/components/playful/HandUnderline";
 import PenguinMascot from "@/components/playful/PenguinMascot";
 import Reveal from "@/components/playful/Reveal";
 import { LANDING_COPY } from "@/lib/landing/copy";
@@ -136,7 +135,6 @@ export default function Hero() {
             {hero.titleA}{" "}
             <span className="relative inline-block whitespace-nowrap">
               {hero.titleB}
-              <HandUnderline draw className="absolute -bottom-3 left-0" />
             </span>
           </h1>
         </Reveal>
