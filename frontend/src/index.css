@@ -188,6 +188,13 @@
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Sembunyikan scrollbar (murni CSS) — halaman tetap bisa di-scroll. */
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge lama */
+  }
+
+  html::-webkit-scrollbar {
+    display: none;                  /* Chrome/Safari/Edge */
   }
 
   body {
