@@ -91,15 +91,17 @@ export default function Hero() {
   const eggControls = useAnimation();
 
   const boop = (): void => {
-    if (reduceMotion) return;
     const next = boops + 1;
     if (next >= EGG_CLICKS) {
       setBoops(0);
       setEggOn(true);
-      void eggControls.start({
-        rotate: [0, 360],
-        transition: { duration: 0.6 },
-      });
+      // Tetap bisa diklik saat reduced-motion — spin dilewati, bubble muncul.
+      if (!reduceMotion) {
+        void eggControls.start({
+          rotate: [0, 360],
+          transition: { duration: 0.6 },
+        });
+      }
       window.setTimeout(() => setEggOn(false), 2500);
     } else {
       setBoops(next);
