@@ -12,7 +12,7 @@ import { LANDING_COPY } from '@/lib/landing/copy'
  */
 export default function MentorsSection() {
   const { mentors } = LANDING_COPY
-  const [activeIndex, setActiveIndex] = useState<number | null>(0)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
   // Inisialisasi sinkron dari matchMedia (hindari flash grid→accordion di desktop).
   const [isLg, setIsLg] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false,
