@@ -158,8 +158,6 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Cap DOSCOM — tetap mengalir setelah copyright (bukan didorong ke dasar);
-            ukuran teks lebih besar & tegas di mobile. */}
         <div
           aria-hidden
           className="pointer-events-none relative mt-3 mb-1 flex items-end justify-center overflow-hidden select-none max-sm:mb-0.5 lg:mb-2"
