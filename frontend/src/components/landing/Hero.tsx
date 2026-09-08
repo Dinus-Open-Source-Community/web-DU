@@ -244,9 +244,16 @@ export default function Hero() {
           type="button"
           onClick={boop}
           aria-label="Sapa pinguin"
-          className="mx-auto block cursor-pointer bg-transparent"
+          className="group relative mx-auto block cursor-pointer bg-transparent outline-none"
         >
-          <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
+          <motion.div
+            animate={eggControls}
+            whileTap={!reduceMotion ? { scale: 0.9, rotate: -2 } : undefined}
+            whileHover={!reduceMotion ? { scale: 1.05 } : undefined}
+            transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+          >
+            <PenguinMascot className="w-24 -rotate-3 sm:w-28 md:w-36" />
+          </motion.div>
         </button>
         <p className="text-ink-500 mt-2 text-[11px] font-bold tracking-wider uppercase md:text-xs">
           ketuk pinguin 5x — ada rahasia
