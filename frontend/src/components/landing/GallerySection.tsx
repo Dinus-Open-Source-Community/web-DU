@@ -84,6 +84,8 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
       src={img.src}
       alt={img.alt}
       loading="lazy"
+      decoding="async"
+      // width/height intrinsik + aspect container mencegah layout-shift
       className={cn(
         'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
         aspectCls,

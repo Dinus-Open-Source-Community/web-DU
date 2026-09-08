@@ -38,7 +38,7 @@ export const GALLERY_IMAGES: GalleryImage[] = [
     caption: 'Prototipe dipresentasikan, feedback langsung — bukan tebak-tebakan.',
   },
   {
-    src: '/images/web.JPG',
+    src: '/images/web.webp',
     alt: 'Peserta kelas web development di depan layar kode',
     caption: 'Kelas web: dari HTML sampai deploy — bareng-bareng.',
   },

@@ -230,7 +230,7 @@ export default function Navbar({ auth }: NavbarProps) {
           'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
           isMenuOpen ? 'max-h-[calc(100dvh-88px)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
         )}>
-        <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pb-8">
+        <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pt-8 pb-8">
           {isAuthenticated && (
             <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2">
               <Avatar className="size-10 ring-2 ring-ink-900/20">
