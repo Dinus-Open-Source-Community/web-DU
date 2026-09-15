@@ -77,12 +77,11 @@
   Hasil: sejajar dengan tombol Login Navbar. Pin hover trio sebelumnya dilepas
   karena sudah tercakup variant.
 
-### 3.5 `components/auth/AuthPasswordToggleButton.tsx` — selaraskan neo
+### 3.5 `components/auth/AuthPasswordToggleButton.tsx` — tetap soft (keputusan user)
 
-- Ganti segmen soft `text-muted-foreground transition-colors hover:bg-muted
-  hover:text-foreground` menjadi `border-2 border-ink-900 bg-paper-white
-  text-ink-900 shadow-button transition-all hover:shadow-button-pressed
-  active:shadow-none`. Ukuran, radius, focus ring, disabled tidak diubah.
+- Dibatalkan dari rencana neo: ikon mata kembali persis ke versi soft semula
+  (tanpa border). Guard T17 dikunci ke versi soft. Alasan: permintaan eksplisit
+  user pasca-implementasi.
 
 ## 4. Acceptance criteria (TDD, ekstensi `tests/neo-scope.test.mjs`)
 
