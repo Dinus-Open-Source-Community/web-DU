@@ -47,14 +47,15 @@
   ke konsumen lama.
 - `variant.auth` (neo): `rounded-xl border-2 border-ink-900 bg-paper-white
   text-foreground shadow-button transition-all placeholder:text-muted-foreground
-  hover:shadow-button-pressed focus:border-ink-900 focus:shadow-button`.
-  Disengaja: tanpa efek translate, tanpa collapse `active:shadow-none`, dan
-  tanpa ring apa pun (input bukan tombol; keputusan user — ring biru sebelumnya
-  identik dengan primary `#13A8FF`, terbukti via Playwright); radius tetap
-  `rounded-xl` (kontinuitas auth), teks tetap `foreground` (keterbacaan).
-  Focus memakai `focus:` (bukan `focus-visible:`) agar selalu menyala termasuk
-  saat klik mouse; `focus:shadow-button` mengalahkan shadow hover-pressed
-  (urutan variant Tailwind) sehingga fokus ditandai shadow penuh.
+  hover:shadow-button-pressed focus:border-ink-900 focus:shadow-none`.
+  Disengaja: tanpa efek translate dan tanpa ring apa pun (input bukan tombol;
+  keputusan user — ring biru sebelumnya identik dengan primary `#13A8FF`,
+  terbukti via Playwright); radius tetap `rounded-xl` (kontinuitas auth), teks
+  tetap `foreground` (keterbacaan). Focus memakai `focus:` (bukan
+  `focus-visible:`) agar selalu menyala termasuk saat klik mouse;
+  `focus:shadow-none` membuat field ambles rata saat fokus (pola neo yang sama
+  seperti tombol ditekan) — juga mengalahkan shadow hover-pressed (urutan
+  variant Tailwind). Keputusan user atas pertanyaan identitas active.
 
 ### 3.2 `components/shared/Input.tsx` — prop `variant` variant-aware
 
@@ -98,9 +99,9 @@
 4. T15: tidak ada lagi import `authInputClassName` di mana pun.
 5. T16: `OauthButton` memakai `variant="neobrutalism"` + `bg-paper-white`.
 6. T17: toggle password kembali soft tanpa border (keputusan user §3.5).
-7. T18: `variant.auth` tanpa ring — `focus:shadow-button` +
-   `focus:border-ink-900`, tanpa `ring`, tanpa `focus-visible` saja dan
-   tanpa `active:shadow-none` (keputusan user: tanpa ring).
+7. T18: `variant.auth` flat saat fokus — `focus:shadow-none` +
+   `focus:border-ink-900`, tanpa `ring` dan tanpa `focus-visible` saja
+   (keputusan user).
 8. Regresi: seluruh test lama (T1–T11) tetap hijau; `tsc -b` + `eslint` bersih;
    smoke `200` untuk `/auth/login`, `/auth/register`, `/`, dan 1 dashboard.
 
