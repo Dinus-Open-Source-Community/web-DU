@@ -47,10 +47,15 @@
   ke konsumen lama.
 - `variant.auth` (neo): `rounded-xl border-2 border-ink-900 bg-paper-white
   text-foreground shadow-button transition-all placeholder:text-muted-foreground
-  hover:shadow-button-pressed focus-visible:border-ink-900 focus-visible:ring-3
-  focus-visible:ring-ink-900/25 active:shadow-none`.
-  Disengaja: tanpa efek translate (input bukan tombol), radius tetap `rounded-xl`
-  (kontinuitas auth), teks tetap `foreground` (keterbacaan).
+  hover:shadow-button-pressed focus:border-ink-900 focus:shadow-button focus:ring-4
+  focus:ring-brand-blue/50`.
+  Disengaja: tanpa efek translate dan tanpa collapse `active:shadow-none` (input
+  bukan tombol); radius tetap `rounded-xl` (kontinuitas auth), teks tetap
+  `foreground` (keterbacaan). Focus memakai `focus:` (bukan `focus-visible:`)
+  agar selalu menyala termasuk saat klik mouse; `focus:shadow-button` mengalahkan
+  shadow hover-pressed (urutan variant Tailwind); ring biru `ring-4` memberi
+  outline yang jelas. Revisi atas keluhan focus terlihat seperti hover/pressed
+  terus.
 
 ### 3.2 `components/shared/Input.tsx` — prop `variant` variant-aware
 
@@ -93,8 +98,11 @@
    definisi `GlobalInput`/`inputVariants`}.
 4. T15: tidak ada lagi import `authInputClassName` di mana pun.
 5. T16: `OauthButton` memakai `variant="neobrutalism"` + `bg-paper-white`.
-6. T17: toggle password memuat `border-ink-900` + `shadow-button`.
-7. Regresi: seluruh test lama (T1–T11) tetap hijau; `tsc -b` + `eslint` bersih;
+6. T17: toggle password kembali soft tanpa border (keputusan user §3.5).
+7. T18: `variant.auth` fokus jelas — `focus:shadow-button` +
+   `focus:ring-4 focus:ring-brand-blue/50`, tanpa `focus-visible` saja dan
+   tanpa `active:shadow-none`.
+8. Regresi: seluruh test lama (T1–T11) tetap hijau; `tsc -b` + `eslint` bersih;
    smoke `200` untuk `/auth/login`, `/auth/register`, `/`, dan 1 dashboard.
 
 ## 5. Risiko & batasan
