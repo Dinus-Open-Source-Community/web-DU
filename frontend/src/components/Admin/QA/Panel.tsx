@@ -133,7 +133,7 @@ function ReviewRow({ review }: { review: AdminReview }) {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 w-fit gap-1.5 rounded-lg border-slate-200 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
+              className="h-8 w-fit gap-1.5 rounded-sm border-slate-200 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
               onClick={() => setShowReply(true)}
             >
               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
@@ -158,7 +158,7 @@ function ReviewRow({ review }: { review: AdminReview }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 rounded-lg border-slate-200"
+                  className="h-8 rounded-sm border-slate-200"
                   disabled={isSubmitting}
                   onClick={() => {
                     setShowReply(false)
@@ -169,7 +169,7 @@ function ReviewRow({ review }: { review: AdminReview }) {
                 </Button>
                 <Button
                   size="sm"
-                  className="h-8 rounded-lg"
+                  className="h-8 rounded-sm"
                   disabled={reply.trim().length < 3 || isSubmitting}
                   onClick={() => void handleSendReply()}
                 >

@@ -24,7 +24,7 @@ export function ToolbarShell({
       aria-label="Toolbar editor"
       className={cn(
         'sticky top-0 z-10 border-b backdrop-blur-sm',
-        isDark ? 'border-zinc-800 bg-zinc-950/95' : 'border-slate-200/80 bg-white/95',
+        isDark ? 'border-zinc-800 bg-zinc-950/95' : 'border-input bg-card/95',
         className,
       )}
     >
@@ -46,7 +46,7 @@ export function ToolbarDivider({
     <span
       className={cn(
         'w-px shrink-0',
-        isDark ? 'bg-zinc-800' : 'bg-slate-200/90',
+        isDark ? 'bg-zinc-800' : 'bg-input',
         dense ? 'mx-0.5 h-4' : 'mx-1 h-6',
       )}
       aria-hidden
@@ -71,8 +71,8 @@ export function ToolbarGroup({
         'flex shrink-0 items-center gap-0.5',
         surface &&
           (isDark
-            ? 'rounded-lg bg-zinc-900 p-0.5 ring-1 ring-zinc-800'
-            : 'rounded-lg bg-slate-50/90 p-0.5 ring-1 ring-slate-200/60'),
+            ? 'rounded-xl bg-zinc-900 p-0.5 ring-1 ring-zinc-800'
+            : 'rounded-xl bg-muted p-0.5 ring-1 ring-input'),
       )}
     >
       {children}
@@ -130,7 +130,7 @@ export function ToolbarIconButton({
         if (!actionOnMouseDown) onClick()
       }}
       className={cn(
-        'shrink-0 rounded-lg p-0 shadow-none transition-colors active:scale-[0.97]',
+        'shrink-0 rounded-sm p-0 shadow-none transition-colors outline-none active:scale-[0.97] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30',
         size === 'bubble' && 'size-8',
         size === 'compact' && 'size-8',
         size === 'default' && 'size-9',
@@ -138,7 +138,7 @@ export function ToolbarIconButton({
           ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
           : isDark
             ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
       {children}
@@ -173,10 +173,10 @@ export function ToolbarMenuButton({
       aria-label={label}
       onMouseDown={(event) => event.preventDefault()}
       className={cn(
-        'shrink-0 gap-1.5 rounded-lg font-medium',
+        'shrink-0 gap-1.5 rounded-sm font-medium',
         isDark
           ? 'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 data-[state=open]:bg-zinc-800 data-[state=open]:text-zinc-100'
-          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 data-[state=open]:bg-slate-100 data-[state=open]:text-slate-900',
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground',
         controlSize === 'compact' && 'h-8 px-2.5 text-xs',
         controlSize === 'default' && 'h-9 px-3 text-sm',
         className,

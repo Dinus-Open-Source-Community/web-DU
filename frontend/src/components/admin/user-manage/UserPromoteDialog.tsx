@@ -97,7 +97,7 @@ export function UserPromoteDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" className="h-10 shrink-0 rounded-xl px-4">
+        <Button type="button" className="h-10 shrink-0 rounded-sm px-4">
           <TriggerIcon className="mr-2 size-4" aria-hidden />
           {triggerLabel}
         </Button>
@@ -189,14 +189,14 @@ export function UserPromoteDialog({
           <Button
             type="button"
             variant="outline"
-            className="h-10 rounded-xl"
+            className="h-10 rounded-sm"
             onClick={() => setOpen(false)}
           >
             Batal
           </Button>
           <Button
             type="button"
-            className="h-10 rounded-xl"
+            className="h-10 rounded-sm"
             onClick={() => void handleConfirm()}
             disabled={!selectedCandidate || isSubmitting}
           >

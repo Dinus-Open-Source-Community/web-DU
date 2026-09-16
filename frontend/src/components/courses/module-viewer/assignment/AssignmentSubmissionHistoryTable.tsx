@@ -101,7 +101,7 @@ function HistoryRowCard({
           size="sm"
           onClick={onViewDetail}
           className={cn(
-            'w-full rounded-lg font-medium',
+            'w-full rounded-sm font-medium',
             isDark
               ? 'border-zinc-700/80 bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700'
               : 'border-slate-200 bg-slate-100/90 text-slate-900 hover:bg-slate-200',
@@ -235,7 +235,7 @@ export function AssignmentSubmissionHistoryTable({
                       size="sm"
                       onClick={onViewDetail}
                       className={cn(
-                        'rounded-lg px-4 font-medium',
+                        'rounded-sm px-4 font-medium',
                         isDark
                           ? 'border-zinc-700/80 bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700'
                           : 'border-slate-200 bg-slate-100/90 text-slate-900 hover:bg-slate-200',

@@ -34,17 +34,17 @@ export function CourseCategoryFilter({
   return (
     <>
       {/* Mobile */}
-      <div className="rounded-xl bg-white p-5 lg:hidden">
+      <div className="rounded-xl border border-input bg-card p-5 lg:hidden">
         <label
           htmlFor="course-category-filter"
-          className="mb-3 block text-xl font-semibold tracking-tight text-black"
+          className="mb-3 block text-xl font-semibold tracking-tight text-foreground"
         >
           {title}
         </label>
         <Select value={selectedValue} onValueChange={handleSelect}>
           <SelectTrigger
             id="course-category-filter"
-            className="w-full rounded-sm"
+            className="w-full rounded-xl"
             aria-label={title}
           >
             <SelectValue placeholder={`Semua ${title}`} />
@@ -63,8 +63,8 @@ export function CourseCategoryFilter({
       </div>
 
       {/* Desktop */}
-      <div className="hidden h-fit w-full rounded-xl bg-white p-5 sm:p-6 lg:sticky lg:top-24 lg:block lg:max-w-[280px] lg:shrink-0 lg:p-8">
-        <h2 className="mb-5 text-2xl font-semibold tracking-tight text-black sm:mb-7 sm:text-[28px]">
+      <div className="hidden h-fit w-full rounded-xl border border-input bg-card p-5 sm:p-6 lg:sticky lg:top-24 lg:block lg:max-w-[280px] lg:shrink-0 lg:p-8">
+        <h2 className="mb-5 text-2xl font-semibold tracking-tight text-foreground sm:mb-7 sm:text-[28px]">
           {title}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-5">
@@ -80,9 +80,9 @@ export function CourseCategoryFilter({
                   onChange={() => handleToggle(category.uid)}
                   className="peer sr-only"
                 />
-                <div className="absolute inset-0 rounded-[6px] border-[2.5px] border-black bg-transparent"></div>
+                <div className="absolute inset-0 rounded-[6px] border-[2.5px] border-ink-900 bg-transparent"></div>
                 <svg
-                  className="absolute opacity-0 transition-opacity peer-checked:opacity-100"
+                  className="absolute text-foreground opacity-0 transition-opacity peer-checked:opacity-100"
                   width="14"
                   height="11"
                   viewBox="0 0 14 11"
@@ -91,7 +91,7 @@ export function CourseCategoryFilter({
                 >
                   <path
                     d="M1.5 5.5L5 9L12.5 1.5"
-                    stroke="black"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"

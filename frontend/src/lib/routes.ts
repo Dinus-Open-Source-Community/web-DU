@@ -17,6 +17,7 @@ export const ROUTES = {
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
   login: '/auth/login',
   register: '/auth/register',
+  redeem: '/redeem',
   oauthCallback: '/auth/oauth/callback',
   forgotPassword: '/auth/forgot-password',
   resetPassword: '/auth/reset-password',
@@ -88,14 +89,6 @@ export const routeGroups: Record<string, RouteItem[]> = {
   Admin: [
     { name: 'Dashboard', path: ROUTES.admin.dashboard },
     {
-      name: 'Users Management',
-      children: [
-        { name: 'Students', path: ROUTES.admin.users.students },
-        { name: 'Mentors', path: ROUTES.admin.users.mentors },
-        { name: 'Administrators', path: ROUTES.admin.users.administrators },
-      ],
-    },
-    {
       name: 'Course Catalog',
       children: [
         { name: 'All Courses', path: ROUTES.admin.courses },
@@ -115,6 +108,28 @@ export const routeGroups: Record<string, RouteItem[]> = {
       name: 'Financial Reports',
       path: ROUTES.admin.financial,
     },
+  ],
+  SuperAdmin: [
+    { name: 'Dashboard', path: ROUTES.admin.dashboard },
+    {
+      name: 'Users Management',
+      children: [
+        { name: 'Students', path: ROUTES.admin.users.students },
+        { name: 'Mentors', path: ROUTES.admin.users.mentors },
+        { name: 'Administrators', path: ROUTES.admin.users.administrators },
+      ],
+    },
+    {
+      name: 'Course Catalog',
+      children: [
+        { name: 'All Courses', path: ROUTES.admin.courses },
+        { name: 'Categories', path: ROUTES.admin.courseCategories },
+        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+      ],
+    },
+    { name: 'Transactions', path: ROUTES.admin.transactions },
+    { name: 'Reviews & Q&A', path: ROUTES.admin.reviewsAndQaPath },
+    { name: 'Financial Reports', path: ROUTES.admin.financial },
   ],
   Mentor: [
     { name: 'Dashboard', path: ROUTES.mentor.dashboard },

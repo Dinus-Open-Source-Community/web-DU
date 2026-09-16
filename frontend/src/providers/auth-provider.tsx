@@ -18,6 +18,7 @@ const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
   student: `${ROUTES.student.dashboard}`,
   mentor: `${ROUTES.mentor.dashboard}`,
   admin: `${ROUTES.admin.dashboard}`,
+  super_admin: `${ROUTES.admin.dashboard}`,
 }
 
 interface AuthContextValue {
@@ -51,7 +52,7 @@ const getTokenExpires = (expiresAt?: string) => {
 }
 
 const normalizeRole = (role: string): UserRole => {
-  if (role === 'super_admin') return 'admin'
+  if (role === 'super_admin') return 'super_admin'
   if (role === 'admin' || role === 'mentor' || role === 'student') return role
   return 'student'
 }

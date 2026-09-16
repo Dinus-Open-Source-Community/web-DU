@@ -14,7 +14,7 @@ type AdminUserDetailPageProps = {
 
 export default function AdminUserDetailPage({ kind }: AdminUserDetailPageProps) {
   const { userUid = '' } = useParams<{ userUid: string }>()
-  const sidebarUser = useSidebarUser('admin')
+  const sidebarUser = useSidebarUser('super_admin')
   const pageState = useAdminUserDetailPage({ kind, uid: userUid })
 
   const isInitialLoading = pageState.isLoading && !pageState.viewModel

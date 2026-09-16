@@ -28,10 +28,7 @@ export default function MentorCard({ mentor, index = 0, active = false, classNam
   return (
     <Reveal delay={(index % 3) * 0.08} className={cn('h-full', className)}>
       <article
-        className={cn(
-          'group relative h-full overflow-hidden rounded-[36px] border-2 border-ink-900 bg-ink-800 shadow-paper transition-all duration-500 ease-out',
-          active && 'shadow-button-hover',
-        )}
+        className="group relative h-full overflow-hidden rounded-[36px] border-2 border-ink-900 bg-ink-800 shadow-paper transition-all duration-500 ease-out"
       >
         {/* Foto full-bleed; fallback pastel di belakangnya */}
         <div className={cn('absolute inset-0', FALLBACK_BG[index % FALLBACK_BG.length])} />

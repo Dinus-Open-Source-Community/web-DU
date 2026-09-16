@@ -23,6 +23,28 @@ export const Navigation: Record<string, NavItem[]> = {
   Admin: [
     { name: 'Dashboard', icon: LayoutDashboard, path: ROUTES.admin.dashboard },
     {
+      name: 'Course Catalog',
+      icon: GraduationCap,
+      children: [
+        { name: 'All Courses', path: ROUTES.admin.courses },
+        { name: 'Categories', path: ROUTES.admin.courseCategories },
+        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+      ],
+    },
+    {
+      name: 'Transactions',
+      path: ROUTES.admin.transactions,
+      icon: Wallet,
+    },
+    {
+      name: 'Financial Reports',
+      path: ROUTES.admin.financial,
+      icon: LineChart,
+    },
+  ],
+  SuperAdmin: [
+    { name: 'Dashboard', icon: LayoutDashboard, path: ROUTES.admin.dashboard },
+    {
       name: 'Users Management',
       icon: Users2,
       children: [

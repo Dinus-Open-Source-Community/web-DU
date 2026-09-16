@@ -49,7 +49,7 @@ export function LessonAssignmentDetailPage({
           variant="ghost"
           onClick={onBack}
           className={cn(
-            '-ml-2 h-9 rounded-[10px] px-3',
+            '-ml-2 h-9 rounded-sm px-3',
             isDark ? 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
           )}>
           <ArrowLeft className="h-4 w-4" aria-hidden />

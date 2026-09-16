@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import CourseSection1 from '../../components/courses/course'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import { useCombinedCourseCategoriesAndTypes } from '@/hooks/use-course'
@@ -17,7 +17,7 @@ export default function CoursePage() {
   )
 
   if (isLoading || isAuthLoading) {
-    return <LottieOverlay visible />
+    return <PageSkeleton message="Memuat kursus..." />
   }
   return (
     <main className="min-h-screen bg-[#f5f5f5]">

@@ -177,7 +177,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
         </div>
       ))}
 
-      <Button type="button" variant="outline" size="sm" onClick={addQuestion} className="w-full rounded-xl border-dashed border-slate-300 bg-transparent text-xs">
+      <Button type="button" variant="outline" size="sm" onClick={addQuestion} className="w-full rounded-sm border-dashed border-slate-300 bg-transparent text-xs">
         <Plus className="size-4" /> Tambah pertanyaan
       </Button>
     </div>

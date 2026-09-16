@@ -21,8 +21,8 @@ function ProgressCell({ value }: { value: number }) {
   const progressPercent = toLearningProgressPercent(value)
   return (
     <div className="flex min-w-[120px] flex-col gap-1.5">
-      <span className="text-xs font-semibold text-slate-600 tabular-nums">{formatLearningProgressLabel(value)}</span>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <span className="text-xs font-semibold text-muted-foreground tabular-nums">{formatLearningProgressLabel(value)}</span>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full bg-primary transition-[width] duration-200"
           style={{ width: `${progressPercent}%` }}
@@ -67,7 +67,7 @@ export function buildUserManageColumns({
             header: 'Kursus',
             align: 'center' as const,
             cell: (row: ManagedUserRow) => (
-              <span className="tabular-nums text-slate-700">{row.enrolledCourses ?? 0}</span>
+              <span className="tabular-nums text-foreground">{row.enrolledCourses ?? 0}</span>
             ),
           },
           {
@@ -82,23 +82,23 @@ export function buildUserManageColumns({
               id: 'joined',
               header: 'Bergabung',
               cell: (row: ManagedUserRow) => (
-                <span className="text-slate-600">{row.joinedAt}</span>
-              ),
-            },
-          ]
-        : [
-            {
-              id: 'joined',
-              header: 'Bergabung',
-              cell: (row: ManagedUserRow) => (
-                <span className="text-slate-600">{row.joinedAt}</span>
-              ),
-            },
-            {
-              id: 'lastActive',
-              header: 'Terakhir aktif',
-              cell: (row: ManagedUserRow) => (
-                <span className="text-slate-600">{row.lastActive ?? '-'}</span>
+              <span className="text-muted-foreground">{row.joinedAt}</span>
+            ),
+          },
+        ]
+      : [
+          {
+            id: 'joined',
+            header: 'Bergabung',
+            cell: (row: ManagedUserRow) => (
+              <span className="text-muted-foreground">{row.joinedAt}</span>
+            ),
+          },
+          {
+            id: 'lastActive',
+            header: 'Terakhir aktif',
+            cell: (row: ManagedUserRow) => (
+              <span className="text-muted-foreground">{row.lastActive ?? '-'}</span>
               ),
             },
           ]
@@ -113,7 +113,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-lg border-slate-200 px-3 text-xs font-semibold text-slate-700"
+          className="h-8 rounded-sm px-3 text-xs font-semibold"
           asChild
         >
           <Link to={detailPath(row.uid)}>Detail</Link>
@@ -122,7 +122,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-lg border-slate-200 px-3 text-xs font-semibold text-slate-700"
+          className="h-8 rounded-sm px-3 text-xs font-semibold"
           onClick={() => onChangeRole(row)}
           disabled={disabled}
         >
@@ -133,7 +133,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-lg border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+          className="h-8 rounded-sm px-3 text-xs font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={() => onDelete(row)}
           disabled={disabled}
         >

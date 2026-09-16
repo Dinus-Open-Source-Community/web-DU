@@ -4,6 +4,7 @@ import { useAuth } from '@/providers/auth-provider'
 
 const SIDEBAR_USER_FALLBACK: Record<UserRole, Pick<SidebarUser, 'name' | 'email'>> = {
   admin: { name: 'Admin', email: 'admin@doscom.id' },
+  super_admin: { name: 'Super Admin', email: 'superadmin@doscom.id' },
   mentor: { name: 'Mentor', email: 'mentor@doscom.id' },
   student: { name: 'Student', email: 'student@doscom.id' },
 }

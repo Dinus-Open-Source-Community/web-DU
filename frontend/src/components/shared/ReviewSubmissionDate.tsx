@@ -40,7 +40,7 @@ export function ReviewSubmissionDateRange({ htmlForId, value, onChange, classNam
             type="button"
             className={cn(
               buttonVariants({ variant: 'outline' }),
-              'h-auto min-h-10 w-full justify-start gap-2 rounded-xl border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-normal text-slate-900 shadow-none hover:bg-slate-50',
+              'h-auto min-h-10 w-full justify-start gap-2 rounded-sm border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-normal text-slate-900 shadow-none hover:bg-slate-50',
               !value?.from && 'text-slate-500',
             )}>
             <CalendarDays className="h-4 w-4 shrink-0 opacity-70" aria-hidden />

@@ -60,7 +60,7 @@ export function UnsavedLessonDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="rounded-sm"
             disabled={isSaving}
             onClick={() => onOpenChange(false)}
           >
@@ -68,7 +68,7 @@ export function UnsavedLessonDialog({
           </Button>
           <Button
             type="button"
-            className="rounded-xl"
+            className="rounded-sm"
             disabled={isSaving}
             onClick={onSaveAndContinue}
           >

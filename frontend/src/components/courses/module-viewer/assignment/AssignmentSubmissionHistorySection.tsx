@@ -64,7 +64,7 @@ export function AssignmentSubmissionHistorySection({
         </div>
 
         {canStart ? (
-          <Button type="button" onClick={onStart} className="w-full shrink-0 rounded-[10px] px-4 sm:w-auto">
+          <Button type="button" onClick={onStart} className="w-full shrink-0 rounded-sm px-4 sm:w-auto">
             <Play className="h-4 w-4" aria-hidden />
             Mulai tugas
           </Button>

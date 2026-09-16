@@ -408,7 +408,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
           variant="outline"
           size="sm"
           onClick={handleAddModule}
-          className="w-full rounded-xl border-dashed border-slate-300 bg-transparent text-xs font-medium text-slate-500 hover:border-primary/40 hover:text-primary">
+          className="w-full rounded-sm border-dashed border-slate-300 bg-transparent text-xs font-medium text-slate-500 hover:border-primary/40 hover:text-primary">
           <Plus className="size-3.5" />
           Tambah modul baru
         </Button>

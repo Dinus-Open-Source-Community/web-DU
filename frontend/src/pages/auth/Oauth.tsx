@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { SafeLottie } from '@/components/ui/lottie'
+import { Loader2 } from 'lucide-react'
 import { getOAuthErrorMessage } from '@/lib/security/oauth-errors'
 import { Message, resolveApiActionError } from '@/lib/Message'
 import { parseOAuthCallbackParams } from '@/lib/validator/auth'
@@ -77,7 +77,7 @@ export default function OAuthCallbackPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-background px-6">
       <div className="flex size-32 items-center justify-center rounded-[28px] border border-border/70 bg-card shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:size-36">
-        <SafeLottie src="/Book-loading.lottie" className="size-24 sm:size-28" />
+        <Loader2 className="size-10 animate-spin text-primary" aria-hidden />
       </div>
       <p className="text-sm font-medium text-muted-foreground" role="status" aria-live="polite">
         Memverifikasi akun Google...

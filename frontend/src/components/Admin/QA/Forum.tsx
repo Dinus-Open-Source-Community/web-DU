@@ -119,7 +119,7 @@ function QaThreadView({ thread, onBack }: { thread: AdminQaThread; onBack: () =>
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-fit gap-1.5 rounded-lg px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+        className="h-8 w-fit gap-1.5 rounded-sm px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
         onClick={onBack}
       >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
@@ -195,7 +195,7 @@ function QaThreadView({ thread, onBack }: { thread: AdminQaThread; onBack: () =>
         />
         <div className="flex justify-end">
           <Button
-            className="h-10 gap-1.5 rounded-xl"
+            className="h-10 gap-1.5 rounded-sm"
             disabled={!canSubmit}
             onClick={() => void handleSendReply()}
           >

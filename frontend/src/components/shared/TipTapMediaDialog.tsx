@@ -148,11 +148,11 @@ export function TipTapMediaDialog({
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Pratinjau</p>
+          <div className="rounded-xl border border-input bg-muted p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pratinjau</p>
 
             {kind === 'link' && (
-              <div className="min-h-[72px] rounded-lg border border-dashed border-slate-200 bg-white p-3">
+              <div className="min-h-[72px] rounded-lg border border-dashed border-input bg-card p-3">
                 {trimmedUrl ? (
                   <SafeExternalLink
                     href={trimmedUrl}
@@ -163,17 +163,17 @@ export function TipTapMediaDialog({
                     {trimmedUrl}
                   </SafeExternalLink>
                 ) : (
-                  <p className="text-sm text-slate-400">Tautan akan tampil di sini.</p>
+                  <p className="text-sm text-muted-foreground">Tautan akan tampil di sini.</p>
                 )}
               </div>
             )}
 
             {kind === 'image' && (
-              <div className="flex min-h-[160px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-200 bg-white">
+              <div className="flex min-h-[160px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-input bg-card">
                 {canPreviewImage && previewImageSrc ? (
                   <>
                     {(imageStatus === 'loading' || protectedFile.isLoading) && (
-                      <p className="text-sm text-slate-400">Memuat gambar…</p>
+                      <p className="text-sm text-muted-foreground">Memuat gambar…</p>
                     )}
                     {imageStatus === 'error' && !protectedFile.isLoading && (
                       <p className="text-sm text-amber-700">Gambar tidak dapat dimuat dari URL ini.</p>
@@ -187,9 +187,9 @@ export function TipTapMediaDialog({
                     />
                   </>
                 ) : canPreviewImage && protectedFile.isLoading ? (
-                  <p className="text-sm text-slate-400">Memuat gambar…</p>
+                  <p className="text-sm text-muted-foreground">Memuat gambar…</p>
                 ) : (
-                  <p className="px-4 text-center text-sm text-slate-400">
+                  <p className="px-4 text-center text-sm text-muted-foreground">
                     Pratinjau gambar akan tampil di sini. Path `/files/...` didukung.
                   </p>
                 )}
@@ -197,14 +197,14 @@ export function TipTapMediaDialog({
             )}
 
             {kind === 'youtube' && (
-              <div className="overflow-hidden rounded-lg border border-dashed border-slate-200 bg-black">
+              <div className="overflow-hidden rounded-lg border border-dashed border-input bg-black">
                 {youtubeEmbed ? (
                   <div className="relative aspect-video w-full">
                     <SafeEmbedFrame embedUrl={trimmedUrl} title="Pratinjau YouTube" className="absolute inset-0" />
                   </div>
                 ) : (
-                  <div className="flex min-h-[160px] items-center justify-center bg-white">
-                    <p className="text-sm text-slate-400">Pratinjau video akan tampil di sini.</p>
+                  <div className="flex min-h-[160px] items-center justify-center bg-card">
+                    <p className="text-sm text-muted-foreground">Pratinjau video akan tampil di sini.</p>
                   </div>
                 )}
               </div>

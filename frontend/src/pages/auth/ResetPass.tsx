@@ -9,7 +9,7 @@ import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
 import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
 import { AuthPasswordToggleButton } from '@/components/auth/AuthPasswordToggleButton'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
-import { authInputClassName, authSubmitButtonClassName } from '@/components/auth/constants'
+import { authSubmitButtonClassName } from '@/components/auth/constants'
 import { GlobalInput } from '@/components/shared/Input'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
@@ -65,7 +65,7 @@ export function FormResetPassword() {
               title="Link tidak valid"
               description="Link reset password ini tidak valid atau sudah kadaluarsa. Silakan minta link baru."
             />
-            <Button asChild className={authSubmitButtonClassName}>
+            <Button asChild variant="neobrutalism" className={authSubmitButtonClassName}>
               <Link to="/auth/forgot-password">Minta link baru</Link>
             </Button>
           </div>
@@ -98,7 +98,8 @@ export function FormResetPassword() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
               required
-              className={`${authInputClassName} pr-12`}
+              variant="auth"
+              className="pr-12"
               rightIcon={
                 <AuthPasswordToggleButton
                   visible={showPassword}
@@ -120,7 +121,8 @@ export function FormResetPassword() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isSubmitting}
               required
-              className={`${authInputClassName} pr-12`}
+              variant="auth"
+              className="pr-12"
               rightIcon={
                 <AuthPasswordToggleButton
                   visible={showConfirm}
@@ -138,6 +140,7 @@ export function FormResetPassword() {
 
           <Button
             type="submit"
+            variant="neobrutalism"
             className={authSubmitButtonClassName}
             disabled={passwordMismatch || !password || isSubmitting}
             aria-busy={isSubmitting}

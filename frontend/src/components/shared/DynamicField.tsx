@@ -27,9 +27,9 @@ export function DynamicListField({ label, items, onChange, placeholder, labelCla
       {items.length > 0 && (
         <ul className="flex flex-col gap-1.5">
           {items.map((item, i) => (
-            <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-1.5 text-sm text-slate-700">
+            <li key={i} className="flex items-center gap-2 rounded-xl border border-input bg-muted px-3 py-1.5 text-sm text-foreground">
               <span className="flex-1">{item}</span>
-              <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="shrink-0 rounded p-0.5 text-slate-400 hover:text-red-500">
+              <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label="Hapus item" className="shrink-0 rounded-md p-0.5 text-muted-foreground outline-none transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:ring-3 focus-visible:ring-ring/30">
                 <X className="size-3" />
               </button>
             </li>
@@ -49,7 +49,7 @@ export function DynamicListField({ label, items, onChange, placeholder, labelCla
           placeholder={placeholder}
           className={inputClass}
         />
-        <Button type="button" variant="outline" size="sm" className="shrink-0 rounded-xl border-slate-300 px-3 text-xs" onClick={add}>
+        <Button type="button" variant="outline" size="sm" className="shrink-0 rounded-sm px-3 text-xs" onClick={add}>
           <Plus className="size-3.5" />
         </Button>
       </div>

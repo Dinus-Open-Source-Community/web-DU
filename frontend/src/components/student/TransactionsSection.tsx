@@ -2,7 +2,7 @@ import { SearchForm } from '@/components/shared/SearchForm'
 import { PageHeader } from '@/components/shared/Header'
 import { SegmentedFilter } from '@/components/shared/SegemntedFilter'
 import { Pagination } from '@/components/shared/Pagination'
-import { SafeLottie } from '@/components/ui/lottie'
+import { ReceiptText } from 'lucide-react'
 import { TransactionPaymentLink } from '@/components/student/transactions/TransactionPaymentLink'
 import { useStudentTransactionsViewModel } from '@/hooks/use-student-transactions-view-model'
 import { buildCourseImageMap } from '@/lib/transactions/build-course-image-map'
@@ -67,7 +67,9 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
         {!viewModel.hasTransactions ? (
           <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
             <div className="flex flex-col items-center gap-4">
-              <SafeLottie src="/transaction-not-found.lottie" />
+              <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                <ReceiptText className="size-7" aria-hidden />
+              </div>
               <div className="space-y-1">
                 <p className="text-base font-semibold text-slate-900">Transaksi tidak ditemukan</p>
                 <p className="text-sm text-slate-500">

@@ -5,7 +5,7 @@ import { SearchForm } from '../shared/SearchForm'
 import { SegmentedFilter } from '../shared/SegemntedFilter'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
-import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
+import { CalendarClock, ChevronRight, ClipboardList, Lock } from 'lucide-react'
 import { Pagination } from '../shared/Pagination'
 import { format, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
@@ -19,7 +19,6 @@ import { formatAssignmentDeadlineRelative } from '@/lib/student-assignments/form
 import type { StudentAssignmentRow } from '@/lib/student-assignments/assignment-row-model'
 import { buildStudentAssignmentHref } from '@/lib/student-assignments/assignment-navigation'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
-import { SafeLottie } from '../ui/lottie'
 
 type StudentAssignmentsSectionProps = {
   view: StudentAssignmentListViewModel
@@ -89,8 +88,8 @@ function AssignmentListSkeleton() {
 function AssignmentEmptyState({ hasAnyItems }: { hasAnyItems: boolean }) {
   return (
     <div className="flex flex-col items-center gap-4 px-6 py-14 text-center">
-      <div className="h-28 w-28">
-        <SafeLottie src="/transaction-not-found.lottie" />
+      <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+        <ClipboardList className="size-7" aria-hidden />
       </div>
       <div className="max-w-md space-y-2">
         <p className="text-base font-semibold text-slate-800">
@@ -137,7 +136,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+    <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-slate-300">
       <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
@@ -197,11 +196,11 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
               asChild
               variant="default"
               size="sm"
-              className="h-11 w-full justify-center gap-2 rounded-xl font-semibold shadow-none active:scale-[0.98]">
+              className="h-11 w-full justify-center gap-2 rounded-sm font-semibold shadow-none active:scale-[0.98]">
               <Link to={href}>
                 {row.rowKind === 'graded' ? 'Lihat hasil' : 'Kerjakan tugas'}
                 <ChevronRight
-                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                  className="h-4 w-4"
                   aria-hidden
                 />
               </Link>

@@ -20,12 +20,14 @@ const roleLabel: Record<UserRole, string> = {
   student: 'Siswa',
   mentor: 'Mentor',
   admin: 'Admin',
+  super_admin: 'Super Admin',
 }
 
 const dashboardPath: Record<UserRole, string> = {
   student: ROUTES.student.dashboard,
   mentor: ROUTES.mentor.dashboard,
   admin: ROUTES.admin.dashboard,
+  super_admin: ROUTES.admin.dashboard,
 }
 
 type NavbarProps = {
@@ -161,7 +163,7 @@ export default function Navbar({ auth }: NavbarProps) {
             <div className="group relative">
               <button
                 type="button"
-                className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3"
+                className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3"
                 aria-haspopup="menu"
               >
                 <Avatar className="size-9 ring-2 ring-ink-900/20">
@@ -178,7 +180,7 @@ export default function Navbar({ auth }: NavbarProps) {
                    pt-2 = bridge hover agar mouse bisa turun ke panel tanpa putus.
                    Inner div yang fade/slide (translate + opacity). */
                 className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 pt-2 group-hover:visible group-hover:pointer-events-auto group-focus-within:visible group-focus-within:pointer-events-auto">
-                <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2 translate-y-1 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                   <div className="px-3 py-2.5">
                     <p className="truncate text-sm font-semibold">{userName}</p>
                     {userEmail ? <p className="text-ink-500 truncate text-xs">{userEmail}</p> : null}
@@ -202,14 +204,20 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex gap-3">
-              <Link to="/">
-                <Button variant="outline" className="px-7">
-                  Beranda
+              <Link to={ROUTES.login}>
+                <Button
+                  variant="neobrutalism"
+                  className="rounded-sm border-2 bg-paper-white px-7 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+                >
+                  Login
                 </Button>
               </Link>
-              <Link to="/">
-                <Button variant="default" className="px-7">
-                  Jelajahi
+              <Link to={ROUTES.redeem}>
+                <Button
+                  variant="neobrutalism"
+                  className="rounded-sm border-2 px-7 font-extrabold text-primary-foreground active:translate-y-[3px]"
+                >
+                  Redeem
                 </Button>
               </Link>
             </div>
@@ -218,7 +226,7 @@ export default function Navbar({ auth }: NavbarProps) {
 
         <button
           type="button"
-          className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
+          className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
           aria-label={isMenuOpen ? 'Tutup menu' : 'Buka menu'}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
@@ -280,14 +288,20 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-3 pt-2">
-              <Link to="/" onClick={closeMenu}>
-                <Button variant="outline" className="w-full">
-                  Beranda
+              <Link to={ROUTES.login} onClick={closeMenu}>
+                <Button
+                  variant="neobrutalism"
+                  className="w-full rounded-sm border-2 bg-paper-white font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+                >
+                  Login
                 </Button>
               </Link>
-              <Link to="/" onClick={closeMenu}>
-                <Button variant="default" className="w-full">
-                  Jelajahi
+              <Link to={ROUTES.redeem} onClick={closeMenu}>
+                <Button
+                  variant="neobrutalism"
+                  className="w-full rounded-sm border-2 font-extrabold text-primary-foreground active:translate-y-[3px]"
+                >
+                  Redeem
                 </Button>
               </Link>
             </div>

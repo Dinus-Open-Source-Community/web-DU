@@ -70,7 +70,7 @@ export default function ManageCourseSection({
               variant="scroll"
             />
             {isAdmin && (
-              <Button className="h-11.5 shrink-0 gap-2 rounded-xl px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
+              <Button className="h-11.5 shrink-0 gap-2 rounded-sm px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
                 <Plus className="h-5 w-5" />
                 Buat kursus
               </Button>
@@ -103,7 +103,7 @@ export default function ManageCourseSection({
               {isAdmin ? 'Ubah filter atau kata kunci pencarian, atau buat kursus baru.' : 'Ubah filter atau kata kunci pencarian untuk melihat kursus yang tersedia.'}
             </p>
             {isAdmin && (
-              <Button className="mt-6 rounded-xl" type="button" onClick={() => setCreateOpen(true)}>
+              <Button className="mt-6 rounded-sm" type="button" onClick={() => setCreateOpen(true)}>
                 Buat kursus
               </Button>
             )}
