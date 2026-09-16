@@ -51,7 +51,7 @@ export function CourseAssignmentRosterView({
         asChild
         type="button"
         variant="ghost"
-        className="-ml-2 h-9 w-fit rounded-lg px-3 text-slate-600 hover:text-slate-900"
+        className="-ml-2 h-9 w-fit rounded-sm px-3 text-slate-600 hover:text-slate-900"
       >
         <Link to={backHref}>
           <ArrowLeft className="size-4" aria-hidden />

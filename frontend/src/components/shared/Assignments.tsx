@@ -69,7 +69,7 @@ function AssignmentCrudRow({
             type="button"
             variant="outline"
             size="icon-sm"
-            className="rounded-xl border-slate-200 shadow-none"
+            className="rounded-sm border-slate-200 shadow-none"
             onClick={() => onEdit(assignment)}
             aria-label={`Edit tugas: ${assignment.title}`}>
             <Pencil className="h-3.5 w-3.5" aria-hidden />
@@ -78,7 +78,7 @@ function AssignmentCrudRow({
             type="button"
             variant="outline"
             size="icon-sm"
-            className="rounded-xl border-rose-200 text-rose-800 shadow-none hover:bg-rose-50"
+            className="rounded-sm border-rose-200 text-rose-800 shadow-none hover:bg-rose-50"
             onClick={() => onDelete(assignment)}
             aria-label={`Hapus tugas: ${assignment.title}`}>
             <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -167,7 +167,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
               <span className="font-medium text-slate-600">Delete</span> hapus dari daftar.
             </p>
           </div>
-          <Button type="button" className="w-fit shrink-0 gap-1.5 rounded-xl" onClick={onOpenCreateForm}>
+          <Button type="button" className="w-fit shrink-0 gap-1.5 rounded-sm" onClick={onOpenCreateForm}>
             <Plus className="h-4 w-4" aria-hidden />
             Buat tugas
           </Button>
@@ -318,7 +318,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="rounded-xl shadow-none"
+                      className="rounded-sm shadow-none"
                       onClick={() => onOpenReview(submission)}>
                       Review
                     </Button>
@@ -366,7 +366,7 @@ export function MentorCourseAssignmentsNotFound({
   return (
     <section className={appPageContentClassName}>
       <p className="text-slate-600">Kursus tidak ditemukan.</p>
-      <Button asChild variant="outline" className="w-fit rounded-xl shadow-none">
+      <Button asChild variant="outline" className="w-fit rounded-sm shadow-none">
         <Link to={backHref}>Kembali ke daftar</Link>
       </Button>
     </section>

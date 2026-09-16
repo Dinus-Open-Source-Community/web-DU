@@ -248,7 +248,7 @@ function ReviewItem({
                 <Button
                   type="button"
                   size="sm"
-                  className="h-9 rounded-xl px-3 text-sm font-semibold"
+                  className="h-9 rounded-sm px-3 text-sm font-semibold"
                   disabled={!replyText.trim() || isSubmitting}
                   onClick={() => void handleSendReply()}
                 >

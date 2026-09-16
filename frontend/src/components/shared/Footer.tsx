@@ -20,7 +20,7 @@ export default function Footer() {
           <div>
             <Link
               to="/"
-              className="font-display text-brand-blue focus-visible:ring-brand-blue/60 inline-block rounded-lg text-2xl font-bold tracking-tight transition outline-none hover:-translate-y-0.5 focus-visible:ring-3 lg:text-3xl"
+              className="font-display text-brand-blue focus-visible:ring-brand-blue/60 inline-block rounded-lg text-2xl font-bold tracking-tight outline-none focus-visible:ring-3 lg:text-3xl"
             >
               DOSCOM University
             </Link>
@@ -47,7 +47,7 @@ export default function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="text-ink-900 hover:text-brand-blue shadow-button hover:shadow-button-hover border-ink-900 bg-paper-white focus-visible:ring-paper-white/80 grid size-10 place-items-center rounded-full border-2 transition outline-none hover:-translate-y-1 focus-visible:ring-3 lg:size-11"
+                  className="text-ink-900 hover:text-brand-blue shadow-button hover:shadow-button-hover border-ink-900 bg-paper-white focus-visible:ring-paper-white/80 grid size-10 place-items-center rounded-full border-2 transition outline-none focus-visible:ring-3 lg:size-11"
                 >
                   <Icon className="size-5" />
                 </a>

@@ -106,7 +106,7 @@ export function LessonAssignmentWork({
               <p
                 className={cn(
                   "text-xs font-semibold tracking-wide uppercase",
-                  isDark ? "text-zinc-400" : "text-slate-500",
+                  isDark ? "text-zinc-400" : "text-muted-foreground",
                 )}
               >
                 Pengerjaan {isQuiz ? "kuis" : "tugas"}
@@ -114,7 +114,7 @@ export function LessonAssignmentWork({
               <h1
                 className={cn(
                   "mt-1 text-2xl font-bold tracking-tight",
-                  isDark ? "text-zinc-50" : "text-slate-950",
+                  isDark ? "text-zinc-50" : "text-foreground",
                 )}
               >
                 {assignment.title}
@@ -132,11 +132,11 @@ export function LessonAssignmentWork({
         <AssignmentWorkInstructions assignment={assignment} theme={theme} />
 
         {isQuiz ? (
-          <section className="space-y-8 border-t border-slate-200/80 pt-6">
+          <section className="space-y-8 border-t border-input pt-6">
             <h2
               className={cn(
                 "text-sm font-semibold",
-                isDark ? "text-zinc-200" : "text-slate-800",
+                isDark ? "text-zinc-200" : "text-foreground",
               )}
             >
               Soal
@@ -147,7 +147,7 @@ export function LessonAssignmentWork({
                 {quiz.questions.map((question, index) => (
                   <div
                     key={question.id}
-                    className="space-y-4 border-b border-slate-200/80 pb-8 last:border-b-0 last:pb-0"
+                    className="space-y-4 border-b border-input pb-8 last:border-b-0 last:pb-0"
                   >
                     <AssignmentQuizPrompt
                       index={index}
@@ -161,14 +161,14 @@ export function LessonAssignmentWork({
                           <label
                             key={option.id}
                             className={cn(
-                              "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                              "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
                               selected
                                 ? isDark
                                   ? "bg-primary/10 ring-primary/40 text-zinc-50 ring-1"
-                                  : "bg-primary/5 ring-primary/30 text-slate-900 ring-1"
+                                  : "bg-primary/5 text-foreground ring-1 ring-ring/30"
                                 : isDark
                                   ? "hover:bg-zinc-900/60"
-                                  : "hover:bg-slate-50",
+                                  : "hover:bg-muted",
                             )}
                           >
                             <input
@@ -195,7 +195,7 @@ export function LessonAssignmentWork({
               <p
                 className={cn(
                   "text-sm",
-                  isDark ? "text-zinc-400" : "text-slate-500",
+                  isDark ? "text-zinc-400" : "text-muted-foreground",
                 )}
               >
                 Soal kuis belum tersedia. Silakan hubungi mentor atau coba lagi
@@ -204,11 +204,11 @@ export function LessonAssignmentWork({
             )}
           </section>
         ) : !hasSubmissionMethods ? (
-          <section className="border-t border-slate-200/80 pt-6">
+          <section className="border-t border-input pt-6">
             <p
               className={cn(
                 "text-sm",
-                isDark ? "text-zinc-400" : "text-slate-500",
+                isDark ? "text-zinc-400" : "text-muted-foreground",
               )}
             >
               Tugas ini belum memiliki metode pengumpulan yang aktif. Silakan
@@ -216,14 +216,14 @@ export function LessonAssignmentWork({
             </p>
           </section>
         ) : (
-          <section className="space-y-6 border-t border-slate-200/80 pt-6">
+          <section className="space-y-6 border-t border-input pt-6">
             {showPlainTextInput ? (
               <div className="space-y-2">
                 <label
                   htmlFor="assignment-answer"
                   className={cn(
                     "text-sm font-medium",
-                    isDark ? "text-zinc-200" : "text-slate-800",
+                    isDark ? "text-zinc-200" : "text-foreground",
                   )}
                 >
                   Teks jawaban
@@ -234,10 +234,10 @@ export function LessonAssignmentWork({
                   onChange={(event) => setPlainText(event.target.value)}
                   rows={8}
                   className={cn(
-                    "focus-visible:ring-primary/30 w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus-visible:ring-2",
+                    "w-full rounded-xl border px-3 py-2.5 text-sm shadow-none outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground hover:border-line-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
                     isDark
                       ? "border-zinc-800 bg-zinc-950 text-zinc-100"
-                      : "border-slate-200 bg-white text-slate-900",
+                      : "border-input bg-card text-foreground",
                   )}
                   placeholder="Tulis jawaban tugas di sini..."
                 />
@@ -249,7 +249,7 @@ export function LessonAssignmentWork({
                 <p
                   className={cn(
                     "text-sm font-medium",
-                    isDark ? "text-zinc-200" : "text-slate-800",
+                    isDark ? "text-zinc-200" : "text-foreground",
                   )}
                 >
                   {showPlainTextInput ? "Jawaban format rich text" : "Jawaban"}
@@ -277,13 +277,13 @@ export function LessonAssignmentWork({
           </section>
         )}
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200/80 pt-6">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-input pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             className={cn(
-              'rounded-[10px] px-5',
+              'rounded-sm px-5',
               isDark &&
                 'border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-900 hover:text-zinc-50',
             )}
@@ -298,7 +298,7 @@ export function LessonAssignmentWork({
               (isQuiz && !quiz?.questions.length) ||
               (!isQuiz && !canSubmitTextAssignment)
             }
-            className="rounded-[10px] px-5"
+            className="rounded-sm px-5"
           >
             {isSubmitting ? "Mengumpulkan..." : "Kumpulkan"}
           </Button>

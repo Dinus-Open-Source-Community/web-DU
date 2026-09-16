@@ -4,7 +4,7 @@ import { SegmentedFilter } from "../shared/SegemntedFilter";
 import { Pagination } from "../shared/Pagination";
 import type { IUserData } from "@/lib/types/user";
 import JoinedCourseCard from "../shared/JoinedCourseCard";
-import { SafeLottie } from "../ui/lottie";
+import { BookOpen } from "lucide-react";
 import {
   isLearningProgressComplete,
   isLearningProgressInProgress,
@@ -113,7 +113,9 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
       ) : (
         <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
           <div className="flex flex-col items-center gap-4">
-            <SafeLottie src="/transaction-not-found.lottie" />
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <BookOpen className="size-7" aria-hidden />
+            </div>
             <div className="space-y-1">
               <p className="text-base font-semibold text-slate-900">
                 Kursus tidak ditemukan

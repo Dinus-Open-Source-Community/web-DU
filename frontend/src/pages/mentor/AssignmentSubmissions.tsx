@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { CourseAssignmentRosterView } from '@/components/shared/course-detail-manage/CourseAssignmentRosterView'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseAssignmentRosterPage } from '@/hooks/course-detail/use-course-assignment-roster-page'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
@@ -17,7 +17,7 @@ export default function MentorAssignmentSubmissionsPage() {
   )
 
   if (isLoading) {
-    return <LottieOverlay visible={isLoading} message="Memuat pengumpulan tugas" />
+    return <PageSkeleton message="Memuat pengumpulan tugas" />
   }
 
   if (!courseUid || !lessonUid || !courseDetail.data) {

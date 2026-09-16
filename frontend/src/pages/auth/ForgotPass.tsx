@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
 import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
-import { authInputClassName, authSubmitButtonClassName } from '@/components/auth/constants'
+import { authSubmitButtonClassName } from '@/components/auth/constants'
 import { GlobalInput } from '@/components/shared/Input'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
@@ -57,11 +57,12 @@ export function ForgotPasswordPages() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
             required
-            className={authInputClassName}
+            variant="auth"
           />
 
           <Button
             type="submit"
+            variant="neobrutalism"
             className={authSubmitButtonClassName}
             disabled={!email.trim() || isSubmitting}
             aria-busy={isSubmitting}

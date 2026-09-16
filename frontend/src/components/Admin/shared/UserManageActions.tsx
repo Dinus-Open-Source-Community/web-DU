@@ -66,7 +66,7 @@ export function UserManageActions({
             type="button"
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-xl border-slate-200"
+            className="h-9 w-9 rounded-sm"
             disabled={disabled || isBusy}
             aria-label={`Kelola akun ${name}`}
           >
@@ -74,7 +74,7 @@ export function UserManageActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel className="text-xs text-slate-500">Kelola user</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-xs text-muted-foreground">Kelola user</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {roleTargets.map((role) => (
             <DropdownMenuItem
@@ -90,7 +90,7 @@ export function UserManageActions({
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-rose-600 focus:text-rose-600"
+            className="text-destructive focus:text-destructive"
             disabled={isBusy}
             onClick={() => setDeleteOpen(true)}
           >

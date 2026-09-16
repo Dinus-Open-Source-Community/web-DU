@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { PageHeader } from '@/components/shared/Header'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { userManageLayout } from '@/lib/user-manage/layout'
 import { getUserManageConfig, type UserManageKind } from '@/lib/user-manage/page-config'
@@ -25,14 +25,14 @@ export function UserManagePageShell({
   const config = getUserManageConfig(kind)
 
   return (
-    <AppSidebarProvider role="admin" user={user}>
-      {isLoading ? (
-        <LottieOverlay visible message={loadingMessage ?? `Memuat ${config.navLabel.toLowerCase()}...`} />
-      ) : null}
-
+    <AppSidebarProvider role="super_admin" user={user}>
       <div className={userManageLayout.page}>
         <PageHeader title={config.pageTitle} subtitle={config.pageSubtitle} />
-        {children}
+        {isLoading ? (
+          <PageSkeleton message={loadingMessage ?? `Memuat ${config.navLabel.toLowerCase()}...`} />
+        ) : (
+          children
+        )}
       </div>
     </AppSidebarProvider>
   )

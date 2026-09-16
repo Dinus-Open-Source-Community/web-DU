@@ -87,7 +87,7 @@ export function CreateModuleDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="rounded-sm"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -95,7 +95,7 @@ export function CreateModuleDialog({
           </Button>
           <Button
             type="button"
-            className="rounded-xl"
+            className="rounded-sm"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
           >

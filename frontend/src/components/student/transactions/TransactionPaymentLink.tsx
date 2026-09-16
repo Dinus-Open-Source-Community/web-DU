@@ -29,7 +29,7 @@ export function TransactionPaymentLink({ transaction }: TransactionPaymentLinkPr
       asChild
       variant="outline"
       size="sm"
-      className="h-9 gap-1.5 rounded-xl border-slate-200 px-3 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
+      className="h-9 gap-1.5 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
     >
       <Link
         to={ROUTES.student.transactionPayment({

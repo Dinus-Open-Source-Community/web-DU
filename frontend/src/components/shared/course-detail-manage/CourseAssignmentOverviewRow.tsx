@@ -80,7 +80,7 @@ function CourseAssignmentOverviewRowBase({
             type="button"
             size="sm"
             variant="outline"
-            className="h-9 shrink-0 rounded-lg"
+            className="h-9 shrink-0 rounded-sm"
             onMouseEnter={onPrefetchRoster}
             onFocus={onPrefetchRoster}
           >

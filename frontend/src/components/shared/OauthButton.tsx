@@ -11,8 +11,8 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <Button
         type="button"
-        variant="outline"
-        className="h-12 rounded-xl border-border bg-background text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted"
+        variant="neobrutalism"
+        className="h-12 rounded-[10px] border-2 bg-paper-white px-5 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
         disabled={isSubmitting}
         onClick={onGoogleSignIn}
       >
@@ -21,8 +21,8 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
       </Button>
       <Button
         type="button"
-        variant="outline"
-        className="h-12 rounded-xl border-border bg-background text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted"
+        variant="neobrutalism"
+        className="h-12 rounded-[10px] border-2 bg-paper-white px-5 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
         disabled={isSubmitting}
       >
         <GitHubIcon className="size-5" aria-hidden />

@@ -52,3 +52,4 @@ dist
 .cache
 package-lock.json
 *.lock
+.playwright-mcp

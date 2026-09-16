@@ -1,15 +1,14 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ReceiptText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
-import { SafeLottie } from '@/components/ui/lottie'
 import { ROUTES } from '@/lib/routes'
 
 export function TransactionPaymentNotFound({ backHref }: { backHref?: string }) {
   return (
     <section className="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col items-center justify-center px-4 text-center">
-      <div className="size-48">
-        <SafeLottie src="/transaction-not-found.lottie" loop={false} />
+      <div className="flex size-24 items-center justify-center rounded-[28px] bg-slate-100 text-slate-400">
+        <ReceiptText className="size-12" aria-hidden />
       </div>
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-950">
         Pembayaran tidak ditemukan

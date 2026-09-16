@@ -143,13 +143,13 @@ export function CourseMasterFormDialog({
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl border-slate-200"
+              className="rounded-sm border-slate-200"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
               Batal
             </Button>
-            <Button type="submit" className="rounded-xl px-5" disabled={submitting}>
+            <Button type="submit" className="rounded-sm px-5" disabled={submitting}>
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />

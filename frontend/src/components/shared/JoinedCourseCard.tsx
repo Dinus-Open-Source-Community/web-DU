@@ -118,7 +118,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
 
             <Button
               asChild
-              className="h-9 shrink-0 rounded-[10px] px-5 text-sm font-semibold shadow-none"
+              className="h-9 shrink-0 rounded-sm px-5 text-sm font-semibold shadow-none"
               variant="default">
               <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
             </Button>

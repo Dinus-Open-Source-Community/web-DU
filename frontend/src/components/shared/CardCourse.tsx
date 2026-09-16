@@ -143,11 +143,11 @@ const CardCourse = ({
             {data.progress !== undefined && isLearningProgressComplete(data.progress) ? (
               <Badge variant="progressComplete" />
             ) : data.detailHref ? (
-              <Button asChild className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">
+              <Button asChild className="px-5 py-2 text-sm font-semibold rounded-sm shadow-sm" variant="default" size="sm">
                 <Link to={data.detailHref}>{actionLabel}</Link>
               </Button>
             ) : (
-              <Button className="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm" variant="default" size="sm">
+              <Button className="px-5 py-2 text-sm font-semibold rounded-sm shadow-sm" variant="default" size="sm">
                 {actionLabel}
               </Button>
             )}

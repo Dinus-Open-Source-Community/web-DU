@@ -7,7 +7,7 @@ import { LANDING_COPY } from '@/lib/landing/copy'
 /**
  * "Tech deck" — kartu teknologi terasa seperti koleksi kartu, bukan grid fitur.
  * Bento asimetris (indeks 0 melintang 2 kolom; 1, 4, 5 pastel aksen), semua
- * ikon dari data DOSCOM_STACK. Hover: kartu terangkat + chip ikon membesar.
+ * ikon dari data DOSCOM_STACK. Hover: chip ikon membesar.
  * Di atas navy ink-800 dengan grid kertas halus + noise. Twinkle dekoratif
  * sengaja dilepas — biar fokus ke kartu, bukan ke gerak latar.
  */
@@ -78,7 +78,7 @@ export default function StackSection() {
               >
                 <article
                   className={cn(
-                    'group relative flex h-full flex-col justify-between rounded-[18px] border-2 border-ink-900 shadow-paper transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:rounded-[20px]',
+                    'group relative flex h-full flex-col justify-between rounded-[18px] border-2 border-ink-900 shadow-paper sm:rounded-[20px]',
                     layout.bg,
                     isBig ? 'p-5 sm:p-7' : 'p-4 sm:p-6',
                   )}

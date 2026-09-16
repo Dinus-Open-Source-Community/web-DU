@@ -6,10 +6,10 @@ export function AuthDivider({ label }: AuthDividerProps) {
   return (
     <div className="relative py-1">
       <div className="absolute inset-0 flex items-center" aria-hidden>
-        <div className="w-full border-t border-border/80" />
+        <div className="w-full border-t-2 border-dashed border-border/25" />
       </div>
       <div className="relative flex justify-center">
-        <span className="bg-card px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase lg:bg-background">
+        <span className="bg-background px-3 text-xs font-bold tracking-wide text-muted-foreground uppercase">
           {label}
         </span>
       </div>

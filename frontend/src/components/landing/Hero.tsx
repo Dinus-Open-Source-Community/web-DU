@@ -156,7 +156,8 @@ export default function Hero() {
             <Button
               asChild
               size="lg"
-              className="group/button h-14 px-8 text-base"
+              variant="neobrutalism"
+              className="group/button h-14 rounded-sm border-2 px-8 text-base font-extrabold active:translate-y-[3px]"
             >
               <Link to={hero.primaryCta.href}>
                 {hero.primaryCta.label}
@@ -166,8 +167,8 @@ export default function Hero() {
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="h-14 px-8 text-base"
+              variant="neobrutalism"
+              className="h-14 rounded-sm border-2 bg-paper-white px-8 text-base font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
             >
               <Link to={hero.secondaryCta.href}>{hero.secondaryCta.label}</Link>
             </Button>

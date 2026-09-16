@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import Section from '@/components/student/BrowseCourseSection'
 import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
@@ -19,7 +19,7 @@ const BrowseCourse = () => {
   )
 
   if (isLoading || isAuthLoading) {
-    return <LottieOverlay visible message="Loading courses..." />
+    return <PageSkeleton message="Memuat courses..." />
   }
   return (
     <AppSidebarProvider role="student" user={sidebarUser}>

@@ -8,7 +8,7 @@ import { mapManagedUsers, toAdminStudent } from '@/lib/user-manage/mappers'
 import { studentToRow } from '@/lib/user-manage/view-models'
 
 export default function AdminStudentsPage() {
-  const sidebarUser = useSidebarUser('admin')
+  const sidebarUser = useSidebarUser('super_admin')
   const pageState = useAdminUserPage({ role: 'student' })
 
   const rows = useMemo(

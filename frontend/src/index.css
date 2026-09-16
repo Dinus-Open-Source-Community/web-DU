@@ -66,11 +66,15 @@
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
-  --shadow: var(--shadow);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-2xl: var(--shadow-2xl);
+  --shadow:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 1px 2px -1px hsl(0 0 0 / 0.1);
+  --shadow-md:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 2px 4px -1px hsl(0 0 0 / 0.1);
+  --shadow-lg:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 4px 6px -1px hsl(0 0 0 / 0.1);
+  --shadow-xl:
+    0px 4px 10px 0px hsl(0 0 0 / 0.1), 0px 8px 10px -1px hsl(0 0 0 / 0.1);
+  --shadow-2xl: 0px 4px 10px 0px hsl(0 0 0 / 0.25);
 
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -109,11 +113,14 @@
   --shadow-paper: 0 12px 26px rgba(5, 9, 20, 0.10);
   --shadow-button: 0 3px 0 #0B1018;
   --shadow-button-hover: 0 5px 0 #0B1018;
+  --shadow-button-pressed: 0 1px 0 #0B1018;
   --shadow-nav: 0 5px 18px rgba(5, 9, 20, 0.08);
   --animate-float: playful-float 4.5s ease-in-out infinite;
   --animate-wiggle: playful-wiggle 2.8s ease-in-out infinite;
   --animate-drift: playful-drift 3.6s ease-in-out infinite;
   --animate-bob: playful-bob 5s ease-in-out infinite;
+  --animate-doodle-float: doodle-float 5.5s ease-in-out infinite;
+  --animate-doodle-float-alt: doodle-float-alt 6.5s ease-in-out infinite;
   --animate-marquee: marquee-x 22s linear infinite;
   --animate-twinkle: twinkle-soft 2.6s ease-in-out infinite;
 
@@ -230,6 +237,15 @@
 @keyframes playful-bob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-10px) rotate(2deg); }
+}
+/* Doodle melayang di sekitar maskot auth — dua ritme agar tidak seragam. */
+@keyframes doodle-float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-9px) rotate(5deg); }
+}
+@keyframes doodle-float-alt {
+  0%, 100% { transform: translateY(0) rotate(8deg); }
+  50% { transform: translateY(-11px) rotate(-5deg); }
 }
 @keyframes marquee-x {
   from { transform: translateX(0); }

@@ -87,7 +87,7 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
       decoding="async"
       // width/height intrinsik + aspect container mencegah layout-shift
       className={cn(
-        'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
+        'w-full object-cover',
         aspectCls,
       )}
     />
@@ -97,7 +97,7 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
 /** 0 — KERTAS SOBEK: potongan kertas dgn tepi miring/sobek (clip-path). */
 function TornPaperCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out hover:-translate-y-1.5">
+    <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out">
       <div
         className="flex h-full flex-col bg-paper-white p-3"
         style={{
@@ -122,7 +122,7 @@ function TornPaperCard({ img, aspect, mobileAspect }: PhotoProps) {
 /** 1 — NOTEBOOK POLOS: halaman buku tulis (garis + margin merah + lubang jilid). */
 function NotebookCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out">
       {/* Garis horizontal halaman */}
       <div
         aria-hidden
@@ -154,7 +154,7 @@ function NotebookCard({ img, aspect, mobileAspect }: PhotoProps) {
 function PolaroidColorCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: number }) {
   const tapeColors = ['bg-note-pink/80', 'bg-note-mint/80', 'bg-note-sky/80', 'bg-note-peach/80']
   return (
-    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out">
       {/* Washi tape warna */}
       <span
         aria-hidden
@@ -188,7 +188,7 @@ function PatchCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: numbe
   return (
     <figure
       className={cn(
-        'group relative flex h-full flex-col p-3.5 transition-transform duration-300 ease-out hover:-translate-y-1.5',
+        'group relative flex h-full flex-col p-3.5 transition-transform duration-300 ease-out',
         patchBg[idx % patchBg.length],
       )}
       style={{
@@ -211,7 +211,7 @@ function PatchCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: numbe
 /** 4 — LABEL KRAFT + TALI: kertas kraft, tali/benang di atas, caption spidol. */
 function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out">
       {/* Tali/benang horizontal di atas */}
       <div aria-hidden className="absolute inset-x-0 top-0 z-10 flex justify-center">
         <div className="h-[7px] w-full border-y-2 border-dashed border-[#8A6A45]/50" />
@@ -234,7 +234,7 @@ function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
 /** 5 — KARTU POS JADUL: krem, bingkai ganda, perangko, stempel. */
 function PostcardCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out">
       {/* Bingkai dalam dashed */}
       <div
         aria-hidden

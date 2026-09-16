@@ -20,7 +20,7 @@ import {
 } from '@/lib/user-manage/view-models'
 
 export default function AdminAdministratorsPage() {
-  const sidebarUser = useSidebarUser('admin')
+  const sidebarUser = useSidebarUser('super_admin')
   const adminsPage = useAdminUserPage({ role: 'admin' })
   const mentorsQuery = useManagedUsers({
     role: 'mentor',

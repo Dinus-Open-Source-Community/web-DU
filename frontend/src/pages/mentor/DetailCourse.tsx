@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 
 import { DetailCourse } from '@/components/shared/DetailCourseComponents'
 import { NotFoundContent } from '@/components/shared/Error'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
@@ -16,7 +16,7 @@ export default function MentorCourseDetailPage() {
     useCourseDetailAdminAndMentor(courseUid ?? '')
 
   if (isLoading) {
-    return <LottieOverlay visible message="Memuat course..." />
+    return <PageSkeleton message="Memuat course..." />
   }
 
   if (!courseUid || !courseDetail.data) {

@@ -81,7 +81,7 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
               </div>
             )}
             {detailHref && (
-              <Button variant="default" size="sm" className="rounded-xl px-3 py-2">
+              <Button variant="default" size="sm" className="rounded-sm px-3 py-2">
                 <Link to={detailHref}>Kelola Kursus</Link>
               </Button>
             )}
@@ -90,7 +90,7 @@ const CardMentor = ({ data, onStatusClick, detailHref }: CardMentorProps) => {
                 onClick={() => onStatusClick(data.uid)}
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-lg border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-900"
+                className="h-9 w-9 rounded-sm border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-900"
                 title="Update Status">
                 <Star className="size-4" />
               </Button>
