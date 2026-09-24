@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from 'gsap'
+import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionHeader from '@/components/playful/SectionHeader'
 import { LANDING_COPY } from '@/lib/landing/copy'
