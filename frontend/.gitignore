@@ -50,6 +50,6 @@ dist-ssr
 dist
 # Gatsby files
 .cache
-public
 package-lock.json
 *.lock
+.playwright-mcp

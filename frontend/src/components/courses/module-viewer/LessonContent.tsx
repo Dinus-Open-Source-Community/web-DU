@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/shared/EmptyState'
 import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
 import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
-import { SafeLottie } from '@/components/ui/lottie'
 import type { LessonDetailItem } from '@/lib/types/course'
 import { parseLessonContent } from '@/lib/rich-text'
 import { resolveSafeEmbedUrl, resolveSafeExternalHref } from '@/lib/security/safe-external-url'
@@ -53,7 +52,7 @@ export function LessonContent({ lesson, theme, isLoading = false }: LessonConten
                 )}
               </>
             ) : (
-              <SafeLottie src="/transaction-not-found.lottie" />
+              <EmptyState title="Lesson tidak ditemukan" description="Konten lesson ini tidak tersedia." />
             )}
           </div>
         </article>

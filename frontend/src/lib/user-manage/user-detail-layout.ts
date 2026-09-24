@@ -9,7 +9,7 @@ export const userDetailLayout = {
   contentPanelToolbar: 'border-b border-slate-100 px-4 py-4 sm:px-6',
   contentPanelBody: 'p-4 sm:p-6',
   card:
-    'rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]',
+    'rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-slate-300',
   cardPadding: 'p-4 sm:p-5',
   cardTitle: 'text-sm font-semibold tracking-tight text-slate-900 sm:text-base',
   cardSubtitle: 'mt-1 text-sm leading-relaxed text-slate-500',

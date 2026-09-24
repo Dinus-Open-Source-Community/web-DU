@@ -7,19 +7,19 @@ export type LandingMentor = {
 
 export const LANDING_MENTORS: LandingMentor[] = [
   {
-    name: 'jar',
-    role: 'Mentor Web Development',
-    tagline: 'Ngajar React dari sudut pandang orang yang pernah pusing sendiri.',
+    name: 'alfi',
+    role: 'Next.js Developer',
+    tagline: 'Suka ngulik Next.js bareng — dari error hydration sampai halaman jadi.',
   },
   {
-    name: 'zapp',
-    role: 'Mentor Machine Learning',
-    tagline: 'Dari data kotor sampai model jalan — semuanya butuh sabar.',
+    name: 'nafan',
+    role: 'Laravel Developer',
+    tagline: 'Ngulik Eloquent & Blade bareng — biar query nggak bikin pusing.',
   },
   {
-    name: 'naf',
-    role: 'Mentor Open Source',
-    tagline: 'PR pertamamu bakal di-review, bukan dihakimi.',
+    name: 'jariz',
+    role: 'Next.js Developer',
+    tagline: 'Senang lihat kode berantakan jadi komponen yang rapi dan kepake.',
   },
 ]
 

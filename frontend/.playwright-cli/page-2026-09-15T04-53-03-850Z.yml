@@ -1,0 +1,4 @@
+- generic [ref=e2]:
+  - status "Memuat halaman autentikasi" [ref=e3]:
+    - generic [ref=e4]: Memuat halaman autentikasi...
+  - region "Notifications alt+T"

@@ -168,7 +168,7 @@ export function CourseAssignmentRosterTable({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="h-9 rounded-lg"
+                    className="h-9 rounded-sm"
                   >
                     <Link to={buildSubmissionDetailHref(submission.uid)}>
                       Lihat jawaban

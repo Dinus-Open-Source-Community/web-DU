@@ -111,7 +111,7 @@ export function MentorsTable({
               </div>
 
               <div className="mt-auto flex items-center justify-end gap-3">
-                <Button asChild variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50">
+                <Button asChild variant="outline" size="sm" className="h-9 rounded-sm border-slate-200 px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50">
                   <Link to={`/admin/users/mentors/${mentor.uid}`}>Detail</Link>
                 </Button>
               </div>

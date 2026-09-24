@@ -47,6 +47,11 @@ const sidebarRoleConfig: Record<UserRole, { navigationKey: keyof typeof Navigati
     title: 'Admin Dashboard',
     roleLabel: 'Administrator',
   },
+  super_admin: {
+    navigationKey: 'SuperAdmin',
+    title: 'Super Admin Dashboard',
+    roleLabel: 'Super Admin',
+  },
   mentor: {
     navigationKey: 'Mentor',
     title: 'Mentor Dashboard',

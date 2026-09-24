@@ -1,10 +1,11 @@
 import React, { Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "./lib/routes.ts";
 import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
-import { LottieOverlay } from "./components/shared/Loader.tsx";
+import { PageSkeleton } from "./components/shared/PageSkeleton.tsx";
+import { AuthPageSkeleton } from "./components/auth/AuthPageSkeleton.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
 import { ErrorBoundary } from "./components/shared/Error.tsx";
 import ScrollManager from "./components/shared/ScrollManager.tsx";
@@ -96,6 +97,7 @@ const StudentTransactions = React.lazy(
 );
 import StudentTransactionPayment from "./pages/student/TransactionPayment.tsx";
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
+const RedeemPage = React.lazy(() => import("./pages/redeem/Redeem.tsx"));
 
 type RouteConfig = {
   path: string;
@@ -103,7 +105,31 @@ type RouteConfig = {
   public: boolean;
   lazy: boolean;
   roles?: UserRole[];
+  /** Fallback Suspense khusus route ini; default ke PageSkeleton generik. */
+  fallback?: React.ReactNode;
 };
+
+const AUTH_PAGE_FALLBACK = <AuthPageSkeleton />;
+
+/**
+ * Lockdown landing: saat true, hanya halaman publik inti yang bisa diakses
+ * (home, katalog kursus, detail kursus, dan auth). Route lain tetap
+ * di-redirect ke home. Ubah ke false untuk membuka kembali seluruh aplikasi.
+ */
+const LOCKDOWN_HOME_ONLY = false;
+
+const LOCKDOWN_ALLOWLIST: ReadonlySet<string> = new Set<string>([
+  ROUTES.home,
+  ROUTES.courses,
+  ROUTES.courseDetail(':courseUid'),
+  ROUTES.login,
+  ROUTES.register,
+  ROUTES.redeem,
+  ROUTES.oauthCallback,
+  ROUTES.forgotPassword,
+  ROUTES.resetPassword,
+  '*',
+]);
 
 const routeConfig: RouteConfig[] = [
   {
@@ -129,35 +155,46 @@ const routeConfig: RouteConfig[] = [
     element: <ViewModuleAndLessons />,
     public: false,
     lazy: true,
-    roles: ["student", "mentor", "admin"],
+    roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.login,
     element: <LoginPage />,
     public: true,
     lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
   },
   {
     path: ROUTES.register,
     element: <RegisterPage />,
     public: true,
     lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
   },
   {
     path: ROUTES.oauthCallback,
     element: <OAuthCallbackPage />,
     public: true,
     lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
   },
   {
     path: ROUTES.forgotPassword,
     element: <ForgotPasswordPages />,
     public: true,
     lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
   },
   {
     path: ROUTES.resetPassword,
     element: <FormResetPassword />,
+    public: true,
+    lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
+  },
+  {
+    path: ROUTES.redeem,
+    element: <RedeemPage />,
     public: true,
     lazy: true,
   },
@@ -166,84 +203,84 @@ const routeConfig: RouteConfig[] = [
     element: <ProfilePage />,
     public: false,
     lazy: true,
-    roles: ["student", "mentor", "admin"],
+    roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.admin.dashboard,
     element: <Dashboard />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.users.students,
     element: <AdminStudentsPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: `${ROUTES.admin.users.students}/:userUid`,
     element: <AdminStudentDetailPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: ROUTES.admin.users.mentors,
     element: <AdminMentorsPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: `${ROUTES.admin.users.mentors}/:userUid`,
     element: <AdminMentorDetailPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: ROUTES.admin.users.administrators,
     element: <AdminAdministratorsPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: `${ROUTES.admin.users.administrators}/:userUid`,
     element: <AdminAdministratorDetailPage />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["super_admin"],
   },
   {
     path: ROUTES.admin.courses,
     element: <Courses />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.courseCategories,
     element: <AdminCourseCategories />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.courseTypes,
     element: <AdminCourseTypes />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.detailCourseAdmin(":courseUid"),
     element: <AdminDetailCourse />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.assignmentSubmissionDetail(
@@ -254,63 +291,63 @@ const routeConfig: RouteConfig[] = [
     element: <AdminAssignmentSubmissionDetail />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.assignmentSubmissions(":courseUid", ":lessonUid"),
     element: <AdminAssignmentSubmissions />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.courseEditAdmin(":courseUid"),
     element: <CourseEditAdmin />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.transactions,
     element: <Transactions />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.financial,
     element: <Financial />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.admin.reviewsAndQaPath,
     element: <ReviewsQa />,
     public: false,
     lazy: true,
-    roles: ["admin"],
+    roles: ["admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.dashboard,
     element: <MentorDashboard />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.courses,
     element: <MentorCourses />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.detailCourseMentor(":courseUid"),
     element: <MentorDetailCourse />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.assignmentSubmissionDetail(
@@ -321,28 +358,28 @@ const routeConfig: RouteConfig[] = [
     element: <MentorAssignmentSubmissionDetail />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.assignmentSubmissions(":courseUid", ":lessonUid"),
     element: <MentorAssignmentSubmissions />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.courseEditMentor(":courseUid"),
     element: <CourseEditMentor />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.mentor.assignments(":courseUid"),
     element: <MentorAssignments />,
     public: false,
     lazy: true,
-    roles: ["mentor", "admin"],
+    roles: ["mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.student.dashboard,
@@ -408,7 +445,16 @@ function renderRouteElement(route: RouteConfig) {
     <RouteGuard allowedRoles={route.roles}>{route.element}</RouteGuard>
   );
   return route.lazy ? (
-    <Suspense fallback={<LottieOverlay visible message="Memuat halaman..." />}>
+    <Suspense
+      fallback={
+        route.fallback ?? (
+          <PageSkeleton
+            message="Memuat halaman..."
+            className="min-h-dvh justify-center px-4 sm:px-6 lg:px-8"
+          />
+        )
+      }
+    >
       {element}
     </Suspense>
   ) : element;
@@ -424,7 +470,17 @@ function App() {
             <Route
               key={route.path}
               path={route.path}
-              element={renderRouteElement(route)}
+              element={
+                // Lockdown: hanya route di LOCKDOWN_ALLOWLIST yang bisa diakses
+                // (home, katalog, detail kursus, auth). Route lain di-redirect
+                // ke home. Matikan flag LOCKDOWN_HOME_ONLY untuk membuka
+                // kembali seluruh app.
+                LOCKDOWN_HOME_ONLY && !LOCKDOWN_ALLOWLIST.has(route.path) ? (
+                  <Navigate to={ROUTES.home} replace />
+                ) : (
+                  renderRouteElement(route)
+                )
+              }
             />
           ))}
         </Routes>

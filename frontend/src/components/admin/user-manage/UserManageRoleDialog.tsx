@@ -127,7 +127,7 @@ export function UserManageRoleDialog({
           <Button
             type="button"
             variant="outline"
-            className="h-10 rounded-xl"
+            className="h-10 rounded-sm"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -135,7 +135,7 @@ export function UserManageRoleDialog({
           </Button>
           <Button
             type="button"
-            className="h-10 rounded-xl"
+            className="h-10 rounded-sm"
             onClick={() => void handleConfirm()}
             disabled={!user || !selectedRole || isSubmitting}
           >

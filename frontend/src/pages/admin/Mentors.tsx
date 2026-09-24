@@ -9,7 +9,7 @@ import { mapManagedUsers, toAdminMentor, toAdminStudent } from '@/lib/user-manag
 import { mentorToRow, rowsToPromoteCandidates, studentToRow } from '@/lib/user-manage/view-models'
 
 export default function AdminMentorsPage() {
-  const sidebarUser = useSidebarUser('admin')
+  const sidebarUser = useSidebarUser('super_admin')
   const mentorsPage = useAdminUserPage({ role: 'mentor' })
   const studentsQuery = useManagedUsers({
     role: 'student',

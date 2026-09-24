@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import type { SidebarUser } from '@/components/shared/Sidebar'
 import { Button } from '@/components/ui/button'
@@ -30,11 +30,7 @@ export function UserDetailPageShell({
   const config = getUserManageConfig(kind)
 
   return (
-    <AppSidebarProvider role="admin" user={user}>
-      {isLoading ? (
-        <LottieOverlay visible message={loadingMessage ?? 'Memuat detail user...'} />
-      ) : null}
-
+    <AppSidebarProvider role="super_admin" user={user}>
       <div className={userManageLayout.page}>
         <div className="flex flex-col gap-4">
           <Button
@@ -49,7 +45,11 @@ export function UserDetailPageShell({
               Kembali ke {config.navLabel.toLowerCase()}
             </Link>
           </Button>
-          {children}
+          {isLoading ? (
+            <PageSkeleton message={loadingMessage ?? 'Memuat detail user...'} />
+          ) : (
+            children
+          )}
         </div>
       </div>
     </AppSidebarProvider>

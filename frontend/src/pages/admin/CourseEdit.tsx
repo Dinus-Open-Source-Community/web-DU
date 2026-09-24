@@ -4,7 +4,7 @@ import type { ICourseDetailItem } from '@/lib/types/course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useCourseEditModules } from '@/hooks/use-course'
 import { useCourseEditController } from '@/hooks/use-course-edit-controller'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
 import { CourseEditClient } from '@/components/courses/(authorized)/editCourse'
 import { AppNavbarProvider } from '../../components/shared/Sidebar'
@@ -21,7 +21,7 @@ const CourseEdit = () => {
   if (isLoading) {
     return (
       <AppNavbarProvider role="admin" user={sidebarUser}>
-        <LottieOverlay visible={isLoading} />
+        <PageSkeleton message="Memuat course..." />
       </AppNavbarProvider>
     )
   }

@@ -8,10 +8,7 @@ import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
 import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
 import { AuthPasswordToggleButton } from '@/components/auth/AuthPasswordToggleButton'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
-import {
-  authInputClassName,
-  authSubmitButtonClassName,
-} from '@/components/auth/constants'
+import { authSubmitButtonClassName } from '@/components/auth/constants'
 import { GlobalInput } from '@/components/shared/Input'
 import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
@@ -81,7 +78,7 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               disabled={isSubmitting}
               required
-              className={authInputClassName}
+              variant="auth"
             />
             <GlobalInput
               label="Email"
@@ -92,7 +89,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
               required
-              className={authInputClassName}
+              variant="auth"
             />
           </div>
 
@@ -106,7 +103,8 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
               required
-              className={`${authInputClassName} pr-12`}
+              variant="auth"
+              className="pr-12"
               rightIcon={
                 <AuthPasswordToggleButton
                   visible={showPassword}
@@ -128,7 +126,8 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isSubmitting}
               required
-              className={`${authInputClassName} pr-12`}
+              variant="auth"
+              className="pr-12"
               rightIcon={
                 <AuthPasswordToggleButton
                   visible={showConfirm}
@@ -156,6 +155,7 @@ export default function RegisterPage() {
 
           <Button
             type="submit"
+            variant="neobrutalism"
             className={authSubmitButtonClassName}
             disabled={passwordMismatch || isSubmitting}
             aria-busy={isSubmitting}

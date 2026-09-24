@@ -22,7 +22,7 @@ export function AuthPageHeader({
       {backHref ? (
         <Link
           to={backHref}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
         >
           <ArrowLeft className="size-4" aria-hidden />
           {backLabel}
@@ -30,7 +30,7 @@ export function AuthPageHeader({
       ) : null}
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
           {title}
         </h1>
         {description ? (

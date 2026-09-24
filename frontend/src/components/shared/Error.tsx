@@ -1,11 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, SearchX } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { SafeLottie } from '../ui/lottie'
 import { Button } from '../ui/button'
-
-const LOTTIE_404 = '/404.lottie'
 
 interface NotFoundContentProps {
   title?: string
@@ -26,8 +23,8 @@ export function NotFoundContent({
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center gap-6 text-center duration-500 animate-in fade-in">
-      <div className="aspect-square w-full max-w-sm">
-        <SafeLottie src={LOTTIE_404} className="size-full" />
+      <div className="flex size-32 items-center justify-center rounded-[28px] bg-slate-100 text-slate-400">
+        <SearchX className="size-14" aria-hidden />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -37,7 +34,7 @@ export function NotFoundContent({
 
       <div className="flex flex-wrap items-center justify-center gap-3">
         {showBackButton ? (
-          <Button variant="outline" onClick={() => navigate(-1)} className="gap-2 rounded-xl shadow-none">
+          <Button variant="outline" onClick={() => navigate(-1)} className="gap-2 rounded-sm shadow-none">
             <ArrowLeft className="size-4" />
             Kembali
           </Button>
@@ -60,10 +57,10 @@ function ErrorFallbackContent({ onRetry }: ErrorFallbackContentProps) {
       showBackButton={false}
       actions={
         <>
-          <Button variant="outline" onClick={onRetry} className="rounded-xl shadow-none">
+          <Button variant="outline" onClick={onRetry} className="rounded-sm shadow-none">
             Coba lagi
           </Button>
-          <Button asChild className="rounded-xl">
+          <Button asChild className="rounded-sm">
             <Link to="/">Ke beranda</Link>
           </Button>
         </>

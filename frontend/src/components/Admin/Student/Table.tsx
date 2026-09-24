@@ -16,8 +16,8 @@ function ProgressCell({ value }: { value: number }) {
   const progressPercent = toLearningProgressPercent(value)
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs font-semibold text-slate-600 tabular-nums">{formatLearningProgressLabel(value)}</span>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <span className="text-xs font-semibold text-muted-foreground tabular-nums">{formatLearningProgressLabel(value)}</span>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-primary transition-[width] duration-200" style={{ width: `${progressPercent}%` }} />
       </div>
     </div>
@@ -56,7 +56,7 @@ export function TableManagementUsers({
       />
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Memuat daftar siswa...</p>
+        <p className="text-sm text-muted-foreground">Memuat daftar siswa...</p>
       ) : studentData.length === 0 ? (
         <EmptyState
           icon={<Users2 className="h-5 w-5" />}
@@ -113,7 +113,7 @@ export function TableManagementUsers({
 
               <div className="mt-auto flex items-center justify-between gap-3">
                 <p className="text-xs text-slate-500">Bergabung {student.joinedAt}</p>
-                <Button asChild variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50">
+                <Button asChild variant="outline" size="sm" className="h-9 rounded-sm px-4 text-xs font-semibold shadow-none hover:bg-muted">
                   <Link to={`/admin/users/students/${student.uid}`}>Detail</Link>
                 </Button>
               </div>

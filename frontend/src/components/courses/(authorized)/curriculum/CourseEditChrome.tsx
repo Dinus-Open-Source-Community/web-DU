@@ -95,7 +95,7 @@ export function CourseEditToolbar({
             type="button"
             variant="ghost"
             size="icon"
-            className="-ml-2 size-9 shrink-0 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className="-ml-2 size-9 shrink-0 rounded-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             onClick={onBack}
             aria-label="Kembali ke halaman sebelumnya"
           >

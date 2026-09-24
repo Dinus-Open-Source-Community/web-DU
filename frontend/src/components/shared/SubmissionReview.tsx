@@ -137,10 +137,10 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
             />
           </div>
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" className="rounded-xl shadow-none" onClick={handleClose}>
+            <Button type="button" variant="outline" className="rounded-sm shadow-none" onClick={handleClose}>
               Batal
             </Button>
-            <Button type="button" className="rounded-xl" onClick={handleSave} disabled={saving}>
+            <Button type="button" className="rounded-sm" onClick={handleSave} disabled={saving}>
               {saving ? 'Menyimpan…' : 'Simpan review'}
             </Button>
           </div>

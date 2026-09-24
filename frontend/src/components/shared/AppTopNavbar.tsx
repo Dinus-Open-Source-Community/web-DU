@@ -52,6 +52,7 @@ function getUserInitial(user: SidebarUser) {
 
 const roleLabel: Record<UserRole, string> = {
   admin: "Administrator",
+  super_admin: "Super Admin",
   mentor: "Mentor",
   student: "Student",
 };
@@ -93,7 +94,13 @@ export function AppTopNavbar({
 
   const navigationItems = useMemo<NavbarSearchItem[]>(() => {
     const key =
-      role === "admin" ? "Admin" : role === "mentor" ? "Mentor" : "Student";
+      role === "admin"
+        ? "Admin"
+        : role === "super_admin"
+          ? "SuperAdmin"
+          : role === "mentor"
+            ? "Mentor"
+            : "Student";
     return [
       {
         id: "profile",
@@ -131,13 +138,19 @@ export function AppTopNavbar({
   const profileImageReference = user.avatar_url ?? user.avatar;
 
   const dashboardPath =
-    role === "admin"
+    role === "admin" || role === "super_admin"
       ? ROUTES.admin.dashboard
       : role === "mentor"
         ? ROUTES.mentor.dashboard
         : ROUTES.student.dashboard;
   const navKey =
-    role === "admin" ? "Admin" : role === "mentor" ? "Mentor" : "Student";
+    role === "admin"
+      ? "Admin"
+      : role === "super_admin"
+        ? "SuperAdmin"
+        : role === "mentor"
+          ? "Mentor"
+          : "Student";
   const navItems = Navigation[navKey];
 
   const breadcrumbs = (() => {
@@ -290,7 +303,7 @@ export function AppTopNavbar({
                     </span>
                   )}
                   {!isLast ? (
-                    <ChevronRight className="size-3.5 shrink-0 text-slate-300" />
+                    <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />
                   ) : null}
                 </span>
               );
@@ -300,7 +313,7 @@ export function AppTopNavbar({
 
         <div className="relative mx-auto w-full max-w-lg min-w-0 flex-1 px-0.5 sm:px-1">
           <Search
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <input
@@ -310,12 +323,12 @@ export function AppTopNavbar({
             onKeyDown={handleInlineKeyDown}
             onFocus={() => setIsCommandOpen(true)}
             placeholder={placeholder}
-            className="focus:border-primary/40 focus:ring-primary/10 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pr-14 pl-10 text-sm text-slate-900 transition outline-none focus:bg-white focus:ring-4 sm:pr-24"
+            className="h-10 w-full rounded-xl border border-input bg-muted pr-14 pl-10 text-sm text-foreground shadow-none transition-[color,box-shadow,background-color] outline-none placeholder:text-muted-foreground hover:border-line-medium focus-visible:border-ring focus-visible:bg-card focus-visible:ring-3 focus-visible:ring-ring/30 sm:pr-24"
           />
           <button
             type="button"
             onClick={() => setIsCommandOpen(true)}
-            className="absolute top-1/2 right-2 hidden -translate-y-1/2 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 shadow-xs transition hover:text-slate-700 sm:inline-flex"
+            className="absolute top-1/2 right-2 hidden -translate-y-1/2 items-center gap-1 rounded-lg border border-input bg-card px-2 py-1 text-[11px] font-medium text-muted-foreground shadow-xs transition outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 sm:inline-flex"
             aria-label="Buka command search"
           >
             <Command className="size-3" />K
@@ -328,7 +341,7 @@ export function AppTopNavbar({
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="h-10 rounded-xl px-2 text-slate-500 hover:bg-red-50 hover:text-red-600 sm:px-3"
+            className="h-10 rounded-sm px-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:px-3"
           >
             <LogOut className="size-4" />
             <span className="hidden md:inline">Logout</span>
@@ -336,21 +349,21 @@ export function AppTopNavbar({
           <Link
             to={ROUTES.profile}
             aria-label="Buka profile"
-            className="focus:ring-primary/15 flex max-w-[11rem] min-w-0 items-center gap-2 rounded-[10px] px-1 py-1 transition hover:bg-slate-50 focus:ring-4 focus:outline-none sm:gap-3 sm:px-1.5 lg:max-w-none"
+            className="flex max-w-[11rem] min-w-0 items-center gap-2 rounded-[10px] px-1 py-1 transition outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30 sm:gap-3 sm:px-1.5 lg:max-w-none"
           >
             <UserAvatarImage
               src={profileImageReference}
               alt={user.name}
               size={40}
               fallbackInitial={getUserInitial(user)}
-              className="bg-primary border border-slate-200 text-white shadow-sm"
-              fallbackClassName="text-white"
+              className="bg-primary border border-input text-primary-foreground shadow-sm"
+              fallbackClassName="text-primary-foreground"
             />
             <span className="hidden min-w-0 text-left lg:block">
-              <span className="block max-w-36 truncate text-sm leading-5 font-semibold text-slate-900">
+              <span className="block max-w-36 truncate text-sm leading-5 font-semibold text-foreground">
                 {user.name}
               </span>
-              <span className="block text-xs leading-4 font-medium text-slate-400">
+              <span className="block text-xs leading-4 font-medium text-muted-foreground">
                 {roleLabel[role]}
               </span>
             </span>
@@ -360,7 +373,7 @@ export function AppTopNavbar({
 
       <Dialog open={isCommandOpen} onOpenChange={setIsCommandOpen}>
         <DialogContent
-          className="top-[18vh] max-w-2xl translate-y-0 gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl"
+          className="top-[18vh] max-w-2xl translate-y-0 gap-0 overflow-hidden rounded-2xl border border-input bg-card p-0 shadow-2xl"
           showCloseButton={false}
         >
           <DialogHeader className="sr-only">
@@ -370,8 +383,8 @@ export function AppTopNavbar({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-            <Search className="size-5 text-slate-400" aria-hidden />
+          <div className="flex items-center gap-3 border-b border-input px-4 py-3">
+            <Search className="size-5 text-muted-foreground" aria-hidden />
             <input
               ref={searchInputRef}
               type="search"
@@ -379,9 +392,9 @@ export function AppTopNavbar({
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleCommandKeyDown}
               placeholder={placeholder}
-              className="h-10 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              className="h-10 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             />
-            <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-500 sm:inline">
+            <kbd className="hidden rounded-md border border-input bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground sm:inline">
               Enter
             </kbd>
           </div>
@@ -391,28 +404,28 @@ export function AppTopNavbar({
               <button
                 type="button"
                 onClick={() => handleSubmitSearch()}
-                className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
+                className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition outline-none hover:bg-muted focus-visible:bg-muted"
               >
-                <span className="text-primary flex size-9 items-center justify-center rounded-lg bg-blue-50">
+                <span className="text-primary flex size-9 items-center justify-center rounded-lg bg-accent/60">
                   <FileSearch className="size-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-slate-900">
+                  <span className="block text-sm font-semibold text-foreground">
                     Cari di halaman ini
                   </span>
-                  <span className="block truncate text-xs text-slate-500">
+                  <span className="block truncate text-xs text-muted-foreground">
                     {query.trim()
                       ? `"${query.trim()}"`
                       : "Gunakan data dan filter pada halaman aktif"}
                   </span>
                 </span>
-                <ArrowRight className="size-4 text-slate-400" />
+                <ArrowRight className="size-4 text-muted-foreground" />
               </button>
             )}
 
             {filteredLocal.length > 0 && (
               <div className="mb-2">
-                <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                   Data halaman
                 </p>
                 {filteredLocal.map((item) => (
@@ -426,7 +439,7 @@ export function AppTopNavbar({
             )}
 
             <div>
-              <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                 Navigasi
               </p>
               {filteredNavigation.length > 0 ? (
@@ -438,7 +451,7 @@ export function AppTopNavbar({
                   />
                 ))
               ) : (
-                <div className="px-3 py-8 text-center text-sm text-slate-500">
+                <div className="px-3 py-8 text-center text-sm text-muted-foreground">
                   Tidak ada hasil navigasi.
                 </div>
               )}
@@ -463,27 +476,27 @@ function SearchResultRow({
     <button
       type="button"
       onClick={onSelect}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition outline-none hover:bg-muted focus:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30"
     >
       <span
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500",
-          item.path && "text-primary bg-blue-50",
+          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground",
+          item.path && "text-primary bg-accent/60",
         )}
       >
         <Icon className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-slate-900">
+        <span className="block truncate text-sm font-semibold text-foreground">
           {item.label}
         </span>
         {item.description ? (
-          <span className="block truncate text-xs text-slate-500">
+          <span className="block truncate text-xs text-muted-foreground">
             {item.description}
           </span>
         ) : null}
       </span>
-      <ArrowRight className="size-4 text-slate-300" />
+      <ArrowRight className="size-4 text-muted-foreground/50" />
     </button>
   );
 }

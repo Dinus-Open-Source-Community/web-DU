@@ -8,6 +8,11 @@ type RevealProps = {
   y?: number
 }
 
+/**
+ * Reveal — animasi masuk satu kali saat elemen pertama kali memasuki viewport
+ * (bukan in/out berulang). Margin -48px vertikal: animasi mulai saat elemen
+ * sudah sedikit masuk viewport. Reduced-motion: konten statis.
+ */
 export default function Reveal({ children, className, delay = 0, y = 36 }: RevealProps) {
   const reduceMotion = useReducedMotion()
   if (reduceMotion) return <div className={className}>{children}</div>

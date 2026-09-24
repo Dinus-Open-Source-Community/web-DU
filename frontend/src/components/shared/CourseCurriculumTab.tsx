@@ -50,11 +50,11 @@ export function CourseCurriculumTab({ modules, editHref }: CourseCurriculumTabPr
 
           <div className="flex flex-wrap items-center gap-2">
             {modules.length > 0 ? (
-              <Button type="button" variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 px-3 text-xs font-semibold text-slate-600" onClick={toggleAll}>
+              <Button type="button" variant="outline" size="sm" className="h-9 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-600" onClick={toggleAll}>
                 {allExpanded ? 'Tutup semua' : 'Buka semua'}
               </Button>
             ) : null}
-            <Button asChild size="sm" className="h-9 rounded-xl px-3 text-xs font-semibold">
+            <Button asChild size="sm" className="h-9 rounded-sm px-3 text-xs font-semibold">
               <Link to={editHref}>
                 <PencilLine className="size-3.5" />
                 Edit kurikulum
@@ -114,7 +114,7 @@ export function CourseCurriculumTab({ modules, editHref }: CourseCurriculumTabPr
                     <ModuleChevron className="size-4 shrink-0 text-slate-400 transition-transform duration-200" />
                   </button>
 
-                  <Button asChild variant="outline" size="sm" className="h-8 shrink-0 rounded-xl border-slate-200 px-3 text-xs font-semibold text-slate-600 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+                  <Button asChild variant="outline" size="sm" className="h-8 shrink-0 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-600 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
                     <Link to={moduleEditorHref(module.uid)}>
                       <PencilLine className="size-3.5" />
                       Edit

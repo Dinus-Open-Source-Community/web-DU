@@ -63,7 +63,7 @@ export function UnsavedEditorTabDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="rounded-sm"
             disabled={isSaving}
             onClick={() => onOpenChange(false)}
           >
@@ -71,7 +71,7 @@ export function UnsavedEditorTabDialog({
           </Button>
           <Button
             type="button"
-            className="rounded-xl"
+            className="rounded-sm"
             disabled={isSaving}
             onClick={onSaveAndContinue}
           >

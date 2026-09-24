@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { CourseDetailLayout } from '@/components/courses/DetailCourse'
 import { CheckoutDialog } from '@/components/checkout/CheckoutDialog'
 import GuestLayout from '@/components/layouts/GuestLayouts'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { Button } from '@/components/ui/button'
 import { useCourseDetailWithCategories } from '@/hooks/use-course'
 import { filterPublishedCourses } from '@/lib/course-catalog/available-courses'
@@ -33,7 +33,7 @@ export default function PublicCourseDetailPage() {
   }, [courseDetail.data, isAuthenticated, navigate])
 
   if (isLoading) {
-    return <LottieOverlay visible={isLoading} />
+    return <PageSkeleton message="Memuat course..." />
   }
 
   if (!courseDetail.data || !isCoursePublished(courseDetail.data)) {
@@ -54,7 +54,7 @@ export default function PublicCourseDetailPage() {
   const enrollButton = (
     <Button
       type="button"
-      className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+      className="w-full rounded-sm px-4 py-2.5 text-sm font-semibold text-white"
       onClick={handleEnrollClick}
     >
       Daftar sekarang

@@ -111,7 +111,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 rounded-lg border-slate-200 px-3 text-xs font-semibold text-slate-700"
+              className="h-8 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-700"
               onClick={() => setDialogState({ mode: 'edit', item: row })}
             >
               <Pencil className="mr-1.5 size-3.5" aria-hidden />
@@ -121,7 +121,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 rounded-lg border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+              className="h-8 rounded-sm border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
               onClick={() => setDeleteTarget({ uid: row.uid, name: row.name })}
             >
               <Trash2 className="mr-1.5 size-3.5" aria-hidden />
@@ -184,7 +184,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         />
         <Button
           type="button"
-          className="rounded-xl px-4"
+          className="rounded-sm px-4"
           onClick={() => setDialogState({ mode: 'create' })}
         >
           <Plus className="mr-2 size-4" aria-hidden />
@@ -208,7 +208,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
               title={labels.emptyTitle}
               description={labels.emptyDescription}
               action={
-                <Button type="button" className="rounded-xl" onClick={() => setDialogState({ mode: 'create' })}>
+                <Button type="button" className="rounded-sm" onClick={() => setDialogState({ mode: 'create' })}>
                   <Plus className="mr-2 size-4" aria-hidden />
                   {labels.createButton}
                 </Button>

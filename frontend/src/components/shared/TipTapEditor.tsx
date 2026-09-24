@@ -23,7 +23,7 @@ function TiptapCharacterCount({ isDark }: { isDark: boolean }) {
     <div
       className={cn(
         'tiptap-character-count flex items-center justify-end gap-3 border-t px-4 py-2 text-xs',
-        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-500' : 'border-slate-100 bg-slate-50/40 text-slate-400',
+        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-500' : 'border-input bg-muted text-muted-foreground',
       )}
     >
       <span>{words} kata</span>
@@ -64,7 +64,7 @@ export function TiptapEditor({
       <div
         className={cn(
           'rounded-xl border p-10 text-center text-sm',
-          isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-400' : 'border-slate-200 bg-white text-slate-500',
+          isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-400' : 'border-input bg-card text-muted-foreground',
         )}
       >
         Memuat editor…
@@ -76,7 +76,7 @@ export function TiptapEditor({
     <div
       className={cn(
         'tiptap-editor-root overflow-hidden rounded-xl border shadow-sm',
-        isDark ? 'tiptap-editor-root--dark border-zinc-800 bg-zinc-950' : 'border-slate-200 bg-white',
+        isDark ? 'tiptap-editor-root--dark border-zinc-800 bg-zinc-950' : 'border-input bg-card',
         variant === 'compact' && 'tiptap-editor-root--compact',
       )}
     >
@@ -85,7 +85,7 @@ export function TiptapEditor({
         <Tiptap.Content
           className={cn(
             variant === 'compact' ? 'min-h-[200px]' : 'min-h-[360px]',
-            isDark ? 'bg-zinc-950' : 'bg-white',
+            isDark ? 'bg-zinc-950' : 'bg-card',
           )}
         />
         <TipTapBubbleMenu />

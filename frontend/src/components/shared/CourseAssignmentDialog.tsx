@@ -468,11 +468,11 @@ export function CourseAssignmentDialog({
 
           <div className="flex justify-end gap-3 pt-2">
             {variant === 'modal' && (
-              <Button type="button" variant="outline" className="rounded-xl shadow-none" onClick={handleClose}>
+              <Button type="button" variant="outline" className="rounded-sm shadow-none" onClick={handleClose}>
                 Batal
               </Button>
             )}
-            <Button type="submit" className="rounded-xl shadow-none">
+            <Button type="submit" className="rounded-sm shadow-none">
               {mode === 'create' ? 'Simpan' : 'Perbarui'}
             </Button>
           </div>

@@ -20,12 +20,14 @@ const roleLabel: Record<UserRole, string> = {
   student: 'Siswa',
   mentor: 'Mentor',
   admin: 'Admin',
+  super_admin: 'Super Admin',
 }
 
 const dashboardPath: Record<UserRole, string> = {
   student: ROUTES.student.dashboard,
   mentor: ROUTES.mentor.dashboard,
   admin: ROUTES.admin.dashboard,
+  super_admin: ROUTES.admin.dashboard,
 }
 
 type NavbarProps = {
@@ -34,14 +36,56 @@ type NavbarProps = {
 
 export default function Navbar({ auth }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<string>('')
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, userName, userEmail, userRole, userAvatar, onSignOut } = auth
 
+  // Scrollspy: tandai section yang sedang dikunjungi. Saat user scroll melewati
+  // sebuah section (id anchor di halaman home), link navbar-nya jadi aktif —
+  // mencerminkan posisi baca, bukan sekadar hash URL.
+  useEffect(() => {
+    const ids = navLinks
+      .map((l) => l.href)
+      .filter((h) => h.includes('#'))
+      .map((h) => h.slice(h.indexOf('#') + 1))
+      .filter((id) => document.getElementById(id))
+
+    if (ids.length === 0) return
+
+    const visible = new Map<string, number>()
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio)
+          else visible.delete(entry.target.id)
+        }
+        // Section dengan rasio paling besar = paling "sedang dibaca".
+        let best: string | null = null
+        let bestRatio = 0
+        for (const [id, ratio] of visible) {
+          if (ratio > bestRatio) {
+            best = id
+            bestRatio = ratio
+          }
+        }
+        setActiveSection(best ?? '')
+      },
+      { rootMargin: '-20% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] },
+    )
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) io.observe(el)
+    }
+    return () => io.disconnect()
+  }, [pathname])
+
   const isActive = (href: string): boolean => {
     const hashIndex = href.indexOf('#')
     if (hashIndex === -1) return pathname === href
-    return pathname === (href.slice(0, hashIndex) || '/') && hash === href.slice(hashIndex)
+    const id = href.slice(hashIndex + 1)
+    // Section aktif hasil scrollspy menang atas hash URL saat sedang dibaca.
+    return pathname === (href.slice(0, hashIndex) || '/') && activeSection === id
   }
 
   useEffect(() => {
@@ -88,20 +132,24 @@ export default function Navbar({ auth }: NavbarProps) {
   }
 
   return (
-    <nav className="text-ink-900 bg-paper-white/95 shadow-nav fixed top-0 left-0 z-50 min-h-22 w-full border-b-2 border-ink-900 backdrop-blur">
-      <div className="container mx-auto flex w-full items-center justify-between px-4 py-4 md:px-8 lg:px-20">
-        <Link to="/" className="text-ink-900 font-display text-2xl font-bold tracking-tight">
-          Doscom University
-        </Link>
+    <nav className="text-ink-900 bg-paper-white/95 shadow-nav fixed top-0 left-0 z-50 min-h-22 w-full border-b-2 border-ink-900 backdrop-blur lg:flex lg:items-center">
+      {/* lg+: konten di-center vertikal presisi (nav flex items-center, tanpa py
+          container); <lg: py-4 seperti semula. */}
+      <div className="container mx-auto flex w-full items-center px-4 py-4 md:px-8 lg:px-20 lg:py-0">
+        <div className="flex flex-1 justify-start">
+          <Link to="/" className="text-ink-900 font-display text-2xl font-bold tracking-tight">
+            Doscom University
+          </Link>
+        </div>
 
-        <div className="hidden items-center lg:flex">
-          <div className="flex w-full flex-wrap items-center justify-center gap-2">
+        <div className="hidden justify-center lg:flex">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {navLinks.map((navLink) => (
               <Link
                 key={navLink.href}
                 to={navLink.href}
-                className={`flex items-center justify-center rounded-2xl py-2 text-sm font-extrabold tracking-wider uppercase transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
-                  isActive(navLink.href) ? 'bg-brand-blue px-6 text-ink-900' : 'text-ink-900 px-4 hover:text-brand-ink'
+                className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-4 text-sm font-extrabold tracking-wider uppercase transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
+                  isActive(navLink.href) ? 'bg-brand-blue px-6 text-ink-900' : 'text-ink-900 hover:text-brand-ink'
                 }`}>
                 {navLink.label}
               </Link>
@@ -109,29 +157,30 @@ export default function Navbar({ auth }: NavbarProps) {
           </div>
         </div>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="flex flex-1 items-center justify-end">
+          <div className="hidden items-center gap-4 lg:flex">
           {isAuthenticated ? (
             <div className="group relative">
-              <div className="pb-2">
-                <button
-                  type="button"
-                  className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3"
-                  aria-haspopup="menu"
-                >
-                  <Avatar className="size-9 ring-2 ring-ink-900/20">
-                    {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
-                    <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
-                  </Avatar>
-                  <span className="max-w-[140px] truncate text-left text-sm font-semibold">{userName}</span>
-                  <ChevronDown className="size-4 shrink-0 opacity-80 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3"
+                aria-haspopup="menu"
+              >
+                <Avatar className="size-9 ring-2 ring-ink-900/20">
+                  {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
+                  <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
+                </Avatar>
+                <span className="max-w-[140px] truncate text-left text-sm font-semibold">{userName}</span>
+                <ChevronDown className="size-4 shrink-0 opacity-80 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden />
+              </button>
 
               <div
                 role="menu"
-                /* Tertutup: visibility-hidden → isi tidak focusable (bukan cuma opacity 0). */
-                className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 translate-y-1 opacity-0 transition-all duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2">
+                /* Tertutup: visibility-hidden → isi tidak focusable (bukan cuma opacity 0).
+                   pt-2 = bridge hover agar mouse bisa turun ke panel tanpa putus.
+                   Inner div yang fade/slide (translate + opacity). */
+                className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 pt-2 group-hover:visible group-hover:pointer-events-auto group-focus-within:visible group-focus-within:pointer-events-auto">
+                <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                   <div className="px-3 py-2.5">
                     <p className="truncate text-sm font-semibold">{userName}</p>
                     {userEmail ? <p className="text-ink-500 truncate text-xs">{userEmail}</p> : null}
@@ -155,14 +204,20 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex gap-3">
-              <Link to="/auth/register">
-                <Button variant="outline" className="px-7">
-                  Daftar
+              <Link to={ROUTES.login}>
+                <Button
+                  variant="neobrutalism"
+                  className="rounded-sm border-2 bg-paper-white px-7 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+                >
+                  Login
                 </Button>
               </Link>
-              <Link to="/auth/login">
-                <Button variant="default" className="px-7">
-                  Masuk
+              <Link to={ROUTES.redeem}>
+                <Button
+                  variant="neobrutalism"
+                  className="rounded-sm border-2 px-7 font-extrabold text-primary-foreground active:translate-y-[3px]"
+                >
+                  Redeem
                 </Button>
               </Link>
             </div>
@@ -171,13 +226,14 @@ export default function Navbar({ auth }: NavbarProps) {
 
         <button
           type="button"
-          className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
+          className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
           aria-label={isMenuOpen ? 'Tutup menu' : 'Buka menu'}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
           onClick={() => setIsMenuOpen((prev) => !prev)}>
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
+        </div>
       </div>
 
       {/* Mobile Menu — inert saat tertutup supaya link tidak focusable. */}
@@ -188,7 +244,7 @@ export default function Navbar({ auth }: NavbarProps) {
           'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
           isMenuOpen ? 'max-h-[calc(100dvh-88px)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
         )}>
-        <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pb-8">
+        <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pt-8 pb-8">
           {isAuthenticated && (
             <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2">
               <Avatar className="size-10 ring-2 ring-ink-900/20">
@@ -232,14 +288,20 @@ export default function Navbar({ auth }: NavbarProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-3 pt-2">
-              <Link to="/auth/register" onClick={closeMenu}>
-                <Button variant="outline" className="w-full">
-                  Daftar
+              <Link to={ROUTES.login} onClick={closeMenu}>
+                <Button
+                  variant="neobrutalism"
+                  className="w-full rounded-sm border-2 bg-paper-white font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+                >
+                  Login
                 </Button>
               </Link>
-              <Link to="/auth/login" onClick={closeMenu}>
-                <Button variant="default" className="w-full">
-                  Masuk
+              <Link to={ROUTES.redeem} onClick={closeMenu}>
+                <Button
+                  variant="neobrutalism"
+                  className="w-full rounded-sm border-2 font-extrabold text-primary-foreground active:translate-y-[3px]"
+                >
+                  Redeem
                 </Button>
               </Link>
             </div>

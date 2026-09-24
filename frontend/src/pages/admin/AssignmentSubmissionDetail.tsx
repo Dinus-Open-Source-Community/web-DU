@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { CourseAssignmentSubmissionDetailView } from '@/components/shared/course-detail-manage/CourseAssignmentSubmissionDetailView'
 import { AppNavbarProvider } from '@/components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseAssignmentSubmissionDetailPage } from '@/hooks/course-detail/use-course-assignment-submission-detail-page'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
@@ -19,7 +19,7 @@ export default function AdminAssignmentSubmissionDetailPage() {
   if (isLoading) {
     return (
       <AppNavbarProvider role="admin" user={sidebarUser}>
-        <LottieOverlay visible={isLoading} message="Memuat jawaban siswa" />
+        <PageSkeleton message="Memuat jawaban siswa" />
       </AppNavbarProvider>
     )
   }

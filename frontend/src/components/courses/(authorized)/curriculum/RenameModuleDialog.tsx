@@ -86,7 +86,7 @@ export function RenameModuleDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="rounded-sm"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -94,7 +94,7 @@ export function RenameModuleDialog({
           </Button>
           <Button
             type="button"
-            className="rounded-xl"
+            className="rounded-sm"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
           >

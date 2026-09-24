@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { StudentAssignmentsSection } from '@/components/student/AssignmentSection'
 import { useStudentAssignmentItems } from '@/hooks/student-assignments/use-student-assignment-items'
 import { useStudentAssignmentListView } from '@/hooks/student-assignments/use-student-assignment-list-view'
@@ -22,7 +22,7 @@ const Assignments = () => {
 
   return (
     <AppSidebarProvider role="student" user={sidebarUser}>
-      <LottieOverlay visible={isAuthLoading && !profile} message="Memuat daftar tugas..." />
+      {isAuthLoading && !profile ? <PageSkeleton message="Memuat daftar tugas..." /> : null}
       <StudentAssignmentsSection
         view={assignmentListView}
         isLoading={isAuthLoading || isAssignmentsLoading}

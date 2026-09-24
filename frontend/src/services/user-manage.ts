@@ -18,8 +18,9 @@ import {
 } from '@/lib/validator/user-manage'
 
 function normalizeProfileRole(role: string): UserRole | null {
-  if (role === 'admin' || role === 'mentor' || role === 'student') return role
-  if (role === 'super_admin') return 'admin'
+  if (role === 'super_admin' || role === 'admin' || role === 'mentor' || role === 'student') {
+    return role
+  }
   return null
 }
 

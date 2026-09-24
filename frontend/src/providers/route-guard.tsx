@@ -8,6 +8,7 @@ const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
   student: `${ROUTES.student.dashboard}`,
   mentor: `${ROUTES.mentor.dashboard}`,
   admin: `${ROUTES.admin.dashboard}`,
+  super_admin: `${ROUTES.admin.dashboard}`,
 }
 
 type RouteGuardProps = {
