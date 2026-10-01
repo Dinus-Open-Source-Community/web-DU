@@ -15,7 +15,7 @@ export default function Redeem() {
           </div>
 
           <h1 className="text-ink-900 font-display mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
-            Redeem Code
+            Tukar Kode
           </h1>
           <p className="text-ink-500 mt-3 text-base leading-relaxed">
             Halaman tukar kode segera hadir.

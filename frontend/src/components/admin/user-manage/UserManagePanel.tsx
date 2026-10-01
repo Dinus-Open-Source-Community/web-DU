@@ -81,7 +81,7 @@ export function UserManagePanel({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <SearchForm
@@ -114,8 +114,8 @@ export function UserManagePanel({
         </div>
 
         {totalUsers != null ? (
-          <span className="shrink-0 text-sm leading-none text-slate-500">
-            Total <span className="font-semibold tabular-nums text-slate-800">{totalUsers}</span>{' '}
+          <span className="shrink-0 text-sm leading-none text-ink-500">
+            Total <span className="font-semibold tabular-nums text-ink-800">{totalUsers}</span>{' '}
             {config.navLabel.toLowerCase()}
           </span>
         ) : null}
@@ -130,7 +130,7 @@ export function UserManagePanel({
         onPageChange={onPageChange}
         emptyState={
           isLoading ? (
-            <p className="text-sm text-slate-500">Memuat data...</p>
+            <p className="text-sm text-ink-500">Memuat data...</p>
           ) : (
             <EmptyState
               icon={<EmptyIcon className="size-5" />}

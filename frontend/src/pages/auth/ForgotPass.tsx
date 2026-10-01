@@ -41,7 +41,7 @@ export function ForgotPasswordPages() {
     >
       <AuthFormPanel>
         <AuthPageHeader
-          title="Reset password"
+          title="Atur ulang password"
           description="Masukkan email yang terdaftar. Reset password akan aktif setelah endpoint backend tersedia."
           backHref="/auth/login"
           backLabel="Kembali ke login"

@@ -2,12 +2,16 @@ import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { cn } from '@/lib/utils'
+
 type AuthPageHeaderProps = {
   title: string
   description?: string
   backHref?: string
   backLabel?: string
   action?: ReactNode
+  /** Judul besar DynaPuff di tengah (login / register). */
+  displayTitle?: boolean
 }
 
 export function AuthPageHeader({
@@ -16,9 +20,10 @@ export function AuthPageHeader({
   backHref,
   backLabel = 'Kembali',
   action,
+  displayTitle = false,
 }: AuthPageHeaderProps) {
   return (
-    <header className="space-y-3">
+    <header className={cn('space-y-3', displayTitle && 'text-center')}>
       {backHref ? (
         <Link
           to={backHref}
@@ -29,12 +34,23 @@ export function AuthPageHeader({
         </Link>
       ) : null}
 
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
+      <div className={cn('space-y-2', displayTitle && 'space-y-0')}>
+        <h1
+          className={cn(
+            displayTitle
+              ? 'font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl'
+              : 'text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]',
+          )}
+        >
           {title}
         </h1>
         {description ? (
-          <p className="max-w-[42ch] text-sm leading-6 text-muted-foreground">
+          <p
+            className={cn(
+              'max-w-[42ch] text-sm leading-6 text-muted-foreground',
+              displayTitle && 'mx-auto',
+            )}
+          >
             {description}
           </p>
         ) : null}

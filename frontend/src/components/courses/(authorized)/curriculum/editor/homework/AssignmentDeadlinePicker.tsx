@@ -86,7 +86,7 @@ export function AssignmentDeadlinePicker({
           initialFocus
         />
 
-        <div className="space-y-2 border-t border-slate-200 p-3">
+        <div className="space-y-2 border-t border-line-light p-3">
           <label htmlFor={`${id}-time`} className={editLayout.fieldLabel}>
             Waktu
           </label>

@@ -11,20 +11,7 @@ import {
 } from '@/lib/course-detail/course-profile'
 import { FormatRupiah } from '@/lib/func/func'
 import { isLearningProgressComplete } from '@/lib/learning/progress'
-
-type CourseLevelKey = 'PEMULA' | 'MENENGAH' | 'LANJUTAN'
-
-const levelLabel: Record<CourseLevelKey, string> = {
-  PEMULA: 'Pemula',
-  MENENGAH: 'Menengah',
-  LANJUTAN: 'Lanjutan',
-}
-
-const levelSignal: Record<CourseLevelKey, { activeBars: number; color: string }> = {
-  PEMULA: { activeBars: 1, color: 'bg-emerald-500' },
-  MENENGAH: { activeBars: 2, color: 'bg-sky-500' },
-  LANJUTAN: { activeBars: 3, color: 'bg-violet-500' },
-}
+import { CourseLevelLabel } from './CourseLevel'
 
 const sizes = {
   container: {
@@ -52,31 +39,6 @@ const sizes = {
     md: 'text-lg',
     lg: 'text-lg',
   },
-}
-
-function normalizeLevel(level?: string): CourseLevelKey | null {
-  const normalized = level?.trim().toUpperCase()
-
-  if (normalized === 'PEMULA' || normalized === 'MENENGAH' || normalized === 'LANJUTAN') return normalized
-  return null
-}
-
-function CourseLevelSignal({ level }: { level?: string }) {
-  const normalizedLevel = normalizeLevel(level)
-  if (!normalizedLevel) return null
-
-  const signal = levelSignal[normalizedLevel]
-
-  return (
-    <span className="inline-flex items-end gap-2 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500">
-      <span className="flex h-4 items-end gap-0.5" aria-hidden>
-        {[1, 2, 3].map((bar) => (
-          <span key={bar} className={`w-1.5 rounded-full ${bar <= signal.activeBars ? signal.color : 'bg-slate-200'}`} style={{ height: `${bar * 4 + 4}px` }} />
-        ))}
-      </span>
-      {levelLabel[normalizedLevel]}
-    </span>
-  )
 }
 
 const CardCourse = ({
@@ -115,7 +77,7 @@ const CardCourse = ({
         {(data.is_premium || data.level) && (
           <div className="mb-3 flex items-center justify-between">
             {data.is_premium ? <Badge variant="premium" /> : <Badge variant="free" />}
-            <CourseLevelSignal level={data.level} />
+            <CourseLevelLabel level={data.level} />
           </div>
         )}
 

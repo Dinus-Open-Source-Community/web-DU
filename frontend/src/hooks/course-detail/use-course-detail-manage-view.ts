@@ -54,9 +54,7 @@ export function useCourseDetailManageView({
   })
 
   const isPublished = course ? isCoursePublished(course) : false
-  const editHref = isAdmin
-    ? ROUTES.admin.courseEditAdmin(courseUid)
-    : ROUTES.mentor.courseEditMentor(courseUid)
+  const editHref = ROUTES.dashboardMenu.courseEdit(courseUid)
   const previewHref = ROUTES.viewModuleAndLessons(courseUid)
   const curriculumEditNavigationState = useMemo(
     () => buildCourseEditNavigationState(location),

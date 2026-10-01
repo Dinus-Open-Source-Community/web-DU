@@ -9,6 +9,7 @@ import {
 } from '@/lib/student-assignments/assignment-list-filters'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
 import { toStudentAssignmentRows } from '@/lib/student-assignments/assignment-row-model'
+import { ROUTES } from '@/lib/routes'
 import type { StudentAssignmentFeedCategory, StudentAssignmentSectionItem } from '@/lib/types/student-assignments'
 
 export type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
@@ -28,7 +29,7 @@ export function useStudentAssignmentListView({
   courseUidFilter = null,
   now: nowProp,
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
-  clearCourseFilterHref = '/student/assignments',
+  clearCourseFilterHref = ROUTES.student.assignments,
 }: UseStudentAssignmentListViewOptions): StudentAssignmentListViewModel {
   const now = useMemo(() => nowProp ?? new Date(), [nowProp])
   const [category, setCategory] = useState<StudentAssignmentFeedCategory>('all')
@@ -85,6 +86,7 @@ export function useStudentAssignmentListView({
     stats,
     paginatedRows: paginated,
     scopedCount: scopedRows.length,
+    categoryMatchCount: filteredRows.length,
     hasVisibleRows: searchFilteredRows.length > 0,
     currentPage: safePage,
     totalPages,

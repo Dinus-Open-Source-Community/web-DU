@@ -4,8 +4,15 @@ import { cn } from '@/lib/utils'
 import type { IModulesDetail } from '@/lib/types/course'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 
-import { type LessonEntry, type LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
+import {
+  LESSON_SIDEBAR_WIDTH_PX,
+  type LessonEntry,
+  type LessonThemeMode,
+} from '@/lib/course-module-viewer/lesson-viewer-utils'
 import { LessonSidebarPanel } from './LessonSidebarPanel'
+
+/** Lebar tab toggle — harus sama dengan sisa wrapper saat sidebar tertutup. */
+const LESSON_SIDEBAR_TOGGLE_PX = 28
 
 type LessonSidebarProps = {
   modules: IModulesDetail[]
@@ -61,44 +68,57 @@ export function LessonSidebar({
     },
   }
 
+  const toggleTabClass = cn(
+    'absolute top-1/2 z-40 flex -translate-y-1/2 items-center justify-center',
+    'h-14 w-7 rounded-r-lg border border-l-0 shadow-md transition focus:outline-none focus:ring-2 focus:ring-primary/30',
+    isOpen
+      ? isDark
+        ? 'border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
+        : 'border-line-light bg-paper-white text-primary hover:bg-paper-white'
+      : isDark
+        ? 'border-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700'
+        : 'border-line-medium bg-paper-white text-primary hover:bg-paper-paper',
+  )
+
   return (
     <>
-      <aside
-        className={cn(
-          'fixed right-0 top-16 z-30 hidden h-[calc(100dvh-4rem)] w-[348px] flex-col overflow-hidden border-l transition-transform duration-200 ease-out lg:block',
-          isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
-          !isOpen && 'translate-x-full',
-        )}>
-        {isOpen && (
-          <button
-            type="button"
-            onClick={onToggleSidebar}
-            className="absolute -left-10 top-4 flex h-8 w-8 items-center justify-center rounded-lg border border-primary/70 bg-primary text-white transition focus:outline-none focus:ring-2 focus:ring-primary/30"
-            aria-label="Sembunyikan daftar modul">
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        )}
+      <div
+        className="fixed top-16 left-0 z-30 hidden h-[calc(100dvh-4rem)] transition-transform duration-200 ease-out will-change-transform lg:block"
+        style={{
+          width: LESSON_SIDEBAR_WIDTH_PX + LESSON_SIDEBAR_TOGGLE_PX,
+          transform: isOpen ? 'translateX(0)' : `translateX(-${LESSON_SIDEBAR_WIDTH_PX}px)`,
+        }}
+      >
+        <aside
+          className={cn(
+            'absolute top-0 left-0 flex h-full flex-col overflow-hidden border-r',
+            isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-line-light bg-paper-white text-ink-900',
+          )}
+          style={{ width: LESSON_SIDEBAR_WIDTH_PX }}
+        >
+          <LessonSidebarPanel {...panelProps} />
+        </aside>
 
-        <LessonSidebarPanel {...panelProps} />
-      </aside>
-
-      {!isOpen && (
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="fixed right-6 top-20 z-30 hidden h-8 w-8 items-center justify-center rounded-lg border border-primary/70 bg-primary text-white transition focus:outline-none focus:ring-2 focus:ring-primary/30 lg:flex"
-          aria-label="Buka daftar modul">
-          <ChevronLeft className="h-5 w-5" />
+          className={toggleTabClass}
+          style={{ left: LESSON_SIDEBAR_WIDTH_PX }}
+          aria-label={isOpen ? 'Sembunyikan daftar modul' : 'Buka daftar modul'}
+          aria-expanded={isOpen}
+        >
+          {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
         </button>
-      )}
+      </div>
 
       <Sheet open={isMobileOpen} onOpenChange={onMobileOpenChange}>
         <SheetContent
-          side="right"
+          side="left"
           className={cn(
-            'flex h-dvh w-full max-w-[348px] flex-col gap-0 overflow-hidden border-l p-0 sm:max-w-[348px] lg:hidden',
-            isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
-          )}>
+            'flex h-dvh w-full max-w-[348px] flex-col gap-0 overflow-hidden border-r p-0 sm:max-w-[348px] lg:hidden',
+            isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-100' : 'border-line-light bg-paper-white text-ink-900',
+          )}
+        >
           <LessonSidebarPanel {...panelProps} />
         </SheetContent>
       </Sheet>

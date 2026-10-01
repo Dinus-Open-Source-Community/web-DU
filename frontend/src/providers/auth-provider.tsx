@@ -5,7 +5,7 @@ import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services
 import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
 import type { JwtPayload } from '@/lib/types/auth/jwt-payload'
-import { ROUTES } from '@/lib/routes'
+import { dashboardPathForUserRole } from '@/lib/dashboard-route'
 import { useResolvedAuthProfile } from '@/hooks/files/use-resolved-auth-profile'
 
 export const AUTH_COOKIE_USER = 'du_auth_user'
@@ -13,13 +13,6 @@ export const AUTH_COOKIE_EXPIRES_AT = 'du_auth_expires_at'
 
 const DEFAULT_SESSION_DAYS = 1
 const AUTH_CHANGE_EVENT = 'du-auth-change'
-
-const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
-  student: `${ROUTES.student.dashboard}`,
-  mentor: `${ROUTES.mentor.dashboard}`,
-  admin: `${ROUTES.admin.dashboard}`,
-  super_admin: `${ROUTES.admin.dashboard}`,
-}
 
 interface AuthContextValue {
   user: IAuthSessionUser | null
@@ -65,7 +58,8 @@ const toSessionUser = (user: IUserData): IAuthSessionUser => ({
   avatar_url: user.avatar_url,
 })
 
-const getDashboardPath = (role?: UserRole | null) => (role ? ROLE_DASHBOARD_PATH[role] : '/auth/login')
+const getDashboardPath = (role?: UserRole | null) =>
+  role ? dashboardPathForUserRole(role) : '/auth/login'
 
 function decodeJwtPayload(token: string): JwtPayload | null {
   try {

@@ -19,16 +19,16 @@ export function AssignmentQuizReview({ review, theme }: AssignmentQuizReviewProp
       <div
         className={cn(
           'rounded-xl border px-4 py-3',
-          isDark ? 'border-zinc-700 bg-zinc-900/60' : 'border-slate-200 bg-slate-50',
+          isDark ? 'border-zinc-700 bg-zinc-900/60' : 'border-line-light bg-paper-paper',
         )}>
-        <p className={cn('text-sm font-medium', isDark ? 'text-zinc-300' : 'text-slate-600')}>
+        <p className={cn('text-sm font-medium', isDark ? 'text-zinc-300' : 'text-ink-600')}>
           Total poin
         </p>
-        <p className={cn('mt-1 text-2xl font-bold tabular-nums', isDark ? 'text-zinc-50' : 'text-slate-900')}>
+        <p className={cn('mt-1 text-2xl font-bold tabular-nums', isDark ? 'text-zinc-50' : 'text-ink-900')}>
           {review.totalEarned.toFixed(1)} / {review.totalMax.toFixed(1)}
         </p>
         {review.scorePercent != null ? (
-          <p className={cn('mt-1 text-sm', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          <p className={cn('mt-1 text-sm', isDark ? 'text-zinc-400' : 'text-ink-500')}>
             Skor {review.scorePercent.toFixed(2)}% - Lulus {review.passingScore}%
           </p>
         ) : null}
@@ -40,7 +40,7 @@ export function AssignmentQuizReview({ review, theme }: AssignmentQuizReviewProp
             key={question.questionId}
             className={cn(
               'rounded-xl border p-4',
-              isDark ? 'border-zinc-700 bg-zinc-900/40' : 'border-slate-200 bg-white',
+              isDark ? 'border-zinc-700 bg-zinc-900/40' : 'border-line-light bg-paper-white',
             )}>
             <div className="flex items-start justify-between gap-3">
               <AssignmentQuizPrompt index={index} promptHtml={question.prompt} theme={theme} className="min-w-0 flex-1" />
@@ -66,12 +66,12 @@ export function AssignmentQuizReview({ review, theme }: AssignmentQuizReviewProp
                 ) : (
                   <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" aria-hidden />
                 )}
-                <p className={isDark ? 'text-zinc-300' : 'text-slate-700'}>
+                <p className={isDark ? 'text-zinc-300' : 'text-ink-700'}>
                   Jawaban Anda: <span className="font-medium">{question.selectedLabel}</span>
                 </p>
               </div>
               {!question.isCorrect ? (
-                <p className={cn('pl-6', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                <p className={cn('pl-6', isDark ? 'text-zinc-400' : 'text-ink-500')}>
                   Jawaban benar: <span className="font-medium text-primary">{question.correctLabel}</span>
                 </p>
               ) : null}

@@ -71,7 +71,8 @@ func mapAdminReviewItem(review entity.CourseReview) gin.H {
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Router       /admin/reviews [get]
 func GetAdminReviewsFunc(c *gin.Context) {
-	if _, ok := requireAdminAccess(c); !ok {
+	user, ok := requireAdminOrMentorModerationAccess(c)
+	if !ok {
 		return
 	}
 
@@ -88,6 +89,17 @@ func GetAdminReviewsFunc(c *gin.Context) {
 	}
 
 	db := database.DB.Model(&entity.CourseReview{})
+	scopedDB, err := scopeModerationQueryToMentorCourses(db, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to resolve mentor courses",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	db = scopedDB
 	if courseUIDStr := strings.TrimSpace(c.Query("courseUid")); courseUIDStr != "" {
 		if courseUID, err := database.ResolveUID("courses", courseUIDStr); err == nil {
 			db = db.Where("course_uid = ?", courseUID)
@@ -176,7 +188,7 @@ func GetAdminReviewsFunc(c *gin.Context) {
 // @Failure      404  {object}  map[string]any  "Review not found"
 // @Router       /admin/reviews/{review_id}/reply [post]
 func CreateAdminReviewReplyFunc(c *gin.Context) {
-	admin, ok := requireAdminAccess(c)
+	user, ok := requireAdminOrMentorModerationAccess(c)
 	if !ok {
 		return
 	}
@@ -203,6 +215,10 @@ func CreateAdminReviewReplyFunc(c *gin.Context) {
 		return
 	}
 
+	if !ensureUserCanModerateCourse(c, user, review.CourseUid) {
+		return
+	}
+
 	encComment, err := utils.Encrypt(req.Comment)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt reply", "data": nil, "error": err.Error()})
@@ -211,7 +227,7 @@ func CreateAdminReviewReplyFunc(c *gin.Context) {
 
 	reply := entity.CourseReviewReply{
 		CourseReviewUid: reviewUID,
-		ReplierUid:      admin.Uid,
+		ReplierUid:      user.Uid,
 		Comment:         encComment,
 	}
 	if err := database.DB.Create(&reply).Error; err != nil {

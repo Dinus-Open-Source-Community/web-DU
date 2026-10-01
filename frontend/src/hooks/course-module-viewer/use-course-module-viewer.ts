@@ -32,8 +32,7 @@ import type {
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
 import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/submission-draft'
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
-
-import { useLessonTheme } from './use-lesson-theme'
+import { useAppTheme } from '@/providers/theme-provider'
 
 export type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 export type {
@@ -63,11 +62,11 @@ export function useCourseModuleViewer({
   const navigate = useNavigate()
   const searchContext = useOptionalNavbarSearch()
   const localSearchInputRef = useRef<HTMLInputElement>(null)
-  const { theme, isThemeDialogOpen, setIsThemeDialogOpen, updateTheme } = useLessonTheme()
+  const { theme } = useAppTheme()
 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false)
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -169,7 +168,7 @@ export function useCourseModuleViewer({
       setActiveLessonId(lessonId)
       setViewerPane('lesson')
       if (targetModuleId) {
-        setExpandedModules((prev) => new Set(prev).add(targetModuleId))
+        setExpandedModules(new Set([targetModuleId]))
       }
       setIsLocalSearchOpen(false)
       setSearchQuery('')
@@ -206,7 +205,7 @@ export function useCourseModuleViewer({
 
     hasAppliedInitialUrlState.current = true
     setActiveLessonId(initialLessonUid)
-    setExpandedModules((prev) => new Set(prev).add(entry.module.uid))
+    setExpandedModules(new Set([entry.module.uid]))
 
     if (initialViewerPane === 'assignment') {
       setViewerPane('assignment')
@@ -230,10 +229,8 @@ export function useCourseModuleViewer({
 
   const toggleModule = useCallback((moduleId: string) => {
     setExpandedModules((prev) => {
-      const next = new Set(prev)
-      if (next.has(moduleId)) next.delete(moduleId)
-      else next.add(moduleId)
-      return next
+      if (prev.has(moduleId)) return new Set()
+      return new Set([moduleId])
     })
   }, [])
 
@@ -292,7 +289,7 @@ export function useCourseModuleViewer({
 
     return searchContext.registerLocalSearch({
       id: `course-module-viewer-${courseUid}`,
-      placeholder: 'Cari modul/konten',
+      placeholder: 'Cari modul atau konten...',
       items: searchItems,
       onSearch: (query) => {
         const item = findLessonSearchItemByQuery(searchItems, query)
@@ -380,9 +377,6 @@ export function useCourseModuleViewer({
     courseTitle,
     backHref,
     theme,
-    isThemeDialogOpen,
-    onThemeDialogOpenChange: setIsThemeDialogOpen,
-    onThemeChange: updateTheme,
     modulesState,
     lessonEntries,
     effectiveActiveLessonId,
@@ -414,7 +408,6 @@ export function useCourseModuleViewer({
     showAssignmentDetail,
     showAssignmentWork,
     onOpenSearch: () => setIsLocalSearchOpen(true),
-    onOpenThemeSettings: () => setIsThemeDialogOpen(true),
     onOpenModules: () => setIsMobileSidebarOpen(true),
     onToggleSidebar: () => setIsRightSidebarOpen((open) => !open),
     onMobileSidebarOpenChange: setIsMobileSidebarOpen,

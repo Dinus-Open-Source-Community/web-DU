@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Receipt } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { ChartCard } from '../../shared/ChartCard'
 import { PaymentBadge } from '../../ui/badge'
-import { EmptyState } from '../../shared/EmptyState'
+import { NothingTransactionLottieIllustration } from '@/components/playful/NothingTransactionLottieIllustration'
 import type { IAdminTransaction } from '../../../lib/types/transaction'
 import { FormatRupiah, FormatPaymentDate } from '../../../lib/func/func'
 import { Initials } from '../../../lib/func/func'
@@ -53,7 +53,7 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
       {isLoading ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <thead className="bg-paper-paper text-xs font-semibold uppercase tracking-wide text-ink-500">
               <tr>
                 <th className="px-5 py-3 text-left">Siswa</th>
                 <th className="px-5 py-3 text-left">Kursus</th>
@@ -69,16 +69,17 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
           </table>
         </div>
       ) : !hasData ? (
-        <EmptyState
-          icon={<Receipt className="h-5 w-5" />}
-          title="Belum ada transaksi"
-          description="Transaksi akan muncul di sini setelah siswa melakukan pembayaran."
-          className="m-5"
-        />
+        <div className="flex flex-col items-center px-6 py-10 text-center">
+          <NothingTransactionLottieIllustration height="200px" className="mb-2" />
+          <h3 className="text-sm font-semibold text-ink-900">Belum ada transaksi</h3>
+          <p className="mt-1.5 max-w-sm text-xs font-medium leading-relaxed text-ink-500">
+            Transaksi akan muncul di sini setelah siswa melakukan pembayaran.
+          </p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <thead className="bg-paper-paper text-xs font-semibold uppercase tracking-wide text-ink-500">
               <tr>
                 <th className="px-5 py-3 text-left">Siswa</th>
                 <th className="px-5 py-3 text-left">Kursus</th>
@@ -102,7 +103,7 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
                     <span className="line-clamp-1">{t.courseName}</span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <PaymentBadge status={t.paymentStatus} />
+                    <PaymentBadge status={t.paymentStatus} presentation="dot" />
                   </td>
                   <td className="px-5 py-3.5 text-right font-semibold tracking-tight text-slate-900 tabular-nums">
                     {t.price === 0 ? 'Gratis' : FormatRupiah(t.price)}

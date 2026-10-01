@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { AdminPublishStatusLabel } from "@/lib/admin/status-label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isCoursePublished } from "@/lib/course-detail/publish-state";
@@ -95,17 +96,21 @@ export function CourseEditToolbar({
             type="button"
             variant="ghost"
             size="icon"
-            className="-ml-2 size-9 shrink-0 rounded-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className="-ml-2 size-9 shrink-0 rounded-sm text-ink-600 hover:bg-paper-paper hover:text-ink-900"
             onClick={onBack}
             aria-label="Kembali ke halaman sebelumnya"
           >
             <ChevronLeft className="size-5" aria-hidden />
           </Button>
           <h1 className={editLayout.pageTitle}>{course.title}</h1>
-          <Badge
-            variant={published ? "coursePublished" : "courseDraft"}
-            className="shrink-0"
-          />
+          {isAdmin ? (
+            <AdminPublishStatusLabel published={published} />
+          ) : (
+            <Badge
+              variant={published ? "coursePublished" : "courseDraft"}
+              className="shrink-0"
+            />
+          )}
         </div>
         {course.subtitle && (
           <p className={`line-clamp-2 sm:truncate ${editLayout.body}`}>

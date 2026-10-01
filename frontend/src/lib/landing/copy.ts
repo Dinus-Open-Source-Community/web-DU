@@ -6,8 +6,6 @@ export const LANDING_COPY = {
     titleA: "Ngoding sendirian",
     titleB: "itu sepi.",
     sub: "Belajar bareng komunitas, dibimbing mentor praktisi, pulang bawa portofolio open source.",
-    primaryCta: { label: "Gabung Komunitas", href: ROUTES.register },
-    secondaryCta: { label: "Jelajahi Kursus", href: ROUTES.courses },
     scrollTease: "di bawah ada terminal, kelas, dan galeri — scroll pelan",
   },
   /** Frasa khas DOSCOM di pita berjalan — bukan kata kunci SEO, bukan duplikat copy section. */

@@ -13,6 +13,8 @@ function isPassThroughReference(reference: string) {
   const trimmed = reference.trim()
   if (!trimmed) return true
   if (trimmed.startsWith('blob:') || trimmed.startsWith('data:')) return true
+  if (trimmed.startsWith('/Logo') || trimmed === '/Logo.svg') return true
+  // Legacy default avatar path (asset removed); keep pass-through so it is not fetched as protected.
   if (trimmed.startsWith('/pinguin') || trimmed === '/pinguin.png') return true
   return false
 }

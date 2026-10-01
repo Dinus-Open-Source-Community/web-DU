@@ -4,7 +4,6 @@ import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePa
 import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
 import { useAdminUserPage } from '@/hooks/use-admin-user-page'
 import { useManagedUsers } from '@/hooks/use-managed-users'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import {
   mapManagedUsers,
   toAdminAdministrator,
@@ -20,7 +19,6 @@ import {
 } from '@/lib/user-manage/view-models'
 
 export default function AdminAdministratorsPage() {
-  const sidebarUser = useSidebarUser('super_admin')
   const adminsPage = useAdminUserPage({ role: 'admin' })
   const mentorsQuery = useManagedUsers({
     role: 'mentor',
@@ -60,7 +58,7 @@ export default function AdminAdministratorsPage() {
   const isInitialLoading = adminsPage.isLoading && rows.length === 0
 
   return (
-    <UserManagePageShell kind="admin" user={sidebarUser} isLoading={isInitialLoading}>
+    <UserManagePageShell kind="admin" isLoading={isInitialLoading}>
       <UserManagePanel
         kind="admin"
         rows={rows}

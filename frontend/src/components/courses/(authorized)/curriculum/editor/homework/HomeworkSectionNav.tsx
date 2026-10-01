@@ -16,7 +16,7 @@ export function HomeworkSectionNav({
   onSectionChange,
 }: HomeworkSectionNavProps) {
   return (
-    <nav aria-label="Bagian konfigurasi tugas" className="border-b border-slate-200 mt-2">
+    <nav aria-label="Bagian konfigurasi tugas" className={cn(editLayout.divider, 'mt-2')}>
       <div className="flex gap-1 overflow-x-auto pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {HOMEWORK_PANEL_SECTIONS.map((section) => {
           const isActive = section.value === activeSection
@@ -29,10 +29,10 @@ export function HomeworkSectionNav({
               onClick={() => onSectionChange(section.value)}
               className={cn(
                 'min-w-[7.5rem] shrink-0 rounded-t-lg px-3 py-2.5 text-left transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30',
                 isActive
-                  ? 'border border-b-white border-slate-200 bg-white text-slate-900'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                  ? 'border-2 border-b-paper-white border-ink-900/10 bg-paper-white text-ink-900'
+                  : 'text-ink-600 hover:bg-paper-paper hover:text-ink-900',
               )}
             >
               <span className="block text-sm font-medium">{section.label}</span>

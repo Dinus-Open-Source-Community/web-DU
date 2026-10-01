@@ -105,6 +105,6 @@ export function EscapeHtml(s: string): string {
 export function ToPreviewHtmlFragment(raw: string): string {
   const t = raw.trim()
   if (t.startsWith('<')) return raw
-  return `<p class="text-sm leading-relaxed text-slate-700">${EscapeHtml(raw)}</p>`
+  return `<p class="text-sm leading-relaxed text-ink-700">${EscapeHtml(raw)}</p>`
 }
 

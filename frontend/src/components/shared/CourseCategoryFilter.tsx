@@ -9,18 +9,19 @@ import {
 } from '@/components/ui/select'
 
 type CourseCategoryFilterProps = {
-  categories: ICategoryItem[]
+  categories?: ICategoryItem[]
   selected: string[]
   onChange: (selected: string[]) => void
   title?: string
 }
 
 export function CourseCategoryFilter({
-  categories,
+  categories = [],
   selected,
   onChange,
   title = 'Kategori',
 }: CourseCategoryFilterProps) {
+  const items = categories ?? []
   const selectedValue = selected.length === 1 ? selected[0] : 'all'
 
   const handleSelect = (value: string) => {
@@ -52,7 +53,7 @@ export function CourseCategoryFilter({
           <SelectContent>
             <SelectGroup>
               <SelectItem value="all">Semua {title}</SelectItem>
-              {categories.map((category) => (
+              {items.map((category) => (
                 <SelectItem key={category.uid} value={category.uid}>
                   {category.name}
                 </SelectItem>
@@ -68,7 +69,7 @@ export function CourseCategoryFilter({
           {title}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-5">
-          {categories.map((category) => (
+          {items.map((category) => (
             <label
               key={category.uid}
               className="group flex min-h-11 items-center gap-4"

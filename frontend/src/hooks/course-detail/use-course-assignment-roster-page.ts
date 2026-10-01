@@ -70,10 +70,14 @@ export function useCourseAssignmentRosterPage({
     [students, submissionsQuery.data],
   )
 
+  const rosterRowsForStatus = useMemo(
+    () => filterRosterByStatus(rosterRows, statusFilter),
+    [rosterRows, statusFilter],
+  )
+
   const filteredRosterRows = useMemo(() => {
-    const bySearch = filterRosterBySearch(rosterRows, searchQuery)
-    return filterRosterByStatus(bySearch, statusFilter)
-  }, [rosterRows, searchQuery, statusFilter])
+    return filterRosterBySearch(rosterRowsForStatus, searchQuery)
+  }, [rosterRowsForStatus, searchQuery])
 
   const buildSubmissionDetailHref = useCallback(
     (submissionUid: string) =>
@@ -82,6 +86,7 @@ export function useCourseAssignmentRosterPage({
   )
 
   return {
+    role,
     courseUid,
     courseTitle,
     lessonUid,
@@ -89,6 +94,7 @@ export function useCourseAssignmentRosterPage({
     moduleTitle: lessonRef?.moduleTitle ?? 'Modul',
     assignment: assignmentQuery.data ?? null,
     rosterRows,
+    rosterRowsForStatus,
     filteredRosterRows,
     isLoading: assignmentQuery.isLoading || submissionsQuery.isLoading,
     isError: assignmentQuery.isError || submissionsQuery.isError,

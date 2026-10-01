@@ -45,7 +45,7 @@ function FilterCheckboxOption({
       <div
         className={cn(
           'flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-all duration-200',
-          checked ? 'border-primary bg-primary shadow-[0_1px_2px_rgba(0,0,0,0.1)]' : 'border-input bg-card group-hover:border-ring/60',
+          checked ? 'border-primary bg-primary shadow-none' : 'border-input bg-card shadow-none group-hover:border-ring/60',
         )}>
         {checked ? (
           <svg className="h-3 w-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

@@ -280,20 +280,20 @@ export function CourseAssignmentDialog({
           description="Pastikan semua informasi sudah benar sebelum menyimpan."
         />
       )}
-      {variant === 'modal' && <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />}
+      {variant === 'modal' && <button type="button" className="absolute inset-0 bg-ink-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />}
       <div
         className={
           variant === 'modal'
-            ? 'relative z-10 max-h-[92vh] w-full max-w-[min(96rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6'
-            : 'w-full rounded-xl border border-slate-200 bg-white p-4 md:p-5'
+            ? 'relative z-10 max-h-[92vh] w-full max-w-[min(96rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-line-light bg-paper-white p-6'
+            : 'w-full rounded-xl border border-line-light bg-paper-white p-4 md:p-5'
         }>
         <div className="mb-6 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">{variant === 'inline' ? 'Konfigurasi tugas lesson' : mode === 'create' ? 'Tugas baru' : 'Edit tugas'}</h2>
-            <p className="mt-1 text-sm text-slate-500">{course.title}</p>
+            <h2 className="text-lg font-semibold tracking-tight text-ink-900">{variant === 'inline' ? 'Konfigurasi tugas lesson' : mode === 'create' ? 'Tugas baru' : 'Edit tugas'}</h2>
+            <p className="mt-1 text-sm text-ink-500">{course.title}</p>
           </div>
           {variant === 'modal' && (
-            <button type="button" onClick={handleClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup">
+            <button type="button" onClick={handleClose} className="rounded-lg p-2 text-ink-400 hover:bg-paper-paper hover:text-ink-700" aria-label="Tutup">
               <X className="h-5 w-5" />
             </button>
           )}
@@ -302,14 +302,14 @@ export function CourseAssignmentDialog({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {variant === 'modal' && (
             <div className="flex flex-col gap-2">
-              <label htmlFor="asg-meeting" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <label htmlFor="asg-meeting" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
                 Pertemuan
               </label>
               <select
                 id="asg-meeting"
                 value={meetingNumber}
                 onChange={(e) => setMeetingNumber(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                 {Array.from({ length: maxMeetings }, (_, i) => i + 1).map((n) => (
                   <option key={n} value={n}>
                     Pertemuan {n}
@@ -320,7 +320,7 @@ export function CourseAssignmentDialog({
           )}
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="asg-title" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="asg-title" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
               Judul
             </label>
             <input
@@ -328,19 +328,19 @@ export function CourseAssignmentDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="asg-task-type" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="asg-task-type" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
               Tipe tugas
             </label>
             <select
               id="asg-task-type"
               value={taskType}
               onChange={(e) => setTaskType(e.target.value as MentorAssignmentTaskType)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
               <option value="text">Text </option>
               <option value="quiz">Quiz</option>
             </select>
@@ -348,7 +348,7 @@ export function CourseAssignmentDialog({
 
           {taskType === 'text' ? (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Deskripsi</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-500">Deskripsi</span>
               <TiptapEditor
                 key={editorResetKey}
                 variant="compact"
@@ -359,28 +359,28 @@ export function CourseAssignmentDialog({
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Form quiz</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-500">Form quiz</span>
               <LessonQuizEditor quiz={quiz} onChange={setQuiz} />
             </div>
           )}
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Opsi submit student</p>
+          <div className="rounded-xl border border-line-light bg-paper-paper/60 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Opsi submit student</p>
             <div className="mt-3 space-y-3">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-ink-700">
                 <Checkbox checked={allowFileSubmit} onCheckedChange={(checked) => setAllowFileSubmit(checked === true)} />
                 File
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-ink-700">
                 <Checkbox checked={allowPlainTextSubmit} onCheckedChange={(checked) => setAllowPlainTextSubmit(checked === true)} />
                 Text biasa
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-ink-700">
                 <Checkbox checked={allowRichTextSubmit} onCheckedChange={(checked) => setAllowRichTextSubmit(checked === true)} />
                 Text editor
               </label>
               {allowFileSubmit && (
-                <label className="flex items-center gap-2 text-sm text-slate-700">
+                <label className="flex items-center gap-2 text-sm text-ink-700">
                   <Checkbox checked={requireFileDescription} onCheckedChange={(checked) => setRequireFileDescription(checked === true)} />
                   Wajib isi deskripsi file saat upload
                 </label>
@@ -388,9 +388,9 @@ export function CourseAssignmentDialog({
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lampiran instruksi (opsional)</span>
-            <p className="text-xs text-slate-500">File terpisah dari deskripsi — berguna untuk PDF, ZIP, atau contoh kode.</p>
+          <div className="flex flex-col gap-2 rounded-xl border border-dashed border-line-light bg-paper-paper/50 p-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-ink-500">Lampiran instruksi (opsional)</span>
+            <p className="text-xs text-ink-500">File terpisah dari deskripsi — berguna untuk PDF, ZIP, atau contoh kode.</p>
             <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-primary">
               <Paperclip className="h-4 w-4" aria-hidden />
               <span>Pilih file</span>
@@ -399,7 +399,7 @@ export function CourseAssignmentDialog({
             {instructionAttachments.length > 0 && (
               <ul className="mt-1 space-y-1.5">
                 {instructionAttachments.map((f, i) => (
-                  <li key={`${f.fileName}-${i}`} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700">
+                  <li key={`${f.fileName}-${i}`} className="flex items-center justify-between gap-2 rounded-lg border border-line-light bg-paper-white px-2 py-1.5 text-sm text-ink-700">
                     <span className="truncate">{f.fileName}</span>
                     <Button type="button" variant="ghost" size="sm" className="h-8 shrink-0 px-2 shadow-none" onClick={() => removeAttachment(i)}>
                       Hapus
@@ -411,7 +411,7 @@ export function CourseAssignmentDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="asg-deadline" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="asg-deadline" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
               Tenggat (wajib)
             </label>
             <input
@@ -420,38 +420,38 @@ export function CourseAssignmentDialog({
               value={deadlineLocal}
               onChange={(e) => setDeadlineLocal(e.target.value)}
               required
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="asg-status" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="asg-status" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
               Status
             </label>
             <select
               id="asg-status"
               value={status}
               onChange={(e) => setStatus(e.target.value as MentorAssignmentLifecycleStatus)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
               <option value="draft">Draf</option>
               <option value="published">Terbit</option>
               <option value="closed">Ditutup</option>
             </select>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-ink-700">
             <input type="checkbox" checked={autoCloseAfterDeadline} onChange={(e) => setAutoCloseAfterDeadline(e.target.checked)} />
             Tutup otomatis setelah tenggat
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-ink-700">
             <input type="checkbox" checked={allowResubmit} onChange={(e) => setAllowResubmit(e.target.checked)} />
             Izinkan resubmit
           </label>
 
           {allowResubmit && (
             <div className="flex flex-col gap-2">
-              <label htmlFor="asg-max" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <label htmlFor="asg-max" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
                 Maks. attempt (opsional)
               </label>
               <input
@@ -461,7 +461,7 @@ export function CourseAssignmentDialog({
                 value={maxAttempts}
                 onChange={(e) => setMaxAttempts(e.target.value)}
                 placeholder="Kosong = tidak dibatasi"
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
           )}

@@ -1,6 +1,8 @@
 import type { CourseDetailReview } from '@/lib/types/course'
 import { Star } from 'lucide-react'
 
+import { ReviewLottieIllustration } from '@/components/playful/ReviewLottieIllustration'
+
 import { detailLayout } from '@/lib/course-detail/detail-layout'
 import { cn } from '@/lib/utils'
 
@@ -31,11 +33,11 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
       </div>
 
       {reviews.length > 0 ? (
-        <div className="flex flex-col divide-y divide-slate-100">
+        <div className="flex flex-col divide-y divide-line-light">
           {reviews.map((review) => (
             <article key={review.uid} className="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
-                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-paper-paper">
                   {review.user.avatar_url ? (
                     <img
                       src={review.user.avatar_url}
@@ -44,7 +46,7 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-slate-500">
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-ink-500">
                       {getInitials(review.user.name)}
                     </div>
                   )}
@@ -52,7 +54,7 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <h3 className="font-semibold text-slate-900">{review.user.name}</h3>
+                    <h3 className="font-semibold text-ink-900">{review.user.name}</h3>
                     <span className={detailLayout.meta}>{formatReviewDate(review.created_at)}</span>
                   </div>
 
@@ -63,7 +65,7 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
                       return (
                         <Star
                           key={index}
-                          className={filled ? 'h-4 w-4 fill-amber-400 text-amber-400' : 'h-4 w-4 text-slate-300'}
+                          className={filled ? 'h-4 w-4 fill-amber-400 text-amber-400' : 'h-4 w-4 text-ink-400'}
                         />
                       )
                     })}
@@ -76,8 +78,9 @@ function CourseUserReviews({ reviews }: { reviews: CourseDetailReview[] }) {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
-          <p className="text-sm font-medium text-slate-600">Belum ada ulasan dari peserta.</p>
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-line-light bg-paper-paper/70 px-4 py-10 text-center">
+          <ReviewLottieIllustration className="mb-2 max-w-[12rem]" height="160px" />
+          <p className="text-sm font-medium text-ink-600">Belum ada ulasan dari peserta.</p>
         </div>
       )}
     </section>

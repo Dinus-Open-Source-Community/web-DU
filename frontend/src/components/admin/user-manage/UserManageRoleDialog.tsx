@@ -53,7 +53,7 @@ export function UserManageRoleDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="border-b border-slate-100 px-6 py-5">
+        <DialogHeader className="border-b border-line-light px-6 py-5">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <UserCog className="size-5 text-primary" aria-hidden />
             Ubah role user
@@ -65,7 +65,7 @@ export function UserManageRoleDialog({
 
         {user ? (
           <div className="space-y-5 px-6 py-5">
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 px-4 py-3">
+            <div className="rounded-2xl border border-ink-900/10 bg-paper-paper/60 px-4 py-3">
               <UserIdentityCell
                 name={user.name}
                 email={user.email}
@@ -75,7 +75,7 @@ export function UserManageRoleDialog({
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-900">Role tujuan</p>
+              <p className="text-sm font-semibold text-ink-900">Role tujuan</p>
               <div className="space-y-2">
                 {roleTargets.map((role) => {
                   const selected = selectedRole === role
@@ -92,16 +92,16 @@ export function UserManageRoleDialog({
                       <span
                         className={cn(
                           'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border',
-                          selected ? 'border-primary bg-primary' : 'border-slate-300 bg-white',
+                          selected ? 'border-primary bg-primary' : 'border-line-medium bg-paper-white',
                         )}
                       >
-                        {selected ? <span className="size-2 rounded-full bg-white" /> : null}
+                        {selected ? <span className="size-2 rounded-full bg-paper-white" /> : null}
                       </span>
                       <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-slate-900">
+                        <span className="block text-sm font-semibold text-ink-900">
                           {ROLE_LABELS[role]}
                         </span>
-                        <span className="mt-0.5 block text-xs leading-5 text-slate-500">
+                        <span className="mt-0.5 block text-xs leading-5 text-ink-500">
                           {ROLE_DESCRIPTIONS[role]}
                         </span>
                       </span>
@@ -123,7 +123,7 @@ export function UserManageRoleDialog({
           </div>
         ) : null}
 
-        <DialogFooter className="border-t border-slate-100 px-6 py-4">
+        <DialogFooter className="border-t border-line-light px-6 py-4">
           <Button
             type="button"
             variant="outline"

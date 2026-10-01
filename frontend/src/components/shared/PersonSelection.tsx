@@ -3,7 +3,7 @@ import { Check, Search, type LucideIcon } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { ScrollArea } from '../ui/scroll-area'
+import { DialogScrollArea } from '../ui/dialog-scroll-area'
 import { cn } from '../../lib/utils'
 import type { PersonSelectionItem } from '../../lib/types/utils'
 
@@ -83,7 +83,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl" onWheel={(event) => event.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -100,7 +100,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
             <span>Pilih satu item lalu lanjutkan</span>
           </div>
 
-          <ScrollArea className="h-[420px] rounded-2xl border border-input bg-muted/50 p-2">
+          <DialogScrollArea className="h-[420px] rounded-2xl border border-input bg-muted/50 p-2">
             <div className="flex flex-col gap-2 p-1">
               {filteredItems.length === 0 ? (
                 <div className="flex min-h-[320px] flex-col items-center justify-center gap-2 px-6 text-center">
@@ -143,7 +143,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
                 })
               )}
             </div>
-          </ScrollArea>
+          </DialogScrollArea>
 
           {selectedItem && renderFooterHint ? <div className="rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground">{renderFooterHint(selectedItem)}</div> : null}
         </div>

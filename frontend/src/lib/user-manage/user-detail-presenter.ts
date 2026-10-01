@@ -16,7 +16,7 @@ function buildStudentStats(
 
   return [
     { id: 'enrollments', label: 'Total kursus', value: String(totalEnrollments) },
-    { id: 'active', label: 'Enrollment aktif', value: String(enrollmentSummary.active) },
+    { id: 'active', label: 'Pendaftaran aktif', value: String(enrollmentSummary.active) },
     { id: 'completed', label: 'Selesai', value: String(enrollmentSummary.completed) },
     { id: 'transactions', label: 'Transaksi', value: String(transactionCount) },
     { id: 'reviews', label: 'Ulasan diberikan', value: String(reviewSummary.totalReviews) },

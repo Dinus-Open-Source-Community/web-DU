@@ -27,7 +27,7 @@ export default function MentorsSection() {
   }, [])
 
   return (
-    <section id="mentor" className="relative overflow-hidden bg-paper-white">
+    <section id="mentor" className="relative overflow-hidden bg-paper-offwhite">
       <div className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         {/* Header kiri + angka editorial — istirahat dari header sentris */}
         <div className="grid items-end gap-8 lg:grid-cols-12">

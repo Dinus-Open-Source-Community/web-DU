@@ -35,9 +35,6 @@ export type CourseModuleViewerViewModel = {
   courseTitle: string
   backHref: string
   theme: LessonThemeMode
-  isThemeDialogOpen: boolean
-  onThemeDialogOpenChange: (open: boolean) => void
-  onThemeChange: (theme: LessonThemeMode) => void
   modulesState: IModulesDetail[]
   lessonEntries: LessonEntry[]
   effectiveActiveLessonId: string | null
@@ -67,7 +64,6 @@ export type CourseModuleViewerViewModel = {
   showAssignmentDetail: boolean
   showAssignmentWork: boolean
   onOpenSearch: () => void
-  onOpenThemeSettings: () => void
   onOpenModules: () => void
   onToggleSidebar: () => void
   onMobileSidebarOpenChange: (open: boolean) => void

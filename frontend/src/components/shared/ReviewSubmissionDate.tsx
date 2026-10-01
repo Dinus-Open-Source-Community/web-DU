@@ -30,7 +30,7 @@ export function ReviewSubmissionDateRange({ htmlForId, value, onChange, classNam
 
   return (
     <div className={cn('flex min-w-[200px] flex-col gap-1.5', className)}>
-      <label htmlFor={htmlForId} className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+      <label htmlFor={htmlForId} className="text-[11px] font-semibold uppercase tracking-wide text-ink-500">
         Tanggal kirim
       </label>
       <Popover>
@@ -40,17 +40,17 @@ export function ReviewSubmissionDateRange({ htmlForId, value, onChange, classNam
             type="button"
             className={cn(
               buttonVariants({ variant: 'outline' }),
-              'h-auto min-h-10 w-full justify-start gap-2 rounded-sm border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-normal text-slate-900 shadow-none hover:bg-slate-50',
-              !value?.from && 'text-slate-500',
+              'h-auto min-h-10 w-full justify-start gap-2 rounded-sm border-line-light bg-paper-white px-3 py-2.5 text-left text-sm font-normal text-ink-900 shadow-none hover:bg-paper-paper',
+              !value?.from && 'text-ink-500',
             )}>
             <CalendarDays className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
             <span className="truncate">{label}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] border-slate-200 p-3 shadow-sm" align="start">
+        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] border-line-light p-3 shadow-sm" align="start">
           <DayPicker mode="range" selected={value} onSelect={onChange} numberOfMonths={2} className="rdp-root" />
-          <div className="mt-3 flex justify-end border-t border-slate-100 pt-3">
-            <Button type="button" variant="ghost" size="sm" className="text-slate-600" onClick={() => onChange(undefined)}>
+          <div className="mt-3 flex justify-end border-t border-line-light pt-3">
+            <Button type="button" variant="ghost" size="sm" className="text-ink-600" onClick={() => onChange(undefined)}>
               Hapus filter tanggal
             </Button>
           </div>

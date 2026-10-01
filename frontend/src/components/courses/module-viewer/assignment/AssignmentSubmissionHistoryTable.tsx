@@ -37,15 +37,15 @@ function HistoryRowCard({
     <article
       className={cn(
         'space-y-3 rounded-xl border p-4',
-        isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-slate-200 bg-white',
+        isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-line-light bg-paper-white',
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={cn('text-xs font-medium uppercase tracking-wide', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+          <p className={cn('text-xs font-medium uppercase tracking-wide', isDark ? 'text-zinc-500' : 'text-ink-500')}>
             Tanggal
           </p>
-          <p className={cn('mt-0.5 text-sm font-medium tabular-nums', isDark ? 'text-zinc-100' : 'text-slate-900')}>
+          <p className={cn('mt-0.5 text-sm font-medium tabular-nums', isDark ? 'text-zinc-100' : 'text-ink-900')}>
             {row.submittedAtLabel}
           </p>
         </div>
@@ -60,35 +60,35 @@ function HistoryRowCard({
 
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>Percobaan</dt>
-          <dd className={cn('mt-0.5 font-medium tabular-nums', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-ink-500')}>Percobaan</dt>
+          <dd className={cn('mt-0.5 font-medium tabular-nums', isDark ? 'text-zinc-200' : 'text-ink-800')}>
             {row.attemptLabel}
           </dd>
         </div>
         <div>
-          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>Persentase</dt>
-          <dd className={cn('mt-0.5 font-medium tabular-nums', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-ink-500')}>Persentase</dt>
+          <dd className={cn('mt-0.5 font-medium tabular-nums', isDark ? 'text-zinc-200' : 'text-ink-800')}>
             {row.scoreLabel}
           </dd>
         </div>
         {showQuizColumns ? (
           <div>
-            <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>Benar</dt>
-            <dd className={cn('mt-0.5 tabular-nums', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+            <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-ink-500')}>Benar</dt>
+            <dd className={cn('mt-0.5 tabular-nums', isDark ? 'text-zinc-200' : 'text-ink-800')}>
               {row.quizAccuracyLabel ?? '-'}
             </dd>
           </div>
         ) : null}
         <div className={showQuizColumns ? undefined : 'col-span-2'}>
-          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>Dinilai</dt>
-          <dd className={cn('mt-0.5 tabular-nums', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+          <dt className={cn('text-xs', isDark ? 'text-zinc-500' : 'text-ink-500')}>Dinilai</dt>
+          <dd className={cn('mt-0.5 tabular-nums', isDark ? 'text-zinc-200' : 'text-ink-800')}>
             {row.gradedAtLabel ?? '-'}
           </dd>
         </div>
       </dl>
 
       {row.hasFeedback ? (
-        <p className={cn('inline-flex items-center gap-1 text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+        <p className={cn('inline-flex items-center gap-1 text-xs', isDark ? 'text-zinc-500' : 'text-ink-500')}>
           <MessageSquareText className="h-3 w-3" aria-hidden />
           Ada feedback
         </p>
@@ -104,7 +104,7 @@ function HistoryRowCard({
             'w-full rounded-sm font-medium',
             isDark
               ? 'border-zinc-700/80 bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700'
-              : 'border-slate-200 bg-slate-100/90 text-slate-900 hover:bg-slate-200',
+              : 'border-line-light bg-paper-paper/90 text-ink-900 hover:bg-muted',
           )}
         >
           Lihat Detail
@@ -126,22 +126,22 @@ export function AssignmentSubmissionHistoryTable({
 
   const headerClass = cn(
     'px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide sm:px-4',
-    isDark ? 'bg-zinc-900/80 text-zinc-400' : 'bg-slate-100/90 text-slate-600',
+    isDark ? 'bg-zinc-900/80 text-zinc-400' : 'bg-paper-paper/90 text-ink-600',
   )
 
   const cellClass = cn(
     'px-3 py-3.5 text-sm align-middle sm:px-4',
-    isDark ? 'text-zinc-200' : 'text-slate-800',
+    isDark ? 'text-zinc-200' : 'text-ink-800',
   )
 
-  const dividerClass = isDark ? 'border-zinc-800/90' : 'border-slate-200/90'
+  const dividerClass = isDark ? 'border-zinc-800/90' : 'border-ink-900/10'
 
   if (rows.length === 0) {
     return (
       <p
         className={cn(
           'rounded-xl border px-4 py-8 text-center text-sm',
-          isDark ? 'border-zinc-800 text-zinc-500' : 'border-slate-200 text-slate-500',
+          isDark ? 'border-zinc-800 text-zinc-500' : 'border-line-light text-ink-500',
         )}
       >
         Belum ada pengumpulan.
@@ -202,7 +202,7 @@ export function AssignmentSubmissionHistoryTable({
                     <p
                       className={cn(
                         'mt-1 inline-flex items-center gap-1 text-xs',
-                        isDark ? 'text-zinc-500' : 'text-slate-500',
+                        isDark ? 'text-zinc-500' : 'text-ink-500',
                       )}
                     >
                       <MessageSquareText className="h-3 w-3" aria-hidden />
@@ -224,7 +224,7 @@ export function AssignmentSubmissionHistoryTable({
                       theme={theme}
                     />
                   ) : (
-                    <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>-</span>
+                    <span className={isDark ? 'text-zinc-500' : 'text-ink-400'}>-</span>
                   )}
                 </td>
                 <td className={cn(cellClass, 'text-right')}>
@@ -238,13 +238,13 @@ export function AssignmentSubmissionHistoryTable({
                         'rounded-sm px-4 font-medium',
                         isDark
                           ? 'border-zinc-700/80 bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700'
-                          : 'border-slate-200 bg-slate-100/90 text-slate-900 hover:bg-slate-200',
+                          : 'border-line-light bg-paper-paper/90 text-ink-900 hover:bg-muted',
                       )}
                     >
                       Lihat Detail
                     </Button>
                   ) : (
-                    <span className={isDark ? 'text-zinc-600' : 'text-slate-300'}>-</span>
+                    <span className={isDark ? 'text-zinc-600' : 'text-ink-400'}>-</span>
                   )}
                 </td>
               </tr>

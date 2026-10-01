@@ -1,9 +1,10 @@
 import { useParams, useSearchParams } from 'react-router-dom'
 
 import type { ICourseDetailItem } from '@/lib/types/course'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 import { useCourseEditModules } from '@/hooks/use-course'
 import { useCourseEditController } from '@/hooks/use-course-edit-controller'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
 import { CourseEditClient } from '@/components/courses/(authorized)/editCourse'
@@ -15,12 +16,12 @@ const CourseEdit = () => {
   const [searchParams] = useSearchParams()
   const moduleId = searchParams.get('moduleId') ?? undefined
 
-  const sidebarUser = useSidebarUser('admin')
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const { courseDetail, modules, isLoading } = useCourseEditModules(courseUid ?? '')
 
   if (isLoading) {
     return (
-      <AppNavbarProvider role="admin" user={sidebarUser}>
+      <AppNavbarProvider role={shellRole} user={sidebarUser}>
         <PageSkeleton message="Memuat course..." />
       </AppNavbarProvider>
     )
@@ -28,7 +29,7 @@ const CourseEdit = () => {
 
   if (!courseUid || !courseDetail.data) {
     return (
-      <AppNavbarProvider role="admin" user={sidebarUser}>
+      <AppNavbarProvider role={shellRole} user={sidebarUser}>
         <NotFoundContent />
       </AppNavbarProvider>
     )
@@ -36,7 +37,7 @@ const CourseEdit = () => {
 
   return (
     <AppNavbarProvider
-      role="admin"
+      role={shellRole}
       user={sidebarUser}
       contentClassName={`${appPageContentClassName} flex-1 gap-6 py-4 lg:py-6`}
     >
@@ -56,9 +57,10 @@ type AdminCourseEditContentProps = {
 }
 
 function AdminCourseEditContent({ courseData, modules, initialModuleId }: AdminCourseEditContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseData.uid, courseData.title)
+
   const view = useCourseEditController({
     initialModuleId,
-    routeBasePath: '/admin',
     role: 'admin',
     courseData,
     modules,

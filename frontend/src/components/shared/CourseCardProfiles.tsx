@@ -50,7 +50,7 @@ export function CourseCardProfiles({ profiles }: CourseCardProfilesProps) {
             ))}
           </div>
           <p className="line-clamp-1 text-base font-medium text-[var(--text-secondary)]">{label}</p>
-          <span className="ml-auto shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+          <span className="ml-auto shrink-0 rounded-full bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-600">
             <Users className="inline size-3 mr-0.5" />
             {profiles.length}
           </span>
@@ -67,12 +67,12 @@ export function CourseCardProfiles({ profiles }: CourseCardProfilesProps) {
                 src={profile.avatar_url?.trim() ?? ''}
                 alt={profile.name}
                 size={40}
-                className="ring-2 ring-slate-100"
+                className="ring-2 ring-border/50"
               />
               <div className="flex flex-col">
-                <span className="font-medium text-slate-900">{profile.name}</span>
+                <span className="font-medium text-ink-900">{profile.name}</span>
                 {profile.role && (
-                  <span className="text-xs text-slate-500">{profile.role}</span>
+                  <span className="text-xs text-ink-500">{profile.role}</span>
                 )}
               </div>
             </div>

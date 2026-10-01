@@ -21,6 +21,7 @@ export interface IAdminDataTableProps<T> {
   wrapperClassName?: string
   compact?: boolean
   onRowClick?: (row: T) => void
+  variant?: 'default' | 'admin'
 }
 
 /** Alias backward-compat. */

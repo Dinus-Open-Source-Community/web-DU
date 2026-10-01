@@ -11,9 +11,9 @@ type PaymentStatusHeroProps = {
 }
 
 const HERO_SURFACE: Record<PaymentStatus, string> = {
-  pending: 'border-sky-200 bg-white',
-  success: 'border-green-200 bg-white',
-  failed: 'border-red-200 bg-white',
+  pending: 'border-sky-200 bg-paper-white',
+  success: 'border-green-200 bg-paper-white',
+  failed: 'border-red-200 bg-paper-white',
 }
 
 const HERO_ICON: Record<PaymentStatus, LucideIcon> = {
@@ -51,7 +51,7 @@ export function PaymentStatusHero({ invoice }: PaymentStatusHeroProps) {
           <StatusIcon className="size-12 sm:size-14" aria-hidden />
         </div>
 
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl">
           {status === 'success'
             ? 'Pembayaran berhasil'
             : status === 'failed'
@@ -61,11 +61,11 @@ export function PaymentStatusHero({ invoice }: PaymentStatusHeroProps) {
         {status === 'pending' && invoice.expiredAt ? (
           <PaymentDeadlineCountdown className="mt-2" expiredAt={invoice.expiredAt} />
         ) : (
-          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+          <p className="mt-2 max-w-xl text-sm leading-6 text-ink-600 sm:text-base">
             {invoice.statusMessage}
           </p>
         )}
-        <p className="mt-4 font-mono text-xs font-semibold tracking-wide text-slate-500">
+        <p className="mt-4 font-mono text-xs font-semibold tracking-wide text-ink-500">
           Ref. {invoice.reference}
         </p>
       </div>

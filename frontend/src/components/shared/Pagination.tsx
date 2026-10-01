@@ -8,6 +8,8 @@ export interface PaginationProps {
   totalPages: number
   onPageChange: (page: number) => void
   className?: string
+  /** @deprecated Semua variant memakai token app shell (ink/paper). */
+  variant?: 'default' | 'admin'
 }
 
 export const Pagination = ({
@@ -37,14 +39,14 @@ export const Pagination = ({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-        aria-label="Previous page">
+        className="rounded-lg border-2 border-ink-900/10 bg-paper-white p-2 text-ink-600 transition-all hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Halaman sebelumnya">
         <ChevronLeft className="w-5 h-5" />
       </button>
 
-      <div className="relative flex items-center p-1.5 rounded-xl bg-slate-100 border border-slate-200/50  w-max shadow-inner">
+      <div className="relative flex w-max items-center rounded-lg border-2 border-ink-900/10 bg-paper-paper p-1.5">
         <div
-          className="absolute bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.1)] border border-slate-200/60 transition-all duration-300 ease-in-out"
+          className="absolute rounded-md border-2 border-ink-900/10 bg-paper-white shadow-paper transition-all duration-300 ease-in-out"
           style={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,
@@ -63,9 +65,13 @@ export const Pagination = ({
                 tabsRef.current[i] = el
               }}
               onClick={() => onPageChange(i + 1)}
-              className={`relative z-10 w-9 h-9 flex items-center justify-center rounded-lg text-sm transition-colors ${
-                isActive ? 'font-bold text-primary' : 'font-medium text-slate-500 hover:text-slate-800'
-              }`}>
+              className={cn(
+                'relative z-10 flex h-9 w-9 items-center justify-center rounded-lg text-sm transition-colors',
+                isActive
+                  ? 'font-bold text-ink-900'
+                  : 'font-medium text-ink-500 hover:text-ink-800',
+              )}
+            >
               {i + 1}
             </button>
           )
@@ -75,8 +81,8 @@ export const Pagination = ({
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-        aria-label="Next page">
+        className="rounded-lg border-2 border-ink-900/10 bg-paper-white p-2 text-ink-600 transition-all hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Halaman berikutnya">
         <ChevronRight className="w-5 h-5" />
       </button>
     </div>

@@ -20,9 +20,9 @@ const PERIOD_OPTIONS: { value: DashboardPeriod; label: string }[] = [
 
 function mapTransactionSummaryToRatio(summary: TransactionSummary): IChartRatioPoint[] {
   return [
-    { label: 'Paid', value: summary.paidCount, color: '#10B981' },
-    { label: 'Pending', value: summary.pendingCount, color: '#F59E0B' },
-    { label: 'Failed', value: summary.failedCount, color: '#EF4444' },
+    { label: 'Lunas', value: summary.paidCount, color: '#10B981' },
+    { label: 'Menunggu', value: summary.pendingCount, color: '#F59E0B' },
+    { label: 'Gagal', value: summary.failedCount, color: '#EF4444' },
   ]
 }
 

@@ -7,6 +7,7 @@ import { isValidInstructionAttachmentUrl } from '@/lib/course-edit/instruction-a
 import type { LessonAssignmentInstructionAttachment } from '@/lib/types/lesson'
 
 import { editLayout } from '@/lib/course-edit/edit-layout'
+import { cn } from '@/lib/utils'
 
 type InstructionAttachmentsFieldProps = {
   attachments: LessonAssignmentInstructionAttachment[]
@@ -41,7 +42,7 @@ export function InstructionAttachmentsField({
   }
 
   return (
-    <div className="space-y-4 border-t border-slate-200 pt-5">
+    <div className={cn('space-y-4 border-t border-line-light pt-5')}>
       <div className="space-y-1">
         <h4 className={editLayout.panelTitle}>Lampiran instruksi</h4>
         <p className={editLayout.meta}>
@@ -53,7 +54,7 @@ export function InstructionAttachmentsField({
       {attachments.length === 0 ? (
         <p className={editLayout.body}>Belum ada lampiran.</p>
       ) : (
-        <ul className="divide-y divide-slate-200">
+        <ul className="divide-y divide-line-light">
           {attachments.map((attachment, index) => {
             const urlIsValid = isValidInstructionAttachmentUrl(attachment.url)
             const previewHref = urlIsValid ? attachment.url.trim() : null
@@ -61,7 +62,7 @@ export function InstructionAttachmentsField({
             return (
               <li key={`instruction-attachment-${index}`} className="space-y-3 py-4 first:pt-0">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-slate-800">
+                  <p className="text-sm font-medium text-ink-800">
                     Lampiran {index + 1}
                   </p>
                   <Button

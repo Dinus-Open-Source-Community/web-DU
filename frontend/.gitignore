@@ -52,4 +52,13 @@ dist
 .cache
 package-lock.json
 *.lock
-.playwright-mcp
+# Playwright / MCP browser artifacts
+.playwright-mcp/
+.playwright-cli/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# graphify knowledge graph outputs
+graphify-out/

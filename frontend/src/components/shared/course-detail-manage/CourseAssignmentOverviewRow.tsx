@@ -6,11 +6,12 @@ import { AssignmentSubmitterAvatarGroup } from '@/components/shared/course-detai
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { CourseAssignmentOverviewItem } from '@/lib/course-detail/course-assignment-overview-presenter'
-import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { AdminTaskTypeLabel } from '@/lib/admin/status-label'
 import { cn } from '@/lib/utils'
 
 type CourseAssignmentOverviewRowProps = {
   item: CourseAssignmentOverviewItem
+  adminStatusLabels?: boolean
   onPrefetchRoster?: () => void
 }
 
@@ -23,8 +24,8 @@ function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['t
       className={cn(
         'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
         isQuiz
-          ? 'border-sky-200 bg-sky-50 text-sky-700'
-          : 'border-violet-200 bg-violet-50 text-violet-700',
+          ? 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+          : 'border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300',
       )}
     >
       <Icon className="size-3" aria-hidden />
@@ -35,30 +36,35 @@ function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['t
 
 function CourseAssignmentOverviewRowBase({
   item,
+  adminStatusLabels = false,
   onPrefetchRoster,
 }: CourseAssignmentOverviewRowProps) {
   return (
-    <li className={manageDetailLayout.flatListItem}>
+    <li className="px-5 py-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <TaskTypeBadge taskType={item.taskType} />
+            {adminStatusLabels ? (
+              <AdminTaskTypeLabel taskType={item.taskType} />
+            ) : (
+              <TaskTypeBadge taskType={item.taskType} />
+            )}
             {item.pendingGradingCount > 0 ? (
-              <span className="text-xs font-medium text-amber-700">
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
                 {item.pendingGradingCount} belum dinilai
               </span>
             ) : null}
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-slate-900">{item.assignmentTitle}</p>
-            <p className="mt-0.5 text-sm text-slate-500">
-              {item.moduleTitle} - {item.lessonTitle}
+            <p className="text-sm font-semibold text-foreground">{item.assignmentTitle}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Modul: {item.moduleTitle} · Lesson: {item.lessonTitle}
             </p>
           </div>
 
-          <p className="text-xs text-slate-400">
-            {item.submissionCount}/{item.totalStudents} pengumpulan
+          <p className="text-xs text-muted-foreground">
+            {item.submissionCount} dari {item.totalStudents} siswa sudah mengumpulkan
           </p>
         </div>
 

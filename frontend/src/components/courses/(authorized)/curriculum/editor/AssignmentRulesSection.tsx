@@ -45,10 +45,10 @@ function FieldGroup({
   className?: string
 }) {
   return (
-    <section className={cn('space-y-4 border-t border-slate-200 pt-5 first:border-t-0 first:pt-0', className)}>
+    <section className={cn('space-y-4 border-t border-line-light pt-5 first:border-t-0 first:pt-0', className)}>
       <div className="flex items-start gap-2">
         {icon ? (
-          <span className="mt-0.5 text-slate-400" aria-hidden>
+          <span className="mt-0.5 text-ink-400" aria-hidden>
             {icon}
           </span>
         ) : null}
@@ -96,9 +96,9 @@ function RuleToggleRow({
         className="mt-0.5"
       />
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-slate-800">{label}</span>
+        <span className="block text-sm font-medium text-ink-800">{label}</span>
         {description ? (
-          <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+          <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">
             {description}
           </span>
         ) : null}
@@ -214,7 +214,7 @@ export function AssignmentRulesSection({
           title="Metode jawaban"
           description="Pilih minimal satu cara peserta mengirim jawaban."
         >
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-line-light">
             <RuleToggleRow
               id="allow-rich-text"
               label="Rich text"

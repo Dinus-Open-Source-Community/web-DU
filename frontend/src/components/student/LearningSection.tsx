@@ -55,10 +55,10 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
     <section className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-5">
         <div>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight text-ink-900">
             Kursus Saya
           </h1>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-ink-500">
             Lanjutkan pembelajaran Anda untuk mencapai tujuan karir dan raih
             sertifikat.
           </p>
@@ -113,14 +113,14 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
       ) : (
         <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-paper-paper text-ink-400">
               <BookOpen className="size-7" aria-hidden />
             </div>
             <div className="space-y-1">
-              <p className="text-base font-semibold text-slate-900">
+              <p className="text-base font-semibold text-ink-900">
                 Kursus tidak ditemukan
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-500">
                 Coba ubah kata kunci pencarian atau filter status.
               </p>
             </div>

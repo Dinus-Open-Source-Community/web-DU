@@ -5,15 +5,15 @@ import Hero from '../../components/landing/Hero'
 import MentorsSection from '../../components/landing/MentorsSection'
 import StackSection from '../../components/landing/StackSection'
 import TestimonialSection from '../../components/landing/TestimonialSection'
-import SplashScreen from '../../components/playful/SplashScreen'
+import { SplashSessionProvider } from '../../components/playful/SplashScreen'
 import ScrollVelocityTape from '../../components/playful/ScrollVelocityTape'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 export default function Home() {
   return (
-    <GuestLayout>
-      <SplashScreen />
-      <main className="w-full bg-paper-white">
+    <SplashSessionProvider>
+    <GuestLayout navbarAuthVariant="home" marketingSurface>
+      <main className="w-full">
         <Hero />
         <StackSection />
         <ScrollVelocityTape items={LANDING_COPY.ticker} />
@@ -23,5 +23,6 @@ export default function Home() {
         <TestimonialSection />
       </main>
     </GuestLayout>
+    </SplashSessionProvider>
   )
 }

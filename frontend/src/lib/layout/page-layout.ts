@@ -1,3 +1,7 @@
+/** Vertical stack — admin & mentor dashboard (satu jarak antar blok). */
+export const dashboardPageStackClassName =
+  'relative z-[1] flex w-full min-w-0 flex-col gap-6'
+
 /** Shared shell padding — sm/md mobile, lg desktop (default). */
 export const appPageContentClassName =
   'mx-auto flex w-full min-w-0  flex-col gap-6 px-4 py-5 sm:gap-7 sm:px-5 sm:py-6 md:px-6 md:py-7 lg:gap-8 lg:px-8 lg:py-10'

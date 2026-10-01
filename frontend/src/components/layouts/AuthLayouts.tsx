@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
-import { AuthPenguinScene } from '@/components/auth/AuthPenguinScene'
 import { LogoDu } from '@/components/shared/icon'
 
 type AuthLayoutProps = {
@@ -30,27 +29,22 @@ export default function AuthLayout({
           }}
         />
 
-        <div className="relative z-10 flex items-center gap-3 px-10 pt-10 xl:px-14">
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-10 pb-12 text-center xl:px-14">
           <Link
             to="/"
-            className="inline-flex items-center gap-2.5 rounded-xl text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+            aria-label="Ke beranda Doscom University"
+            className="inline-flex rounded-2xl outline-none transition-transform hover:scale-105 focus-visible:ring-3 focus-visible:ring-ring/40 motion-reduce:transition-none motion-reduce:hover:scale-100"
           >
-            <LogoDu className="size-8 text-primary" />
-            <span className="text-sm font-semibold tracking-tight text-foreground">
-              Doscom University
-            </span>
+            <LogoDu className="size-20 text-primary sm:size-24 xl:size-28" />
           </Link>
-        </div>
 
-        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-10 pb-12 text-center xl:px-14">
-          <AuthPenguinScene />
           {heading ? (
-            <h2 className="mt-8 max-w-md text-3xl font-bold tracking-tight text-foreground xl:text-4xl">
+            <h2 className="font-display mt-8 max-w-lg text-3xl font-bold tracking-tight text-foreground sm:text-4xl xl:leading-tight">
               {heading}
             </h2>
           ) : null}
           {subheading ? (
-            <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
+            <p className="font-display mt-4 max-w-lg text-lg font-medium leading-snug text-muted-foreground sm:text-xl sm:leading-snug">
               {subheading}
             </p>
           ) : null}

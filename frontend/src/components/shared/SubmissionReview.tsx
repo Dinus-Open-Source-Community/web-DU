@@ -70,51 +70,51 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
   return (
     <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
       {isConfirm && <ConfirmDialog open={isConfirm} onOpenChange={setIsConfirm} title="" />}
-      <button type="button" className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />
-      <div className="relative z-10 flex max-h-[min(92vh,960px)] w-full max-w-[min(96rem,calc(100vw-2rem))] flex-col rounded-2xl border border-slate-200 bg-white">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <button type="button" className="absolute inset-0 bg-ink-900/40 backdrop-blur-[2px]" aria-label="Tutup" onClick={handleClose} />
+      <div className="relative z-10 flex max-h-[min(92vh,960px)] w-full max-w-[min(96rem,calc(100vw-2rem))] flex-col rounded-2xl border border-line-light bg-paper-white">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line-light px-5 py-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Review kiriman</p>
-            <h2 className="truncate text-lg font-semibold tracking-tight text-slate-900">{submission.studentName}</h2>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Review kiriman</p>
+            <h2 className="truncate text-lg font-semibold tracking-tight text-ink-900">{submission.studentName}</h2>
+            <p className="mt-0.5 text-sm text-ink-500">
               {assignmentTitle} · Attempt {submission.attemptNumber} · {format(new Date(submission.submittedAt), 'd MMM yyyy HH:mm', { locale: id })}
             </p>
           </div>
-          <button type="button" onClick={handleClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup">
+          <button type="button" onClick={handleClose} className="rounded-lg p-2 text-ink-400 hover:bg-paper-paper hover:text-ink-700" aria-label="Tutup">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Konten siswa</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-500">Konten siswa</p>
           <SubmissionContentView blocks={submission.contentBlocks} />
         </div>
 
-        <div className="shrink-0 space-y-4 border-t border-slate-100 px-5 py-4">
+        <div className="shrink-0 space-y-4 border-t border-line-light px-5 py-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <label htmlFor="review-status" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <label htmlFor="review-status" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
                 Status
               </label>
               <select
                 id="review-status"
                 value={reviewStatus}
                 onChange={(e) => setReviewStatus(e.target.value as IMentorAssignmentSubmission['reviewStatus'])}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                 <option value="graded">Selesai dinilai</option>
                 <option value="returned">Minta revisi</option>
                 <option value="pending_review">Belum dinilai</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="review-rating" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <label htmlFor="review-rating" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
                 Rating (1–5)
               </label>
               <select
                 id="review-rating"
                 value={rating}
                 onChange={(e) => setRating(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
                     {n}
@@ -124,7 +124,7 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="review-comment" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="review-comment" className="text-xs font-semibold uppercase tracking-wide text-ink-500">
               Komentar mentor
             </label>
             <textarea
@@ -133,7 +133,7 @@ export function SubmissionReviewDialog({ open, onOpenChange, submission, assignm
               onChange={(e) => setComment(e.target.value)}
               rows={3}
               placeholder="Feedback untuk siswa…"
-              className="resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="resize-y rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
           <div className="flex justify-end gap-3">

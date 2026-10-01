@@ -19,13 +19,13 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
           switch (b.type) {
             case 'html':
               return (
-                <div key={i} className="tiptap-editor-root tiptap-preview text-slate-800">
+                <div key={i} className="tiptap-editor-root tiptap-preview text-ink-800">
                   <SanitizedHtml html={b.html} className="ProseMirror" />
                 </div>
               )
             case 'text':
               return (
-                <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed text-ink-700">
                   {b.text}
                 </p>
               )
@@ -34,7 +34,7 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
               if (!imageSrc) return null
 
               return (
-                <figure key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50">
+                <figure key={i} className="overflow-hidden rounded-xl border border-line-light bg-paper-paper/50">
                   <SafeExternalImage
                     src={imageSrc}
                     width={320}
@@ -55,17 +55,17 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
                   <SafeExternalLink
                     href={fileHref}
                     download={b.fileName}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-xl border border-line-light bg-paper-white px-3 py-2 text-sm font-medium text-primary hover:bg-paper-paper"
                   >
                     Unduh {b.fileName}
                   </SafeExternalLink>
-                  {b.description && <p className="text-xs text-slate-500">{b.description}</p>}
+                  {b.description && <p className="text-xs text-ink-500">{b.description}</p>}
                 </div>
               )
             }
             case 'videoEmbed':
               return (
-                <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-black/5">
+                <div key={i} className="overflow-hidden rounded-xl border border-line-light bg-black/5">
                   <div className="aspect-video w-full">
                     <SafeEmbedFrame embedUrl={b.embedUrl} title={b.title ?? 'Video'} />
                   </div>
@@ -83,14 +83,14 @@ export function SubmissionContentView({ blocks, className }: SubmissionContentVi
               )
             case 'quiz':
               return (
-                <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Jawaban quiz</p>
-                  {b.passingScore != null && <p className="mt-1 text-xs text-slate-500">Passing score: {b.passingScore}</p>}
+                <div key={i} className="rounded-xl border border-line-light bg-paper-paper/50 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Jawaban quiz</p>
+                  {b.passingScore != null && <p className="mt-1 text-xs text-ink-500">Passing score: {b.passingScore}</p>}
                   <div className="mt-3 space-y-2.5">
                     {b.answers.map((answer) => (
-                      <div key={answer.questionId} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-                        <p className="text-sm font-medium text-slate-800">{answer.prompt}</p>
-                        <p className="mt-1 text-xs text-slate-500">Jawaban: {answer.selectedLabel}</p>
+                      <div key={answer.questionId} className="rounded-lg border border-line-light bg-paper-white px-3 py-2">
+                        <p className="text-sm font-medium text-ink-800">{answer.prompt}</p>
+                        <p className="mt-1 text-xs text-ink-500">Jawaban: {answer.selectedLabel}</p>
                       </div>
                     ))}
                   </div>

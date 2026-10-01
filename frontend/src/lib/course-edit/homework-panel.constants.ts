@@ -23,7 +23,7 @@ export const ASSIGNMENT_STATUS_META: Record<
   LessonAssignmentStatus,
   { label: string; className: string }
 > = {
-  DRAFT: { label: 'Draft', className: 'bg-slate-100 text-slate-700' },
+  DRAFT: { label: 'Draft', className: 'bg-paper-paper text-ink-700' },
   TERBIT: { label: 'Terbit', className: 'bg-emerald-50 text-emerald-700' },
   DITUTUP: { label: 'Ditutup', className: 'bg-amber-50 text-amber-800' },
 }

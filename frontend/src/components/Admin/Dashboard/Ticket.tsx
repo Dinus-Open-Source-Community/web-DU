@@ -1,5 +1,5 @@
-import { MessageSquareWarning, ChevronRight } from 'lucide-react'
-import { Badge } from '../../ui/badge'
+import { ChevronRight } from 'lucide-react'
+import { AdminSeverityLabel } from '@/lib/admin/status-label'
 import { Link } from 'react-router-dom'
 import { cn } from '../../../lib/utils'
 import { EmptyState } from '../../shared/EmptyState'
@@ -16,12 +16,6 @@ export interface AdminTicket {
   category: 'Payment' | 'Course Content' | 'Account' | 'Certificate' | 'Other'
 }
 
-const severityMap = {
-  high: 'severityHigh',
-  medium: 'severityMedium',
-  low: 'severityLow',
-} as const
-
 export function UnresolvedTickets({ tickets }: { tickets?: AdminTicket[] }) {
   return (
     <ChartCard
@@ -34,18 +28,29 @@ export function UnresolvedTickets({ tickets }: { tickets?: AdminTicket[] }) {
       }
       contentClassName="px-0 py-0">
       {tickets?.length === 0 ? (
-        <EmptyState icon={<MessageSquareWarning className="h-5 w-5" />} title="Tidak ada tiket tertunda" description="Semua tiket sudah ditangani tim support." className="m-5" />
+        <EmptyState
+          hideIcon
+          title="Tidak ada tiket tertunda"
+          description="Semua tiket sudah ditangani tim support."
+          className="m-5 border-0 bg-transparent"
+        />
       ) : (
         <ul className="divide-y divide-slate-100">
           {tickets?.map((ticket, idx) => (
-            <li key={ticket.uid} className={cn('group flex items-start gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50/70', idx === 0 && 'pt-4')}>
-              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+            <li
+              key={ticket.uid}
+              className={cn(
+                'group flex items-start gap-3 px-5 py-3.5 transition-colors hover:bg-paper-paper',
+                idx === 0 && 'pt-4',
+              )}
+            >
+              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-paper-paper ring-2 ring-ink-900/10">
                 <img src={ticket.studentAvatar} alt={ticket.studentName} className="object-cover" sizes="36px" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="line-clamp-1 text-sm font-semibold text-slate-800">{ticket.subject}</p>
-                  <Badge variant={severityMap[ticket.severity]} />
+                  <p className="line-clamp-1 text-sm font-semibold text-ink-900">{ticket.subject}</p>
+                  <AdminSeverityLabel severity={ticket.severity} />
                 </div>
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
                   <span className="truncate font-medium text-slate-600">{ticket.studentName}</span>

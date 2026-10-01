@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type RenameModuleDialogProps = {
   open: boolean
@@ -47,25 +48,27 @@ export function RenameModuleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-              <Pencil className="size-5" />
-            </span>
-            <div>
-              <DialogTitle className="text-base font-semibold text-slate-900">
-                Ubah nama modul
-              </DialogTitle>
-              <DialogDescription className="text-slate-500">
-                Nama modul akan tampil di tab kurikulum.
-              </DialogDescription>
+      <DialogContent className={editLayout.dialogShell}>
+        <div className={editLayout.dialogHeader}>
+          <DialogHeader className="text-left">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl border-2 border-ink-900/10 bg-paper-paper text-ink-600">
+                <Pencil className="size-5" />
+              </span>
+              <div>
+                <DialogTitle className="text-base font-semibold text-ink-900">
+                  Ubah nama modul
+                </DialogTitle>
+                <DialogDescription className={editLayout.body}>
+                  Nama modul akan tampil di tab kurikulum.
+                </DialogDescription>
+              </div>
             </div>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="rename-module-title" className="text-slate-700">
+        <div className="space-y-2 px-5 py-4 sm:px-6">
+          <Label htmlFor="rename-module-title" className={editLayout.fieldLabel}>
             Nama modul
           </Label>
           <Input
@@ -82,11 +85,11 @@ export function RenameModuleDialog({
           />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className={editLayout.dialogFooter}>
           <Button
             type="button"
             variant="outline"
-            className="rounded-sm"
+            className="h-10 rounded-sm border-2 border-ink-900/10"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -94,7 +97,7 @@ export function RenameModuleDialog({
           </Button>
           <Button
             type="button"
-            className="rounded-sm"
+            className="h-10 rounded-sm"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
           >

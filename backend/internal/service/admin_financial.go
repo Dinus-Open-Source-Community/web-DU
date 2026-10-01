@@ -71,21 +71,21 @@ func GetAdminFinancialSummaryFunc(c *gin.Context) {
 
 	kpis := []gin.H{
 		{
-			"id": "gross-revenue-12m", "label": "Gross Revenue (12m)", "value": utils.FormatPriceIDR(gross12m),
+			"id": "gross-revenue-12m", "label": "Pendapatan kotor (12 bln)", "value": utils.FormatPriceIDR(gross12m),
 			"trendValue": trendPercent(gross30d, grossPrev30d), "trendDirection": trendDirection(gross30d, grossPrev30d),
 			"trendLabel": "30 hari terakhir", "iconName": "revenue",
 		},
 		{
-			"id": "avg-order-value", "label": "Avg Order Value", "value": utils.FormatPriceIDR(avgOrder),
+			"id": "avg-order-value", "label": "Nilai pesanan rata-rata", "value": utils.FormatPriceIDR(avgOrder),
 			"trendValue": 0, "trendDirection": "neutral", "trendLabel": "30 hari terakhir", "iconName": "transactions",
 		},
 		{
-			"id": "paid-transactions", "label": "Paid Transactions", "value": fmt.Sprintf("%d", txCount),
+			"id": "paid-transactions", "label": "Transaksi lunas", "value": fmt.Sprintf("%d", txCount),
 			"trendValue": 0, "trendDirection": "neutral", "trendLabel": "30 hari terakhir", "iconName": "paid",
 		},
 		{
-			"id": "conversion-rate", "label": "Conversion Rate", "value": fmt.Sprintf("%.1f%%", convRate),
-			"trendValue": 0, "trendDirection": "neutral", "trendLabel": "all time", "iconName": "conversion",
+			"id": "conversion-rate", "label": "Tingkat konversi", "value": fmt.Sprintf("%.1f%%", convRate),
+			"trendValue": 0, "trendDirection": "neutral", "trendLabel": "sepanjang waktu", "iconName": "conversion",
 		},
 	}
 

@@ -1,10 +1,55 @@
+import type { ReactNode } from 'react'
 import { ImageIcon, Loader2 } from 'lucide-react'
 
+import { SettingsThemeSection } from '@/components/profile/SettingsThemeSection'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
+import { Button } from '@/components/ui/button'
+import { navbarUserRoleLabel } from '@/lib/layout/navbar-user-display'
 import { initialsFromName } from '@/lib/profile/profile-formatters'
 import type { ProfileSectionShellProps } from '@/lib/profile/profile-section-view-model'
+import { settingsLayout } from '@/lib/profile/settings-layout'
+import { cn } from '@/lib/utils'
 import { Input } from '../ui/input'
+
+function SettingsCardHeader({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return (
+    <div className={settingsLayout.cardHeader}>
+      <h2 className={settingsLayout.sectionTitle}>{title}</h2>
+      <p className={settingsLayout.sectionDescription}>{description}</p>
+    </div>
+  )
+}
+
+function FormActions({ children }: { children: ReactNode }) {
+  return <div className={settingsLayout.formActions}>{children}</div>
+}
+
+function PersonalRow({
+  label,
+  hint,
+  children,
+}: {
+  label: string
+  hint?: string
+  children: ReactNode
+}) {
+  return (
+    <div className={settingsLayout.personalRow}>
+      <div className={settingsLayout.personalRowCopy}>
+        <p className={settingsLayout.personalRowLabel}>{label}</p>
+        {hint ? <p className={settingsLayout.personalRowHint}>{hint}</p> : null}
+      </div>
+      <div className={settingsLayout.personalRowControl}>{children}</div>
+    </div>
+  )
+}
 
 export default function ProfileSection({ view }: ProfileSectionShellProps) {
   const {
@@ -26,177 +71,219 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
     onSubmitPassword,
   } = view
 
-  return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-      <div className="flex flex-col gap-1 pb-2">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Pengaturan Profil</h1>
-        <p className="text-sm text-slate-500">Kelola informasi pribadi dan keamanan di akun Anda.</p>
-      </div>
+  const roleLabel = navbarUserRoleLabel[user.role]
 
-      <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:flex-row sm:items-center sm:p-8">
-        <div className="flex items-center gap-6">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
-            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-50">
+  return (
+    <section className={settingsLayout.page}>
+      <header className="flex flex-col gap-1 pb-1">
+        <h1 className={settingsLayout.pageTitle}>Pengaturan</h1>
+        <p className={settingsLayout.pageSubtitle}>
+          Kelola foto profil, informasi pribadi, tema tampilan, dan keamanan akun Anda.
+        </p>
+      </header>
+
+      <div className={settingsLayout.cardLg}>
+        <SettingsCardHeader
+          title="Foto profil"
+          description="Foto ini ditampilkan di navbar, dashboard, dan aktivitas Anda di platform."
+        />
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+          <div className={cn(settingsLayout.avatarFrame, 'h-28 w-28 sm:h-32 sm:w-32')}>
+            <div className={settingsLayout.avatarInner}>
               <UserAvatarImage
                 src={user.avatar_url}
                 alt={user.name}
-                size={88}
-                className="h-full w-full rounded-xl bg-emerald-50"
+                size={120}
+                className="h-full w-full rounded-lg bg-note-mint/50"
                 fallbackInitial={initialsFromName(user.name)}
-                fallbackClassName="text-2xl font-bold text-emerald-800"
+                fallbackClassName={settingsLayout.avatarFallback}
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">{user.name}</h2>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                {user.role}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-slate-500">Diperbarui {lastUpdatedLabel || '-'}</p>
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <p className={settingsLayout.meta}>
+              Unggah gambar persegi. Format JPEG, PNG, atau GIF — maks. ukuran mengikuti
+              kebijakan server.
+            </p>
+            <Input
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              onChange={onPhotoChange}
+              className="hidden"
+              id="avatar-upload"
+            />
+            <label
+              htmlFor="avatar-upload"
+              aria-disabled={isPhotoPending}
+              className={cn(settingsLayout.outlineButton, 'w-fit')}
+            >
+              {isPhotoPending ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <ImageIcon className="size-4" aria-hidden />
+              )}
+              {isPhotoPending ? 'Mengunggah…' : 'Ubah foto profil'}
+            </label>
           </div>
-        </div>
-        <div className="mt-2 flex w-full shrink-0 gap-3 sm:mt-0 sm:w-auto">
-          <Input
-            type="file"
-            accept="image/jpeg,image/png,image/gif"
-            onChange={onPhotoChange}
-            className="hidden"
-            id="avatar-upload"
-          />
-          <label
-            htmlFor="avatar-upload"
-            aria-disabled={isPhotoPending}
-            className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:ring-2 focus:ring-primary focus:ring-offset-2 aria-disabled:pointer-events-none aria-disabled:opacity-60">
-            {isPhotoPending ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
-            Ubah Foto
-          </label>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
-        <h2 className="mb-6 text-lg font-bold text-slate-800">Informasi User</h2>
-        <form onSubmit={onSubmitProfile} className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-500">Nama Tampilan</label>
+      <div className={settingsLayout.cardLg}>
+        <SettingsCardHeader
+          title="Pengaturan pribadi"
+          description="Detail akun Anda dan nama yang tampil di seluruh platform."
+        />
+        <form onSubmit={onSubmitProfile} className="flex flex-col gap-5">
+          <div className={settingsLayout.personalRows}>
+            <PersonalRow
+              label="Nama tampilan"
+              hint="Digunakan di navbar, sertifikat, dan interaksi dengan pengguna lain."
+            >
               <Input
+                id="settings-display-name"
                 type="text"
                 value={displayName}
                 onChange={(event) => onDisplayNameChange(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                className={settingsLayout.input}
+                aria-label="Nama tampilan"
               />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-500">Alamat Email</label>
-              <Input
-                type="email"
-                defaultValue={user.email}
-                readOnly
-                className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-500 outline-none"
-              />
-            </div>
+            </PersonalRow>
+            <PersonalRow
+              label="Email login"
+              hint="Untuk mengganti email, gunakan kartu Alamat email di bawah."
+            >
+              <p className={settingsLayout.personalRowValue}>{user.email}</p>
+            </PersonalRow>
+            <PersonalRow label="Peran akun">
+              <div className="flex sm:justify-end">
+                <span className={settingsLayout.roleBadge}>{roleLabel}</span>
+              </div>
+            </PersonalRow>
+            <PersonalRow label="Terakhir diperbarui">
+              <p className={settingsLayout.personalRowValue}>
+                {lastUpdatedLabel || '-'}
+              </p>
+            </PersonalRow>
           </div>
-          <div className="mt-2 flex justify-end pt-2">
-            <button
+          <FormActions>
+            <Button
               type="submit"
               disabled={isProfilePending}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/95 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60">
+              className={settingsLayout.primaryButton}
+            >
               {isProfilePending ? <Loader2 className="size-4 animate-spin" /> : null}
-              Simpan Perubahan
-            </button>
-          </div>
+              Simpan perubahan
+            </Button>
+          </FormActions>
         </form>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
-        <h2 className="mb-8 text-lg font-bold text-slate-800">Keamanan Akun</h2>
+      <SettingsThemeSection />
 
-        <div className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8">
-          <h3 className="ml-1 text-xs font-bold uppercase tracking-wider text-primary/80">Ubah Password Akun</h3>
-          <form onSubmit={onSubmitPassword} className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="ml-1 text-sm font-medium text-slate-700">Password Saat Ini</label>
+      <div className={settingsLayout.securityGrid}>
+        <div className={settingsLayout.cardLg}>
+          <SettingsCardHeader
+            title="Kata sandi"
+            description="Gunakan password unik yang sulit ditebak."
+          />
+          <form onSubmit={onSubmitPassword} className={settingsLayout.formStack}>
+            <div className={settingsLayout.formSingleColumn}>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-current-pw">
+                  Password saat ini
+                </label>
                 <Input
+                  id="settings-current-pw"
                   type="password"
                   placeholder="Masukkan password saat ini"
                   value={currentPassword}
                   onChange={(event) => onCurrentPasswordChange(event.target.value)}
                   autoComplete="current-password"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  className={settingsLayout.input}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="ml-1 text-sm font-medium text-slate-700">Password Baru</label>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-new-pw">
+                  Password baru
+                </label>
                 <Input
+                  id="settings-new-pw"
                   type="password"
                   placeholder="Minimal 8 karakter"
                   value={newPassword}
                   onChange={(event) => onNewPasswordChange(event.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  autoComplete="new-password"
+                  className={settingsLayout.input}
                 />
                 <PasswordStrengthIndicator password={newPassword} className="mt-1" />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="ml-1 text-sm font-medium text-slate-700">Konfirmasi Password Baru</label>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-confirm-pw">
+                  Konfirmasi password baru
+                </label>
                 <Input
+                  id="settings-confirm-pw"
                   type="password"
                   placeholder="Ulangi password baru"
                   value={confirmPassword}
                   onChange={(event) => onConfirmPasswordChange(event.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  autoComplete="new-password"
+                  className={settingsLayout.input}
                 />
-                {confirmPassword.length > 0 && newPassword !== confirmPassword && (
-                  <p className="ml-1 text-xs font-medium text-rose-500">Password tidak cocok</p>
-                )}
+                {confirmPassword.length > 0 && newPassword !== confirmPassword ? (
+                  <p className={settingsLayout.errorText}>Password tidak cocok</p>
+                ) : null}
               </div>
             </div>
-            <div className="flex justify-start">
-              <button
+            <FormActions>
+              <Button
                 type="submit"
                 disabled={isPasswordPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/95 disabled:opacity-60">
+                className={settingsLayout.primaryButton}
+              >
                 {isPasswordPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                Perbarui Password
-              </button>
-            </div>
+                Perbarui password
+              </Button>
+            </FormActions>
           </form>
         </div>
 
-        <div className="flex flex-col gap-5">
-          <div className="mb-2 ml-1 flex flex-col gap-1.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-primary/80">Perbarui Alamat Email</h3>
-            <p className="text-sm font-medium text-slate-500">
-              Instruksi dan link konfirmasi akan dikirim ke kotak masuk email baru Anda.
-            </p>
-          </div>
-          <form className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <label className="ml-1 text-sm font-medium text-slate-700">Alamat Email Baru</label>
+        <div className={settingsLayout.cardLg}>
+          <SettingsCardHeader
+            title="Alamat email"
+            description="Konfirmasi lewat link di inbox email baru Anda."
+          />
+          <form className={settingsLayout.formStack}>
+            <div className={settingsLayout.formSingleColumn}>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-new-email">
+                  Email baru
+                </label>
                 <Input
+                  id="settings-new-email"
                   type="email"
-                  defaultValue={user.email}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="nama@email.com"
+                  className={settingsLayout.input}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="ml-1 text-sm font-medium text-slate-700">Password Saat Ini</label>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-email-pw">
+                  Password saat ini
+                </label>
                 <Input
+                  id="settings-email-pw"
                   type="password"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-lg tracking-[0.2em] text-slate-900 shadow-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="Verifikasi identitas Anda"
+                  autoComplete="current-password"
+                  className={settingsLayout.input}
                 />
               </div>
             </div>
-            <div className="flex justify-start">
-              <button
-                type="button"
-                className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/95 disabled:opacity-60">
-                Ajukan Perubahan Email
-              </button>
-            </div>
+            <FormActions>
+              <Button type="button" className={settingsLayout.primaryButton}>
+                Ajukan perubahan email
+              </Button>
+            </FormActions>
           </form>
         </div>
       </div>

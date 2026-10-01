@@ -69,7 +69,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <label className="text-xs font-semibold text-slate-600">Passing score (%)</label>
+        <label className="text-xs font-semibold text-ink-600">Passing score (%)</label>
         <input
           type="number"
           min={0}
@@ -77,25 +77,25 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
           value={passingScore}
           onChange={(e) => setPassingScore(Number(e.target.value))}
           onBlur={handlePassingScoreBlur}
-          className="w-20 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-center text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+          className="w-20 rounded-lg border border-line-light bg-paper-white px-2 py-1.5 text-center text-sm text-ink-800 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/30"
         />
       </div>
 
       {quiz.questions.map((q, qi) => (
-        <div key={q.id} className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
+        <div key={q.id} className="rounded-xl border border-line-light bg-paper-paper/50 p-4 space-y-3">
           <div className="flex items-start gap-2">
-            <GripVertical className="mt-2 size-3.5 shrink-0 text-slate-300" />
+            <GripVertical className="mt-2 size-3.5 shrink-0 text-ink-400" />
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
-                <span className="shrink-0 text-xs font-bold text-slate-500">Q{qi + 1}</span>
+                <span className="shrink-0 text-xs font-bold text-ink-500">Q{qi + 1}</span>
                 <input
                   type="text"
                   value={promptToEditableText(q.prompt)}
                   onChange={(e) => updateQuestion(q.id, (x) => ({ ...x, prompt: e.target.value }))}
                   placeholder="Tulis pertanyaan..."
-                  className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                  className="flex-1 rounded-lg border border-line-light bg-paper-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/30"
                 />
-                <button type="button" onClick={() => removeQuestion(q.id)} className="shrink-0 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500" title="Hapus pertanyaan">
+                <button type="button" onClick={() => removeQuestion(q.id)} className="shrink-0 rounded p-1 text-ink-400 hover:bg-red-50 hover:text-red-500" title="Hapus pertanyaan">
                   <Trash2 className="size-3.5" />
                 </button>
               </div>
@@ -109,7 +109,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                         type="button"
                         onClick={() => updateQuestion(q.id, (x) => ({ ...x, correctOptionId: opt.id }))}
                         className={`flex size-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors ${
-                          isCorrect ? 'border-emerald-400 bg-emerald-100 text-emerald-700' : 'border-slate-300 bg-white text-slate-400 hover:border-emerald-300'
+                          isCorrect ? 'border-emerald-400 bg-emerald-100 text-emerald-700' : 'border-line-medium bg-paper-white text-ink-400 hover:border-emerald-300'
                         }`}
                         title={isCorrect ? 'Jawaban benar' : 'Pilih sebagai jawaban benar'}>
                         {isCorrect ? <CheckCircle2 className="size-3.5" /> : optionLabels[oi]}
@@ -124,7 +124,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                           }))
                         }
                         placeholder={`Opsi ${optionLabels[oi]}`}
-                        className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                        className="flex-1 rounded-lg border border-line-light bg-paper-white px-2.5 py-1.5 text-sm text-ink-700 placeholder:text-ink-400 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/30"
                       />
                       {q.options.length > 2 && (
                         <button
@@ -139,7 +139,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                               }
                             })
                           }
-                          className="shrink-0 rounded p-0.5 text-slate-400 hover:text-red-500"
+                          className="shrink-0 rounded p-0.5 text-ink-400 hover:text-red-500"
                           title="Hapus opsi">
                           <Trash2 className="size-3" />
                         </button>
@@ -157,7 +157,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                         options: [...x.options, { id: createId(), label: '' }],
                       }))
                     }
-                    className="flex items-center gap-1 pl-7 text-[11px] text-slate-400 hover:text-slate-600">
+                    className="flex items-center gap-1 pl-7 text-[11px] text-ink-400 hover:text-ink-600">
                     <Plus className="size-3" /> Tambah opsi
                   </button>
                 )}
@@ -169,7 +169,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
                   value={q.explanation ?? ''}
                   onChange={(e) => updateQuestion(q.id, (x) => ({ ...x, explanation: e.target.value || undefined }))}
                   placeholder="Penjelasan jawaban (opsional)"
-                  className="w-full rounded-lg border border-dashed border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                  className="w-full rounded-lg border border-dashed border-line-light bg-paper-white px-2.5 py-1.5 text-xs text-ink-600 placeholder:text-ink-400 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/30"
                 />
               </div>
             </div>
@@ -177,7 +177,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
         </div>
       ))}
 
-      <Button type="button" variant="outline" size="sm" onClick={addQuestion} className="w-full rounded-sm border-dashed border-slate-300 bg-transparent text-xs">
+      <Button type="button" variant="outline" size="sm" onClick={addQuestion} className="w-full rounded-sm border-dashed border-line-medium bg-transparent text-xs">
         <Plus className="size-4" /> Tambah pertanyaan
       </Button>
     </div>

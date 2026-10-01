@@ -1,3 +1,5 @@
+import { DASHBOARD_PATH } from './dashboard-route'
+
 export interface RouteChildItem {
   name: string
   path: string
@@ -9,8 +11,48 @@ export interface RouteItem {
   children?: RouteChildItem[]
 }
 
+function dash(...segments: string[]) {
+  return [DASHBOARD_PATH, ...segments.filter(Boolean)].join('/')
+}
+
+/** Path menu di dalam shell dashboard (tanpa prefix role di URL). */
+export const dashboardMenu = {
+  users: {
+    students: dash('users', 'students'),
+    studentDetail: (userUid: string) => dash('users', 'students', userUid),
+    mentors: dash('users', 'mentors'),
+    mentorDetail: (userUid: string) => dash('users', 'mentors', userUid),
+    administrators: dash('users', 'administrators'),
+    administratorDetail: (userUid: string) => dash('users', 'administrators', userUid),
+  },
+  courses: dash('courses'),
+  courseCategories: dash('course-categories'),
+  courseTypes: dash('course-types'),
+  courseDetail: (courseUid: string) => dash('courses', courseUid),
+  courseEdit: (courseUid: string) => dash('courses', courseUid, 'edit'),
+  /** Halaman ringkasan tugas per kursus (mentor). */
+  courseAssignmentHub: (courseUid: string) => dash('courses', courseUid, 'assignments'),
+  assignmentSubmissions: (courseUid: string, lessonUid: string) =>
+    dash('courses', courseUid, 'assignments', lessonUid),
+  assignmentSubmissionDetail: (
+    courseUid: string,
+    lessonUid: string,
+    submissionUid: string,
+  ) => dash('courses', courseUid, 'assignments', lessonUid, 'submissions', submissionUid),
+  transactions: dash('transactions'),
+  transactionPayment: dash('transactions', 'payment'),
+  financial: dash('financial'),
+  reviewsAndQa: dash('reviews-and-qa'),
+  learning: dash('learning'),
+  learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
+  assignments: dash('assignments'),
+  browse: dash('browse'),
+  certificates: dash('certificates'),
+}
+
 export const ROUTES = {
   home: '/',
+  dashboard: DASHBOARD_PATH,
   profile: '/profile',
   courses: '/course',
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
@@ -21,133 +63,120 @@ export const ROUTES = {
   oauthCallback: '/auth/oauth/callback',
   forgotPassword: '/auth/forgot-password',
   resetPassword: '/auth/reset-password',
+  dashboardMenu,
   admin: {
-    dashboard: '/admin/dashboard',
-    users: {
-      students: '/admin/users/students',
-      studentDetail: (userUid: string) => `/admin/users/students/${userUid}`,
-      mentors: '/admin/users/mentors',
-      mentorDetail: (userUid: string) => `/admin/users/mentors/${userUid}`,
-      administrators: '/admin/users/administrators',
-      administratorDetail: (userUid: string) => `/admin/users/administrators/${userUid}`,
-    },
-    courses: '/admin/courses',
-    courseCategories: '/admin/course-categories',
-    courseTypes: '/admin/course-types',
-    detailCourseAdmin: (courseId: string) => `/admin/courses/${courseId}`,
-    assignmentSubmissions: (courseUid: string, lessonUid: string) =>
-      `/admin/courses/${courseUid}/assignments/${lessonUid}`,
-    assignmentSubmissionDetail: (
-      courseUid: string,
-      lessonUid: string,
-      submissionUid: string,
-    ) => `/admin/courses/${courseUid}/assignments/${lessonUid}/submissions/${submissionUid}`,
-    courseEditAdmin: (courseId: string) => `/admin/courses/${courseId}/edit`,
-    transactions: '/admin/transactions',
-    financial: '/admin/financial',
-    /** Pathname untuk <Route>; query `courseUid` opsional di-set lewat navigasi/link. */
-    reviewsAndQaPath: '/admin/reviews-and-qa',
-    reviewsAndQa: (courseUid?: string) => `${'/admin/reviews-and-qa'}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
+    dashboard: DASHBOARD_PATH,
+    users: dashboardMenu.users,
+    courses: dashboardMenu.courses,
+    courseCategories: dashboardMenu.courseCategories,
+    courseTypes: dashboardMenu.courseTypes,
+    detailCourseAdmin: dashboardMenu.courseDetail,
+    assignmentSubmissions: dashboardMenu.assignmentSubmissions,
+    assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
+    courseEditAdmin: dashboardMenu.courseEdit,
+    transactions: dashboardMenu.transactions,
+    financial: dashboardMenu.financial,
+    reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    reviewsAndQa: (courseUid?: string) =>
+      `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
   mentor: {
-    dashboard: '/mentor/dashboard',
-    courses: '/mentor/courses',
-    detailCourseMentor: (courseId: string) => `/mentor/courses/${courseId}`,
-    assignmentSubmissions: (courseUid: string, lessonUid: string) =>
-      `/mentor/courses/${courseUid}/assignments/${lessonUid}`,
-    assignmentSubmissionDetail: (
-      courseUid: string,
-      lessonUid: string,
-      submissionUid: string,
-    ) => `/mentor/courses/${courseUid}/assignments/${lessonUid}/submissions/${submissionUid}`,
-    courseEditMentor: (courseId: string) => `/mentor/courses/${courseId}/edit`,
-    assignments: (courseId: string) => `/mentor/courses/${courseId}/assignments`,
+    dashboard: DASHBOARD_PATH,
+    courses: dashboardMenu.courses,
+    detailCourseMentor: dashboardMenu.courseDetail,
+    assignmentSubmissions: dashboardMenu.assignmentSubmissions,
+    assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
+    courseEditMentor: dashboardMenu.courseEdit,
+    assignments: dashboardMenu.courseAssignmentHub,
+    reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    reviewsAndQa: (courseUid?: string) =>
+      `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
   student: {
-    dashboard: '/student/dashboard',
-    learning: '/student/learning',
-    learningCourse: (courseUid: string) => `/student/learning/course/${courseUid}`,
-    assignments: '/student/assignments',
-    browse: '/student/browse',
-    /** Hidden until certificate API is available */
-    certificates: '/student/certificates',
-    transactions: '/student/transactions',
-    transactionPaymentPath: '/student/transactions/payment',
+    dashboard: DASHBOARD_PATH,
+    learning: dashboardMenu.learning,
+    learningCourse: dashboardMenu.learningCourse,
+    assignments: dashboardMenu.assignments,
+    browse: dashboardMenu.browse,
+    certificates: dashboardMenu.certificates,
+    transactions: dashboardMenu.transactions,
+    transactionPaymentPath: dashboardMenu.transactionPayment,
     transactionPayment: (query: { reference?: string; merchantRef?: string }) => {
       const params = new URLSearchParams()
       if (query.reference) params.set('reference', query.reference)
       if (query.merchantRef) params.set('merchant_ref', query.merchantRef)
       const queryString = params.toString()
       return queryString
-        ? `${ROUTES.student.transactionPaymentPath}?${queryString}`
-        : ROUTES.student.transactionPaymentPath
+        ? `${dashboardMenu.transactionPayment}?${queryString}`
+        : dashboardMenu.transactionPayment
     },
   },
 } as const
 
 export const routeGroups: Record<string, RouteItem[]> = {
   Admin: [
-    { name: 'Dashboard', path: ROUTES.admin.dashboard },
+    { name: 'Dasbor', path: ROUTES.admin.dashboard },
     {
-      name: 'Course Catalog',
+      name: 'Katalog Kursus',
       children: [
-        { name: 'All Courses', path: ROUTES.admin.courses },
-        { name: 'Categories', path: ROUTES.admin.courseCategories },
-        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+        { name: 'Kursus', path: ROUTES.admin.courses },
+        { name: 'Kategori', path: ROUTES.admin.courseCategories },
+        { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
     {
-      name: 'Transactions',
+      name: 'Transaksi',
       path: ROUTES.admin.transactions,
     },
     {
-      name: 'Reviews & Q&A',
+      name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
     },
     {
-      name: 'Financial Reports',
+      name: 'Laporan Keuangan',
       path: ROUTES.admin.financial,
     },
   ],
   SuperAdmin: [
-    { name: 'Dashboard', path: ROUTES.admin.dashboard },
+    { name: 'Dasbor', path: ROUTES.admin.dashboard },
     {
-      name: 'Users Management',
+      name: 'Kelola Pengguna',
       children: [
-        { name: 'Students', path: ROUTES.admin.users.students },
-        { name: 'Mentors', path: ROUTES.admin.users.mentors },
-        { name: 'Administrators', path: ROUTES.admin.users.administrators },
+        { name: 'Siswa', path: ROUTES.admin.users.students },
+        { name: 'Mentor', path: ROUTES.admin.users.mentors },
+        { name: 'Administrator', path: ROUTES.admin.users.administrators },
       ],
     },
     {
-      name: 'Course Catalog',
+      name: 'Katalog Kursus',
       children: [
-        { name: 'All Courses', path: ROUTES.admin.courses },
-        { name: 'Categories', path: ROUTES.admin.courseCategories },
-        { name: 'Course Types', path: ROUTES.admin.courseTypes },
+        { name: 'Kursus', path: ROUTES.admin.courses },
+        { name: 'Kategori', path: ROUTES.admin.courseCategories },
+        { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
-    { name: 'Transactions', path: ROUTES.admin.transactions },
-    { name: 'Reviews & Q&A', path: ROUTES.admin.reviewsAndQaPath },
-    { name: 'Financial Reports', path: ROUTES.admin.financial },
+    { name: 'Transaksi', path: ROUTES.admin.transactions },
+    { name: 'Ulasan & Tanya Jawab', path: ROUTES.admin.reviewsAndQaPath },
+    { name: 'Laporan Keuangan', path: ROUTES.admin.financial },
   ],
   Mentor: [
-    { name: 'Dashboard', path: ROUTES.mentor.dashboard },
+    { name: 'Dasbor', path: ROUTES.mentor.dashboard },
     {
-      name: 'Courses',
+      name: 'Kursus',
       path: ROUTES.mentor.courses,
     },
+    { name: 'Ulasan & Tanya Jawab', path: ROUTES.mentor.reviewsAndQaPath },
   ],
   Student: [
-    { name: 'Dashboard', path: ROUTES.student.dashboard },
+    { name: 'Dasbor', path: ROUTES.student.dashboard },
     {
-      name: 'My Learning',
+      name: 'Pembelajaran Saya',
       children: [
-        { name: 'Course', path: ROUTES.student.learning },
-        { name: 'Assignment', path: ROUTES.student.assignments },
+        { name: 'Kursus', path: ROUTES.student.learning },
+        { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Browse Courses', path: ROUTES.student.browse },
-    { name: 'Transactions', path: ROUTES.student.transactions },
+    { name: 'Jelajahi Kursus', path: ROUTES.student.browse },
+    { name: 'Transaksi', path: ROUTES.student.transactions },
   ],
 }

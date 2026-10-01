@@ -65,7 +65,7 @@ export function CourseEditStickySaveBar({
 
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-sm supports-backdrop-filter:bg-white/85 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className={editLayout.stickyBar}>
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           {hasUnsavedChanges && (
             <p className="min-w-0 flex-1 text-xs font-medium text-amber-700 sm:text-sm">

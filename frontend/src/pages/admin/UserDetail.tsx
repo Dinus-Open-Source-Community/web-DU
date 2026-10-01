@@ -5,7 +5,6 @@ import { UserDetailView } from '@/components/admin/user-manage/UserDetailView'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useAdminUserDetailPage } from '@/hooks/use-admin-user-detail-page'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 
 type AdminUserDetailPageProps = {
@@ -14,14 +13,13 @@ type AdminUserDetailPageProps = {
 
 export default function AdminUserDetailPage({ kind }: AdminUserDetailPageProps) {
   const { userUid = '' } = useParams<{ userUid: string }>()
-  const sidebarUser = useSidebarUser('super_admin')
   const pageState = useAdminUserDetailPage({ kind, uid: userUid })
 
   const isInitialLoading = pageState.isLoading && !pageState.viewModel
 
   if (!userUid) {
     return (
-      <UserDetailPageShell kind={kind} user={sidebarUser} backHref={pageState.config.path}>
+      <UserDetailPageShell kind={kind} backHref={pageState.config.path}>
         <EmptyState
           title="User tidak ditemukan"
           description="ID user tidak valid atau tidak tersedia di URL."
@@ -32,7 +30,7 @@ export default function AdminUserDetailPage({ kind }: AdminUserDetailPageProps) 
 
   if (pageState.isError && !pageState.viewModel) {
     return (
-      <UserDetailPageShell kind={kind} user={sidebarUser} backHref={pageState.config.path}>
+      <UserDetailPageShell kind={kind} backHref={pageState.config.path}>
         <EmptyState
           title="Gagal memuat detail user"
           description={
@@ -52,22 +50,12 @@ export default function AdminUserDetailPage({ kind }: AdminUserDetailPageProps) 
 
   if (!pageState.viewModel || !pageState.selectedUser) {
     return (
-      <UserDetailPageShell
-        kind={kind}
-        user={sidebarUser}
-        backHref={pageState.config.path}
-        isLoading={isInitialLoading}
-      />
+      <UserDetailPageShell kind={kind} backHref={pageState.config.path} isLoading={isInitialLoading} />
     )
   }
 
   return (
-    <UserDetailPageShell
-      kind={kind}
-      user={sidebarUser}
-      backHref={pageState.config.path}
-      isLoading={isInitialLoading}
-    >
+    <UserDetailPageShell kind={kind} backHref={pageState.config.path} isLoading={isInitialLoading}>
       <UserDetailView
         kind={kind}
         viewModel={pageState.viewModel}

@@ -16,12 +16,18 @@ import {
 } from '../../components/ui/sidebar'
 import type { NavChildItem, NavItem } from '../../lib/types/utils'
 import { Navigation } from '../../lib/navigation'
+import { isNavLinkActive } from '@/lib/dashboard-route'
 import { ROUTES } from '../../lib/routes'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { cn } from '../../lib/utils'
 import type { UserRole } from '../../lib/types/user'
 import { NavbarSearchProvider } from '../../providers/navbar-search-provider'
 import { useAppTopNavbarAuth } from '@/hooks/layout/use-navbar-auth'
+import {
+  appShellPageBgClassName,
+  appShellSidebarClassName,
+  brandWordmarkClassName,
+} from '@/lib/design/app-shell-tokens'
 import { appPageContentClassName } from '@/lib/layout/page-layout'
 import { AppTopNavbar } from './AppTopNavbar'
 
@@ -37,53 +43,61 @@ type AppLayoutProps = {
   role: UserRole
   user: SidebarUser
   contentClassName?: string
+  /** Tanpa sidebar — tombol kembali di navbar (breadcrumb disembunyikan). */
+  navbarBack?: 'dashboard' | 'history'
 }
 
 type AppSidebarProviderProps = AppLayoutProps
 
-const sidebarRoleConfig: Record<UserRole, { navigationKey: keyof typeof Navigation; title: string; roleLabel: string }> = {
+function sidebarNavActiveClass(isActive: boolean) {
+  if (!isActive) {
+    return 'text-ink-600 hover:bg-paper-paper hover:text-ink-900'
+  }
+  return 'border-brand-blue bg-brand-blue/25 font-semibold text-ink-900'
+}
+
+const sidebarRoleConfig: Record<UserRole, { navigationKey: keyof typeof Navigation; roleLabel: string }> = {
   admin: {
     navigationKey: 'Admin',
-    title: 'Admin Dashboard',
     roleLabel: 'Administrator',
   },
   super_admin: {
     navigationKey: 'SuperAdmin',
-    title: 'Super Admin Dashboard',
     roleLabel: 'Super Admin',
   },
   mentor: {
     navigationKey: 'Mentor',
-    title: 'Mentor Dashboard',
     roleLabel: 'Mentor',
   },
   student: {
     navigationKey: 'Student',
-    title: 'Student Dashboard',
     roleLabel: 'Student',
   },
 }
 
-function isActivePath(pathname: string, path?: string) {
-  if (!path) return false
-  return pathname === path || pathname.startsWith(`${path}/`)
-}
-
 function SidebarSubItem({ child, index, total }: { child: NavChildItem; index: number; total: number }) {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const { setOpenMobile } = useSidebar()
-  const isActive = isActivePath(pathname, child.path)
+  const isActive = isNavLinkActive(pathname, search, child.path)
   const isLast = index === total - 1
 
   return (
     <Link to={child.path} onClick={() => setOpenMobile(false)} className="relative block pl-8">
-      <svg className="pointer-events-none absolute left-0 top-0 h-full w-8 text-slate-200" viewBox="0 0 32 44" fill="none" aria-hidden>
+      <svg
+        className={cn(
+          'pointer-events-none absolute left-0 top-0 h-full w-8',
+          'text-line-light',
+        )}
+        viewBox="0 0 32 44"
+        fill="none"
+        aria-hidden
+      >
         <path d={isLast ? 'M4 0 V18 Q4 26 12 26 H28' : 'M4 0 V44 M4 18 Q4 26 12 26 H28'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <div
         className={cn(
           'group relative flex min-h-11 cursor-pointer items-center rounded-[10px] border-r-4 border-transparent bg-transparent px-4 text-sm transition-all duration-150',
-          isActive ? 'border-primary bg-primary/10 font-semibold text-primary' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
+          sidebarNavActiveClass(isActive),
         )}>
         {child.name}
       </div>
@@ -92,9 +106,9 @@ function SidebarSubItem({ child, index, total }: { child: NavChildItem; index: n
 }
 
 function SidebarNavItem({ item }: { item: NavItem }) {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const { setOpenMobile } = useSidebar()
-  const isActive = isActivePath(pathname, item.path)
+  const isActive = item.path ? isNavLinkActive(pathname, search, item.path) : false
   const Icon = item.icon
 
   if (!item.path) return null
@@ -105,9 +119,18 @@ function SidebarNavItem({ item }: { item: NavItem }) {
         <div
           className={cn(
             'group relative flex min-h-12 items-center gap-3 rounded-[10px] border-r-4 border-transparent px-4 text-sm font-medium transition-all duration-150',
-            isActive ? 'border-primary bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            sidebarNavActiveClass(isActive),
           )}>
-          {Icon && <Icon className={cn('size-[18px] flex-shrink-0 transition-colors', isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600')} />}
+          {Icon ? (
+            <Icon
+              className={cn(
+                'size-[18px] flex-shrink-0 transition-colors',
+                isActive
+                  ? 'text-brand-ink'
+                  : 'text-ink-400 group-hover:text-ink-600',
+              )}
+            />
+          ) : null}
           <span>{item.name}</span>
         </div>
       </Link>
@@ -116,9 +139,10 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 }
 
 function SidebarNavGroup({ item }: { item: NavItem }) {
-  const { pathname } = useLocation()
-  const isChildActive = item.children?.some((child) => isActivePath(pathname, child.path)) ?? false
-  const isParentActive = item.path ? isActivePath(pathname, item.path) : false
+  const { pathname, search } = useLocation()
+  const isChildActive =
+    item.children?.some((child) => isNavLinkActive(pathname, search, child.path)) ?? false
+  const isParentActive = item.path ? isNavLinkActive(pathname, search, item.path) : false
   const [isOpen, setIsOpen] = useState(isChildActive)
   const Icon = item.icon
 
@@ -134,13 +158,22 @@ function SidebarNavGroup({ item }: { item: NavItem }) {
             type="button"
             className={cn(
               'group relative flex min-h-12 w-full items-center justify-between rounded-[10px] border-r-4 border-transparent px-4 text-sm font-medium transition-all duration-150',
-              isParentActive ? 'border-primary bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+              sidebarNavActiveClass(isParentActive),
             )}>
             <div className="flex items-center gap-3">
-              {Icon && <Icon className={cn('size-[18px] flex-shrink-0 transition-colors', isParentActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600')} />}
+              {Icon ? (
+                <Icon
+                  className={cn(
+                    'size-[18px] flex-shrink-0 transition-colors',
+                    isParentActive
+                      ? 'text-brand-ink'
+                      : 'text-ink-400 group-hover:text-ink-600',
+                  )}
+                />
+              ) : null}
               <span>{item.name}</span>
             </div>
-            <ChevronDown className={cn('size-4 flex-shrink-0 text-slate-400 transition-transform duration-300', isOpen ? 'rotate-180' : '')} />
+            <ChevronDown className={cn('size-4 flex-shrink-0 text-ink-400 transition-transform duration-300', isOpen ? 'rotate-180' : '')} />
           </button>
         </CollapsibleTrigger>
 
@@ -162,20 +195,26 @@ function SidebarBrand() {
   const { isMobile, setOpenMobile } = useSidebar()
 
   return (
-    <div className={cn('relative flex h-16 flex-shrink-0 items-center border-b border-slate-100', isMobile ? 'justify-center px-12' : 'justify-center gap-3 px-5')}>
-      <Link to={ROUTES.home} className={cn('flex flex-shrink-0 items-center gap-3', isMobile && 'mx-auto justify-center')}>
-        <div className="overflow-hidden leading-none text-center">
-          <span className="whitespace-nowrap pr-2 text-xl font-bold text-primary">Doscom</span>
-          <span className="text-base font-medium text-gray-500">University</span>
-        </div>
+    <div
+      className={cn(
+        'relative flex h-16 flex-shrink-0 items-center',
+        'border-b-2 border-ink-900/10',
+        isMobile ? 'justify-center px-12' : 'justify-center gap-3 px-5',
+      )}
+    >
+      <Link
+        to={ROUTES.home}
+        className={cn('flex flex-shrink-0 items-center', isMobile && 'mx-auto justify-center')}
+      >
+        <span className={cn(brandWordmarkClassName, 'whitespace-nowrap')}>Doscom University</span>
       </Link>
 
       {isMobile && (
         <button
           type="button"
           onClick={() => setOpenMobile(false)}
-          className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-[10px] text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
-          aria-label="Close sidebar">
+          className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-[10px] text-ink-500 transition-all duration-200 hover:bg-paper-paper hover:text-ink-900 active:scale-95"
+          aria-label="Tutup sidebar">
           <X className="size-4" />
         </button>
       )}
@@ -187,7 +226,13 @@ function AppSidebar({ role }: { role: UserRole }) {
   const navigation = Navigation[sidebarRoleConfig[role].navigationKey]
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r border-slate-100 bg-white transition-all duration-300 ease-in-out [&_[data-slot=sidebar-inner]]:bg-white">
+    <Sidebar
+      collapsible="offcanvas"
+      className={cn(
+        'transition-all duration-300 ease-in-out',
+        appShellSidebarClassName,
+      )}
+    >
       <SidebarHeader className="p-0">
         <SidebarBrand />
       </SidebarHeader>
@@ -223,18 +268,21 @@ export function AppNavbarProvider({
   role,
   user,
   contentClassName,
+  navbarBack,
 }: AppLayoutProps) {
   const normalizedUser = normalizeSidebarUser(user)
   const { onSignOut } = useAppTopNavbarAuth()
 
   return (
     <NavbarSearchProvider>
-      <div className="flex min-h-dvh w-full flex-col bg-white">
+      <div
+        className="flex min-h-dvh w-full flex-col bg-paper-offwhite"
+      >
         <AppTopNavbar
           role={role}
           user={normalizedUser}
-          title={sidebarRoleConfig[role].title}
           showSidebarTrigger={false}
+          navbarBack={navbarBack}
           onSignOut={onSignOut}
         />
         <main
@@ -269,8 +317,10 @@ export function AppSidebarProvider({
         }>
         <AppSidebar role={role} />
 
-        <SidebarInset className="min-w-0">
-          <AppTopNavbar role={role} user={normalizedUser} title={sidebarRoleConfig[role].title} onSignOut={onSignOut} />
+        <SidebarInset
+          className={cn('min-w-0', appShellPageBgClassName)}
+        >
+          <AppTopNavbar role={role} user={normalizedUser} onSignOut={onSignOut} />
           <div
             className={cn(
               'flex w-full min-w-0 flex-col',

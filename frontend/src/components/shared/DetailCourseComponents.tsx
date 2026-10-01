@@ -20,6 +20,7 @@ import {
 } from './course-detail-manage/CourseDetailNavTabs'
 import { CourseDetailAttendanceTab } from './course-detail-manage/CourseDetailAttendanceTab'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
+import { AdminPageShell } from '@/components/admin/AdminPageShell'
 
 export function DetailCourse({ view }: CourseDetailShellProps) {
   const {
@@ -68,11 +69,15 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
   })
 
   return (
-    <div className={cn(manageDetailLayout.page, manageDetailLayout.pageBottomMobile, 'animate-in fade-in duration-500')}>
+    <AdminPageShell
+      className={cn(
+        manageDetailLayout.page,
+        manageDetailLayout.pageBottomMobile,
+        'animate-in fade-in duration-500',
+      )}
+    >
       <CourseDetailManageHeader
         course={course}
-        curriculumEditHref={editHref}
-        curriculumEditNavigationState={curriculumEditNavigationState}
         previewHref={previewHref}
         isAdmin={isAdmin}
         isPublished={isPublished}
@@ -86,19 +91,36 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         onValueChange={(value) => setActiveTab(value as typeof activeTab)}
         className="w-full gap-4 sm:gap-6"
       >
-        <CourseDetailNavTabs isAdmin={isAdmin} />
+        <CourseDetailNavTabs isAdmin={isAdmin} value={activeTab} onChange={setActiveTab} />
 
         <div className="min-h-[18rem] sm:min-h-[24rem]">
           <TabsContent value="overview" className="mt-0 animate-in fade-in duration-300">
-            <CourseDetailOverviewTab course={course} students={dataStudents} />
+            <CourseDetailOverviewTab
+              course={course}
+              modules={modules}
+              courseUid={courseUid}
+              students={dataStudents}
+              isAdmin={isAdmin}
+              isPublished={isPublished}
+              overviewDataEnabled={activeTab === 'overview' || activeTab === 'assignments'}
+              onNavigateToTab={setActiveTab}
+            />
           </TabsContent>
 
           <TabsContent value="kurikulum" className="mt-0 animate-in fade-in duration-300">
-            <CourseCurriculumTab modules={modules} editHref={editHref} />
+            <CourseCurriculumTab
+              modules={modules}
+              editHref={editHref}
+              editNavigationState={curriculumEditNavigationState}
+            />
           </TabsContent>
 
           <TabsContent value="peserta" className="mt-0 animate-in fade-in duration-300">
-            <CourseParticipantsSection courseUid={courseUid} studentsData={dataStudents} />
+            <CourseParticipantsSection
+              courseUid={courseUid}
+              studentsData={dataStudents}
+              adminStatusLabels
+            />
           </TabsContent>
 
           <TabsContent value="assignments" className="mt-0 animate-in fade-in duration-300">
@@ -117,16 +139,20 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           ) : null}
 
           <TabsContent value="review" className="mt-0 animate-in fade-in duration-300">
-            <CourseReviewSection
-              reviews={course.reviews || []}
-              isAdmin={isAdmin}
-              onReply={onReplyReview}
-              submittingReviewUid={submittingReviewUid}
-            />
+            <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
+              <CourseReviewSection
+                reviews={course.reviews || []}
+                isAdmin={isAdmin}
+                staffShellChrome
+                onReply={onReplyReview}
+                submittingReviewUid={submittingReviewUid}
+              />
+            </div>
           </TabsContent>
 
           {isAdmin && assignMentorDialog ? (
             <TabsContent value="mentor" className="mt-0 animate-in fade-in duration-300">
+              <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
               <CourseMentorTable
                 mentors={course.mentors || []}
                 isAdmin={isAdmin}
@@ -137,14 +163,13 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
                 onConfirmUnassignMentor={mentorManagement.onConfirmUnassignMentor}
                 unassigningMentorUid={mentorManagement.unassigningMentorUid}
               />
+              </div>
             </TabsContent>
           ) : null}
         </div>
       </Tabs>
 
       <CourseDetailMobileActions
-        curriculumEditHref={editHref}
-        curriculumEditNavigationState={curriculumEditNavigationState}
         previewHref={previewHref}
         isAdmin={isAdmin}
         isPublished={isPublished}
@@ -191,6 +216,6 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           onCancel={() => onDeleteConfirmOpenChange(false)}
         />
       ) : null}
-    </div>
+    </AdminPageShell>
   )
 }

@@ -2,6 +2,16 @@ import type { SidebarUser } from '@/components/shared/Sidebar'
 import type { UserRole } from '@/lib/types/user'
 import { useAuth } from '@/providers/auth-provider'
 
+export type AdminShellRole = 'admin' | 'super_admin'
+
+/** Sidebar + label nav untuk halaman yang diakses admin dan super admin. */
+export function useAdminAppSidebar(): { role: AdminShellRole; user: SidebarUser } {
+  const { role: authRole } = useAuth()
+  const role: AdminShellRole = authRole === 'super_admin' ? 'super_admin' : 'admin'
+  const user = useSidebarUser(role)
+  return { role, user }
+}
+
 const SIDEBAR_USER_FALLBACK: Record<UserRole, Pick<SidebarUser, 'name' | 'email'>> = {
   admin: { name: 'Admin', email: 'admin@doscom.id' },
   super_admin: { name: 'Super Admin', email: 'superadmin@doscom.id' },

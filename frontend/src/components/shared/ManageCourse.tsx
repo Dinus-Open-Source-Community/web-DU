@@ -2,19 +2,46 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader } from './Header'
 import { Button } from '../ui/button'
-import { SegmentedFilter } from './SegemntedFilter'
+import { AdminUnderlineTabs } from '@/components/admin/AdminUnderlineTabs'
 import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
-import { EmptyCourseIcon } from './icon'
+import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
 import { CreateCourseDialog } from './CreateCourse'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import type { CourseFormValues } from '@/lib/course-form/types'
 import type { ICourseItem } from '@/lib/types/course'
+import { ROUTES } from '@/lib/routes'
+import {
+  appCardClassName,
+  appToolbarPrimaryButtonClassName,
+} from '@/lib/design/app-shell-tokens'
+import { cn } from '@/lib/utils'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
 type CourseFilter = (typeof filters)[number]
 const ITEMS_PER_PAGE = 6
+
+const EMPTY_FILTER_COPY: Record<
+  CourseFilter,
+  { title: string; descriptionAdmin: string; descriptionMentor: string }
+> = {
+  Semua: {
+    title: 'Belum ada kursus',
+    descriptionAdmin: 'Buat kursus baru untuk mengisi katalog.',
+    descriptionMentor: 'Belum ada kursus di daftar Anda.',
+  },
+  Aktif: {
+    title: 'Tidak ada kursus aktif',
+    descriptionAdmin: 'Tidak ada kursus yang sudah dipublikasikan. Cek tab Draf atau buat kursus baru.',
+    descriptionMentor: 'Tidak ada kursus yang sudah dipublikasikan.',
+  },
+  Draf: {
+    title: 'Tidak ada kursus draf',
+    descriptionAdmin: 'Semua kursus sudah aktif, atau belum ada kursus sama sekali.',
+    descriptionMentor: 'Tidak ada kursus yang masih dalam draf.',
+  },
+}
 
 type CreateCourseActions = {
   submitting: boolean
@@ -55,22 +82,35 @@ export default function ManageCourseSection({
 
   const totalPages = Math.max(1, Math.ceil(filteredCourses.length / ITEMS_PER_PAGE))
   const paginatedCourses = filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const emptyCopy = EMPTY_FILTER_COPY[activeFilter]
 
   return (
     <>
-      <div className="flex w-full flex-col gap-8">
-        <div className="flex flex-col gap-5">
-          <PageHeader title="Courses" subtitle={isAdmin ? 'Kelola kursus platform: buat, atur, dan hapus kursus.' : 'Kelola konten modul, lesson, dan peserta kursus.'} />
+      <div className="flex w-full flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <PageHeader
+            title="Semua kursus"
+            subtitle={
+              isAdmin
+                ? 'Kelola kursus platform: buat, atur, dan hapus kursus.'
+                : 'Kelola modul, lesson, dan peserta pada kursus yang Anda bimbing.'
+            }
+            className="mb-0 space-y-2"
+          />
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <SegmentedFilter<CourseFilter>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <AdminUnderlineTabs<CourseFilter>
               items={filters.map((f) => ({ value: f, label: f }))}
               value={activeFilter}
               onChange={setActiveFilter}
-              variant="scroll"
+              ariaLabel="Filter kursus"
             />
             {isAdmin && (
-              <Button className="h-11.5 shrink-0 gap-2 rounded-sm px-5 font-semibold" onClick={() => setCreateOpen(true)} type="button">
+              <Button
+                className={appToolbarPrimaryButtonClassName}
+                onClick={() => setCreateOpen(true)}
+                type="button"
+              >
                 <Plus className="h-5 w-5" />
                 Buat kursus
               </Button>
@@ -79,31 +119,47 @@ export default function ManageCourseSection({
         </div>
 
         {filteredCourses.length > 0 ? (
-          <div className="flex flex-col gap-10">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col gap-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedCourses.map((c) => (
                 <CardMentor
                   key={c.uid}
                   data={c}
-                  detailHref={`${isAdmin ? '/admin' : '/mentor'}/courses/${c.uid}`}
+                  detailHref={ROUTES.dashboardMenu.courseDetail(c.uid)}
+                  adminStatusLabel
                 />
               ))}
             </div>
             {totalPages > 1 && (
               <nav className="flex w-full justify-center pt-2" aria-label="Pagination daftar kursus">
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  variant="admin"
+                />
               </nav>
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <EmptyCourseIcon className="mb-6 h-48 w-48" />
-            <h3 className="mb-2 text-xl font-bold text-slate-900">Belum ada kursus</h3>
-            <p className="max-w-sm text-sm leading-relaxed text-slate-500">
-              {isAdmin ? 'Ubah filter atau kata kunci pencarian, atau buat kursus baru.' : 'Ubah filter atau kata kunci pencarian untuk melihat kursus yang tersedia.'}
+          <div
+            className={cn(
+              'flex flex-col items-center justify-center py-16 text-center',
+              appCardClassName,
+              'px-6',
+            )}
+          >
+            <NothingLottieIllustration />
+            <h3 className="mb-2 text-xl font-bold text-ink-900">{emptyCopy.title}</h3>
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-ink-500">
+              {isAdmin ? emptyCopy.descriptionAdmin : emptyCopy.descriptionMentor}
             </p>
             {isAdmin && (
-              <Button className="mt-6 rounded-sm" type="button" onClick={() => setCreateOpen(true)}>
+              <Button
+                className={cn('mt-6', appToolbarPrimaryButtonClassName)}
+                type="button"
+                onClick={() => setCreateOpen(true)}
+              >
                 Buat kursus
               </Button>
             )}

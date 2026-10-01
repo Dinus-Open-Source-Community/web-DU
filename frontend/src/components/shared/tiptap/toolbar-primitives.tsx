@@ -10,23 +10,17 @@ export type ToolbarControlSize = 'default' | 'compact' | 'bubble'
 export function ToolbarShell({
   children,
   className,
-  theme = 'light',
+  theme: _theme = 'light',
 }: {
   children: ReactNode
   className?: string
   theme?: TiptapEditorTheme
 }) {
-  const isDark = theme === 'dark'
-
   return (
     <div
       role="toolbar"
       aria-label="Toolbar editor"
-      className={cn(
-        'sticky top-0 z-10 border-b backdrop-blur-sm',
-        isDark ? 'border-zinc-800 bg-zinc-950/95' : 'border-input bg-card/95',
-        className,
-      )}
+      className={cn('sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur-sm', className)}
     >
       {children}
     </div>
@@ -35,20 +29,14 @@ export function ToolbarShell({
 
 export function ToolbarDivider({
   dense,
-  theme = 'light',
+  theme: _theme = 'light',
 }: {
   dense?: boolean
   theme?: TiptapEditorTheme
 }) {
-  const isDark = theme === 'dark'
-
   return (
     <span
-      className={cn(
-        'w-px shrink-0',
-        isDark ? 'bg-zinc-800' : 'bg-input',
-        dense ? 'mx-0.5 h-4' : 'mx-1 h-6',
-      )}
+      className={cn('w-px shrink-0 bg-border', dense ? 'mx-0.5 h-4' : 'mx-1 h-6')}
       aria-hidden
     />
   )
@@ -57,22 +45,17 @@ export function ToolbarDivider({
 export function ToolbarGroup({
   children,
   surface,
-  theme = 'light',
+  theme: _theme = 'light',
 }: {
   children: ReactNode
   surface?: boolean
   theme?: TiptapEditorTheme
 }) {
-  const isDark = theme === 'dark'
-
   return (
     <div
       className={cn(
         'flex shrink-0 items-center gap-0.5',
-        surface &&
-          (isDark
-            ? 'rounded-xl bg-zinc-900 p-0.5 ring-1 ring-zinc-800'
-            : 'rounded-xl bg-muted p-0.5 ring-1 ring-input'),
+        surface && 'rounded-xl bg-muted p-0.5 ring-1 ring-border',
       )}
     >
       {children}
@@ -110,10 +93,8 @@ export function ToolbarIconButton({
   actionOnMouseDown = false,
   children,
   size = 'default',
-  theme = 'light',
+  theme: _theme = 'light',
 }: ToolbarIconButtonProps) {
-  const isDark = theme === 'dark'
-
   return (
     <Button
       type="button"
@@ -136,9 +117,7 @@ export function ToolbarIconButton({
         size === 'default' && 'size-9',
         active
           ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
-          : isDark
-            ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
       {children}
@@ -163,8 +142,6 @@ export function ToolbarMenuButton({
   className,
   ...props
 }: ToolbarMenuButtonProps) {
-  const isDark = theme === 'dark'
-
   return (
     <Button
       type="button"
@@ -173,10 +150,7 @@ export function ToolbarMenuButton({
       aria-label={label}
       onMouseDown={(event) => event.preventDefault()}
       className={cn(
-        'shrink-0 gap-1.5 rounded-sm font-medium',
-        isDark
-          ? 'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 data-[state=open]:bg-zinc-800 data-[state=open]:text-zinc-100'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground',
+        'shrink-0 gap-1.5 rounded-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground',
         controlSize === 'compact' && 'h-8 px-2.5 text-xs',
         controlSize === 'default' && 'h-9 px-3 text-sm',
         className,

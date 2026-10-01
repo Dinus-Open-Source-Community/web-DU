@@ -39,7 +39,7 @@ export function UserAvatarImage({
   return (
     <div
       className={cn(
-        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-400',
+        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper-paper text-ink-400',
         className,
       )}
       style={{ width: size, height: size }}

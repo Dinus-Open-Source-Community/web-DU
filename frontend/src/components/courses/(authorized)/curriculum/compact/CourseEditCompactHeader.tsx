@@ -46,13 +46,13 @@ export function CourseEditCompactHeader({
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 py-3 backdrop-blur-sm supports-backdrop-filter:bg-white/80 lg:hidden">
+    <header className={editLayout.stickyHeader}>
       <div className="flex items-center gap-2">
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className={`${editLayout.control} -ml-2 shrink-0 gap-1 px-2 text-slate-700`}
+          className={`${editLayout.control} -ml-2 shrink-0 gap-1 px-2 text-ink-700`}
           onClick={onBackToOutline}
         >
           <ChevronLeft className="size-4" aria-hidden />
@@ -83,7 +83,7 @@ export function CourseEditCompactHeader({
             type="button"
             variant="ghost"
             size="icon"
-            className={`${editLayout.iconButton} shrink-0 text-slate-600`}
+            className={`${editLayout.iconButton} shrink-0 text-ink-600`}
             aria-label="Ubah nama lesson"
             onClick={() => setIsRenaming(true)}
           >

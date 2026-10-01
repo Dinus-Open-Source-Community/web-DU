@@ -7,8 +7,8 @@ import { LessonContent } from '../module-viewer/LessonContent'
 import { LessonFooter } from '../module-viewer/LessonFooter'
 import { LessonSearchDialog } from '../module-viewer/LessonSearchDialog'
 import { LessonSidebar } from '../module-viewer/LessonSidebar'
-import { LessonThemeDialog } from '../module-viewer/LessonThemeDialog'
 import { LessonViewerHeader } from '../module-viewer/LessonViewerHeader'
+import { lessonViewerSurfaceClassName } from '@/lib/course-module-viewer/lesson-viewer-surface'
 import { cn } from '@/lib/utils'
 import type { CourseModuleViewerShellProps } from '@/lib/course-module-viewer/course-module-viewer-view-model'
 
@@ -19,9 +19,6 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     backHref,
     courseTitle,
     theme,
-    isThemeDialogOpen,
-    onThemeDialogOpenChange,
-    onThemeChange,
     modulesState,
     lessonEntries,
     effectiveActiveLessonId,
@@ -50,7 +47,6 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     showAssignmentDetail,
     showAssignmentWork,
     onOpenSearch,
-    onOpenThemeSettings,
     onOpenModules,
     onToggleSidebar,
     onMobileSidebarOpenChange,
@@ -65,22 +61,23 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
   return (
     <section
       className={cn(
-        'relative min-h-dvh overflow-hidden',
-        theme === 'dark' ? 'bg-zinc-950 text-zinc-100' : 'bg-white text-slate-950',
-      )}>
+        lessonViewerSurfaceClassName,
+        'relative min-h-dvh overflow-hidden bg-background text-foreground',
+      )}
+      data-lesson-theme={theme}
+    >
       <LessonViewerHeader
         backHref={backHref}
         courseTitle={courseTitle}
         theme={theme}
         onOpenSearch={onOpenSearch}
-        onOpenThemeSettings={onOpenThemeSettings}
         onOpenModules={onOpenModules}
       />
 
       <div
         className={cn(
-          'transition-[margin-right] duration-200 ease-out',
-          isContentShifted && 'lg:mr-[348px]',
+          'transition-[margin-left] duration-200 ease-out',
+          isContentShifted && 'lg:ml-[348px]',
         )}>
         {showLessonContent ? (
           <LessonContent lesson={displayedLesson} theme={theme} isLoading={isLessonLoading} />
@@ -89,7 +86,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         {isAssignmentLoading ? (
           <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 lg:px-10">
             <div className="mx-auto w-full max-w-3xl">
-              <p className={cn('text-sm', theme === 'dark' ? 'text-zinc-400' : 'text-slate-500')}>
+              <p className={cn('text-sm', theme === 'dark' ? 'text-zinc-400' : 'text-ink-500')}>
                 Memuat data tugas...
               </p>
             </div>
@@ -176,12 +173,6 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         onClose={onCloseSearch}
       />
 
-      <LessonThemeDialog
-        open={isThemeDialogOpen}
-        value={theme}
-        onOpenChange={onThemeDialogOpenChange}
-        onChange={onThemeChange}
-      />
     </section>
   )
 }

@@ -62,10 +62,7 @@ export default function RegisterPage() {
       subheading="Daftar sekarang dan mulai perjalanan belajar Anda dengan Doscom University."
     >
       <AuthFormPanel>
-        <AuthPageHeader
-          title="Daftar"
-          description="Lengkapi data di bawah untuk membuat akun baru."
-        />
+        <AuthPageHeader title="Daftar" displayTitle />
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

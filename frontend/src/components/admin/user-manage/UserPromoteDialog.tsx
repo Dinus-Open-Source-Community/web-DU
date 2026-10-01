@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Check, Search, type LucideIcon } from 'lucide-react'
 
 import { UserIdentityCell } from '@/components/admin/user-manage/UserIdentityCell'
-import { Badge } from '@/components/ui/badge'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { DialogScrollArea } from '@/components/ui/dialog-scroll-area'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import type { PromoteCandidate } from '@/lib/user-manage/view-models'
 import { cn } from '@/lib/utils'
 
@@ -103,37 +103,44 @@ export function UserPromoteDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b border-slate-100 px-6 py-5">
+      <DialogContent
+        className="flex max-h-[min(90vh,720px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        onWheel={(event) => event.stopPropagation()}
+      >
+        <DialogHeader className="shrink-0 border-b border-line-light px-6 py-5">
           <DialogTitle className="text-lg">{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 px-6 py-5">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 py-5">
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400"
               aria-hidden
             />
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={searchPlaceholder}
-              className="h-11 rounded-xl border-slate-200 bg-white pl-10"
+              className="h-11 rounded-xl border-line-light bg-paper-white pl-10"
             />
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 px-4 py-2.5 text-xs text-slate-500">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-ink-900/10 bg-paper-paper/70 px-4 py-2.5 text-xs text-ink-500">
             <span>{filteredCandidates.length} kandidat cocok</span>
             <span>Pilih satu user untuk melanjutkan</span>
           </div>
 
-          <ScrollArea className="h-[360px] rounded-2xl border border-slate-200/80 bg-slate-50/40 p-2">
+          <DialogScrollArea
+            className="h-[min(50vh,360px)] rounded-2xl border border-ink-900/10 bg-paper-paper/40 p-2"
+            role="listbox"
+            aria-label="Daftar kandidat"
+          >
             <div className="space-y-2 p-1">
               {filteredCandidates.length === 0 ? (
                 <div className="flex min-h-[280px] flex-col items-center justify-center gap-2 px-6 text-center">
-                  <p className="text-sm font-semibold text-slate-700">{emptyTitle}</p>
-                  <p className="max-w-sm text-sm leading-relaxed text-slate-500">
+                  <p className="text-sm font-semibold text-ink-700">{emptyTitle}</p>
+                  <p className="max-w-sm text-sm leading-relaxed text-ink-500">
                     {emptyDescription}
                   </p>
                 </div>
@@ -144,12 +151,14 @@ export function UserPromoteDialog({
                     <button
                       key={candidate.uid}
                       type="button"
+                      role="option"
+                      aria-selected={selected}
                       onClick={() => setSelectedUid(candidate.uid)}
                       className={cn(
                         'flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
                         selected
                           ? 'border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.12)]'
-                          : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/80',
+                          : 'border-ink-900/10 bg-paper-white hover:border-line-medium hover:bg-paper-paper/80',
                       )}
                     >
                       <div className="min-w-0 flex-1">
@@ -161,10 +170,10 @@ export function UserPromoteDialog({
                         />
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
-                        <Badge variant="userRole">{candidate.sourceRoleLabel}</Badge>
+                        <AdminMetaLabel>{candidate.sourceRoleLabel}</AdminMetaLabel>
                         <span
                           className={cn(
-                            'flex size-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400',
+                            'flex size-7 items-center justify-center rounded-full border border-line-light bg-paper-white text-ink-400',
                             selected && 'border-primary text-primary',
                           )}
                         >
@@ -176,16 +185,16 @@ export function UserPromoteDialog({
                 })
               )}
             </div>
-          </ScrollArea>
+          </DialogScrollArea>
 
           {selectedCandidate ? (
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
+            <div className="rounded-xl border border-ink-900/10 bg-paper-paper/70 px-4 py-3 text-sm text-ink-600">
               {footerHint(selectedCandidate.name)}
             </div>
           ) : null}
         </div>
 
-        <DialogFooter className="border-t border-slate-100 px-6 py-4">
+        <DialogFooter className="shrink-0 border-t border-line-light px-6 py-4">
           <Button
             type="button"
             variant="outline"

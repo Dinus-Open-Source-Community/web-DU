@@ -24,7 +24,7 @@ const BrowseCourse = () => {
   return (
     <AppSidebarProvider role="student" user={sidebarUser}>
       <Section
-        dataCategories={courseCategories?.course_categories as ICategoryItem[]}
+        dataCategories={(courseCategories?.course_categories ?? []) as ICategoryItem[]}
         dataCourses={availableCourses as ICourseItem[]}
       />
     </AppSidebarProvider>

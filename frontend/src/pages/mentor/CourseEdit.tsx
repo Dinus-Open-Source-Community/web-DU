@@ -5,6 +5,7 @@ import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
 import { useCourseEditController } from '@/hooks/use-course-edit-controller'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useCourseEditModules } from '@/hooks/use-course'
@@ -55,9 +56,10 @@ function MentorCourseEditContent({
   modules,
   initialModuleId,
 }: MentorCourseEditContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseData.uid, courseData.title)
+
   const view = useCourseEditController({
     initialModuleId,
-    routeBasePath: '/mentor',
     role: 'mentor',
     courseData,
     modules,

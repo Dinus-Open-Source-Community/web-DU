@@ -9,7 +9,7 @@ import { ROUTES } from '@/lib/routes'
 import {
   resolveCourseProfiles,
 } from '@/lib/course-detail/course-profile'
-import { CourseLevelSignal } from './CourseLevel'
+import { CourseLevelLabel } from './CourseLevel'
 import {
   formatLearningProgressLabel,
   isLearningProgressComplete,
@@ -70,7 +70,7 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
 
   return (
     <div
-      className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:border-slate-300/90 hover:shadow-md`}>
+      className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-ink-900/10 bg-paper-white shadow-sm transition-all duration-300 hover:border-line-medium/90 hover:shadow-md`}>
       <CourseCardCoverFrame className={sizes.imageWrapper[size]}>
         <CourseCardCover
           src={image}
@@ -79,38 +79,38 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
           sizes="(max-width: 768px) 100vw, 384px"
           imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-slate-950/45 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-ink-900/45 to-transparent" />
       </CourseCardCoverFrame>
 
-      <div className={`relative z-10 flex grow flex-col rounded-xl border border-slate-100/70 bg-white shadow-[0_-8px_24px_rgba(15,23,42,0.04)] ${sizes.contentWrapper[size]}`}>
+      <div className={`relative z-10 flex grow flex-col rounded-xl border border-line-light/70 bg-paper-white shadow-[0_-8px_24px_rgba(15,23,42,0.04)] ${sizes.contentWrapper[size]}`}>
         <div className="mb-5 flex flex-col">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <CourseLevelSignal level={data.level} />
+            <CourseLevelLabel level={data.level} />
             <div className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
               <Check className="h-3.5 w-3.5" aria-hidden />
               <span className="line-clamp-1">Dapat diakses</span>
             </div>
           </div>
-          <h3 className={`mb-2 line-clamp-2 font-bold leading-snug text-slate-900 ${sizes.title[size]}`}>{data.title}</h3>
-          <p className={`line-clamp-2 font-normal leading-[1.55] text-slate-500 ${sizes.description[size]}`}>{data.description || data.subtitle}</p>
+          <h3 className={`mb-2 line-clamp-2 font-bold leading-snug text-ink-900 ${sizes.title[size]}`}>{data.title}</h3>
+          <p className={`line-clamp-2 font-normal leading-[1.55] text-ink-500 ${sizes.description[size]}`}>{data.description || data.subtitle}</p>
         </div>
 
         {showProgress && (
-          <div className={`mt-auto mb-5 w-full rounded-xl border border-slate-100 bg-slate-50/70 ${sizes.progress[size]}`}>
+          <div className={`mt-auto mb-5 w-full rounded-xl border border-line-light bg-paper-paper/70 ${sizes.progress[size]}`}>
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-slate-500">Progres Belajar</span>
+              <span className="text-xs font-semibold text-ink-500">Progres Belajar</span>
               <div className="flex items-center gap-2">
                 {isComplete ? <Badge variant="progressComplete" /> : null}
                 <span className="text-xs font-bold text-primary tabular-nums">{progressLabel}</span>
               </div>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper-paper">
               <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}
 
-        <div className="mt-auto border-t border-slate-100 pt-4">
+        <div className="mt-auto border-t border-line-light pt-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} /> : null}

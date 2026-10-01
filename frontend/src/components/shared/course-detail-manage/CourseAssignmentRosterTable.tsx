@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { AdminStatusLabel } from "@/lib/admin/status-label";
 import { ArrowRight, CheckCircle2, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,14 +19,25 @@ import { cn } from "@/lib/utils";
 type CourseAssignmentRosterTableProps = {
   rows: ICourseAssignmentRosterRow[];
   buildSubmissionDetailHref: (submissionUid: string) => string;
+  adminStatusLabels?: boolean;
 };
 
 function SubmissionStatusBadge({
   status,
+  adminStatusLabels = false,
 }: {
   status: ICourseAssignmentRosterRow["status"];
+  adminStatusLabels?: boolean;
 }) {
   const isSubmitted = status === "submitted";
+
+  if (adminStatusLabels) {
+    return (
+      <AdminStatusLabel tone={isSubmitted ? "success" : "neutral"}>
+        {isSubmitted ? "Sudah kumpul" : "Belum kumpul"}
+      </AdminStatusLabel>
+    );
+  }
 
   return (
     <span
@@ -48,8 +60,10 @@ function SubmissionStatusBadge({
 
 function GradingStatusBadge({
   row,
+  adminStatusLabels = false,
 }: {
   row: ICourseAssignmentRosterRow;
+  adminStatusLabels?: boolean;
 }) {
   const submission = row.submission;
   if (!submission) {
@@ -82,6 +96,10 @@ function GradingStatusBadge({
     );
   }
 
+  if (adminStatusLabels) {
+    return <AdminStatusLabel tone="warning">Menunggu penilaian</AdminStatusLabel>;
+  }
+
   return (
     <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
       Menunggu penilaian
@@ -92,6 +110,7 @@ function GradingStatusBadge({
 export function CourseAssignmentRosterTable({
   rows,
   buildSubmissionDetailHref,
+  adminStatusLabels = false,
 }: CourseAssignmentRosterTableProps) {
   return (
     <Table>
@@ -147,7 +166,7 @@ export function CourseAssignmentRosterTable({
                 </div>
               </TableCell>
               <TableCell className="px-0 py-4">
-                <SubmissionStatusBadge status={row.status} />
+                <SubmissionStatusBadge status={row.status} adminStatusLabels={adminStatusLabels} />
               </TableCell>
               <TableCell className="px-0 py-4 text-sm text-slate-600">
                 {submission?.submittedAt
@@ -159,7 +178,7 @@ export function CourseAssignmentRosterTable({
                   : "-"}
               </TableCell>
               <TableCell className="px-0 py-4">
-                <GradingStatusBadge row={row} />
+                <GradingStatusBadge row={row} adminStatusLabels={adminStatusLabels} />
               </TableCell>
               <TableCell className="px-0 py-4 text-right">
                 {submission ? (

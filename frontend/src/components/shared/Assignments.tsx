@@ -47,10 +47,10 @@ function AssignmentCrudRow({
 
   return (
     <tr
-      className={cn('border-b border-slate-100', getAssignmentRowUrgencyClass(assignment, now))}>
-      <td className="px-3 py-3 font-medium text-slate-900">{assignment.title}</td>
-      <td className="px-3 py-3 tabular-nums text-slate-600">#{assignment.meetingNumber}</td>
-      <td className="px-3 py-3 tabular-nums text-slate-600">
+      className={cn('border-b border-line-light', getAssignmentRowUrgencyClass(assignment, now))}>
+      <td className="px-3 py-3 font-medium text-ink-900">{assignment.title}</td>
+      <td className="px-3 py-3 tabular-nums text-ink-600">#{assignment.meetingNumber}</td>
+      <td className="px-3 py-3 tabular-nums text-ink-600">
         {format(new Date(assignment.deadlineAt), 'd MMM yyyy HH:mm', { locale: id })}
       </td>
       <td className="px-3 py-3">
@@ -59,7 +59,7 @@ function AssignmentCrudRow({
           {urgentVariant && <Badge variant={urgentVariant} />}
         </div>
       </td>
-      <td className="px-3 py-3 text-slate-600">
+      <td className="px-3 py-3 text-ink-600">
         {assignment.autoCloseAfterDeadline ? 'Tutup otomatis setelah tenggat' : '—'}
         {assignment.allowResubmit ? ' · Resubmit diizinkan' : ''}
       </td>
@@ -69,7 +69,7 @@ function AssignmentCrudRow({
             type="button"
             variant="outline"
             size="icon-sm"
-            className="rounded-sm border-slate-200 shadow-none"
+            className="rounded-sm border-line-light shadow-none"
             onClick={() => onEdit(assignment)}
             aria-label={`Edit tugas: ${assignment.title}`}>
             <Pencil className="h-3.5 w-3.5" aria-hidden />
@@ -160,11 +160,11 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
       <CardPanel>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold tracking-tight text-slate-900">CRUD tugas</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              <span className="font-medium text-slate-600">Create</span> buat baru ·{' '}
-              <span className="font-medium text-slate-600">Update</span> edit ·{' '}
-              <span className="font-medium text-slate-600">Delete</span> hapus dari daftar.
+            <h2 className="text-sm font-semibold tracking-tight text-ink-900">CRUD tugas</h2>
+            <p className="mt-1 text-sm text-ink-500">
+              <span className="font-medium text-ink-600">Create</span> buat baru ·{' '}
+              <span className="font-medium text-ink-600">Update</span> edit ·{' '}
+              <span className="font-medium text-ink-600">Hapus</span> menghapus dari daftar.
             </p>
           </div>
           <Button type="button" className="w-fit shrink-0 gap-1.5 rounded-sm" onClick={onOpenCreateForm}>
@@ -175,23 +175,23 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80">
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-line-light bg-paper-paper/80">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Judul
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Pertemuan
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Tenggat
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Status
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Kebijakan
                 </th>
-                <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Aksi
                 </th>
               </tr>
@@ -199,7 +199,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
             <tbody>
               {assignmentData.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-500">
+                  <td colSpan={6} className="px-3 py-8 text-center text-sm text-ink-500">
                     Belum ada tugas. Klik Buat tugas.
                   </td>
                 </tr>
@@ -219,20 +219,20 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
       </CardPanel>
 
       <CardPanel>
-        <h2 className="text-sm font-semibold tracking-tight text-slate-900">Kiriman peserta</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="text-sm font-semibold tracking-tight text-ink-900">Kiriman peserta</h2>
+        <p className="mt-1 text-sm text-ink-500">
           Filter lalu buka review untuk melihat teks, file, gambar, video, dan tautan.
         </p>
 
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
           <div className="flex min-w-[180px] flex-1 flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tugas</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-500">Tugas</label>
             <select
               value={assignmentUid}
               onChange={(event) =>
                 onAssignmentUidChange(event.target.value === 'all' ? 'all' : event.target.value)
               }
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
               <option value="all">Semua tugas</option>
               {assignmentData.map((assignment) => (
                 <option key={assignment.uid} value={assignment.uid}>
@@ -242,13 +242,13 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
             </select>
           </div>
           <div className="flex min-w-[180px] flex-1 flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-500">
               Status review
             </label>
             <select
               value={submissionStatus}
               onChange={(event) => onSubmissionStatusChange(event.target.value as typeof submissionStatus)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+              className="rounded-xl border border-line-light bg-paper-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
               <option value="all">Semua</option>
               <option value="pending_review">Menunggu review</option>
               <option value="graded">Selesai dinilai</option>
@@ -266,30 +266,30 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80">
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-line-light bg-paper-paper/80">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Siswa
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Tugas
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Dikirim
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Attempt
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   Review
                 </th>
-                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink-500">
                   {' '}
                 </th>
               </tr>
             </thead>
             <tbody>
               {filteredSubmissions.map((submission) => (
-                <tr key={submission.uid} className="border-b border-slate-100">
+                <tr key={submission.uid} className="border-b border-line-light">
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
                       <img
@@ -300,16 +300,16 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
                         alt={submission.studentName}
                         className="h-8 w-8 rounded-full object-cover"
                       />
-                      <span className="font-medium text-slate-900">{submission.studentName}</span>
+                      <span className="font-medium text-ink-900">{submission.studentName}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-slate-700">
+                  <td className="px-3 py-3 text-ink-700">
                     {assignmentTitleMap.get(submission.assignmentUid) ?? '—'}
                   </td>
-                  <td className="px-3 py-3 tabular-nums text-slate-600">
+                  <td className="px-3 py-3 tabular-nums text-ink-600">
                     {format(new Date(submission.submittedAt), 'd MMM yyyy', { locale: id })}
                   </td>
-                  <td className="px-3 py-3 tabular-nums text-slate-600">{submission.attemptNumber}</td>
+                  <td className="px-3 py-3 tabular-nums text-ink-600">{submission.attemptNumber}</td>
                   <td className="px-3 py-3">
                     <Badge variant={submissionReviewBadgeVariant(submission.reviewStatus)} />
                   </td>
@@ -328,7 +328,7 @@ export function MentorCourseAssignmentsSection({ view }: MentorCourseAssignments
             </tbody>
           </table>
           {filteredSubmissions.length === 0 && (
-            <p className="py-8 text-center text-sm text-slate-500">Tidak ada kiriman untuk filter ini.</p>
+            <p className="py-8 text-center text-sm text-ink-500">Tidak ada kiriman untuk filter ini.</p>
           )}
         </div>
       </CardPanel>
@@ -365,7 +365,7 @@ export function MentorCourseAssignmentsNotFound({
 }: MentorCourseAssignmentsNotFoundProps) {
   return (
     <section className={appPageContentClassName}>
-      <p className="text-slate-600">Kursus tidak ditemukan.</p>
+      <p className="text-ink-600">Kursus tidak ditemukan.</p>
       <Button asChild variant="outline" className="w-fit rounded-sm shadow-none">
         <Link to={backHref}>Kembali ke daftar</Link>
       </Button>

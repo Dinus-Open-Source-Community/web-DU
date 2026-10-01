@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom'
 import { Pagination } from '../../shared/Pagination'
 import type { AdminStudent } from '../../../lib/types/user'
 import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
+import { ROUTES } from '@/lib/routes'
 
 function ProgressCell({ value }: { value: number }) {
   const progressPercent = toLearningProgressPercent(value)
@@ -114,7 +115,7 @@ export function TableManagementUsers({
               <div className="mt-auto flex items-center justify-between gap-3">
                 <p className="text-xs text-slate-500">Bergabung {student.joinedAt}</p>
                 <Button asChild variant="outline" size="sm" className="h-9 rounded-sm px-4 text-xs font-semibold shadow-none hover:bg-muted">
-                  <Link to={`/admin/users/students/${student.uid}`}>Detail</Link>
+                  <Link to={ROUTES.admin.users.studentDetail(student.uid)}>Detail</Link>
                 </Button>
               </div>
             </article>

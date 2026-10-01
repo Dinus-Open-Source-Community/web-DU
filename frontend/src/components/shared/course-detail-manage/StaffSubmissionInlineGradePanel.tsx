@@ -70,7 +70,7 @@ export function StaffSubmissionInlineGradePanel({
             onCheckedChange={(checked) => setPassed(checked === true)}
             disabled={isSubmitting}
           />
-          <Label htmlFor="inline-grade-passed" className="font-normal text-slate-700">
+          <Label htmlFor="inline-grade-passed" className="font-normal text-ink-700">
             Dinyatakan lulus
           </Label>
         </div>
@@ -97,7 +97,7 @@ export function StaffSubmissionInlineGradePanel({
       <p
         className={cn(
           'mt-3 text-xs leading-5',
-          isGraded ? 'text-slate-500' : 'text-amber-700',
+          isGraded ? 'text-ink-500' : 'text-amber-700',
         )}
       >
         {isGraded

@@ -51,9 +51,9 @@ export interface ITransactionHistory {
 
 /** Label UI untuk status pembayaran. */
 export const paymentStatusLabels: Record<PaymentStatus, string> = {
-  pending: 'Pending',
-  success: 'Success',
-  failed: 'Failed',
+  pending: 'Menunggu',
+  success: 'Berhasil',
+  failed: 'Gagal',
 }
 
 /** Urutan sort tabel transaksi menurut status. */

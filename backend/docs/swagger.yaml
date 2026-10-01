@@ -327,6 +327,18 @@ definitions:
       video_url:
         type: string
     type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: StrongPassword123
+        type: string
+    required:
+    - email
+    - password
+    type: object
   dto.OrderItem:
     properties:
       image_url:
@@ -371,6 +383,22 @@ definitions:
         type: array
       title:
         type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      name:
+        example: User DU
+        type: string
+      password:
+        example: StrongPassword123
+        type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   dto.UpdateClassTypeRequest:
     properties:
@@ -3717,6 +3745,45 @@ paths:
       summary: Get my lesson reading history (Enrolled Student)
       tags:
       - Lesson Reading
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, returns JWT token valid
+        for 24 hours
+      parameters:
+      - description: Login credentials (email and password)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logged in successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to generate token
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login (Public)
+      tags:
+      - Auth
   /mentor/{id}:
     get:
       consumes:
@@ -4286,6 +4353,45 @@ paths:
       summary: Get Payment (Tripay)
       tags:
       - Payment
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with name, email, and password. Returns JWT
+        token on success.
+      parameters:
+      - description: Register payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registered successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Email already registered
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register new user (Public)
+      tags:
+      - Auth
   /students/me/assignments:
     get:
       description: Retrieve all published assignments across courses the authenticated

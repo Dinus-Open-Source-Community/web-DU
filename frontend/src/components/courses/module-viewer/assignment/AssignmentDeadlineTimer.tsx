@@ -33,10 +33,10 @@ export function AssignmentDeadlineTimer({
         showExpired
           ? isDark
             ? 'border-zinc-800/90 bg-zinc-900/70'
-            : 'border-slate-200/90 bg-slate-50/90'
+            : 'border-ink-900/10 bg-paper-paper/90'
           : isDark
             ? 'border-zinc-700 bg-zinc-900 text-zinc-100'
-            : 'border-slate-200 bg-white text-slate-900',
+            : 'border-line-light bg-paper-white text-ink-900',
         className,
       )}>
       <span
@@ -45,10 +45,10 @@ export function AssignmentDeadlineTimer({
           showExpired
             ? isDark
               ? 'bg-zinc-800 text-zinc-500'
-              : 'bg-slate-100 text-slate-400'
+              : 'bg-paper-paper text-ink-400'
             : isDark
               ? 'bg-zinc-800 text-zinc-300'
-              : 'bg-slate-100 text-slate-500',
+              : 'bg-paper-paper text-ink-500',
         )}>
         {showExpired ? (
           <TimerOff className="h-3.5 w-3.5" aria-hidden />
@@ -63,10 +63,10 @@ export function AssignmentDeadlineTimer({
           showExpired
             ? isDark
               ? 'text-zinc-400'
-              : 'text-slate-500'
+              : 'text-ink-500'
             : isDark
               ? 'text-zinc-100'
-              : 'text-slate-900',
+              : 'text-ink-900',
         )}>
         {isClosed ? 'Ditutup' : isExpired ? 'Waktu habis' : remainingLabel}
       </span>

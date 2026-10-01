@@ -5,6 +5,7 @@ import { AppNavbarProvider } from '@/components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseAssignmentSubmissionDetailPage } from '@/hooks/course-detail/use-course-assignment-submission-detail-page'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
@@ -71,6 +72,8 @@ function MentorAssignmentSubmissionDetailContent({
   modules,
   students,
 }: MentorAssignmentSubmissionDetailContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseUid, courseTitle)
+
   const view = useCourseAssignmentSubmissionDetailPage({
     courseUid,
     lessonUid,

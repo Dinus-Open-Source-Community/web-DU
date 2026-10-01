@@ -39,14 +39,14 @@ const nodeStyles: Record<StepState, string> = {
   complete: 'bg-primary text-white shadow-[0_4px_14px_-4px_rgba(10,132,220,0.55)]',
   active: 'bg-sky-600 text-white shadow-[0_4px_14px_-4px_rgba(2,132,199,0.55)]',
   failed: 'bg-red-600 text-white shadow-[0_4px_14px_-4px_rgba(220,38,38,0.5)]',
-  upcoming: 'bg-slate-50 text-slate-400 ring-1 ring-slate-200/90',
+  upcoming: 'bg-paper-paper text-ink-400 ring-1 ring-line-light/90',
 }
 
 const labelStyles: Record<StepState, string> = {
-  complete: 'text-slate-900',
-  active: 'text-slate-900',
+  complete: 'text-ink-900',
+  active: 'text-ink-900',
   failed: 'text-red-700',
-  upcoming: 'text-slate-400',
+  upcoming: 'text-ink-400',
 }
 
 export function PaymentProgressNavigation({ status }: { status: PaymentStatus }) {
@@ -67,7 +67,7 @@ export function PaymentProgressNavigation({ status }: { status: PaymentStatus })
                 <span
                   className={cn(
                     'absolute top-[22px] right-1/2 h-[2px] w-full -translate-y-1/2 rounded-full transition-colors duration-300 motion-reduce:transition-none',
-                    connectorComplete ? 'bg-primary/50' : 'bg-slate-200',
+                    connectorComplete ? 'bg-primary/50' : 'bg-muted',
                   )}
                   aria-hidden
                 />

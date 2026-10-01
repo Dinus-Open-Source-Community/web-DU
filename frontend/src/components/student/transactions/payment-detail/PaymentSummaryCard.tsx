@@ -23,15 +23,15 @@ export function PaymentSummaryCard({
   const serviceFee = invoice.totalAmount - itemsTotal
 
   return (
-    <aside className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-lg shadow-slate-900/5">
-      <div className="border-b border-slate-100 p-5">
+    <aside className="overflow-hidden rounded-[24px] border border-ink-900/10 bg-paper-white shadow-lg shadow-ink-900/5">
+      <div className="border-b border-line-light p-5">
         <p className="text-xs font-bold tracking-wider text-primary uppercase">Ringkasan</p>
-        <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-950">
+        <h2 className="mt-1 text-xl font-bold tracking-tight text-ink-900">
           Pesanan Anda
         </h2>
       </div>
 
-      <div className="flex gap-4 border-b border-slate-100 p-5">
+      <div className="flex gap-4 border-b border-line-light p-5">
         <CourseCardCoverCompactFrame className="w-28 rounded-2xl">
           <CourseCardCover
             src={invoice.courseImageUrl}
@@ -42,10 +42,10 @@ export function PaymentSummaryCard({
           />
         </CourseCardCoverCompactFrame>
         <div className="min-w-0">
-          <p className="line-clamp-2 text-sm leading-6 font-bold text-slate-950">
+          <p className="line-clamp-2 text-sm leading-6 font-bold text-ink-900">
             {invoice.courseTitle}
           </p>
-          <p className="mt-1 text-xs text-slate-500">{invoice.paymentMethodLabel}</p>
+          <p className="mt-1 text-xs text-ink-500">{invoice.paymentMethodLabel}</p>
         </div>
       </div>
 
@@ -53,20 +53,20 @@ export function PaymentSummaryCard({
         {invoice.lineItems.map((item) => (
           <div key={item.label} className="flex items-start justify-between gap-4 text-sm">
             <div className="min-w-0">
-              <p className="font-medium text-slate-700">{item.label}</p>
+              <p className="font-medium text-ink-700">{item.label}</p>
               {item.description ? (
-                <p className="mt-0.5 text-xs text-slate-400">{item.description}</p>
+                <p className="mt-0.5 text-xs text-ink-400">{item.description}</p>
               ) : null}
             </div>
-            <span className="shrink-0 font-semibold text-slate-900 tabular-nums">
+            <span className="shrink-0 font-semibold text-ink-900 tabular-nums">
               {FormatRupiah(item.amount)}
             </span>
           </div>
         ))}
         {serviceFee > 0 ? (
           <div className="flex justify-between gap-4 text-sm">
-            <span className="text-slate-500">Biaya layanan</span>
-            <span className="font-semibold text-slate-900 tabular-nums">
+            <span className="text-ink-500">Biaya layanan</span>
+            <span className="font-semibold text-ink-900 tabular-nums">
               {FormatRupiah(serviceFee)}
             </span>
           </div>
@@ -74,7 +74,7 @@ export function PaymentSummaryCard({
       </div>
 
       <div className="border-y border-primary/10 bg-primary/[0.035] p-5">
-        <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">
+        <p className="text-xs font-bold tracking-wider text-ink-500 uppercase">
           Total pembayaran
         </p>
         <div className="mt-1 flex items-center justify-between gap-3">
