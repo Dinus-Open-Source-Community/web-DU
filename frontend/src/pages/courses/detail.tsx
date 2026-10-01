@@ -40,7 +40,7 @@ export default function PublicCourseDetailPage() {
     return (
       <GuestLayout>
         <main className="min-h-[100dvh] bg-[#f5f5f5]">
-          <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-4 text-center text-slate-600 sm:px-6">
+          <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-4 text-center text-ink-600 sm:px-6">
             Kursus tidak ditemukan.
           </div>
         </main>

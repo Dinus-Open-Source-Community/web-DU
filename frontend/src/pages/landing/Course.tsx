@@ -24,7 +24,7 @@ export default function CoursePage() {
       <GuestLayout>
         <CourseSection1
           Data={availableCourses as ICourseItem[]}
-          Categories={courseCategories?.course_categories as ICategoryItem[]}
+          Categories={(courseCategories?.course_categories ?? []) as ICategoryItem[]}
         />
       </GuestLayout>
     </main>

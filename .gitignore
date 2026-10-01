@@ -7,7 +7,15 @@
 !/backend/public/uploads/avatars/*.txt
 # Environment variables
 .env
-/.playwright-mcp/
+# Playwright / MCP browser artifacts (any path, never push)
+**/.playwright-mcp/
+**/.playwright-cli/
+.playwright-mcp/
+.playwright-cli/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
 /graphify-out/
 /.impeccable/
 /.superpowers/

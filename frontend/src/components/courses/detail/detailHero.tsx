@@ -26,11 +26,11 @@ export function CourseDetailHero({
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(135deg,#0a84dc_0%,#075e9c_100%)] text-white">
       <div
-        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-paper-white/10 blur-3xl"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -bottom-16 -left-10 h-64 w-64 rounded-full bg-white/5 blur-3xl"
+        className="pointer-events-none absolute -bottom-16 -left-10 h-64 w-64 rounded-full bg-paper-white/5 blur-3xl"
         aria-hidden
       />
 
@@ -49,7 +49,7 @@ export function CourseDetailHero({
         </nav>
 
         <div className="flex flex-col gap-2.5 sm:gap-3">
-          <span className="w-fit rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+          <span className="w-fit rounded-full bg-paper-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
             {category}
           </span>
           <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-[2.5rem]">

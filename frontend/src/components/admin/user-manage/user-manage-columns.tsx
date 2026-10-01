@@ -8,6 +8,7 @@ import { ROUTES } from '@/lib/routes'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 import type { ManagedUserRow } from '@/lib/user-manage/view-models'
 import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
+import { userManageLayout } from '@/lib/user-manage/layout'
 
 type BuildColumnsOptions = {
   kind: UserManageKind
@@ -113,7 +114,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-sm px-3 text-xs font-semibold"
+          className={userManageLayout.tableActionButton}
           asChild
         >
           <Link to={detailPath(row.uid)}>Detail</Link>
@@ -122,7 +123,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-sm px-3 text-xs font-semibold"
+          className={userManageLayout.tableActionButton}
           onClick={() => onChangeRole(row)}
           disabled={disabled}
         >
@@ -133,7 +134,7 @@ export function buildUserManageColumns({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-sm px-3 text-xs font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+          className={`${userManageLayout.tableActionButton} ${userManageLayout.tableDestructiveActionButton}`}
           onClick={() => onDelete(row)}
           disabled={disabled}
         >

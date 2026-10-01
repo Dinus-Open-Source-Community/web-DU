@@ -5,21 +5,20 @@ import {
   resolveCourseEditBackTarget,
   type CourseEditBackTarget,
 } from '@/lib/course-edit/navigation-state'
+import { dashboardMenu } from '@/lib/routes'
 
-export function useCourseEditBackNavigation(routeBasePath: '/mentor' | '/admin') {
+export function useCourseEditBackNavigation(coursesListPath = dashboardMenu.courses) {
   const location = useLocation()
   const navigate = useNavigate()
-
-  const fallbackPath = `${routeBasePath}/courses`
 
   const backTarget = useMemo(
     () =>
       resolveCourseEditBackTarget(
         location.state,
         `${location.pathname}${location.search}`,
-        fallbackPath,
+        coursesListPath,
       ),
-    [fallbackPath, location.pathname, location.search, location.state],
+    [coursesListPath, location.pathname, location.search, location.state],
   )
 
   const goBack = useCallback(() => {

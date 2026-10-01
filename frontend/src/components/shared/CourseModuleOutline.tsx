@@ -216,16 +216,16 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
   const totalLessons = modules.reduce((sum, m) => sum + moduleLessons(m).length, 0)
 
   return (
-    <aside className="rounded-2xl border border-slate-200/80 bg-white lg:sticky lg:top-6">
+    <aside className="rounded-2xl border border-ink-900/10 bg-paper-white lg:sticky lg:top-6">
       {/* Header */}
-      <div className="border-b border-slate-100 px-4 py-3.5">
+      <div className="border-b border-line-light px-4 py-3.5">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
             <FolderOpen className="size-3.5 text-primary" />
           </div>
           <div>
-            <h3 className="text-[13px] font-semibold text-slate-900">Struktur Kursus</h3>
-            <p className="text-[11px] text-slate-400">
+            <h3 className="text-[13px] font-semibold text-ink-900">Struktur Kursus</h3>
+            <p className="text-[11px] text-ink-400">
               {modules.length} modul &middot; {totalLessons} lesson
             </p>
           </div>
@@ -242,15 +242,15 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
           return (
             <div key={mod.uid} className={cn('overflow-hidden rounded-xl transition-colors', hasActiveLesson && !isExpanded ? 'bg-primary/3' : '')}>
               {/* Module header */}
-              <div className="group/mod flex items-center gap-1.5 rounded-xl px-2.5 py-2 hover:bg-slate-50">
+              <div className="group/mod flex items-center gap-1.5 rounded-xl px-2.5 py-2 hover:bg-paper-paper">
                 <button
                   type="button"
                   onClick={() => toggleExpand(mod.uid)}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-600">
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-muted/60 hover:text-ink-600">
                   {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                 </button>
 
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">{mi + 1}</span>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-paper-paper text-[10px] font-bold text-ink-500">{mi + 1}</span>
 
                 {editingThisModule ? (
                   <div className="flex flex-1 items-center gap-1">
@@ -260,7 +260,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                       onChange={(e) => setDraft(e.target.value)}
                       onKeyDown={handleRenameKeyDown}
                       autoFocus
-                      className="min-w-0 flex-1 rounded-lg border border-primary/30 bg-white px-2 py-1 text-xs font-medium text-slate-900 outline-none ring-2 ring-primary/10 placeholder:text-slate-300"
+                      className="min-w-0 flex-1 rounded-lg border border-primary/30 bg-paper-white px-2 py-1 text-xs font-medium text-ink-900 outline-none ring-2 ring-primary/10 placeholder:text-ink-400"
                       placeholder="Nama modul..."
                     />
                     <button
@@ -273,7 +273,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                     <button
                       type="button"
                       onClick={cancelRename}
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-paper-paper text-ink-500 transition-colors hover:bg-muted"
                       title="Batal">
                       <X className="size-3" />
                     </button>
@@ -281,22 +281,22 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                 ) : (
                   <>
                     <button type="button" onClick={() => toggleExpand(mod.uid)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
-                      <span className="truncate text-xs font-semibold text-slate-700">{mod.title}</span>
-                      <span className="shrink-0 text-[10px] text-slate-400">({moduleLessons(mod).length})</span>
+                      <span className="truncate text-xs font-semibold text-ink-700">{mod.title}</span>
+                      <span className="shrink-0 text-[10px] text-ink-400">({moduleLessons(mod).length})</span>
                     </button>
 
                     <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/mod:opacity-100">
                       <button
                         type="button"
                         onClick={() => startEditModule(mod.uid, mod.title)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                        title="Rename modul">
+                        className="flex h-6 w-6 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-paper-paper hover:text-ink-600"
+                        title="Ubah nama modul">
                         <Pencil className="size-3" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteModule(mod.uid)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                        className="flex h-6 w-6 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-red-50 hover:text-red-500"
                         title="Hapus modul">
                         <Trash2 className="size-3" />
                       </button>
@@ -307,7 +307,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
 
               {/* Expanded lesson list */}
               {isExpanded && (
-                <div className="ml-4.5 border-l-2 border-slate-100 pb-1 pl-3 pr-2">
+                <div className="ml-4.5 border-l-2 border-line-light pb-1 pl-3 pr-2">
                   <div className="space-y-0.5 pt-0.5">
                     {moduleLessons(mod).map((lesson) => {
                       const isActive = lesson.uid === activeLessonId
@@ -319,7 +319,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                       return (
                         <div key={lesson.uid} className="group/lesson">
                           {editingThisLesson ? (
-                            <div className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2 py-1.5">
+                            <div className="flex items-center gap-1.5 rounded-lg bg-paper-paper px-2 py-1.5">
                               <Icon className={cn('size-3.5 shrink-0', typeColor.split(' ')[1])} />
                               <input
                                 ref={inputRef}
@@ -327,7 +327,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                                 onChange={(e) => setDraft(e.target.value)}
                                 onKeyDown={handleRenameKeyDown}
                                 autoFocus
-                                className="min-w-0 flex-1 rounded-md border border-primary/30 bg-white px-2 py-0.5 text-xs text-slate-900 outline-none ring-2 ring-primary/10 placeholder:text-slate-300"
+                                className="min-w-0 flex-1 rounded-md border border-primary/30 bg-paper-white px-2 py-0.5 text-xs text-ink-900 outline-none ring-2 ring-primary/10 placeholder:text-ink-400"
                                 placeholder="Nama lesson..."
                               />
                               <button
@@ -340,19 +340,19 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                               <button
                                 type="button"
                                 onClick={cancelRename}
-                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300"
+                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-muted text-ink-500 transition-colors hover:bg-muted/80"
                                 title="Batal">
                                 <X className="size-2.5" />
                               </button>
                             </div>
                           ) : (
-                            <div className={cn('flex items-center gap-1.5 rounded-lg transition-colors', isActive ? 'bg-primary/[0.07]' : 'hover:bg-slate-50/80')}>
+                            <div className={cn('flex items-center gap-1.5 rounded-lg transition-colors', isActive ? 'bg-primary/[0.07]' : 'hover:bg-paper-paper/80')}>
                               <button type="button" onClick={() => onSelectLesson(lesson.uid)} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left">
                                 {isActive && <span className="h-4 w-0.5 shrink-0 rounded-full bg-primary" />}
                                 <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-md', typeColor)}>
                                   <Icon className="size-3" />
                                 </span>
-                                <span className={cn('flex-1 truncate text-xs', isActive ? 'font-medium text-slate-900' : 'text-slate-600')}>{lesson.title}</span>
+                                <span className={cn('flex-1 truncate text-xs', isActive ? 'font-medium text-ink-900' : 'text-ink-600')}>{lesson.title}</span>
                               </button>
 
                               {/* Lesson actions */}
@@ -360,7 +360,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                                 <select
                                   value={lessonType}
                                   onChange={(e) => handleChangeLessonType(mod.uid, lesson.uid, e.target.value as LessonDeliveryType)}
-                                  className="h-5 cursor-pointer rounded-md border-0 bg-slate-100 px-1 text-[10px] font-medium text-slate-500 outline-none hover:bg-slate-200"
+                                  className="h-5 cursor-pointer rounded-md border-0 bg-paper-paper px-1 text-[10px] font-medium text-ink-500 outline-none hover:bg-muted"
                                   title="Ubah tipe konten">
                                   <option value="text">{LESSON_TYPE_LABEL.text}</option>
                                   <option value="video">{LESSON_TYPE_LABEL.video}</option>
@@ -368,14 +368,14 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                                 <button
                                   type="button"
                                   onClick={() => startEditLesson(mod.uid, lesson.uid, lesson.title)}
-                                  className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                                  title="Rename lesson">
+                                  className="flex h-5 w-5 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-paper-paper hover:text-ink-600"
+                                  title="Ubah nama lesson">
                                   <Pencil className="size-2.5" />
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteLesson(mod.uid, lesson.uid)}
-                                  className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                                  className="flex h-5 w-5 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                   title="Hapus lesson">
                                   <Trash2 className="size-2.5" />
                                 </button>
@@ -390,7 +390,7 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                   <button
                     type="button"
                     onClick={() => handleAddLesson(mod.uid)}
-                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600">
+                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-ink-400 transition-colors hover:bg-paper-paper hover:text-ink-600">
                     <Plus className="size-3" />
                     Tambah lesson
                   </button>
@@ -402,13 +402,13 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
       </div>
 
       {/* Add module button */}
-      <div className="border-t border-slate-100 p-2">
+      <div className="border-t border-line-light p-2">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleAddModule}
-          className="w-full rounded-sm border-dashed border-slate-300 bg-transparent text-xs font-medium text-slate-500 hover:border-primary/40 hover:text-primary">
+          className="w-full rounded-sm border-dashed border-line-medium bg-transparent text-xs font-medium text-ink-500 hover:border-primary/40 hover:text-primary">
           <Plus className="size-3.5" />
           Tambah modul baru
         </Button>

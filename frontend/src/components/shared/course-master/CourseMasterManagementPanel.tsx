@@ -4,8 +4,9 @@ import { FolderTree, Layers3, Pencil, Plus, Trash2 } from 'lucide-react'
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { PageHeader } from '@/components/shared/Header'
 import { SearchForm } from '@/components/shared/SearchForm'
-import { Badge } from '@/components/ui/badge'
+import { AdminActiveStatusLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
 import { useCourseMasterList } from '@/hooks/use-course-master-list'
 import {
@@ -24,6 +25,11 @@ import type {
 } from '@/lib/course-master/types'
 import { COURSE_MASTER_LABELS } from '@/lib/course-master/types'
 import { CourseMasterFormDialog } from './CourseMasterFormDialog'
+import {
+  appKpiLabelClassName,
+  appToolbarPrimaryButtonClassName,
+} from '@/lib/design/app-shell-tokens'
+import { cn } from '@/lib/utils'
 
 const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',
@@ -68,9 +74,9 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         header: 'Nama',
         cell: (row: CourseMasterItem) => (
           <div className="min-w-[180px]">
-            <p className="font-semibold text-slate-900">{row.name}</p>
+            <p className="font-semibold text-ink-900">{row.name}</p>
             {row.description ? (
-              <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">{row.description}</p>
+              <p className="mt-0.5 line-clamp-1 text-xs font-medium text-ink-500">{row.description}</p>
             ) : null}
           </div>
         ),
@@ -79,9 +85,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         id: 'status',
         header: 'Status',
         cell: (row: CourseMasterItem) => (
-          <Badge variant={row.is_active ? 'userActive' : 'userInactive'}>
-            {row.is_active ? 'Aktif' : 'Nonaktif'}
-          </Badge>
+          <AdminActiveStatusLabel active={row.is_active} />
         ),
       },
       {
@@ -89,14 +93,14 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         header: 'Kursus',
         align: 'center' as const,
         cell: (row: CourseMasterItem) => (
-          <span className="tabular-nums text-slate-700">{row.courses?.length ?? 0}</span>
+          <span className="tabular-nums font-medium text-ink-700">{row.courses?.length ?? 0}</span>
         ),
       },
       {
         id: 'updated',
         header: 'Diperbarui',
         cell: (row: CourseMasterItem) => (
-          <span className="text-slate-600">
+          <span className="text-sm font-medium text-ink-600">
             {row.updated_at ? dateFormatter.format(new Date(row.updated_at)) : '-'}
           </span>
         ),
@@ -111,7 +115,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-700"
+              className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-ink-700 shadow-none"
               onClick={() => setDialogState({ mode: 'edit', item: row })}
             >
               <Pencil className="mr-1.5 size-3.5" aria-hidden />
@@ -121,7 +125,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 rounded-sm border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+              className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
               onClick={() => setDeleteTarget({ uid: row.uid, name: row.name })}
             >
               <Trash2 className="mr-1.5 size-3.5" aria-hidden />
@@ -165,26 +169,32 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <SearchForm
-          value={search}
-          onChange={(value) => {
-            setSearch(value)
-            if (value === '') {
-              setCommittedSearch('')
-              setPage(1)
-            }
-          }}
-          onSubmit={() => {
-            setCommittedSearch(search)
+      <SearchForm
+        value={search}
+        onChange={(value) => {
+          setSearch(value)
+          if (value === '') {
+            setCommittedSearch('')
             setPage(1)
-          }}
-          placeholder={`Cari ${labels.singular.toLowerCase()}...`}
-          submitLabel="Cari"
+          }
+        }}
+        onSubmit={() => {
+          setCommittedSearch(search)
+          setPage(1)
+        }}
+        placeholder={`Cari ${labels.singular.toLowerCase()}...`}
+        submitLabel="Cari"
+      />
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <PageHeader
+          title={labels.pageTitle}
+          subtitle={labels.pageSubtitle}
+          className="mb-0 min-w-0 flex-1 space-y-2"
         />
         <Button
           type="button"
-          className="rounded-sm px-4"
+          className={cn(appToolbarPrimaryButtonClassName, 'shrink-0 self-start')}
           onClick={() => setDialogState({ mode: 'create' })}
         >
           <Plus className="mr-2 size-4" aria-hidden />
@@ -193,6 +203,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
       </div>
 
       <AdminDataTable
+        variant="admin"
         columns={columns}
         data={items}
         keyField={(row) => row.uid}
@@ -201,14 +212,18 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         onPageChange={setPage}
         emptyState={
           isLoading ? (
-            <p className="text-sm text-slate-500">Memuat data...</p>
+            <p className={appKpiLabelClassName}>Memuat data...</p>
           ) : (
             <EmptyState
               icon={kind === 'category' ? <FolderTree className="size-5" /> : <Layers3 className="size-5" />}
               title={labels.emptyTitle}
               description={labels.emptyDescription}
               action={
-                <Button type="button" className="rounded-sm" onClick={() => setDialogState({ mode: 'create' })}>
+                <Button
+                  type="button"
+                  className={appToolbarPrimaryButtonClassName}
+                  onClick={() => setDialogState({ mode: 'create' })}
+                >
                   <Plus className="mr-2 size-4" aria-hidden />
                   {labels.createButton}
                 </Button>

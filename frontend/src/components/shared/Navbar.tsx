@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, UserCircle, X } from 'lucide-react'
+import { LogOut, Menu, Settings, X } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { navLinks } from '../../lib/navigation'
 import type { GuestNavbarAuthProps } from '@/lib/layout/navbar-auth-view-model'
+import {
+  getAccountMenuNavContext,
+  getAccountMenuNavLinks,
+  shouldShowAccountSettingsLink,
+} from '@/lib/layout/account-menu-nav'
 import type { UserRole } from '../../lib/types/user'
 import { ROUTES } from '../../lib/routes'
+import { greetingForUser, navbarUserRoleLabel } from '@/lib/layout/navbar-user-display'
 import { cn } from '../../lib/utils'
 
 function userInitials(name: string): string {
@@ -16,30 +22,89 @@ function userInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-const roleLabel: Record<UserRole, string> = {
-  student: 'Siswa',
-  mentor: 'Mentor',
-  admin: 'Admin',
-  super_admin: 'Super Admin',
-}
-
 const dashboardPath: Record<UserRole, string> = {
-  student: ROUTES.student.dashboard,
-  mentor: ROUTES.mentor.dashboard,
-  admin: ROUTES.admin.dashboard,
-  super_admin: ROUTES.admin.dashboard,
+  student: ROUTES.dashboard,
+  mentor: ROUTES.dashboard,
+  admin: ROUTES.dashboard,
+  super_admin: ROUTES.dashboard,
 }
 
 type NavbarProps = {
   auth: GuestNavbarAuthProps
+  authActionsVariant?: 'default' | 'home'
 }
 
-export default function Navbar({ auth }: NavbarProps) {
+function GuestAuthActions({
+  variant,
+  onNavigate,
+  layout,
+}: {
+  variant: 'default' | 'home'
+  onNavigate?: () => void
+  layout: 'desktop' | 'mobile'
+}) {
+  const isMobile = layout === 'mobile'
+  const buttonClass = isMobile
+    ? 'h-10 w-full rounded-sm border-2 text-sm font-extrabold active:translate-y-[3px]'
+    : 'h-10 rounded-sm border-2 px-5 text-sm font-extrabold active:translate-y-[3px]'
+
+  if (variant === 'home') {
+    return (
+      <div className={cn('flex gap-3', isMobile && 'flex-col')}>
+        <Link to={ROUTES.login} onClick={onNavigate}>
+          <Button
+            variant="neobrutalism"
+            className={cn(
+              buttonClass,
+              'bg-paper-white text-ink-900 hover:bg-paper-paper',
+            )}
+          >
+            Masuk
+          </Button>
+        </Link>
+        <Link to={ROUTES.register} onClick={onNavigate}>
+          <Button variant="neobrutalism" className={buttonClass}>
+            Daftar
+          </Button>
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn('flex gap-3', isMobile && 'flex-col')}>
+      <Link to={ROUTES.login} onClick={onNavigate}>
+        <Button
+          variant="neobrutalism"
+          className={cn(
+            buttonClass,
+            'bg-paper-white hover:bg-paper-paper',
+          )}
+        >
+          Masuk
+        </Button>
+      </Link>
+      <Link to={ROUTES.redeem} onClick={onNavigate}>
+        <Button
+          variant="neobrutalism"
+          className={cn(buttonClass, 'text-primary-foreground')}
+        >
+          Tukar Kode
+        </Button>
+      </Link>
+    </div>
+  )
+}
+
+export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('')
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
-  const { isAuthenticated, userName, userEmail, userRole, userAvatar, onSignOut } = auth
+  const { isAuthenticated, userName, userRole, userAvatar, onSignOut } = auth
+  const accountNavContext = getAccountMenuNavContext(pathname)
+  const accountNavLinks = getAccountMenuNavLinks(accountNavContext, dashboardPath[userRole])
+  const showAccountSettings = shouldShowAccountSettingsLink(accountNavContext)
 
   // Scrollspy: tandai section yang sedang dikunjungi. Saat user scroll melewati
   // sebuah section (id anchor di halaman home), link navbar-nya jadi aktif —
@@ -121,23 +186,19 @@ export default function Navbar({ auth }: NavbarProps) {
     onSignOut()
   }
 
-  const handleProfile = () => {
+  const handleSettings = () => {
     setIsMenuOpen(false)
     navigate(ROUTES.profile)
   }
 
-  const handleDashboard = () => {
-    setIsMenuOpen(false)
-    navigate(dashboardPath[userRole])
-  }
-
   return (
-    <nav className="text-ink-900 bg-paper-white/95 shadow-nav fixed top-0 left-0 z-50 min-h-22 w-full border-b-2 border-ink-900 backdrop-blur lg:flex lg:items-center">
-      {/* lg+: konten di-center vertikal presisi (nav flex items-center, tanpa py
-          container); <lg: py-4 seperti semula. */}
-      <div className="container mx-auto flex w-full items-center px-4 py-4 md:px-8 lg:px-20 lg:py-0">
+    <nav className="text-ink-900 bg-paper-white/95 shadow-nav fixed top-0 left-0 z-50 flex h-16 w-full items-center border-b-2 border-ink-900 backdrop-blur">
+      <div className="container mx-auto flex h-full w-full items-center px-4 md:px-8 lg:px-16">
         <div className="flex flex-1 justify-start">
-          <Link to="/" className="text-ink-900 font-display text-2xl font-bold tracking-tight">
+          <Link
+            to="/"
+            className="text-ink-900 font-display text-xl font-bold tracking-tight sm:text-2xl"
+          >
             Doscom University
           </Link>
         </div>
@@ -148,8 +209,8 @@ export default function Navbar({ auth }: NavbarProps) {
               <Link
                 key={navLink.href}
                 to={navLink.href}
-                className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-4 text-sm font-extrabold tracking-wider uppercase transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
-                  isActive(navLink.href) ? 'bg-brand-blue px-6 text-ink-900' : 'text-ink-900 hover:text-brand-ink'
+                className={`inline-flex h-8 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-3 text-xs font-extrabold tracking-wider uppercase transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/30 sm:text-sm sm:px-3.5 ${
+                  isActive(navLink.href) ? 'bg-brand-blue px-4 text-ink-900 sm:px-5' : 'text-ink-900 hover:text-brand-ink'
                 }`}>
                 {navLink.label}
               </Link>
@@ -157,22 +218,30 @@ export default function Navbar({ auth }: NavbarProps) {
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-end">
-          <div className="hidden items-center gap-4 lg:flex">
+        <div className="flex flex-1 items-center justify-end gap-3 lg:gap-4">
+          <div className="hidden items-center lg:flex">
           {isAuthenticated ? (
-            <div className="group relative">
-              <button
-                type="button"
-                className="ring-ink-900/20 bg-paper-white shadow-button flex min-h-11 items-center gap-2 rounded-[10px] border-2 border-ink-900 py-1.5 pr-3 pl-1.5 text-ink-900 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3"
+            <div className="group relative ml-4 cursor-pointer py-2 pl-4 lg:ml-6 lg:pl-6">
+              <div
+                tabIndex={0}
+                className="flex cursor-pointer items-center gap-3 rounded-sm py-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
                 aria-haspopup="menu"
               >
-                <Avatar className="size-9 ring-2 ring-ink-900/20">
+                <span className="max-w-[9rem] min-w-0 text-right sm:max-w-[10rem]">
+                  <span className="block truncate text-sm font-semibold leading-5 text-ink-900">
+                    {userName}
+                  </span>
+                  <span className="block truncate text-xs font-medium leading-4 text-ink-500">
+                    {navbarUserRoleLabel[userRole]}
+                  </span>
+                </span>
+                <Avatar className="size-9 shrink-0 ring-2 ring-ink-900/15">
                   {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
-                  <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
+                  <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">
+                    {userInitials(userName)}
+                  </AvatarFallback>
                 </Avatar>
-                <span className="max-w-[140px] truncate text-left text-sm font-semibold">{userName}</span>
-                <ChevronDown className="size-4 shrink-0 opacity-80 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden />
-              </button>
+              </div>
 
               <div
                 role="menu"
@@ -181,52 +250,52 @@ export default function Navbar({ auth }: NavbarProps) {
                    Inner div yang fade/slide (translate + opacity). */
                 className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 pt-2 group-hover:visible group-hover:pointer-events-auto group-focus-within:visible group-focus-within:pointer-events-auto">
                 <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                  <div className="px-3 py-2.5">
-                    <p className="truncate text-sm font-semibold">{userName}</p>
-                    {userEmail ? <p className="text-ink-500 truncate text-xs">{userEmail}</p> : null}
-                    <p className="text-brand-ink mt-1 text-xs font-bold">{roleLabel[userRole]}</p>
+                  <div className="px-3 py-3">
+                    <p className="text-sm font-semibold">{greetingForUser(userName)}</p>
+                    <p className="text-ink-500 mt-1 text-xs leading-relaxed">
+                      Senang bertemu lagi di Doscom University.
+                    </p>
                   </div>
                   <div className="bg-ink-900/10 my-1 h-px" />
-                  <Link to={dashboardPath[userRole]} className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none">
-                    <LayoutDashboard className="size-4 opacity-70" />
-                    Dashboard
-                  </Link>
-                  <Link to={ROUTES.profile} className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none">
-                    <UserCircle className="size-4 opacity-70" />
-                    Profile
-                  </Link>
+                  {accountNavLinks.map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        role="menuitem"
+                        className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none"
+                      >
+                        <Icon className="size-4 opacity-70" aria-hidden />
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                  {showAccountSettings ? (
+                    <Link
+                      to={ROUTES.profile}
+                      role="menuitem"
+                      className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none"
+                    >
+                      <Settings className="size-4 opacity-70" aria-hidden />
+                      Pengaturan
+                    </Link>
+                  ) : null}
                   <button type="button" className="text-destructive hover:bg-destructive/10 flex min-h-10 w-full items-center gap-2 rounded-[10px] px-3 text-left text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-destructive/20 outline-none" onClick={handleLogout}>
                     <LogOut className="size-4" />
-                    Logout
+                    Keluar
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex gap-3">
-              <Link to={ROUTES.login}>
-                <Button
-                  variant="neobrutalism"
-                  className="rounded-sm border-2 bg-paper-white px-7 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
-                >
-                  Login
-                </Button>
-              </Link>
-              <Link to={ROUTES.redeem}>
-                <Button
-                  variant="neobrutalism"
-                  className="rounded-sm border-2 px-7 font-extrabold text-primary-foreground active:translate-y-[3px]"
-                >
-                  Redeem
-                </Button>
-              </Link>
-            </div>
+            <GuestAuthActions variant={authActionsVariant} layout="desktop" />
           )}
         </div>
 
         <button
           type="button"
-          className="bg-paper-white text-ink-900 shadow-button inline-flex items-center justify-center rounded-[10px] border-2 border-ink-900 px-3 py-2 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
+          className="bg-paper-white text-ink-900 shadow-button inline-flex size-10 items-center justify-center rounded-[10px] border-2 border-ink-900 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
           aria-label={isMenuOpen ? 'Tutup menu' : 'Buka menu'}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
@@ -242,19 +311,21 @@ export default function Navbar({ auth }: NavbarProps) {
         inert={!isMenuOpen}
         className={cn(
           'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
-          isMenuOpen ? 'max-h-[calc(100dvh-88px)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
+          isMenuOpen ? 'max-h-[calc(100dvh-4rem)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
         )}>
         <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pt-8 pb-8">
           {isAuthenticated && (
-            <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2">
-              <Avatar className="size-10 ring-2 ring-ink-900/20">
+            <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2.5">
+              <div className="min-w-0 flex-1 text-right">
+                <p className="truncate text-sm font-semibold text-ink-900">{userName}</p>
+                <p className="truncate text-xs font-medium text-ink-500">
+                  {navbarUserRoleLabel[userRole]}
+                </p>
+              </div>
+              <Avatar className="size-10 shrink-0 ring-2 ring-ink-900/15">
                 {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
                 <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="text-ink-900 truncate text-sm font-semibold">{userName}</p>
-                <p className="text-ink-500 text-xs">{roleLabel[userRole]}</p>
-              </div>
             </div>
           )}
           <div className="flex flex-col gap-2">
@@ -273,37 +344,42 @@ export default function Navbar({ auth }: NavbarProps) {
           {isAuthenticated ? (
             <div className="flex flex-col gap-1 border-t border-ink-900/15 pt-3">
               <p className="text-ink-500 px-4 text-xs font-extrabold tracking-wider uppercase">Menu akun</p>
-              <button type="button" className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30" onClick={handleDashboard}>
-                <LayoutDashboard className="size-4 shrink-0 opacity-80" />
-                Dashboard
-              </button>
-              <button type="button" className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30" onClick={handleProfile}>
-                <UserCircle className="size-4 shrink-0 opacity-80" />
-                Profile
-              </button>
+              {accountNavLinks.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+                    onClick={closeMenu}
+                  >
+                    <Icon className="size-4 shrink-0 opacity-80" aria-hidden />
+                    {item.label}
+                  </Link>
+                )
+              })}
+              {showAccountSettings ? (
+                <button
+                  type="button"
+                  className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+                  onClick={handleSettings}
+                >
+                  <Settings className="size-4 shrink-0 opacity-80" aria-hidden />
+                  Pengaturan
+                </button>
+              ) : null}
               <button type="button" className="text-destructive hover:text-destructive/80 flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-destructive/20" onClick={handleLogout}>
                 <LogOut className="size-4 shrink-0" />
-                Logout
+                Keluar
               </button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 pt-2">
-              <Link to={ROUTES.login} onClick={closeMenu}>
-                <Button
-                  variant="neobrutalism"
-                  className="w-full rounded-sm border-2 bg-paper-white font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
-                >
-                  Login
-                </Button>
-              </Link>
-              <Link to={ROUTES.redeem} onClick={closeMenu}>
-                <Button
-                  variant="neobrutalism"
-                  className="w-full rounded-sm border-2 font-extrabold text-primary-foreground active:translate-y-[3px]"
-                >
-                  Redeem
-                </Button>
-              </Link>
+            <div className="pt-2">
+              <GuestAuthActions
+                variant={authActionsVariant}
+                layout="mobile"
+                onNavigate={closeMenu}
+              />
             </div>
           )}
         </div>

@@ -29,7 +29,8 @@ import (
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Router       /admin/qna [get]
 func GetAdminQnaFunc(c *gin.Context) {
-	if _, ok := requireAdminAccess(c); !ok {
+	user, ok := requireAdminOrMentorModerationAccess(c)
+	if !ok {
 		return
 	}
 
@@ -46,6 +47,17 @@ func GetAdminQnaFunc(c *gin.Context) {
 	}
 
 	db := database.DB.Model(&entity.CourseQaThread{})
+	scopedDB, err := scopeModerationQueryToMentorCourses(db, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to resolve mentor courses",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	db = scopedDB
 	if courseUIDStr := strings.TrimSpace(c.Query("courseUid")); courseUIDStr != "" {
 		if courseUID, err := database.ResolveUID("courses", courseUIDStr); err == nil {
 			db = db.Where("course_uid = ?", courseUID)
@@ -135,7 +147,7 @@ func GetAdminQnaFunc(c *gin.Context) {
 // @Failure      404  {object}  map[string]any  "Thread not found"
 // @Router       /admin/qna/{thread_id}/replies [post]
 func CreateAdminQnaReplyFunc(c *gin.Context) {
-	admin, ok := requireAdminAccess(c)
+	user, ok := requireAdminOrMentorModerationAccess(c)
 	if !ok {
 		return
 	}
@@ -162,6 +174,10 @@ func CreateAdminQnaReplyFunc(c *gin.Context) {
 		return
 	}
 
+	if !ensureUserCanModerateCourse(c, user, thread.CourseUid) {
+		return
+	}
+
 	encBody, err := utils.Encrypt(req.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encrypt reply", "data": nil, "error": err.Error()})
@@ -170,7 +186,7 @@ func CreateAdminQnaReplyFunc(c *gin.Context) {
 
 	reply := entity.CourseQaReply{
 		ThreadUid: threadUID,
-		AuthorUid: admin.Uid,
+		AuthorUid: user.Uid,
 		Body:      encBody,
 	}
 	if err := database.DB.Create(&reply).Error; err != nil {

@@ -1,0 +1,404 @@
+/* Interpolasi token warna (termasuk teks via var(--color-ink-*)) saat toggle tema. */
+
+@property --background {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fbfcfd;
+}
+
+@property --foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --text-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a29f9f;
+}
+
+@property --card {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --card-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --popover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --popover-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --primary-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f1f3f5;
+}
+
+@property --secondary-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f1f3f5;
+}
+
+@property --muted-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #56657a;
+}
+
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bceeff;
+}
+
+@property --accent-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #008eff;
+}
+
+@property --destructive {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e34d59;
+}
+
+@property --destructive-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e5e8ec;
+}
+
+@property --input {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e5e8ec;
+}
+
+@property --ring {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --chart-1 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --chart-2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e34d59;
+}
+
+@property --chart-3 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f2a900;
+}
+
+@property --chart-4 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bceeff;
+}
+
+@property --chart-5 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a991ff;
+}
+
+@property --sidebar {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fbfcfd;
+}
+
+@property --sidebar-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --sidebar-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --sidebar-primary-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --sidebar-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bceeff;
+}
+
+@property --sidebar-accent-foreground {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #008eff;
+}
+
+@property --sidebar-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e5e8ec;
+}
+
+@property --sidebar-ring {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --color-paper-white {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --color-paper-offwhite {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fbfcfd;
+}
+
+@property --color-paper-paper {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f6f7f8;
+}
+
+@property --color-paper-panel {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f1f3f5;
+}
+
+@property --color-ink-900 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050914;
+}
+
+@property --color-ink-800 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #07111f;
+}
+
+@property --color-ink-700 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #102039;
+}
+
+@property --color-ink-600 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2b3c55;
+}
+
+@property --color-ink-500 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #56657a;
+}
+
+@property --color-ink-400 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7e8998;
+}
+
+@property --color-line-light {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e5e8ec;
+}
+
+@property --color-line-medium {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #cbd2da;
+}
+
+@property --color-brand-blue {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #13a8ff;
+}
+
+@property --color-brand-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0061c8;
+}
+
+@property --color-brand-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bceeff;
+}
+
+@property --color-brand-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0798ee;
+}
+
+@property --color-note-mint {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a8efcf;
+}
+
+@property --color-note-yellow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffef9d;
+}
+
+@property --color-note-peach {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffc4a6;
+}
+
+@property --color-note-pink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f4a6cd;
+}
+
+@property --color-note-sky {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bceeff;
+}
+
+@property --color-note-lavender {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d7cbff;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition {
+    transition:
+      color 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --background 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --text-secondary 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --card 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --card-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --popover 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --popover-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --primary 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --primary-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --secondary 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --secondary-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --muted 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --muted-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --accent 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --accent-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --destructive 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --destructive-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --border 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --input 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --ring 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --chart-1 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --chart-2 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --chart-3 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --chart-4 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --chart-5 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-primary 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-primary-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-accent 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-accent-foreground 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-border 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --sidebar-ring 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-paper-white 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-paper-offwhite 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-paper-paper 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-paper-panel 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-900 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-800 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-700 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-600 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-500 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-ink-400 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-line-light 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-line-medium 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-brand-blue 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-brand-ink 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-brand-soft 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-brand-hover 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-mint 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-yellow 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-peach 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-pink 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-sky 380ms cubic-bezier(0.4, 0, 0.2, 1),
+      --color-note-lavender 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition-property: background-color, border-color, color, fill, stroke, outline-color,
+      box-shadow, text-decoration-color;
+    transition-duration: 380ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

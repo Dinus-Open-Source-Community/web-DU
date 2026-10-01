@@ -5,7 +5,7 @@ const PLACEHOLDER = 'bg-foreground/10'
 /**
  * AuthPageSkeleton — loading state yang meniru struktur AuthLayout supaya
  * tata letak auth sudah terbaca sebelum halaman selesai dimuat. Panel kiri
- * (scene pinguin) hanya tampil di layar lg+, sama seperti layout asli.
+ * hanya tampil di layar lg+, sama seperti layout asli.
  * Statis: tanpa hover maupun press-effect.
  */
 export function AuthPageSkeleton() {
@@ -18,7 +18,7 @@ export function AuthPageSkeleton() {
     >
       <span className="sr-only">Memuat halaman autentikasi...</span>
 
-      {/* Panel kiri — scene maskot (hanya lg+). */}
+      {/* Panel kiri — brand + heading (hanya lg+). */}
       <section className="relative hidden overflow-hidden bg-muted lg:flex lg:flex-col lg:justify-between">
         <div
           aria-hidden
@@ -30,28 +30,12 @@ export function AuthPageSkeleton() {
           }}
         />
 
-        {/* Brand mark. */}
-        <div className="relative z-10 flex items-center gap-3 px-10 pt-10 xl:px-14">
-          <Skeleton className={`size-8 rounded-lg ${PLACEHOLDER}`} />
-          <Skeleton className={`h-4 w-36 rounded-md ${PLACEHOLDER}`} />
-        </div>
-
-        {/* Kartu scene + heading. */}
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-10 pb-12 text-center xl:px-14">
-          <div className="relative mx-auto w-full max-w-sm rounded-[10px] border-2 border-border bg-background px-6 pt-8 pb-6 shadow-md">
-            <Skeleton
-              className={`absolute -top-3 left-5 size-8 rounded-full border-2 border-border ${PLACEHOLDER}`}
-            />
-            <Skeleton className={`mx-auto h-40 w-40 rounded-2xl sm:h-44 sm:w-44 ${PLACEHOLDER}`} />
-            <Skeleton
-              className={`absolute top-16 right-4 h-7 w-16 rounded-[10px] ${PLACEHOLDER}`}
-            />
-          </div>
-
-          <Skeleton className={`mt-8 h-8 w-64 max-w-full rounded-xl ${PLACEHOLDER}`} />
-          <div className="mt-4 w-full max-w-md space-y-2">
-            <Skeleton className={`mx-auto h-4 w-full rounded-md ${PLACEHOLDER}`} />
-            <Skeleton className={`mx-auto h-4 w-3/4 rounded-md ${PLACEHOLDER}`} />
+          <Skeleton className={`size-20 rounded-2xl sm:size-24 xl:size-28 ${PLACEHOLDER}`} />
+          <Skeleton className={`mt-8 h-9 w-64 max-w-full rounded-xl ${PLACEHOLDER}`} />
+          <div className="mt-4 w-full max-w-lg space-y-2">
+            <Skeleton className={`mx-auto h-5 w-full rounded-md ${PLACEHOLDER}`} />
+            <Skeleton className={`mx-auto h-5 w-4/5 rounded-md ${PLACEHOLDER}`} />
           </div>
         </div>
 

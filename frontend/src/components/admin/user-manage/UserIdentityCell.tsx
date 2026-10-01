@@ -16,14 +16,14 @@ export function UserIdentityCell({ name, email, avatar, meta }: UserIdentityCell
     <div className="flex min-w-[220px] items-center gap-3">
       <Avatar className="size-10 shrink-0">
         <AvatarImage src={avatar} alt={name} />
-        <AvatarFallback className="bg-slate-100 text-sm font-semibold text-slate-600">
+        <AvatarFallback className="bg-paper-paper text-sm font-semibold text-ink-600">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0">
-        <p className="truncate font-semibold text-slate-900">{name}</p>
-        <p className="truncate text-xs text-slate-500">{email}</p>
-        {meta ? <p className="mt-0.5 truncate text-xs font-medium text-slate-400">{meta}</p> : null}
+        <p className="truncate font-semibold text-ink-900">{name}</p>
+        <p className="truncate text-xs text-ink-500">{email}</p>
+        {meta ? <p className="mt-0.5 truncate text-xs font-medium text-ink-400">{meta}</p> : null}
       </div>
     </div>
   )

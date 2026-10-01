@@ -1,114 +1,77 @@
-import { gridStatsClassName, gridCardsClassName } from "@/lib/layout/page-layout";
-import { StatCard } from "@/components/shared/StatCard";
-import { cn } from "@/lib/utils";
-import { Calendar, MessageSquare, PlayCircle } from "lucide-react";
-import ResumeCard from "@/components/shared/ResumeCard";
-import FeedbackCard from "@/components/shared/Feedback";
-import type { IUserData } from "@/lib/types/user";
-import { isLearningProgressInProgress } from "@/lib/learning/progress";
+import { ChartCard } from '@/components/shared/ChartCard'
+import ResumeCard from '@/components/shared/ResumeCard'
+import FeedbackCard from '@/components/shared/Feedback'
+import { PageHeader } from '@/components/shared/Header'
+import { StudentKpiGrid } from '@/components/student/dashboard/StudentKpiGrid'
+import { StudentQuickLinks } from '@/components/student/dashboard/StudentQuickLinks'
+import { isLearningProgressInProgress } from '@/lib/learning/progress'
+import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
+import { gridCardsClassName, gridMainSidebarClassName } from '@/lib/layout/page-layout'
+import type { IUserData } from '@/lib/types/user'
+import { cn } from '@/lib/utils'
 
-const feedbackDateFormatter = new Intl.DateTimeFormat("id-ID", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+const feedbackDateFormatter = new Intl.DateTimeFormat('id-ID', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
 
-const DashboardSection = ({ Data }: { Data: IUserData }) => {
-  const iconMap: Record<
-    string,
-    typeof PlayCircle | typeof MessageSquare | typeof Calendar
-  > = {
-    Aktif: PlayCircle,
-    Selesai: MessageSquare,
-    Pending: Calendar,
-  };
+type DashboardSectionProps = {
+  Data: IUserData
+}
+
+const DashboardSection = ({ Data }: DashboardSectionProps) => {
   const resumeCourses = (Data?.joined_courses ?? []).filter((course) =>
     isLearningProgressInProgress(course.progress),
-  );
+  )
   const recentFeedback = Data.course_reviews.slice(0, 3).map((review) => ({
-    status: (review.rating >= 4 ? "Lulus" : "Perlu Revisi") as
-      | "Lulus"
-      | "Perlu Revisi",
+    status: (review.rating >= 4 ? 'Lulus' : 'Perlu Revisi') as 'Lulus' | 'Perlu Revisi',
     time: feedbackDateFormatter.format(new Date(review.created_at)),
     title: review.course.title,
     comment: review.comment,
     instructor: {
       name: Data.name,
-      avatar: Data.avatar_url || "/pinguin.png",
+      avatar: Data.avatar_url || '/Logo.svg',
     },
-  }));
+  }))
 
   return (
-    <section className="w-full flex-col gap-10">
-      <div className="mb-10">
-        <h1 className="font-headline text-on-surface text-3xl font-extrabold tracking-tight">
-          Halo, {Data.name} 👋
-        </h1>
-        <p className="text-on-surface-variant mt-1">
-          Siap untuk melanjutkan perjalanan belajarmu hari ini?
-        </p>
-      </div>
+    <>
+      <PageHeader
+        className={studentDashboardLayout.pageHeader}
+        title="Dasbor"
+        subtitle={`Halo, ${Data.name}! Siap melanjutkan perjalanan belajarmu hari ini?`}
+      />
 
-      <div className={cn("mb-10", gridStatsClassName)}>
-        {Data?.enrollment_summary ? (
-          Object.entries(Data.enrollment_summary).map(([label, value]) => {
-            const Icon = iconMap[label];
-            return (
-              <StatCard
-                key={label}
-                variant="compact"
-                label={label}
-                value={value}
-                icon={Icon ? <Icon className="h-5 w-5" /> : undefined}
-              />
-            );
-          })
-        ) : (
-          <div className="col-span-full rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
-            Belum ada ringkasan data dashboard.
-          </div>
-        )}
-      </div>
+      <StudentKpiGrid summary={Data.enrollment_summary} />
 
-      <div className="mb-10">
-        <h2 className="font-headline mb-6 flex items-center gap-2 text-xl font-bold">
-          <PlayCircle className="text-primary" size={24} />
-          Lanjutkan Belajar
-        </h2>
-        <div className={gridCardsClassName}>
+      <StudentQuickLinks />
+
+      <ChartCard
+        title="Lanjutkan Belajar"
+        subtitle="Kursus yang masih berjalan — lanjutkan dari progres terakhir"
+        contentClassName="pt-0"
+      >
+        <div className={cn(gridCardsClassName, 'px-0')}>
           {resumeCourses.length > 0 ? (
-            resumeCourses.map((course) => (
-              <ResumeCard key={course.uid} data={course} />
-            ))
+            resumeCourses.map((course) => <ResumeCard key={course.uid} data={course} />)
           ) : (
-            <div className="col-span-full rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+            <div className={cn(studentDashboardLayout.emptyBlock, 'col-span-full')}>
               Belum ada kursus untuk dilanjutkan.
             </div>
           )}
         </div>
-      </div>
+      </ChartCard>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-headline flex items-center gap-2 text-xl font-bold">
-              <Calendar className="text-error" size={24} />
-              Tenggat Waktu
-            </h2>
+      <div className={gridMainSidebarClassName}>
+        <ChartCard title="Tenggat Waktu" subtitle="Deadline tugas dan pengumpulan mendatang">
+          <div className={studentDashboardLayout.emptyBlock}>
+            Tidak ada tenggat waktu saat ini.
           </div>
-          <div className="space-y-4">
-            <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
-              Tidak ada tenggat waktu saat ini.
-            </div>
-          </div>
-        </div>
+        </ChartCard>
 
-        <div>
-          <h2 className="font-headline mb-6 flex items-center gap-2 text-xl font-bold">
-            <MessageSquare className="text-secondary" size={24} />
-            Umpan Balik
-          </h2>
-          <div className="space-y-4">
+        <ChartCard title="Umpan Balik" subtitle="Ulasan kursus dan catatan terbaru">
+          <div className="space-y-3">
             {recentFeedback.length > 0 ? (
               recentFeedback.map((fb, i) => (
                 <FeedbackCard
@@ -121,15 +84,15 @@ const DashboardSection = ({ Data }: { Data: IUserData }) => {
                 />
               ))
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+              <div className={studentDashboardLayout.emptyBlock}>
                 Belum ada umpan balik terbaru.
               </div>
             )}
           </div>
-        </div>
+        </ChartCard>
       </div>
-    </section>
-  );
-};
+    </>
+  )
+}
 
-export default DashboardSection;
+export default DashboardSection

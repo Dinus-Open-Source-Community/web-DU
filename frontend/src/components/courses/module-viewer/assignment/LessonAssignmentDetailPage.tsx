@@ -50,26 +50,26 @@ export function LessonAssignmentDetailPage({
           onClick={onBack}
           className={cn(
             '-ml-2 h-9 rounded-sm px-3',
-            isDark ? 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
+            isDark ? 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100' : 'text-ink-500 hover:bg-paper-paper hover:text-ink-900',
           )}>
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Kembali ke tugas
         </Button>
 
         <header className="space-y-3">
-          <p className={cn('text-xs font-semibold uppercase tracking-wide', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          <p className={cn('text-xs font-semibold uppercase tracking-wide', isDark ? 'text-zinc-400' : 'text-ink-500')}>
             Detail pengumpulan
           </p>
-          <h1 className={cn('text-2xl font-bold tracking-tight sm:text-3xl', isDark ? 'text-zinc-50' : 'text-slate-950')}>
+          <h1 className={cn('text-2xl font-bold tracking-tight sm:text-3xl', isDark ? 'text-zinc-50' : 'text-ink-900')}>
             {assignment.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-3">
-            <p className={cn('text-sm tabular-nums', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+            <p className={cn('text-sm tabular-nums', isDark ? 'text-zinc-400' : 'text-ink-500')}>
               Dikumpulkan {submittedLabel}
             </p>
             {history.showScore && history.scoreLabel ? (
-              <p className={cn('text-sm font-semibold tabular-nums', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+              <p className={cn('text-sm font-semibold tabular-nums', isDark ? 'text-zinc-200' : 'text-ink-800')}>
                 Nilai {history.scoreLabel}
               </p>
             ) : null}
@@ -86,7 +86,7 @@ export function LessonAssignmentDetailPage({
         <section
           className={cn(
             'rounded-2xl border p-5',
-            isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-slate-200 bg-white',
+            isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-line-light bg-paper-white',
           )}>
           {assignment.task_type === 'quiz' && quizReview ? (
             <AssignmentQuizReview review={quizReview} theme={theme} />

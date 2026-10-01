@@ -2,14 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { isAuthTokenExpired, useAuth } from './auth-provider'
 import type { UserRole } from '../lib/types/user'
-import { ROUTES } from '@/lib/routes'
-
-const ROLE_DASHBOARD_PATH: Record<UserRole, string> = {
-  student: `${ROUTES.student.dashboard}`,
-  mentor: `${ROUTES.mentor.dashboard}`,
-  admin: `${ROUTES.admin.dashboard}`,
-  super_admin: `${ROUTES.admin.dashboard}`,
-}
+import { dashboardPathForUserRole } from '@/lib/dashboard-route'
 
 type RouteGuardProps = {
   children: ReactNode
@@ -32,7 +25,9 @@ export function RouteGuard({ children, allowedRoles }: RouteGuardProps) {
   }
 
   if (!role || !allowedRoles?.includes(role)) {
-    return <Navigate to={role ? ROLE_DASHBOARD_PATH[role] : '/auth/login'} replace />
+    return (
+      <Navigate to={role ? dashboardPathForUserRole(role) : '/auth/login'} replace />
+    )
   }
 
   return children

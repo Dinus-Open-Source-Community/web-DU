@@ -79,13 +79,13 @@ export function CourseMasterFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-2xl border-slate-200 p-0">
+      <DialogContent className="max-w-lg rounded-2xl border-line-light p-0">
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <DialogHeader className="border-b border-slate-100 px-6 py-5">
-            <DialogTitle className="text-lg font-semibold text-slate-900">
+          <DialogHeader className="border-b border-line-light px-6 py-5">
+            <DialogTitle className="text-lg font-semibold text-ink-900">
               {isEdit ? labels.editDialogTitle : labels.createDialogTitle}
             </DialogTitle>
-            <DialogDescription className="text-sm leading-6 text-slate-500">
+            <DialogDescription className="text-sm leading-6 text-ink-500">
               {labels.dialogDescription}
             </DialogDescription>
           </DialogHeader>
@@ -124,8 +124,8 @@ export function CourseMasterFormDialog({
 
             <div className={courseMasterLayout.activeRow}>
               <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-slate-900">Status aktif</p>
-                <p className="text-xs leading-5 text-slate-500">
+                <p className="text-sm font-semibold text-ink-900">Status aktif</p>
+                <p className="text-xs leading-5 text-ink-500">
                   Nonaktifkan agar tidak muncul di form pembuatan kursus.
                 </p>
               </div>
@@ -139,11 +139,11 @@ export function CourseMasterFormDialog({
             </div>
           </div>
 
-          <DialogFooter className="border-t border-slate-100 px-6 py-4">
+          <DialogFooter className="border-t border-line-light px-6 py-4">
             <Button
               type="button"
               variant="outline"
-              className="rounded-sm border-slate-200"
+              className="rounded-sm border-line-light"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >

@@ -10,10 +10,10 @@ export function TransactionPaymentForbidden({ backHref }: { backHref?: string })
       <div className="flex size-16 items-center justify-center rounded-2xl bg-amber-50">
         <ShieldAlert className="size-8 text-amber-500" aria-hidden />
       </div>
-      <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-950">
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink-900">
         Akses ditolak
       </h1>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
+      <p className="mt-2 max-w-sm text-sm leading-6 text-ink-600">
         Anda tidak memiliki izin untuk melihat detail pembayaran ini. Pastikan referensi transaksi milik akun Anda.
       </p>
       <Button asChild size="lg" className="mt-6 min-h-11 px-5">

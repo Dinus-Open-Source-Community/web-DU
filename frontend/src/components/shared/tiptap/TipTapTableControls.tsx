@@ -25,7 +25,7 @@ export function TipTapTableControls({ size = 'default', theme = 'light' }: TipTa
 
   return (
     <ToolbarGroup>
-      <span className={cn('px-1 text-[11px] font-medium', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+      <span className={cn('px-1 text-[11px] font-medium', isDark ? 'text-zinc-500' : 'text-ink-400')}>
         Tabel
       </span>
       <ToolbarIconButton

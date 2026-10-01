@@ -36,7 +36,6 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
     isAssignmentLoading,
     unsavedDialogOpen,
     pendingNavigation,
-    routeBasePath,
     setUnsavedDialogOpen,
     setIsCreateModuleOpen,
     setRenameModuleId,
@@ -56,6 +55,9 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
     handleSaveCurrentAssignment,
     handleDeleteCurrentAssignment,
     handleSaveAndContinue,
+    handleDiscardAndContinue,
+    discardActiveLessonContent,
+    discardActiveAssignmentEdits,
     patchLocalLesson,
     patchAssignmentLesson,
   } = view
@@ -80,7 +82,6 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
   return (
     <>
       <CourseEditShell
-        routeBasePath={routeBasePath}
         course={course}
         isAdmin={isAdmin}
         isSaving={isSaving}
@@ -115,6 +116,8 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
         onRenameLesson={handleRenameLesson}
         onDeleteLesson={handleDeleteLesson}
         onChangeLessonType={handleChangeLessonType}
+        onDiscardActiveLessonContent={discardActiveLessonContent}
+        onDiscardActiveAssignmentEdits={discardActiveAssignmentEdits}
       />
 
       <UnsavedLessonDialog
@@ -123,6 +126,7 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
         lessonTitle={activeLesson?.title ?? 'Lesson ini'}
         targetLabel={pendingNavigation?.label ?? 'melanjutkan'}
         isSaving={isSaving || isSavingAssignment}
+        onDiscardAndContinue={handleDiscardAndContinue}
         onSaveAndContinue={() => void handleSaveAndContinue()}
       />
 

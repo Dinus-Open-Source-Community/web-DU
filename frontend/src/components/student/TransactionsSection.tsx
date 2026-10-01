@@ -67,22 +67,22 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
         {!viewModel.hasTransactions ? (
           <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <div className="flex size-16 items-center justify-center rounded-2xl bg-paper-paper text-ink-400">
                 <ReceiptText className="size-7" aria-hidden />
               </div>
               <div className="space-y-1">
-                <p className="text-base font-semibold text-slate-900">Transaksi tidak ditemukan</p>
-                <p className="text-sm text-slate-500">
+                <p className="text-base font-semibold text-ink-900">Transaksi tidak ditemukan</p>
+                <p className="text-sm text-ink-500">
                   Coba ubah kata kunci pencarian atau filter status pembayaran.
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
+          <div className="overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                <TableRow className="bg-paper-paper/80 hover:bg-paper-paper/80">
                   <TableHead className="w-[88px]">Kursus</TableHead>
                   <TableHead>Nama kursus</TableHead>
                   <TableHead>Referensi</TableHead>
@@ -95,7 +95,7 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
               </TableHeader>
               <TableBody>
                 {viewModel.paginatedTransactions.map((item) => (
-                  <TableRow key={item.uid} className="hover:bg-slate-50/70">
+                  <TableRow key={item.uid} className="hover:bg-paper-paper/70">
                     <TableCell>
                       <CourseCardCoverCompactFrame className="w-16 rounded-xl">
                         <CourseCardCover
@@ -108,16 +108,16 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
                       </CourseCardCoverCompactFrame>
                     </TableCell>
                     <TableCell>
-                      <span className="line-clamp-2 font-semibold whitespace-normal text-slate-900">
+                      <span className="line-clamp-2 font-semibold whitespace-normal text-ink-900">
                         {item.course?.title ?? 'Kursus tidak tersedia'}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-slate-500">{item.reference}</TableCell>
+                    <TableCell className="font-mono text-xs text-ink-500">{item.reference}</TableCell>
                     <TableCell>
                       <PaymentBadge status={item.payment_status} />
                     </TableCell>
-                    <TableCell className="font-medium text-slate-600">{item.payment_method}</TableCell>
-                    <TableCell className="text-slate-500">
+                    <TableCell className="font-medium text-ink-600">{item.payment_method}</TableCell>
+                    <TableCell className="text-ink-500">
                       {item.paid_at
                         ? new Date(item.paid_at).toLocaleDateString('id-ID', {
                             day: 'numeric',
@@ -126,7 +126,7 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
                           })
                         : 'Belum dibayar'}
                     </TableCell>
-                    <TableCell className="text-right font-bold text-slate-950">
+                    <TableCell className="text-right font-bold text-ink-900">
                       {FormatRupiah(item.amount)}
                     </TableCell>
                     <TableCell className="text-right">

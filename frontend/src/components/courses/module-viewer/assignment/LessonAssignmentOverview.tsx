@@ -74,10 +74,10 @@ export function LessonAssignmentOverview({
             />
           </div>
           <div className="space-y-2">
-            <h1 className={cn('text-2xl font-bold tracking-tight sm:text-3xl', isDark ? 'text-zinc-50' : 'text-slate-950')}>
+            <h1 className={cn('text-2xl font-bold tracking-tight sm:text-3xl', isDark ? 'text-zinc-50' : 'text-ink-900')}>
               {assignment.title}
             </h1>
-            <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+            <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-ink-500')}>
               {deadlineLabel ? (
                 <>
                   <span className="font-medium tabular-nums">{deadlineLabel.relative}</span>
@@ -92,8 +92,8 @@ export function LessonAssignmentOverview({
         </header>
 
         {instruction?.contentHtml || instructionAttachments.length > 0 ? (
-          <section className="space-y-3 border-t border-slate-200/80 pt-5">
-            <h2 className={cn('text-sm font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+          <section className="space-y-3 border-t border-ink-900/10 pt-5">
+            <h2 className={cn('text-sm font-semibold', isDark ? 'text-zinc-200' : 'text-ink-800')}>
               Instruksi
             </h2>
             {instruction?.contentHtml ? (

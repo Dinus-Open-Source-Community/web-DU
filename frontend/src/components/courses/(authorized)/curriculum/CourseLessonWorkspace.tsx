@@ -36,7 +36,7 @@ type CourseLessonWorkspaceProps = {
 function EmptyWorkspace({ isCompact = false }: { isCompact?: boolean }) {
   return (
     <div className="flex min-h-[16rem] flex-col items-center justify-center px-4 py-12 text-center lg:min-h-[24rem]">
-      <FileText className="size-10 text-slate-300" aria-hidden />
+      <FileText className="size-10 text-ink-300" aria-hidden />
       <p className={`mt-4 ${editLayout.sectionTitle}`}>
         {isCompact ? 'Pilih lesson di kurikulum' : 'Pilih lesson di panel kiri'}
       </p>
@@ -52,7 +52,7 @@ function EmptyWorkspace({ isCompact = false }: { isCompact?: boolean }) {
 function LoadingWorkspace() {
   return (
     <div className="flex min-h-[16rem] flex-col items-center justify-center py-12 text-center lg:min-h-[24rem]">
-      <div className="size-10 animate-pulse rounded-full bg-slate-200" aria-hidden />
+      <div className="size-10 animate-pulse rounded-full bg-paper-paper" aria-hidden />
       <p className={`mt-4 ${editLayout.sectionTitle}`}>Memuat lesson…</p>
       <p className={`mt-2 max-w-sm ${editLayout.body}`}>
         Mengambil daftar lesson modul yang dipilih.

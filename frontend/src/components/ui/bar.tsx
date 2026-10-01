@@ -5,10 +5,10 @@ export const ProgressBar = ({ value }: { value: number }) => {
   const normalized = toLearningProgressPercent(value)
   return (
     <div className="space-y-1">
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-paper-paper">
         <div className="h-full rounded-full bg-primary" style={{ width: `${normalized}%` }} />
       </div>
-      <p className="text-xs font-medium tabular-nums text-slate-500">{formatLearningProgressLabel(value)}</p>
+      <p className="text-xs font-medium tabular-nums text-ink-500">{formatLearningProgressLabel(value)}</p>
     </div>
   )
 }
@@ -19,10 +19,10 @@ export const AttendanceBar = ({ student }: { student: IMentorCourseStudent }) =>
   const value = Math.round((present / total) * 100)
   return (
     <div className="space-y-1">
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-paper-paper">
         <div className="h-full rounded-full bg-emerald-500" style={{ width: `${value}%` }} />
       </div>
-      <p className="text-xs font-medium tabular-nums text-slate-500">
+      <p className="text-xs font-medium tabular-nums text-ink-500">
         {present}/{total}
       </p>
     </div>

@@ -30,11 +30,11 @@ interface CourseDetailLayoutProps extends ICourseDetailItem {
 function buildCourseIncludes() {
   return [
     {
-      icon: <InfinityIcon className="h-4 w-4 text-slate-400" aria-hidden />,
+      icon: <InfinityIcon className="h-4 w-4 text-ink-400" aria-hidden />,
       label: 'Akses selamanya',
     },
     {
-      icon: <Award className="h-4 w-4 text-slate-400" aria-hidden />,
+      icon: <Award className="h-4 w-4 text-ink-400" aria-hidden />,
       label: 'Sertifikat penyelesaian',
     },
   ]

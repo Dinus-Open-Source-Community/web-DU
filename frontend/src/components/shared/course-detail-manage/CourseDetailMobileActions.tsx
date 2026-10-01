@@ -1,4 +1,4 @@
-import { Eye, Layers3, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { Eye, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -8,13 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { CourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
 
 type CourseDetailMobileActionsProps = {
-  curriculumEditHref: string
-  curriculumEditNavigationState?: CourseEditNavigationState
   previewHref: string
   isAdmin: boolean
   isPublished: boolean
@@ -24,8 +21,6 @@ type CourseDetailMobileActionsProps = {
 }
 
 export function CourseDetailMobileActions({
-  curriculumEditHref,
-  curriculumEditNavigationState,
   previewHref,
   isAdmin,
   isPublished,
@@ -36,23 +31,6 @@ export function CourseDetailMobileActions({
   return (
     <div className={manageDetailLayout.stickyBar}>
       <div className={manageDetailLayout.stickyBarInner}>
-        <p className="text-xs font-medium text-slate-500">
-          Langkah utama: kelola kurikulum, lalu pratinjau sebelum terbit.
-        </p>
-
-        <Button
-          asChild
-          className={cn(
-            manageDetailLayout.actionButton,
-            'w-full bg-primary text-white hover:bg-primary/90',
-          )}
-        >
-          <Link to={curriculumEditHref} state={curriculumEditNavigationState}>
-            <Layers3 className="mr-2 size-4" aria-hidden />
-            Edit kurikulum
-          </Link>
-        </Button>
-
         <div
           className={cn(
             'grid gap-2',

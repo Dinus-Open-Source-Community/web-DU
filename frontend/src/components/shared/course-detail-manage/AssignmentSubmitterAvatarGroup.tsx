@@ -20,7 +20,7 @@ export function AssignmentSubmitterAvatarGroup({
   maxVisible = MAX_VISIBLE_AVATARS,
 }: AssignmentSubmitterAvatarGroupProps) {
   if (participants.length === 0) {
-    return <span className="text-sm text-slate-500">Belum ada peserta</span>
+    return <span className="text-sm text-ink-500">Belum ada peserta</span>
   }
 
   const submittedCount = participants.filter((item) => item.hasSubmitted).length
@@ -42,7 +42,7 @@ export function AssignmentSubmitterAvatarGroup({
         ))}
         {overflowCount > 0 ? <AvatarGroupCount>+{overflowCount}</AvatarGroupCount> : null}
       </AvatarGroup>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ink-500">
         {submittedCount}/{participants.length} sudah kumpul
       </p>
     </div>

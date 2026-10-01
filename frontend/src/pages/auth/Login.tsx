@@ -59,10 +59,7 @@ export default function LoginPage() {
       subheading="Masuk ke akunmu dan lanjutkan perjalanan belajar bersama Doscom University."
     >
       <AuthFormPanel>
-        <AuthPageHeader
-          title="Masuk"
-          description="Gunakan email kampus atau akun yang sudah terdaftar."
-        />
+        <AuthPageHeader title="Masuk" displayTitle />
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
@@ -141,14 +138,14 @@ export default function LoginPage() {
               'Masuk ke akun'
             )}
           </Button>
+
+          <AuthDivider label="Atau masuk dengan" />
+
+          <OauthButton
+            isSubmitting={isSubmitting}
+            onGoogleSignIn={startGoogleOAuth}
+          />
         </form>
-
-        <AuthDivider label="Atau masuk dengan" />
-
-        <OauthButton
-          isSubmitting={isSubmitting}
-          onGoogleSignIn={startGoogleOAuth}
-        />
       </AuthFormPanel>
     </AuthLayout>
   )

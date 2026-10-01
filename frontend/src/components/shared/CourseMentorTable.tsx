@@ -1,11 +1,14 @@
 import type { ReactNode } from 'react'
-import { ShieldCheck, UserRound, UsersRound } from 'lucide-react'
+import { GraduationCap, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
 import type { ICourseMentorItem } from '@/lib/types/user'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { Badge } from '../ui/badge'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { ConfirmDialog } from './ConfirmDialog'
+import { CourseDetailTabSectionIntro } from '@/components/shared/course-detail-manage/CourseDetailTabSectionIntro'
+import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { cn } from '@/lib/utils'
 
 interface CourseMentorTableProps {
   mentors: ICourseMentorItem[]
@@ -22,17 +25,17 @@ function MentorIdentity({ mentor, size = 'default' }: { mentor: ICourseMentorIte
   return (
     <div className="flex min-w-0 items-center gap-3">
       <Avatar className={size === 'compact' ? 'size-10' : 'size-11'}>
-        <AvatarImage src={mentor.avatar_url || '/pinguin.png'} alt={mentor.name} />
-        <AvatarFallback className="bg-slate-100 text-slate-500">
+        <AvatarImage src={mentor.avatar_url || '/Logo.svg'} alt={mentor.name} />
+        <AvatarFallback className="bg-muted text-muted-foreground">
           <UserRound className="size-4" />
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate text-sm font-semibold leading-5 text-slate-950">{mentor.name}</p>
+          <p className="truncate text-sm font-semibold leading-5 text-foreground">{mentor.name}</p>
           {mentor.is_verified ? <ShieldCheck className="size-4 shrink-0 text-emerald-600" aria-label="Mentor terverifikasi" /> : null}
         </div>
-        <p className="mt-0.5 truncate text-xs leading-5 text-slate-500">{mentor.email}</p>
+        <p className="mt-0.5 truncate text-xs leading-5 text-muted-foreground">{mentor.email}</p>
       </div>
     </div>
   )
@@ -79,28 +82,31 @@ export function CourseMentorTable({
   const canUnassign = isAdmin && Boolean(onRequestUnassignMentor)
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
-            <UsersRound className="size-4 text-slate-500" />
-            Tim pengajar
-          </div>
-          <p className="mt-1 text-sm leading-6 text-slate-500">{mentors.length} mentor ditugaskan untuk kursus ini.</p>
-        </div>
+    <>
+      <CourseDetailTabSectionIntro
+        className="mb-5"
+        icon={GraduationCap}
+        title="Tim mentor"
+        description="Lihat mentor yang ditugaskan untuk mengajar kursus ini."
+        aside={
+          <span className={manageDetailLayout.tabCountBadge}>
+            {mentors.length} mentor
+          </span>
+        }
+      />
 
-        {isAdmin && assignAction ? assignAction : null}
-      </div>
+      {isAdmin && assignAction ? <div className="mb-4 flex justify-end">{assignAction}</div> : null}
 
+      <section className={manageDetailLayout.tableSurface}>
       {mentors.length === 0 ? (
         <div className="px-4 py-10 text-center sm:px-5">
           <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
               <UsersRound className="size-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-950">Belum ada mentor</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Assign mentor agar peserta tahu siapa pengajar kursus ini.</p>
+              <h3 className="text-sm font-semibold text-foreground">Belum ada mentor</h3>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">Tugaskan mentor agar peserta tahu siapa pengajar kursus ini.</p>
             </div>
           </div>
         </div>
@@ -108,27 +114,27 @@ export function CourseMentorTable({
         <>
           <div className="hidden md:block">
             <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow className="border-slate-200 hover:bg-slate-50">
-                  <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Mentor</TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Peran</TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-semibold text-slate-500">Deskripsi</TableHead>
-                  {canUnassign ? <TableHead className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Aksi</TableHead> : null}
+              <TableHeader>
+                <TableRow className={manageDetailLayout.tableHeaderRow}>
+                  <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Nama mentor</TableHead>
+                  <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Peran di kursus</TableHead>
+                  <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Deskripsi</TableHead>
+                  {canUnassign ? (
+                    <TableHead className={cn('px-5 py-3 text-right', manageDetailLayout.tableHead)}>Kelola</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {mentors.map((mentor) => (
-                  <TableRow key={mentor.uid} className="border-slate-200 hover:bg-slate-50/70">
+                  <TableRow key={mentor.uid} className={manageDetailLayout.tableBodyRow}>
                     <TableCell className="max-w-72 px-5 py-4">
                       <MentorIdentity mentor={mentor} />
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      <Badge variant="categoryDefault" className="rounded-lg px-2 py-1 text-xs font-semibold normal-case tracking-normal">
-                        {mentor.role || 'Mentor'}
-                      </Badge>
+                      <AdminMetaLabel>{mentor.role || 'Mentor'}</AdminMetaLabel>
                     </TableCell>
                     <TableCell className="max-w-md px-5 py-4">
-                      <p className="line-clamp-2 text-sm leading-6 text-slate-600">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
+                      <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
                     </TableCell>
                     {canUnassign ? (
                       <TableCell className="px-5 py-4 text-right">
@@ -136,7 +142,7 @@ export function CourseMentorTable({
                           mentor={mentor}
                           onRequestUnassignMentor={onRequestUnassignMentor!}
                           unassigningMentorUid={unassigningMentorUid}
-                          className="h-8 rounded-xl border-slate-200 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                          className="h-8 rounded-xl border-line-light px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                         />
                       </TableCell>
                     ) : null}
@@ -146,28 +152,26 @@ export function CourseMentorTable({
             </Table>
           </div>
 
-          <div className="divide-y divide-slate-200 md:hidden">
+          <div className="divide-y divide-border md:hidden">
             {mentors.map((mentor) => (
               <article key={mentor.uid} className="px-4 py-4">
                 <MentorIdentity mentor={mentor} size="compact" />
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Badge variant="categoryDefault" className="rounded-lg px-2 py-1 text-xs font-semibold normal-case tracking-normal">
-                    {mentor.role || 'Mentor'}
-                  </Badge>
+                  <AdminMetaLabel>{mentor.role || 'Mentor'}</AdminMetaLabel>
                   {mentor.is_verified ? (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
                       <ShieldCheck className="size-3.5" />
-                      Verified
+                      Terverifikasi
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
                 {canUnassign ? (
                   <UnassignMentorButton
                     mentor={mentor}
                     onRequestUnassignMentor={onRequestUnassignMentor!}
                     unassigningMentorUid={unassigningMentorUid}
-                    className="mt-4 h-9 w-full rounded-xl border-slate-200 text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                    className="mt-4 h-9 w-full rounded-xl border-line-light text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   />
                 ) : null}
               </article>
@@ -175,6 +179,7 @@ export function CourseMentorTable({
           </div>
         </>
       )}
+      </section>
 
       {pendingUnassignMentor ? (
         <ConfirmDialog
@@ -191,6 +196,6 @@ export function CourseMentorTable({
           onCancel={() => onCancelUnassignMentor?.()}
         />
       ) : null}
-    </section>
+    </>
   )
 }

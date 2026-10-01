@@ -10,7 +10,8 @@ import { Link } from 'react-router-dom'
 import { Pagination } from '../../shared/Pagination'
 import type { AdminMentor } from '../../../lib/types/api'
 import type { PersonSelectionItem } from '../../../lib/types/utils'
-import { Badge } from '../../ui/badge'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
+import { ROUTES } from '@/lib/routes'
 import { PersonSelectionDialog } from '../../shared/PersonSelection'
 import type { AdminStudent } from '../../../lib/types/user'
 
@@ -41,7 +42,7 @@ export function MentorsTable({
     email: student.email,
     avatar: student.avatar,
     detail: `${student.enrolledCourses} kursus • progres rata-rata ${student.averageProgress}%`,
-    meta: <Badge variant="userPending">Student</Badge>,
+    meta: <AdminMetaLabel>Student</AdminMetaLabel>,
   }))
 
   return (
@@ -59,7 +60,7 @@ export function MentorsTable({
           className="w-full max-w-3xl"
         />
         <PersonSelectionDialog<PersonSelectionItem>
-          triggerLabel="Promosikan Student"
+          triggerLabel="Jadikan Mentor"
           triggerIcon={UserPlus}
           title="Jadikan Mentor"
           description="Pilih student yang ingin dipromosikan menjadi mentor."
@@ -70,7 +71,7 @@ export function MentorsTable({
           emptyDescription="Coba kata kunci lain untuk menemukan student yang akan dijadikan mentor."
           renderFooterHint={(item) => (
             <span>
-              <strong className="font-semibold text-slate-900">{item.name}</strong> akan diubah rolenya menjadi mentor.
+              <strong className="font-semibold text-ink-900">{item.name}</strong> akan diubah rolenya menjadi mentor.
             </span>
           )}
           onConfirm={async (item) => {
@@ -80,20 +81,20 @@ export function MentorsTable({
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Memuat daftar mentor...</p>
+        <p className="text-sm text-ink-500">Memuat daftar mentor...</p>
       ) : dataMentors.length === 0 ? (
         <EmptyState icon={<UsersRound className="h-5 w-5" />} title="Belum ada mentor" description="Tidak ada mentor yang cocok dengan filter saat ini." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {dataMentors.map((mentor) => (
-            <article key={mentor.uid} className="flex h-full flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <article key={mentor.uid} className="flex h-full flex-col gap-4 rounded-3xl border border-ink-900/10 bg-paper-white p-5 shadow-xs">
               <div className="flex items-start gap-3">
-                <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
+                <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-paper-paper ring-1 ring-border/50">
                   <img src={mentor.avatar} alt={mentor.name} className="object-cover" sizes="48px" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-semibold text-slate-900">{mentor.name}</h3>
-                  <p className="truncate text-xs text-slate-500">{mentor.email}</p>
+                  <h3 className="truncate text-sm font-semibold text-ink-900">{mentor.name}</h3>
+                  <p className="truncate text-xs text-ink-500">{mentor.email}</p>
                 </div>
                 <UserManageActions
                   uid={mentor.uid}
@@ -105,14 +106,14 @@ export function MentorsTable({
                 />
               </div>
 
-              <div className="rounded-2xl bg-slate-50/70 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Status</p>
-                <p className="mt-1 text-sm font-semibold capitalize text-slate-900">{mentor.status}</p>
+              <div className="rounded-2xl bg-paper-paper/70 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Status</p>
+                <p className="mt-1 text-sm font-semibold capitalize text-ink-900">{mentor.status}</p>
               </div>
 
               <div className="mt-auto flex items-center justify-end gap-3">
-                <Button asChild variant="outline" size="sm" className="h-9 rounded-sm border-slate-200 px-4 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50">
-                  <Link to={`/admin/users/mentors/${mentor.uid}`}>Detail</Link>
+                <Button asChild variant="outline" size="sm" className="h-9 rounded-sm border-line-light px-4 text-xs font-semibold text-ink-700 shadow-none hover:bg-paper-paper">
+                  <Link to={ROUTES.admin.users.mentorDetail(mentor.uid)}>Detail</Link>
                 </Button>
               </div>
             </article>

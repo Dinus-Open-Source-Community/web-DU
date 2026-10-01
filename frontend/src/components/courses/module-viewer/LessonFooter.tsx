@@ -30,7 +30,7 @@ export function LessonFooter({
     <footer
       className={cn(
         'fixed bottom-0 left-0 right-0 z-40 border-t pb-[env(safe-area-inset-bottom)]',
-        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-100' : 'border-slate-200 bg-white text-slate-950',
+        isDark ? 'border-zinc-800 bg-zinc-950 text-zinc-100' : 'border-line-light bg-paper-white text-ink-900',
       )}>
       <div className="flex min-h-[4.25rem] items-center justify-between gap-2 px-3 py-2 sm:min-h-[4.75rem] sm:gap-3 sm:px-6 sm:py-0">
         <button
@@ -45,12 +45,12 @@ export function LessonFooter({
           <span
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition sm:h-9 sm:w-9',
-              isDark ? 'border-zinc-700 bg-zinc-900 group-hover:border-zinc-500' : 'border-slate-200 bg-slate-50 group-hover:border-slate-300',
+              isDark ? 'border-zinc-700 bg-zinc-900 group-hover:border-zinc-500' : 'border-line-light bg-paper-paper group-hover:border-line-medium',
             )}>
             <ChevronLeft className="h-4 w-4" />
           </span>
           <span className="min-w-0 hidden sm:block">
-            <span className={cn('block text-[11px] font-semibold uppercase', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+            <span className={cn('block text-[11px] font-semibold uppercase', isDark ? 'text-zinc-500' : 'text-ink-400')}>
               {previousAction?.label ?? 'Sebelumnya'}
             </span>
             <span className="block truncate text-sm font-semibold">
@@ -62,7 +62,7 @@ export function LessonFooter({
         <p
           className={cn(
             'hidden max-w-[26%] truncate border px-3 py-1.5 text-center text-xs font-semibold md:block md:px-4 md:py-2 md:text-sm',
-            isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-300' : 'border-slate-200 bg-slate-50 text-slate-600',
+            isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-300' : 'border-line-light bg-paper-paper text-ink-600',
           )}>
           {activeTitle}
         </p>
@@ -77,7 +77,7 @@ export function LessonFooter({
             isDark ? 'hover:text-white' : 'hover:text-primary',
           )}>
           <span className="min-w-0 hidden text-right sm:block">
-            <span className={cn('block text-[10px] font-semibold uppercase sm:text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+            <span className={cn('block text-[10px] font-semibold uppercase sm:text-[11px]', isDark ? 'text-zinc-500' : 'text-ink-400')}>
               {nextAction?.label ?? 'Selanjutnya'}
             </span>
             <span className="block truncate text-xs font-semibold sm:text-sm">
@@ -87,7 +87,7 @@ export function LessonFooter({
           <span
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition sm:h-9 sm:w-9',
-              isDark ? 'border-zinc-700 bg-zinc-900 group-hover:border-zinc-500' : 'border-slate-200 bg-slate-50 group-hover:border-slate-300',
+              isDark ? 'border-zinc-700 bg-zinc-900 group-hover:border-zinc-500' : 'border-line-light bg-paper-paper group-hover:border-line-medium',
             )}>
             <ChevronRight className="h-4 w-4" />
           </span>

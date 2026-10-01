@@ -4,6 +4,7 @@ import { id } from 'date-fns/locale'
 import { Loader2, Send, UserRound } from 'lucide-react'
 
 import { SubmissionDetailSection } from '@/components/shared/course-detail-manage/SubmissionDetailSection'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -26,6 +27,7 @@ type StaffSubmissionFeedbackSectionProps = {
   staffDirectory?: StaffGraderDirectoryEntry[]
   onSubmit: (feedback: string) => Promise<void>
   isSubmitting: boolean
+  adminStatusLabels?: boolean
 }
 
 function formatFeedbackDate(value: string | null) {
@@ -36,9 +38,11 @@ function formatFeedbackDate(value: string | null) {
 function StaffSubmissionFeedbackThread({
   submission,
   grader,
+  adminStatusLabels = false,
 }: {
   submission: ICourseStaffSubmission
   grader: StaffSubmissionGraderView | null
+  adminStatusLabels?: boolean
 }) {
   const graderName = grader?.name ?? 'Penilai'
   const roleLabel = formatGraderRoleLabel(grader?.role)
@@ -64,19 +68,27 @@ function StaffSubmissionFeedbackThread({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold leading-5 text-slate-950">{graderName}</span>
             {roleLabel ? (
-              <Badge
-                variant="outline"
-                className="rounded-md px-1.5 py-0 text-[10px] font-semibold normal-case tracking-normal"
-              >
-                {roleLabel}
-              </Badge>
+              adminStatusLabels ? (
+                <AdminMetaLabel>{roleLabel}</AdminMetaLabel>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="rounded-md px-1.5 py-0 text-[10px] font-semibold normal-case tracking-normal"
+                >
+                  {roleLabel}
+                </Badge>
+              )
             ) : null}
-            <Badge
-              variant="coursePublished"
-              className="rounded-md border-emerald-100 px-1.5 py-0 text-[10px] font-semibold normal-case tracking-normal"
-            >
-              Feedback
-            </Badge>
+            {adminStatusLabels ? (
+              <AdminMetaLabel>Feedback</AdminMetaLabel>
+            ) : (
+              <Badge
+                variant="coursePublished"
+                className="rounded-md border-emerald-100 px-1.5 py-0 text-[10px] font-semibold normal-case tracking-normal"
+              >
+                Feedback
+              </Badge>
+            )}
             {feedbackDate ? (
               <span className="text-xs leading-5 text-slate-500">{feedbackDate}</span>
             ) : null}
@@ -96,6 +108,7 @@ export function StaffSubmissionFeedbackSection({
   staffDirectory = [],
   onSubmit,
   isSubmitting,
+  adminStatusLabels = false,
 }: StaffSubmissionFeedbackSectionProps) {
   const [feedbackText, setFeedbackText] = useState('')
   const grader = useSubmissionGraderProfile({
@@ -124,7 +137,11 @@ export function StaffSubmissionFeedbackSection({
       description="Feedback terbaru mengganti feedback sebelumnya untuk kiriman ini."
     >
       {hasFeedback ? (
-        <StaffSubmissionFeedbackThread submission={submission} grader={grader} />
+        <StaffSubmissionFeedbackThread
+          submission={submission}
+          grader={grader}
+          adminStatusLabels={adminStatusLabels}
+        />
       ) : (
         <p className="text-sm text-slate-500">Belum ada feedback untuk jawaban ini.</p>
       )}

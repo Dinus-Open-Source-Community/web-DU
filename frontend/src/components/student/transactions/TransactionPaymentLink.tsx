@@ -16,7 +16,7 @@ export function TransactionPaymentLink({ transaction }: TransactionPaymentLinkPr
 
   if (!reference || !enrollmentUid) {
     return (
-      <span className="text-xs font-medium text-slate-400" title="Data pembayaran tidak tersedia">
+      <span className="text-xs font-medium text-ink-400" title="Data pembayaran tidak tersedia">
         Tidak tersedia
       </span>
     )
@@ -29,7 +29,7 @@ export function TransactionPaymentLink({ transaction }: TransactionPaymentLinkPr
       asChild
       variant="outline"
       size="sm"
-      className="h-9 gap-1.5 rounded-sm border-slate-200 px-3 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-50"
+      className="h-9 gap-1.5 rounded-sm border-line-light px-3 text-xs font-semibold text-ink-700 shadow-none hover:bg-paper-paper"
     >
       <Link
         to={ROUTES.student.transactionPayment({
@@ -40,7 +40,7 @@ export function TransactionPaymentLink({ transaction }: TransactionPaymentLinkPr
       >
         <Receipt className="size-3.5" aria-hidden />
         Detail
-        <ArrowUpRight className="size-3.5 text-slate-400" aria-hidden />
+        <ArrowUpRight className="size-3.5 text-ink-400" aria-hidden />
       </Link>
     </Button>
   )

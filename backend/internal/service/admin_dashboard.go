@@ -178,23 +178,23 @@ func GetAdminDashboardKPIsFunc(c *gin.Context) {
 	prevConv := conversionRate(period.prevStart, period.prevEnd)
 
 	kpis := []gin.H{
-		buildAdminKpi("gross-revenue", "Gross Revenue", "revenue", period.label, curRevenue, prevRevenue, func(v float64) string {
+		buildAdminKpi("gross-revenue", "Pendapatan kotor", "revenue", period.label, curRevenue, prevRevenue, func(v float64) string {
 			return utils.FormatPriceIDR(v)
 		}),
-		buildAdminKpi("active-users", "Active Users", "users", "vs periode sebelumnya", curUsers, prevUsers, func(v float64) string {
+		buildAdminKpi("active-users", "Pengguna aktif", "users", "dibanding periode sebelumnya", curUsers, prevUsers, func(v float64) string {
 			return fmt.Sprintf("%.0f", v)
 		}),
-		buildAdminKpi("transactions", "Transactions", "transactions", period.label, curTx, prevTx, func(v float64) string {
+		buildAdminKpi("transactions", "Transaksi", "transactions", period.label, curTx, prevTx, func(v float64) string {
 			return fmt.Sprintf("%.0f", v)
 		}),
-		buildAdminKpi("conversion-rate", "Conversion Rate", "conversion", "stabil", curConv, prevConv, func(v float64) string {
+		buildAdminKpi("conversion-rate", "Tingkat konversi", "conversion", period.label, curConv, prevConv, func(v float64) string {
 			return fmt.Sprintf("%.1f%%", v)
 		}),
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Dashboard KPIs fetched",
+		"message": "KPI dasbor berhasil diambil",
 		"data":    kpis,
 		"error":   nil,
 	})

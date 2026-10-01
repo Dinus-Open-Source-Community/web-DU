@@ -18,7 +18,7 @@ export function AssignmentTextSubmissionView({ submission, theme }: AssignmentTe
   return (
     <div className="space-y-4">
       {submission.plainText ? (
-        <p className={cn('whitespace-pre-wrap text-sm leading-relaxed', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+        <p className={cn('whitespace-pre-wrap text-sm leading-relaxed', isDark ? 'text-zinc-300' : 'text-ink-700')}>
           {submission.plainText}
         </p>
       ) : null}
@@ -40,7 +40,7 @@ export function AssignmentTextSubmissionView({ submission, theme }: AssignmentTe
             {submission.fileOriginalFilename || 'Unduh lampiran'}
           </SafeExternalLink>
           {submission.fileDescription ? (
-            <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>{submission.fileDescription}</p>
+            <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-ink-500')}>{submission.fileDescription}</p>
           ) : null}
         </div>
       ) : null}
@@ -49,7 +49,7 @@ export function AssignmentTextSubmissionView({ submission, theme }: AssignmentTe
         <div
           className={cn(
             'rounded-xl border px-4 py-3 text-sm',
-            isDark ? 'border-zinc-700 bg-zinc-900/60 text-zinc-300' : 'border-slate-200 bg-slate-50 text-slate-700',
+            isDark ? 'border-zinc-700 bg-zinc-900/60 text-zinc-300' : 'border-line-light bg-paper-paper text-ink-700',
           )}>
           <p className="font-semibold">Feedback mentor</p>
           <p className="mt-1 leading-relaxed">{submission.grading.feedback}</p>

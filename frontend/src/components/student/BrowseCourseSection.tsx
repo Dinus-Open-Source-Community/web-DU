@@ -62,12 +62,12 @@ export default function Section({
 
   return (
     <section className="flex w-full flex-col gap-6 pt-4">
-      <div className="flex flex-col justify-between gap-6 border-b border-slate-100 pb-6">
+      <div className="flex flex-col justify-between gap-6 border-b border-line-light pb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight text-ink-900">
             Katalog Kursus
           </h1>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-ink-500">
             Eksplorasi materi terbaik untuk tingkatkan keahlian Anda secara
             profesional.
           </p>
@@ -165,12 +165,12 @@ export default function Section({
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white py-24 text-center">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-line-light bg-paper-white py-24 text-center">
               <EmptyCourseIcon className="mb-6 h-40 w-40" />
-              <h3 className="mb-2 text-xl font-bold text-slate-900">
+              <h3 className="mb-2 text-xl font-bold text-ink-900">
                 Ups, hasil tidak ditemukan
               </h3>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-500">
+              <p className="max-w-sm text-sm leading-relaxed text-ink-500">
                 Kami tidak menemukan kursus yang sesuai dengan kata kunci atau
                 filter kategori yang Anda pilih.
               </p>

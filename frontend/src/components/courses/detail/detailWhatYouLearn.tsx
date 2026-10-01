@@ -16,7 +16,7 @@ export function CourseWhatYouLearn({ title = 'Yang akan kamu pelajari', items }:
       <h2 className={cn(detailLayout.sectionTitle, 'mb-4')}>{title}</h2>
       <ul className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
         {items.map((item) => (
-          <li key={item} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700">
+          <li key={item} className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-700">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" aria-hidden />
             <span>{item}</span>
           </li>

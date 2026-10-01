@@ -4,13 +4,17 @@ import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePa
 import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
 import { useAdminUserPage } from '@/hooks/use-admin-user-page'
 import { useManagedUsers } from '@/hooks/use-managed-users'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { mapManagedUsers, toAdminMentor, toAdminStudent } from '@/lib/user-manage/mappers'
 import { mentorToRow, rowsToPromoteCandidates, studentToRow } from '@/lib/user-manage/view-models'
 
 export default function AdminMentorsPage() {
-  const sidebarUser = useSidebarUser('super_admin')
   const mentorsPage = useAdminUserPage({ role: 'mentor' })
+  const mentorsListQuery = useManagedUsers({
+    role: 'mentor',
+    per_page: 100,
+    sort: 'created_at',
+    order: 'desc',
+  })
   const studentsQuery = useManagedUsers({
     role: 'student',
     per_page: 100,
@@ -25,8 +29,12 @@ export default function AdminMentorsPage() {
 
   const promoteCandidates = useMemo(() => {
     const students = mapManagedUsers(studentsQuery.data?.users ?? [], toAdminStudent).map(studentToRow)
-    return rowsToPromoteCandidates(students, 'Siswa')
-  }, [studentsQuery.data?.users])
+    const mentors = mapManagedUsers(mentorsListQuery.data?.users ?? [], toAdminMentor).map(mentorToRow)
+    return [
+      ...rowsToPromoteCandidates(students, 'Siswa'),
+      ...rowsToPromoteCandidates(mentors, 'Mentor'),
+    ]
+  }, [mentorsListQuery.data?.users, studentsQuery.data?.users])
 
   const handlePromoteStudent = useCallback(
     async (uid: string) => {
@@ -38,7 +46,7 @@ export default function AdminMentorsPage() {
   const isInitialLoading = mentorsPage.isLoading && rows.length === 0
 
   return (
-    <UserManagePageShell kind="mentor" user={sidebarUser} isLoading={isInitialLoading}>
+    <UserManagePageShell kind="mentor" isLoading={isInitialLoading}>
       <UserManagePanel
         kind="mentor"
         rows={rows}

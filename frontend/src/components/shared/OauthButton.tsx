@@ -1,3 +1,4 @@
+import { authOAuthButtonClassName } from '@/components/auth/constants'
 import { Button } from '../ui/button'
 import { GitHubIcon, GoogleIcon } from './icon'
 
@@ -12,7 +13,7 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
       <Button
         type="button"
         variant="neobrutalism"
-        className="h-12 rounded-[10px] border-2 bg-paper-white px-5 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+        className={authOAuthButtonClassName}
         disabled={isSubmitting}
         onClick={onGoogleSignIn}
       >
@@ -22,7 +23,7 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
       <Button
         type="button"
         variant="neobrutalism"
-        className="h-12 rounded-[10px] border-2 bg-paper-white px-5 font-extrabold hover:bg-paper-paper active:translate-y-[3px]"
+        className={authOAuthButtonClassName}
         disabled={isSubmitting}
       >
         <GitHubIcon className="size-5" aria-hidden />

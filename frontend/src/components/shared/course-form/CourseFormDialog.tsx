@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CourseFormCoverField } from '@/components/shared/course-form/CourseFormCoverField'
 import { DynamicListField } from '@/components/shared/DynamicField'
 import { RupiahInput } from '@/components/shared/InputRupiah'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
@@ -29,6 +30,7 @@ import type { CourseFormMode, CourseFormValues } from '@/lib/course-form/types'
 import { EMPTY_COURSE_FORM_VALUES } from '@/lib/course-form/types'
 import type { CourseLevel, ICourseDetailItem } from '@/lib/types/course'
 import { getCourseFormValidationMessage } from '@/lib/validator/course-form'
+import { DialogScrollArea } from '@/components/ui/dialog-scroll-area'
 import { courseFormLayout } from '@/lib/course-form/layout'
 
 type CourseFormDialogProps = CourseFormOptionsViewModel & {
@@ -166,30 +168,15 @@ export function CourseFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className={courseFormLayout.body}>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-col overflow-hidden">
+          <DialogScrollArea className={courseFormLayout.body}>
             <section className="space-y-4">
               <h3 className={courseFormLayout.sectionTitle}>Informasi Dasar</h3>
 
-              <div className="flex flex-col gap-2">
-                <span className={courseFormLayout.label}>Cover</span>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className={courseFormLayout.uploadZone}>
-                    <input type="file" accept="image/*" className="sr-only" onChange={handleCoverChange} />
-                    {values.coverPreviewUrl ? 'Ganti gambar' : 'Unggah gambar'}
-                  </label>
-                  {values.coverPreviewUrl ? (
-                    <img
-                      src={values.coverPreviewUrl}
-                      width={320}
-                      height={200}
-                      loading="lazy"
-                      alt="Pratinjau cover kursus"
-                      className={courseFormLayout.coverPreview}
-                    />
-                  ) : null}
-                </div>
-              </div>
+              <CourseFormCoverField
+                previewUrl={values.coverPreviewUrl}
+                onFileChange={handleCoverChange}
+              />
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 sm:col-span-2">
@@ -389,7 +376,7 @@ export function CourseFormDialog({
                 setDraft={setListDraft}
               />
             </section>
-          </div>
+          </DialogScrollArea>
 
           <DialogFooter className={courseFormLayout.footer}>
             <Button

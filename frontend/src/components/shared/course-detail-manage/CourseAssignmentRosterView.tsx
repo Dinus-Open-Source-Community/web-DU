@@ -1,6 +1,8 @@
 import { ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AdminUnderlineTabs } from "@/components/admin/AdminUnderlineTabs";
+import { isAdminStaffRole } from "@/lib/admin/staff-shell";
 import { CourseAssignmentRosterTable } from "@/components/shared/course-detail-manage/CourseAssignmentRosterTable";
 import { CourseDetailSectionHeader } from "@/components/shared/course-detail-manage/CourseDetailSectionHeader";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CourseAssignmentRosterPageViewModel } from "@/lib/course-detail/course-assignment-roster-view-model";
 import { manageDetailLayout } from "@/lib/course-detail/manage-detail-layout";
 import type { AssignmentRosterStatusFilter } from "@/lib/types/features/course-detail-assignments";
+import { CourseDetailLottieEmpty } from "@/components/shared/course-detail-manage/CourseDetailLottieEmpty";
 import { cn } from "@/lib/utils";
+
+function rosterStatusEmptyTitle(filter: AssignmentRosterStatusFilter): string {
+  switch (filter) {
+    case "submitted":
+      return "Belum ada siswa yang mengumpulkan tugas ini.";
+    case "not_submitted":
+      return "Semua siswa sudah mengumpulkan tugas ini.";
+    default:
+      return "Tidak ada data pengumpulan.";
+  }
+}
 
 type CourseAssignmentRosterViewProps = {
   view: CourseAssignmentRosterPageViewModel;
@@ -29,6 +43,7 @@ export function CourseAssignmentRosterView({
   view,
 }: CourseAssignmentRosterViewProps) {
   const {
+    role,
     lessonTitle,
     moduleTitle,
     assignment,
@@ -40,10 +55,13 @@ export function CourseAssignmentRosterView({
     statusFilter,
     onStatusFilterChange,
     rosterRows,
+    rosterRowsForStatus,
     filteredRosterRows,
     backHref,
     buildSubmissionDetailHref,
   } = view;
+
+  const useAdminChrome = isAdminStaffRole(role);
 
   return (
     <div className={manageDetailLayout.flatPage}>
@@ -51,7 +69,7 @@ export function CourseAssignmentRosterView({
         asChild
         type="button"
         variant="ghost"
-        className="-ml-2 h-9 w-fit rounded-sm px-3 text-slate-600 hover:text-slate-900"
+        className="-ml-2 h-9 w-fit rounded-sm px-3 text-ink-600 hover:text-ink-900"
       >
         <Link to={backHref}>
           <ArrowLeft className="size-4" aria-hidden />
@@ -65,38 +83,47 @@ export function CourseAssignmentRosterView({
       />
 
       <div className={manageDetailLayout.flatToolbar}>
-        <div
-          className={manageDetailLayout.segmentedControl}
-          role="group"
-          aria-label="Filter status pengumpulan"
-        >
-          {STATUS_FILTER_OPTIONS.map((option) => {
-            const isActive = statusFilter === option.value;
+        {useAdminChrome ? (
+          <AdminUnderlineTabs
+            value={statusFilter}
+            items={STATUS_FILTER_OPTIONS}
+            onChange={onStatusFilterChange}
+            ariaLabel="Filter status pengumpulan"
+          />
+        ) : (
+          <div
+            className={manageDetailLayout.segmentedControl}
+            role="group"
+            aria-label="Filter status pengumpulan"
+          >
+            {STATUS_FILTER_OPTIONS.map((option) => {
+              const isActive = statusFilter === option.value;
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => onStatusFilterChange(option.value)}
-                className={cn(
-                  manageDetailLayout.segmentedButton,
-                  isActive
-                    ? manageDetailLayout.segmentedButtonActive
-                    : manageDetailLayout.segmentedButtonInactive,
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => onStatusFilterChange(option.value)}
+                  className={cn(
+                    manageDetailLayout.segmentedButton,
+                    isActive
+                      ? manageDetailLayout.segmentedButtonActive
+                      : manageDetailLayout.segmentedButtonInactive,
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="w-full space-y-2 lg:max-w-sm">
           <Label htmlFor="roster-search">Cari siswa</Label>
           <div className="relative">
             <Search
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-400"
               aria-hidden
             />
             <Input
@@ -122,29 +149,21 @@ export function CourseAssignmentRosterView({
         </p>
       ) : !assignment ? (
         <div className={manageDetailLayout.flatEmpty}>
-          <p className="font-medium text-slate-700">
+          <p className="font-medium text-ink-700">
             Tugas tidak ditemukan untuk lesson ini.
           </p>
         </div>
       ) : rosterRows.length === 0 ? (
-        <div className={manageDetailLayout.flatEmpty}>
-          <p className="font-medium text-slate-700">Belum ada peserta terdaftar.</p>
-          <p className="mt-1">
-            Daftar pengumpulan akan muncul setelah ada siswa yang enroll ke kursus
-            ini.
-          </p>
-        </div>
+        <CourseDetailLottieEmpty title="Belum ada peserta terdaftar di kursus ini." />
+      ) : rosterRowsForStatus.length === 0 ? (
+        <CourseDetailLottieEmpty title={rosterStatusEmptyTitle(statusFilter)} />
       ) : filteredRosterRows.length === 0 ? (
-        <div className={manageDetailLayout.flatEmpty}>
-          <p className="font-medium text-slate-700">
-            Tidak ada siswa yang cocok dengan filter.
-          </p>
-          <p className="mt-1">Coba ubah kata kunci atau status filter.</p>
-        </div>
+        <CourseDetailLottieEmpty title="Tidak ada siswa yang cocok dengan pencarian." />
       ) : (
         <CourseAssignmentRosterTable
           rows={filteredRosterRows}
           buildSubmissionDetailHref={buildSubmissionDetailHref}
+          adminStatusLabels={useAdminChrome}
         />
       )}
     </div>

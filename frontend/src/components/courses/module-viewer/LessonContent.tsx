@@ -18,7 +18,7 @@ export function LessonContent({ lesson, theme, isLoading = false }: LessonConten
   if (isLoading) {
     return (
       <main className="flex min-h-dvh items-center justify-center px-4 pb-24 pt-20 sm:px-6 sm:pb-28 sm:pt-24 lg:pt-26">
-        <p className={theme === 'dark' ? 'text-zinc-400' : 'text-slate-500'}>Memuat konten lesson...</p>
+        <p className={theme === 'dark' ? 'text-zinc-400' : 'text-ink-500'}>Memuat konten lesson...</p>
       </main>
     )
   }
@@ -31,7 +31,7 @@ export function LessonContent({ lesson, theme, isLoading = false }: LessonConten
     <main className="min-h-dvh px-4 pb-24 pt-20 transition-[padding] duration-200 sm:px-6 sm:pb-28 sm:pt-24 md:px-8 lg:px-10 lg:pt-26">
       <div className="mx-auto flex w-full max-w-7xl justify-center">
         <article className="w-full max-w-[920px]">
-          <div className={cn('lesson-reader', isDark ? 'lesson-reader--dark text-zinc-200' : 'lesson-reader--light text-slate-700')}>
+          <div className={cn('lesson-reader', isDark ? 'lesson-reader--dark text-zinc-200' : 'lesson-reader--light text-ink-700')}>
             {lesson ? (
               <>
                 {lesson.content_type === 'text' &&
@@ -81,10 +81,10 @@ function LessonRichContent({
 
 function LessonVideo({ lesson, theme }: { lesson: LessonDetailItem; theme: LessonThemeMode }) {
   const videoUrl = lesson.video_url?.trim() ?? ''
-  const frameClassName = cn('mx-auto w-full max-w-[920px] overflow-hidden rounded-lg border bg-black', theme === 'dark' ? 'border-zinc-800' : 'border-slate-200')
+  const frameClassName = cn('mx-auto w-full max-w-[920px] overflow-hidden rounded-lg border bg-black', theme === 'dark' ? 'border-zinc-800' : 'border-line-light')
 
   if (!videoUrl) {
-    return <EmptyState title="Video not found" />
+    return <EmptyState title="Video tidak ditemukan" />
   }
 
   if (resolveSafeEmbedUrl(videoUrl)) {
@@ -106,5 +106,5 @@ function LessonVideo({ lesson, theme }: { lesson: LessonDetailItem; theme: Lesso
     )
   }
 
-  return <EmptyState title="Video not found" />
+  return <EmptyState title="Video tidak ditemukan" />
 }

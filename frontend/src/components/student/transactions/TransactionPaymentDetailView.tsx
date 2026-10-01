@@ -31,13 +31,13 @@ export function TransactionPaymentDetailView({
   return (
     <main className="mx-auto w-full max-w-7xl pb-16">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="lg" className="-ml-3 min-h-11 px-3 text-slate-600">
+        <Button asChild variant="ghost" size="lg" className="-ml-3 min-h-11 px-3 text-ink-600">
           <Link to={backHref ?? ROUTES.student.transactions}>
             <ArrowLeft className="size-4" aria-hidden data-icon="inline-start" />
             Riwayat transaksi
           </Link>
         </Button>
-        <span className="hidden text-xs font-semibold text-slate-400 sm:block">
+        <span className="hidden text-xs font-semibold text-ink-400 sm:block">
           Pembayaran aman dan terenkripsi
         </span>
       </div>
@@ -45,7 +45,7 @@ export function TransactionPaymentDetailView({
       <div className="space-y-6">
         <PaymentStatusHero invoice={invoice} />
 
-        <section className="rounded-[24px] border border-slate-200/80 bg-white px-4 py-5 shadow-sm sm:px-8">
+        <section className="rounded-[24px] border border-ink-900/10 bg-paper-white px-4 py-5 shadow-sm sm:px-8">
           <PaymentProgressNavigation status={invoice.paymentStatus} />
         </section>
 

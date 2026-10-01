@@ -1,3 +1,4 @@
+import type { StaffAssignmentRole } from '@/lib/course-detail/course-assignment-navigation'
 import type {
   AssignmentRosterStatusFilter,
   ICourseAssignmentRosterRow,
@@ -5,6 +6,7 @@ import type {
 import type { ILessonDetailAssignment } from '@/lib/types/lesson'
 
 export type CourseAssignmentRosterPageViewModel = {
+  role: StaffAssignmentRole
   courseUid: string
   courseTitle: string
   lessonUid: string
@@ -12,6 +14,7 @@ export type CourseAssignmentRosterPageViewModel = {
   moduleTitle: string
   assignment: ILessonDetailAssignment | null
   rosterRows: ICourseAssignmentRosterRow[]
+  rosterRowsForStatus: ICourseAssignmentRosterRow[]
   filteredRosterRows: ICourseAssignmentRosterRow[]
   isLoading: boolean
   isError: boolean

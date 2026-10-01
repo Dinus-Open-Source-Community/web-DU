@@ -5,13 +5,14 @@ import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseAssignmentRosterPage } from '@/hooks/course-detail/use-course-assignment-roster-page'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function AdminAssignmentSubmissionsPage() {
   const { courseUid, lessonUid } = useParams()
-  const sidebarUser = useSidebarUser('admin')
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const { courseDetail, moduleCourse, userCourse, isLoading } = useCourseDetailAdminAndMentor(
     courseUid ?? '',
   )
@@ -31,7 +32,7 @@ export default function AdminAssignmentSubmissionsPage() {
   }
 
   return (
-    <AppSidebarProvider role="admin" user={sidebarUser}>
+    <AppSidebarProvider role={shellRole} user={sidebarUser}>
       <AdminAssignmentSubmissionsContent
         courseUid={courseUid}
         lessonUid={lessonUid}
@@ -58,6 +59,8 @@ function AdminAssignmentSubmissionsContent({
   modules,
   students,
 }: AdminAssignmentSubmissionsContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseUid, courseTitle)
+
   const view = useCourseAssignmentRosterPage({
     courseUid,
     lessonUid,

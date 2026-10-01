@@ -1,13 +1,25 @@
 import React, { Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "./lib/routes.ts";
+import {
+  DashboardAssignmentSubmissionDetailGateway,
+  DashboardAssignmentSubmissionsGateway,
+  DashboardCourseDetailGateway,
+  DashboardCourseEditGateway,
+  DashboardCoursesGateway,
+  DashboardTransactionsGateway,
+} from "./pages/dashboard/Gateways.tsx";
+import {
+  LEGACY_DASHBOARD_REDIRECTS,
+  LegacyRedirect,
+} from "./pages/dashboard/LegacyRedirects.tsx";
 import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
 import { PageSkeleton } from "./components/shared/PageSkeleton.tsx";
 import { AuthPageSkeleton } from "./components/auth/AuthPageSkeleton.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
-import { ErrorBoundary } from "./components/shared/Error.tsx";
+import { RouterErrorBoundary } from "./components/shared/Error.tsx";
 import ScrollManager from "./components/shared/ScrollManager.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
@@ -19,7 +31,7 @@ const CoursePage = React.lazy(() => import("./pages/landing/Course.tsx"));
 const ViewModuleAndLessons = React.lazy(
   () => import("./pages/courses/view.tsx"),
 );
-const Dashboard = React.lazy(() => import("./pages/admin/Dashboard.tsx"));
+const DashboardGateway = React.lazy(() => import("./pages/DashboardGateway.tsx"));
 const AdminStudentsPage = React.lazy(() => import("./pages/admin/Student.tsx"));
 const AdminMentorsPage = React.lazy(() => import("./pages/admin/Mentors.tsx"));
 const AdminAdministratorsPage = React.lazy(
@@ -34,7 +46,6 @@ const AdminMentorDetailPage = React.lazy(
 const AdminAdministratorDetailPage = React.lazy(
   () => import("./pages/admin/AdministratorDetail.tsx"),
 );
-const Courses = React.lazy(() => import("./pages/admin/Courses.tsx"));
 const AdminCourseCategories = React.lazy(
   () => import("./pages/admin/CourseCategories.tsx"),
 );
@@ -42,43 +53,11 @@ const AdminCourseTypes = React.lazy(
   () => import("./pages/admin/CourseTypes.tsx"),
 );
 const CourseDetail = React.lazy(() => import("./pages/courses/detail.tsx"));
-const AdminDetailCourse = React.lazy(
-  () => import("./pages/admin/DetailCourse.tsx"),
-);
-const AdminAssignmentSubmissions = React.lazy(
-  () => import("./pages/admin/AssignmentSubmissions.tsx"),
-);
-const AdminAssignmentSubmissionDetail = React.lazy(
-  () => import("./pages/admin/AssignmentSubmissionDetail.tsx"),
-);
-const MentorDetailCourse = React.lazy(
-  () => import("./pages/mentor/DetailCourse.tsx"),
-);
-const MentorAssignmentSubmissions = React.lazy(
-  () => import("./pages/mentor/AssignmentSubmissions.tsx"),
-);
-const MentorAssignmentSubmissionDetail = React.lazy(
-  () => import("./pages/mentor/AssignmentSubmissionDetail.tsx"),
-);
-const Transactions = React.lazy(() => import("./pages/admin/Transactions.tsx"));
 const Financial = React.lazy(() => import("./pages/admin/Financial.tsx"));
-const CourseEditAdmin = React.lazy(
-  () => import("./pages/admin/CourseEdit.tsx"),
-);
-const CourseEditMentor = React.lazy(
-  () => import("./pages/mentor/CourseEdit.tsx"),
-);
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
-const MentorDashboard = React.lazy(
-  () => import("./pages/mentor/Dashboard.tsx"),
-);
-const MentorCourses = React.lazy(() => import("./pages/mentor/Courses.tsx"));
 const MentorAssignments = React.lazy(
   () => import("./pages/mentor/CourseAssignments.tsx"),
-);
-const StudentDashboard = React.lazy(
-  () => import("./pages/student/Dashboard.tsx"),
 );
 const StudentLearning = React.lazy(
   () => import("./pages/student/Learning.tsx"),
@@ -91,9 +70,6 @@ const StudentAssignments = React.lazy(
 );
 const StudentBrowse = React.lazy(
   () => import("./pages/student/BrowseCourse.tsx"),
-);
-const StudentTransactions = React.lazy(
-  () => import("./pages/student/Transactions.tsx"),
 );
 import StudentTransactionPayment from "./pages/student/TransactionPayment.tsx";
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
@@ -206,11 +182,11 @@ const routeConfig: RouteConfig[] = [
     roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
-    path: ROUTES.admin.dashboard,
-    element: <Dashboard />,
+    path: ROUTES.dashboard,
+    element: <DashboardGateway />,
     public: false,
     lazy: true,
-    roles: ["admin", "super_admin"],
+    roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.admin.users.students,
@@ -256,10 +232,10 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.admin.courses,
-    element: <Courses />,
+    element: <DashboardCoursesGateway />,
     public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    lazy: false,
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.admin.courseCategories,
@@ -276,11 +252,18 @@ const routeConfig: RouteConfig[] = [
     roles: ["admin", "super_admin"],
   },
   {
-    path: ROUTES.admin.detailCourseAdmin(":courseUid"),
-    element: <AdminDetailCourse />,
+    path: ROUTES.dashboardMenu.courseAssignmentHub(":courseUid"),
+    element: <MentorAssignments />,
     public: false,
     lazy: true,
-    roles: ["admin", "super_admin"],
+    roles: ["mentor", "admin", "super_admin"],
+  },
+  {
+    path: ROUTES.admin.detailCourseAdmin(":courseUid"),
+    element: <DashboardCourseDetailGateway />,
+    public: false,
+    lazy: false,
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.admin.assignmentSubmissionDetail(
@@ -288,31 +271,31 @@ const routeConfig: RouteConfig[] = [
       ":lessonUid",
       ":submissionUid",
     ),
-    element: <AdminAssignmentSubmissionDetail />,
+    element: <DashboardAssignmentSubmissionDetailGateway />,
     public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    lazy: false,
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.admin.assignmentSubmissions(":courseUid", ":lessonUid"),
-    element: <AdminAssignmentSubmissions />,
+    element: <DashboardAssignmentSubmissionsGateway />,
     public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    lazy: false,
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.admin.courseEditAdmin(":courseUid"),
-    element: <CourseEditAdmin />,
+    element: <DashboardCourseEditGateway />,
     public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    lazy: false,
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.admin.transactions,
-    element: <Transactions />,
+    element: <DashboardTransactionsGateway />,
     public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    lazy: false,
+    roles: ["admin", "super_admin", "student"],
   },
   {
     path: ROUTES.admin.financial,
@@ -326,67 +309,7 @@ const routeConfig: RouteConfig[] = [
     element: <ReviewsQa />,
     public: false,
     lazy: true,
-    roles: ["admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.dashboard,
-    element: <MentorDashboard />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.courses,
-    element: <MentorCourses />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.detailCourseMentor(":courseUid"),
-    element: <MentorDetailCourse />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.assignmentSubmissionDetail(
-      ":courseUid",
-      ":lessonUid",
-      ":submissionUid",
-    ),
-    element: <MentorAssignmentSubmissionDetail />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.assignmentSubmissions(":courseUid", ":lessonUid"),
-    element: <MentorAssignmentSubmissions />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.courseEditMentor(":courseUid"),
-    element: <CourseEditMentor />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.mentor.assignments(":courseUid"),
-    element: <MentorAssignments />,
-    public: false,
-    lazy: true,
-    roles: ["mentor", "admin", "super_admin"],
-  },
-  {
-    path: ROUTES.student.dashboard,
-    element: <StudentDashboard />,
-    public: false,
-    lazy: true,
-    roles: ["student"],
+    roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.student.learning,
@@ -424,13 +347,6 @@ const routeConfig: RouteConfig[] = [
     roles: ["student"],
   },
   {
-    path: ROUTES.student.transactions,
-    element: <StudentTransactions />,
-    public: false,
-    lazy: true,
-    roles: ["student"],
-  },
-  {
     path: "*",
     element: <NotFoundContent />,
     public: true,
@@ -464,8 +380,15 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollManager />
-      <ErrorBoundary>
+      <RouterErrorBoundary>
         <Routes>
+          {LEGACY_DASHBOARD_REDIRECTS.map((legacy) => (
+            <Route
+              key={legacy.path}
+              path={legacy.path}
+              element={<LegacyRedirect template={legacy.template} />}
+            />
+          ))}
           {routeConfig.map((route) => (
             <Route
               key={route.path}
@@ -484,7 +407,7 @@ function App() {
             />
           ))}
         </Routes>
-      </ErrorBoundary>
+      </RouterErrorBoundary>
     </BrowserRouter>
   );
 }

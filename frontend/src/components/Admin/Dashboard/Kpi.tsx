@@ -1,40 +1,25 @@
-import { DollarSign, Users2, CreditCard, TrendingUp, type LucideIcon } from 'lucide-react'
-
 import type { AdminKpi } from '@/lib/types/admin/dashboard'
+import { adminKpiAccentClassName } from '@/lib/admin/kpi-accent'
+import { localizeAdminKpis } from '@/lib/admin/localize-admin-kpi'
 import { cn } from '@/lib/utils'
 
 import { StatCard } from '../../shared/StatCard'
 
-const iconMap: Record<AdminKpi['iconName'], LucideIcon> = {
-  revenue: DollarSign,
-  users: Users2,
-  transactions: CreditCard,
-  conversion: TrendingUp,
-  ticket: DollarSign,
-  paid: DollarSign,
-  pending: DollarSign,
-  failed: DollarSign,
-}
-
 function KpiSkeleton() {
   return (
-    <div className="flex w-full animate-pulse flex-col items-start gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50/70 p-4 shadow-xs">
-      <div className="flex w-full items-start justify-between gap-3">
-        <div className="flex flex-col gap-2">
-          <div className="h-3 w-20 rounded bg-slate-200" />
-          <div className="h-7 w-28 rounded bg-slate-200" />
-        </div>
-        <div className="h-10 w-10 rounded-xl bg-slate-200" />
+    <div className="flex w-full animate-pulse flex-col items-start gap-3 rounded-xl border-2 border-l-4 border-ink-900/10 border-l-line-medium bg-paper-white p-4">
+      <div className="flex w-full flex-col gap-2">
+        <div className="h-3 w-20 rounded bg-line-light" />
+        <div className="h-7 w-28 rounded bg-line-light" />
       </div>
-      <div className="flex items-center gap-2">
-        <div className="h-5 w-14 rounded-full bg-slate-200" />
-        <div className="h-3 w-24 rounded bg-slate-200" />
-      </div>
+      <div className="h-3 w-40 max-w-full rounded bg-line-light" />
     </div>
   )
 }
 
 export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLoading?: boolean }) {
+  const localizedKpis = localizeAdminKpis(adminKpis)
+
   if (isLoading) {
     return (
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -47,21 +32,18 @@ export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLo
 
   return (
     <section className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4')}>
-      {adminKpis?.map((k) => {
-        const Icon = iconMap[k.iconName]
-        return (
-          <StatCard
-            key={k.id}
-            variant="kpi"
-            label={k.label}
-            value={k.value}
-            trendValue={k.trendValue}
-            trendDirection={k.trendDirection}
-            trendLabel={k.trendLabel}
-            icon={<Icon className="h-5 w-5" aria-hidden />}
-          />
-        )
-      })}
+      {localizedKpis?.map((k) => (
+        <StatCard
+          key={k.id}
+          variant="kpi"
+          label={k.label}
+          value={k.value}
+          trendValue={k.trendValue}
+          trendDirection={k.trendDirection}
+          trendLabel={k.trendLabel}
+          accentClassName={adminKpiAccentClassName[k.iconName]}
+        />
+      ))}
     </section>
   )
 }

@@ -64,7 +64,7 @@ export function TipTapInsertMenu({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[11.5rem]">
-        <DropdownMenuLabel className="text-xs font-normal text-slate-500">
+        <DropdownMenuLabel className="text-xs font-normal text-ink-500">
           Media & elemen
         </DropdownMenuLabel>
         <DropdownMenuItem onSelect={() => openAfterMenuClose(onInsertLink)}>

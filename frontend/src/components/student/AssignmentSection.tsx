@@ -5,7 +5,7 @@ import { SearchForm } from '../shared/SearchForm'
 import { SegmentedFilter } from '../shared/SegemntedFilter'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
-import { CalendarClock, ChevronRight, ClipboardList, Lock } from 'lucide-react'
+import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
 import { Pagination } from '../shared/Pagination'
 import { format, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
@@ -19,6 +19,7 @@ import { formatAssignmentDeadlineRelative } from '@/lib/student-assignments/form
 import type { StudentAssignmentRow } from '@/lib/student-assignments/assignment-row-model'
 import { buildStudentAssignmentHref } from '@/lib/student-assignments/assignment-navigation'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
+import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
 
 type StudentAssignmentsSectionProps = {
   view: StudentAssignmentListViewModel
@@ -44,8 +45,8 @@ const rowKindMeta: Record<StudentAssignmentRowKind, { label: string; className: 
 const urgencyTone: Record<DeadlineUrgency, { border: string; text: string; bg: string }> = {
   overdue: { border: 'border-rose-200', text: 'text-rose-700', bg: 'bg-rose-50' },
   due_soon: { border: 'border-amber-200', text: 'text-amber-800', bg: 'bg-amber-50' },
-  ok: { border: 'border-slate-200', text: 'text-slate-700', bg: 'bg-slate-50' },
-  closed: { border: 'border-slate-200', text: 'text-slate-500', bg: 'bg-slate-100' },
+  ok: { border: 'border-line-light', text: 'text-ink-700', bg: 'bg-paper-paper' },
+  closed: { border: 'border-line-light', text: 'text-ink-500', bg: 'bg-paper-paper' },
 }
 
 function DeadlineUrgencyBadges({ urgency }: { urgency: DeadlineUrgency }) {
@@ -78,28 +79,57 @@ function AssignmentListSkeleton() {
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={index}
-          className="h-[220px] animate-pulse rounded-2xl border border-slate-200/80 bg-slate-100/70"
+          className="h-[220px] animate-pulse rounded-2xl border border-ink-900/10 bg-paper-paper/70"
         />
       ))}
     </div>
   )
 }
 
-function AssignmentEmptyState({ hasAnyItems }: { hasAnyItems: boolean }) {
+function categoryEmptyTitle(category: StudentAssignmentFeedCategory): string {
+  switch (category) {
+    case 'todo':
+      return 'Belum ada tugas yang perlu dikumpulkan.'
+    case 'pending_review':
+      return 'Belum ada tugas yang menunggu review.'
+    case 'done':
+      return 'Belum ada tugas yang selesai dinilai.'
+    case 'late':
+      return 'Belum ada tugas terlambat.'
+    default:
+      return 'Belum ada tugas yang bisa ditampilkan.'
+  }
+}
+
+function AssignmentEmptyState({
+  scopedCount,
+  categoryMatchCount,
+  category,
+}: {
+  scopedCount: number
+  categoryMatchCount: number
+  category: StudentAssignmentFeedCategory
+}) {
+  const title =
+    scopedCount === 0
+      ? 'Belum ada tugas yang bisa ditampilkan.'
+      : categoryMatchCount === 0
+        ? categoryEmptyTitle(category)
+        : 'Tidak ada tugas yang cocok dengan pencarian.'
+
+  const description =
+    scopedCount === 0
+      ? 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah diterbitkan.'
+      : undefined
+
   return (
-    <div className="flex flex-col items-center gap-4 px-6 py-14 text-center">
-      <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-        <ClipboardList className="size-7" aria-hidden />
-      </div>
+    <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+      <NothingLottieIllustration className="mb-1 max-w-[12rem]" />
       <div className="max-w-md space-y-2">
-        <p className="text-base font-semibold text-slate-800">
-          {hasAnyItems ? 'Tidak ada tugas untuk filter ini' : 'Belum ada tugas yang bisa ditampilkan'}
-        </p>
-        <p className="text-sm leading-6 text-slate-500">
-          {hasAnyItems
-            ? 'Coba ubah filter atau kata kunci pencarian.'
-            : 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah mentor menerbitkan tugas di kursus tersebut.'}
-        </p>
+        <p className="text-base font-semibold text-foreground">{title}</p>
+        {description ? (
+          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+        ) : null}
       </div>
     </div>
   )
@@ -136,7 +166,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-slate-300">
+    <article className="group overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-line-medium">
       <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
@@ -144,7 +174,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-primary">{row.courseTitle}</p>
                 {row.moduleTitle && row.lessonTitle && (
-                  <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-500">
+                  <p className="mt-1 line-clamp-1 text-xs font-medium text-ink-500">
                     {row.moduleTitle} · {row.lessonTitle}
                   </p>
                 )}
@@ -153,42 +183,42 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
             </div>
 
             <div className="min-w-0">
-              <h3 className="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-slate-900 sm:text-xl">
+              <h3 className="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-ink-900 sm:text-xl">
                 {row.assignment.title}
               </h3>
               {plainDescription && (
-                <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-500">
+                <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-ink-500">
                   {plainDescription}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-            <span className="rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-ink-500">
+            <span className="rounded-lg border border-ink-900/10 bg-paper-paper px-2.5 py-1.5">
               Pelajaran {row.assignment.meetingNumber}
             </span>
-            <span className="rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5">
+            <span className="rounded-lg border border-ink-900/10 bg-paper-paper px-2.5 py-1.5">
               {row.assignment.taskType === 'quiz' ? 'Quiz' : 'Tugas teks'}
             </span>
             {row.latestSubmission && (
-              <span className="rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5">
+              <span className="rounded-lg border border-ink-900/10 bg-paper-paper px-2.5 py-1.5">
                 Percobaan {row.latestSubmission.attemptNumber}
               </span>
             )}
           </div>
         </div>
 
-        <aside className="flex flex-col justify-between gap-4 border-t border-slate-100 bg-slate-50/60 p-5 sm:p-6 lg:border-l lg:border-t-0">
+        <aside className="flex flex-col justify-between gap-4 border-t border-line-light bg-paper-paper/60 p-5 sm:p-6 lg:border-l lg:border-t-0">
           <div className={cn('rounded-xl border px-4 py-3.5', urgency.border, urgency.bg)}>
             <div className="flex items-center gap-2">
               <CalendarClock className={cn('h-4 w-4', urgency.text)} aria-hidden />
-              <p className="text-xs font-semibold uppercase text-slate-500">Tenggat</p>
+              <p className="text-xs font-semibold uppercase text-ink-500">Tenggat</p>
             </div>
             <p className={cn('mt-2 text-base font-bold leading-snug', urgency.text)}>
               {formatAssignmentDeadlineRelative(row.assignment.deadlineAt, now, row.deadlineUrgency)}
             </p>
-            <p className="mt-1 text-xs tabular-nums text-slate-500">{deadlineLabel}</p>
+            <p className="mt-1 text-xs tabular-nums text-ink-500">{deadlineLabel}</p>
           </div>
 
           {canOpen ? (
@@ -206,10 +236,10 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
               </Link>
             </Button>
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-3.5">
+            <div className="rounded-xl border border-dashed border-line-light bg-paper-white px-4 py-3.5">
               <div className="flex items-start gap-2.5">
-                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-                <p className="text-xs leading-5 text-slate-600">{blockReason}</p>
+                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" aria-hidden />
+                <p className="text-xs leading-5 text-ink-600">{blockReason}</p>
               </div>
             </div>
           )}
@@ -231,6 +261,7 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
     onSearchSubmit,
     paginatedRows,
     scopedCount,
+    categoryMatchCount,
     hasVisibleRows,
     currentPage,
     totalPages,
@@ -291,7 +322,11 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
         </div>
       ) : (
-        <AssignmentEmptyState hasAnyItems={scopedCount > 0} />
+        <AssignmentEmptyState
+          scopedCount={scopedCount}
+          categoryMatchCount={categoryMatchCount}
+          category={category}
+        />
       )}
     </section>
   )
