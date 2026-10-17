@@ -18,14 +18,14 @@ export function FilterSelect<T extends string>({ id, label, value, onChange, opt
         'flex w-full min-w-0 flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2',
         className,
       )}>
-      <label htmlFor={id} className="shrink-0 text-xs font-medium text-slate-500 sm:whitespace-nowrap">
+      <label htmlFor={id} className="shrink-0 text-xs font-medium text-muted-foreground sm:whitespace-nowrap">
         {label}
       </label>
       <Select value={value} onValueChange={(v) => onChange(v as T)}>
         <SelectTrigger
           id={id}
           size="sm"
-          className="h-9 w-full min-w-0 rounded-xl border-slate-200 px-3 text-xs sm:h-9 sm:w-36 sm:rounded-3xl sm:text-sm md:w-40">
+          className="h-9 w-full min-w-0 rounded-xl border-input bg-card px-3 text-xs hover:border-line-medium sm:h-9 sm:w-36 sm:text-sm md:w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

@@ -44,9 +44,9 @@ type CurriculumOutlineProps = Pick<
 
 function LessonTypeIcon({ type }: { type: string | undefined }) {
   if (type === "video") {
-    return <Film className="size-3.5 shrink-0 text-slate-400" aria-hidden />;
+    return <Film className="mt-0.5 size-3.5 shrink-0 text-ink-400" aria-hidden />;
   }
-  return <FileText className="size-3.5 shrink-0 text-slate-400" aria-hidden />;
+  return <FileText className="mt-0.5 size-3.5 shrink-0 text-ink-400" aria-hidden />;
 }
 
 type LessonRowProps = {
@@ -74,13 +74,12 @@ function LessonRow({
         editLayout.lessonRow,
         editMotion.rowSelect,
         editMotion.reducedMotion,
-        "w-full",
         isActive ? editLayout.lessonRowActive : editLayout.lessonRowIdle,
       )}
     >
-      <span className={editLayout.meta}>{index + 1}</span>
+      <span className={cn(editLayout.meta, "pt-0.5")}>{index + 1}</span>
       <LessonTypeIcon type={contentType} />
-      <span className="min-w-0 truncate">{title}</span>
+      <span className="min-w-0 break-words text-pretty">{title}</span>
     </button>
   );
 }
@@ -118,24 +117,26 @@ function ModuleGroup({
     <section
       aria-label={`Modul ${module.title}`}
       className={cn(
-        "py-3 first:pt-0",
+        editLayout.outlineSection,
         editMotion.outlineItem,
         editMotion.reducedMotion,
       )}
       style={{ animationDelay: `${Math.min(moduleIndex, 6) * 40}ms` }}
     >
-      <div className="mb-1 flex items-center gap-1">
+      <div
+        className={cn(
+          editLayout.moduleRow,
+          editMotion.reducedMotion,
+          isActiveModule ? editLayout.moduleRowActive : editLayout.moduleRowIdle,
+        )}
+      >
         <button
           type="button"
           onClick={() => onSelectModule(module.uid)}
-          className={cn(
-            "min-w-0 flex-1 rounded-md px-2 py-1.5 text-left transition-[background-color,color,transform] duration-200 ease-out",
-            editMotion.reducedMotion,
-            isActiveModule ? "bg-slate-50" : "hover:bg-slate-50",
-          )}
+          className="min-w-0 flex-1 rounded-md px-1.5 py-1.5 text-left"
         >
           <p className={editLayout.moduleTitle}>Modul {moduleIndex + 1}</p>
-          <p className="truncate text-sm font-medium text-slate-800">
+          <p className={editLayout.moduleTitleText}>
             {module.title}
           </p>
         </button>
@@ -146,7 +147,7 @@ function ModuleGroup({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className={`${editLayout.iconButton} shrink-0`}
+              className={`${editLayout.iconButton} shrink-0 self-center`}
               aria-label={`Kelola modul ${module.title}`}
             >
               <MoreHorizontal className="size-4" />
@@ -171,8 +172,8 @@ function ModuleGroup({
 
       {isLoading ? (
         <div className="space-y-2 px-3 py-2">
-          <div className="h-8 animate-pulse rounded-md bg-slate-100" />
-          <div className="h-8 animate-pulse rounded-md bg-slate-100" />
+          <div className={cn(editLayout.skeleton, 'h-8')} />
+          <div className={cn(editLayout.skeleton, 'h-8')} />
         </div>
       ) : isLoaded ? (
         lessons.length > 0 ? (
@@ -198,7 +199,7 @@ function ModuleGroup({
         )
       ) : (
         <p className={`px-3 py-2 ${editLayout.body}`}>
-          Pilih modul untuk memuat daftar lesson.
+          Klik judul modul di atas untuk menampilkan daftar lesson di sini.
         </p>
       )}
 
@@ -206,7 +207,7 @@ function ModuleGroup({
         type="button"
         variant="ghost"
         size="sm"
-        className="mt-1 h-8 w-full justify-start gap-1.5 px-3 text-slate-600"
+        className="mt-1 h-auto min-h-8 w-full justify-start gap-1.5 whitespace-normal px-3 py-2 text-left text-ink-600"
         onClick={() => onAddLesson(module.uid)}
       >
         <Plus className="size-3.5" />
@@ -250,9 +251,9 @@ export function CurriculumOutline({
       )}
     >
       <div
-        className={`flex items-center justify-between gap-3 pb-3 ${editLayout.divider}`}
+        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pb-3 ${editLayout.divider}`}
       >
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className={editLayout.panelTitle}>Kurikulum</h2>
           {isFullLayout && (
             <p className={`mt-0.5 ${editLayout.body}`}>
@@ -289,14 +290,16 @@ export function CurriculumOutline({
       ) : (
         <ScrollArea
           className={cn(
+            "min-h-0 min-w-0 flex-1",
+            "[&_[data-slot=scroll-area-viewport]]:min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:min-w-0",
             isFullLayout
-              ? "min-h-[12rem] flex-1"
-              : "max-h-[min(40dvh,20rem)] flex-1 lg:max-h-[calc(100dvh-10rem)]",
+              ? "min-h-[12rem]"
+              : "max-h-[min(40dvh,20rem)] lg:max-h-[calc(100dvh-10rem)]",
           )}
         >
           <div
             ref={scrollContainerRef}
-            className={`divide-y divide-slate-100 ${editLayout.divider}`}
+            className="min-w-0 pr-2"
           >
             {modules.map((module, index) => (
               <ModuleGroup

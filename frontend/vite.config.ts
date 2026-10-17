@@ -30,7 +30,6 @@ function manualVendorChunk(id: string): string | undefined {
 
   if (id.includes('@tiptap') || id.includes('prosemirror')) return 'tiptap'
   if (id.includes('recharts') || id.includes('d3-')) return 'recharts'
-  if (id.includes('@lottiefiles')) return 'lottie'
   if (id.includes('@tanstack/react-query')) return 'query'
   if (id.includes('react-router')) return 'router'
   if (id.includes('radix-ui') || id.includes('@radix-ui')) return 'radix'

@@ -34,7 +34,7 @@ export default function TestimonialSection() {
             <Reveal key={item.name} delay={(i % 3) * 0.12} className="h-full">
               <figure
                 className={cn(
-                  'relative flex h-full flex-col rounded-[24px] border-2 border-ink-900 bg-paper-white p-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover sm:p-7',
+                  'relative flex h-full flex-col rounded-[24px] border-2 border-ink-900 bg-paper-white p-5 shadow-paper sm:p-7',
                   CARD_TILT[i % CARD_TILT.length],
                 )}
               >

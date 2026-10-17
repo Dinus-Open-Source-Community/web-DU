@@ -21,7 +21,7 @@ export type CourseClassType = 'Free' | 'Premium' | 'Event'
 export type ClassType = 'online' | 'offline'
 
 export type AdminStatus = 'active' | 'inactive' | 'pending'
-export type UserRole = 'student' | 'mentor' | 'admin'
+export type UserRole = 'student' | 'mentor' | 'admin' | 'super_admin'
 export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'cancelled'
 
 export type LessonAssignmentStatus = 'DRAFT' | 'TERBIT' | 'DITUTUP'

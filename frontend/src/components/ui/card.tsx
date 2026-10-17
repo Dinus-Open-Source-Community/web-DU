@@ -56,7 +56,12 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 export function CardPanel({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div className={cn('rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]', 'p-5', className)} {...props} />
+  return (
+    <div
+      className={cn('rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-sm', className)}
+      {...props}
+    />
+  )
 }
 
 export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent }

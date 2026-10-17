@@ -250,7 +250,7 @@ func UpdateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		return
 	}
 
-	merged := mergePayloadForUpdate(&row, payload)
+	merged := mergePayloadForUpdate(&row, payload, &assignment)
 	if err := validateSubmissionAgainstAssignment(&assignment, merged, &row); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error(), "data": nil, "error": err.Error()})
 		return
@@ -648,7 +648,7 @@ func parseSubmissionUpsert(c *gin.Context) (*submissionPayload, error) {
 	return p, nil
 }
 
-func mergePayloadForUpdate(existing *entity.LessonAssignmentSubmission, inc *submissionPayload) *submissionPayload {
+func mergePayloadForUpdate(existing *entity.LessonAssignmentSubmission, inc *submissionPayload, assignment *entity.LessonAssignment) *submissionPayload {
 	out := &submissionPayload{
 		PlainText:       inc.PlainText,
 		RichText:        inc.RichText,
@@ -670,6 +670,23 @@ func mergePayloadForUpdate(existing *entity.LessonAssignmentSubmission, inc *sub
 		out.FileDescription = existing.FileDescription
 	} else {
 		out.FileDescription = inc.FileDescription
+	}
+	// Jangan wariskan nilai lama untuk metode yang sudah dinonaktifkan mentor.
+	// Tanpa ini, resubmit selalu gagal karena data lama melanggar aturan baru
+	// (mis. submission plain_text lama vs tugas yang kini hanya menerima rich_text).
+	if assignment != nil {
+		if assignment.TaskType == entity.LessonAssignmentTaskTypeQuiz {
+			out.PlainText = ""
+			out.RichText = nil
+		} else {
+			if !assignment.AllowPlainTextSubmission {
+				out.PlainText = ""
+			}
+			if !assignment.AllowRichTextSubmission {
+				out.RichText = nil
+			}
+			out.QuizAnswers = nil
+		}
 	}
 	return out
 }

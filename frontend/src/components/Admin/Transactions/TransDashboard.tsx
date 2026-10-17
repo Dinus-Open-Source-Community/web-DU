@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react'
-import { CreditCard, DollarSign, TrendingDown, TrendingUp, Wallet, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { IAdminTransaction, PaymentStatus } from '../../../lib/types/transaction'
 import type { AdminDataTableColumn } from '../../../lib/types/api'
@@ -13,15 +12,25 @@ import type { IChartRatioPoint } from '../../../lib/types/components/charts'
 import { FormatDateTime, FormatRupiah } from '@/lib/func/func'
 import type { TransactionSummary } from '@/lib/types/admin/dashboard'
 import type { DailyTransactionStat } from '@/hooks/use-admin-transactions'
+import {
+  appCardClassName,
+  appKpiLabelClassName,
+  appKpiValueClassName,
+} from '@/lib/design/app-shell-tokens'
+import {
+  transactionSparkAccentClassName,
+  type TransactionSparkMetric,
+} from '@/lib/admin/kpi-accent'
+import { cn } from '@/lib/utils'
 
 type StatusFilter = 'all' | PaymentStatus
 type MethodFilter = 'all' | IAdminTransaction['paymentMethod']
 
 const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'Semua' },
-  { value: 'success', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'failed', label: 'Failed' },
+  { value: 'success', label: 'Lunas' },
+  { value: 'pending', label: 'Menunggu' },
+  { value: 'failed', label: 'Gagal' },
 ]
 
 const methodOptions: { value: MethodFilter; label: string }[] = [
@@ -33,18 +42,18 @@ const methodOptions: { value: MethodFilter; label: string }[] = [
 ]
 
 function KpiSparkCard({
+  metric,
   label,
   value,
-  icon,
   sparkData,
   color,
   gradientId,
   subLabel,
   tooltipPrefix,
 }: {
+  metric: TransactionSparkMetric
   label: string
   value: string
-  icon: ReactNode
   sparkData: { date: string; value: number }[]
   color: string
   gradientId: string
@@ -54,18 +63,19 @@ function KpiSparkCard({
   const hasData = sparkData.length >= 2
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50/70 p-4 shadow-xs">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-black uppercase tracking-widest text-slate-500">{label}</span>
-          <span className="text-2xl font-black tracking-tight text-slate-950">{value}</span>
-        </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-primary/10 text-primary shadow-xs">
-          {icon}
-        </div>
+    <div
+      className={cn(
+        appCardClassName,
+        'flex flex-col border-l-4 p-4 shadow-none',
+        transactionSparkAccentClassName[metric],
+      )}
+    >
+      <div className="flex flex-col gap-1">
+        <span className={appKpiLabelClassName}>{label}</span>
+        <span className={appKpiValueClassName}>{value}</span>
       </div>
 
-      <div className="-mx-1 mt-2 h-14">
+      <div className="-mx-1 mt-3 h-14">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={sparkData} margin={{ top: 4, right: 2, bottom: 0, left: 2 }}>
@@ -77,16 +87,18 @@ function KpiSparkCard({
               </defs>
               <Tooltip
                 contentStyle={{
-                  background: 'white',
+                  background: '#FFFFFF',
                   borderRadius: 10,
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  border: '2px solid rgba(5, 9, 20, 0.1)',
+                  boxShadow: '0 12px 26px rgba(5, 9, 20, 0.10)',
                   fontSize: 11,
                   padding: '6px 10px',
                   lineHeight: '1.4',
                 }}
                 formatter={(v) => [
-                  tooltipPrefix ? `${tooltipPrefix}${Number(v).toLocaleString('id-ID')}` : Number(v).toLocaleString('id-ID'),
+                  tooltipPrefix
+                    ? `${tooltipPrefix}${Number(v).toLocaleString('id-ID')}`
+                    : Number(v).toLocaleString('id-ID'),
                   label,
                 ]}
                 labelFormatter={(l) => {
@@ -94,17 +106,27 @@ function KpiSparkCard({
                   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
                 }}
               />
-              <Area type="monotone" dataKey="value" stroke={color} fill={`url(#${gradientId})`} strokeWidth={2} dot={false} isAnimationActive={false} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={color}
+                fill={`url(#${gradientId})`}
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="text-[10px] text-slate-300">Belum cukup data untuk chart</span>
+            <span className="text-[10px] font-medium text-ink-400">Belum cukup data untuk chart</span>
           </div>
         )}
       </div>
 
-      {subLabel && <span className="mt-1 text-[11px] font-medium text-slate-400">{subLabel}</span>}
+      {subLabel ? (
+        <span className="mt-1 text-[11px] font-medium text-ink-500">{subLabel}</span>
+      ) : null}
     </div>
   )
 }
@@ -168,8 +190,8 @@ export function TransactionsDashboard({
       header: 'Transaksi',
       cell: (t) => (
         <div className="flex flex-col">
-          <span className="font-semibold text-slate-800">{t.transactionId}</span>
-          <span className="text-xs text-slate-400">{FormatDateTime(t.purchasedAt)}</span>
+          <span className="font-semibold text-ink-900">{t.transactionId}</span>
+          <span className="text-xs text-ink-500">{FormatDateTime(t.purchasedAt)}</span>
         </div>
       ),
     },
@@ -178,40 +200,44 @@ export function TransactionsDashboard({
       header: 'Siswa',
       cell: (t) => (
         <div className="flex items-center gap-2.5">
-          <div className="relative h-8 w-8 overflow-hidden rounded-full bg-slate-100">
+          <div className="relative h-8 w-8 overflow-hidden rounded-full bg-paper-paper ring-2 ring-ink-900/10">
             <img src={t.studentAvatar} alt={t.studentName} className="object-cover" sizes="32px" />
           </div>
-          <span className="truncate text-slate-700">{t.studentName}</span>
+          <span className="truncate text-ink-700">{t.studentName}</span>
         </div>
       ),
     },
     {
       id: 'course',
       header: 'Kursus',
-      cell: (t) => <span className="line-clamp-1 max-w-[240px] text-slate-700">{t.courseName}</span>,
+      cell: (t) => <span className="line-clamp-1 max-w-[240px] text-ink-700">{t.courseName}</span>,
     },
     {
       id: 'method',
       header: 'Metode',
-      cell: (t) => <span className="text-slate-600">{t.paymentMethod}</span>,
+      cell: (t) => <span className="text-ink-600">{t.paymentMethod}</span>,
     },
     {
       id: 'status',
       header: 'Status',
-      cell: (t) => <PaymentBadge status={t.paymentStatus} />,
+      cell: (t) => <PaymentBadge status={t.paymentStatus} presentation="dot" />,
     },
     {
       id: 'price',
       header: 'Total',
       align: 'right',
-      cell: (t) => <span className="font-semibold tabular-nums text-slate-900">{t.price === 0 ? 'Gratis' : FormatRupiah(t.price)}</span>,
+      cell: (t) => (
+        <span className="font-semibold tabular-nums text-ink-900">
+          {t.price === 0 ? 'Gratis' : FormatRupiah(t.price)}
+        </span>
+      ),
     },
   ]
 
   if (isLoading) {
     return (
       <section className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-ink-400" aria-hidden />
       </section>
     )
   }
@@ -220,39 +246,39 @@ export function TransactionsDashboard({
     <section className="flex flex-col gap-5">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiSparkCard
-          label="Gross Revenue"
+          metric="revenue"
+          label="Pendapatan kotor"
           value={String(FormatRupiah(grossRevenue))}
-          icon={<DollarSign className="h-5 w-5" />}
           sparkData={revenueSparkData}
-          color="#10B981"
+          color="#13A8FF"
           gradientId="spark-revenue"
           tooltipPrefix="Rp "
           subLabel={totalTx > 0 ? `${totalTx.toLocaleString('id-ID')} total transaksi` : undefined}
         />
         <KpiSparkCard
-          label="Paid"
+          metric="paid"
+          label="Lunas"
           value={paidCount.toLocaleString('id-ID')}
-          icon={<TrendingUp className="h-5 w-5" />}
           sparkData={paidSparkData}
           color="#10B981"
           gradientId="spark-paid"
           subLabel={totalTx > 0 ? `${((paidCount / totalTx) * 100).toFixed(1)}% dari total` : undefined}
         />
         <KpiSparkCard
-          label="Pending"
+          metric="pending"
+          label="Menunggu"
           value={pendingCount.toLocaleString('id-ID')}
-          icon={<Wallet className="h-5 w-5" />}
           sparkData={pendingSparkData}
           color="#F59E0B"
           gradientId="spark-pending"
           subLabel={totalTx > 0 ? `${((pendingCount / totalTx) * 100).toFixed(1)}% dari total` : undefined}
         />
         <KpiSparkCard
-          label="Failed"
+          metric="failed"
+          label="Gagal"
           value={failedCount.toLocaleString('id-ID')}
-          icon={<TrendingDown className="h-5 w-5" />}
           sparkData={failedSparkData}
-          color="#EF4444"
+          color="#E34D59"
           gradientId="spark-failed"
           subLabel={totalTx > 0 ? `${((failedCount / totalTx) * 100).toFixed(1)}% dari total` : undefined}
         />
@@ -264,13 +290,14 @@ export function TransactionsDashboard({
         </ChartCard>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-          <CreditCard className="h-4 w-4 text-slate-400" aria-hidden />
+      <div className={cn(appCardClassName, 'flex flex-col gap-1 p-4 shadow-none')}>
+        <div className="flex items-center gap-2 text-sm font-semibold text-ink-900">
           Daftar Transaksi
-          {isFetching && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />}
+          {isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin text-ink-400" aria-hidden /> : null}
         </div>
-        <p className="text-xs text-slate-500">Semua transaksi platform. Filter untuk menemukan transaksi spesifik.</p>
+        <p className="text-xs font-medium text-ink-500">
+          Semua transaksi platform. Filter untuk menemukan transaksi spesifik.
+        </p>
       </div>
 
       <div className="flex flex-1 flex-wrap items-center gap-3">

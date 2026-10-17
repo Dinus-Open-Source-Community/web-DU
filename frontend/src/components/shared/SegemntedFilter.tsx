@@ -23,7 +23,7 @@ type SegmentedFilterProps<T extends string> = {
 };
 
 const CONTAINER_CLASS =
-  "relative flex  items-center gap-1.5 rounded-lg bg-slate-100 p-1.5 shadow-inner w-max";
+  "relative flex  items-center gap-1.5 rounded-lg bg-paper-paper p-1.5 shadow-inner w-max";
 
 const SCROLLBAR_HIDDEN =
   "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
@@ -83,7 +83,7 @@ export function SegmentedFilter<T extends string>({
       )}
     >
       <div
-        className="pointer-events-none absolute top-1.5 bottom-1.5 hidden rounded-lg border border-slate-200/60 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300 ease-in-out sm:block"
+        className="pointer-events-none absolute top-1.5 bottom-1.5 hidden rounded-lg border border-line-light bg-paper-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300 ease-in-out sm:block"
         style={{
           left: indicatorStyle.left,
           width: indicatorStyle.width,
@@ -106,9 +106,9 @@ export function SegmentedFilter<T extends string>({
               TAB_CLASS,
               active
                 ? "text-primary font-semibold"
-                : "text-slate-500 hover:text-slate-800",
+                : "text-ink-500 hover:text-ink-800",
               active &&
-                "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] ring-1 ring-slate-200/70 sm:bg-transparent sm:shadow-none sm:ring-0",
+                "bg-paper-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] ring-1 ring-line-light/70 sm:bg-transparent sm:shadow-none sm:ring-0",
             )}
           >
             {item.label}

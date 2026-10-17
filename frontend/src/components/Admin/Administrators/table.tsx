@@ -9,7 +9,7 @@ import { cn } from '../../../lib/utils'
 import { Pagination } from '../../shared/Pagination'
 import type { AdminAdministrator, AdminMentor } from '../../../lib/types/api'
 import type { PersonSelectionItem } from '../../../lib/types/utils'
-import { Badge } from '../../ui/badge'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { PersonSelectionDialog } from '../../shared/PersonSelection'
 import type { AdminStudent } from '../../../lib/types/user'
 
@@ -47,7 +47,7 @@ export function AdministratorsTable({
     avatar: mentor.avatar,
     kind: 'mentor',
     detail: `Bergabung ${mentor.joinedAt}`,
-    meta: <Badge variant="userRole">Mentor</Badge>,
+    meta: <AdminMetaLabel>Mentor</AdminMetaLabel>,
   }))
 
   const studentItems: InvitePersonItem[] = dataStudents.map((student) => ({
@@ -57,7 +57,7 @@ export function AdministratorsTable({
     avatar: student.avatar,
     kind: 'student',
     detail: `${student.enrolledCourses} kursus • progres rata-rata ${student.averageProgress}%`,
-    meta: <Badge variant="userActive">Student</Badge>,
+    meta: <AdminMetaLabel>Student</AdminMetaLabel>,
   }))
 
   const items = [...mentorItems, ...studentItems]

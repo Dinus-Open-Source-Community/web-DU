@@ -58,10 +58,10 @@ export default function CourseSection() {
           <Reveal delay={0.1} className="shrink-0">
             <Link
               to={course.allHref}
-              className="group/btn text-ink-900 hover:bg-note-yellow focus-visible:ring-brand-blue/50 inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase shadow-button outline-none transition-all hover:-translate-y-0.5 hover:shadow-button-hover focus-visible:ring-4"
+              className="group/btn text-ink-900 hover:bg-note-yellow focus-visible:ring-brand-blue/50 inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase shadow-button outline-none transition-all focus-visible:ring-4"
             >
               {course.allLabel}
-              <ArrowRight className="size-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+              <ArrowRight className="size-5" />
             </Link>
           </Reveal>
         </div>
@@ -118,7 +118,7 @@ export default function CourseSection() {
 
                     <ArrowRight
                       aria-hidden
-                      className="text-ink-900/40 size-5 shrink-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-blue sm:size-7"
+                      className="text-ink-900/40 size-5 shrink-0 transition-all duration-300 group-hover:text-brand-blue sm:size-7"
                     />
                   </Link>
                 </li>

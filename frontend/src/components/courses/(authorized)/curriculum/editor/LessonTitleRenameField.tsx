@@ -55,7 +55,7 @@ export function LessonTitleRenameField({
   return (
     <div
       className={cn(
-        'flex min-w-0 items-center overflow-hidden border border-slate-200 bg-white',
+        'flex min-w-0 items-center overflow-hidden border-2 border-ink-900/10 bg-paper-white',
         editLayout.control,
         'focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20',
         className,
@@ -72,7 +72,7 @@ export function LessonTitleRenameField({
         onChange={(event) => setDraftTitle(event.target.value)}
         onKeyDown={handleTitleKeyDown}
         className={cn(
-          'min-w-0 flex-1 border-0 bg-transparent px-3 font-semibold text-slate-900 outline-none disabled:opacity-60',
+          'min-w-0 flex-1 border-0 bg-transparent px-3 font-semibold text-ink-900 outline-none disabled:opacity-60',
           compact ? 'py-2 text-base' : 'py-2.5 text-lg sm:text-xl',
         )}
       />

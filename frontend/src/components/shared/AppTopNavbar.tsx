@@ -7,14 +7,13 @@ import {
 } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   ArrowRight,
   ChevronRight,
-  Command,
   FileSearch,
-  LogOut,
   Menu,
   Search,
-  UserRound,
+  User,
 } from "lucide-react";
 
 import {
@@ -24,8 +23,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { UserAvatarImage } from "./UserAvatarImage";
+import { DialogScrollArea } from "../ui/dialog-scroll-area";
+import { AppShellNavbarSearch } from "./AppShellNavbarSearch";
+import { NavbarAccountHoverMenu } from "./NavbarAccountHoverMenu";
 import { Navigation, flattenNavItems } from "../../lib/navigation";
 import { ROUTES } from "../../lib/routes";
 import { cn } from "../../lib/utils";
@@ -37,23 +37,22 @@ import {
   type NavbarSearchItem,
 } from "../../providers/navbar-search-provider";
 import { SidebarTrigger } from "../ui/sidebar";
-
+import {
+  appShellBackGhostClassName,
+  appShellBreadcrumbCurrentClassName,
+  appShellBreadcrumbLinkClassName,
+  appShellBreadcrumbMutedClassName,
+  appShellNavTriggerClassName,
+  appShellTopBarClassName,
+} from "@/lib/design/app-shell-tokens";
+import { buildDashboardBreadcrumbs } from "@/lib/layout/dashboard-breadcrumbs";
+import { navigateBackOrDashboard } from "@/lib/layout/navbar-back";
 type AppTopNavbarProps = {
   role: UserRole;
   user: SidebarUser;
-  title: string;
   showSidebarTrigger?: boolean;
+  navbarBack?: "dashboard" | "history";
   onSignOut: AppTopNavbarAuthProps["onSignOut"];
-};
-
-function getUserInitial(user: SidebarUser) {
-  return user.name.trim().charAt(0).toUpperCase() || "U";
-}
-
-const roleLabel: Record<UserRole, string> = {
-  admin: "Administrator",
-  mentor: "Mentor",
-  student: "Student",
 };
 
 function matchesSearch(item: NavbarSearchItem, query: string) {
@@ -64,44 +63,37 @@ function matchesSearch(item: NavbarSearchItem, query: string) {
     .some((value) => value!.toLowerCase().includes(q));
 }
 
-function isActivePath(pathname: string, path?: string) {
-  if (!path) return false;
-  return pathname === path || pathname.startsWith(`${path}/`);
-}
-
-function titleCase(value: string) {
-  return value
-    .split(/[-_]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 export function AppTopNavbar({
   role,
   user,
-  title,
   showSidebarTrigger = true,
+  navbarBack,
   onSignOut,
 }: AppTopNavbarProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { localSearch } = useNavbarSearch();
+  const { localSearch, courseBreadcrumb } = useNavbarSearch();
   const [query, setQuery] = useState("");
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const navigationItems = useMemo<NavbarSearchItem[]>(() => {
     const key =
-      role === "admin" ? "Admin" : role === "mentor" ? "Mentor" : "Student";
+      role === "admin"
+        ? "Admin"
+        : role === "super_admin"
+          ? "SuperAdmin"
+          : role === "mentor"
+            ? "Mentor"
+            : "Student";
     return [
       {
-        id: "profile",
-        label: "Profile",
-        description: "Buka pengaturan profil akun",
+        id: "settings",
+        label: "Pengaturan",
+        description: "Buka pengaturan akun",
         path: ROUTES.profile,
-        icon: UserRound,
-        keywords: ["account", "akun", "settings", "pengaturan"],
+        icon: User,
+        keywords: ["account", "akun", "settings", "pengaturan", "profile"],
       },
       ...flattenNavItems(Navigation[key]).map((item) => ({
         id: item.path,
@@ -127,55 +119,31 @@ export function AppTopNavbar({
     [localItems, query],
   );
   const placeholder =
-    localSearch?.placeholder ?? "Cari halaman, data, atau navigasi...";
+    localSearch?.placeholder ?? "Cari halaman atau data...";
   const profileImageReference = user.avatar_url ?? user.avatar;
 
-  const dashboardPath =
-    role === "admin"
-      ? ROUTES.admin.dashboard
-      : role === "mentor"
-        ? ROUTES.mentor.dashboard
-        : ROUTES.student.dashboard;
   const navKey =
-    role === "admin" ? "Admin" : role === "mentor" ? "Mentor" : "Student";
+    role === "admin"
+      ? "Admin"
+      : role === "super_admin"
+        ? "SuperAdmin"
+        : role === "mentor"
+          ? "Mentor"
+          : "Student";
   const navItems = Navigation[navKey];
 
-  const breadcrumbs = (() => {
-    if (pathname === ROUTES.profile) {
-      return [
-        { label: title, path: dashboardPath },
-        { label: "Profile", path: ROUTES.profile },
-      ];
-    }
+  const breadcrumbContext = useMemo(
+    () =>
+      courseBreadcrumb
+        ? { courseDetailLabel: courseBreadcrumb.label }
+        : undefined,
+    [courseBreadcrumb],
+  );
 
-    const trail = [{ label: title, path: dashboardPath }];
-
-    for (const item of navItems) {
-      if (item.path && isActivePath(pathname, item.path)) {
-        return [...trail, { label: item.name, path: item.path }];
-      }
-
-      const child = item.children?.find((childItem) =>
-        isActivePath(pathname, childItem.path),
-      );
-      if (child) {
-        return [
-          ...trail,
-          { label: item.name },
-          { label: child.name, path: child.path },
-        ];
-      }
-    }
-
-    const dynamicSegments = pathname
-      .split("/")
-      .filter(Boolean)
-      .slice(1)
-      .filter((segment) => !/^[a-z0-9_-]{8,}$/i.test(segment))
-      .map((segment) => ({ label: titleCase(segment) }));
-
-    return [...trail, ...dynamicSegments];
-  })();
+  const breadcrumbs = useMemo(
+    () => buildDashboardBreadcrumbs(pathname, navItems, breadcrumbContext),
+    [pathname, navItems, breadcrumbContext],
+  );
 
   const visibleBreadcrumbs =
     breadcrumbs.length > 3 ? breadcrumbs.slice(-3) : breadcrumbs;
@@ -243,37 +211,63 @@ export function AppTopNavbar({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 min-w-0 shrink-0 items-center gap-2 border-b border-slate-100 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:gap-3 sm:px-5 md:px-6 lg:gap-4 lg:px-8">
+      <header
+        className={cn(
+          "sticky top-0 z-30 flex h-16 min-w-0 shrink-0 items-center gap-2 px-4 sm:gap-3 sm:px-5 md:px-6 lg:gap-4 lg:px-8",
+          appShellTopBarClassName,
+        )}
+      >
         <div className="flex min-w-0 items-center gap-2 md:gap-3">
           {showSidebarTrigger ? (
-            <SidebarTrigger className="size-10 shrink-0 rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95 lg:hidden">
+            <SidebarTrigger
+              className={cn(appShellNavTriggerClassName, "lg:hidden")}
+            >
               <Menu className="size-5" />
             </SidebarTrigger>
           ) : null}
 
+          {navbarBack === "dashboard" ? (
+            <Link to={ROUTES.dashboard} className={appShellBackGhostClassName}>
+              <ArrowLeft className="size-4 shrink-0" aria-hidden />
+              <span className="truncate">Dasbor</span>
+            </Link>
+          ) : null}
+          {navbarBack === "history" ? (
+            <button
+              type="button"
+              onClick={() => navigateBackOrDashboard(navigate)}
+              className={appShellBackGhostClassName}
+            >
+              <ArrowLeft className="size-4 shrink-0" aria-hidden />
+              <span className="truncate">Kembali</span>
+            </button>
+          ) : null}
+
+          {!navbarBack ? (
           <nav
             aria-label="Breadcrumb"
-            className="hidden min-w-0 items-center gap-1 overflow-hidden text-sm md:flex md:max-w-[12rem] lg:max-w-[16rem]"
+            className="hidden min-w-0 items-center gap-1 overflow-hidden text-sm md:flex md:max-w-[14rem] lg:max-w-[22rem]"
           >
             {hasHiddenBreadcrumbs ? (
               <>
-                <span className="rounded-md px-1.5 py-1 text-slate-400">
+                <span className="rounded-md px-1.5 py-1 text-muted-foreground">
                   ...
                 </span>
-                <ChevronRight className="size-3.5 shrink-0 text-slate-300" />
+                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />
               </>
             ) : null}
             {visibleBreadcrumbs.map((crumb, index) => {
               const isLast = index === visibleBreadcrumbs.length - 1;
+              const crumbHref = 'path' in crumb ? crumb.path : undefined;
               return (
                 <span
                   key={`${crumb.label}-${index}`}
                   className="flex min-w-0 items-center gap-1"
                 >
-                  {crumb.path && !isLast ? (
+                  {crumbHref && !isLast ? (
                     <Link
-                      to={crumb.path}
-                      className="max-w-[7rem] truncate rounded-md px-1.5 py-1 font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 lg:max-w-[9rem]"
+                      to={crumbHref}
+                      className={appShellBreadcrumbLinkClassName}
                     >
                       {crumb.label}
                     </Link>
@@ -282,96 +276,57 @@ export function AppTopNavbar({
                       className={cn(
                         "truncate rounded-md px-1.5 py-1",
                         isLast
-                          ? "max-w-[8rem] font-semibold text-slate-900 lg:max-w-[11rem]"
-                          : "max-w-[7rem] font-medium text-slate-500 lg:max-w-[9rem]",
+                          ? appShellBreadcrumbCurrentClassName
+                          : appShellBreadcrumbMutedClassName,
                       )}
                     >
                       {crumb.label}
                     </span>
                   )}
                   {!isLast ? (
-                    <ChevronRight className="size-3.5 shrink-0 text-slate-300" />
+                    <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />
                   ) : null}
                 </span>
               );
             })}
           </nav>
+          ) : null}
         </div>
 
-        <div className="relative mx-auto w-full max-w-lg min-w-0 flex-1 px-0.5 sm:px-1">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={handleInlineKeyDown}
-            onFocus={() => setIsCommandOpen(true)}
-            placeholder={placeholder}
-            className="focus:border-primary/40 focus:ring-primary/10 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pr-14 pl-10 text-sm text-slate-900 transition outline-none focus:bg-white focus:ring-4 sm:pr-24"
-          />
-          <button
-            type="button"
-            onClick={() => setIsCommandOpen(true)}
-            className="absolute top-1/2 right-2 hidden -translate-y-1/2 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 shadow-xs transition hover:text-slate-700 sm:inline-flex"
-            aria-label="Buka command search"
-          >
-            <Command className="size-3" />K
-          </button>
-        </div>
+        <AppShellNavbarSearch
+          placeholder={placeholder}
+          value={query}
+          onValueChange={setQuery}
+          onKeyDown={handleInlineKeyDown}
+          onActivate={() => setIsCommandOpen(true)}
+        />
 
-        <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="h-10 rounded-xl px-2 text-slate-500 hover:bg-red-50 hover:text-red-600 sm:px-3"
-          >
-            <LogOut className="size-4" />
-            <span className="hidden md:inline">Logout</span>
-          </Button>
-          <Link
-            to={ROUTES.profile}
-            aria-label="Buka profile"
-            className="focus:ring-primary/15 flex max-w-[11rem] min-w-0 items-center gap-2 rounded-[10px] px-1 py-1 transition hover:bg-slate-50 focus:ring-4 focus:outline-none sm:gap-3 sm:px-1.5 lg:max-w-none"
-          >
-            <UserAvatarImage
-              src={profileImageReference}
-              alt={user.name}
-              size={40}
-              fallbackInitial={getUserInitial(user)}
-              className="bg-primary border border-slate-200 text-white shadow-sm"
-              fallbackClassName="text-white"
-            />
-            <span className="hidden min-w-0 text-left lg:block">
-              <span className="block max-w-36 truncate text-sm leading-5 font-semibold text-slate-900">
-                {user.name}
-              </span>
-              <span className="block text-xs leading-4 font-medium text-slate-400">
-                {roleLabel[role]}
-              </span>
-            </span>
-          </Link>
+        <div className="flex shrink-0 items-center justify-end pl-1 sm:pl-2">
+          <NavbarAccountHoverMenu
+            userName={user.name}
+            userRole={role}
+            userAvatar={profileImageReference}
+            dashboardHref={ROUTES.dashboard}
+            onLogout={handleLogout}
+            variant="shell"
+          />
         </div>
       </header>
 
       <Dialog open={isCommandOpen} onOpenChange={setIsCommandOpen}>
         <DialogContent
-          className="top-[18vh] max-w-2xl translate-y-0 gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl"
+          className="top-[18vh] flex max-h-[min(80dvh,28rem)] max-w-2xl translate-y-0 flex-col gap-0 overflow-hidden rounded-2xl border border-input bg-card p-0 shadow-2xl"
           showCloseButton={false}
         >
           <DialogHeader className="sr-only">
-            <DialogTitle>Command search</DialogTitle>
+            <DialogTitle>Pencarian cepat</DialogTitle>
             <DialogDescription>
               Cari navigasi dan data pada halaman aktif.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-            <Search className="size-5 text-slate-400" aria-hidden />
+          <div className="flex shrink-0 items-center gap-3 border-b border-input px-4 py-3">
+            <Search className="size-5 text-muted-foreground" aria-hidden />
             <input
               ref={searchInputRef}
               type="search"
@@ -379,40 +334,40 @@ export function AppTopNavbar({
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleCommandKeyDown}
               placeholder={placeholder}
-              className="h-10 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              className="h-10 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             />
-            <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-500 sm:inline">
+            <kbd className="hidden rounded-md border border-input bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground sm:inline">
               Enter
             </kbd>
           </div>
 
-          <div className="max-h-[420px] overflow-y-auto p-2">
+          <DialogScrollArea className="min-h-0 flex-1 p-2">
             {localSearch?.onSearch && (
               <button
                 type="button"
                 onClick={() => handleSubmitSearch()}
-                className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
+                className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition outline-none hover:bg-muted focus-visible:bg-muted"
               >
-                <span className="text-primary flex size-9 items-center justify-center rounded-lg bg-blue-50">
+                <span className="text-primary flex size-9 items-center justify-center rounded-lg bg-accent/60">
                   <FileSearch className="size-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-slate-900">
+                  <span className="block text-sm font-semibold text-foreground">
                     Cari di halaman ini
                   </span>
-                  <span className="block truncate text-xs text-slate-500">
+                  <span className="block truncate text-xs text-muted-foreground">
                     {query.trim()
                       ? `"${query.trim()}"`
                       : "Gunakan data dan filter pada halaman aktif"}
                   </span>
                 </span>
-                <ArrowRight className="size-4 text-slate-400" />
+                <ArrowRight className="size-4 text-muted-foreground" />
               </button>
             )}
 
             {filteredLocal.length > 0 && (
               <div className="mb-2">
-                <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                   Data halaman
                 </p>
                 {filteredLocal.map((item) => (
@@ -426,7 +381,7 @@ export function AppTopNavbar({
             )}
 
             <div>
-              <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              <p className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                 Navigasi
               </p>
               {filteredNavigation.length > 0 ? (
@@ -438,12 +393,12 @@ export function AppTopNavbar({
                   />
                 ))
               ) : (
-                <div className="px-3 py-8 text-center text-sm text-slate-500">
+                <div className="px-3 py-8 text-center text-sm text-muted-foreground">
                   Tidak ada hasil navigasi.
                 </div>
               )}
             </div>
-          </div>
+          </DialogScrollArea>
         </DialogContent>
       </Dialog>
     </>
@@ -463,27 +418,27 @@ function SearchResultRow({
     <button
       type="button"
       onClick={onSelect}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition outline-none hover:bg-muted focus:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30"
     >
       <span
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500",
-          item.path && "text-primary bg-blue-50",
+          "flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground",
+          item.path && "text-primary bg-accent/60",
         )}
       >
         <Icon className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-slate-900">
+        <span className="block truncate text-sm font-semibold text-foreground">
           {item.label}
         </span>
         {item.description ? (
-          <span className="block truncate text-xs text-slate-500">
+          <span className="block truncate text-xs text-muted-foreground">
             {item.description}
           </span>
         ) : null}
       </span>
-      <ArrowRight className="size-4 text-slate-300" />
+      <ArrowRight className="size-4 text-muted-foreground/50" />
     </button>
   );
 }

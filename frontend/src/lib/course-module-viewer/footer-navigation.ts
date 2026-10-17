@@ -8,7 +8,18 @@ import type { LessonDetailItem } from '@/lib/types/lesson'
 type FooterNavigationHandlers = {
   setViewerPane: (pane: CourseViewerPane) => void
   navigateToLessonEntry: (entry: LessonEntry) => void
+  navigateToAssignmentEntry?: (entry: LessonEntry) => void
   navigateToLearningHome?: () => void
+}
+
+type FooterPreviousOptions = {
+  previousEntryHasAssignment?: boolean
+  previousEntryAssignmentTitle?: string
+}
+
+type FooterNextOptions = {
+  hasAssignmentStep?: boolean
+  assignmentTitle?: string
 }
 
 export function buildFooterPreviousAction(
@@ -16,6 +27,7 @@ export function buildFooterPreviousAction(
   displayedLesson: LessonDetailItem | null | undefined,
   previousEntry: LessonEntry | null,
   handlers: FooterNavigationHandlers,
+  options: FooterPreviousOptions = {},
 ): LessonFooterNavAction | null {
   if (viewerPane === 'assignment-detail') {
     return {
@@ -34,6 +46,20 @@ export function buildFooterPreviousAction(
   }
 
   if (viewerPane === 'lesson' && previousEntry) {
+    if (options.previousEntryHasAssignment) {
+      return {
+        label: 'Sebelumnya',
+        title: options.previousEntryAssignmentTitle ?? 'Tugas',
+        onClick: () => {
+          if (handlers.navigateToAssignmentEntry) {
+            handlers.navigateToAssignmentEntry(previousEntry)
+          } else {
+            handlers.navigateToLessonEntry(previousEntry)
+          }
+        },
+      }
+    }
+
     return {
       label: 'Sebelumnya',
       title: previousEntry.lesson.title,
@@ -50,6 +76,7 @@ export function buildFooterNextAction(
   displayedLesson: LessonDetailItem | null | undefined,
   nextEntry: LessonEntry | null,
   handlers: FooterNavigationHandlers,
+  options: FooterNextOptions = {},
 ): LessonFooterNavAction | null {
   if (viewerPane === 'assignment-detail' && nextEntry) {
     return {
@@ -67,10 +94,14 @@ export function buildFooterNextAction(
     }
   }
 
-  if (variant === 'student' && viewerPane === 'lesson' && shouldOpenAssignmentAfterLesson(displayedLesson, viewerPane)) {
+  const hasAssignmentStep =
+    options.hasAssignmentStep ??
+    (variant === 'student' && shouldOpenAssignmentAfterLesson(displayedLesson, viewerPane))
+
+  if (viewerPane === 'lesson' && hasAssignmentStep) {
     return {
       label: 'Selanjutnya',
-      title: displayedLesson?.assignment?.title ?? 'Tugas',
+      title: options.assignmentTitle ?? displayedLesson?.assignment?.title ?? 'Tugas',
       onClick: () => handlers.setViewerPane('assignment'),
     }
   }

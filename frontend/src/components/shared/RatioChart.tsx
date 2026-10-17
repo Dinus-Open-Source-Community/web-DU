@@ -1,4 +1,5 @@
 import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { chartTooltipContentStyle } from '@/lib/charts/recharts-theme'
 import type { TransactionRatioPoint } from '../../lib/types/utils'
 
 interface TransactionRatioChartProps {
@@ -36,21 +37,14 @@ export function TransactionRatioChart({ data, height = 280 }: TransactionRatioCh
             innerRadius="60%"
             outerRadius="85%"
             paddingAngle={1}
-            stroke="#fff"
+            stroke="var(--card)"
             strokeWidth={3}
             isAnimationActive={false}
             label={false}
           />
           {hasData ? (
             <Tooltip
-              contentStyle={{
-                background: 'white',
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                fontSize: 12,
-                padding: '8px 12px',
-              }}
+              contentStyle={chartTooltipContentStyle}
               formatter={(value, _name, props) => {
                 const num = Number(value)
                 const pct = total ? ((num / total) * 100).toFixed(1) : '0.0'
@@ -59,7 +53,7 @@ export function TransactionRatioChart({ data, height = 280 }: TransactionRatioCh
               }}
             />
           ) : null}
-          <Legend verticalAlign="bottom" align="center" iconSize={10} iconType="circle" wrapperStyle={{ fontSize: 12, color: '#475569', paddingTop: 8 }} />
+          <Legend verticalAlign="bottom" align="center" iconSize={10} iconType="circle" wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)', paddingTop: 8 }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

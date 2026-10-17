@@ -15,16 +15,43 @@ type LessonSearchDialogProps = {
   onClose: () => void
 }
 
-export function LessonSearchDialog({ open, query, items, inputRef, theme, onQueryChange, onClose }: LessonSearchDialogProps) {
+export function LessonSearchDialog({
+  open,
+  query,
+  items,
+  inputRef,
+  theme,
+  onQueryChange,
+  onClose,
+}: LessonSearchDialogProps) {
   const isDark = theme === 'dark'
 
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 px-4 pt-[13vh]" onMouseDown={onClose}>
-      <div className={cn('mx-auto w-full max-w-2xl overflow-hidden border shadow-2xl', isDark ? 'border-zinc-700 bg-zinc-900' : 'border-slate-200 bg-white')} onMouseDown={(event) => event.stopPropagation()}>
-        <div className={cn('flex items-center gap-3 border-b px-4 py-3', isDark ? 'border-zinc-800' : 'border-slate-200')}>
-          <Search className={cn('h-5 w-5', isDark ? 'text-zinc-500' : 'text-slate-400')} />
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 pt-[13vh] sm:p-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Cari modul atau konten"
+        className={cn(
+          'flex w-full max-w-2xl max-h-[min(80dvh,28rem)] flex-col overflow-hidden rounded-2xl border shadow-2xl',
+          isDark ? 'border-zinc-700 bg-zinc-900' : 'border-line-light bg-paper-white',
+        )}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div
+          className={cn(
+            'flex shrink-0 items-center gap-3 border-b px-4 py-3',
+            isDark ? 'border-zinc-800' : 'border-line-light',
+          )}
+        >
+          <Search className={cn('h-5 w-5 shrink-0', isDark ? 'text-zinc-500' : 'text-ink-400')} />
           <input
             ref={inputRef}
             type="search"
@@ -37,19 +64,26 @@ export function LessonSearchDialog({ open, query, items, inputRef, theme, onQuer
               }
               if (event.key === 'Escape') onClose()
             }}
-            placeholder="Cari modul/konten"
-            className={cn('h-11 flex-1 bg-transparent text-sm font-medium outline-none', isDark ? 'text-zinc-100 placeholder:text-zinc-500' : 'text-slate-950 placeholder:text-slate-400')}
+            placeholder="Cari modul atau konten..."
+            className={cn(
+              'h-11 min-w-0 flex-1 bg-transparent text-sm font-medium outline-none',
+              isDark ? 'text-zinc-100 placeholder:text-zinc-500' : 'text-ink-900 placeholder:text-ink-400',
+            )}
           />
           <button
             type="button"
             onClick={onClose}
-            className={cn('flex h-9 w-9 items-center justify-center rounded-lg transition', isDark ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-950')}
-            aria-label="Tutup pencarian">
+            className={cn(
+              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition',
+              isDark ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100' : 'text-ink-400 hover:bg-paper-paper hover:text-ink-900',
+            )}
+            aria-label="Tutup pencarian"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="max-h-[420px] overflow-y-auto p-2">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-2 [-webkit-overflow-scrolling:touch]">
           {items.length > 0 ? (
             items.map((item) => {
               const Icon = item.icon ?? FileText
@@ -59,19 +93,49 @@ export function LessonSearchDialog({ open, query, items, inputRef, theme, onQuer
                   key={item.id}
                   type="button"
                   onClick={() => item.onSelect?.()}
-                  className={cn('flex w-full items-center gap-3 px-3 py-3 text-left transition focus:outline-none', isDark ? 'hover:bg-zinc-800 focus:bg-zinc-800' : 'hover:bg-slate-50 focus:bg-slate-50')}>
-                  <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-primary', isDark ? 'border-zinc-700 bg-zinc-950' : 'border-slate-200 bg-slate-50')}>
+                  className={cn(
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+                    isDark ? 'hover:bg-zinc-800 focus:bg-zinc-800' : 'hover:bg-paper-paper focus:bg-paper-paper',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-primary',
+                      isDark ? 'border-zinc-700 bg-zinc-950' : 'border-line-light bg-paper-paper',
+                    )}
+                  >
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className={cn('block truncate text-sm font-semibold', isDark ? 'text-zinc-100' : 'text-slate-950')}>{item.label}</span>
-                    <span className={cn('block truncate text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>{item.description}</span>
+                    <span
+                      className={cn(
+                        'block truncate text-sm font-semibold',
+                        isDark ? 'text-zinc-100' : 'text-ink-900',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    <span
+                      className={cn(
+                        'block truncate text-xs',
+                        isDark ? 'text-zinc-500' : 'text-ink-500',
+                      )}
+                    >
+                      {item.description}
+                    </span>
                   </span>
                 </button>
               )
             })
           ) : (
-            <div className={cn('px-3 py-10 text-center text-sm', isDark ? 'text-zinc-500' : 'text-slate-500')}>Tidak ada modul atau konten yang cocok.</div>
+            <div
+              className={cn(
+                'px-3 py-10 text-center text-sm',
+                isDark ? 'text-zinc-500' : 'text-ink-500',
+              )}
+            >
+              Tidak ada modul atau konten yang cocok.
+            </div>
           )}
         </div>
       </div>

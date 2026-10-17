@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
 import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
-import { authInputClassName, authSubmitButtonClassName } from '@/components/auth/constants'
+import { authSubmitButtonClassName } from '@/components/auth/constants'
 import { GlobalInput } from '@/components/shared/Input'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
@@ -41,7 +41,7 @@ export function ForgotPasswordPages() {
     >
       <AuthFormPanel>
         <AuthPageHeader
-          title="Reset password"
+          title="Atur ulang password"
           description="Masukkan email yang terdaftar. Reset password akan aktif setelah endpoint backend tersedia."
           backHref="/auth/login"
           backLabel="Kembali ke login"
@@ -57,11 +57,12 @@ export function ForgotPasswordPages() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
             required
-            className={authInputClassName}
+            variant="auth"
           />
 
           <Button
             type="submit"
+            variant="neobrutalism"
             className={authSubmitButtonClassName}
             disabled={!email.trim() || isSubmitting}
             aria-busy={isSubmitting}

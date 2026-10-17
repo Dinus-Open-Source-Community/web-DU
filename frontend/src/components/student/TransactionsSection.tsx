@@ -1,8 +1,11 @@
 import { SearchForm } from '@/components/shared/SearchForm'
 import { PageHeader } from '@/components/shared/Header'
-import { SegmentedFilter } from '@/components/shared/SegemntedFilter'
+import { UnderlineTabList } from '@/components/shared/UnderlineTabList'
 import { Pagination } from '@/components/shared/Pagination'
-import { SafeLottie } from '@/components/ui/lottie'
+import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
+import { appCardClassName } from '@/lib/design/app-shell-tokens'
+import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
+import { cn } from '@/lib/utils'
 import { TransactionPaymentLink } from '@/components/student/transactions/TransactionPaymentLink'
 import { useStudentTransactionsViewModel } from '@/hooks/use-student-transactions-view-model'
 import { buildCourseImageMap } from '@/lib/transactions/build-course-image-map'
@@ -40,8 +43,9 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
   const courseImagesByUid = useMemo(() => buildCourseImageMap(Data), [Data])
 
   return (
-    <section className="h-full w-full">
+    <section className="flex w-full flex-col gap-8">
       <PageHeader
+        className={studentDashboardLayout.pageHeader}
         title="Riwayat Transaksi"
         subtitle="Pantau status pembayaran kursus dan lihat detail transaksi untuk setiap pembayaran."
       />
@@ -56,31 +60,28 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
             className="md:flex-1"
           />
 
-          <SegmentedFilter
+          <UnderlineTabList
             value={viewModel.statusFilter}
+            options={STATUS_FILTER_OPTIONS}
             onChange={(value) => viewModel.setStatusFilter(value as TransactionStatusFilter)}
-            items={STATUS_FILTER_OPTIONS}
-            variant="wrap"
+            ariaLabel="Status pembayaran"
+            className="w-max max-w-full"
           />
         </div>
 
         {!viewModel.hasTransactions ? (
-          <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
-            <div className="flex flex-col items-center gap-4">
-              <SafeLottie src="/transaction-not-found.lottie" />
-              <div className="space-y-1">
-                <p className="text-base font-semibold text-slate-900">Transaksi tidak ditemukan</p>
-                <p className="text-sm text-slate-500">
-                  Coba ubah kata kunci pencarian atau filter status pembayaran.
-                </p>
-              </div>
-            </div>
+          <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
+            <NothingLottieIllustration />
+            <h3 className="mb-2 text-xl font-bold text-ink-900">Transaksi tidak ditemukan</h3>
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-ink-500">
+              Coba ubah kata kunci pencarian atau filter status pembayaran.
+            </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
+          <div className="overflow-hidden rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                <TableRow className="bg-paper-paper/80 hover:bg-paper-paper/80">
                   <TableHead className="w-[88px]">Kursus</TableHead>
                   <TableHead>Nama kursus</TableHead>
                   <TableHead>Referensi</TableHead>
@@ -93,7 +94,7 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
               </TableHeader>
               <TableBody>
                 {viewModel.paginatedTransactions.map((item) => (
-                  <TableRow key={item.uid} className="hover:bg-slate-50/70">
+                  <TableRow key={item.uid} className="hover:bg-paper-paper/70">
                     <TableCell>
                       <CourseCardCoverCompactFrame className="w-16 rounded-xl">
                         <CourseCardCover
@@ -106,16 +107,16 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
                       </CourseCardCoverCompactFrame>
                     </TableCell>
                     <TableCell>
-                      <span className="line-clamp-2 font-semibold whitespace-normal text-slate-900">
+                      <span className="line-clamp-2 font-semibold whitespace-normal text-ink-900">
                         {item.course?.title ?? 'Kursus tidak tersedia'}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-slate-500">{item.reference}</TableCell>
+                    <TableCell className="font-mono text-xs text-ink-500">{item.reference}</TableCell>
                     <TableCell>
                       <PaymentBadge status={item.payment_status} />
                     </TableCell>
-                    <TableCell className="font-medium text-slate-600">{item.payment_method}</TableCell>
-                    <TableCell className="text-slate-500">
+                    <TableCell className="font-medium text-ink-600">{item.payment_method}</TableCell>
+                    <TableCell className="text-ink-500">
                       {item.paid_at
                         ? new Date(item.paid_at).toLocaleDateString('id-ID', {
                             day: 'numeric',
@@ -124,7 +125,7 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
                           })
                         : 'Belum dibayar'}
                     </TableCell>
-                    <TableCell className="text-right font-bold text-slate-950">
+                    <TableCell className="text-right font-bold text-ink-900">
                       {FormatRupiah(item.amount)}
                     </TableCell>
                     <TableCell className="text-right">

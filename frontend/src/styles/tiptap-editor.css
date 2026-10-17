@@ -1,11 +1,14 @@
-/* TipTap / ProseMirror — imported by TipTapEditor.tsx */
+/* TipTap / ProseMirror — imported by TipTapEditor.tsx
+   Warna teks & placeholder memakai token tema (foreground / muted-foreground);
+   gaya konten (heading, list, quote, code) dibiarkan sebagai semantik konten. */
 .tiptap-editor-root:not(.tiptap-preview) .ProseMirror {
   outline: none;
   min-height: 280px;
   padding: 1rem 1.25rem 1.25rem;
   font-size: 0.9375rem;
   line-height: 1.7;
-  color: rgb(15 23 42);
+  color: var(--foreground);
+  caret-color: var(--ring);
 }
 
 .tiptap-editor-root.tiptap-editor-root--compact:not(.tiptap-preview) .ProseMirror {
@@ -26,7 +29,7 @@
 }
 
 .tiptap-editor-root .ProseMirror p.is-editor-empty:first-child::before {
-  color: rgb(148 163 184);
+  color: var(--muted-foreground);
   content: attr(data-placeholder);
   float: left;
   height: 0;
@@ -380,20 +383,20 @@
 }
 
 .tiptap-editor-root--dark:not(.tiptap-preview) .ProseMirror {
-  color: rgb(244 244 245);
+  color: var(--foreground);
 }
 
 .tiptap-editor-root--dark .ProseMirror p.is-editor-empty:first-child::before {
-  color: rgb(113 113 122);
+  color: var(--muted-foreground);
 }
 
 .tiptap-editor-root--dark .ProseMirror blockquote {
-  border-color: rgb(63 63 70);
-  color: rgb(212 212 216);
+  border-color: var(--border);
+  color: var(--muted-foreground);
 }
 
 .tiptap-editor-root--dark .ProseMirror code,
 .tiptap-editor-root--dark .ProseMirror pre {
-  background: rgb(24 24 27);
-  color: rgb(228 228 231);
+  background: var(--muted);
+  color: var(--foreground);
 }

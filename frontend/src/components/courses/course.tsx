@@ -7,10 +7,17 @@ import { LogoDuBig } from '../shared/icon'
 import { CourseCategoryFilter } from '../shared/CourseCategoryFilter'
 import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 
-const filter = [{ name: 'All' }, { name: 'Free' }, { name: 'Premium' }, { name: 'Ongoing Event' }]
+const filter = [
+  { name: 'Semua', key: 'All' },
+  { name: 'Gratis', key: 'Free' },
+  { name: 'Premium', key: 'Premium' },
+  { name: 'Event Berjalan', key: 'Ongoing Event' },
+] as const
+
+type TopFilterKey = (typeof filter)[number]['key']
 
 export default function CourseSection1({ Data, Categories }: { Data: ICourseItem[]; Categories: ICategoryItem[] }) {
-  const [isActiveFilter, setIsActiveFilter] = useState<string>('All')
+  const [isActiveFilter, setIsActiveFilter] = useState<TopFilterKey>('All')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
 
@@ -43,12 +50,12 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
       <div className="relative container mx-auto h-full w-full px-4 sm:px-6 lg:px-10">
         {/*search section*/}
         <div className="h-full w-full pt-12 text-center sm:pt-16 lg:pt-20">
-          <h1 className="mx-auto mb-4 max-w-4xl text-3xl leading-[1.3] font-bold sm:mb-5 sm:text-4xl lg:text-5xl">Explore Open Source Course</h1>
+          <h1 className="mx-auto mb-4 max-w-4xl text-3xl leading-[1.3] font-bold sm:mb-5 sm:text-4xl lg:text-5xl">Jelajahi Kursus Open Source</h1>
           <p className="mx-auto mb-6 max-w-2xl text-base leading-[1.5] font-normal text-[#A29F9F] sm:mb-8 sm:text-xl sm:leading-[1.3]">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
           </p>
           <Search
-            placeholder="Search courses or mentors"
+            placeholder="Cari kursus atau mentor"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="bg-muted rounded-[10px] py-5 align-middle text-base placeholder:text-base placeholder:font-normal placeholder:text-[#A29F9F] sm:py-6 sm:placeholder:text-xl"
@@ -59,11 +66,11 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
         {/*top filtering*/}
         <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
           {filter.map((f) => {
-            const isCurrentActive = isActiveFilter === f.name
+            const isCurrentActive = isActiveFilter === f.key
             return (
               <button
-                key={f.name}
-                onClick={() => setIsActiveFilter(f.name)}
+                key={f.key}
+                onClick={() => setIsActiveFilter(f.key)}
                 className={`border-primary min-h-11 rounded-2xl border px-3 py-2.5 transition-colors sm:px-6 sm:py-3 ${isCurrentActive ? 'bg-primary text-white' : 'text-primary bg-transparent'}`}>
                 <h3 className="justify-center text-center align-middle text-sm font-normal leading-tight sm:text-xl">{f.name}</h3>
               </button>
@@ -81,7 +88,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
 
           {/*Card Course*/}
           <div className="relative h-full w-full">
-            <h5 className="align-middle text-2xl leading-[1.3] font-semibold">Available Course</h5>
+            <h5 className="align-middle text-2xl leading-[1.3] font-semibold">Kursus Tersedia</h5>
             <div className="mt-3 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {filteredCourses.length > 0 ? (
                 filteredCourses.map((data) => (
@@ -116,7 +123,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
                   />
                 ))
               ) : (
-                <p className="col-span-full px-6 py-12 text-center text-base text-slate-500">No courses match your current filters.</p>
+                <p className="col-span-full px-6 py-12 text-center text-base text-ink-500">Tidak ada kursus yang cocok dengan filter saat ini.</p>
               )}
             </div>
           </div>
@@ -126,16 +133,16 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
         <div className="relative mt-16 h-full w-full py-8 sm:mt-20 sm:p-10 lg:mt-30 lg:p-15">
           <div className="from-primary to-muted mx-auto flex h-full w-full max-w-7xl rounded-[20px] bg-linear-to-r from-10% to-75% px-6 py-10 sm:px-10 md:px-16 md:py-16 lg:px-25 lg:py-21">
             <div className="relative z-10 max-w-2xl gap-5 lg:pr-12">
-              <h3 className="mb-4 align-middle text-3xl leading-[1.3] font-bold sm:text-4xl">Ready to Start Your Journey?</h3>
+              <h3 className="mb-4 align-middle text-3xl leading-[1.3] font-bold sm:text-4xl">Siap Memulai Perjalananmu?</h3>
               <p className="text-base leading-[1.5] font-normal sm:text-xl sm:leading-[1.3]">
-                Join thousands of developers who are already learning and growing with Doscom University. Start with free courses today!
+                Bergabung dengan ribuan developer yang belajar dan berkembang bersama Doscom University. Mulai dari kursus gratis hari ini!
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Button asChild variant={'secondary'} className="text-primary min-h-12 bg-white px-5 py-3 text-center text-base font-medium sm:py-6 sm:text-lg">
-                  <Link to={'/auth/register'}>Join Now - It’s Free</Link>
+                <Button asChild variant={'secondary'} className="text-primary min-h-12 bg-paper-white px-5 py-3 text-center text-base font-medium sm:py-6 sm:text-lg">
+                  <Link to={'/auth/register'}>Daftar Sekarang — Gratis</Link>
                 </Button>
                 <Button variant={'default'} className="min-h-12 px-5 py-3 text-center text-base font-medium text-white sm:py-6 sm:text-lg">
-                  Browse All Course
+                  Lihat Semua Kursus
                 </Button>
               </div>
             </div>

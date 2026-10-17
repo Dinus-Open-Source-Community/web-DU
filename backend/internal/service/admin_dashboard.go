@@ -67,6 +67,20 @@ func parseDashboardPeriod(raw string) dashboardPeriod {
 	}
 }
 
+// parseOptionalDashboardPeriod mem-parsing nilai `period` dari query string.
+// Mengembalikan ok=false bila parameter kosong atau nilainya tidak dikenal,
+// sehingga pemanggil bisa memakai rentang default sendiri.
+//
+// Nilai yang dikenali: 7d, 30d, 90d, 12m.
+func parseOptionalDashboardPeriod(raw string) (dashboardPeriod, bool) {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "7d", "30d", "90d", "12m":
+		return parseDashboardPeriod(raw), true
+	default:
+		return dashboardPeriod{}, false
+	}
+}
+
 func trendDirection(current, previous float64) string {
 	switch {
 	case current > previous:
@@ -120,6 +134,17 @@ func countActiveUsers(start, end time.Time) int64 {
 	return count
 }
 
+// conversionRate menghitung persentase enrollment yang berubah menjadi transaksi
+// lunas, DI DALAM rentang waktu yang sama.
+//
+// Penting: pembilang dan penyebut harus memakai populasi & kolom tanggal yang
+// sama. Versi lama menghitung COUNT(payments by created_at) dibagi
+// COUNT(enrollments by enrolled_at) - dua populasi berbeda dengan tanggal
+// berbeda, sehingga pembayaran untuk enrollment lama bisa membuat hasil >100%
+// (terbukti: 111.1% pada periode 12m, 2026-10-08).
+//
+// Sekarang: enrollment yang dibuat di [start,end] yang punya minimal satu
+// pembayaran berstatus success. Hasil dijamin berada di rentang 0..100.
 func conversionRate(start, end time.Time) float64 {
 	var enrollments int64
 	database.DB.Table("enrollments").
@@ -129,9 +154,16 @@ func conversionRate(start, end time.Time) float64 {
 		return 0
 	}
 	var paid int64
-	database.DB.Table("payments").
-		Where("status = ? AND created_at >= ? AND created_at <= ?", entity.PaymentSuccess, start, end).
+	database.DB.Table("enrollments AS e").
+		Joins("INNER JOIN payments AS p ON p.enrollment_uid = e.uid AND p.status = ?", entity.PaymentSuccess).
+		Where("e.enrolled_at >= ? AND e.enrolled_at <= ?", start, end).
+		Distinct("e.uid").
 		Count(&paid)
+	if paid > enrollments {
+		// Teoretically tidak mungkin (paid adalah subset dari enrollments pada
+		// window yang sama), tapi dijaga agar metrik tidak pernah >100%.
+		paid = enrollments
+	}
 	return math.Round((float64(paid)/float64(enrollments))*1000) / 10
 }
 
@@ -178,23 +210,23 @@ func GetAdminDashboardKPIsFunc(c *gin.Context) {
 	prevConv := conversionRate(period.prevStart, period.prevEnd)
 
 	kpis := []gin.H{
-		buildAdminKpi("gross-revenue", "Gross Revenue", "revenue", period.label, curRevenue, prevRevenue, func(v float64) string {
+		buildAdminKpi("gross-revenue", "Pendapatan kotor", "revenue", period.label, curRevenue, prevRevenue, func(v float64) string {
 			return utils.FormatPriceIDR(v)
 		}),
-		buildAdminKpi("active-users", "Active Users", "users", "vs periode sebelumnya", curUsers, prevUsers, func(v float64) string {
+		buildAdminKpi("active-users", "Pengguna aktif", "users", "dibanding periode sebelumnya", curUsers, prevUsers, func(v float64) string {
 			return fmt.Sprintf("%.0f", v)
 		}),
-		buildAdminKpi("transactions", "Transactions", "transactions", period.label, curTx, prevTx, func(v float64) string {
+		buildAdminKpi("transactions", "Transaksi", "transactions", period.label, curTx, prevTx, func(v float64) string {
 			return fmt.Sprintf("%.0f", v)
 		}),
-		buildAdminKpi("conversion-rate", "Conversion Rate", "conversion", "stabil", curConv, prevConv, func(v float64) string {
+		buildAdminKpi("conversion-rate", "Tingkat konversi", "conversion", period.label, curConv, prevConv, func(v float64) string {
 			return fmt.Sprintf("%.1f%%", v)
 		}),
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Dashboard KPIs fetched",
+		"message": "KPI dasbor berhasil diambil",
 		"data":    kpis,
 		"error":   nil,
 	})
@@ -206,7 +238,8 @@ func GetAdminDashboardKPIsFunc(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        limit  query  int  false  "Number of items (default: 5)"
+// @Param        limit  query  int     false  "Number of items (default: 5)"
+// @Param        period query  string  false  "Period shorthand: 7d, 30d, 90d, 12m (used when no explicit date range)"
 // @Success      200  {object}  map[string]any  "Recent transactions retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
@@ -224,7 +257,7 @@ func GetAdminRecentTransactionsFunc(c *gin.Context) {
 		}
 	}
 
-	items, err := fetchRecentAdminTransactions(limit)
+	items, err := fetchRecentAdminTransactions(limit, strings.TrimSpace(c.Query("period")))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

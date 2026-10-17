@@ -20,9 +20,9 @@ const PERIOD_OPTIONS: { value: DashboardPeriod; label: string }[] = [
 
 function mapTransactionSummaryToRatio(summary: TransactionSummary): IChartRatioPoint[] {
   return [
-    { label: 'Paid', value: summary.paidCount, color: '#10B981' },
-    { label: 'Pending', value: summary.pendingCount, color: '#F59E0B' },
-    { label: 'Failed', value: summary.failedCount, color: '#EF4444' },
+    { label: 'Lunas', value: summary.paidCount, color: '#10B981' },
+    { label: 'Menunggu', value: summary.pendingCount, color: '#F59E0B' },
+    { label: 'Gagal', value: summary.failedCount, color: '#EF4444' },
   ]
 }
 
@@ -35,21 +35,25 @@ export function useAdminDashboard() {
     staleTime: 60_000,
   })
 
+  // Period diteruskan ke seluruh query, bukan hanya KPI, supaya grafik dan tabel
+  // selalu konsisten dengan tab periode yang dipilih user.
+  const RECENT_LIMIT = 5
+
   const recentTransactions = useQuery({
-    queryKey: adminDashboardKeys.recentTransactions(5),
-    queryFn: () => fetchRecentTransactions(5),
+    queryKey: adminDashboardKeys.recentTransactions(RECENT_LIMIT, period),
+    queryFn: () => fetchRecentTransactions(RECENT_LIMIT, period),
     staleTime: 60_000,
   })
 
   const transactionSummary = useQuery({
-    queryKey: adminDashboardKeys.transactionSummary,
-    queryFn: fetchTransactionSummary,
+    queryKey: adminDashboardKeys.transactionSummary(period),
+    queryFn: () => fetchTransactionSummary(period),
     staleTime: 60_000,
   })
 
   const financialCharts = useQuery({
-    queryKey: adminDashboardKeys.financialCharts,
-    queryFn: fetchFinancialSummary,
+    queryKey: adminDashboardKeys.financialCharts(period),
+    queryFn: () => fetchFinancialSummary(period),
     staleTime: 120_000,
   })
 

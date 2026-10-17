@@ -5,14 +5,23 @@ import { Initials } from '../../lib/func/func'
 import { Pagination } from './Pagination'
 import { AttendanceBar, ProgressBar } from '../ui/bar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { AdminParticipantStatusLabel } from '@/lib/admin/status-label'
+import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { cn } from '@/lib/utils'
 import { CourseParticipantStatusBadge } from '../ui/badge'
+import { CourseDetailTabSectionIntro } from './course-detail-manage/CourseDetailTabSectionIntro'
 
 type CourseParticipantsSectionProps = {
   courseUid: string
   studentsData: IMentorCourseStudent[]
+  adminStatusLabels?: boolean
 }
 
-export function CourseParticipantsSection({ courseUid, studentsData }: CourseParticipantsSectionProps) {
+export function CourseParticipantsSection({
+  courseUid,
+  studentsData,
+  adminStatusLabels = false,
+}: CourseParticipantsSectionProps) {
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -31,42 +40,45 @@ export function CourseParticipantsSection({ courseUid, studentsData }: CoursePar
   }, [studentsData, currentPage])
 
   return (
-    <div className="rounded-2xl border border-slate-200/70 bg-transparent p-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Peserta kursus</h2>
-          <p className="mt-1 text-sm text-slate-500">Lihat daftar peserta yang sudah bergabung pada kursus ini.</p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-          <Users className="size-3.5" />
-          {studentsData.length} peserta
-        </span>
-      </div>
+    <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
+      <CourseDetailTabSectionIntro
+        className="mb-4"
+        icon={Users}
+        title="Peserta kursus"
+        description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
+        aside={
+          <span className={manageDetailLayout.tabCountBadge}>
+            {studentsData.length} peserta
+          </span>
+        }
+      />
 
       {studentsData.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center text-sm text-slate-500">Belum ada peserta terdaftar untuk kursus ini.</div>
+        <div className="rounded-2xl border-2 border-dashed border-ink-900/10 bg-paper-paper/80 px-6 py-12 text-center text-sm text-ink-600">
+          Belum ada peserta terdaftar untuk kursus ini.
+        </div>
       ) : (
         <>
-          <div className="hidden overflow-hidden rounded-2xl border border-slate-200/70 md:block">
+          <div className={cn(manageDetailLayout.tableSurface, 'hidden md:block')}>
             <Table className="min-w-[760px] text-left text-sm">
-              <TableHeader className="bg-slate-50/70">
-                <TableRow className="border-slate-100 hover:bg-slate-50/70">
-                  <TableHead className="w-[38%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Siswa</TableHead>
-                  <TableHead className="w-[18%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <TableHeader>
+                <TableRow className={manageDetailLayout.tableHeaderRow}>
+                  <TableHead className={cn('w-[38%] px-5 py-3', manageDetailLayout.tableHead)}>Nama siswa</TableHead>
+                  <TableHead className={cn('w-[18%] px-5 py-3', manageDetailLayout.tableHead)}>
                     <span className="inline-flex items-center gap-1.5">
-                      <CheckCircle className="size-3.5" />
-                      Status
+                      <CheckCircle className="size-3.5" aria-hidden />
+                      Status pendaftaran
                     </span>
                   </TableHead>
-                  <TableHead className="w-[22%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  <TableHead className={cn('w-[22%] px-5 py-3', manageDetailLayout.tableHead)}>
                     <span className="inline-flex items-center gap-1.5">
-                      <BarChart3 className="size-3.5" />
-                      Progress
+                      <BarChart3 className="size-3.5" aria-hidden />
+                      Kemajuan belajar
                     </span>
                   </TableHead>
-                  <TableHead className="w-[22%] px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  <TableHead className={cn('w-[22%] px-5 py-3', manageDetailLayout.tableHead)}>
                     <span className="inline-flex items-center gap-1.5">
-                      <ClipboardList className="size-3.5" />
+                      <ClipboardList className="size-3.5" aria-hidden />
                       Kehadiran
                     </span>
                   </TableHead>
@@ -74,21 +86,25 @@ export function CourseParticipantsSection({ courseUid, studentsData }: CoursePar
               </TableHeader>
               <TableBody>
                 {paginatedStudents.map((student) => (
-                  <TableRow key={student.student_uid} className="border-slate-100 hover:bg-slate-50/60">
+                  <TableRow key={student.student_uid} className={manageDetailLayout.tableBodyRow}>
                     <TableCell className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         {student.student_avatar_url ? (
-                          <img src={student.student_avatar_url} width={36} height={36} loading="lazy" alt={student.student_name} className="size-9 rounded-full object-cover ring-1 ring-slate-100" />
+                          <img src={student.student_avatar_url} width={36} height={36} loading="lazy" alt={student.student_name} className="size-9 rounded-full object-cover ring-1 ring-border/50" />
                         ) : (
-                          <span className="flex size-9 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.student_name)}</span>
+                          <span className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{Initials(student.student_name)}</span>
                         )}
                         <div className="min-w-0">
-                          <p className="font-medium text-slate-900">{student.student_name}</p>
+                          <p className="font-medium text-foreground">{student.student_name}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-5 py-4 text-sm font-medium text-slate-700">
-                      <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                    <TableCell className="px-5 py-4 text-sm font-medium text-foreground">
+                      {adminStatusLabels ? (
+                        <AdminParticipantStatusLabel status={student.status} />
+                      ) : (
+                        <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                      )}
                     </TableCell>
                     <TableCell className="min-w-44 px-5 py-4">
                       <ProgressBar value={student.progress} />
@@ -104,25 +120,29 @@ export function CourseParticipantsSection({ courseUid, studentsData }: CoursePar
 
           <ul className="flex flex-col gap-3 md:hidden">
             {paginatedStudents.map((student) => (
-              <li key={student.student_uid} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+              <li key={student.student_uid} className={cn(manageDetailLayout.sectionCard, 'p-4 shadow-paper')}>
                 <div className="flex items-start gap-3">
                   {student.student_avatar_url ? (
-                    <img src={student.student_avatar_url} width={40} height={40} loading="lazy" alt={student.student_name} className="size-10 rounded-full object-cover ring-1 ring-slate-100" />
+                    <img src={student.student_avatar_url} width={40} height={40} loading="lazy" alt={student.student_name} className="size-10 rounded-full object-cover ring-1 ring-border/50" />
                   ) : (
-                    <span className="flex size-10 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">{Initials(student.student_name)}</span>
+                    <span className="flex size-10 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{Initials(student.student_name)}</span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-900">{student.student_name}</p>
+                    <p className="font-semibold text-foreground">{student.student_name}</p>
                     <div className="mt-3 flex flex-col gap-1">
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Status</p>
-                      <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                      <p className={manageDetailLayout.tableHead}>Status pendaftaran</p>
+                      {adminStatusLabels ? (
+                        <AdminParticipantStatusLabel status={student.status} />
+                      ) : (
+                        <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                      )}
                     </div>
                     <div className="mt-3 flex flex-col gap-1">
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Progress</p>
+                      <p className={manageDetailLayout.tableHead}>Kemajuan belajar</p>
                       <ProgressBar value={student.progress} />
                     </div>
                     <div className="mt-3 flex flex-col gap-1">
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Kehadiran</p>
+                      <p className={manageDetailLayout.tableHead}>Kehadiran</p>
                       <AttendanceBar student={student} />
                     </div>
                   </div>
@@ -131,7 +151,14 @@ export function CourseParticipantsSection({ courseUid, studentsData }: CoursePar
             ))}
           </ul>
 
-          {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              variant={adminStatusLabels ? 'admin' : 'default'}
+            />
+          )}
         </>
       )}
     </div>

@@ -1,22 +1,18 @@
-type CourseDetailSectionHeaderProps = {
-  title: string;
-  description?: string;
-};
+import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { cn } from '@/lib/utils'
 
-export function CourseDetailSectionHeader({
-  title,
-  description,
-}: CourseDetailSectionHeaderProps) {
+type CourseDetailSectionHeaderProps = {
+  title: string
+  description?: string
+}
+
+export function CourseDetailSectionHeader({ title, description }: CourseDetailSectionHeaderProps) {
   return (
-    <header className="space-y-1 border-b border-slate-200 pb-5">
-      <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-        {title}
-      </h2>
+    <header className="space-y-1 border-b border-border pb-5">
+      <h2 className={cn(manageDetailLayout.sectionTitle, 'text-lg sm:text-xl')}>{title}</h2>
       {description ? (
-        <p className="max-w-2xl text-sm leading-relaxed text-slate-500">
-          {description}
-        </p>
+        <p className={cn(manageDetailLayout.pageSubtitle, 'max-w-2xl')}>{description}</p>
       ) : null}
     </header>
-  );
+  )
 }

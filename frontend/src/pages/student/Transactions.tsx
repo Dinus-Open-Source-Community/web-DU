@@ -1,5 +1,4 @@
-import { appPageContentCenteredClassName } from '@/lib/layout/page-layout'
-import { AppSidebarProvider } from "@/components/shared/Sidebar";
+import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import TransactionsList from "@/components/student/TransactionsSection";
 import { useSidebarUser } from "@/hooks/use-sidebar-user";
 import type { IUserData } from "@/lib/types/user";
@@ -10,13 +9,9 @@ const Transactions = () => {
   const sidebarUser = useSidebarUser("student");
 
   return (
-    <AppSidebarProvider
-      role="student"
-      user={sidebarUser}
-      contentClassName={appPageContentCenteredClassName}
-    >
+    <StudentAppPageShell user={sidebarUser}>
       <TransactionsList Data={profile as IUserData | null} />
-    </AppSidebarProvider>
+    </StudentAppPageShell>
   );
 };
 

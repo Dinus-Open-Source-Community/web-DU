@@ -1,19 +1,23 @@
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import { PageHeader } from '@/components/shared/Header'
 import { CourseMasterManagementPanel } from '@/components/shared/course-master/CourseMasterManagementPanel'
-import { COURSE_MASTER_LABELS } from '@/lib/course-master/types'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { AdminPageShell } from '@/components/admin/AdminPageShell'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
+import { appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
+import { cn } from '@/lib/utils'
 
 export default function AdminCourseCategoriesPage() {
-  const sidebarUser = useSidebarUser('admin')
-  const labels = COURSE_MASTER_LABELS.category
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
 
   return (
-    <AppSidebarProvider role="admin" user={sidebarUser}>
-      <div className="flex flex-col gap-6">
-        <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <AppSidebarProvider
+      role={shellRole}
+      user={sidebarUser}
+      contentClassName={cn(appPageContentClassName, appShellPageBgClassName, 'relative')}
+    >
+      <AdminPageShell>
         <CourseMasterManagementPanel kind="category" />
-      </div>
+      </AdminPageShell>
     </AppSidebarProvider>
   )
 }

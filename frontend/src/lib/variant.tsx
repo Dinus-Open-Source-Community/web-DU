@@ -8,7 +8,7 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       premium: 'rounded-[9px] bg-[#E2F7FF] px-3 py-1 text-sm leading-[1.3] text-[#2290DF]',
       event: 'rounded-[9px] bg-[#D8DEFF] px-3 py-1 text-sm leading-[1.3] text-[#B922DF]',
       draft: 'rounded-[9px] bg-gray-100 px-3 py-1 text-sm leading-[1.3] text-gray-600',
-      outline: 'rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-medium text-slate-700',
+      outline: 'rounded-full border border-line-light bg-paper-white px-2.5 py-0.5 text-xs font-medium text-ink-700',
       // Payment (transaksi)
       paymentPaid: 'rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide border-emerald-200 bg-emerald-50 text-emerald-700',
       paymentPending: 'rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide border-amber-200 bg-amber-50 text-amber-700',
@@ -18,7 +18,8 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
         'rounded-full border border-amber-300/80 bg-linear-to-br from-amber-50 to-orange-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]',
       assignmentPublished:
         'rounded-full border border-emerald-300/80 bg-linear-to-br from-emerald-50 to-teal-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-emerald-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]',
-      assignmentClosed: 'rounded-full border border-slate-300/70 bg-linear-to-br from-slate-100 to-slate-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-slate-800',
+      assignmentClosed:
+        'rounded-full border border-line-medium/70 bg-linear-to-br from-paper-paper to-paper-white px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-ink-800 dark:from-muted dark:to-card dark:text-foreground',
       // Mentor — tenggat
       deadlineOverdue: 'rounded-full border border-rose-300/80 bg-linear-to-br from-rose-50 to-red-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-rose-900',
       deadlineDueSoon: 'rounded-full border border-orange-300/80 bg-linear-to-br from-orange-50 to-amber-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-orange-900',
@@ -47,12 +48,12 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       attendanceStudentActive: 'rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-800',
       attendanceStudentComplete: 'rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-800',
       attendanceStudentLate: 'rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-900',
-      attendanceStudentNotStarted: 'rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600',
+      attendanceStudentNotStarted: 'rounded-lg border border-line-light bg-paper-paper px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-600',
       // Mentor — status peserta kursus
       courseParticipantActive: 'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700',
       courseParticipantComplete: 'rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700',
       courseParticipantLate: 'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800',
-      courseParticipantNotStarted: 'rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600',
+      courseParticipantNotStarted: 'rounded-full border border-line-light bg-paper-paper px-2.5 py-1 text-xs font-semibold text-ink-600',
       // Ajuan absensi menunggu review
       attendanceAjuanPending: 'rounded-md border border-amber-200/90 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-950',
       // Admin — severity (support tickets)
@@ -68,10 +69,10 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       auditCreate: 'rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
       auditUpdate: 'rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700',
       auditDelete: 'rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-rose-700',
-      auditView: 'rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600',
+      auditView: 'rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-600',
       // Admin — coupons
       couponActive: 'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
-      couponExpired: 'rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500',
+      couponExpired: 'rounded-full border border-line-light bg-paper-paper px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-500',
       couponScheduled: 'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700',
       // Admin — course status
       coursePublished: 'rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700',
@@ -88,7 +89,7 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       categoryMarketing: 'rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-700',
       categoryBusiness: 'rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700',
       categoryLanguage: 'rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700',
-      categoryDefault: 'rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600',
+      categoryDefault: 'rounded-full border border-line-light bg-paper-paper px-2 py-0.5 text-[11px] font-medium text-ink-600',
     },
   },
   defaultVariants: {

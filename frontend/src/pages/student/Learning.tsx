@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
-import { AppSidebarProvider } from '@/components/shared/Sidebar'
+import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import LearningSection from '@/components/student/LearningSection'
 import { useResolvedProfileJoinedCourses } from '@/hooks/files/use-resolved-profile-joined-courses'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
@@ -8,9 +8,13 @@ import type { IUserData } from '@/lib/types/user'
 import { useAuth } from '@/providers/auth-provider'
 
 const Learning = () => {
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
   const sidebarUser = useSidebarUser('student')
   const { courses: joinedCourses } = useResolvedProfileJoinedCourses(profile?.joined_courses)
+
+  useEffect(() => {
+    void refreshProfile()
+  }, [refreshProfile])
 
   const profileWithResolvedCourses = useMemo<IUserData | null>(() => {
     if (!profile) return null
@@ -23,9 +27,9 @@ const Learning = () => {
   if (!profileWithResolvedCourses) return null
 
   return (
-    <AppSidebarProvider role="student" user={sidebarUser}>
+    <StudentAppPageShell user={sidebarUser}>
       <LearningSection Data={profileWithResolvedCourses} />
-    </AppSidebarProvider>
+    </StudentAppPageShell>
   )
 }
 

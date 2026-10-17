@@ -16,7 +16,7 @@ export function AuthPasswordToggleButton({
     <button
       type="button"
       className={cn(
-        'flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+        'flex size-9 shrink-0 items-center justify-center rounded-[10px] text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       aria-label={visible ? 'Sembunyikan password' : 'Tampilkan password'}

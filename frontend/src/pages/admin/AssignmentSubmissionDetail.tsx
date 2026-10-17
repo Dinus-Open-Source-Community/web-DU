@@ -3,30 +3,31 @@ import { useParams } from 'react-router-dom'
 import { CourseAssignmentSubmissionDetailView } from '@/components/shared/course-detail-manage/CourseAssignmentSubmissionDetailView'
 import { AppNavbarProvider } from '@/components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseAssignmentSubmissionDetailPage } from '@/hooks/course-detail/use-course-assignment-submission-detail-page'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function AdminAssignmentSubmissionDetailPage() {
   const { courseUid, lessonUid, submissionUid } = useParams()
-  const sidebarUser = useSidebarUser('admin')
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const { courseDetail, moduleCourse, userCourse, isLoading } = useCourseDetailAdminAndMentor(
     courseUid ?? '',
   )
 
   if (isLoading) {
     return (
-      <AppNavbarProvider role="admin" user={sidebarUser}>
-        <LottieOverlay visible={isLoading} message="Memuat jawaban siswa" />
+      <AppNavbarProvider role={shellRole} user={sidebarUser}>
+        <PageSkeleton message="Memuat jawaban siswa" />
       </AppNavbarProvider>
     )
   }
 
   if (!courseUid || !lessonUid || !submissionUid || !courseDetail.data) {
     return (
-      <AppNavbarProvider role="admin" user={sidebarUser}>
+      <AppNavbarProvider role={shellRole} user={sidebarUser}>
         <NotFoundContent
           description="Halaman jawaban siswa tidak ditemukan"
           showBackButton={false}
@@ -38,7 +39,7 @@ export default function AdminAssignmentSubmissionDetailPage() {
 
   return (
     <AppNavbarProvider
-      role="admin"
+      role={shellRole}
       user={sidebarUser}
       contentClassName="flex min-h-0 w-full flex-1 flex-col gap-0 p-0"
     >
@@ -71,6 +72,8 @@ function AdminAssignmentSubmissionDetailContent({
   modules,
   students,
 }: AdminAssignmentSubmissionDetailContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseUid, courseTitle)
+
   const view = useCourseAssignmentSubmissionDetailPage({
     courseUid,
     lessonUid,

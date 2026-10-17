@@ -1,4 +1,6 @@
 import { useCallback, useDeferredValue, useMemo, useState } from 'react'
+
+import { useQueryStateEnum } from '@/lib/nuqs-react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useCourseAssignmentsOverview } from '@/hooks/course-detail/use-course-assignments-overview'
@@ -10,6 +12,10 @@ import type { StaffAssignmentRole } from '@/lib/course-detail/course-assignment-
 import type { CourseDetailAssignmentsViewModel } from '@/lib/course-detail/course-detail-assignments-view-model'
 import type { CourseAssignmentTaskFilter } from '@/lib/types/features/course-detail-assignments'
 import type { IMentorCourseStudent } from '@/lib/types/course'
+
+const ASSIGNMENT_TASK_FILTER_VALUES = ['quiz', 'text'] as const satisfies readonly CourseAssignmentTaskFilter[]
+
+const DEFAULT_ASSIGNMENT_TASK_FILTER: CourseAssignmentTaskFilter = 'quiz'
 
 type UseCourseDetailAssignmentsViewOptions = {
   courseUid: string
@@ -25,7 +31,13 @@ export function useCourseDetailAssignmentsView({
   enabled = true,
 }: UseCourseDetailAssignmentsViewOptions): CourseDetailAssignmentsViewModel {
   const queryClient = useQueryClient()
-  const [taskFilter, setTaskFilter] = useState<CourseAssignmentTaskFilter>('text')
+  const [taskFilter, setTaskFilter] = useQueryStateEnum(
+    'task',
+    ASSIGNMENT_TASK_FILTER_VALUES,
+    DEFAULT_ASSIGNMENT_TASK_FILTER,
+  )
+  const activeTaskFilter: CourseAssignmentTaskFilter =
+    taskFilter ?? DEFAULT_ASSIGNMENT_TASK_FILTER
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery)
 
@@ -37,21 +49,23 @@ export function useCourseDetailAssignmentsView({
     error,
   } = useCourseAssignmentsOverview(courseUid, enabled)
 
-  const assignmentItems = useMemo(() => {
+  const itemsForTaskType = useMemo(() => {
     const overviewItems = toAssignmentOverviewItems(sources, role, courseUid, students)
+    return overviewItems.filter((item) => item.taskType === activeTaskFilter)
+  }, [courseUid, role, sources, students, activeTaskFilter])
+
+  const assignmentItems = useMemo(() => {
     const normalizedSearch = deferredSearchQuery.trim().toLowerCase()
+    if (!normalizedSearch) return itemsForTaskType
 
-    return overviewItems.filter((item) => {
-      if (item.taskType !== taskFilter) return false
-      if (!normalizedSearch) return true
-
+    return itemsForTaskType.filter((item) => {
       const haystack = [item.assignmentTitle, item.lessonTitle, item.moduleTitle]
         .join(' ')
         .toLowerCase()
 
       return haystack.includes(normalizedSearch)
     })
-  }, [courseUid, deferredSearchQuery, role, sources, students, taskFilter])
+  }, [deferredSearchQuery, itemsForTaskType])
 
   const prefetchSubmissionRoster = useCallback(
     (lessonUid: string) => {
@@ -85,15 +99,17 @@ export function useCourseDetailAssignmentsView({
   )
 
   return {
+    role,
     isLoading,
     isHydratingSubmissions,
     isError,
     errorMessage: (error as Error | undefined)?.message ?? null,
-    taskFilter,
+    taskFilter: activeTaskFilter,
     onTaskFilterChange: setTaskFilter,
     searchQuery,
     onSearchQueryChange: setSearchQuery,
     assignmentItems,
+    itemsForTaskType,
     prefetchSubmissionRoster,
   }
 }

@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AdminUnderlineTabs } from '@/components/admin/AdminUnderlineTabs'
 import { useQueryStateEnum } from '@/lib/nuqs-react-router'
 import type { AdminQaThread, AdminReview } from '@/lib/types/course'
 
@@ -29,32 +29,25 @@ export function ReviewsQaTabs({
     'reviews',
   )
 
+  const tab = activeTab ?? 'reviews'
+
   return (
-    <Tabs
-      value={activeTab ?? 'reviews'}
-      onValueChange={(value) => setActiveTab(value as ModerationTabValue)}
-      className="flex flex-col gap-4"
-    >
-      <TabsList variant="line" className="w-full justify-start rounded-none border-b border-slate-100 px-0 pb-0">
-        <TabsTrigger value="reviews" className="text-sm">
-          Reviews
-        </TabsTrigger>
-        <TabsTrigger value="qa" className="text-sm">
-          Q&amp;A
-        </TabsTrigger>
-      </TabsList>
+    <div className="flex flex-col gap-4">
+      <AdminUnderlineTabs
+        value={tab}
+        ariaLabel="Ulasan dan tanya jawab"
+        items={[
+          { value: 'reviews', label: 'Ulasan' },
+          { value: 'qa', label: 'Tanya Jawab' },
+        ]}
+        onChange={(value) => setActiveTab(value as ModerationTabValue)}
+      />
 
-      <TabsContent value="reviews" className="mt-2">
-        <ReviewsPanel
-          courseUid={courseUid}
-          reviews={reviews}
-          isLoading={isLoadingReviews}
-        />
-      </TabsContent>
-
-      <TabsContent value="qa" className="mt-2">
+      {tab === 'reviews' ? (
+        <ReviewsPanel courseUid={courseUid} reviews={reviews} isLoading={isLoadingReviews} />
+      ) : (
         <QaForum threads={qnaThreads} isLoading={isLoadingQna} />
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   )
 }

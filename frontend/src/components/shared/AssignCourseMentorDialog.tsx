@@ -33,7 +33,7 @@ export function AssignCourseMentorDialog({
       emptyDescription={emptyDescription}
       renderFooterHint={(item) => (
         <span>
-          <strong className="font-semibold text-slate-900">{item.name}</strong> akan ditugaskan sebagai
+          <strong className="font-semibold text-ink-900">{item.name}</strong> akan ditugaskan sebagai
           mentor kursus.
         </span>
       )}

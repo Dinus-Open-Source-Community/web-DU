@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 
 import { Message } from '@/lib/Message'
 import { CourseModulePreview } from '@/components/courses/(authorized)/viewModuleAndLessons'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
 import { useCourseModuleViewer } from '@/hooks/course-module-viewer/use-course-module-viewer'
 import { useCourseEditData } from '@/hooks/use-course'
@@ -44,7 +44,7 @@ export default function CourseViewPage() {
   }, [courseDetail.data, courseUid, storedModules])
 
   if (isLoading) {
-    return <LottieOverlay visible={isLoading} />
+    return <PageSkeleton message="Memuat course..." />
   }
 
   if (!courseUid || !courseWithModules) {

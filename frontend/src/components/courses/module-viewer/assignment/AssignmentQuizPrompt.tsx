@@ -15,10 +15,10 @@ export function AssignmentQuizPrompt({ index, promptHtml, theme, className }: As
 
   return (
     <div className={cn('space-y-2', className)}>
-      <p className={cn('text-sm font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+      <p className={cn('text-sm font-semibold', isDark ? 'text-zinc-300' : 'text-ink-700')}>
         {index + 1}.
       </p>
-      <div className={cn('lesson-reader text-sm leading-6', isDark ? 'lesson-reader--dark text-zinc-100' : 'lesson-reader--light text-slate-900')}>
+      <div className={cn('lesson-reader text-sm leading-6', isDark ? 'lesson-reader--dark text-zinc-100' : 'lesson-reader--light text-ink-900')}>
         <div className="tiptap-editor-root tiptap-preview">
           <SanitizedHtml html={promptHtml} className="ProseMirror" />
         </div>

@@ -24,7 +24,7 @@ export function PaymentDetailSkeleton() {
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         {/* Left column */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6">
+          <div className="rounded-2xl border border-ink-900/10 bg-paper-white p-5 sm:p-6">
             <PaymentSkeletonBone className="mb-5 h-5 w-40" />
             <div className="grid grid-cols-2 gap-x-6 gap-y-5">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -34,7 +34,7 @@ export function PaymentDetailSkeleton() {
                 </div>
               ))}
             </div>
-            <div className="mt-5 border-t border-slate-100 pt-5">
+            <div className="mt-5 border-t border-line-light pt-5">
               <PaymentSkeletonBone className="h-3 w-24" />
               <PaymentSkeletonBone className="mt-1.5 h-5 w-48" />
             </div>
@@ -42,13 +42,13 @@ export function PaymentDetailSkeleton() {
         </div>
 
         {/* Right column */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-5 py-4">
+        <div className="rounded-2xl border border-ink-900/10 bg-paper-white shadow-sm">
+          <div className="border-b border-line-light px-5 py-4">
             <PaymentSkeletonBone className="h-4 w-36" />
           </div>
 
           {/* Course preview */}
-          <div className="border-b border-slate-100 px-5 py-4">
+          <div className="border-b border-line-light px-5 py-4">
             <div className="flex gap-3">
               <PaymentSkeletonBone className="size-14 !rounded-xl" />
               <div className="flex-1 space-y-2">
@@ -69,7 +69,7 @@ export function PaymentDetailSkeleton() {
           </div>
 
           {/* Total */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-4">
+          <div className="flex items-center justify-between border-t border-line-light bg-paper-paper px-5 py-4">
             <PaymentSkeletonBone className="h-4 w-32" />
             <PaymentSkeletonBone className="h-6 w-28" />
           </div>

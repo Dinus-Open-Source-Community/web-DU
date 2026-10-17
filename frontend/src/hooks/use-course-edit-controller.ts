@@ -57,11 +57,17 @@ import type {
   EditableModule,
   LessonApiItem,
 } from "@/lib/course-edit/types";
+import type { ILessonDetailAssignment } from "@/lib/types/lesson";
 import type {
   ICourseDetailItem,
   ICourseDetailModule,
 } from "@/lib/types/course";
-import { courseKeys, lessonAssignmentKeys, lessonKeys, moduleKeys } from "@/hooks/query-keys";
+import {
+  courseKeys,
+  lessonAssignmentKeys,
+  lessonKeys,
+  moduleKeys,
+} from "@/hooks/query-keys";
 import { useUpdateCourseStatus } from "@/hooks/use-course-mutations";
 import { useLessonAssignmentAdmin } from "@/hooks/use-lesson-assignment-admin";
 import { useLessonByUid, useLessonsByModule } from "@/hooks/use-lessons";
@@ -73,7 +79,6 @@ type PendingNavigation =
 
 export function useCourseEditController({
   initialModuleId,
-  routeBasePath = "/mentor",
   courseData,
   modules: sourceModules,
 }: CourseEditClientProps) {
@@ -755,6 +760,95 @@ export function useCourseEditController({
     }
   }, [activeLesson, activeLessonId, deleteAssignmentMutation]);
 
+  const restoreLessonContentFromCache = useCallback(
+    (lessonId: string) => {
+      const cached = queryClient.getQueryData<LessonApiItem>(
+        lessonKeys.detail(lessonId),
+      );
+      if (!cached?.uid) return;
+
+      const hydrated = toLesson(
+        cached,
+        Number(cached.order_index ?? 1) || 1,
+      );
+
+      setModules((previous) =>
+        previous.map((courseModule) => ({
+          ...courseModule,
+          lessons: courseModule.lessons.map((lesson) => {
+            const lessonKey = getLessonKey(lesson);
+            if (lessonKey !== lessonId) return lesson;
+            return mergeLessonDetailFromApi(lesson, hydrated, cached.uid);
+          }),
+        })),
+      );
+      lastHydratedLessonRef.current = lessonId;
+    },
+    [queryClient],
+  );
+
+  const restoreAssignmentFromCache = useCallback(
+    (lessonId: string) => {
+      const lesson = findLesson(modules, lessonId);
+      const lessonUid = lesson?.uid ?? null;
+
+      const assignment = lessonUid
+        ? (queryClient.getQueryData<ILessonDetailAssignment | null>(
+            lessonAssignmentKeys.detail(lessonUid),
+          ) ?? null)
+        : null;
+
+      setModules((previous) =>
+        previous.map((courseModule) => ({
+          ...courseModule,
+          lessons: courseModule.lessons.map((item) => {
+            const lessonKey = getLessonKey(item);
+            if (lessonKey !== lessonId) return item;
+            return applyHomeworkFromAssignment(item, assignment);
+          }),
+        })),
+      );
+      lastHydratedAssignmentRef.current = lessonId;
+    },
+    [modules, queryClient],
+  );
+
+  const discardActiveLessonContent = useCallback(() => {
+    if (!activeLessonId) return;
+    const lessonId = activeLessonId;
+    setModifiedLessons((previous) => {
+      const next = new Set(previous);
+      next.delete(lessonId);
+      return next;
+    });
+    lastHydratedLessonRef.current = null;
+    restoreLessonContentFromCache(lessonId);
+  }, [activeLessonId, restoreLessonContentFromCache]);
+
+  const discardActiveAssignmentEdits = useCallback(() => {
+    if (!activeLessonId) return;
+    const lessonId = activeLessonId;
+    setModifiedAssignmentLessons((previous) => {
+      const next = new Set(previous);
+      next.delete(lessonId);
+      return next;
+    });
+    lastHydratedAssignmentRef.current = null;
+    restoreAssignmentFromCache(lessonId);
+  }, [activeLessonId, restoreAssignmentFromCache]);
+
+  const completePendingNavigation = useCallback(() => {
+    if (!pendingNavigation) return;
+
+    if (pendingNavigation.type === "lesson") {
+      proceedSelectLesson(pendingNavigation.lessonId);
+    } else {
+      proceedSelectModule(pendingNavigation.moduleId);
+    }
+
+    setPendingNavigation(null);
+  }, [pendingNavigation, proceedSelectLesson, proceedSelectModule]);
+
   const handleSaveAndContinue = useCallback(async () => {
     if (!activeLessonId || !pendingNavigation) return;
 
@@ -767,14 +861,7 @@ export function useCourseEditController({
       }
 
       setUnsavedDialogOpen(false);
-
-      if (pendingNavigation.type === "lesson") {
-        proceedSelectLesson(pendingNavigation.lessonId);
-      } else {
-        proceedSelectModule(pendingNavigation.moduleId);
-      }
-
-      setPendingNavigation(null);
+      completePendingNavigation();
       toast.success(Message.courseEdit.saveAndContinue);
     } catch {
       // Error toast already shown in save handlers.
@@ -784,10 +871,88 @@ export function useCourseEditController({
     pendingNavigation,
     modifiedLessons,
     modifiedAssignmentLessons,
-    proceedSelectLesson,
-    proceedSelectModule,
+    completePendingNavigation,
     saveLesson,
     handleSaveCurrentAssignment,
+  ]);
+
+  const discardAllActiveLessonEdits = useCallback(() => {
+    if (!activeLessonId) return;
+
+    const lessonId = activeLessonId;
+    const shouldRestoreContent = modifiedLessons.has(lessonId);
+    const shouldRestoreAssignment = modifiedAssignmentLessons.has(lessonId);
+
+    if (!shouldRestoreContent && !shouldRestoreAssignment) return;
+
+    const cachedLesson = shouldRestoreContent
+      ? queryClient.getQueryData<LessonApiItem>(lessonKeys.detail(lessonId))
+      : null;
+    const lessonForAssignment = findLesson(modules, lessonId);
+    const assignment =
+      shouldRestoreAssignment && lessonForAssignment?.uid
+        ? (queryClient.getQueryData<ILessonDetailAssignment | null>(
+            lessonAssignmentKeys.detail(lessonForAssignment.uid),
+          ) ?? null)
+        : null;
+
+    setModifiedLessons((previous) => {
+      const next = new Set(previous);
+      next.delete(lessonId);
+      return next;
+    });
+    setModifiedAssignmentLessons((previous) => {
+      const next = new Set(previous);
+      next.delete(lessonId);
+      return next;
+    });
+
+    setModules((previous) =>
+      previous.map((courseModule) => ({
+        ...courseModule,
+        lessons: courseModule.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== lessonId) return lesson;
+
+          let nextLesson = lesson;
+          if (shouldRestoreContent && cachedLesson?.uid) {
+            const hydrated = toLesson(
+              cachedLesson,
+              Number(cachedLesson.order_index ?? 1) || 1,
+            );
+            nextLesson = mergeLessonDetailFromApi(
+              nextLesson,
+              hydrated,
+              cachedLesson.uid,
+            );
+          }
+          if (shouldRestoreAssignment) {
+            nextLesson = applyHomeworkFromAssignment(nextLesson, assignment);
+          }
+          return nextLesson;
+        }),
+      })),
+    );
+
+    if (shouldRestoreContent) {
+      lastHydratedLessonRef.current = lessonId;
+    }
+    if (shouldRestoreAssignment) {
+      lastHydratedAssignmentRef.current = lessonId;
+    }
+  }, [activeLessonId, modifiedLessons, modifiedAssignmentLessons, modules, queryClient]);
+
+  const handleDiscardAndContinue = useCallback(() => {
+    if (!activeLessonId || !pendingNavigation) return;
+
+    discardAllActiveLessonEdits();
+    setUnsavedDialogOpen(false);
+    completePendingNavigation();
+  }, [
+    activeLessonId,
+    pendingNavigation,
+    discardAllActiveLessonEdits,
+    completePendingNavigation,
   ]);
 
   const handleCreateModule = useCallback(
@@ -1261,7 +1426,6 @@ export function useCourseEditController({
     isAssignmentLoading,
     unsavedDialogOpen,
     pendingNavigation,
-    routeBasePath,
     courseUid: courseData.uid,
     setUnsavedDialogOpen,
     setIsCreateModuleOpen,
@@ -1282,6 +1446,9 @@ export function useCourseEditController({
     handleSaveCurrentAssignment,
     handleDeleteCurrentAssignment,
     handleSaveAndContinue,
+    handleDiscardAndContinue,
+    discardActiveLessonContent,
+    discardActiveAssignmentEdits,
     patchLocalLesson,
     patchAssignmentLesson,
   };

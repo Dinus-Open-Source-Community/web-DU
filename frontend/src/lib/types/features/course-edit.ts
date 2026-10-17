@@ -20,7 +20,6 @@ export interface ICourseEditNavigationActions {
 
 export interface ICourseEditClientProps {
   initialModuleId?: string
-  routeBasePath?: '/mentor' | '/admin'
   role?: CourseEditRole
   courseData: ICourseDetailItem
   modules: ICourseDetailModule[]

@@ -71,11 +71,11 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-72 gap-0 rounded-xl border-slate-200/90 p-0 shadow-lg ring-1 ring-slate-900/5"
+        className="w-72 gap-0 rounded-xl border-input p-0 shadow-lg ring-1 ring-foreground/5"
       >
         <div className="space-y-4 p-3">
           <section className="space-y-2">
-            <p className="text-xs font-medium text-slate-500">Perataan</p>
+            <p className="text-xs font-medium text-muted-foreground">Perataan</p>
             <ToolbarGroup>
               {(
                 [
@@ -99,9 +99,9 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
           </section>
 
           <section className="space-y-2">
-            <p className="text-xs font-medium text-slate-500">Font</p>
+            <p className="text-xs font-medium text-muted-foreground">Font</p>
             <select
-              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              className="h-9 w-full rounded-xl border border-input bg-card px-2.5 text-sm text-foreground shadow-none outline-none transition-[color,box-shadow,background-color] hover:border-line-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
               aria-label="Jenis font"
               value={toolbar.fontFamily}
               onChange={(event) => {
@@ -119,11 +119,11 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
           </section>
 
           <section className="space-y-2">
-            <p className="text-xs font-medium text-slate-500">Warna & sorotan</p>
+            <p className="text-xs font-medium text-muted-foreground">Warna & sorotan</p>
             <div className="flex flex-wrap items-center gap-2">
               <input
                 type="color"
-                className="size-9 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5"
+                className="size-9 cursor-pointer rounded-xl border border-input bg-card p-1 outline-none transition-[color,box-shadow,background-color] hover:border-line-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
                 aria-label="Warna teks"
                 onMouseDown={rememberSelection}
                 onChange={(event) =>
@@ -153,10 +153,10 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
                   type="button"
                   aria-label={`Sorot ${color.label}`}
                   className={cn(
-                    'size-7 rounded-md border border-slate-200 transition-shadow active:scale-95',
+                    'size-7 rounded-md border border-input outline-none transition-shadow active:scale-95 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30',
                     toolbar.isHighlight &&
                       toolbar.highlightColor === color.value &&
-                      'ring-2 ring-primary ring-offset-1',
+                      'ring-2 ring-ring ring-offset-1 ring-offset-card',
                   )}
                   style={{ backgroundColor: color.value }}
                   onMouseDown={(event) => {
@@ -180,7 +180,7 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
           </section>
 
           <section className="space-y-2">
-            <p className="text-xs font-medium text-slate-500">Lanjutan</p>
+            <p className="text-xs font-medium text-muted-foreground">Lanjutan</p>
             <ToolbarGroup>
               <ToolbarIconButton
                 label="Subscript"

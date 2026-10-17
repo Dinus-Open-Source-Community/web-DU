@@ -27,7 +27,6 @@ import { editLayout } from '@/lib/course-edit/edit-layout'
 import { UnsavedEditorTabDialog } from './UnsavedEditorTabDialog'
 
 type CourseEditShellProps = CourseEditNavigationActions & {
-  routeBasePath: '/mentor' | '/admin'
   course: Partial<ICourseDetailItem>
   isAdmin: boolean
   isSaving: boolean
@@ -59,10 +58,11 @@ type CourseEditShellProps = CourseEditNavigationActions & {
     lessonId: string,
     updater: (lesson: EditableLesson) => EditableLesson,
   ) => void
+  onDiscardActiveLessonContent: () => void
+  onDiscardActiveAssignmentEdits: () => void
 }
 
 export function CourseEditShell({
-  routeBasePath,
   course,
   isAdmin,
   isSaving,
@@ -97,13 +97,15 @@ export function CourseEditShell({
   onRenameLesson,
   onDeleteLesson,
   onChangeLessonType,
+  onDiscardActiveLessonContent,
+  onDiscardActiveAssignmentEdits,
 }: CourseEditShellProps) {
   const [editorTab, setEditorTab] = useState<CourseEditorTab>('content')
   const [unsavedTabDialogOpen, setUnsavedTabDialogOpen] = useState(false)
   const [pendingEditorTab, setPendingEditorTab] = useState<CourseEditorTab | null>(
     null,
   )
-  const { goBack } = useCourseEditBackNavigation(routeBasePath)
+  const { goBack } = useCourseEditBackNavigation()
   const { isCompact, viewportMode } = useCourseEditViewport()
   const { compactPane, openOutline, openEditor } = useCompactCourseEditNavigation(
     isCompact,
@@ -167,6 +169,27 @@ export function CourseEditShell({
     pendingEditorTab,
   ])
 
+  const handleDiscardTabAndContinue = useCallback(() => {
+    if (editorTab === 'content' && hasUnsavedLesson) {
+      onDiscardActiveLessonContent()
+    } else if (editorTab === 'homework' && hasUnsavedAssignment) {
+      onDiscardActiveAssignmentEdits()
+    }
+
+    if (pendingEditorTab) {
+      setEditorTab(pendingEditorTab)
+    }
+    setPendingEditorTab(null)
+    setUnsavedTabDialogOpen(false)
+  }, [
+    editorTab,
+    hasUnsavedAssignment,
+    hasUnsavedLesson,
+    onDiscardActiveAssignmentEdits,
+    onDiscardActiveLessonContent,
+    pendingEditorTab,
+  ])
+
   const moduleLabel =
     activeModuleTitle && activeModuleIndex != null
       ? `Modul ${activeModuleIndex + 1} · ${activeModuleTitle}`
@@ -208,7 +231,11 @@ export function CourseEditShell({
 
       <div className={isCompact ? 'flex min-h-0 flex-1 flex-col' : editLayout.shell}>
         {showOutline && (
-          <div className={isCompact ? editLayout.shellCompactOutline : undefined}>
+          <div
+            className={
+              isCompact ? editLayout.shellCompactOutline : 'min-w-0 w-full'
+            }
+          >
             <CurriculumOutline
               layout={outlineLayout}
               modules={modules}
@@ -291,6 +318,7 @@ export function CourseEditShell({
         targetTab={pendingEditorTab}
         isSaving={isTabSaving}
         onSaveAndContinue={() => void handleSaveTabAndContinue()}
+        onDiscardAndContinue={handleDiscardTabAndContinue}
       />
     </div>
   )

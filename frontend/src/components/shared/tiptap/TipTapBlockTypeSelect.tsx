@@ -52,10 +52,10 @@ export function TipTapBlockTypeSelect({ size = 'default', theme = 'light' }: Tip
           size="sm"
           onMouseDown={preventEditorBlur}
           className={cn(
-            'w-full justify-between gap-2 rounded-full border font-medium shadow-none',
+            'w-full justify-between gap-2 rounded-sm border font-medium shadow-none',
             isDark
               ? 'border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 data-[state=open]:bg-zinc-800'
-              : 'border-slate-200/90 bg-slate-50/80 text-slate-700 hover:bg-slate-100/90 data-[state=open]:bg-slate-100',
+              : 'border-input bg-card text-foreground hover:bg-muted data-[state=open]:bg-muted',
             size === 'bubble' && 'h-8 min-w-[2.75rem] px-2 text-xs',
             size === 'compact' && 'h-8 min-w-[8.5rem] max-w-[10rem] px-3 text-xs',
             size === 'default' && 'h-9 min-w-[9rem] max-w-[11rem] px-3.5 text-sm',
@@ -66,7 +66,7 @@ export function TipTapBlockTypeSelect({ size = 'default', theme = 'light' }: Tip
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[10.5rem]">
-        <DropdownMenuLabel className="text-xs font-normal text-slate-500">
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
           Tipe blok
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup

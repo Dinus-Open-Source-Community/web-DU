@@ -118,7 +118,7 @@ export function LessonEditorHeader({
             {hasHomework && (
               <span
                 className={cn(
-                  'ml-1 size-1.5 rounded-full bg-primary',
+                  'ml-1 size-1.5 rounded-full bg-brand-blue',
                   'animate-in fade-in zoom-in-95 duration-200',
                   editMotion.reducedMotion,
                 )}

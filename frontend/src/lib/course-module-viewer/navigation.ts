@@ -1,10 +1,13 @@
-export type CourseModulePreviewVariant = 'mentor' | 'student' | 'admin'
+import { dashboardMenu } from '@/lib/routes'
+
+export type CourseModulePreviewVariant = 'student' | 'mentor' | 'admin'
 
 export function getCourseModuleViewerBackHref(
   variant: CourseModulePreviewVariant,
   courseUid: string,
 ): string {
-  if (variant === 'mentor') return `/mentor/courses/${courseUid}`
-  if (variant === 'admin') return `/admin/courses/${courseUid}`
-  return '/student/learning'
+  if (variant === 'mentor' || variant === 'admin') {
+    return dashboardMenu.courseDetail(courseUid)
+  }
+  return dashboardMenu.learning
 }

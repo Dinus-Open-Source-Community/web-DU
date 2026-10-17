@@ -42,7 +42,7 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
         <ToolbarRow
           className={cn(
             'justify-between gap-3 border-b',
-            isDark ? 'border-zinc-800' : 'border-slate-100',
+            isDark ? 'border-zinc-800' : 'border-input',
             compact ? 'py-1.5' : 'py-2',
           )}
         >

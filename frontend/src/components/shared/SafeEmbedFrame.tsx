@@ -12,7 +12,7 @@ export function SafeEmbedFrame({ embedUrl, title = 'Video', className }: SafeEmb
 
   if (!safeSrc) {
     return (
-      <div className={cn('flex aspect-video items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 text-center text-sm text-slate-500', className)}>
+      <div className={cn('flex aspect-video items-center justify-center rounded-xl border border-line-light bg-paper-paper px-4 text-center text-sm text-ink-500', className)}>
         Video tidak dapat ditampilkan karena URL embed tidak valid.
       </div>
     )

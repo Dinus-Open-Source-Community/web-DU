@@ -7,10 +7,7 @@ import { AuthDivider } from '@/components/auth/AuthDivider'
 import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
 import { AuthPageHeader } from '@/components/auth/AuthPageHeader'
 import { AuthPasswordToggleButton } from '@/components/auth/AuthPasswordToggleButton'
-import {
-  authInputClassName,
-  authSubmitButtonClassName,
-} from '@/components/auth/constants'
+import { authSubmitButtonClassName } from '@/components/auth/constants'
 import { GlobalInput } from '@/components/shared/Input'
 import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
@@ -62,10 +59,7 @@ export default function LoginPage() {
       subheading="Masuk ke akunmu dan lanjutkan perjalanan belajar bersama Doscom University."
     >
       <AuthFormPanel>
-        <AuthPageHeader
-          title="Masuk"
-          description="Gunakan email kampus atau akun yang sudah terdaftar."
-        />
+        <AuthPageHeader title="Masuk" displayTitle />
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
@@ -78,7 +72,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
               required
-              className={authInputClassName}
+              variant="auth"
             />
 
             <div className="space-y-2">
@@ -105,7 +99,8 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
                 required
-                className={`${authInputClassName} pr-12`}
+                variant="auth"
+              className="pr-12"
                 rightIcon={
                   <AuthPasswordToggleButton
                     visible={showPassword}
@@ -129,6 +124,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
+            variant="neobrutalism"
             className={authSubmitButtonClassName}
             disabled={isSubmitting}
             aria-busy={isSubmitting}
@@ -142,14 +138,14 @@ export default function LoginPage() {
               'Masuk ke akun'
             )}
           </Button>
+
+          <AuthDivider label="Atau masuk dengan" />
+
+          <OauthButton
+            isSubmitting={isSubmitting}
+            onGoogleSignIn={startGoogleOAuth}
+          />
         </form>
-
-        <AuthDivider label="Atau masuk dengan" />
-
-        <OauthButton
-          isSubmitting={isSubmitting}
-          onGoogleSignIn={startGoogleOAuth}
-        />
       </AuthFormPanel>
     </AuthLayout>
   )

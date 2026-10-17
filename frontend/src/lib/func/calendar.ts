@@ -5,14 +5,31 @@ import type { ClassType } from '../types/course'
 export type CalendarSource = 'google' | 'backend' | 'local'
 
 export const VIEW_OPTIONS: Array<{ label: string; value: CalendarViewMode }> = [
-  { label: 'Month', value: 'month' },
-  { label: 'Week', value: 'week' },
-  { label: 'Day', value: 'day' },
+  { label: 'Bulan', value: 'month' },
+  { label: 'Minggu', value: 'week' },
+  { label: 'Hari', value: 'day' },
   { label: 'Agenda', value: 'agenda' },
 ]
 
-export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+export const WEEKDAY_LABELS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+
+const MONTH_NAMES_ID = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+]
+
+const WEEKDAY_NAMES_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
 // Keep this fixed so aside height remains stable while content scrolls.
 export const UPCOMING_PANEL_HEIGHT_CLASS = 'lg:h-[700px]'
@@ -196,11 +213,11 @@ export const isDateInRange = (date: Date, start: Date, end: Date): boolean => {
 
 export const buildRangeLabel = (cursorDate: Date, mode: CalendarViewMode): string => {
   if (mode === 'month') {
-    return `${MONTH_LABELS[cursorDate.getMonth()]} ${cursorDate.getFullYear()}`
+    return `${cursorDate.getDate()} ${MONTH_NAMES_ID[cursorDate.getMonth()]} ${cursorDate.getFullYear()}`
   }
 
   if (mode === 'day') {
-    return `${WEEKDAY_LABELS[cursorDate.getDay()]}, ${cursorDate.getDate()} ${MONTH_LABELS[cursorDate.getMonth()]} ${cursorDate.getFullYear()}`
+    return `${WEEKDAY_NAMES_ID[cursorDate.getDay()]}, ${cursorDate.getDate()} ${MONTH_NAMES_ID[cursorDate.getMonth()]} ${cursorDate.getFullYear()}`
   }
 
   const weekStart = startOfWeek(cursorDate)
@@ -208,10 +225,17 @@ export const buildRangeLabel = (cursorDate: Date, mode: CalendarViewMode): strin
 
   if (mode === 'agenda') {
     const agendaEnd = addDays(startOfDay(cursorDate), 13)
-    return `${cursorDate.getDate()} ${MONTH_LABELS[cursorDate.getMonth()]} - ${agendaEnd.getDate()} ${MONTH_LABELS[agendaEnd.getMonth()]} ${agendaEnd.getFullYear()}`
+    return `${cursorDate.getDate()} ${MONTH_NAMES_ID[cursorDate.getMonth()]} – ${agendaEnd.getDate()} ${MONTH_NAMES_ID[agendaEnd.getMonth()]} ${agendaEnd.getFullYear()}`
   }
 
-  return `${weekStart.getDate()} ${MONTH_LABELS[weekStart.getMonth()]} - ${weekEnd.getDate()} ${MONTH_LABELS[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`
+  return `${weekStart.getDate()} ${MONTH_NAMES_ID[weekStart.getMonth()]} – ${weekEnd.getDate()} ${MONTH_NAMES_ID[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`
+}
+
+export const CALENDAR_VIEW_HINT: Record<CalendarViewMode, string> = {
+  month: 'Satu bulan penuh',
+  week: 'Satu minggu',
+  day: 'Satu hari',
+  agenda: 'Agenda 14 hari',
 }
 
 export interface UpcomingGroups {

@@ -55,21 +55,21 @@ export function AssignmentSubmissionHistorySection({
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className={cn('text-base font-semibold tracking-tight', isDark ? 'text-zinc-100' : 'text-slate-900')}>
+          <h2 className={cn('text-base font-semibold tracking-tight', isDark ? 'text-zinc-100' : 'text-ink-900')}>
             Riwayat pengumpulan
           </h2>
-          <p className={cn('mt-1 text-sm', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          <p className={cn('mt-1 text-sm', isDark ? 'text-zinc-400' : 'text-ink-500')}>
             Lacak percobaan, nilai, dan status pengumpulan Anda.
           </p>
         </div>
 
         {canStart ? (
-          <Button type="button" onClick={onStart} className="w-full shrink-0 rounded-[10px] px-4 sm:w-auto">
+          <Button type="button" onClick={onStart} className="w-full shrink-0 rounded-sm px-4 sm:w-auto">
             <Play className="h-4 w-4" aria-hidden />
             Mulai tugas
           </Button>
         ) : submissionBlockReason ? (
-          <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-ink-500')}>
             {submissionBlockReason}
           </p>
         ) : null}

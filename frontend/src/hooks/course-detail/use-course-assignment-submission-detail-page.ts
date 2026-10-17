@@ -163,6 +163,7 @@ export function useCourseAssignmentSubmissionDetailPage({
   )
 
   return {
+    role,
     courseUid,
     courseTitle,
     lessonUid,

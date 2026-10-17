@@ -23,12 +23,12 @@ interface CourseDetailSidebarProps {
 }
 
 const defaultIncludes: IncludeItem[] = [
-  { icon: <Monitor className="h-4 w-4 text-slate-400" aria-hidden />, label: 'Video on-demand' },
+  { icon: <Monitor className="h-4 w-4 text-ink-400" aria-hidden />, label: 'Video sesuai permintaan' },
   {
-    icon: <InfinityIcon className="h-4 w-4 text-slate-400" aria-hidden />,
+    icon: <InfinityIcon className="h-4 w-4 text-ink-400" aria-hidden />,
     label: 'Akses selamanya',
   },
-  { icon: <Award className="h-4 w-4 text-slate-400" aria-hidden />, label: 'Sertifikat penyelesaian' },
+  { icon: <Award className="h-4 w-4 text-ink-400" aria-hidden />, label: 'Sertifikat penyelesaian' },
 ]
 
 export function CourseDetailSidebar({
@@ -68,10 +68,10 @@ export function CourseDetailSidebar({
 
         <div className="flex flex-col gap-2.5">
           <h3 className={detailLayout.sectionTitle}>Yang termasuk dalam kursus</h3>
-          <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+          <ul className="flex flex-col gap-2.5 text-sm text-ink-600">
             {includes.map((item) => (
               <li key={item.label} className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-paper-paper">
                   {item.icon}
                 </span>
                 <span>{item.label}</span>

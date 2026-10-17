@@ -16,12 +16,12 @@ export function StickerStar({ className }: StickerProps) {
   )
 }
 
-export function StickerSparkle({ className, twinkle = false }: StickerProps & { twinkle?: boolean }) {
+export function StickerSparkle({ className }: StickerProps & { twinkle?: boolean }) {
   return (
     <svg
       aria-hidden
       viewBox="0 0 24 24"
-      className={cn(twinkle ? 'animate-twinkle' : 'animate-float', 'text-brand-blue', className)}
+      className={cn('text-brand-blue', className)}
     >
       <path
         d="M12 2 C 13 8, 16 11, 22 12 C 16 13, 13 16, 12 22 C 11 16, 8 13, 2 12 C 8 11, 11 8, 12 2 Z"

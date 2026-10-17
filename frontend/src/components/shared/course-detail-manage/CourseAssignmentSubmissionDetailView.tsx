@@ -14,6 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type { CourseAssignmentSubmissionDetailPageViewModel } from '@/lib/course-detail/course-assignment-submission-detail-view-model'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { Initials } from '@/lib/func/func'
+import { AdminStatusLabel } from '@/lib/admin/status-label'
+import { isAdminStaffRole } from '@/lib/admin/staff-shell'
 import { cn } from '@/lib/utils'
 
 type CourseAssignmentSubmissionDetailViewProps = {
@@ -28,6 +30,8 @@ function DetailGradingBadge({
   const submission = view.submission
   if (!submission) return null
 
+  const adminLabels = isAdminStaffRole(view.role)
+
   if (submission.taskType === 'quiz') {
     if (!submission.isAutoGraded) {
       return (
@@ -35,15 +39,20 @@ function DetailGradingBadge({
       )
     }
 
-    return (
+    const label = `${submission.quizCorrectCount ?? 0}/${submission.quizQuestionCount ?? 0} benar`
+    return adminLabels ? (
+      <AdminStatusLabel tone="info">{label}</AdminStatusLabel>
+    ) : (
       <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
-        {submission.quizCorrectCount ?? 0}/{submission.quizQuestionCount ?? 0} benar
+        {label}
       </span>
     )
   }
 
   if (submission.gradingStatus !== 'graded') {
-    return (
+    return adminLabels ? (
+      <AdminStatusLabel tone="warning">Menunggu penilaian</AdminStatusLabel>
+    ) : (
       <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
         Menunggu penilaian
       </span>
@@ -52,6 +61,15 @@ function DetailGradingBadge({
 
   const score =
     submission.scorePercent !== null ? `${Math.round(submission.scorePercent)}%` : '-'
+  const label = `${submission.passed ? 'Lulus' : 'Tidak lulus'} - ${score}`
+
+  if (adminLabels) {
+    return (
+      <AdminStatusLabel tone={submission.passed ? 'success' : 'danger'}>
+        {label}
+      </AdminStatusLabel>
+    )
+  }
 
   return (
     <span
@@ -63,7 +81,7 @@ function DetailGradingBadge({
       )}
     >
       <CheckCircle2 className="size-3" aria-hidden />
-      {submission.passed ? 'Lulus' : 'Tidak lulus'} - {score}
+      {label}
     </span>
   )
 }
@@ -74,6 +92,7 @@ function SubmissionDetailMain({
   view: CourseAssignmentSubmissionDetailPageViewModel
 }) {
   const {
+    role,
     assignment,
     submission,
     lessonTitle,
@@ -88,6 +107,8 @@ function SubmissionDetailMain({
     isSavingScore,
     isSavingFeedback,
   } = view
+
+  const adminStatusLabels = isAdminStaffRole(role)
 
   if (isLoading) {
     return (
@@ -189,6 +210,7 @@ function SubmissionDetailMain({
             staffViewer={staffViewer}
             onSubmit={onSubmitFeedback}
             isSubmitting={isSavingFeedback}
+            adminStatusLabels={adminStatusLabels}
           />
         </>
       ) : null}

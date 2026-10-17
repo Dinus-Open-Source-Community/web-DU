@@ -9,7 +9,7 @@ export type StaffGraderDirectoryEntry = {
 }
 
 function toUserRole(role: string | undefined): UserRole {
-  if (role === 'admin' || role === 'mentor' || role === 'student') {
+  if (role === 'super_admin' || role === 'admin' || role === 'mentor' || role === 'student') {
     return role
   }
 

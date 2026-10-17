@@ -17,6 +17,7 @@ export type StaffSubmissionGraderView = {
 
 const GRADER_ROLE_LABELS: Record<UserRole, string> = {
   admin: 'Admin',
+  super_admin: 'Super Admin',
   mentor: 'Mentor',
   student: 'Siswa',
 }

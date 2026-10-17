@@ -35,9 +35,6 @@ export type CourseModuleViewerViewModel = {
   courseTitle: string
   backHref: string
   theme: LessonThemeMode
-  isThemeDialogOpen: boolean
-  onThemeDialogOpenChange: (open: boolean) => void
-  onThemeChange: (theme: LessonThemeMode) => void
   modulesState: IModulesDetail[]
   lessonEntries: LessonEntry[]
   effectiveActiveLessonId: string | null
@@ -57,6 +54,9 @@ export type CourseModuleViewerViewModel = {
   localSearchInputRef: RefObject<HTMLInputElement | null>
   viewerPane: CourseViewerPane
   assignmentState: CourseModuleViewerAssignmentState
+  assignmentByLessonUid: ReadonlyMap<string, LessonDetailAssignment>
+  /** Mentor/admin hanya melihat pratinjau tugas tanpa aksi pengumpulan. */
+  isAssignmentReadOnly: boolean
   footerActiveTitle: string
   footerPreviousAction: LessonFooterNavAction | null
   footerNextAction: LessonFooterNavAction | null
@@ -67,12 +67,12 @@ export type CourseModuleViewerViewModel = {
   showAssignmentDetail: boolean
   showAssignmentWork: boolean
   onOpenSearch: () => void
-  onOpenThemeSettings: () => void
   onOpenModules: () => void
   onToggleSidebar: () => void
   onMobileSidebarOpenChange: (open: boolean) => void
   onToggleModule: (moduleId: string) => void
   onSelectLesson: (lessonId: string, moduleId?: string) => void
+  onSelectAssignment: (lessonId: string, moduleId?: string) => void
   onSearchQueryChange: (query: string) => void
   onCloseSearch: () => void
   onViewerPaneChange: (pane: CourseViewerPane) => void

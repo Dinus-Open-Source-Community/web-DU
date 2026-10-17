@@ -3,7 +3,7 @@ import type { AdminStatus, AdminStudent } from '@/lib/types/user'
 import type { ManagedUserItem } from './types'
 import { toLearningProgressPercent } from '@/lib/learning/progress'
 
-const DEFAULT_AVATAR = '/pinguin.png'
+const DEFAULT_AVATAR = '/Logo.svg'
 
 const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
+import { useDialogPageScrollLock } from "../../lib/dialog-scroll"
 import { cn } from "../../lib/utils"
 import { Button } from "./button"
 import { XIcon } from "lucide-react"
@@ -45,6 +46,11 @@ function DialogOverlay({
   )
 }
 
+function DialogPageScrollLockEffect() {
+  useDialogPageScrollLock(true)
+  return null
+}
+
 function DialogContent({
   className,
   children,
@@ -64,6 +70,7 @@ function DialogContent({
         )}
         {...props}
       >
+        <DialogPageScrollLockEffect />
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
@@ -74,7 +81,7 @@ function DialogContent({
             >
               <XIcon
               />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">Tutup</span>
             </Button>
           </DialogPrimitive.Close>
         )}
@@ -113,7 +120,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">Tutup</Button>
         </DialogPrimitive.Close>
       )}
     </div>

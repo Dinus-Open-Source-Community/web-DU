@@ -2,9 +2,10 @@ import { useParams, useSearchParams } from 'react-router-dom'
 
 import { CourseEditClient } from '@/components/courses/(authorized)/editCourse'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
 import { useCourseEditController } from '@/hooks/use-course-edit-controller'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useCourseEditModules } from '@/hooks/use-course'
@@ -20,7 +21,7 @@ export default function MentorCourseEditPage() {
   if (isLoading) {
     return (
       <AppSidebarProvider role="mentor" user={sidebarUser}>
-        <LottieOverlay visible={isLoading} />
+        <PageSkeleton message="Memuat course..." />
       </AppSidebarProvider>
     )
   }
@@ -55,9 +56,10 @@ function MentorCourseEditContent({
   modules,
   initialModuleId,
 }: MentorCourseEditContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseData.uid, courseData.title)
+
   const view = useCourseEditController({
     initialModuleId,
-    routeBasePath: '/mentor',
     role: 'mentor',
     courseData,
     modules,

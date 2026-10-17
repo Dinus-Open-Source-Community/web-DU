@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/run/media/jariz/SATA/coding/udinus/doscom/web-DU/logs/.f6da030ebb4e78c6358550ebce8e589b849e2ccd-audit.json",
+    "files": [
+        {
+            "date": 1792244050753,
+            "name": "/run/media/jariz/SATA/coding/udinus/doscom/web-DU/logs/application-2026-10-17.log",
+            "hash": "a16e5e86e2e3a91d87020fc15677a9944d307a4c7961573661979894c643cb8d"
+        }
+    ],
+    "hashType": "sha256"
+}

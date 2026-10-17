@@ -65,7 +65,7 @@ export function AssignmentDeadlinePicker({
           variant="outline"
           className={cn(
             editLayout.control,
-            'h-10 w-full justify-start rounded-lg px-3 font-normal',
+            'h-10 w-full justify-start rounded-sm px-3 font-normal',
             !selectedDate && 'text-muted-foreground',
           )}
         >
@@ -86,7 +86,7 @@ export function AssignmentDeadlinePicker({
           initialFocus
         />
 
-        <div className="space-y-2 border-t border-slate-200 p-3">
+        <div className="space-y-2 border-t border-line-light p-3">
           <label htmlFor={`${id}-time`} className={editLayout.fieldLabel}>
             Waktu
           </label>

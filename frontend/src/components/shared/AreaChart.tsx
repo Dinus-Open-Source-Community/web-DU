@@ -1,4 +1,9 @@
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  chartAxisStroke,
+  chartGridStroke,
+  chartTooltipContentStyle,
+} from '@/lib/charts/recharts-theme'
 import type { TimelinePoint, TimelineSeries } from '../../lib/types/utils'
 interface TimelineAreaChartProps {
   data: TimelinePoint[]
@@ -29,21 +34,14 @@ export function TimelineAreaChart({ data, series, height = 280 }: TimelineAreaCh
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid vertical={false} stroke="#eef2f7" strokeDasharray="4 4" />
-          <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
-          <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} width={48} />
+          <CartesianGrid vertical={false} stroke={chartGridStroke} strokeDasharray="4 4" />
+          <XAxis dataKey="label" stroke={chartAxisStroke} tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
+          <YAxis stroke={chartAxisStroke} tickLine={false} axisLine={false} fontSize={11} width={48} />
           <Tooltip
-            cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }}
-            contentStyle={{
-              background: 'white',
-              borderRadius: 12,
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-              fontSize: 12,
-              padding: '8px 12px',
-            }}
+            cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '3 3' }}
+            contentStyle={chartTooltipContentStyle}
           />
-          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: '#475569' }} />
+          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }} />
           {series.map((s) => (
             <Area
               key={s.dataKey}
@@ -54,7 +52,7 @@ export function TimelineAreaChart({ data, series, height = 280 }: TimelineAreaCh
               strokeWidth={2}
               fill={`url(#tl-${s.dataKey})`}
               dot={false}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--card)' }}
               isAnimationActive={false}
             />
           ))}

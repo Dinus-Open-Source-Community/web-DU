@@ -1,17 +1,19 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { type VariantProps } from 'class-variance-authority'
 import { BadgeVariants } from '../../lib/variant'
+import { AdminStatusLabel } from '@/lib/admin/status-label'
 import { paymentStatusLabels, type PaymentStatus } from '../../lib/types/transaction'
 import { cn } from '../../lib/utils'
+import { formatParticipantEnrollmentStatus } from '@/lib/course-detail/participant-enrollment-status'
 import type { BadgeVariant, ClassType, MentorCourseStudentStatus } from '../../lib/types/course'
 
 export type AppBadgeVariant = NonNullable<VariantProps<typeof BadgeVariants>['variant']>
 
 const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
-  free: 'Free',
+  free: 'Gratis',
   premium: 'Premium',
   event: 'Event',
-  draft: 'Draft',
+  draft: 'Draf',
   paymentPaid: paymentStatusLabels.success,
   paymentPending: paymentStatusLabels.pending,
   paymentFailed: paymentStatusLabels.failed,
@@ -20,7 +22,7 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   assignmentClosed: 'Ditutup',
   deadlineOverdue: 'Lewat tenggat',
   deadlineDueSoon: 'Mendekati tenggat',
-  reviewPending: 'Menunggu review',
+  reviewPending: 'Menunggu penilaian',
   reviewGraded: 'Selesai dinilai',
   reviewReturned: 'Minta revisi',
   demo: 'Demo',
@@ -38,13 +40,13 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   courseParticipantLate: 'Terlambat',
   courseParticipantNotStarted: 'Belum mulai',
   attendanceAjuanPending: 'Menunggu',
-  severityHigh: 'High',
-  severityMedium: 'Medium',
-  severityLow: 'Low',
-  payoutRequested: 'Requested',
-  payoutApproved: 'Approved',
-  payoutPaid: 'Paid',
-  payoutRejected: 'Rejected',
+  severityHigh: 'Tinggi',
+  severityMedium: 'Sedang',
+  severityLow: 'Rendah',
+  payoutRequested: 'Diminta',
+  payoutApproved: 'Disetujui',
+  payoutPaid: 'Dibayar',
+  payoutRejected: 'Ditolak',
   auditCreate: 'CREATE',
   auditUpdate: 'UPDATE',
   auditDelete: 'DELETE',
@@ -53,9 +55,9 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   couponExpired: 'Kedaluwarsa',
   couponScheduled: 'Terjadwal',
   coursePublished: 'Terbit',
-  courseDraft: 'Draft',
-  coursePending: 'Pending',
-  courseRejected: 'Rejected',
+  courseDraft: 'Draf',
+  coursePending: 'Menunggu',
+  courseRejected: 'Ditolak',
   qaAnswered: 'Terjawab',
   qaUnanswered: 'Belum dijawab',
 }
@@ -80,8 +82,30 @@ export function CourseBadge({ variant, className }: { variant: BadgeVariant; cla
   return <Badge variant={variant} className={className} />
 }
 
-/** Status pembayaran dengan gaya badge aplikasi. */
-export function PaymentBadge({ status, className }: { status: PaymentStatus; className?: string }) {
+const paymentStatusTone: Record<PaymentStatus, 'success' | 'warning' | 'danger'> = {
+  success: 'success',
+  pending: 'warning',
+  failed: 'danger',
+}
+
+/** Status pembayaran — `dot` untuk tabel admin (tanpa chip), default badge untuk area lain. */
+export function PaymentBadge({
+  status,
+  className,
+  presentation = 'badge',
+}: {
+  status: PaymentStatus
+  className?: string
+  presentation?: 'badge' | 'dot'
+}) {
+  if (presentation === 'dot') {
+    return (
+      <AdminStatusLabel tone={paymentStatusTone[status]} className={className}>
+        {paymentStatusLabels[status]}
+      </AdminStatusLabel>
+    )
+  }
+
   const v = status === 'success' ? 'paymentPaid' : status === 'pending' ? 'paymentPending' : 'paymentFailed'
   return (
     <Badge variant={v} className={className}>
@@ -103,9 +127,24 @@ export function ClassTypeBadge({ classType, className }: { classType: ClassType;
 function courseParticipantStatusVariant(status?: string): Extract<AppBadgeVariant, `courseParticipant${string}`> {
   const normalized = (status || '').trim().toLowerCase()
 
-  if (normalized === 'selesai' || normalized === 'completed' || normalized === 'complete') return 'courseParticipantComplete'
-  if (normalized === 'terlambat' || normalized === 'late') return 'courseParticipantLate'
-  if (normalized === 'belum mulai' || normalized === 'not_started' || normalized === 'not started' || normalized === 'registered' || normalized === 'terdaftar') {
+  if (normalized === 'selesai' || normalized === 'completed' || normalized === 'complete') {
+    return 'courseParticipantComplete'
+  }
+  if (normalized === 'terlambat' || normalized === 'late') {
+    return 'courseParticipantLate'
+  }
+  if (
+    normalized === 'belum mulai' ||
+    normalized === 'not_started' ||
+    normalized === 'not started' ||
+    normalized === 'registered' ||
+    normalized === 'terdaftar' ||
+    normalized === 'pending' ||
+    normalized === 'menunggu' ||
+    normalized === 'cancelled' ||
+    normalized === 'canceled' ||
+    normalized === 'dibatalkan'
+  ) {
     return 'courseParticipantNotStarted'
   }
 
@@ -113,7 +152,7 @@ function courseParticipantStatusVariant(status?: string): Extract<AppBadgeVarian
 }
 
 export function CourseParticipantStatusBadge({ status, className }: { status?: MentorCourseStudentStatus | string; className?: string }) {
-  const label = status || 'Terdaftar'
+  const label = formatParticipantEnrollmentStatus(status)
 
   return (
     <Badge variant={courseParticipantStatusVariant(status)} className={cn('max-w-full', className)}>

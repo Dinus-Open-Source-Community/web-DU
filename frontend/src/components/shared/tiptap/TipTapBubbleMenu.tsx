@@ -41,7 +41,7 @@ export function TipTapBubbleMenu() {
         <div
           role="toolbar"
           aria-label="Format teks terpilih"
-          className="flex items-center gap-0.5 rounded-xl border border-slate-200/90 bg-white px-1 py-1 shadow-lg ring-1 ring-slate-900/5"
+          className="flex items-center gap-0.5 rounded-xl border border-border bg-card px-1 py-1 shadow-lg ring-1 ring-foreground/5"
         >
           <ToolbarGroup>
             <TipTapBlockTypeSelect size="bubble" />
@@ -115,7 +115,7 @@ export function TipTapBubbleMenu() {
                 type="button"
                 aria-label={`Sorot ${color.label}`}
                 className={cn(
-                  'size-6 shrink-0 rounded-md border border-slate-200 transition-transform active:scale-95',
+                  'size-6 shrink-0 rounded-md border border-line-light transition-transform active:scale-95',
                   toolbar.isHighlight &&
                     toolbar.highlightColor === color.value &&
                     'ring-2 ring-primary ring-offset-1',

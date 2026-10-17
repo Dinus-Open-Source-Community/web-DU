@@ -1,8 +1,12 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { AdminPageShell } from '@/components/admin/AdminPageShell'
 import ProfileSection from '@/components/profile/Section'
-import { AppSidebarProvider } from '@/components/shared/Sidebar'
+import { AppNavbarProvider } from '@/components/shared/Sidebar'
+import { appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
+import { cn } from '@/lib/utils'
 import { useProfileSectionView } from '@/hooks/profile/use-profile-section-view'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useAuth } from '@/providers/auth-provider'
@@ -31,10 +35,19 @@ export default function ProfilePage() {
   })
 
   return (
-    <AppSidebarProvider role={profileUser.role} user={sidebarUser}>
-      <main>
+    <AppNavbarProvider
+      role={profileUser.role}
+      user={sidebarUser}
+      navbarBack="history"
+      contentClassName={cn(
+        appPageContentClassName,
+        appShellPageBgClassName,
+        'relative',
+      )}
+    >
+      <AdminPageShell className="gap-0">
         <ProfileSection view={view} />
-      </main>
-    </AppSidebarProvider>
+      </AdminPageShell>
+    </AppNavbarProvider>
   )
 }

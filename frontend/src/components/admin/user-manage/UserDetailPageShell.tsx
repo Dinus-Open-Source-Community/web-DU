@@ -2,17 +2,21 @@ import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
-import type { SidebarUser } from '@/components/shared/Sidebar'
-import { Button } from '@/components/ui/button'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
+import {
+  appShellGridOverlayClassName,
+  appShellPageBgClassName,
+} from '@/lib/design/app-shell-tokens'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
 import { userManageLayout } from '@/lib/user-manage/layout'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 import { getUserManageConfig } from '@/lib/user-manage/page-config'
+import { cn } from '@/lib/utils'
 
 type UserDetailPageShellProps = {
   kind: UserManageKind
-  user: SidebarUser
   backHref: string
   isLoading?: boolean
   loadingMessage?: string
@@ -21,35 +25,32 @@ type UserDetailPageShellProps = {
 
 export function UserDetailPageShell({
   kind,
-  user,
   backHref,
   isLoading = false,
   loadingMessage,
   children,
 }: UserDetailPageShellProps) {
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const config = getUserManageConfig(kind)
 
   return (
-    <AppSidebarProvider role="admin" user={user}>
-      {isLoading ? (
-        <LottieOverlay visible message={loadingMessage ?? 'Memuat detail user...'} />
-      ) : null}
-
+    <AppSidebarProvider
+      role={shellRole}
+      user={sidebarUser}
+      contentClassName={cn(appPageContentClassName, appShellPageBgClassName, 'relative')}
+    >
+      <div aria-hidden className={appShellGridOverlayClassName} />
       <div className={userManageLayout.page}>
         <div className="flex flex-col gap-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-9 w-fit gap-2 px-2 text-sm font-medium text-slate-600 hover:text-slate-900"
-            asChild
-          >
-            <Link to={backHref}>
-              <ArrowLeft className="size-4" aria-hidden />
-              Kembali ke {config.navLabel.toLowerCase()}
-            </Link>
-          </Button>
-          {children}
+          <Link to={backHref} className={userManageLayout.backLink}>
+            <ArrowLeft className="size-4 shrink-0" aria-hidden />
+            <span>Kembali ke {config.navLabel.toLowerCase()}</span>
+          </Link>
+          {isLoading ? (
+            <PageSkeleton message={loadingMessage ?? 'Memuat detail user...'} />
+          ) : (
+            children
+          )}
         </div>
       </div>
     </AppSidebarProvider>

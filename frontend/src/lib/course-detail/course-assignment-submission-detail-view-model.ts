@@ -1,3 +1,4 @@
+import type { StaffAssignmentRole } from '@/lib/course-detail/course-assignment-navigation'
 import type { ICourseAssignmentRosterRow, ICourseStaffSubmission } from '@/lib/types/features/course-detail-assignments'
 import type { ILessonDetailAssignment } from '@/lib/types/lesson'
 
@@ -6,6 +7,7 @@ import type { StaffGraderDirectoryEntry } from './staff-grader-directory'
 import type { StaffSubmissionViewer } from './staff-submission-grader-presenter'
 
 export type CourseAssignmentSubmissionDetailPageViewModel = {
+  role: StaffAssignmentRole
   courseUid: string
   courseTitle: string
   lessonUid: string

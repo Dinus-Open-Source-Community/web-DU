@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Film } from 'lucide-react'
 
 import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
+import { TiptapEditor } from '@/components/shared/TipTapEditor'
 import { resolveSafeEmbedUrl } from '@/lib/security/safe-external-url'
 
 type LessonVideoEditorProps = {
@@ -11,9 +12,33 @@ type LessonVideoEditorProps = {
   onDescriptionChange: (html: string) => void
 }
 
-export function LessonVideoEditor({ videoUrl, description, onVideoUrlChange, onDescriptionChange }: LessonVideoEditorProps) {
+function coerceTiptapInitialContent(html: string): string {
+  const trimmed = html.trim()
+  if (!trimmed) return '<p></p>'
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) return trimmed
+  const escaped = trimmed
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  return `<p>${escaped}</p>`
+}
+
+export function LessonVideoEditor({
+  videoUrl,
+  description,
+  onVideoUrlChange,
+  onDescriptionChange,
+}: LessonVideoEditorProps) {
   const [localUrl, setLocalUrl] = useState(videoUrl)
   const hasSafeEmbed = Boolean(localUrl.trim() && resolveSafeEmbedUrl(localUrl))
+  const descriptionInitial = useMemo(
+    () => coerceTiptapInitialContent(description),
+    [description],
+  )
+
+  useEffect(() => {
+    setLocalUrl(videoUrl)
+  }, [videoUrl])
 
   const handleBlur = () => {
     onVideoUrlChange(localUrl)
@@ -22,19 +47,19 @@ export function LessonVideoEditor({ videoUrl, description, onVideoUrlChange, onD
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-600">URL Video (YouTube / Vimeo)</label>
+        <label className="text-xs font-semibold text-ink-600">URL Video (YouTube / Vimeo)</label>
         <input
           type="url"
           value={localUrl}
           onChange={(e) => setLocalUrl(e.target.value)}
           onBlur={handleBlur}
           placeholder="https://www.youtube.com/watch?v=..."
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+          className="w-full rounded-xl border-2 border-ink-900/10 bg-paper-white px-3 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 focus:border-brand-blue/40 focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
         />
       </div>
 
       {hasSafeEmbed ? (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-hidden rounded-xl border-2 border-ink-900/10">
           <div className="relative aspect-video w-full">
             <SafeEmbedFrame embedUrl={localUrl} title="Video preview" className="absolute inset-0" />
           </div>
@@ -47,13 +72,12 @@ export function LessonVideoEditor({ videoUrl, description, onVideoUrlChange, onD
       ) : null}
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-600">Deskripsi (opsional)</label>
-        <textarea
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          rows={4}
-          placeholder="Catatan tambahan untuk video ini..."
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+        <p className="text-xs font-semibold text-ink-600">Deskripsi (opsional)</p>
+        <TiptapEditor
+          variant="compact"
+          initialContent={descriptionInitial}
+          onChange={onDescriptionChange}
+          placeholder="Tambahkan ringkasan, poin penting, atau materi pendukung untuk video ini…"
         />
       </div>
     </div>

@@ -2,7 +2,7 @@ import { Trash2, UserCog } from 'lucide-react'
 
 import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
+import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
 import { userDetailLayout } from '@/lib/user-manage/user-detail-layout'
 import type { ManagedUserDetailViewModel } from '@/lib/user-manage/user-detail-types'
@@ -32,22 +32,18 @@ export function UserDetailProfileHeader({
         <div className="flex min-w-0 items-start gap-4">
           <Avatar className="size-16 shrink-0">
             <AvatarImage src={profile.avatar} alt={profile.name} />
-            <AvatarFallback className="bg-slate-100 text-lg font-semibold text-slate-600">
+            <AvatarFallback className={userDetailLayout.avatarFallback}>
               {getInitials(profile.name)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
-                {profile.name}
-              </h1>
-              <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-xs font-medium">
-                {profile.roleLabel}
-              </Badge>
+              <h1 className={userDetailLayout.profileName}>{profile.name}</h1>
+              <AdminMetaLabel>{profile.roleLabel}</AdminMetaLabel>
               <UserStatusBadge status={profile.status} />
             </div>
-            <p className="text-sm text-slate-600">{profile.email}</p>
+            <p className={userDetailLayout.profileEmail}>{profile.email}</p>
             <p className={userDetailLayout.cardMeta}>
               Bergabung {profile.createdAtLabel} · Terakhir aktif {profile.updatedAtLabel}
             </p>
@@ -70,7 +66,7 @@ export function UserDetailProfileHeader({
             type="button"
             variant="outline"
             size="sm"
-            className={`${userDetailLayout.actionButton} text-rose-600 hover:bg-rose-50 hover:text-rose-700`}
+            className={`${userDetailLayout.actionButton} ${userDetailLayout.destructiveActionButton}`}
             onClick={onOpenDeleteDialog}
             disabled={isMutating}
           >

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
@@ -87,7 +89,7 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
       decoding="async"
       // width/height intrinsik + aspect container mencegah layout-shift
       className={cn(
-        'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]',
+        'w-full object-cover',
         aspectCls,
       )}
     />
@@ -97,7 +99,7 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
 /** 0 — KERTAS SOBEK: potongan kertas dgn tepi miring/sobek (clip-path). */
 function TornPaperCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out hover:-translate-y-1.5">
+    <figure className="group relative flex h-full flex-col transition-transform duration-300 ease-out">
       <div
         className="flex h-full flex-col bg-paper-white p-3"
         style={{
@@ -122,7 +124,7 @@ function TornPaperCard({ img, aspect, mobileAspect }: PhotoProps) {
 /** 1 — NOTEBOOK POLOS: halaman buku tulis (garis + margin merah + lubang jilid). */
 function NotebookCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[4px] border border-ink-900/20 bg-[#FDFBF3] shadow-paper transition-transform duration-300 ease-out">
       {/* Garis horizontal halaman */}
       <div
         aria-hidden
@@ -154,7 +156,7 @@ function NotebookCard({ img, aspect, mobileAspect }: PhotoProps) {
 function PolaroidColorCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: number }) {
   const tapeColors = ['bg-note-pink/80', 'bg-note-mint/80', 'bg-note-sky/80', 'bg-note-peach/80']
   return (
-    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col rounded-[3px] border border-ink-900/30 bg-paper-white p-2.5 pb-5 shadow-paper transition-transform duration-300 ease-out">
       {/* Washi tape warna */}
       <span
         aria-hidden
@@ -188,7 +190,7 @@ function PatchCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: numbe
   return (
     <figure
       className={cn(
-        'group relative flex h-full flex-col p-3.5 transition-transform duration-300 ease-out hover:-translate-y-1.5',
+        'group relative flex h-full flex-col p-3.5 transition-transform duration-300 ease-out',
         patchBg[idx % patchBg.length],
       )}
       style={{
@@ -211,7 +213,7 @@ function PatchCard({ img, aspect, idx, mobileAspect }: PhotoProps & { idx: numbe
 /** 4 — LABEL KRAFT + TALI: kertas kraft, tali/benang di atas, caption spidol. */
 function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#8A6A45]/40 bg-[#EDE0CB] shadow-paper transition-transform duration-300 ease-out">
       {/* Tali/benang horizontal di atas */}
       <div aria-hidden className="absolute inset-x-0 top-0 z-10 flex justify-center">
         <div className="h-[7px] w-full border-y-2 border-dashed border-[#8A6A45]/50" />
@@ -234,7 +236,7 @@ function KraftLabelCard({ img, mobileAspect }: PhotoProps) {
 /** 5 — KARTU POS JADUL: krem, bingkai ganda, perangko, stempel. */
 function PostcardCard({ img, aspect, mobileAspect }: PhotoProps) {
   return (
-    <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:shadow-button-hover">
+    <figure className="group relative flex h-full flex-col rounded-[4px] border border-ink-900/35 bg-[#F7F1E3] p-3 shadow-paper transition-transform duration-300 ease-out">
       {/* Bingkai dalam dashed */}
       <div
         aria-hidden
@@ -262,7 +264,7 @@ function PostcardCard({ img, aspect, mobileAspect }: PhotoProps) {
 }
 
 /** Pilih kulit kartu berdasarkan indeks foto global (putar 6 varian). */
-function ScrapbookCard({
+export function ScrapbookCard({
   img,
   globalIdx,
   aspect,
@@ -282,11 +284,13 @@ function ScrapbookCard({
   return <PostcardCard img={img} aspect={aspect} mobileAspect={mobileAspect} />
 }
 
-/* ============================== Section ============================== */
+/* ============================== Grid bento ============================== */
 
-export default function GallerySection() {
-  const { gallery } = LANDING_COPY
-  const photos = GALLERY_IMAGES
+/** Jumlah foto pratinjau di beranda — 2 baris bento penuh (2 + 3). */
+export const GALLERY_PREVIEW_COUNT = 5
+
+/** Grid bento scrapbook — dipakai beranda (pratinjau) & halaman galeri (penuh). */
+export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
   const rowSizes = BENTO_ROWS.map((r) => r.length)
   const rows = chunkRows(photos, rowSizes)
 
@@ -301,6 +305,65 @@ export default function GallerySection() {
     }
   }
 
+  if (rows.length === 0) {
+    return (
+      <p className="text-ink-500 mt-10 text-center text-sm font-bold uppercase tracking-[0.2em] sm:mt-16">
+        Dokumentasi segera hadir.
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
+      {rows.map((rowPhotos, rowIdx) => {
+        const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
+        return (
+          <div
+            key={rowIdx}
+            className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7"
+          >
+            {rowPhotos.map((img, i) => {
+              const gIdx = rowStartIdx[rowIdx] + i
+              const slot: RowSlot =
+                rowPhotos.length === 1
+                  ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/9]' }
+                  : (slotDefs[i % slotDefs.length] ?? {
+                      cols: COL_SPANS[4],
+                      aspect: 'aspect-[4/3]',
+                      tilt: 'rotate-1',
+                      mobileAspect: 'aspect-square',
+                    })
+              const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
+              return (
+                <Reveal
+                  key={`${img.src}-${rowIdx}-${i}`}
+                  delay={(i % 3) * 0.08}
+                  className={cn(
+                    'h-full col-span-1',
+                    isLastOdd && 'col-span-2',
+                    slot.cols,
+                  )}
+                >
+                  {/* Rotasi di luar (kulit) — scrapbook miring halus */}
+                  <div className={cn('h-full', slot.tilt)}>
+                    <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} mobileAspect={slot.mobileAspect} />
+                  </div>
+                </Reveal>
+              )
+            })}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ============================== Section ============================== */
+
+export default function GallerySection() {
+  const { gallery } = LANDING_COPY
+  const photos = GALLERY_IMAGES.slice(0, GALLERY_PREVIEW_COUNT)
+
   return (
     <section id="galeri" className="relative overflow-hidden bg-paper-white">
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
@@ -311,53 +374,17 @@ export default function GallerySection() {
           className="mx-auto max-w-3xl"
         />
 
-        {rows.length === 0 ? (
-          <p className="text-ink-500 mt-10 text-center text-sm font-bold uppercase tracking-[0.2em] sm:mt-16">
-            Dokumentasi segera hadir.
-          </p>
-        ) : (
-          <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
-            {rows.map((rowPhotos, rowIdx) => {
-              const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
-              return (
-                <div
-                  key={rowIdx}
-                  className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7"
-                >
-                  {rowPhotos.map((img, i) => {
-                    const gIdx = rowStartIdx[rowIdx] + i
-                    const slot: RowSlot =
-                      rowPhotos.length === 1
-                        ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/9]' }
-                        : (slotDefs[i % slotDefs.length] ?? {
-                            cols: COL_SPANS[4],
-                            aspect: 'aspect-[4/3]',
-                            tilt: 'rotate-1',
-                            mobileAspect: 'aspect-square',
-                          })
-                    const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
-                    return (
-                      <Reveal
-                        key={`${img.src}-${rowIdx}-${i}`}
-                        delay={(i % 3) * 0.08}
-                        className={cn(
-                          'h-full col-span-1',
-                          isLastOdd && 'col-span-2',
-                          slot.cols,
-                        )}
-                      >
-                        {/* Rotasi di luar (kulit) — scrapbook miring halus */}
-                        <div className={cn('h-full', slot.tilt)}>
-                          <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} mobileAspect={slot.mobileAspect} />
-                        </div>
-                      </Reveal>
-                    )
-                  })}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        <GalleryBentoGrid photos={photos} />
+
+        <Reveal className="mt-10 flex justify-center sm:mt-14">
+          <Link
+            to={gallery.allHref}
+            className="group/btn text-ink-900 hover:bg-note-yellow focus-visible:ring-brand-blue/50 inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase shadow-button outline-none transition-all focus-visible:ring-4"
+          >
+            {gallery.allLabel}
+            <ArrowRight className="size-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+          </Link>
+        </Reveal>
       </div>
     </section>
   )

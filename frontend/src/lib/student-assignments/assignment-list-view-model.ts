@@ -14,6 +14,7 @@ export type StudentAssignmentListViewModel = {
   stats: StudentAssignmentListStats
   paginatedRows: StudentAssignmentRow[]
   scopedCount: number
+  categoryMatchCount: number
   hasVisibleRows: boolean
   currentPage: number
   totalPages: number

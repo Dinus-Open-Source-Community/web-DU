@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import PenguinMascot from '@/components/playful/PenguinMascot'
 
 /**
- * SplashScreen — preloader 1× per sesi. Muncul saat load (overlay paper),
- * kata "DOSCOM" + pinguin + bar tinta yang terisi. Dismiss otomatis ≤1200ms,
- * atau saat window 'load' / dokumen siap (mana duluan), atau klik untuk skip.
- * Absen total saat prefers-reduced-motion; dilewati jika sesi sudah pernah
- * melihat (sessionStorage 'du-splash-seen'). Body di-scroll-lock selama tampil.
+ * Splash 1× per sesi pada landing. Saat aktif, SplashSessionProvider hanya
+ * merender overlay — navbar/konten tidak dimount. Dismiss ≤1200ms, klik, atau load.
  */
 
 const SPLASH_MAX_MS = 1200
 const STORAGE_KEY = 'du-splash-seen'
 
-/** Baca flag sesi — aman walau sessionStorage diblokir. */
 function hasSeenSplash(): boolean {
   try {
     return sessionStorage.getItem(STORAGE_KEY) === '1'
@@ -22,13 +17,24 @@ function hasSeenSplash(): boolean {
   }
 }
 
-export default function SplashScreen() {
-  const reduceMotion = useReducedMotion()
-  // Inisialisasi sinkron: tampil sejak render pertama (hindari flash konten),
-  // kecuali reduce-motion atau sesi sudah pernah lihat.
-  const [show, setShow] = useState<boolean>(() => !reduceMotion && !hasSeenSplash())
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
-  // Dismiss + scroll lock + simpan flag.
+function useSplashSessionState() {
+  const reduceMotion = useReducedMotion()
+  const [show, setShow] = useState<boolean>(() => {
+    if (prefersReducedMotion() || hasSeenSplash()) return false
+    return true
+  })
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setShow(false)
+    }
+  }, [reduceMotion])
+
   useEffect(() => {
     if (!show) return
 
@@ -37,11 +43,10 @@ export default function SplashScreen() {
       try {
         sessionStorage.setItem(STORAGE_KEY, '1')
       } catch {
-        /* sessionStorage tak tersedia — splash bisa muncul lagi, tidak fatal */
+        /* abaikan */
       }
     }
 
-    // Dokumen sudah siap (SPA: 'load' bisa terlewat) atau event load menyusul.
     if (document.readyState === 'complete') {
       const t = window.setTimeout(dismiss, SPLASH_MAX_MS)
       return () => window.clearTimeout(t)
@@ -56,7 +61,6 @@ export default function SplashScreen() {
     }
   }, [show])
 
-  // Scroll lock terpisah — hanya selama show.
   useEffect(() => {
     if (!show) return
     const prevOverflow = document.body.style.overflow
@@ -66,9 +70,6 @@ export default function SplashScreen() {
     }
   }, [show])
 
-  if (reduceMotion) return null
-
-  // Skip manual: tutup + tandai sesi sudah lihat (1× per sesi tetap berlaku).
   const skip = (): void => {
     setShow(false)
     try {
@@ -78,44 +79,53 @@ export default function SplashScreen() {
     }
   }
 
+  return { show, skip }
+}
+
+function SplashOverlay({ onSkip }: { onSkip: () => void }) {
   return (
-    <AnimatePresence>
-      {show ? (
+    <motion.div
+      role="status"
+      aria-label="Memuat DOSCOM"
+      onClick={onSkip}
+      initial={false}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, y: -24 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="fixed inset-0 z-[200] flex cursor-pointer flex-col items-center justify-center bg-paper-white"
+    >
+      <p className="font-display text-5xl font-bold tracking-tight text-ink-900 md:text-6xl">
+        DOSCOM
+      </p>
+
+      <div className="mt-6 h-2 w-44 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel">
         <motion.div
-          key="splash"
-          role="status"
-          aria-label="Memuat DOSCOM"
-          onClick={skip}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -24 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="fixed inset-0 z-[80] flex cursor-pointer flex-col items-center justify-center bg-paper-white"
-        >
-          {/* Pinguin bob santai */}
-          <PenguinMascot className="w-28 md:w-36" />
+          aria-hidden
+          className="h-full bg-brand-blue"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 1, ease: 'easeInOut' }}
+        />
+      </div>
 
-          {/* Wordmark */}
-          <p className="font-display mt-6 text-5xl font-bold tracking-tight text-ink-900 md:text-6xl">
-            DOSCOM
-          </p>
+      <p className="text-ink-500 mt-4 text-xs font-bold tracking-[0.2em] uppercase">
+        menyiapkan kertas dan tinta…
+      </p>
+    </motion.div>
+  )
+}
 
-          {/* Bar tinta yang terisi */}
-          <div className="mt-6 h-2 w-44 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel">
-            <motion.div
-              aria-hidden
-              className="h-full bg-brand-blue"
-              initial={{ width: '0%' }}
-              animate={{ width: '100%' }}
-              transition={{ duration: 1, ease: 'easeInOut' }}
-            />
-          </div>
+/** Bungkus halaman landing: saat splash aktif, anak (layout + konten) tidak dirender. */
+export function SplashSessionProvider({ children }: { children: ReactNode }) {
+  const { show, skip } = useSplashSessionState()
 
-          <p className="text-ink-500 mt-4 text-xs font-bold tracking-[0.2em] uppercase">
-            menyiapkan kertas dan tinta…
-          </p>
-        </motion.div>
-      ) : null}
+  if (!show) {
+    return <>{children}</>
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      <SplashOverlay key="splash" onSkip={skip} />
     </AnimatePresence>
   )
 }

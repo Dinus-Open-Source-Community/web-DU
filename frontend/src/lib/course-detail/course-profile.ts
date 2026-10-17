@@ -1,6 +1,6 @@
 import type { IAuthorCourseItem, ICourseMentorItem } from '@/lib/types/user'
 
-export const DEFAULT_COURSE_PROFILE_AVATAR = '/pinguin.png'
+export const DEFAULT_COURSE_PROFILE_AVATAR = '/Logo.svg'
 
 export type CourseProfile = {
   uid?: string

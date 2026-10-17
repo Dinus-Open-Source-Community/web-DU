@@ -1,24 +1,44 @@
 import type { AdminDataTableProps } from '../../lib/types/api'
+import {
+  appCardClassName,
+  appCardHeaderClassName,
+  appKpiLabelClassName,
+} from '@/lib/design/app-shell-tokens'
 import { cn } from '../../lib/utils'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Pagination } from './Pagination'
 
-export function AdminDataTable<T>({ columns, data, keyField, page, totalPages, onPageChange, emptyState, tableClassName, wrapperClassName, compact, onRowClick }: AdminDataTableProps<T>) {
+export function AdminDataTable<T>({
+  columns,
+  data,
+  keyField,
+  page,
+  totalPages,
+  onPageChange,
+  emptyState,
+  tableClassName,
+  wrapperClassName,
+  compact,
+  onRowClick,
+}: AdminDataTableProps<T>) {
   return (
-    <section className={cn('flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]', wrapperClassName)}>
+    <section
+      className={cn('flex flex-col overflow-hidden', appCardClassName, wrapperClassName)}
+    >
       <div className="overflow-x-auto">
         <Table className={cn(compact ? 'text-[13px]' : 'text-sm', tableClassName)}>
-          <TableHeader className="bg-slate-50/70">
-            <TableRow className="border-slate-100 hover:bg-slate-50/70">
+          <TableHeader className={cn('bg-paper-paper', appCardHeaderClassName)}>
+            <TableRow className="border-ink-900/10 hover:bg-paper-paper">
               {columns.map((col) => (
                 <TableHead
                   key={col.id}
                   className={cn(
-                    'px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500',
+                    'px-5 py-3 text-xs font-semibold uppercase tracking-wider text-ink-500',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     col.headerClassName,
-                  )}>
+                  )}
+                >
                   {col.header}
                 </TableHead>
               ))}
@@ -30,7 +50,9 @@ export function AdminDataTable<T>({ columns, data, keyField, page, totalPages, o
                 <td colSpan={columns.length} className="px-5 py-10">
                   {emptyState ?? (
                     <div className="flex flex-col items-center gap-1 text-center">
-                      <p className="text-base font-medium text-slate-500">Data Tidak Ditemukan</p>
+                      <p className="text-base font-medium text-ink-500">
+                        Data Tidak Ditemukan
+                      </p>
                     </div>
                   )}
                 </td>
@@ -40,12 +62,21 @@ export function AdminDataTable<T>({ columns, data, keyField, page, totalPages, o
                 <tr
                   key={keyField(row)}
                   className={cn(
-                    'border-b border-slate-100 transition-colors last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:0_56px]',
-                    onRowClick ? 'cursor-pointer hover:bg-slate-50/80' : 'hover:bg-slate-50/50',
+                    'border-b border-line-light transition-colors last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:0_56px] hover:bg-paper-paper/80',
+                    onRowClick && 'cursor-pointer hover:bg-paper-paper',
                   )}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}>
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                >
                   {columns.map((col) => (
-                    <td key={col.id} className={cn('px-5 py-3.5 align-middle text-slate-700', col.align === 'right' && 'text-right', col.align === 'center' && 'text-center', col.className)}>
+                    <td
+                      key={col.id}
+                      className={cn(
+                        'px-5 py-3.5 align-middle text-ink-700',
+                        col.align === 'right' && 'text-right',
+                        col.align === 'center' && 'text-center',
+                        col.className,
+                      )}
+                    >
                       {col.cell(row)}
                     </td>
                   ))}
@@ -56,10 +87,13 @@ export function AdminDataTable<T>({ columns, data, keyField, page, totalPages, o
         </Table>
       </div>
       {page !== undefined && totalPages !== undefined && onPageChange ? (
-        <div className="flex flex-col items-center gap-3 border-t border-slate-100 bg-slate-50/40 px-5 py-4 sm:flex-row sm:justify-between">
-          <p className="text-sm text-slate-500">
-            Halaman <span className="font-semibold tabular-nums text-slate-800">{page}</span> dari{' '}
-            <span className="font-semibold tabular-nums text-slate-800">{Math.max(totalPages, 1)}</span>
+        <div className="flex flex-col items-center gap-3 border-t border-line-light bg-paper-paper/60 px-5 py-4 sm:flex-row sm:justify-between">
+          <p className={cn('text-sm', appKpiLabelClassName)}>
+            Halaman{' '}
+            <span className="font-semibold tabular-nums text-ink-900">{page}</span> dari{' '}
+            <span className="font-semibold tabular-nums text-ink-900">
+              {Math.max(totalPages, 1)}
+            </span>
           </p>
           <Pagination
             currentPage={page}

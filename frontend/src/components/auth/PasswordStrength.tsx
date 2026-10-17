@@ -27,13 +27,13 @@ export function PasswordStrengthIndicator({ password, className }: PasswordStren
   return (
     <div className={cn('flex flex-col gap-2.5', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Kekuatan Password</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Kekuatan Password</span>
         <span className={cn('text-[11px] font-bold', strengthIndex >= 3 ? 'text-emerald-600' : strengthIndex >= 2 ? 'text-amber-600' : 'text-rose-500')}>{level.label}</span>
       </div>
 
       <div className="flex gap-1.5">
         {Array.from({ length: segments }, (_, i) => (
-          <div key={i} className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+          <div key={i} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
             <div className={cn('h-full rounded-full transition-all duration-300 ease-out', i < metCount ? level.color : 'bg-transparent')} style={{ width: i < metCount ? '100%' : '0%' }} />
           </div>
         ))}
@@ -42,8 +42,8 @@ export function PasswordStrengthIndicator({ password, className }: PasswordStren
       <ul className="flex flex-col gap-1">
         {criteria.map((c) => (
           <li key={c.label} className="flex items-center gap-2">
-            {c.met ? <Check className="size-3.5 shrink-0 text-emerald-500" strokeWidth={2.5} /> : <X className="size-3.5 shrink-0 text-slate-300" strokeWidth={2.5} />}
-            <span className={cn('text-xs', c.met ? 'font-medium text-slate-700' : 'text-slate-400')}>{c.label}</span>
+            {c.met ? <Check className="size-3.5 shrink-0 text-emerald-500" strokeWidth={2.5} /> : <X className="size-3.5 shrink-0 text-muted-foreground/40" strokeWidth={2.5} />}
+            <span className={cn('text-xs', c.met ? 'font-medium text-foreground' : 'text-muted-foreground')}>{c.label}</span>
           </li>
         ))}
       </ul>

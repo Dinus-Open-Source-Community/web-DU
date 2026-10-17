@@ -13,7 +13,7 @@ import type {
   ManagedUserDetailTransaction,
 } from './user-detail-types'
 
-const DEFAULT_AVATAR = '/pinguin.png'
+const DEFAULT_AVATAR = '/Logo.svg'
 
 const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',

@@ -5,12 +5,9 @@ import { useCreateCourse } from '@/hooks/use-course-mutations'
 import { buildCourseEditNavigationState } from '@/lib/course-edit/navigation-state'
 import { formValuesToCreatePayload } from '@/lib/course-form/mappers'
 import type { CourseFormValues } from '@/lib/course-form/types'
+import { dashboardMenu } from '@/lib/routes'
 
-type UseCreateCourseActionsOptions = {
-  roleBasePath?: '/mentor' | '/admin'
-}
-
-export function useCreateCourseActions({ roleBasePath = '/mentor' }: UseCreateCourseActionsOptions = {}) {
+export function useCreateCourseActions() {
   const navigate = useNavigate()
   const location = useLocation()
   const createCourse = useCreateCourse()
@@ -22,11 +19,11 @@ export function useCreateCourseActions({ roleBasePath = '/mentor' }: UseCreateCo
         throw new Error('Backend tidak mengembalikan uid kursus')
       }
 
-      navigate(`${roleBasePath}/courses/${created.uid}/edit`, {
+      navigate(dashboardMenu.courseEdit(created.uid), {
         state: buildCourseEditNavigationState(location),
       })
     },
-    [createCourse, location, navigate, roleBasePath],
+    [createCourse, location, navigate],
   )
 
   return {

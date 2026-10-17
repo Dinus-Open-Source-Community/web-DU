@@ -3,35 +3,43 @@ import { useParams } from 'react-router-dom'
 import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
-import { LottieOverlay } from '@/components/shared/Loader'
+import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
+import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
-import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
+import { appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
+import { appPageContentClassName } from '@/lib/layout/page-layout'
+import { cn } from '@/lib/utils'
 
 export default function AdminCourseDetailPage() {
   const { courseUid } = useParams()
-  const sidebarUser = useSidebarUser('admin')
+  const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const { courseDetail, isLoading, userCourse, moduleCourse } = useCourseDetailAdminAndMentor(
     courseUid as string,
   )
 
   if (isLoading) {
-    return <LottieOverlay visible={isLoading} message="Memuat course" />
+    return <PageSkeleton message="Memuat course" />
   }
 
   if (!courseDetail?.data || !courseUid) {
     return (
       <NotFoundContent
-        description="Detail course tidak ditemukan"
+        description="Detail kursus tidak ditemukan"
         showBackButton={false}
-        title="Course tidak ditemukan"
+        title="Kursus tidak ditemukan"
       />
     )
   }
 
   return (
-    <AppSidebarProvider role="admin" user={sidebarUser}>
+    <AppSidebarProvider
+      role={shellRole}
+      user={sidebarUser}
+      contentClassName={cn(appPageContentClassName, appShellPageBgClassName, 'relative')}
+    >
       <AdminCourseDetailContent
         courseUid={courseUid}
         dataCourse={courseDetail.data}
@@ -55,6 +63,8 @@ function AdminCourseDetailContent({
   dataStudents,
   dataModules,
 }: AdminCourseDetailContentProps) {
+  useRegisterCourseNavbarBreadcrumb(courseUid, dataCourse.title)
+
   const view = useCourseDetailManageView({
     courseUid,
     role: 'admin',

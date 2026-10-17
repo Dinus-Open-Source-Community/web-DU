@@ -1,108 +1,84 @@
-import CalendarView from "@/components/shared/Calendar/View";
-import { gridStatsClassName } from "@/lib/layout/page-layout";
-import { TimelineAreaChart } from "@/components/shared/AreaChart";
-import { ChartCard } from "@/components/shared/ChartCard";
-import { PageHeader } from "@/components/shared/Header";
-import QuickStats from "@/components/shared/QuickStats";
-import { AppSidebarProvider } from "@/components/shared/Sidebar";
-import { DashboardError } from "@/components/Admin/Dashboard/DashboardError";
-import { useMentorDashboard } from "@/hooks/use-mentor-dashboard";
-import { useSidebarUser } from "@/hooks/use-sidebar-user";
-import type { TimelineSeries } from "@/lib/types/utils";
+import CalendarView from '@/components/shared/Calendar/View'
+import { TimelineAreaChart } from '@/components/shared/AreaChart'
+import { ChartCard } from '@/components/shared/ChartCard'
+import { PageHeader } from '@/components/shared/Header'
+import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
+import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
+import { MentorKpiGrid } from '@/components/mentor/dashboard/MentorKpiGrid'
+import { MentorQuickLinks } from '@/components/mentor/dashboard/MentorQuickLinks'
+import { useMentorDashboard } from '@/hooks/use-mentor-dashboard'
+import { useSidebarUser } from '@/hooks/use-sidebar-user'
+import { mentorDashboardLayout } from '@/lib/layout/mentor-dashboard-layout'
+import type { TimelineSeries } from '@/lib/types/utils'
 
 const SCHEDULE_CHART_SERIES: TimelineSeries[] = [
-  { dataKey: "sessions", label: "Sesi", color: "#0A84DC" },
-  { dataKey: "students", label: "Peserta", color: "#10B981" },
-];
+  { dataKey: 'sessions', label: 'Sesi', color: '#0A84DC' },
+  { dataKey: 'students', label: 'Peserta', color: '#10B981' },
+]
 
-function QuickStatsSkeleton() {
+const SKELETON_BAR_HEIGHTS = [55, 72, 40, 85, 63, 48, 78, 36]
+
+function ChartSkeleton({ height = 280 }: { height?: number }) {
   return (
-    <div className={gridStatsClassName}>
-      {Array.from({ length: 4 }, (_, index) => (
-        <div
-          key={index}
-          className="h-[104px] animate-pulse rounded-2xl border border-slate-100 bg-white shadow-2xs"
-        />
-      ))}
+    <div className="animate-pulse" style={{ height }}>
+      <div className="flex h-full items-end gap-2 px-2 pb-4">
+        {SKELETON_BAR_HEIGHTS.map((h, i) => (
+          <div key={i} className="flex-1 rounded-t bg-muted" style={{ height: `${h}%` }} />
+        ))}
+      </div>
     </div>
-  );
+  )
 }
 
 function CalendarSkeleton() {
-  return (
-    <div className="h-[700px] animate-pulse rounded-2xl border border-slate-200/80 bg-white shadow-sm" />
-  );
-}
-
-function ChartSkeleton() {
-  return <div className="h-[280px] animate-pulse rounded-xl bg-slate-100" />;
+  return <div className={mentorDashboardLayout.calendarSkeleton} />
 }
 
 export default function MentorDashboardPage() {
-  const sidebarUser = useSidebarUser("mentor");
-  const { kpis, schedules, scheduleTimeline } = useMentorDashboard();
+  const sidebarUser = useSidebarUser('mentor')
+  const { kpis, schedules, scheduleTimeline } = useMentorDashboard()
 
   return (
-    <AppSidebarProvider role="mentor" user={sidebarUser}>
-      <section>
-        <PageHeader
-          title={`Halo Mentor ${sidebarUser.name}!`}
-          subtitle="Selamat datang di dashboard Anda."
+    <MentorAppPageShell user={sidebarUser}>
+      <PageHeader
+        className={mentorDashboardLayout.pageHeader}
+        title="Dasbor"
+        subtitle={`Halo, ${sidebarUser.name}! Ringkasan aktivitas mentoring, jadwal, dan tugas yang perlu ditindaklanjuti.`}
+      />
+
+      {kpis.isError ? (
+        <DashboardError
+          message={kpis.error?.message ?? 'Terjadi kesalahan saat memuat statistik'}
+          onRetry={() => kpis.refetch()}
         />
+      ) : (
+        <MentorKpiGrid stats={kpis.data} isLoading={kpis.isLoading} />
+      )}
 
-        <div className="mb-10">
-          {kpis.isError ? (
-            <DashboardError
-              message={
-                kpis.error?.message ?? "Terjadi kesalahan saat memuat statistik"
-              }
-              onRetry={() => kpis.refetch()}
-            />
-          ) : kpis.isLoading ? (
-            <QuickStatsSkeleton />
-          ) : (
-            <QuickStats
-              stats={
-                kpis.data ?? {
-                  pendingGrading: 0,
-                  unansweredQA: 0,
-                  activeStudents: 0,
-                  totalCourses: 0,
-                }
-              }
-            />
-          )}
-        </div>
+      <MentorQuickLinks />
 
-        <ChartCard
-          title="Beban Jadwal Mentor"
-          subtitle="Jumlah sesi dan peserta terjadwal per hari"
-          className="mb-10"
-        >
-          {schedules.isError ? (
-            <DashboardError
-              message={
-                schedules.error?.message ??
-                "Terjadi kesalahan saat memuat chart jadwal"
-              }
-              onRetry={() => schedules.refetch()}
-            />
-          ) : schedules.isLoading ? (
-            <ChartSkeleton />
-          ) : (
-            <TimelineAreaChart
-              data={scheduleTimeline}
-              series={SCHEDULE_CHART_SERIES}
-              height={280}
-            />
-          )}
-        </ChartCard>
-
+      <ChartCard title="Beban Jadwal Mentor" subtitle="Jumlah sesi dan peserta terjadwal per hari">
         {schedules.isError ? (
           <DashboardError
-            message={
-              schedules.error?.message ?? "Terjadi kesalahan saat memuat jadwal"
-            }
+            message={schedules.error?.message ?? 'Terjadi kesalahan saat memuat chart jadwal'}
+            onRetry={() => schedules.refetch()}
+          />
+        ) : schedules.isLoading ? (
+          <ChartSkeleton />
+        ) : (
+          <TimelineAreaChart data={scheduleTimeline} series={SCHEDULE_CHART_SERIES} height={280} />
+        )}
+      </ChartCard>
+
+      <ChartCard
+        title="Kalender Mengajar"
+        subtitle="Jadwal sesi dan timeline sesi mendatang"
+        className="overflow-visible"
+        contentClassName="px-5 py-4"
+      >
+        {schedules.isError ? (
+          <DashboardError
+            message={schedules.error?.message ?? 'Terjadi kesalahan saat memuat jadwal'}
             onRetry={() => schedules.refetch()}
           />
         ) : schedules.isLoading ? (
@@ -110,7 +86,7 @@ export default function MentorDashboardPage() {
         ) : (
           <CalendarView schedules={schedules.data ?? []} />
         )}
-      </section>
-    </AppSidebarProvider>
-  );
+      </ChartCard>
+    </MentorAppPageShell>
+  )
 }

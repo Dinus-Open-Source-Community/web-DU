@@ -29,14 +29,14 @@ export function CourseAssignmentSubmissionStudentSidebar({
 }: CourseAssignmentSubmissionStudentSidebarProps) {
   return (
     <aside className="flex h-full min-h-0 w-full flex-col md:w-80 lg:w-96">
-      <div className="space-y-2 border-b border-slate-200 px-4 py-4">
-        <p className="text-sm font-semibold text-slate-900">Daftar siswa</p>
+      <div className="space-y-2 border-b border-line-light px-4 py-4">
+        <p className="text-sm font-semibold text-ink-900">Daftar siswa</p>
         <Label htmlFor="submission-sidebar-search" className="sr-only">
           Cari siswa
         </Label>
         <div className="relative">
           <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-400"
             aria-hidden
           />
           <Input
@@ -44,7 +44,7 @@ export function CourseAssignmentSubmissionStudentSidebar({
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
             placeholder="Cari siswa..."
-            className="h-9 bg-white pl-9"
+            className="h-9 bg-paper-white pl-9"
           />
         </div>
       </div>
@@ -57,11 +57,11 @@ export function CourseAssignmentSubmissionStudentSidebar({
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-slate-500">
+          <p className="px-4 py-8 text-center text-sm text-ink-500">
             Tidak ada siswa yang cocok.
           </p>
         ) : (
-          <ul className="divide-y divide-slate-200">
+          <ul className="divide-y divide-border">
             {rows.map((row) => {
               const submission = row.submission;
               const isActive = submission?.uid === activeSubmissionUid;
@@ -76,15 +76,15 @@ export function CourseAssignmentSubmissionStudentSidebar({
                       className="size-9 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-ink-600">
                       {Initials(row.student.student_name)}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-900">
+                    <p className="truncate text-sm font-medium text-ink-900">
                       {row.student.student_name}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-ink-500">
                       {submission
                         ? format(
                             new Date(submission.submittedAt),
@@ -100,7 +100,7 @@ export function CourseAssignmentSubmissionStudentSidebar({
               if (!isClickable) {
                 return (
                   <li key={row.student.enrollment_uid}>
-                    <div className="flex items-center gap-3 px-4 py-3 text-slate-500">
+                    <div className="flex items-center gap-3 px-4 py-3 text-ink-500">
                       {content}
                     </div>
                   </li>
@@ -114,8 +114,8 @@ export function CourseAssignmentSubmissionStudentSidebar({
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 transition-colors",
                       isActive
-                        ? "bg-slate-50 text-slate-900 shadow-[inset_3px_0_0_0_var(--color-primary)]"
-                        : "hover:bg-slate-50/80",
+                        ? "bg-paper-paper text-ink-900 shadow-[inset_3px_0_0_0_var(--color-primary)]"
+                        : "hover:bg-paper-paper/80",
                     )}
                     aria-current={isActive ? "page" : undefined}
                   >

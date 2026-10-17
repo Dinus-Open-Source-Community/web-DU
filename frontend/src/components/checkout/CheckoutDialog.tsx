@@ -60,32 +60,32 @@ function MethodCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative flex items-center gap-3 rounded-xl border-2 px-3 py-3 text-left transition-all duration-150',
+        'relative flex items-center gap-3 rounded-xl border px-3 py-3 text-left outline-none transition-[color,box-shadow,background-color] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20',
         selected
-          ? 'border-primary bg-primary/[0.03] ring-1 ring-primary/20'
-          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
+          ? 'border-primary bg-primary/[0.03] ring-3 ring-ring/30'
+          : 'border-input bg-card hover:border-line-medium hover:bg-muted',
       )}
     >
       {selected && (
         <span className="absolute right-2 top-2 flex size-4 items-center justify-center rounded-full bg-primary">
-          <Check className="size-2.5 text-white" strokeWidth={3} aria-hidden />
+          <Check className="size-2.5 text-primary-foreground" strokeWidth={3} aria-hidden />
         </span>
       )}
 
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
         {vm.iconUrl ? (
           <img src={vm.iconUrl} alt="" className="h-5 w-auto max-w-[36px] object-contain" />
         ) : (
-          <span className="text-[9px] font-bold text-slate-400">{vm.code}</span>
+          <span className="text-[9px] font-bold text-muted-foreground">{vm.code}</span>
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-slate-800">{vm.name}</p>
+        <p className="truncate text-sm font-semibold text-foreground">{vm.name}</p>
         <p
           className={cn(
             'text-xs',
-            vm.isFree ? 'font-medium text-emerald-600' : 'text-slate-400',
+            vm.isFree ? 'font-medium text-emerald-600' : 'text-muted-foreground',
           )}
         >
           {vm.isFree ? 'Tanpa biaya tambahan' : `Biaya ${vm.feeLabel}`}
@@ -111,7 +111,7 @@ function MethodGroupSection({
 
   return (
     <div>
-      <h3 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+      <h3 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
         {group.name}
       </h3>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -130,7 +130,7 @@ function MethodGroupSection({
 
 function CoursePreview({ vm }: { vm: CheckoutCourseViewModel }) {
   return (
-    <div className="flex gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4">
+    <div className="flex gap-4 rounded-xl border border-input bg-muted p-4">
       {vm.coverUrl ? (
         <img
           src={vm.coverUrl}
@@ -143,12 +143,12 @@ function CoursePreview({ vm }: { vm: CheckoutCourseViewModel }) {
         </div>
       )}
       <div className="flex min-w-0 flex-col justify-center">
-        <p className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{vm.title}</p>
-        {vm.level && <p className="mt-0.5 text-xs text-slate-500">{vm.level}</p>}
+        <p className="line-clamp-2 text-sm font-bold leading-snug text-foreground">{vm.title}</p>
+        {vm.level && <p className="mt-0.5 text-xs text-muted-foreground">{vm.level}</p>}
         <div className="mt-1.5 flex items-baseline gap-2">
           <span className="text-base font-extrabold tracking-tight text-primary">{vm.priceLabel}</span>
           {vm.strikePriceLabel && (
-            <span className="text-xs text-slate-400 line-through">{vm.strikePriceLabel}</span>
+            <span className="text-xs text-muted-foreground line-through">{vm.strikePriceLabel}</span>
           )}
         </div>
       </div>
@@ -166,20 +166,20 @@ function OrderSummaryInline({
   const feeLabel = selectedMethod ? formatFeeLabel(selectedMethod.fee_customer) : null
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <h3 className="text-sm font-bold text-slate-900">Ringkasan Pesanan</h3>
+    <div className="rounded-xl border border-input bg-card p-4">
+      <h3 className="text-sm font-bold text-foreground">Ringkasan Pesanan</h3>
       <div className="mt-3 space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500">Harga</span>
-          <span className="font-semibold tabular-nums text-slate-800">{formatCurrency(price)}</span>
+          <span className="text-muted-foreground">Harga</span>
+          <span className="font-semibold tabular-nums text-foreground">{formatCurrency(price)}</span>
         </div>
         {feeLabel && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500">Biaya admin</span>
+            <span className="text-muted-foreground">Biaya admin</span>
             <span
               className={cn(
                 'font-semibold tabular-nums',
-                feeLabel === 'Gratis' ? 'text-emerald-600' : 'text-slate-800',
+                feeLabel === 'Gratis' ? 'text-emerald-600' : 'text-foreground',
               )}
             >
               {feeLabel}
@@ -188,7 +188,7 @@ function OrderSummaryInline({
         )}
         <Separator className="my-1" />
         <div className="flex items-center justify-between">
-          <span className="text-sm font-bold text-slate-900">Total</span>
+          <span className="text-sm font-bold text-foreground">Total</span>
           <span className="text-lg font-extrabold tabular-nums tracking-tight text-primary">
             {formatCurrency(price)}
           </span>
@@ -196,12 +196,12 @@ function OrderSummaryInline({
       </div>
 
       {selectedMethod && (
-        <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
           {selectedMethod.icon_url && (
             <img src={selectedMethod.icon_url} alt="" className="h-4 w-auto shrink-0" />
           )}
-          <span className="text-xs text-slate-500">
-            Bayar via <strong className="font-semibold text-slate-700">{selectedMethod.name}</strong>
+          <span className="text-xs text-muted-foreground">
+            Bayar via <strong className="font-semibold text-foreground">{selectedMethod.name}</strong>
           </span>
         </div>
       )}
@@ -238,10 +238,10 @@ export function CheckoutDialog({ open, onOpenChange, courseUid }: CheckoutDialog
           <div className="mx-auto flex h-44 w-44 shrink-0 items-center justify-center rounded-full bg-emerald-50 sm:h-48 sm:w-48">
             <CheckCircle2 className="h-24 w-24 text-emerald-500 sm:h-28 sm:w-28" aria-hidden />
           </div>
-          <DialogTitle className="mt-3 text-lg font-bold tracking-tight text-slate-900 sm:text-xl">
+          <DialogTitle className="mt-3 text-lg font-bold tracking-tight text-foreground sm:text-xl">
             Selesaikan Pendaftaran
           </DialogTitle>
-          <DialogDescription className="mt-1 max-w-md text-sm leading-relaxed text-slate-500">
+          <DialogDescription className="mt-1 max-w-md text-sm leading-relaxed">
             Pilih metode pembayaran favorit Anda untuk mengakses materi kursus ini.
           </DialogDescription>
         </div>
@@ -253,20 +253,20 @@ export function CheckoutDialog({ open, onOpenChange, courseUid }: CheckoutDialog
             <CheckoutDialogSkeleton />
           ) : !course || !courseVm ? (
             <div className="flex flex-col items-center py-10 text-center">
-              <BookOpen className="size-10 text-slate-300" aria-hidden />
-              <p className="mt-3 text-sm font-medium text-slate-700">Kursus tidak ditemukan</p>
-              <p className="mt-1 text-xs text-slate-500">Silakan tutup dialog dan coba lagi.</p>
+              <BookOpen className="size-10 text-muted-foreground/40" aria-hidden />
+              <p className="mt-3 text-sm font-medium text-foreground">Kursus tidak ditemukan</p>
+              <p className="mt-1 text-xs text-muted-foreground">Silakan tutup dialog dan coba lagi.</p>
             </div>
           ) : (
             <>
               <CoursePreview vm={courseVm} />
 
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Metode Pembayaran</h3>
-                <p className="mt-0.5 text-xs text-slate-400">Pilih salah satu metode di bawah</p>
+                <h3 className="text-sm font-bold text-foreground">Metode Pembayaran</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">Pilih salah satu metode di bawah</p>
 
                 {groups.length === 0 ? (
-                  <p className="mt-6 text-center text-sm text-slate-400">
+                  <p className="mt-6 text-center text-sm text-muted-foreground">
                     Tidak ada metode tersedia saat ini
                   </p>
                 ) : (

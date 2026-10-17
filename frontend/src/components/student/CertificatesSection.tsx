@@ -48,44 +48,44 @@ const CertificatesSection = () => {
 
   return (
     <section className="flex w-full flex-col gap-10">
-      <div className="flex flex-col justify-between gap-6 border-b border-slate-100 pb-6">
+      <div className="flex flex-col justify-between gap-6 border-b border-line-light pb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">Sertifikat Saya</h1>
-          <p className="text-sm font-medium text-slate-500">Lihat, unduh, dan bagikan bukti penyelesaian kursus Anda secara profesional.</p>
+          <h1 className="mb-2 text-3xl font-bold tracking-tight text-ink-900">Sertifikat Saya</h1>
+          <p className="text-sm font-medium text-ink-500">Lihat, unduh, dan bagikan bukti penyelesaian kursus Anda secara profesional.</p>
         </div>
 
         <SearchForm value={searchInput} onChange={setSearchInput} onSubmit={() => setSearchQuery(searchInput)} placeholder="Cari sertifikat atau nama kursus..." />
       </div>
 
       <div className="flex flex-col items-start gap-10 lg:flex-row">
-        <FilterCheckboxPanel title="Kategori" options={CERTIFICATE_CATEGORIES} selected={selectedCategories} onToggle={toggleCategory} innerClassName="border-slate-200 shadow-xs" />
+        <FilterCheckboxPanel title="Kategori" options={CERTIFICATE_CATEGORIES} selected={selectedCategories} onToggle={toggleCategory} innerClassName="border-line-light shadow-xs" />
 
         <div className="min-w-0 flex-1">
           {filteredCertificates.length > 0 ? (
             <div className="flex flex-col gap-10">
               <div key={`${selectedCategories.join(',')}-${searchQuery}-${currentPage}`} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {paginatedCertificates.map((cert) => (
-                  <div key={cert.uid} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-colors hover:border-slate-300">
-                    <div className="relative flex aspect-[4/3] w-full items-center justify-center border-b border-slate-100 bg-slate-50 p-6">
+                  <div key={cert.uid} className="flex flex-col overflow-hidden rounded-2xl border border-line-light bg-paper-white shadow-xs transition-colors hover:border-line-medium">
+                    <div className="relative flex aspect-[4/3] w-full items-center justify-center border-b border-line-light bg-paper-paper p-6">
                       <img src={cert.imageUrl || 'https://picsum.photos/seed/cert/800/600'} alt={cert.title} className="object-cover" />
                     </div>
                     <div className="flex flex-1 flex-col p-5">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary/80">{cert.category}</p>
-                      <h4 className="mb-1 line-clamp-1 font-bold leading-snug text-slate-900">{cert.title}</h4>
-                      <p className="mb-4 line-clamp-1 text-sm text-slate-500">{cert.courseName}</p>
+                      <h4 className="mb-1 line-clamp-1 font-bold leading-snug text-ink-900">{cert.title}</h4>
+                      <p className="mb-4 line-clamp-1 text-sm text-ink-500">{cert.courseName}</p>
                       <div className="mb-6 flex items-center gap-2">
-                        <span className="text-xs font-medium text-slate-400">ID Kredensial: {cert.credentialId}</span>
+                        <span className="text-xs font-medium text-ink-400">ID Kredensial: {cert.credentialId}</span>
                       </div>
 
                       <div className="mt-auto flex gap-3">
-                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2 px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900">
+                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-line-light bg-paper-white py-2 px-4 text-sm font-medium text-ink-700 transition-colors hover:bg-paper-paper hover:text-ink-900">
                           <Download className="h-4 w-4" />
                           Unduh
                         </button>
                         <button
                           onClick={() => handleShare(cert.uid)}
                           className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-2 px-4 text-sm font-medium transition-colors ${
-                            copiedUid === cert.uid ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            copiedUid === cert.uid ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-line-light bg-paper-white text-ink-700 hover:bg-paper-paper hover:text-ink-900'
                           }`}>
                           {copiedUid === cert.uid ? (
                             <>
@@ -108,10 +108,10 @@ const CertificatesSection = () => {
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[2rem] border border-slate-200 bg-white py-24 text-center shadow-xs">
+            <div className="flex flex-col items-center justify-center rounded-[2rem] border border-line-light bg-paper-white py-24 text-center shadow-xs">
               <EmptyCourseIcon className="mb-6 h-40 w-40" />
-              <h3 className="mb-2 text-xl font-bold text-slate-900">Ups, sertifikat tidak ditemukan</h3>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-500">Kami tidak menemukan sertifikat yang sesuai dengan kata kunci atau filter kategori yang Anda pilih.</p>
+              <h3 className="mb-2 text-xl font-bold text-ink-900">Ups, sertifikat tidak ditemukan</h3>
+              <p className="max-w-sm text-sm leading-relaxed text-ink-500">Kami tidak menemukan sertifikat yang sesuai dengan kata kunci atau filter kategori yang Anda pilih.</p>
             </div>
           )}
         </div>

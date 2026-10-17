@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import DashboardSection from '@/components/student/DashboardSection'
-import { AppSidebarProvider } from '../../components/shared/Sidebar'
+import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import { useResolvedProfileJoinedCourses } from '@/hooks/files/use-resolved-profile-joined-courses'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IUserData } from '@/lib/types/user'
@@ -23,8 +23,8 @@ export default function StudentDashboard() {
   if (!profileWithResolvedCourses) return null
 
   return (
-    <AppSidebarProvider role="student" user={sidebarUser}>
+    <StudentAppPageShell user={sidebarUser}>
       <DashboardSection Data={profileWithResolvedCourses} />
-    </AppSidebarProvider>
+    </StudentAppPageShell>
   )
 }

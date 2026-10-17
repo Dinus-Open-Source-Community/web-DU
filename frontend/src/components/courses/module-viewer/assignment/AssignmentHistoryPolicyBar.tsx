@@ -19,10 +19,10 @@ function MetaItem({
 }) {
   return (
     <span className="inline-flex min-w-0 items-baseline gap-1.5">
-      <span className={cn('shrink-0 text-xs', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+      <span className={cn('shrink-0 text-xs', isDark ? 'text-zinc-500' : 'text-ink-400')}>
         {label}
       </span>
-      <span className={cn('text-xs font-medium', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+      <span className={cn('text-xs font-medium', isDark ? 'text-zinc-300' : 'text-ink-700')}>
         {value}
       </span>
     </span>
@@ -42,7 +42,7 @@ export function AssignmentPolicyMeta({ policy, theme }: AssignmentPolicyMetaProp
     <div
       className={cn(
         'flex flex-wrap items-center gap-x-3 gap-y-1.5',
-        isDark ? 'text-zinc-400' : 'text-slate-500',
+        isDark ? 'text-zinc-400' : 'text-ink-500',
       )}
       aria-label="Aturan pengumpulan tugas"
     >
@@ -50,7 +50,7 @@ export function AssignmentPolicyMeta({ policy, theme }: AssignmentPolicyMetaProp
         <span key={item.label} className="inline-flex min-w-0 items-center gap-3">
           {index > 0 ? (
             <span
-              className={cn('hidden size-1 shrink-0 rounded-full sm:inline-block', isDark ? 'bg-zinc-700' : 'bg-slate-300')}
+              className={cn('hidden size-1 shrink-0 rounded-full sm:inline-block', isDark ? 'bg-border' : 'bg-muted-foreground/40')}
               aria-hidden
             />
           ) : null}

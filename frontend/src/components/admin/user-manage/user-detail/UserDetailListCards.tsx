@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { ExternalLink, Star } from 'lucide-react'
 
 import { UserDetailProgressBar } from '@/components/admin/user-manage/user-detail/UserDetailProgressBar'
-import { Badge, PaymentBadge } from '@/components/ui/badge'
+import { PaymentBadge } from '@/components/ui/badge'
+import { AdminPublishStatusLabel, AdminStatusLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
 import { userDetailLayout } from '@/lib/user-manage/user-detail-layout'
 import type {
@@ -25,9 +26,7 @@ export function UserDetailJoinedCourseCard({ course }: { course: ManagedUserDeta
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="rounded-full text-[11px] font-medium">
-              {course.enrollmentStatusLabel}
-            </Badge>
+            <AdminStatusLabel tone="info">{course.enrollmentStatusLabel}</AdminStatusLabel>
             <span className={userDetailLayout.metaChip}>Terdaftar {course.enrolledAtLabel}</span>
           </div>
 
@@ -49,25 +48,20 @@ export function UserDetailJoinedCourseCard({ course }: { course: ManagedUserDeta
       </div>
 
       {course.assignments.length > 0 ? (
-        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 sm:pb-5">
-          <p className="mb-3 text-xs font-semibold text-slate-500">
+        <div className={userDetailLayout.nestedSection}>
+          <p className={userDetailLayout.nestedSectionTitle}>
             Pengumpulan tugas ({course.assignments.length})
           </p>
           <ul className="space-y-2">
             {course.assignments.slice(0, 3).map((assignment) => (
-              <li
-                key={assignment.submissionUid}
-                className="flex flex-col gap-1 rounded-xl bg-slate-50 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
-              >
+              <li key={assignment.submissionUid} className={userDetailLayout.nestedRow}>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-800">
-                    {assignment.assignmentTitle}
-                  </p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className={userDetailLayout.nestedRowTitle}>{assignment.assignmentTitle}</p>
+                  <p className={userDetailLayout.nestedRowMeta}>
                     {assignment.moduleTitle} · {assignment.lessonTitle}
                   </p>
                 </div>
-                <p className="text-xs font-medium tabular-nums text-slate-600">
+                <p className={userDetailLayout.nestedRowValue}>
                   {assignment.scorePercent != null
                     ? `${assignment.scorePercent}%`
                     : 'Belum dinilai'}{' '}
@@ -95,12 +89,7 @@ export function UserDetailMentoredCourseCard({ course }: { course: ManagedUserDe
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant={course.isPublished ? 'coursePublished' : 'courseDraft'}
-              className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-            >
-              {course.isPublished ? 'Terbit' : 'Draft'}
-            </Badge>
+            <AdminPublishStatusLabel published={course.isPublished} />
             <span className={userDetailLayout.metaChip}>{course.priceLabel}</span>
             <span className={userDetailLayout.metaChip}>Dibuat {course.createdAtLabel}</span>
           </div>
@@ -132,12 +121,12 @@ export function UserDetailReviewCard({ review }: { review: ManagedUserDetailRevi
             <h3 className={userDetailLayout.cardTitle}>{review.courseTitle}</h3>
             <p className={userDetailLayout.cardMeta}>{review.createdAtLabel}</p>
           </div>
-          <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+          <div className={userDetailLayout.ratingValue}>
             <Star className="size-3.5 fill-current" aria-hidden />
             {review.rating}
           </div>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-slate-700">{review.comment}</p>
+        <p className={userDetailLayout.reviewBody}>{review.comment}</p>
       </div>
     </article>
   )
@@ -160,10 +149,8 @@ export function UserDetailTransactionCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
-          <p className="text-base font-semibold tabular-nums text-slate-900">
-            {transaction.amountLabel}
-          </p>
-          <PaymentBadge status={transaction.paymentStatus} />
+          <p className={userDetailLayout.amountValue}>{transaction.amountLabel}</p>
+          <PaymentBadge status={transaction.paymentStatus} presentation="dot" />
         </div>
       </div>
     </article>

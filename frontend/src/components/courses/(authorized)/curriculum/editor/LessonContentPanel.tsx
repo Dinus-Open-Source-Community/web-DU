@@ -59,7 +59,7 @@ export function LessonContentPanel({
 
   return (
     <section aria-label="Konten lesson" className="space-y-4 py-4 sm:py-5">
-      <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-3 sm:p-4">
+      <div className={editLayout.surfaceMuted}>
         <p className={editLayout.fieldLabel}>Tipe konten lesson</p>
         <SegmentedControl
           value={lesson.contentType}

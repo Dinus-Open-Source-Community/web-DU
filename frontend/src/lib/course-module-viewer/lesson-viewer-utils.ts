@@ -1,8 +1,10 @@
 import { FileText, Film } from 'lucide-react'
 
+import type { AppTheme } from '@/lib/theme/app-theme'
 import type { IModulesDetail, LessonDeliveryType, LessonDetailItem } from '@/lib/types/course'
 
-export type LessonThemeMode = 'dark' | 'light'
+/** Sama dengan tema app (Settings → Tema). */
+export type LessonThemeMode = AppTheme
 
 /** Lebar sidebar modul di desktop/tablet (px). */
 export const LESSON_SIDEBAR_WIDTH_PX = 348
