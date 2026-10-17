@@ -17,17 +17,16 @@ export type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navi
 export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
   const {
     backHref,
+    courseUid,
     courseTitle,
     theme,
     modulesState,
-    lessonEntries,
     effectiveActiveLessonId,
     activeEntry,
     displayedLesson,
     isLessonLoading,
     isAssignmentLoading,
     readLessonIds,
-    completedLessonsCount,
     progressPercent,
     effectiveExpandedModules,
     isRightSidebarOpen,
@@ -37,6 +36,9 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     filteredSearchItems,
     localSearchInputRef,
     assignmentState,
+    assignmentByLessonUid,
+    isAssignmentReadOnly,
+    viewerPane,
     footerActiveTitle,
     footerPreviousAction,
     footerNextAction,
@@ -52,6 +54,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     onMobileSidebarOpenChange,
     onToggleModule,
     onSelectLesson,
+    onSelectAssignment,
     onSearchQueryChange,
     onCloseSearch,
     onViewerPaneChange,
@@ -68,7 +71,6 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     >
       <LessonViewerHeader
         backHref={backHref}
-        courseTitle={courseTitle}
         theme={theme}
         onOpenSearch={onOpenSearch}
         onOpenModules={onOpenModules}
@@ -103,6 +105,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
             canStart={assignmentState.canStart}
             submissionBlockReason={assignmentState.submissionBlockReason}
             theme={theme}
+            readOnly={isAssignmentReadOnly}
             onStart={() => onViewerPaneChange('assignment-work')}
             onViewDetail={() => onViewerPaneChange('assignment-detail')}
           />
@@ -147,11 +150,13 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
 
       <LessonSidebar
         modules={modulesState}
-        lessonEntries={lessonEntries}
+        courseUid={courseUid}
+        courseTitle={courseTitle}
         activeModuleId={activeEntry?.module.uid}
         activeLessonId={effectiveActiveLessonId}
+        activePane={viewerPane}
+        assignmentByLessonUid={assignmentByLessonUid}
         readLessonIds={readLessonIds}
-        completedLessonsCount={completedLessonsCount}
         progressPercent={progressPercent}
         expandedModules={effectiveExpandedModules}
         isOpen={isRightSidebarOpen}
@@ -161,6 +166,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         onMobileOpenChange={onMobileSidebarOpenChange}
         onToggleModule={onToggleModule}
         onSelectLesson={onSelectLesson}
+        onSelectAssignment={onSelectAssignment}
       />
 
       <LessonSearchDialog

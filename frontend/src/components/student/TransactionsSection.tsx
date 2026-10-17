@@ -1,8 +1,11 @@
 import { SearchForm } from '@/components/shared/SearchForm'
 import { PageHeader } from '@/components/shared/Header'
-import { SegmentedFilter } from '@/components/shared/SegemntedFilter'
+import { UnderlineTabList } from '@/components/shared/UnderlineTabList'
 import { Pagination } from '@/components/shared/Pagination'
-import { ReceiptText } from 'lucide-react'
+import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
+import { appCardClassName } from '@/lib/design/app-shell-tokens'
+import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
+import { cn } from '@/lib/utils'
 import { TransactionPaymentLink } from '@/components/student/transactions/TransactionPaymentLink'
 import { useStudentTransactionsViewModel } from '@/hooks/use-student-transactions-view-model'
 import { buildCourseImageMap } from '@/lib/transactions/build-course-image-map'
@@ -40,8 +43,9 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
   const courseImagesByUid = useMemo(() => buildCourseImageMap(Data), [Data])
 
   return (
-    <section className="h-full w-full">
+    <section className="flex w-full flex-col gap-8">
       <PageHeader
+        className={studentDashboardLayout.pageHeader}
         title="Riwayat Transaksi"
         subtitle="Pantau status pembayaran kursus dan lihat detail transaksi untuk setiap pembayaran."
       />
@@ -56,30 +60,25 @@ export default function TransactionsList({ Data }: TransactionsListProps) {
             className="md:flex-1"
           />
 
-          <SegmentedFilter
+          <UnderlineTabList
             value={viewModel.statusFilter}
+            options={STATUS_FILTER_OPTIONS}
             onChange={(value) => viewModel.setStatusFilter(value as TransactionStatusFilter)}
-            items={STATUS_FILTER_OPTIONS}
-            variant="wrap"
+            ariaLabel="Status pembayaran"
+            className="w-max max-w-full"
           />
         </div>
 
         {!viewModel.hasTransactions ? (
-          <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex size-16 items-center justify-center rounded-2xl bg-paper-paper text-ink-400">
-                <ReceiptText className="size-7" aria-hidden />
-              </div>
-              <div className="space-y-1">
-                <p className="text-base font-semibold text-ink-900">Transaksi tidak ditemukan</p>
-                <p className="text-sm text-ink-500">
-                  Coba ubah kata kunci pencarian atau filter status pembayaran.
-                </p>
-              </div>
-            </div>
+          <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
+            <NothingLottieIllustration />
+            <h3 className="mb-2 text-xl font-bold text-ink-900">Transaksi tidak ditemukan</h3>
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-ink-500">
+              Coba ubah kata kunci pencarian atau filter status pembayaran.
+            </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
+          <div className="overflow-hidden rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper">
             <Table>
               <TableHeader>
                 <TableRow className="bg-paper-paper/80 hover:bg-paper-paper/80">

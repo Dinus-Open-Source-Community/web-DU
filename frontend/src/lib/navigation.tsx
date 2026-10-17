@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, MessageSquare, BookMarked, Layers, Globe, ArrowRightLeft, LayoutGrid, Mail, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, MessageSquare, BookMarked, Layers, ArrowRightLeft, LayoutGrid, Mail, Images, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/components/navigation'
 
@@ -30,6 +30,11 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Kategori', path: ROUTES.admin.courseCategories },
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
+    },
+    {
+      name: 'Galeri',
+      path: ROUTES.admin.gallery,
+      icon: Images,
     },
     {
       name: 'Transaksi',
@@ -66,6 +71,11 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Kategori', path: ROUTES.admin.courseCategories },
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
+    },
+    {
+      name: 'Galeri',
+      path: ROUTES.admin.gallery,
+      icon: Images,
     },
     {
       name: 'Transaksi',
@@ -106,7 +116,6 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Jelajahi Kursus', icon: Globe, path: ROUTES.student.browse },
     { name: 'Transaksi', icon: ArrowRightLeft, path: ROUTES.student.transactions },
   ],
 }
@@ -178,9 +187,7 @@ export const socialLinks: BrandSocialLink[] = [
 /** Anchor navigasi landing — semua menuju section di halaman home. */
 export const navLinks = [
   { label: 'Beranda', href: '/#top' },
-  { label: 'Stack', href: '/#stack' },
   { label: 'Mentor', href: '/#mentor' },
   { label: 'Kursus', href: '/#kursus' },
-  { label: 'Galeri', href: '/#galeri' },
-  { label: 'Ulasan', href: '/#testimoni' },
+  { label: 'Galeri', href: ROUTES.gallery },
 ]

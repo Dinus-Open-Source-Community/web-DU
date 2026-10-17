@@ -16,9 +16,9 @@ const QUICK_LINKS: { label: string; href: string; description: string }[] = [
     description: 'Lihat deadline dan pengumpulan tugas',
   },
   {
-    label: 'Jelajahi kursus',
-    href: ROUTES.student.browse,
-    description: 'Temukan kursus baru untuk diikuti',
+    label: 'Transaksi',
+    href: ROUTES.student.transactions,
+    description: 'Lihat riwayat transaksi dan pembayaran',
   },
 ]
 

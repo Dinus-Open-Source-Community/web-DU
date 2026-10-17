@@ -13,7 +13,6 @@ import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-u
 
 type LessonViewerHeaderProps = {
   backHref: string
-  courseTitle: string
   theme: LessonThemeMode
   onOpenSearch: () => void
   onOpenModules?: () => void
@@ -21,7 +20,6 @@ type LessonViewerHeaderProps = {
 
 export function LessonViewerHeader({
   backHref,
-  courseTitle,
   theme,
   onOpenSearch,
   onOpenModules,
@@ -56,7 +54,7 @@ export function LessonViewerHeader({
           )}
         >
           <ArrowLeft className="size-4 shrink-0" aria-hidden />
-          <span className="truncate">{courseTitle}</span>
+          <span className="truncate">Keluar dari halaman</span>
         </Link>
       </div>
 

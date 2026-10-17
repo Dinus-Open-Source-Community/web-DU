@@ -15,21 +15,21 @@ export type StaticCourse = {
  *  kelas & stack — ditampilkan sebagai dua program terpisah. */
 export const LANDING_COURSES: StaticCourse[] = [
   {
-    title: 'Web Development: Next.js',
+    title: 'Pengembangan Web: Next.js',
     desc: 'React untuk produksi — server & client components, routing, API route, sampai deploy.',
     level: 'Menengah',
     accent: 'yellow',
     icon: 'nextjs',
   },
   {
-    title: 'Web Development: Laravel',
+    title: 'Pengembangan Web: Laravel',
     desc: 'PHP modern dengan MVC, Eloquent, autentikasi, dan REST API — dari nol sampai aplikasi jalan.',
     level: 'Pemula',
     accent: 'mint',
     icon: 'laravel',
   },
   {
-    title: 'UI/UX Design',
+    title: 'Desain UI/UX',
     desc: 'Riset pengguna, wireframe, sampai prototipe interaktif — desain yang enak dilihat dan gampang dipakai.',
     level: 'Pemula',
     accent: 'pink',

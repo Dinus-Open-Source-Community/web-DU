@@ -23,6 +23,8 @@ type LessonAssignmentOverviewProps = {
   canStart: boolean
   submissionBlockReason?: string | null
   theme: LessonThemeMode
+  /** Pratinjau mentor/admin: sembunyikan riwayat & aksi pengumpulan. */
+  readOnly?: boolean
   onStart: () => void
   onViewDetail: () => void
 }
@@ -35,6 +37,7 @@ export function LessonAssignmentOverview({
   canStart,
   submissionBlockReason,
   theme,
+  readOnly = false,
   onStart,
   onViewDetail,
 }: LessonAssignmentOverviewProps) {
@@ -129,17 +132,19 @@ export function LessonAssignmentOverview({
           </section>
         ) : null}
 
-        <AssignmentSubmissionHistorySection
-          assignment={assignment}
-          submission={submission}
-          submissionAttempts={submissionAttempts}
-          submissionMaxAttempts={submissionMaxAttempts}
-          canStart={canStart}
-          submissionBlockReason={submissionBlockReason}
-          theme={theme}
-          onStart={onStart}
-          onViewDetail={onViewDetail}
-        />
+        {readOnly ? null : (
+          <AssignmentSubmissionHistorySection
+            assignment={assignment}
+            submission={submission}
+            submissionAttempts={submissionAttempts}
+            submissionMaxAttempts={submissionMaxAttempts}
+            canStart={canStart}
+            submissionBlockReason={submissionBlockReason}
+            theme={theme}
+            onStart={onStart}
+            onViewDetail={onViewDetail}
+          />
+        )}
       </div>
     </main>
   )

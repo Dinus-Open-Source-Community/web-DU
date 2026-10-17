@@ -1,30 +1,22 @@
-import { useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+
 import SectionHeader from '@/components/playful/SectionHeader'
+import Reveal from '@/components/playful/Reveal'
 import MentorCard from '@/components/landing/MentorCard'
 import { LANDING_MENTORS } from '@/lib/landing/mentors'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
+/** Jumlah mentor pratinjau di beranda — selebihnya di halaman /mentors. */
+export const MENTOR_PREVIEW_COUNT = 4
+
 /**
- * Mentors — komposisi pecah (asimetris): header rata-kiri di atas kolom angka
- * editorial, lalu tiga kartu foto dengan expand-on-hover. Beda material &
- * irama dari Stack (kartu pastel) dan Courses (kartu kertas).
+ * Mentors — grid kartu profil persegi: foto, nama, course yang diajar,
+ * sosmed. Klik kartu membuka modal detail mentor.
  */
 export default function MentorsSection() {
   const { mentors } = LANDING_COPY
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  // Inisialisasi sinkron dari matchMedia (hindari flash grid→accordion di desktop).
-  const [isLg, setIsLg] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false,
-  )
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const update = () => setIsLg(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
+  const preview = LANDING_MENTORS.slice(0, MENTOR_PREVIEW_COUNT)
 
   return (
     <section id="mentor" className="relative overflow-hidden bg-paper-offwhite">
@@ -47,51 +39,30 @@ export default function MentorsSection() {
               03
             </p>
             <p className="text-ink-400 mt-2 text-right text-xs font-extrabold tracking-[0.2em] uppercase">
-              active mentors · next.js & laravel
+              mentor aktif · next.js & laravel
             </p>
           </div>
           <p className="text-ink-400 mt-3 text-xs font-extrabold tracking-[0.2em] uppercase lg:hidden">
-            active mentors · next.js & laravel
+            mentor aktif · next.js & laravel
           </p>
         </div>
 
-        {isLg ? (
-          /* Accordion horizontal: kartu aktif (hover/focus) melebar, sisanya menyempit. */
-          <div
-            className="mx-auto mt-14 flex h-[540px] max-w-7xl items-stretch gap-3"
-            onMouseLeave={() => setActiveIndex(null)}
+        {/* Grid kartu profil kompak */}
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
+          {preview.map((mentor, i) => (
+            <MentorCard key={mentor.name} mentor={mentor} index={i} />
+          ))}
+        </div>
+
+        <Reveal className="mt-10 flex justify-center sm:mt-14">
+          <Link
+            to={mentors.allHref}
+            className="group/btn text-ink-900 hover:bg-note-yellow focus-visible:ring-brand-blue/50 inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase shadow-button outline-none transition-all focus-visible:ring-4"
           >
-            {LANDING_MENTORS.map((mentor, i) => {
-              const isActive = activeIndex === i
-              return (
-                <div
-                  key={mentor.name}
-                  onMouseEnter={() => setActiveIndex(i)}
-                  onFocus={() => setActiveIndex(i)}
-                  onBlur={() => setActiveIndex(null)}
-                  tabIndex={0}
-                  aria-label={`${mentor.name} — ${mentor.role}`}
-                  aria-expanded={isActive}
-                  className={cn(
-                    'min-w-0 cursor-pointer rounded-[36px] outline-none transition-[flex-grow,flex-basis] duration-500 ease-out focus-visible:ring-4 focus-visible:ring-brand-blue/50',
-                    isActive ? 'grow-[2.4] basis-0' : 'grow basis-0',
-                  )}
-                >
-                  <MentorCard mentor={mentor} index={i} active={isActive} />
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          /* Grid normal (mobile/tablet): semua kartu menampilkan nama+role+tagline. */
-          <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-6">
-            {LANDING_MENTORS.map((mentor, i) => (
-              <div key={mentor.name} className="h-72 sm:h-80">
-                <MentorCard mentor={mentor} index={i} active />
-              </div>
-            ))}
-          </div>
-        )}
+            {mentors.allLabel}
+            <ArrowRight className="size-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+          </Link>
+        </Reveal>
       </div>
     </section>
   )

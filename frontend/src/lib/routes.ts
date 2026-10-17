@@ -28,6 +28,8 @@ export const dashboardMenu = {
   courses: dash('courses'),
   courseCategories: dash('course-categories'),
   courseTypes: dash('course-types'),
+  /** CRUD galeri gambar landing (dummy lokal — backend belum tersedia). */
+  gallery: dash('gallery'),
   courseDetail: (courseUid: string) => dash('courses', courseUid),
   courseEdit: (courseUid: string) => dash('courses', courseUid, 'edit'),
   /** Halaman ringkasan tugas per kursus (mentor). */
@@ -46,17 +48,19 @@ export const dashboardMenu = {
   learning: dash('learning'),
   learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
   assignments: dash('assignments'),
-  browse: dash('browse'),
   certificates: dash('certificates'),
 }
 
 export const ROUTES = {
   home: '/',
+  gallery: '/gallery',
+  mentors: '/mentors',
   dashboard: DASHBOARD_PATH,
   profile: '/profile',
   courses: '/course',
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
+  courseLessons: (courseUid: string) => `/course/${courseUid}/lessons`,
   login: '/auth/login',
   register: '/auth/register',
   redeem: '/redeem',
@@ -70,6 +74,7 @@ export const ROUTES = {
     courses: dashboardMenu.courses,
     courseCategories: dashboardMenu.courseCategories,
     courseTypes: dashboardMenu.courseTypes,
+    gallery: dashboardMenu.gallery,
     detailCourseAdmin: dashboardMenu.courseDetail,
     assignmentSubmissions: dashboardMenu.assignmentSubmissions,
     assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
@@ -97,7 +102,6 @@ export const ROUTES = {
     learning: dashboardMenu.learning,
     learningCourse: dashboardMenu.learningCourse,
     assignments: dashboardMenu.assignments,
-    browse: dashboardMenu.browse,
     certificates: dashboardMenu.certificates,
     transactions: dashboardMenu.transactions,
     transactionPaymentPath: dashboardMenu.transactionPayment,
@@ -123,6 +127,10 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Kategori', path: ROUTES.admin.courseCategories },
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
+    },
+    {
+      name: 'Galeri',
+      path: ROUTES.admin.gallery,
     },
     {
       name: 'Transaksi',
@@ -155,6 +163,7 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
+    { name: 'Galeri', path: ROUTES.admin.gallery },
     { name: 'Transaksi', path: ROUTES.admin.transactions },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.admin.reviewsAndQaPath },
     { name: 'Laporan Keuangan', path: ROUTES.admin.financial },
@@ -176,7 +185,6 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Jelajahi Kursus', path: ROUTES.student.browse },
     { name: 'Transaksi', path: ROUTES.student.transactions },
   ],
 }

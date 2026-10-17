@@ -30,6 +30,7 @@ export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string 
   { path: '/admin/courses', template: dashboardMenu.courses },
   { path: '/admin/course-categories', template: dashboardMenu.courseCategories },
   { path: '/admin/course-types', template: dashboardMenu.courseTypes },
+  { path: '/admin/gallery', template: dashboardMenu.gallery },
   { path: '/admin/courses/:courseUid', template: dashboardMenu.courseDetail(':courseUid') },
   { path: '/admin/courses/:courseUid/edit', template: dashboardMenu.courseEdit(':courseUid') },
   {
@@ -61,7 +62,7 @@ export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string 
   { path: '/student/learning', template: dashboardMenu.learning },
   { path: '/student/learning/course/:courseUid', template: dashboardMenu.learningCourse(':courseUid') },
   { path: '/student/assignments', template: dashboardMenu.assignments },
-  { path: '/student/browse', template: dashboardMenu.browse },
+  { path: '/student/browse', template: dashboardMenu.learning },
   { path: '/student/transactions', template: dashboardMenu.transactions },
   { path: '/student/transactions/payment', template: dashboardMenu.transactionPayment },
   { path: '/student/certificates', template: dashboardMenu.certificates },

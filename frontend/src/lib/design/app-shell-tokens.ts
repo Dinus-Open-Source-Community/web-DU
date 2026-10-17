@@ -72,6 +72,10 @@ export const appShellNavTriggerClassName =
 export const appShellBackLinkClassName =
   'inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-input bg-card px-2.5 py-2 text-sm font-semibold text-foreground transition outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30 sm:px-3'
 
+/** Tombol kembali di navbar — tanpa outline/border, hanya ikon + teks. */
+export const appShellBackGhostClassName =
+  'flex min-w-0 items-center gap-2 text-sm font-semibold text-ink-900 transition outline-none hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/30'
+
 export const appShellBreadcrumbLinkClassName =
   'max-w-[7rem] truncate rounded-md px-1.5 py-1 font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground lg:max-w-[9rem]'
 

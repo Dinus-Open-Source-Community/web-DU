@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
 import { CourseCardProfiles } from './CourseCardProfiles'
@@ -96,16 +95,23 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
         </div>
 
         {showProgress && (
-          <div className={`mt-auto mb-5 w-full rounded-xl border border-line-light bg-paper-paper/70 ${sizes.progress[size]}`}>
+          <div className={`mt-auto mb-5 w-full rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper ${sizes.progress[size]}`}>
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-ink-500">Progres Belajar</span>
-              <div className="flex items-center gap-2">
-                {isComplete ? <Badge variant="progressComplete" /> : null}
-                <span className="text-xs font-bold text-primary tabular-nums">{progressLabel}</span>
-              </div>
+              <span className="text-xs font-bold tabular-nums text-ink-900">{progressLabel}</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper-paper">
-              <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
+            <div
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Progres belajar ${progressLabel}`}
+              className="h-2 w-full overflow-hidden rounded-full border border-ink-900/10 bg-paper-paper"
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] ${isComplete ? 'bg-emerald-500' : 'bg-brand-blue'}`}
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         )}

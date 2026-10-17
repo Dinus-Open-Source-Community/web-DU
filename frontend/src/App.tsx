@@ -27,9 +27,14 @@ const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
 const OAuthCallbackPage = React.lazy(() => import("./pages/auth/Oauth.tsx"));
 const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
+const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
+const MentorsPage = React.lazy(() => import("./pages/landing/Mentors.tsx"));
 const CoursePage = React.lazy(() => import("./pages/landing/Course.tsx"));
 const ViewModuleAndLessons = React.lazy(
   () => import("./pages/courses/view.tsx"),
+);
+const CourseLessonsPage = React.lazy(
+  () => import("./pages/courses/lessons.tsx"),
 );
 const DashboardGateway = React.lazy(() => import("./pages/DashboardGateway.tsx"));
 const AdminStudentsPage = React.lazy(() => import("./pages/admin/Student.tsx"));
@@ -52,6 +57,9 @@ const AdminCourseCategories = React.lazy(
 const AdminCourseTypes = React.lazy(
   () => import("./pages/admin/CourseTypes.tsx"),
 );
+const AdminGalleryPage = React.lazy(
+  () => import("./pages/admin/Gallery.tsx"),
+);
 const CourseDetail = React.lazy(() => import("./pages/courses/detail.tsx"));
 const Financial = React.lazy(() => import("./pages/admin/Financial.tsx"));
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
@@ -67,9 +75,6 @@ const StudentLearningCourse = React.lazy(
 );
 const StudentAssignments = React.lazy(
   () => import("./pages/student/Assignments.tsx"),
-);
-const StudentBrowse = React.lazy(
-  () => import("./pages/student/BrowseCourse.tsx"),
 );
 import StudentTransactionPayment from "./pages/student/TransactionPayment.tsx";
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
@@ -96,6 +101,8 @@ const LOCKDOWN_HOME_ONLY = false;
 
 const LOCKDOWN_ALLOWLIST: ReadonlySet<string> = new Set<string>([
   ROUTES.home,
+  ROUTES.gallery,
+  ROUTES.mentors,
   ROUTES.courses,
   ROUTES.courseDetail(':courseUid'),
   ROUTES.login,
@@ -115,6 +122,18 @@ const routeConfig: RouteConfig[] = [
     lazy: true,
   },
   {
+    path: ROUTES.gallery,
+    element: <GalleryPage />,
+    public: true,
+    lazy: true,
+  },
+  {
+    path: ROUTES.mentors,
+    element: <MentorsPage />,
+    public: true,
+    lazy: true,
+  },
+  {
     path: ROUTES.courses,
     element: <CoursePage />,
     public: true,
@@ -129,6 +148,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.viewModuleAndLessons(":courseUid"),
     element: <ViewModuleAndLessons />,
+    public: false,
+    lazy: true,
+    roles: ["student", "mentor", "admin", "super_admin"],
+  },
+  {
+    path: ROUTES.courseLessons(":courseUid"),
+    element: <CourseLessonsPage />,
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
@@ -252,6 +278,13 @@ const routeConfig: RouteConfig[] = [
     roles: ["admin", "super_admin"],
   },
   {
+    path: ROUTES.admin.gallery,
+    element: <AdminGalleryPage />,
+    public: false,
+    lazy: true,
+    roles: ["admin", "super_admin"],
+  },
+  {
     path: ROUTES.dashboardMenu.courseAssignmentHub(":courseUid"),
     element: <MentorAssignments />,
     public: false,
@@ -328,13 +361,6 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.student.assignments,
     element: <StudentAssignments />,
-    public: false,
-    lazy: true,
-    roles: ["student"],
-  },
-  {
-    path: ROUTES.student.browse,
-    element: <StudentBrowse />,
     public: false,
     lazy: true,
     roles: ["student"],

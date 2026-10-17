@@ -38,7 +38,7 @@ import {
 } from "../../providers/navbar-search-provider";
 import { SidebarTrigger } from "../ui/sidebar";
 import {
-  appShellBackLinkClassName,
+  appShellBackGhostClassName,
   appShellBreadcrumbCurrentClassName,
   appShellBreadcrumbLinkClassName,
   appShellBreadcrumbMutedClassName,
@@ -227,19 +227,19 @@ export function AppTopNavbar({
           ) : null}
 
           {navbarBack === "dashboard" ? (
-            <Link to={ROUTES.dashboard} className={appShellBackLinkClassName}>
+            <Link to={ROUTES.dashboard} className={appShellBackGhostClassName}>
               <ArrowLeft className="size-4 shrink-0" aria-hidden />
-              Dasbor
+              <span className="truncate">Dasbor</span>
             </Link>
           ) : null}
           {navbarBack === "history" ? (
             <button
               type="button"
               onClick={() => navigateBackOrDashboard(navigate)}
-              className={appShellBackLinkClassName}
+              className={appShellBackGhostClassName}
             >
               <ArrowLeft className="size-4 shrink-0" aria-hidden />
-              Kembali
+              <span className="truncate">Kembali</span>
             </button>
           ) : null}
 

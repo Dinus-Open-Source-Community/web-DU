@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { Badge } from '../ui/badge'
 import { PageHeader } from '../shared/Header'
 import { SearchForm } from '../shared/SearchForm'
-import { SegmentedFilter } from '../shared/SegemntedFilter'
+import { UnderlineTabList } from '../shared/UnderlineTabList'
+import { appCardClassName } from '@/lib/design/app-shell-tokens'
+import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
@@ -79,7 +81,7 @@ function AssignmentListSkeleton() {
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={index}
-          className="h-[220px] animate-pulse rounded-2xl border border-ink-900/10 bg-paper-paper/70"
+          className="h-[220px] animate-pulse rounded-xl border-2 border-ink-900/10 bg-paper-paper/70"
         />
       ))}
     </div>
@@ -123,14 +125,12 @@ function AssignmentEmptyState({
       : undefined
 
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+    <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
       <NothingLottieIllustration className="mb-1 max-w-[12rem]" />
-      <div className="max-w-md space-y-2">
-        <p className="text-base font-semibold text-foreground">{title}</p>
-        {description ? (
-          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
+      <h3 className="mb-2 text-xl font-bold text-ink-900">{title}</h3>
+      {description ? (
+        <p className="max-w-md text-sm font-medium leading-relaxed text-ink-500">{description}</p>
+      ) : null}
     </div>
   )
 }
@@ -166,7 +166,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-line-medium">
+    <article className="group overflow-hidden rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper transition-colors duration-200 hover:border-ink-900/20">
       <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
@@ -272,6 +272,7 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
     <section className={cn('flex w-full flex-col gap-8', className)}>
       <div className="flex flex-col gap-5">
         <PageHeader
+          className={studentDashboardLayout.pageHeader}
           title="Tugas"
           subtitle="Pantau deadline, status pengumpulan, dan nilai tugas dari seluruh kursus yang Anda ikuti."
         />
@@ -297,11 +298,12 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
           className="md:max-w-none"
         />
 
-        <SegmentedFilter
-          items={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
+        <UnderlineTabList
           value={category}
+          options={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
           onChange={onCategoryChange}
-          variant="wrap"
+          ariaLabel="Kategori tugas"
+          className="w-max max-w-full"
         />
       </div>
 

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { SearchForm } from "../shared/SearchForm";
-import { SegmentedFilter } from "../shared/SegemntedFilter";
+import { PageHeader } from "../shared/Header";
+import { UnderlineTabList } from "../shared/UnderlineTabList";
 import { Pagination } from "../shared/Pagination";
 import type { IUserData } from "@/lib/types/user";
 import JoinedCourseCard from "../shared/JoinedCourseCard";
-import { BookOpen } from "lucide-react";
+import { NothingLottieIllustration } from "@/components/playful/NothingLottieIllustration";
+import { appCardClassName } from "@/lib/design/app-shell-tokens";
+import { studentDashboardLayout } from "@/lib/layout/student-dashboard-layout";
+import { gridCardsClassName } from "@/lib/layout/page-layout";
+import { cn } from "@/lib/utils";
 import {
   isLearningProgressComplete,
   isLearningProgressInProgress,
@@ -54,15 +59,11 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
   return (
     <section className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-5">
-        <div>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight text-ink-900">
-            Kursus Saya
-          </h1>
-          <p className="text-sm font-medium text-ink-500">
-            Lanjutkan pembelajaran Anda untuk mencapai tujuan karir dan raih
-            sertifikat.
-          </p>
-        </div>
+        <PageHeader
+          className={studentDashboardLayout.pageHeader}
+          title="Kursus Saya"
+          subtitle="Lanjutkan pembelajaran Anda untuk mencapai tujuan karir dan raih sertifikat."
+        />
 
         <SearchForm
           value={searchInput}
@@ -75,19 +76,20 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
         />
       </div>
 
-      <SegmentedFilter
-        items={filters.map((f) => ({ value: f, label: f }))}
+      <UnderlineTabList
         value={activeFilter}
+        options={filters.map((f) => ({ value: f, label: f }))}
         onChange={(value) => {
           setActiveFilter(value);
           setCurrentPage(1);
         }}
-        variant="scroll"
+        ariaLabel="Tipe kursus"
+        className="w-max max-w-full"
       />
 
       {filteredCourses.length > 0 ? (
         <div className="flex flex-col gap-10">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className={cn(gridCardsClassName, "lg:grid-cols-4")}>
             {paginatedCourses.map((course) => {
               const isInProgress = isLearningProgressInProgress(
                 course.progress,
@@ -111,20 +113,14 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
           />
         </div>
       ) : (
-        <div className="flex min-h-[60vh] w-full items-center justify-center text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-paper-paper text-ink-400">
-              <BookOpen className="size-7" aria-hidden />
-            </div>
-            <div className="space-y-1">
-              <p className="text-base font-semibold text-ink-900">
-                Kursus tidak ditemukan
-              </p>
-              <p className="text-sm text-ink-500">
-                Coba ubah kata kunci pencarian atau filter status.
-              </p>
-            </div>
-          </div>
+        <div className={cn(appCardClassName, "flex min-h-[40vh] flex-col items-center justify-center px-6 py-16 text-center")}>
+          <NothingLottieIllustration />
+          <h3 className="mb-2 text-xl font-bold text-ink-900">
+            Kursus tidak ditemukan
+          </h3>
+          <p className="max-w-sm text-sm font-medium leading-relaxed text-ink-500">
+            Coba ubah kata kunci pencarian atau filter status.
+          </p>
         </div>
       )}
     </section>

@@ -18,7 +18,7 @@ import {
   isActiveLessonDetailPending,
   resolveActiveLessonDetail,
 } from '@/lib/course-module-viewer/resolve-active-lesson'
-import { useStudentLessonDetails } from '@/hooks/course-module-viewer/use-student-lesson-details'
+import { useLessonDetails } from '@/hooks/course-module-viewer/use-lesson-details'
 import {
   buildLessonSearchItems,
   filterLessonSearchItems,
@@ -30,6 +30,8 @@ import type {
   CourseModuleViewerViewModel,
 } from '@/lib/course-module-viewer/course-module-viewer-view-model'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
+import { shouldOpenAssignmentAfterLesson } from '@/lib/lesson-assignment/navigation'
+import { isAssignmentVisibleToStudent } from '@/lib/lesson-assignment/submission-status'
 import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/submission-draft'
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
 import { useAppTheme } from '@/providers/theme-provider'
@@ -81,10 +83,10 @@ export function useCourseModuleViewer({
     () => lessonEntries.map((entry) => entry.lesson.uid),
     [lessonEntries],
   )
-  const studentLessonDetails = useStudentLessonDetails(lessonUids, isStudent)
+  const lessonDetails = useLessonDetails(lessonUids, true)
   const effectiveActiveLessonId = activeLessonId ?? lessonEntries[0]?.lesson.uid ?? null
   const hasCachedActiveLessonDetail = Boolean(
-    effectiveActiveLessonId && studentLessonDetails.detailsByUid.has(effectiveActiveLessonId),
+    effectiveActiveLessonId && lessonDetails.detailsByUid.has(effectiveActiveLessonId),
   )
   const shouldFetchActiveLessonDetail =
     isStudent && Boolean(effectiveActiveLessonId) && !hasCachedActiveLessonDetail
@@ -112,7 +114,7 @@ export function useCourseModuleViewer({
     () =>
       resolveActiveLessonDetail(
         effectiveActiveLessonId,
-        studentLessonDetails.detailsByUid,
+        lessonDetails.detailsByUid,
         lessonDetailQuery.data,
         activeLesson,
         { allowListFallback: !isStudent },
@@ -122,15 +124,15 @@ export function useCourseModuleViewer({
       effectiveActiveLessonId,
       isStudent,
       lessonDetailQuery.data,
-      studentLessonDetails.detailsByUid,
+      lessonDetails.detailsByUid,
     ],
   )
 
   const isActiveLessonDetailLoading = isActiveLessonDetailPending(
     effectiveActiveLessonId,
-    studentLessonDetails.detailsByUid,
+    lessonDetails.detailsByUid,
     lessonDetailQuery.data,
-    studentLessonDetails.isActiveDetailLoading(effectiveActiveLessonId),
+    lessonDetails.isActiveDetailLoading(effectiveActiveLessonId),
     lessonDetailQuery.isLoading || lessonDetailQuery.isFetching,
   )
 
@@ -176,6 +178,22 @@ export function useCourseModuleViewer({
     [lessonEntries],
   )
 
+  const selectAssignment = useCallback(
+    (lessonId: string, moduleId?: string) => {
+      const targetModuleId =
+        moduleId ?? lessonEntries.find((entry) => entry.lesson.uid === lessonId)?.module.uid
+
+      setActiveLessonId(lessonId)
+      setViewerPane('assignment')
+      if (targetModuleId) {
+        setExpandedModules(new Set([targetModuleId]))
+      }
+      setIsLocalSearchOpen(false)
+      setSearchQuery('')
+    },
+    [lessonEntries],
+  )
+
   const navigateToLessonEntry = useCallback(
     (entry: LessonEntry) => {
       selectLesson(entry.lesson.uid, entry.module.uid)
@@ -183,17 +201,43 @@ export function useCourseModuleViewer({
     [selectLesson],
   )
 
+  const navigateToAssignmentEntry = useCallback(
+    (entry: LessonEntry) => {
+      selectAssignment(entry.lesson.uid, entry.module.uid)
+    },
+    [selectAssignment],
+  )
+
   const navigateToLearningHome = useCallback(() => {
     navigate(backHref)
   }, [backHref, navigate])
+
+  const assignmentByLessonUid = useMemo(() => {
+    const map = new Map<string, NonNullable<LessonEntry['lesson']['assignment']>>()
+    for (const entry of lessonEntries) {
+      const detailed = lessonDetails.detailsByUid.get(entry.lesson.uid)
+      const candidate = detailed?.assignment ?? entry.lesson.assignment
+      if (!candidate) continue
+      // Student hanya melihat tugas yang terbit; mentor/admin melihat semua (termasuk draf) untuk pratinjau.
+      if (isStudent ? isAssignmentVisibleToStudent(candidate) : true) {
+        map.set(entry.lesson.uid, candidate)
+      }
+    }
+    return map
+  }, [isStudent, lessonEntries, lessonDetails.detailsByUid])
+
+  const previousEntryAssignment = previousEntry
+    ? (assignmentByLessonUid.get(previousEntry.lesson.uid) ?? null)
+    : null
 
   const footerHandlers = useMemo(
     () => ({
       setViewerPane,
       navigateToLessonEntry,
+      navigateToAssignmentEntry,
       ...(isStudent ? { navigateToLearningHome } : {}),
     }),
-    [isStudent, navigateToLearningHome, navigateToLessonEntry],
+    [isStudent, navigateToAssignmentEntry, navigateToLearningHome, navigateToLessonEntry],
   )
 
   useEffect(() => {
@@ -218,8 +262,9 @@ export function useCourseModuleViewer({
   }, [effectiveActiveLessonId, markLessonIfUnread, trackLessonReading])
 
   const searchItems = useMemo(
-    () => buildLessonSearchItems(lessonEntries, selectLesson),
-    [lessonEntries, selectLesson],
+    () =>
+      buildLessonSearchItems(lessonEntries, selectLesson, selectAssignment, assignmentByLessonUid),
+    [assignmentByLessonUid, lessonEntries, selectAssignment, selectLesson],
   )
 
   const filteredSearchItems = useMemo(
@@ -235,12 +280,22 @@ export function useCourseModuleViewer({
   }, [])
 
   const footerPreviousAction = useMemo(
-    () => buildFooterPreviousAction(viewerPane, displayedLesson, previousEntry, footerHandlers),
-    [displayedLesson, footerHandlers, previousEntry, viewerPane],
+    () =>
+      buildFooterPreviousAction(viewerPane, displayedLesson, previousEntry, footerHandlers, {
+        previousEntryHasAssignment: Boolean(previousEntryAssignment),
+        previousEntryAssignmentTitle: previousEntryAssignment?.title,
+      }),
+    [displayedLesson, footerHandlers, previousEntry, previousEntryAssignment, viewerPane],
   )
 
+  const canStepToAssignment =
+    viewerPane === 'lesson' &&
+    (isStudent
+      ? shouldOpenAssignmentAfterLesson(displayedLesson, viewerPane)
+      : Boolean(displayedLesson?.assignment))
+
   const footerNextAction = useMemo(() => {
-    if (isStudent && viewerPane === 'lesson' && isActiveLessonDetailLoading) {
+    if (viewerPane === 'lesson' && isActiveLessonDetailLoading) {
       return {
         label: 'Selanjutnya',
         title: 'Memuat tugas...',
@@ -248,12 +303,15 @@ export function useCourseModuleViewer({
       }
     }
 
-    return buildFooterNextAction(viewerPane, variant, displayedLesson, nextEntry, footerHandlers)
+    return buildFooterNextAction(viewerPane, variant, displayedLesson, nextEntry, footerHandlers, {
+      hasAssignmentStep: canStepToAssignment,
+      assignmentTitle: displayedLesson?.assignment?.title,
+    })
   }, [
+    canStepToAssignment,
     displayedLesson,
     footerHandlers,
     isActiveLessonDetailLoading,
-    isStudent,
     nextEntry,
     variant,
     viewerPane,
@@ -342,16 +400,13 @@ export function useCourseModuleViewer({
     ],
   )
 
-  const hasResolvedAssignmentLesson = isStudent
-    ? hasResolvedLessonDetail(
-        effectiveActiveLessonId,
-        studentLessonDetails.detailsByUid,
-        lessonDetailQuery.data,
-      )
-    : Boolean(lessonDetailQuery.data)
+  const hasResolvedAssignmentLesson = hasResolvedLessonDetail(
+    effectiveActiveLessonId,
+    lessonDetails.detailsByUid,
+    lessonDetailQuery.data,
+  )
 
   const showAssignmentOverview =
-    isStudent &&
     viewerPane === 'assignment' &&
     hasResolvedAssignmentLesson &&
     Boolean(assignmentState.assignment && assignmentLesson)
@@ -369,7 +424,9 @@ export function useCourseModuleViewer({
     Boolean(assignmentState.assignment && assignmentLesson)
 
   const isAssignmentLoading =
-    isStudent && isAssignmentPane && !hasResolvedAssignmentLesson && isActiveLessonDetailLoading
+    isAssignmentPane && !hasResolvedAssignmentLesson && isActiveLessonDetailLoading
+
+  const isAssignmentReadOnly = !isStudent
 
   return {
     courseUid,
@@ -398,6 +455,8 @@ export function useCourseModuleViewer({
     localSearchInputRef,
     viewerPane,
     assignmentState,
+    assignmentByLessonUid,
+    isAssignmentReadOnly,
     footerActiveTitle,
     footerPreviousAction,
     footerNextAction,
@@ -413,6 +472,7 @@ export function useCourseModuleViewer({
     onMobileSidebarOpenChange: setIsMobileSidebarOpen,
     onToggleModule: toggleModule,
     onSelectLesson: selectLesson,
+    onSelectAssignment: selectAssignment,
     onSearchQueryChange: setSearchQuery,
     onCloseSearch: () => setIsLocalSearchOpen(false),
     onViewerPaneChange: setViewerPane,

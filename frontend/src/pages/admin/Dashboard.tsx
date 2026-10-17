@@ -92,6 +92,15 @@ export default function Dashboard() {
     !transactionSummary.isError &&
     !recentTransactions.isError;
 
+  // Label periode berasal dari backend (KPI pertama) agar subtitle chart dan
+  // tabel tidak lagiclaims "12 bulan terakhir" ketika user memilih periode lain.
+  const periodLabel = kpis.data?.[0]?.trendLabel
+  const isShortPeriod = period === '7d' || period === '30d'
+  const revenueTrendTitle = isShortPeriod ? 'Tren Pendapatan Harian' : 'Tren Pendapatan Bulanan'
+  const revenueTrendSubtitle = periodLabel
+    ? `Pendapatan kotor ${periodLabel}`
+    : 'Pendapatan kotor 12 bulan terakhir'
+
   const monthlyRevenue = financialCharts.data?.monthlyRevenue ?? [];
   const revenueByCategory = financialCharts.data?.revenueByCategory ?? [];
   const hasRevenueData =
@@ -144,8 +153,8 @@ export default function Dashboard() {
           <>
             <section className={gridDashboardChartsClassName}>
               <ChartCard
-                title="Tren Pendapatan Bulanan"
-                subtitle="Pendapatan kotor 12 bulan terakhir"
+                title={revenueTrendTitle}
+                subtitle={revenueTrendSubtitle}
                 className="lg:col-span-2"
               >
                 {financialCharts.isError ? (
@@ -236,6 +245,7 @@ export default function Dashboard() {
               <RecentTransactions
                 transactions={recentTransactions.data}
                 isLoading={recentTransactions.isLoading}
+                periodLabel={periodLabel}
               />
             )}
           </>
