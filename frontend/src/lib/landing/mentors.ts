@@ -1,25 +1,55 @@
+import type { SocialPlatform } from '@/lib/profile/social-links'
+
+export type MentorSocial = {
+  platform: SocialPlatform
+  url: string
+}
+
 export type LandingMentor = {
   name: string
   role: string
-  /** Satu kalimat wajar tentang mentor — mengisi kartu saat accordion terbuka. */
-  tagline: string
+  /** Foto profil persegi (public/). */
+  photo: string
+  /** Course yang diajar — tampil sebagai chip di kartu & daftar di modal. */
+  courses: string[]
+  /** Sosmed mentor (platform + URL). URL '#' = placeholder sampai ada akun asli. */
+  socials: MentorSocial[]
 }
 
+// TODO: ganti url '#' dengan akun asli tiap mentor sebelum launch.
 export const LANDING_MENTORS: LandingMentor[] = [
   {
     name: 'alfi',
-    role: 'Next.js Developer',
-    tagline: 'Suka ngulik Next.js bareng — dari error hydration sampai halaman jadi.',
+    role: 'Pengembang Next.js',
+    photo: '/images/alfi.webp',
+    courses: ['Pengembangan Web: Next.js'],
+    socials: [
+      { platform: 'github', url: '#' },
+      { platform: 'instagram', url: '#' },
+      { platform: 'linkedin', url: '#' },
+    ],
   },
   {
     name: 'nafan',
-    role: 'Laravel Developer',
-    tagline: 'Ngulik Eloquent & Blade bareng — biar query nggak bikin pusing.',
+    role: 'Pengembang Laravel',
+    photo: '/images/nafan.webp',
+    courses: ['Pengembangan Web: Laravel'],
+    socials: [
+      { platform: 'github', url: '#' },
+      { platform: 'instagram', url: '#' },
+      { platform: 'linkedin', url: '#' },
+    ],
   },
   {
     name: 'jariz',
-    role: 'Next.js Developer',
-    tagline: 'Senang lihat kode berantakan jadi komponen yang rapi dan kepake.',
+    role: 'Pengembang Next.js',
+    photo: '/images/jariz.webp',
+    courses: ['Pengembangan Web: Next.js'],
+    socials: [
+      { platform: 'github', url: '#' },
+      { platform: 'instagram', url: '#' },
+      { platform: 'linkedin', url: '#' },
+    ],
   },
 ]
 

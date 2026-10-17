@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 
-import { AppSidebarProvider } from '@/components/shared/Sidebar'
+import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { StudentAssignmentsSection } from '@/components/student/AssignmentSection'
 import { useStudentAssignmentItems } from '@/hooks/student-assignments/use-student-assignment-items'
@@ -21,13 +21,13 @@ const Assignments = () => {
   })
 
   return (
-    <AppSidebarProvider role="student" user={sidebarUser}>
+    <StudentAppPageShell user={sidebarUser}>
       {isAuthLoading && !profile ? <PageSkeleton message="Memuat daftar tugas..." /> : null}
       <StudentAssignmentsSection
         view={assignmentListView}
         isLoading={isAuthLoading || isAssignmentsLoading}
       />
-    </AppSidebarProvider>
+    </StudentAppPageShell>
   )
 }
 

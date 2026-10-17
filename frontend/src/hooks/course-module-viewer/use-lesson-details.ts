@@ -7,7 +7,7 @@ import type { LessonDetailItem } from '@/lib/types/lesson'
 
 const STUDENT_LESSON_DETAIL_STALE_MS = 60_000
 
-export function useStudentLessonDetails(lessonUids: string[], enabled: boolean) {
+export function useLessonDetails(lessonUids: string[], enabled: boolean) {
   const uniqueUids = useMemo(
     () => [...new Set(lessonUids.filter(Boolean))],
     [lessonUids],

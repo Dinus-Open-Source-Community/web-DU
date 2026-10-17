@@ -30,15 +30,23 @@ function TransactionRowSkeleton() {
 interface RecentTransactionsProps {
   transactions?: IAdminTransaction[]
   isLoading?: boolean
+  periodLabel?: string
 }
 
-export function RecentTransactions({ transactions, isLoading }: RecentTransactionsProps) {
+export function RecentTransactions({
+  transactions,
+  isLoading,
+  periodLabel,
+}: RecentTransactionsProps) {
   const hasData = transactions && transactions.length > 0
+  const subtitle = periodLabel
+    ? `5 transaksi terakhir pada ${periodLabel}`
+    : '5 transaksi terakhir di platform'
 
   return (
     <ChartCard
       title="Transaksi Terbaru"
-      subtitle="5 transaksi terakhir di platform"
+      subtitle={subtitle}
       action={
         <Link
           to={ROUTES.admin.transactions}

@@ -19,23 +19,26 @@ export async function fetchDashboardKpis(period: DashboardPeriod = '30d') {
   return unwrapApiResponse(response.data, 'Gagal mengambil data KPI dashboard')
 }
 
-export async function fetchRecentTransactions(limit = 5) {
+export async function fetchRecentTransactions(
+  limit = 5,
+  period?: DashboardPeriod,
+) {
   const response = await api.get<IResponse<IAdminTransaction[]>>(
-    API_ROUTES.admin.dashboard.recentTransactions({ limit }),
+    API_ROUTES.admin.dashboard.recentTransactions({ limit, period }),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil transaksi terbaru')
 }
 
-export async function fetchTransactionSummary() {
+export async function fetchTransactionSummary(period?: DashboardPeriod) {
   const response = await api.get<IResponse<TransactionSummary>>(
-    API_ROUTES.admin.transactions.summary(),
+    API_ROUTES.admin.transactions.summary({ period }),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil ringkasan transaksi')
 }
 
-export async function fetchFinancialSummary() {
+export async function fetchFinancialSummary(period?: DashboardPeriod) {
   const response = await api.get<IResponse<FinancialSummary>>(
-    API_ROUTES.admin.financial.summary,
+    API_ROUTES.admin.financial.summary({ period }),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil ringkasan keuangan')
 }

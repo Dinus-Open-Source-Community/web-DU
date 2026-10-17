@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ImageIcon, Loader2 } from 'lucide-react'
 
+import { SettingsSocialSection } from '@/components/profile/SettingsSocialSection'
 import { SettingsThemeSection } from '@/components/profile/SettingsThemeSection'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
@@ -78,7 +79,8 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
       <header className="flex flex-col gap-1 pb-1">
         <h1 className={settingsLayout.pageTitle}>Pengaturan</h1>
         <p className={settingsLayout.pageSubtitle}>
-          Kelola foto profil, informasi pribadi, tema tampilan, dan keamanan akun Anda.
+          Kelola foto profil, informasi pribadi, media sosial, tema tampilan, dan keamanan
+          akun Anda.
         </p>
       </header>
 
@@ -177,6 +179,8 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
           </FormActions>
         </form>
       </div>
+
+      <SettingsSocialSection userUid={user.uid} />
 
       <SettingsThemeSection />
 

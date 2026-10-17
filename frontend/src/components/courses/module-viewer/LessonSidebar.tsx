@@ -6,9 +6,10 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 
 import {
   LESSON_SIDEBAR_WIDTH_PX,
-  type LessonEntry,
   type LessonThemeMode,
 } from '@/lib/course-module-viewer/lesson-viewer-utils'
+import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
+import type { LessonDetailAssignment } from '@/lib/types/lesson'
 import { LessonSidebarPanel } from './LessonSidebarPanel'
 
 /** Lebar tab toggle — harus sama dengan sisa wrapper saat sidebar tertutup. */
@@ -16,11 +17,13 @@ const LESSON_SIDEBAR_TOGGLE_PX = 28
 
 type LessonSidebarProps = {
   modules: IModulesDetail[]
-  lessonEntries: LessonEntry[]
+  courseUid: string
+  courseTitle: string
   activeModuleId?: string
   activeLessonId: string | null
+  activePane?: CourseViewerPane
+  assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>
   readLessonIds: ReadonlySet<string>
-  completedLessonsCount: number
   progressPercent: number
   expandedModules: Set<string>
   isOpen: boolean
@@ -30,15 +33,18 @@ type LessonSidebarProps = {
   onMobileOpenChange: (open: boolean) => void
   onToggleModule: (moduleId: string) => void
   onSelectLesson: (lessonId: string, moduleId: string) => void
+  onSelectAssignment?: (lessonId: string, moduleId: string) => void
 }
 
 export function LessonSidebar({
   modules,
-  lessonEntries,
+  courseUid,
+  courseTitle,
   activeModuleId,
   activeLessonId,
+  activePane,
+  assignmentByLessonUid,
   readLessonIds,
-  completedLessonsCount,
   progressPercent,
   expandedModules,
   isOpen,
@@ -48,22 +54,29 @@ export function LessonSidebar({
   onMobileOpenChange,
   onToggleModule,
   onSelectLesson,
+  onSelectAssignment,
 }: LessonSidebarProps) {
   const isDark = theme === 'dark'
 
   const panelProps = {
     modules,
-    lessonEntries,
+    courseUid,
+    courseTitle,
     activeModuleId,
     activeLessonId,
+    activePane,
+    assignmentByLessonUid,
     readLessonIds,
-    completedLessonsCount,
     progressPercent,
     expandedModules,
     theme,
     onToggleModule,
     onSelectLesson: (lessonId: string, moduleId: string) => {
       onSelectLesson(lessonId, moduleId)
+      onMobileOpenChange(false)
+    },
+    onSelectAssignment: (lessonId: string, moduleId: string) => {
+      onSelectAssignment?.(lessonId, moduleId)
       onMobileOpenChange(false)
     },
   }

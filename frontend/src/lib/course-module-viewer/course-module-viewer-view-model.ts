@@ -54,6 +54,9 @@ export type CourseModuleViewerViewModel = {
   localSearchInputRef: RefObject<HTMLInputElement | null>
   viewerPane: CourseViewerPane
   assignmentState: CourseModuleViewerAssignmentState
+  assignmentByLessonUid: ReadonlyMap<string, LessonDetailAssignment>
+  /** Mentor/admin hanya melihat pratinjau tugas tanpa aksi pengumpulan. */
+  isAssignmentReadOnly: boolean
   footerActiveTitle: string
   footerPreviousAction: LessonFooterNavAction | null
   footerNextAction: LessonFooterNavAction | null
@@ -69,6 +72,7 @@ export type CourseModuleViewerViewModel = {
   onMobileSidebarOpenChange: (open: boolean) => void
   onToggleModule: (moduleId: string) => void
   onSelectLesson: (lessonId: string, moduleId?: string) => void
+  onSelectAssignment: (lessonId: string, moduleId?: string) => void
   onSearchQueryChange: (query: string) => void
   onCloseSearch: () => void
   onViewerPaneChange: (pane: CourseViewerPane) => void

@@ -33,6 +33,7 @@ import (
 // @Param        search     query  string  false  "Search by reference, course, or student"
 // @Param        date_from  query  string  false  "Filter from date (YYYY-MM-DD or RFC3339)"
 // @Param        date_to    query  string  false  "Filter to date (YYYY-MM-DD or RFC3339)"
+// @Param        period     query  string  false  "Period shorthand: 7d, 30d, 90d, 12m (used when date_from/date_to absent)"
 // @Success      200  {object}  map[string]any  "Transaction summary retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
@@ -125,11 +126,12 @@ func GetAdminTransactionsFunc(c *gin.Context) {
 	})
 }
 
-func fetchRecentAdminTransactions(limit int) ([]gin.H, error) {
+func fetchRecentAdminTransactions(limit int, period string) ([]gin.H, error) {
 	if limit <= 0 {
 		limit = 5
 	}
-	filters := adminTransactionFilters{Limit: limit}
+	filters := adminTransactionFilters{Limit: limit, Period: period}
+	filters.applyPeriod()
 	db := buildAdminTransactionsQuery(filters)
 
 	var rows []adminTransactionRow

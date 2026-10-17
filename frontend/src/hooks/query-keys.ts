@@ -59,10 +59,12 @@ export const paymentKeys = {
 export const adminDashboardKeys = {
   all: ['admin-dashboard'] as const,
   kpis: (period: string) => ['admin-dashboard', 'kpis', period] as const,
-  recentTransactions: (limit: number) =>
-    ['admin-dashboard', 'recent-transactions', limit] as const,
-  transactionSummary: ['admin-dashboard', 'transaction-summary'] as const,
-  financialCharts: ['admin-dashboard', 'financial-charts'] as const,
+  recentTransactions: (limit: number, period: string) =>
+    ['admin-dashboard', 'recent-transactions', limit, period] as const,
+  transactionSummary: (period: string) =>
+    ['admin-dashboard', 'transaction-summary', period] as const,
+  financialCharts: (period: string) =>
+    ['admin-dashboard', 'financial-charts', period] as const,
 }
 
 export const adminTransactionsKeys = {

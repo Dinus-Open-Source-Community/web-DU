@@ -1,12 +1,17 @@
+import { ClipboardList } from 'lucide-react'
+
 import type { NavbarSearchItem } from '@/providers/navbar-search-provider'
 
 import { getLessonIcon, type LessonEntry } from '@/lib/course-module-viewer/lesson-viewer-utils'
+import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
 export function buildLessonSearchItems(
   lessonEntries: LessonEntry[],
   onSelectLesson: (lessonId: string, moduleId: string) => void,
+  onSelectAssignment?: (lessonId: string, moduleId: string) => void,
+  assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>,
 ): NavbarSearchItem[] {
-  return lessonEntries.map((entry) => ({
+  const lessonItems: NavbarSearchItem[] = lessonEntries.map((entry) => ({
     id: entry.lesson.uid,
     label: entry.lesson.title,
     description: `${entry.module.title} - Lesson ${entry.lessonIndex + 1}`,
@@ -19,6 +24,24 @@ export function buildLessonSearchItems(
     ],
     onSelect: () => onSelectLesson(entry.lesson.uid, entry.module.uid),
   }))
+
+  if (!onSelectAssignment || !assignmentByLessonUid) return lessonItems
+
+  const assignmentItems: NavbarSearchItem[] = []
+  for (const entry of lessonEntries) {
+    const assignment = assignmentByLessonUid.get(entry.lesson.uid)
+    if (!assignment) continue
+    assignmentItems.push({
+      id: `${entry.lesson.uid}:assignment`,
+      label: assignment.title,
+      description: `${entry.module.title} - Tugas · ${entry.lesson.title}`,
+      icon: ClipboardList,
+      keywords: [entry.module.title, entry.lesson.title, 'tugas', 'assignment', 'quiz', 'kuis'],
+      onSelect: () => onSelectAssignment(entry.lesson.uid, entry.module.uid),
+    })
+  }
+
+  return [...lessonItems, ...assignmentItems]
 }
 
 export function filterLessonSearchItems(items: NavbarSearchItem[], searchQuery: string): NavbarSearchItem[] {

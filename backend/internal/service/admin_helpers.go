@@ -143,6 +143,30 @@ type adminTransactionFilters struct {
 	Page     int
 	PerPage  int
 	Limit    int
+	// Period diisi dari query `period` (7d/30d/90d/12m). Dipakai oleh endpoint
+	// ringkasan dasbor agar grafik & tabel ikut periode yang dipilih user.
+	// Nilai eksplisit date_from/date_to selalu menang bila keduanya dikirim.
+	Period string
+}
+
+// applyPeriod mengisi DateFrom/DateTo dari `period` bila rentang tanggal
+// eksplisit belum diberikan, sehingga ringkasan dasbor/se financials mengikuti
+// pilihan periode user.
+func (f *adminTransactionFilters) applyPeriod() {
+	if f.DateFrom != nil || f.DateTo != nil {
+		return
+	}
+	if f.Period == "" {
+		return
+	}
+	period, ok := parseOptionalDashboardPeriod(f.Period)
+	if !ok {
+		return
+	}
+	start := period.currentStart
+	end := period.currentEnd
+	f.DateFrom = &start
+	f.DateTo = &end
 }
 
 func parseAdminTransactionFilters(c *gin.Context) adminTransactionFilters {
@@ -165,6 +189,7 @@ func parseAdminTransactionFilters(c *gin.Context) adminTransactionFilters {
 		Page:    page,
 		PerPage: perPage,
 		Limit:   limit,
+		Period:  strings.TrimSpace(c.Query("period")),
 	}
 
 	if dateFromStr := strings.TrimSpace(c.Query("date_from")); dateFromStr != "" {
@@ -182,6 +207,8 @@ func parseAdminTransactionFilters(c *gin.Context) adminTransactionFilters {
 			filters.DateTo = &end
 		}
 	}
+
+	filters.applyPeriod()
 
 	return filters
 }

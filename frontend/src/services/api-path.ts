@@ -203,7 +203,8 @@ export const API_ROUTES = {
         withQuery(`/admin/transactions/summary`, params),
     },
     financial: {
-      summary: `/admin/financial/summary`,
+      summary: (params?: IQueryParamsPayload) =>
+        withQuery(`/admin/financial/summary`, params),
     },
     moderation: {
       reviews: (params?: IQueryParamsPayload & { courseUid?: string }) =>
