@@ -15,16 +15,11 @@ const QUICK_LINKS: { label: string; href: string; description: string }[] = [
     href: ROUTES.student.assignments,
     description: 'Lihat deadline dan pengumpulan tugas',
   },
-  {
-    label: 'Transaksi',
-    href: ROUTES.student.transactions,
-    description: 'Lihat riwayat transaksi dan pembayaran',
-  },
 ]
 
 export function StudentQuickLinks() {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {QUICK_LINKS.map((link) => (
         <Link
           key={link.href}

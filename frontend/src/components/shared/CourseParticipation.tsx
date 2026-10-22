@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, CheckCircle, ClipboardList, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BarChart3, CheckCircle, ClipboardList, Loader2, Users } from 'lucide-react'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 import { Initials } from '../../lib/func/func'
 import { Pagination } from './Pagination'
@@ -10,10 +10,11 @@ import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
 import { CourseParticipantStatusBadge } from '../ui/badge'
 import { CourseDetailTabSectionIntro } from './course-detail-manage/CourseDetailTabSectionIntro'
+import { useCourseStudents } from '@/hooks/use-course'
 
 type CourseParticipantsSectionProps = {
   courseUid: string
-  studentsData: IMentorCourseStudent[]
+  studentsData?: IMentorCourseStudent[]
   adminStatusLabels?: boolean
 }
 
@@ -28,16 +29,25 @@ export function CourseParticipantsSection({
     setCurrentPage(1)
   }, [courseUid])
 
-  const totalPages = Math.max(1, Math.ceil(studentsData.length / 8))
+  const { data: studentsResponse, isLoading, isFetching } = useCourseStudents(
+    courseUid,
+    { page: currentPage, per_page: 8 },
+  )
+
+  const studentsList: IMentorCourseStudent[] =
+    studentsResponse?.enrollments ??
+    (studentsResponse ? [] : (studentsData ?? []))
+
+  const totalCount =
+    studentsResponse?.meta?.total ?? studentsData?.length ?? 0
+
+  const totalPages =
+    studentsResponse?.meta?.total_pages ??
+    Math.max(1, Math.ceil(totalCount / 8))
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages)
   }, [currentPage, totalPages])
-
-  const paginatedStudents = useMemo(() => {
-    const start = (currentPage - 1) * 8
-    return studentsData.slice(start, start + 8)
-  }, [studentsData, currentPage])
 
   return (
     <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
@@ -47,13 +57,24 @@ export function CourseParticipantsSection({
         title="Peserta kursus"
         description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
         aside={
-          <span className={manageDetailLayout.tabCountBadge}>
-            {studentsData.length} peserta
-          </span>
+          <div className={manageDetailLayout.tabCountBadge}>
+            <span className={manageDetailLayout.tabCountDot} aria-hidden />
+            <span>Total</span>
+            <span className={manageDetailLayout.tabCountNumber}>{totalCount}</span>
+            <span>peserta</span>
+            {isFetching && !isLoading ? (
+              <Loader2 className="size-3.5 animate-spin text-ink-400" aria-label="Memuat data..." />
+            ) : null}
+          </div>
         }
       />
 
-      {studentsData.length === 0 ? (
+      {isLoading && !studentsResponse ? (
+        <div className="flex h-48 items-center justify-center text-sm text-ink-500">
+          <Loader2 className="mr-2 size-5 animate-spin text-brand-blue" />
+          Memuat data peserta...
+        </div>
+      ) : studentsList.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-ink-900/10 bg-paper-paper/80 px-6 py-12 text-center text-sm text-ink-600">
           Belum ada peserta terdaftar untuk kursus ini.
         </div>
@@ -85,7 +106,7 @@ export function CourseParticipantsSection({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedStudents.map((student) => (
+                {studentsList.map((student) => (
                   <TableRow key={student.student_uid} className={manageDetailLayout.tableBodyRow}>
                     <TableCell className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -119,7 +140,7 @@ export function CourseParticipantsSection({
           </div>
 
           <ul className="flex flex-col gap-3 md:hidden">
-            {paginatedStudents.map((student) => (
+            {studentsList.map((student) => (
               <li key={student.student_uid} className={cn(manageDetailLayout.sectionCard, 'p-4 shadow-paper')}>
                 <div className="flex items-start gap-3">
                   {student.student_avatar_url ? (
@@ -152,12 +173,14 @@ export function CourseParticipantsSection({
           </ul>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              variant={adminStatusLabels ? 'admin' : 'default'}
-            />
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                variant={adminStatusLabels ? 'admin' : 'default'}
+              />
+            </div>
           )}
         </>
       )}

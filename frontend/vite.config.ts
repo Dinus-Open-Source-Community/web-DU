@@ -59,11 +59,12 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
+        '@': path.resolve(import.meta.dirname, './src'),
       },
     },
     server: {
       host: true,
+      port: 3000,
       watch: {
         usePolling: true,
         interval: 100

@@ -40,7 +40,11 @@ export function SegmentedControl<T extends string>({
             key={option.value}
             type="button"
             aria-pressed={isActive}
-            onClick={() => onChange(option.value)}
+            onClick={() => {
+              if (option.value !== value) {
+                onChange(option.value)
+              }
+            }}
             className={cn(
               editLayout.segmentedItem,
               editMotion.reducedMotion,

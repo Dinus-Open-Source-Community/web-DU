@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ExternalLink, Star } from 'lucide-react'
 
+import { formatCourseRatingLabel } from '@/lib/course-detail/course-rating'
 import { UserDetailProgressBar } from '@/components/admin/user-manage/user-detail/UserDetailProgressBar'
 import { PaymentBadge } from '@/components/ui/badge'
 import { AdminPublishStatusLabel, AdminStatusLabel } from '@/lib/admin/status-label'
@@ -25,8 +26,9 @@ export function UserDetailJoinedCourseCard({ course }: { course: ManagedUserDeta
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             <AdminStatusLabel tone="info">{course.enrollmentStatusLabel}</AdminStatusLabel>
+            <span className="text-line-medium">·</span>
             <span className={userDetailLayout.metaChip}>Terdaftar {course.enrolledAtLabel}</span>
           </div>
 
@@ -88,9 +90,11 @@ export function UserDetailMentoredCourseCard({ course }: { course: ManagedUserDe
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             <AdminPublishStatusLabel published={course.isPublished} />
+            <span className="text-line-medium">·</span>
             <span className={userDetailLayout.metaChip}>{course.priceLabel}</span>
+            <span className="text-line-medium">·</span>
             <span className={userDetailLayout.metaChip}>Dibuat {course.createdAtLabel}</span>
           </div>
         </div>
@@ -123,7 +127,7 @@ export function UserDetailReviewCard({ review }: { review: ManagedUserDetailRevi
           </div>
           <div className={userDetailLayout.ratingValue}>
             <Star className="size-3.5 fill-current" aria-hidden />
-            {review.rating}
+            {formatCourseRatingLabel(review.rating)}
           </div>
         </div>
         <p className={userDetailLayout.reviewBody}>{review.comment}</p>

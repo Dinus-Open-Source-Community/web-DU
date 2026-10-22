@@ -7,7 +7,6 @@ import {
   DashboardCourseDetailGateway,
   DashboardCourseEditGateway,
   DashboardCoursesGateway,
-  DashboardTransactionsGateway,
 } from "./pages/dashboard/Gateways.tsx";
 import {
   LEGACY_DASHBOARD_REDIRECTS,
@@ -61,7 +60,6 @@ const AdminGalleryPage = React.lazy(
   () => import("./pages/admin/Gallery.tsx"),
 );
 const CourseDetail = React.lazy(() => import("./pages/courses/detail.tsx"));
-const Financial = React.lazy(() => import("./pages/admin/Financial.tsx"));
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
 const MentorAssignments = React.lazy(
@@ -76,7 +74,6 @@ const StudentLearningCourse = React.lazy(
 const StudentAssignments = React.lazy(
   () => import("./pages/student/Assignments.tsx"),
 );
-import StudentTransactionPayment from "./pages/student/TransactionPayment.tsx";
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
 const RedeemPage = React.lazy(() => import("./pages/redeem/Redeem.tsx"));
 
@@ -261,7 +258,7 @@ const routeConfig: RouteConfig[] = [
     element: <DashboardCoursesGateway />,
     public: false,
     lazy: false,
-    roles: ["admin", "super_admin", "mentor"],
+    roles: ["admin", "super_admin", "mentor", "student"],
   },
   {
     path: ROUTES.admin.courseCategories,
@@ -321,21 +318,7 @@ const routeConfig: RouteConfig[] = [
     element: <DashboardCourseEditGateway />,
     public: false,
     lazy: false,
-    roles: ["admin", "super_admin", "mentor"],
-  },
-  {
-    path: ROUTES.admin.transactions,
-    element: <DashboardTransactionsGateway />,
-    public: false,
-    lazy: false,
-    roles: ["admin", "super_admin", "student"],
-  },
-  {
-    path: ROUTES.admin.financial,
-    element: <Financial />,
-    public: false,
-    lazy: true,
-    roles: ["admin", "super_admin"],
+    roles: ["admin", "super_admin", "mentor", "student"],
   },
   {
     path: ROUTES.admin.reviewsAndQaPath,
@@ -363,13 +346,6 @@ const routeConfig: RouteConfig[] = [
     element: <StudentAssignments />,
     public: false,
     lazy: true,
-    roles: ["student"],
-  },
-  {
-    path: ROUTES.student.transactionPaymentPath,
-    element: <StudentTransactionPayment />,
-    public: false,
-    lazy: false,
     roles: ["student"],
   },
   {

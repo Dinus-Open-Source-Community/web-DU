@@ -4,7 +4,10 @@
 # Golang
 /backend/vendor/
 /backend/*.exe
+/backend/bin/
 !/backend/public/uploads/avatars/*.txt
+# Logs
+/logs/
 # Environment variables
 .env
 # Playwright / MCP browser artifacts (any path, never push)

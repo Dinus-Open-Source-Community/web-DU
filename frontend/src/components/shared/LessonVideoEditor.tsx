@@ -41,7 +41,9 @@ export function LessonVideoEditor({
   }, [videoUrl])
 
   const handleBlur = () => {
-    onVideoUrlChange(localUrl)
+    if (localUrl.trim() !== videoUrl.trim()) {
+      onVideoUrlChange(localUrl.trim())
+    }
   }
 
   return (

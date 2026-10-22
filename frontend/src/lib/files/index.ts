@@ -8,6 +8,7 @@ export { blobToDataUrl } from './blob-to-data-url'
 export {
   collectCourseListImageReferences,
   collectCourseDetailImageReferences,
+  collectCourseMentorsImageReferences,
   collectCourseStudentsImageReferences,
   collectUserProfileAvatarReference,
   collectUserProfileImageReferences,
@@ -19,6 +20,7 @@ export {
 export {
   applyResolvedImagesToCourseItem,
   applyResolvedImagesToCourseDetail,
+  applyResolvedImagesToCourseMentors,
   applyResolvedImagesToCourseStudents,
   applyResolvedAvatarToUserProfile,
   applyResolvedImagesToUserProfile,

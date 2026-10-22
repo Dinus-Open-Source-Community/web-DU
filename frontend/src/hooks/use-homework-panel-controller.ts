@@ -37,6 +37,7 @@ export function useHomeworkPanelController(
   }
 
   const setHomeworkType = (type: HomeworkTaskType) => {
+    if (type === homeworkType) return
     patchHomework({ homeworkType: type })
   }
 

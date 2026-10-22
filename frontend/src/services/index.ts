@@ -3,7 +3,6 @@
  * Tidak boleh mengimpor React atau TanStack Query di folder ini.
  */
 export * from './admin-dashboard'
-export * from './admin-transactions'
 export * from './api-error'
 export * from './api-path'
 export * from './auth'

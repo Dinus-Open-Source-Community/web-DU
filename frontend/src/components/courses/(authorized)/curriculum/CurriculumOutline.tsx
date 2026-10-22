@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
+  ChevronDown,
   FileText,
   Film,
   MoreHorizontal,
@@ -102,7 +103,7 @@ function ModuleGroup({
   module,
   moduleIndex,
   activeLessonId,
-  isLoaded,
+  isLoaded: _isLoaded,
   isLoading,
   onSelectModule,
   onSelectLesson,
@@ -126,19 +127,29 @@ function ModuleGroup({
       <div
         className={cn(
           editLayout.moduleRow,
-          editMotion.reducedMotion,
+          'transition-colors duration-200 ease-in-out',
           isActiveModule ? editLayout.moduleRowActive : editLayout.moduleRowIdle,
         )}
       >
         <button
           type="button"
           onClick={() => onSelectModule(module.uid)}
-          className="min-w-0 flex-1 rounded-md px-1.5 py-1.5 text-left"
+          className="flex min-w-0 flex-1 items-start gap-2.5 rounded-md px-1.5 py-1.5 text-left"
+          aria-expanded={isActiveModule}
         >
-          <p className={editLayout.moduleTitle}>Modul {moduleIndex + 1}</p>
-          <p className={editLayout.moduleTitleText}>
-            {module.title}
-          </p>
+          <ChevronDown
+            className={cn(
+              "mt-0.5 size-4 shrink-0 text-ink-400 transition-transform duration-200 ease-in-out",
+              isActiveModule ? "rotate-0 text-ink-700" : "-rotate-90 text-ink-400",
+            )}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <p className={editLayout.moduleTitle}>Modul {moduleIndex + 1}</p>
+            <p className={cn(editLayout.moduleTitleText, "mt-0.5")}>
+              {module.title}
+            </p>
+          </div>
         </button>
 
         <DropdownMenu>
@@ -170,49 +181,52 @@ function ModuleGroup({
         </DropdownMenu>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2 px-3 py-2">
-          <div className={cn(editLayout.skeleton, 'h-8')} />
-          <div className={cn(editLayout.skeleton, 'h-8')} />
-        </div>
-      ) : isLoaded ? (
-        lessons.length > 0 ? (
-          <div className="space-y-0.5">
-            {lessons.map((lesson, lessonIndex) => (
-              <div
-                key={lesson.uid}
-                className={cn(editMotion.outlineItem, editMotion.reducedMotion)}
-                style={{ animationDelay: `${Math.min(lessonIndex, 8) * 30}ms` }}
-              >
-                <LessonRow
-                  index={lessonIndex}
-                  title={lesson.title}
-                  contentType={lesson.content_type}
-                  isActive={lesson.uid === activeLessonId}
-                  onSelect={() => onSelectLesson(lesson.uid)}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className={`px-3 py-2 ${editLayout.body}`}>Belum ada lesson.</p>
-        )
-      ) : (
-        <p className={`px-3 py-2 ${editLayout.body}`}>
-          Klik judul modul di atas untuk menampilkan daftar lesson di sini.
-        </p>
-      )}
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="mt-1 h-auto min-h-8 w-full justify-start gap-1.5 whitespace-normal px-3 py-2 text-left text-ink-600"
-        onClick={() => onAddLesson(module.uid)}
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-in-out',
+          isActiveModule
+            ? 'grid-rows-[1fr] opacity-100'
+            : 'grid-rows-[0fr] pointer-events-none opacity-0',
+        )}
       >
-        <Plus className="size-3.5" />
-        Tambah lesson
-      </Button>
+        <div className="overflow-hidden">
+          <div className="mt-1 space-y-1">
+            {isLoading ? (
+              <div className="space-y-2 px-3 py-2">
+                <div className={cn(editLayout.skeleton, 'h-8')} />
+                <div className={cn(editLayout.skeleton, 'h-8')} />
+              </div>
+            ) : lessons.length > 0 ? (
+              <div className="space-y-0.5">
+                {lessons.map((lesson, lessonIndex) => (
+                  <div key={lesson.uid}>
+                    <LessonRow
+                      index={lessonIndex}
+                      title={lesson.title}
+                      contentType={lesson.content_type}
+                      isActive={lesson.uid === activeLessonId}
+                      onSelect={() => onSelectLesson(lesson.uid)}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className={`px-3 py-2 ${editLayout.body}`}>Belum ada lesson.</p>
+            )}
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-1 h-auto min-h-8 w-full justify-start gap-1.5 whitespace-normal px-3 py-2 text-left text-ink-600 hover:text-ink-900"
+              onClick={() => onAddLesson(module.uid)}
+            >
+              <Plus className="size-3.5" />
+              Tambah lesson
+            </Button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -231,7 +245,7 @@ export function CurriculumOutline({
   onRenameModule,
   onDeleteModule,
 }: CurriculumOutlineProps) {
-  const resolvedModuleId = activeModuleId ?? modules[0]?.uid ?? null;
+  const resolvedModuleId = activeModuleId;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isFullLayout = layout === "full";
 

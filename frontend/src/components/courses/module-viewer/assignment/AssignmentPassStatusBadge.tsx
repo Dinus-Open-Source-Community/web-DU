@@ -40,7 +40,7 @@ export function AssignmentPassStatusBadge({ outcome, label, theme }: AssignmentP
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium',
         isDark ? colors.dark : colors.light,
       )}>
       {label}

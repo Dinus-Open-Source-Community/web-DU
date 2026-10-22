@@ -103,6 +103,7 @@ export function useAssignMentorsToCourse() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      void queryClient.invalidateQueries({ queryKey: ['course-mentors', courseUid] })
       toast.success(Message.course.mentorAssigned)
     },
     onError: (error: Error) => {
@@ -141,6 +142,7 @@ export function useUnassignMentorsFromCourse() {
     onSuccess: (_data, { courseUid }) => {
       void queryClient.invalidateQueries({ queryKey: courseKeys.all })
       void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      void queryClient.invalidateQueries({ queryKey: ['course-mentors', courseUid] })
       toast.success(Message.course.mentorUnassigned)
     },
     onError: (error: Error) => {

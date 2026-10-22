@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // @Summary      Create new lesson (Admin/Mentor)
@@ -248,7 +249,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 	// Filter judul lesson dilakukan in-memory karena title disimpan terenkripsi
 	if nameFilter != "" {
 		var allLessons []entity.Lesson
-		if err := db.Order("order_index ASC").Find(&allLessons).Error; err != nil {
+		if err := db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC").Find(&allLessons).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
 				"message": "Failed to retrieve lessons for search",
@@ -318,7 +319,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 	// Apply pagination
 	offset := (page - 1) * perPage
 	var lessons []entity.Lesson
-	if err := db.Order("order_index ASC").Limit(perPage).Offset(offset).Find(&lessons).Error; err != nil {
+	if err := db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC").Limit(perPage).Offset(offset).Find(&lessons).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve lessons",
@@ -566,7 +567,9 @@ func UpdateLessonFunc(c *gin.Context) {
 			lesson.EndTime = parsed
 		}
 	}
-	lesson.OrderIndex = req.OrderIndex
+	if req.OrderIndex != 0 {
+		lesson.OrderIndex = req.OrderIndex
+	}
 
 	if err := database.DB.Save(&lesson).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -586,6 +589,47 @@ func UpdateLessonFunc(c *gin.Context) {
 		"data":    lesson,
 		"error":   nil,
 	})
+}
+
+func deleteLessonsWithCascadeTx(tx *gorm.DB, lessonIDs []uuid.UUID) error {
+	if len(lessonIDs) == 0 {
+		return nil
+	}
+
+	if err := tx.Where("lesson_uid IN ?", lessonIDs).Delete(&entity.LessonAttendance{}).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Where("lesson_uid IN ?", lessonIDs).Delete(&entity.LessonReading{}).Error; err != nil {
+		return err
+	}
+
+	var assignmentIDs []uuid.UUID
+	if err := tx.Model(&entity.LessonAssignment{}).Where("lesson_uid IN ?", lessonIDs).Pluck("uid", &assignmentIDs).Error; err != nil {
+		return err
+	}
+
+	if len(assignmentIDs) > 0 {
+		var submissionIDs []uuid.UUID
+		if err := tx.Model(&entity.LessonAssignmentSubmission{}).Where("lesson_assignment_uid IN ?", assignmentIDs).Pluck("uid", &submissionIDs).Error; err != nil {
+			return err
+		}
+
+		if len(submissionIDs) > 0 {
+			if err := tx.Where("lesson_assignment_submission_uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmissionAttempt{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmission{}).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Where("uid IN ?", assignmentIDs).Delete(&entity.LessonAssignment{}).Error; err != nil {
+			return err
+		}
+	}
+
+	return tx.Where("uid IN ?", lessonIDs).Delete(&entity.Lesson{}).Error
 }
 
 // DeleteLessonFunc deletes a lesson by ID (Admin/Mentor).
@@ -642,17 +686,9 @@ func DeleteLessonFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAttendance{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson attendances", "data": nil, "error": err.Error()})
-		return
-	}
-
-	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAssignment{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson assignment", "data": nil, "error": err.Error()})
-		return
-	}
-
-	if err := database.DB.Delete(&lesson).Error; err != nil {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return deleteLessonsWithCascadeTx(tx, []uuid.UUID{lesson.Uid})
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to delete lesson",

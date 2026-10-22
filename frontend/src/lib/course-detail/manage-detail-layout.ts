@@ -20,7 +20,9 @@ export const manageDetailLayout = {
   sectionTitle: 'text-base font-semibold tracking-tight text-ink-900 sm:text-lg',
   sectionLabel: appKpiLabelClassName,
   tabCountBadge:
-    'inline-flex items-center gap-1.5 rounded-md border-2 border-ink-900/10 bg-paper-paper px-2.5 py-1 text-xs font-semibold text-ink-600',
+    'inline-flex items-center gap-2 text-xs font-medium text-ink-500 sm:text-sm',
+  tabCountNumber: 'font-bold tabular-nums text-ink-900',
+  tabCountDot: 'size-1.5 rounded-full bg-brand-blue',
   tableSurface: cn(appCardClassName, 'overflow-hidden shadow-paper'),
   tableHead:
     'text-[11px] font-semibold uppercase tracking-wide text-ink-500',

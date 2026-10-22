@@ -8,9 +8,6 @@ import { useCourseAssignmentRosterPage } from '@/hooks/course-detail/use-course-
 import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
-import { appShellGridOverlayClassName, appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
-import { appPageContentClassName } from '@/lib/layout/page-layout'
-import { cn } from '@/lib/utils'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
 
 export default function AdminAssignmentSubmissionsPage() {
@@ -38,9 +35,7 @@ export default function AdminAssignmentSubmissionsPage() {
     <AppSidebarProvider
       role={shellRole}
       user={sidebarUser}
-      contentClassName={cn(appPageContentClassName, appShellPageBgClassName, 'relative')}
     >
-      <div aria-hidden className={appShellGridOverlayClassName} />
       <div className="relative z-[1]">
         <AdminAssignmentSubmissionsContent
           courseUid={courseUid}

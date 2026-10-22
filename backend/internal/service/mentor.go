@@ -1,6 +1,7 @@
 package service
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -830,7 +831,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 		}
 
 		if len(reviewRows) > 0 {
-			averageRating = float64(totalRating) / float64(len(reviewRows))
+			averageRating = math.Round((float64(totalRating)/float64(len(reviewRows)))*10) / 10
 		}
 	}
 

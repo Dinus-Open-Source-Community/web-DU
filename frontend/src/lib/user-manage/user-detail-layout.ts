@@ -31,8 +31,7 @@ export const userDetailLayout = {
   statLabel: appKpiLabelClassName,
   statValue: cn(appKpiValueClassName, 'text-2xl'),
   list: 'flex flex-col gap-4',
-  metaChip:
-    'inline-flex items-center rounded-lg border border-ink-900/10 bg-paper-paper px-2.5 py-1 text-xs font-medium text-ink-600',
+  metaChip: 'text-xs font-medium text-ink-500',
   actionButton:
     'h-9 shrink-0 rounded-lg border-ink-900/10 px-3 text-xs font-semibold',
   destructiveActionButton:

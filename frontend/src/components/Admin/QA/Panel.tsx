@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Loader2, MessageCircle, Star } from 'lucide-react'
+import { Loader2, MessageSquare, SendHorizontal, Star } from 'lucide-react'
 
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ReviewLottieIllustration } from '@/components/playful/ReviewLottieIllustration'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
+import { formatCourseRatingLabel } from '@/lib/course-detail/course-rating'
 import { appCardClassName, appCardHeaderClassName } from '@/lib/design/app-shell-tokens'
 import { Button } from '@/components/ui/button'
 import {
@@ -63,13 +64,13 @@ export function ReviewsPanel({ courseUid, reviews, isLoading = false }: ReviewsP
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-full text-left">
           <thead className={cn('bg-paper-paper', appCardHeaderClassName)}>
-            <tr className="border-b border-line-light text-xs uppercase tracking-wider text-ink-500">
-              <th className="px-4 py-3 font-semibold">Siswa</th>
-              <th className="px-4 py-3 font-semibold">Course</th>
-              <th className="px-4 py-3 font-semibold">Rating</th>
-              <th className="px-4 py-3 font-semibold">Review</th>
-              <th className="px-4 py-3 font-semibold">Tanggal</th>
-              <th className="px-4 py-3 font-semibold">Balasan</th>
+            <tr className="border-b border-line-light text-xs font-medium text-ink-500">
+              <th className="px-4 py-3">Siswa</th>
+              <th className="px-4 py-3">Kursus</th>
+              <th className="px-4 py-3">Rating</th>
+              <th className="px-4 py-3">Ulasan</th>
+              <th className="px-4 py-3">Tanggal</th>
+              <th className="px-4 py-3">Balasan</th>
             </tr>
           </thead>
           <tbody>
@@ -83,19 +84,26 @@ export function ReviewsPanel({ courseUid, reviews, isLoading = false }: ReviewsP
   )
 }
 
-function ReviewRatingStars({ rating }: { rating: number }) {
+function ReviewRatingStars({ rating, showLabel = false }: { rating: number; showLabel?: boolean }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`Rating ${rating} dari 5`}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Star
-          key={index}
-          className={cn(
-            'h-3.5 w-3.5',
-            index < rating ? 'fill-amber-400 text-amber-400' : 'text-ink-400',
-          )}
-          aria-hidden
-        />
-      ))}
+    <div className="flex items-center gap-1.5" aria-label={`Rating ${rating} dari 5`}>
+      <div className="flex items-center gap-0.5">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Star
+            key={index}
+            className={cn(
+              'h-3.5 w-3.5',
+              index < Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-ink-300 dark:text-ink-600',
+            )}
+            aria-hidden
+          />
+        ))}
+      </div>
+      {showLabel && (
+        <span className="text-xs font-semibold tabular-nums text-ink-900">
+          {formatCourseRatingLabel(rating)}
+        </span>
+      )}
     </div>
   )
 }
@@ -110,7 +118,8 @@ function ReviewReplyDialog({ review, open, onOpenChange }: ReviewReplyDialogProp
   const replyMutation = useReplyAdminReview()
   const [reply, setReply] = useState('')
   const isSubmitting = replyMutation.isPending
-  const canSubmit = reply.trim().length >= 3 && !isSubmitting
+  const trimmed = reply.trim()
+  const canSubmit = trimmed.length >= 3 && !isSubmitting
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) setReply('')
@@ -135,74 +144,114 @@ function ReviewReplyDialog({ review, open, onOpenChange }: ReviewReplyDialogProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl rounded-2xl border-line-light">
+        {/* Header */}
         <DialogHeader className="border-b border-line-light px-6 py-5">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <MessageCircle className="size-5 text-primary" aria-hidden />
-            Balas review
-          </DialogTitle>
-          <DialogDescription>
-            Balasan akan tampil di bawah ulasan siswa pada halaman course.
-          </DialogDescription>
+          <div className="flex items-start gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft border border-brand-blue/30 text-brand-ink">
+              <MessageSquare className="size-4" aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <DialogTitle className="text-base font-semibold text-ink-900">
+                Balas Ulasan Siswa
+              </DialogTitle>
+              <DialogDescription className="text-xs text-ink-500 leading-relaxed">
+                Tanggapan resmi Anda akan dipublikasikan langsung di bawah ulasan siswa pada halaman kursus.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
+        {/* Content Body */}
         <div className="flex flex-col gap-5 px-6 py-5">
-          <div className="rounded-xl border border-line-light bg-paper-paper/80 p-4">
-            <div className="flex items-start gap-3">
-              <UserAvatarImage
-                src={review.studentAvatar}
-                alt={review.studentName}
-                size={40}
-                className="ring-1 ring-border"
-              />
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <p className="font-semibold text-ink-900">{review.studentName}</p>
-                <AdminMetaLabel className="max-w-full truncate">{review.courseTitle}</AdminMetaLabel>
-                <div className="flex flex-wrap items-center gap-2">
-                  <ReviewRatingStars rating={review.rating} />
-                  <span className="text-xs text-ink-500">{review.createdAt}</span>
+          {/* Review Context Card */}
+          <div className="flex flex-col gap-3 rounded-xl border border-line-light bg-paper-offwhite/80 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <UserAvatarImage
+                  src={review.studentAvatar}
+                  alt={review.studentName}
+                  size={36}
+                  className="ring-1 ring-border shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink-900 truncate">{review.studentName}</p>
+                  <p className="text-xs text-ink-500 truncate max-w-[200px] sm:max-w-[280px]">
+                    {review.courseTitle}
+                  </p>
                 </div>
               </div>
+
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <ReviewRatingStars rating={review.rating} showLabel />
+                <span className="text-[11px] text-ink-400 tabular-nums">{review.createdAt}</span>
+              </div>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-ink-700">{review.comment}</p>
+
+            <div className="border-l-2 border-brand-blue/60 pl-3.5 py-1 bg-paper-white/60 rounded-r-lg">
+              <p className="text-sm leading-relaxed text-ink-800 italic">
+                "{review.comment}"
+              </p>
+            </div>
           </div>
 
+          {/* Reply Form */}
           <div className="space-y-2">
-            <label htmlFor={`review-reply-${review.uid}`} className="text-sm font-semibold text-ink-900">
-              Balasan Anda
-            </label>
+            <div className="flex items-center justify-between text-xs">
+              <label htmlFor={`review-reply-${review.uid}`} className="font-medium text-ink-700">
+                Tanggapan Anda
+              </label>
+              <span className={cn('tabular-nums text-xs', trimmed.length >= 3 ? 'text-ink-400' : 'text-amber-600 font-medium')}>
+                {trimmed.length} karakter (min. 3)
+              </span>
+            </div>
+
             <Textarea
               id={`review-reply-${review.uid}`}
               value={reply}
               onChange={(event) => setReply(event.target.value)}
-              placeholder="Tulis balasan kepada siswa..."
+              placeholder="Tuliskan tanggapan, apresiasi, atau klarifikasi secara ramah dan profesional..."
               disabled={isSubmitting}
-              className="min-h-28 resize-none text-sm"
+              className="min-h-32 resize-none rounded-xl border-line-light bg-paper-white p-3.5 text-sm leading-relaxed placeholder:text-ink-400 focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900/10"
             />
+            <p className="text-[11px] text-ink-400">
+              Gunakan bahasa yang sopan dan solutif untuk menjaga kenyamanan peserta kursus.
+            </p>
           </div>
         </div>
 
-        <DialogFooter className="border-t border-line-light px-6 py-4 sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-9 rounded-sm border-border"
-            disabled={isSubmitting}
-            onClick={() => handleOpenChange(false)}
-          >
-            Batal
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            className="h-9 rounded-sm"
-            disabled={!canSubmit}
-            onClick={() => void handleSendReply()}
-          >
-            {isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
-            Kirim balasan
-          </Button>
+        {/* Footer */}
+        <DialogFooter className="border-t border-line-light px-6 py-4 bg-paper-paper/40 flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[11px] text-ink-400 hidden sm:block">
+            Tanggapan tidak dapat diedit setelah dikirim.
+          </p>
+
+          <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-lg border-line-light px-4 text-xs font-medium text-ink-700 hover:bg-paper-white"
+              disabled={isSubmitting}
+              onClick={() => handleOpenChange(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 rounded-lg px-4 text-xs font-medium bg-ink-900 text-paper-white hover:bg-ink-800 gap-1.5 shadow-sm disabled:opacity-50"
+              disabled={!canSubmit}
+              onClick={() => void handleSendReply()}
+            >
+              {isSubmitting ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              ) : (
+                <SendHorizontal className="size-3.5" aria-hidden />
+              )}
+              Kirim balasan
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -230,7 +279,7 @@ function ReviewRow({ review }: { review: AdminReview }) {
           <AdminMetaLabel className="max-w-48 truncate">{review.courseTitle}</AdminMetaLabel>
         </td>
         <td className="px-4 py-4">
-          <ReviewRatingStars rating={review.rating} />
+          <ReviewRatingStars rating={review.rating} showLabel />
         </td>
         <td className="px-4 py-4">
           <p className="line-clamp-3 min-w-56 leading-relaxed text-ink-700">{review.comment}</p>
@@ -238,20 +287,22 @@ function ReviewRow({ review }: { review: AdminReview }) {
         <td className="px-4 py-4 text-xs text-ink-500">{review.createdAt}</td>
         <td className="px-4 py-4">
           {review.reply ? (
-            <div className="rounded-xl border border-primary/25 bg-primary/10 p-3">
-              <p className="text-xs font-semibold text-primary">
-                Balasan dari {review.reply.author} • {review.reply.createdAt}
-              </p>
-              <p className="mt-1 text-sm text-ink-700">{review.reply.comment}</p>
+            <div className="rounded-lg border border-line-light bg-paper-paper/70 p-3 text-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-medium text-ink-600">
+                <span>Balasan dari {review.reply.author}</span>
+                <span className="text-line-medium">·</span>
+                <span className="tabular-nums text-ink-400">{review.reply.createdAt}</span>
+              </div>
+              <p className="text-sm leading-relaxed text-ink-800">{review.reply.comment}</p>
             </div>
           ) : (
             <Button
               variant="outline"
               size="sm"
-              className="h-8 w-fit gap-1.5 rounded-sm border-border text-xs font-semibold text-foreground shadow-none hover:bg-muted"
+              className="h-8 w-fit gap-1.5 rounded-lg border-line-light px-3 text-xs font-medium text-ink-800 shadow-none hover:bg-paper-paper hover:border-ink-900/20"
               onClick={() => setReplyDialogOpen(true)}
             >
-              <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+              <MessageSquare className="size-3.5 text-ink-500" aria-hidden />
               Balas review
             </Button>
           )}

@@ -294,7 +294,7 @@ export function CourseDetailOverviewTab({
                     <p className="line-clamp-3">{reviewSummary.latestReview.comment}</p>
                     <footer className="mt-2 text-xs font-medium text-ink-500">
                       {reviewSummary.latestReview.user?.name ?? 'Siswa'} ·{' '}
-                      {reviewSummary.latestReview.rating}/5
+                      {formatCourseRatingLabel(reviewSummary.latestReview.rating)}/5
                     </footer>
                   </blockquote>
                 ) : null}

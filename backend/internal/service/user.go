@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"math"
 	"net/http"
 	"net/mail"
 	"sort"
@@ -429,7 +430,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 
 	averageRating := 0.0
 	if len(reviewRows) > 0 {
-		averageRating = float64(totalRating) / float64(len(reviewRows))
+		averageRating = math.Round((float64(totalRating)/float64(len(reviewRows)))*10) / 10
 	}
 
 	type transactionRow struct {

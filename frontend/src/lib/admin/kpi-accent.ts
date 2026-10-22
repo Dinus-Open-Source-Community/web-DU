@@ -1,22 +1,26 @@
 import type { AdminKpiIconName } from '@/lib/types/admin/dashboard'
 
-/** Aksen kiri KPI — warna sticky-note / brand DOSCOM, tanpa ikon dekoratif generik. */
-export const adminKpiAccentClassName: Record<AdminKpiIconName, string> = {
-  revenue: 'border-l-brand-blue',
-  users: 'border-l-[#A8EFCF]',
-  transactions: 'border-l-[#D7CBFF]',
-  conversion: 'border-l-[#FFC4A6]',
+/** Aksen kiri KPI — warna sticky-note / brand DOSCOM, selaras design tokens. */
+export const adminKpiAccentClassName: Record<string, string> = {
+  users: 'border-l-note-mint',
   ticket: 'border-l-note-yellow',
-  paid: 'border-l-emerald-500',
-  pending: 'border-l-amber-500',
-  failed: 'border-l-destructive',
+  courses: 'border-l-note-sky',
+  completion: 'border-l-note-lavender',
+  mint: 'border-l-note-mint',
+  yellow: 'border-l-note-yellow',
+  sky: 'border-l-note-sky',
+  lavender: 'border-l-note-lavender',
+  peach: 'border-l-note-peach',
+  pink: 'border-l-note-pink',
 }
 
-export type TransactionSparkMetric = 'revenue' | 'paid' | 'pending' | 'failed'
-
-export const transactionSparkAccentClassName: Record<TransactionSparkMetric, string> = {
-  revenue: adminKpiAccentClassName.revenue,
-  paid: adminKpiAccentClassName.paid,
-  pending: adminKpiAccentClassName.pending,
-  failed: adminKpiAccentClassName.failed,
+export function getAdminKpiAccent(iconName?: AdminKpiIconName, id?: string): string {
+  if (id === 'active-users') return 'border-l-note-mint'
+  if (id === 'total-students') return 'border-l-note-sky'
+  if (id === 'active-courses') return 'border-l-note-yellow'
+  if (id === 'course-completion') return 'border-l-note-lavender'
+  if (iconName && adminKpiAccentClassName[iconName]) {
+    return adminKpiAccentClassName[iconName]
+  }
+  return 'border-l-note-mint'
 }

@@ -978,7 +978,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 	if err := database.DB.Preload("Modules", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
 	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Order("order_index ASC")
+		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
 	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,

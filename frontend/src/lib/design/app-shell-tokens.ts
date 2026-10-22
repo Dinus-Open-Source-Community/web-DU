@@ -40,10 +40,10 @@ export const appKpiLabelClassName = 'truncate text-sm font-medium text-ink-500'
 export const appKpiValueClassName = 'text-2xl font-bold tracking-tight text-ink-900'
 
 export const appSegmentedControlClassName =
-  'inline-flex items-center gap-1 rounded-lg border-2 border-ink-900/10 bg-paper-paper p-1'
+  'inline-flex items-center gap-1 rounded-full border-2 border-ink-900/10 bg-paper-paper p-1'
 
 export const appSegmentedItemActiveClassName =
-  'bg-brand-blue text-ink-900 shadow-none'
+  'bg-primary/10 text-primary hover:bg-primary/15 font-semibold shadow-none'
 
 export const appSegmentedItemIdleClassName = 'text-ink-500 hover:text-ink-700'
 

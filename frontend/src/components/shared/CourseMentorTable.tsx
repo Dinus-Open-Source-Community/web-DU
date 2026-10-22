@@ -1,16 +1,19 @@
-import type { ReactNode } from 'react'
-import { GraduationCap, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { GraduationCap, Loader2, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
 import type { ICourseMentorItem } from '@/lib/types/user'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { ConfirmDialog } from './ConfirmDialog'
+import { Pagination } from './Pagination'
 import { CourseDetailTabSectionIntro } from '@/components/shared/course-detail-manage/CourseDetailTabSectionIntro'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
+import { useCourseMentors } from '@/hooks/use-course'
 
 interface CourseMentorTableProps {
+  courseUid?: string
   mentors: ICourseMentorItem[]
   isAdmin?: boolean
   assignAction?: ReactNode
@@ -70,6 +73,7 @@ function UnassignMentorButton({
 }
 
 export function CourseMentorTable({
+  courseUid,
   mentors,
   isAdmin,
   assignAction,
@@ -80,6 +84,30 @@ export function CourseMentorTable({
   unassigningMentorUid,
 }: CourseMentorTableProps) {
   const canUnassign = isAdmin && Boolean(onRequestUnassignMentor)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [courseUid])
+
+  const { data: mentorsResponse, isLoading, isFetching } = useCourseMentors(
+    courseUid ?? '',
+    courseUid ? { page: currentPage, per_page: 8 } : undefined,
+  )
+
+  const displayedMentors: ICourseMentorItem[] =
+    mentorsResponse?.mentors ?? (courseUid ? [] : mentors)
+
+  const totalCount =
+    mentorsResponse?.meta?.total ?? mentors.length
+
+  const totalPages =
+    mentorsResponse?.meta?.total_pages ??
+    Math.max(1, Math.ceil(totalCount / 8))
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
 
   return (
     <>
@@ -89,16 +117,27 @@ export function CourseMentorTable({
         title="Tim mentor"
         description="Lihat mentor yang ditugaskan untuk mengajar kursus ini."
         aside={
-          <span className={manageDetailLayout.tabCountBadge}>
-            {mentors.length} mentor
-          </span>
+          <div className={manageDetailLayout.tabCountBadge}>
+            <span className={manageDetailLayout.tabCountDot} aria-hidden />
+            <span>Total</span>
+            <span className={manageDetailLayout.tabCountNumber}>{totalCount}</span>
+            <span>mentor</span>
+            {isFetching && !isLoading ? (
+              <Loader2 className="size-3.5 animate-spin text-ink-400" aria-label="Memuat data..." />
+            ) : null}
+          </div>
         }
       />
 
       {isAdmin && assignAction ? <div className="mb-4 flex justify-end">{assignAction}</div> : null}
 
       <section className={manageDetailLayout.tableSurface}>
-      {mentors.length === 0 ? (
+      {isLoading && !mentorsResponse && courseUid ? (
+        <div className="flex h-48 items-center justify-center text-sm text-ink-500">
+          <Loader2 className="mr-2 size-5 animate-spin text-brand-blue" />
+          Memuat data mentor...
+        </div>
+      ) : displayedMentors.length === 0 ? (
         <div className="px-4 py-10 text-center sm:px-5">
           <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -125,7 +164,7 @@ export function CourseMentorTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mentors.map((mentor) => (
+                {displayedMentors.map((mentor) => (
                   <TableRow key={mentor.uid} className={manageDetailLayout.tableBodyRow}>
                     <TableCell className="max-w-72 px-5 py-4">
                       <MentorIdentity mentor={mentor} />
@@ -153,7 +192,7 @@ export function CourseMentorTable({
           </div>
 
           <div className="divide-y divide-border md:hidden">
-            {mentors.map((mentor) => (
+            {displayedMentors.map((mentor) => (
               <article key={mentor.uid} className="px-4 py-4">
                 <MentorIdentity mentor={mentor} size="compact" />
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -180,6 +219,17 @@ export function CourseMentorTable({
         </>
       )}
       </section>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            variant={isAdmin ? 'admin' : 'default'}
+          />
+        </div>
+      )}
 
       {pendingUnassignMentor ? (
         <ConfirmDialog

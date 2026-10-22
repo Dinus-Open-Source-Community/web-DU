@@ -95,7 +95,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	if nameFilter != "" {
 		var allModules []entity.Module
 		if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-			return db.Order("order_index ASC")
+			return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
 		}).Order("order_index ASC").Find(&allModules).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
@@ -158,7 +158,7 @@ func GetAllModulesFunc(c *gin.Context) {
 
 	var modules []entity.Module
 	if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Order("order_index ASC")
+		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
 	}).Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -212,7 +212,7 @@ func GetModuleByIDFunc(c *gin.Context) {
 
 	var module entity.Module
 	if err := database.DB.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Order("order_index ASC")
+		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
 	}).First(&module, moduleUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -513,15 +513,7 @@ func DeleteAdminModuleFunc(c *gin.Context) {
 			return err
 		}
 
-		if len(lessonIDs) > 0 {
-			if err := tx.Where("lesson_uid IN ?", lessonIDs).
-				Delete(&entity.LessonAttendance{}).Error; err != nil {
-				return err
-			}
-		}
-
-		if err := tx.Where("module_uid = ?", module.Uid).
-			Delete(&entity.Lesson{}).Error; err != nil {
+		if err := deleteLessonsWithCascadeTx(tx, lessonIDs); err != nil {
 			return err
 		}
 

@@ -56,11 +56,11 @@ export default function MentorCard({ mentor, index = 0, className }: MentorCardP
                 <p className="mt-0.5 text-xs font-bold text-brand-ink sm:text-sm">{mentor.role}</p>
 
                 {/* Course yang diajar */}
-                <ul className="mt-2 flex flex-wrap gap-1" aria-label={`Course yang diajar ${mentor.name}`}>
+                <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={`Course yang diajar ${mentor.name}`}>
                   {mentor.courses.map((course) => (
                     <li
                       key={course}
-                      className="rounded-full border border-ink-900/25 bg-paper-panel px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-ink-900 uppercase"
+                      className="rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-700"
                     >
                       {course}
                     </li>

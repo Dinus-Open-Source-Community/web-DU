@@ -1062,14 +1062,15 @@ func seedLessons(db *gorm.DB) {
 				videoURL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 			}
 
+			dayOffset := (module.OrderIndex-1)*3 + i - 3
 			lesson := entity.Lesson{
 				ModuleUid:   module.Uid,
 				Title:       module.Title + " - Lesson " + lessonNo,
 				ContentType: contentType,
 				Content:     contentJSON,
 				VideoURL:    videoURL,
-				StartTime:   now.AddDate(0, 0, i),
-				EndTime:     now.AddDate(0, 0, i).Add(2 * time.Hour),
+				StartTime:   now.AddDate(0, 0, dayOffset),
+				EndTime:     now.AddDate(0, 0, dayOffset).Add(2 * time.Hour),
 				OrderIndex:  i,
 			}
 

@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, MessageSquare, BookMarked, Layers, ArrowRightLeft, LayoutGrid, Mail, Images, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Mail, Images, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/components/navigation'
 
@@ -31,25 +31,15 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
-    {
+   {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
       icon: Images,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-      icon: Wallet,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
       icon: MessageSquare,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
-      icon: LineChart,
     },
   ],
   SuperAdmin: [
@@ -78,19 +68,9 @@ export const Navigation: Record<string, NavItem[]> = {
       icon: Images,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-      icon: Wallet,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
       icon: MessageSquare,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
-      icon: LineChart,
     },
   ],
   Mentor: [
@@ -116,7 +96,6 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Transaksi', icon: ArrowRightLeft, path: ROUTES.student.transactions },
   ],
 }
 

@@ -154,6 +154,7 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
             <TabsContent value="mentor" className="mt-0 animate-in fade-in duration-300">
               <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
               <CourseMentorTable
+                courseUid={courseUid}
                 mentors={course.mentors || []}
                 isAdmin={isAdmin}
                 assignAction={<AssignCourseMentorDialog {...assignMentorDialog} />}

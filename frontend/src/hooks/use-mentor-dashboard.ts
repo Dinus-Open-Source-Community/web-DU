@@ -11,7 +11,8 @@ import {
 } from '@/services/mentor-dashboard'
 
 const DEFAULT_SCHEDULE_PARAMS: MentorDashboardSchedulesParams = {
-  limit: 50,
+  include_past: true,
+  limit: 100,
 }
 
 export function useMentorDashboard(

@@ -72,11 +72,40 @@ export function AdminQaStatusLabel({ answered }: { answered: boolean }) {
   )
 }
 
-export function AdminPublishStatusLabel({ published }: { published: boolean }) {
+export function AdminPublishStatusLabel({
+  published,
+  className,
+}: {
+  published: boolean
+  className?: string
+}) {
+  if (published) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-emerald-700',
+          className,
+        )}
+      >
+        <span className="relative flex size-2 shrink-0">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+        </span>
+        Terbit
+      </span>
+    )
+  }
+
   return (
-    <AdminStatusLabel tone={published ? 'success' : 'warning'}>
-      {published ? 'Terbit' : 'Draft'}
-    </AdminStatusLabel>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-ink-500',
+        className,
+      )}
+    >
+      <span className="size-2 shrink-0 rounded-full bg-ink-400" aria-hidden />
+      Draft
+    </span>
   )
 }
 

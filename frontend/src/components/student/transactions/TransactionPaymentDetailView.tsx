@@ -20,7 +20,6 @@ type TransactionPaymentDetailViewProps = {
 }
 
 export function TransactionPaymentDetailView({
-  backHref,
   detail,
 }: TransactionPaymentDetailViewProps) {
   const invoice = presentPaymentInvoiceView(detail)
@@ -32,7 +31,7 @@ export function TransactionPaymentDetailView({
     <main className="mx-auto w-full max-w-7xl pb-16">
       <div className="mb-5 flex items-center justify-between gap-4">
         <Button asChild variant="ghost" size="lg" className="-ml-3 min-h-11 px-3 text-ink-600">
-          <Link to={backHref ?? ROUTES.student.transactions}>
+          <Link to={ROUTES.student.dashboard}>
             <ArrowLeft className="size-4" aria-hidden data-icon="inline-start" />
             Riwayat transaksi
           </Link>

@@ -55,7 +55,7 @@ export function ToolbarGroup({
     <div
       className={cn(
         'flex shrink-0 items-center gap-0.5',
-        surface && 'rounded-xl bg-muted p-0.5 ring-1 ring-border',
+        surface && 'rounded-full bg-muted p-0.5 ring-1 ring-border',
       )}
     >
       {children}
@@ -111,7 +111,7 @@ export function ToolbarIconButton({
         if (!actionOnMouseDown) onClick()
       }}
       className={cn(
-        'shrink-0 rounded-sm p-0 shadow-none transition-colors outline-none active:scale-[0.97] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30',
+        'shrink-0 rounded-full p-0 shadow-none transition-colors outline-none active:scale-[0.97] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30',
         size === 'bubble' && 'size-8',
         size === 'compact' && 'size-8',
         size === 'default' && 'size-9',
