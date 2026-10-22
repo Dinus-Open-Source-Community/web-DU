@@ -22,10 +22,10 @@ function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['t
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium',
         isQuiz
-          ? 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300'
-          : 'border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300',
+          ? 'border-sky-500/30 bg-sky-50 text-sky-800 dark:bg-sky-950/40 dark:border-sky-800/40 dark:text-sky-300'
+          : 'border-purple-500/30 bg-purple-50 text-purple-800 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300',
       )}
     >
       <Icon className="size-3" aria-hidden />

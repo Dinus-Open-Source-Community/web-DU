@@ -61,6 +61,7 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
   }
 
   const handlePassingScoreBlur = () => {
+    if (passingScore === (quiz.passingScore ?? 70)) return
     onChange({ ...quiz, passingScore })
   }
 

@@ -1,8 +1,10 @@
 import {
+  buildEditableLessonFromOutline,
   createFallbackLesson,
   getLessonKey,
   toLesson,
 } from '@/lib/course-edit/mappers'
+import type { CourseDetailLesson } from '@/lib/types/lesson'
 import type { EditableLesson, EditableModule, LessonApiItem } from '@/lib/course-edit/types'
 
 export function mergeModuleLessonsFromApi(
@@ -74,6 +76,7 @@ export function toModuleShell(
     order_index?: number
     created_at?: string
     updated_at?: string
+    lessons?: CourseDetailLesson[]
   },
   fallbackOrder: number,
 ): EditableModule {
@@ -84,7 +87,9 @@ export function toModuleShell(
     order_index: Number(item.order_index ?? fallbackOrder) || fallbackOrder,
     created_at: item.created_at ?? '',
     updated_at: item.updated_at,
-    lessons: [],
+    lessons: (item.lessons ?? []).map((lesson, index) =>
+      buildEditableLessonFromOutline(lesson, index + 1),
+    ),
   }
 }
 

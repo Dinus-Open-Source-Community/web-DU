@@ -112,10 +112,10 @@ export function useCheckout(courseUid: string, options: UseCheckoutOptions = {})
           product_url: '',
           image_url: course.cover_url ?? '',
         }],
-        return_url: `${window.location.origin}${ROUTES.student.transactions}`,
+    return_url: `${window.location.origin}${ROUTES.student.dashboard}`,
       })
 
-      const result = await paymentMutation.mutateAsync(paymentPayload)
+      await paymentMutation.mutateAsync(paymentPayload)
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: courseKeys.all }),
@@ -123,17 +123,10 @@ export function useCheckout(courseUid: string, options: UseCheckoutOptions = {})
         refreshProfile(),
       ])
 
-      const ref = result?.data?.reference
-      const merchantRef = result?.data?.merchant_ref
-
       onPaymentStarted?.()
 
-      if (ref || merchantRef) {
-        navigate(ROUTES.student.transactionPayment({ reference: ref, merchantRef }))
-      } else {
-        toast.success(Message.payment.created)
-        navigate(ROUTES.student.transactions)
-      }
+      toast.success(Message.payment.created)
+      navigate(ROUTES.student.learning)
     } catch (err) {
       toast.error(
         err instanceof Error

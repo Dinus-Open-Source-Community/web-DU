@@ -6,6 +6,7 @@ import type {
   ICategoryItem,
   ICategoryListResponse,
   ICourseListResponse,
+  ICourseMentorListResponse,
   ICourseStudentListResponse,
   ICourseTypeListResponse,
   CourseReadingProgress,
@@ -153,11 +154,18 @@ export async function joinCourse(courseUid: string) {
   return unwrapApiResponse(response.data, 'Gagal mendaftar kursus')
 }
 
-export async function fetchCourseStudents(courseUid: string) {
+export async function fetchCourseStudents(courseUid: string, params?: IQueryParamsPayload) {
   const response = await api.get<IResponse<ICourseStudentListResponse>>(
-    API_ROUTES.courses.getStudentsByUid(courseUid),
+    API_ROUTES.courses.getStudentsByUid(courseUid, params),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil peserta kursus')
+}
+
+export async function fetchCourseMentors(courseUid: string, params?: IQueryParamsPayload) {
+  const response = await api.get<IResponse<ICourseMentorListResponse>>(
+    API_ROUTES.courses.getMentorByUid(courseUid, params),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil mentor kursus')
 }
 
 export async function fetchCourseProgress(courseUid: string) {

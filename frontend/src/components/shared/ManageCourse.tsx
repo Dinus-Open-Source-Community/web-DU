@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
 type CourseFilter = (typeof filters)[number]
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 8
 
 const EMPTY_FILTER_COPY: Record<
   CourseFilter,
@@ -120,13 +120,12 @@ export default function ManageCourseSection({
 
         {filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedCourses.map((c) => (
                 <CardMentor
                   key={c.uid}
                   data={c}
                   detailHref={ROUTES.dashboardMenu.courseDetail(c.uid)}
-                  adminStatusLabel
                 />
               ))}
             </div>

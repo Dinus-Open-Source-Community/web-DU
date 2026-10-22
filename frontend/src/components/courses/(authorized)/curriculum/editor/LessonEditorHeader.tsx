@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ClipboardList, Pencil } from 'lucide-react'
+import { ClipboardCheck, ClipboardList, FileText, Pencil } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { CourseEditorTab } from '@/lib/course-edit/types'
 import { cn } from '@/lib/utils'
 
 import { editLayout } from '@/lib/course-edit/edit-layout'
-import { editMotion } from '@/lib/course-edit/edit-motion'
 import { LessonTitleRenameField } from './LessonTitleRenameField'
 
 type LessonEditorHeaderProps = {
@@ -59,7 +57,7 @@ export function LessonEditorHeader({
   }
 
   return (
-    <header className={`space-y-4 pb-4 sm:pb-5 ${editLayout.divider}`}>
+    <header className="space-y-4">
       {!isCompact && (
         <div className="min-w-0 space-y-2">
           {moduleLabel && (
@@ -97,37 +95,71 @@ export function LessonEditorHeader({
         </div>
       )}
 
-      <Tabs
-        value={editorTab}
-        onValueChange={(value) => onEditorTabChange(value as CourseEditorTab)}
-        className="gap-0"
-      >
-        <TabsList variant="line" className="h-10 w-full bg-transparent p-0 sm:h-9 sm:w-auto">
-          <TabsTrigger
-            value="content"
-            className="flex-1 px-0 text-sm font-medium transition-colors duration-200 sm:flex-none"
-          >
-            Konten
-          </TabsTrigger>
-          <TabsTrigger
-            value="homework"
-            className="ml-0 flex-1 gap-1.5 px-0 text-sm font-medium transition-colors duration-200 sm:ml-6 sm:flex-none"
-          >
-            <ClipboardList className="size-4" aria-hidden />
-            Tugas
-            {hasHomework && (
-              <span
-                className={cn(
-                  'ml-1 size-1.5 rounded-full bg-brand-blue',
-                  'animate-in fade-in zoom-in-95 duration-200',
-                  editMotion.reducedMotion,
-                )}
-                aria-label="Tugas sudah diisi"
-              />
+      <div className="w-full border-b-2 border-ink-900/10">
+        <div
+          role="tablist"
+          aria-label="Navigasi konten dan tugas lesson"
+          className="inline-flex h-auto w-max min-w-full flex-nowrap"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={editorTab === 'content'}
+            onClick={() => onEditorTabChange('content')}
+            className={cn(
+              '-mb-0.5 inline-flex min-h-11 shrink-0 snap-start items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:min-h-10 sm:px-4',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30',
+              editorTab === 'content'
+                ? 'border-brand-blue text-ink-900 font-semibold'
+                : 'border-transparent text-ink-500 hover:text-ink-800',
             )}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+          >
+            <span
+              className={cn(
+                'flex size-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200',
+                editorTab === 'content'
+                  ? 'border-brand-blue/30 bg-brand-blue/15 text-brand-blue'
+                  : 'border-line-light bg-paper-paper text-ink-400',
+              )}
+            >
+              <FileText className="size-3.5" aria-hidden />
+            </span>
+            <span>Konten</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={editorTab === 'homework'}
+            onClick={() => onEditorTabChange('homework')}
+            className={cn(
+              '-mb-0.5 inline-flex min-h-11 shrink-0 snap-start items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:min-h-10 sm:px-4',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30',
+              editorTab === 'homework'
+                ? 'border-brand-blue text-ink-900 font-semibold'
+                : 'border-transparent text-ink-500 hover:text-ink-800',
+            )}
+          >
+            <span
+              className={cn(
+                'flex size-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200',
+                hasHomework
+                  ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-600'
+                  : editorTab === 'homework'
+                    ? 'border-brand-blue/30 bg-brand-blue/15 text-brand-blue'
+                    : 'border-line-light bg-paper-paper text-ink-400',
+              )}
+            >
+              {hasHomework ? (
+                <ClipboardCheck className="size-3.5 stroke-[2.2]" aria-hidden />
+              ) : (
+                <ClipboardList className="size-3.5" aria-hidden />
+              )}
+            </span>
+            <span>Tugas</span>
+          </button>
+        </div>
+      </div>
     </header>
   )
 }

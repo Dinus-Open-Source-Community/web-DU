@@ -194,7 +194,7 @@ export function editableLessonToPayloadInput(
   }
 }
 
-function buildEditableLessonFromOutline(
+export function buildEditableLessonFromOutline(
   outlineLesson: CourseDetailLesson,
   lessonIndex: number,
   prevLesson?: EditableLesson,

@@ -52,7 +52,7 @@ export const settingsLayout = {
   avatarFallback: 'text-2xl font-bold text-ink-900',
   displayName: 'text-xl font-bold tracking-tight text-ink-900 sm:text-2xl',
   roleBadge:
-    'rounded-full border-2 border-ink-900/10 bg-brand-blue/25 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-ink-900',
+    'rounded-md border border-line-light bg-paper-paper px-2.5 py-1 text-xs font-medium text-ink-700',
   divider: 'border-b-2 border-ink-900/10',
   subsection: 'flex flex-col gap-4 pb-6',
   formGrid: 'grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5',

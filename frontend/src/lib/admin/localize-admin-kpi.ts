@@ -2,23 +2,13 @@ import type { AdminKpi } from '@/lib/types/admin/dashboard'
 
 /** Label KPI dari API (fallback jika backend belum terbarui). */
 const KPI_LABEL_BY_ID: Record<string, string> = {
-  'gross-revenue': 'Pendapatan kotor',
   'active-users': 'Pengguna aktif',
-  transactions: 'Transaksi',
-  'conversion-rate': 'Tingkat konversi',
-  'gross-revenue-12m': 'Pendapatan kotor (12 bln)',
-  'avg-order-value': 'Nilai pesanan rata-rata',
-  'paid-transactions': 'Transaksi lunas',
+  'support-tickets': 'Tiket support',
 }
 
 const KPI_LABEL_BY_LEGACY_ENGLISH: Record<string, string> = {
-  'Gross Revenue': 'Pendapatan kotor',
-  'Gross Revenue (12m)': 'Pendapatan kotor (12 bln)',
   'Active Users': 'Pengguna aktif',
-  Transactions: 'Transaksi',
-  'Conversion Rate': 'Tingkat konversi',
-  'Avg Order Value': 'Nilai pesanan rata-rata',
-  'Paid Transactions': 'Transaksi lunas',
+  'Support Tickets': 'Tiket support',
 }
 
 const TREND_LABEL_MAP: Record<string, string> = {

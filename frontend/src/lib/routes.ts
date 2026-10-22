@@ -41,9 +41,6 @@ export const dashboardMenu = {
     lessonUid: string,
     submissionUid: string,
   ) => dash('courses', courseUid, 'assignments', lessonUid, 'submissions', submissionUid),
-  transactions: dash('transactions'),
-  transactionPayment: dash('transactions', 'payment'),
-  financial: dash('financial'),
   reviewsAndQa: dash('reviews-and-qa'),
   learning: dash('learning'),
   learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
@@ -79,8 +76,6 @@ export const ROUTES = {
     assignmentSubmissions: dashboardMenu.assignmentSubmissions,
     assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
     courseEditAdmin: dashboardMenu.courseEdit,
-    transactions: dashboardMenu.transactions,
-    financial: dashboardMenu.financial,
     reviewsAndQaPath: dashboardMenu.reviewsAndQa,
     reviewsAndQa: (courseUid?: string) =>
       `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
@@ -103,17 +98,6 @@ export const ROUTES = {
     learningCourse: dashboardMenu.learningCourse,
     assignments: dashboardMenu.assignments,
     certificates: dashboardMenu.certificates,
-    transactions: dashboardMenu.transactions,
-    transactionPaymentPath: dashboardMenu.transactionPayment,
-    transactionPayment: (query: { reference?: string; merchantRef?: string }) => {
-      const params = new URLSearchParams()
-      if (query.reference) params.set('reference', query.reference)
-      if (query.merchantRef) params.set('merchant_ref', query.merchantRef)
-      const queryString = params.toString()
-      return queryString
-        ? `${dashboardMenu.transactionPayment}?${queryString}`
-        : dashboardMenu.transactionPayment
-    },
   },
 } as const
 
@@ -133,16 +117,8 @@ export const routeGroups: Record<string, RouteItem[]> = {
       path: ROUTES.admin.gallery,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
     },
   ],
   SuperAdmin: [
@@ -164,9 +140,7 @@ export const routeGroups: Record<string, RouteItem[]> = {
       ],
     },
     { name: 'Galeri', path: ROUTES.admin.gallery },
-    { name: 'Transaksi', path: ROUTES.admin.transactions },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.admin.reviewsAndQaPath },
-    { name: 'Laporan Keuangan', path: ROUTES.admin.financial },
   ],
   Mentor: [
     { name: 'Dasbor', path: ROUTES.mentor.dashboard },
@@ -185,6 +159,5 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Transaksi', path: ROUTES.student.transactions },
   ],
 }

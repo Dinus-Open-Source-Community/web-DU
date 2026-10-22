@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 
 import { DASHBOARD_PATH } from '@/lib/dashboard-route'
+import { ROUTES } from '@/lib/routes'
 import { useAuth } from '@/providers/auth-provider'
 
 import AdminCourses from '@/pages/admin/Courses'
@@ -27,6 +28,7 @@ export function DashboardCoursesGateway() {
   const staff = staffCourseRole(role)
   if (staff === 'admin') return <AdminCourses />
   if (staff === 'mentor') return <MentorCourses />
+  if (role === 'student') return <Navigate to={ROUTES.student.learning} replace />
   return <Navigate to={DASHBOARD_PATH} replace />
 }
 
@@ -42,7 +44,7 @@ export function DashboardCourseEditGateway() {
   const { role } = useAuth()
   const staff = staffCourseRole(role)
   if (staff === 'admin') return <CourseEditAdmin />
-  if (staff === 'mentor') return <CourseEditMentor />
+  if (staff === 'mentor' || role === 'student') return <CourseEditMentor />
   return <Navigate to={DASHBOARD_PATH} replace />
 }
 

@@ -62,7 +62,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
 
             {/* Course yang diajar */}
             <div>
-              <p className="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-[0.15em] text-ink-500 uppercase">
+              <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500">
                 <BookOpen className="size-3.5" aria-hidden />
                 Mengajar
               </p>
@@ -70,7 +70,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                 {mentor.courses.map((course) => (
                   <li
                     key={course}
-                    className="rounded-full border-2 border-ink-900 bg-note-yellow px-2.5 py-1 text-xs font-extrabold text-ink-900"
+                    className="rounded-md border border-line-light bg-paper-paper px-2.5 py-1 text-xs font-medium text-ink-800"
                   >
                     {course}
                   </li>

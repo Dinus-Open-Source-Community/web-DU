@@ -5,9 +5,11 @@ import type { LessonDetailItem } from '@/lib/types/course'
 import {
   applyResolvedImagesToCourseDetail,
   applyResolvedImagesToCourseItem,
+  applyResolvedImagesToCourseMentors,
   applyResolvedImagesToCourseStudents,
   collectCourseDetailImageReferences,
   collectCourseListImageReferences,
+  collectCourseMentorsImageReferences,
   collectCourseStudentsImageReferences,
 } from '@/lib/files'
 import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
@@ -18,6 +20,7 @@ import {
   fetchCourses,
   fetchCourseProgress,
   fetchCourseStudents,
+  fetchCourseMentors,
   fetchCourseTypes,
   stripLessonsFromModules,
 } from '@/services/course'
@@ -115,11 +118,11 @@ export function useCourseTypes(params?: IQueryParamsPayload) {
   })
 }
 
-export function useCourseStudents(courseUid: string) {
+export function useCourseStudents(courseUid: string, params?: IQueryParamsPayload) {
   const query = useQuery({
-    queryKey: courseKeys.students(courseUid),
+    queryKey: courseKeys.students(courseUid, params),
     enabled: !!courseUid,
-    queryFn: () => fetchCourseStudents(courseUid),
+    queryFn: () => fetchCourseStudents(courseUid, params),
   })
 
   const imageReferences = useMemo(
@@ -134,6 +137,34 @@ export function useCourseStudents(courseUid: string) {
   const data = useMemo(() => {
     if (!query.data) return undefined
     return applyResolvedImagesToCourseStudents(query.data, fileMap.getDisplayUrl)
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseMentors(courseUid: string, params?: IQueryParamsPayload) {
+  const query = useQuery({
+    queryKey: courseKeys.mentors(courseUid, params),
+    enabled: !!courseUid,
+    queryFn: () => fetchCourseMentors(courseUid, params),
+  })
+
+  const imageReferences = useMemo(
+    () => collectCourseMentorsImageReferences(query.data),
+    [query.data],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return applyResolvedImagesToCourseMentors(query.data, fileMap.getDisplayUrl)
   }, [fileMap.getDisplayUrl, query.data])
 
   return {
@@ -218,7 +249,7 @@ export function useCourseEditModules(courseUid: string) {
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
 
   const modules = useMemo(
-    () => stripLessonsFromModules(modulesQuery.data?.modules ?? []),
+    () => modulesQuery.data?.modules ?? [],
     [modulesQuery.data?.modules],
   )
 

@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 import { LessonContentPanel } from './editor/LessonContentPanel'
 import { LessonEditorHeader } from './editor/LessonEditorHeader'
 import { LessonHomeworkPanel } from './editor/LessonHomeworkPanel'
-import { PanelTransition } from './editor/PanelTransition'
 import { editLayout } from '@/lib/course-edit/edit-layout'
 
 type CourseLessonWorkspaceProps = {
@@ -83,7 +82,7 @@ export function CourseLessonWorkspace({
   const showEditor = editorReady && !isLoadingDetail
 
   return (
-    <PanelTransition panelKey={lessonKey} direction="bottom" className="min-w-0">
+    <div className="min-w-0">
       <LessonEditorHeader
         lessonId={lessonKey}
         lessonTitle={activeLesson.title}
@@ -113,6 +112,6 @@ export function CourseLessonWorkspace({
           onPatchAssignment={onPatchAssignment}
         />
       ) : null}
-    </PanelTransition>
+    </div>
   )
 }

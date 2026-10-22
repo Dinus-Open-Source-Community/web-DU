@@ -17,7 +17,7 @@ export function TransactionPaymentForbidden({ backHref }: { backHref?: string })
         Anda tidak memiliki izin untuk melihat detail pembayaran ini. Pastikan referensi transaksi milik akun Anda.
       </p>
       <Button asChild size="lg" className="mt-6 min-h-11 px-5">
-        <Link to={backHref ?? ROUTES.student.transactions}>
+        <Link to={backHref ?? ROUTES.student.dashboard}>
           <ArrowLeft className="size-4" aria-hidden data-icon="inline-start" />
           Kembali ke riwayat
         </Link>

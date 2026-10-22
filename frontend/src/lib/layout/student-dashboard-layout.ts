@@ -1,17 +1,15 @@
 import {
   appShellGridOverlayClassName,
-  appShellPageBgClassName,
 } from '@/lib/design/app-shell-tokens'
 import { dashboardSurface } from '@/lib/layout/dashboard-surface'
 import {
   appPageContentClassName,
   dashboardPageStackClassName,
 } from '@/lib/layout/page-layout'
-import { cn } from '@/lib/utils'
 
 /** Layout shell halaman student dashboard — selaras mentor/admin. */
 export const studentDashboardLayout = {
-  contentClassName: cn(appPageContentClassName, appShellPageBgClassName, 'relative'),
+  contentClassName: appPageContentClassName,
   gridOverlay: appShellGridOverlayClassName,
   pageStack: dashboardPageStackClassName,
   pageHeader: dashboardSurface.pageHeader,

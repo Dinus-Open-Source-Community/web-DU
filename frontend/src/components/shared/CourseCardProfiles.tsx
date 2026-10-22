@@ -4,9 +4,12 @@ import type { CourseProfile } from '@/lib/course-detail/course-profile'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Profile } from '../ui/profile'
 import { UserAvatarImage } from './UserAvatarImage'
+import { cn } from '@/lib/utils'
 
 type CourseCardProfilesProps = {
   profiles: CourseProfile[]
+  compact?: boolean
+  className?: string
 }
 
 function buildMentorGroupLabel(profiles: CourseProfile[]) {
@@ -19,14 +22,21 @@ function buildMentorGroupLabel(profiles: CourseProfile[]) {
   return `${primary.name} +${rest.length} lainnya`
 }
 
-export function CourseCardProfiles({ profiles }: CourseCardProfilesProps) {
+export function CourseCardProfiles({ profiles, compact = false, className }: CourseCardProfilesProps) {
   const [open, setOpen] = useState(false)
 
   if (profiles.length === 0) return null
 
   if (profiles.length === 1) {
     const profile = profiles[0]
-    return <Profile image={profile.avatar_url?.trim() ?? ''} name={profile.name} />
+    return (
+      <Profile
+        image={profile.avatar_url?.trim() ?? ''}
+        name={profile.name}
+        compact={compact}
+        className={className}
+      />
+    )
   }
 
   const label = buildMentorGroupLabel(profiles)
@@ -36,22 +46,38 @@ export function CourseCardProfiles({ profiles }: CourseCardProfilesProps) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="flex w-full min-w-0 items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          className={cn(
+            'flex min-w-0 items-center cursor-pointer transition-opacity hover:opacity-80',
+            compact ? 'max-w-[140px] gap-1.5 sm:max-w-[160px]' : 'w-full gap-2',
+            className,
+          )}
         >
-          <div className="flex shrink-0 -space-x-2">
+          <div className={cn('flex shrink-0', compact ? '-space-x-1.5' : '-space-x-2')}>
             {profiles.slice(0, 3).map((profile) => (
               <UserAvatarImage
                 key={profile.uid ?? profile.name}
                 src={profile.avatar_url?.trim() ?? ''}
                 alt={profile.name}
-                size={28}
+                size={compact ? 24 : 28}
                 className="ring-2 ring-white"
               />
             ))}
           </div>
-          <p className="line-clamp-1 text-base font-medium text-[var(--text-secondary)]">{label}</p>
-          <span className="ml-auto shrink-0 rounded-full bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-600">
-            <Users className="inline size-3 mr-0.5" />
+          <p
+            className={cn(
+              'truncate font-medium',
+              compact ? 'text-xs text-ink-700' : 'line-clamp-1 text-base text-[var(--text-secondary)]',
+            )}
+          >
+            {label}
+          </p>
+          <span
+            className={cn(
+              'shrink-0 bg-paper-paper font-medium text-ink-600',
+              compact ? 'ml-0.5 rounded-md border border-ink-900/10 px-1.5 py-0.5 text-[10px]' : 'ml-auto rounded-full px-2 py-0.5 text-xs',
+            )}
+          >
+            <Users className={cn('inline mr-0.5', compact ? 'size-2.5' : 'size-3')} />
             {profiles.length}
           </span>
         </button>

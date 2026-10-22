@@ -16,11 +16,14 @@ func StartAdminRoutes(r *gin.Engine) {
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(middleware.AuthMiddleware())
 	{
-		adminGroup.GET("/transactions", service.GetAdminTransactionsFunc)
-		adminGroup.GET("/transactions/summary", service.GetAdminTransactionsSummaryFunc)
-		adminGroup.GET("/financial/summary", service.GetAdminFinancialSummaryFunc)
+		// Endpoint transaksi & keuangan dihapus per request pengguna
+		// adminGroup.GET("/transactions", service.GetAdminTransactionsFunc)
+		// adminGroup.GET("/transactions/summary", service.GetAdminTransactionsSummaryFunc)
+		// adminGroup.GET("/financial/summary", service.GetAdminFinancialSummaryFunc)
+		// adminGroup.GET("/dashboard/recent-transactions", service.GetAdminRecentTransactionsFunc)
+
 		adminGroup.GET("/dashboard/kpis", service.GetAdminDashboardKPIsFunc)
-		adminGroup.GET("/dashboard/recent-transactions", service.GetAdminRecentTransactionsFunc)
+		adminGroup.GET("/dashboard/analytics", service.GetAdminDashboardAnalyticsFunc)
 		adminGroup.GET("/reviews", service.GetAdminReviewsFunc)
 		adminGroup.POST("/reviews/:review_id/reply", service.CreateAdminReviewReplyFunc)
 		adminGroup.GET("/qna", service.GetAdminQnaFunc)

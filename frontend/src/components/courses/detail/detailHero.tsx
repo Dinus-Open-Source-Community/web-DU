@@ -49,7 +49,7 @@ export function CourseDetailHero({
         </nav>
 
         <div className="flex flex-col gap-2.5 sm:gap-3">
-          <span className="w-fit rounded-full bg-paper-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+          <span className="text-xs font-medium text-white/80">
             {category}
           </span>
           <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-[2.5rem]">

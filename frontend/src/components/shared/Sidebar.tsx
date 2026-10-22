@@ -24,6 +24,7 @@ import type { UserRole } from '../../lib/types/user'
 import { NavbarSearchProvider } from '../../providers/navbar-search-provider'
 import { useAppTopNavbarAuth } from '@/hooks/layout/use-navbar-auth'
 import {
+  appShellGridOverlayClassName,
   appShellPageBgClassName,
   appShellSidebarClassName,
   brandWordmarkClassName,
@@ -276,8 +277,9 @@ export function AppNavbarProvider({
   return (
     <NavbarSearchProvider>
       <div
-        className="flex min-h-dvh w-full flex-col bg-paper-offwhite"
+        className="relative flex min-h-dvh w-full flex-col bg-paper-offwhite"
       >
+        <div aria-hidden className={appShellGridOverlayClassName} />
         <AppTopNavbar
           role={role}
           user={normalizedUser}
@@ -287,7 +289,7 @@ export function AppNavbarProvider({
         />
         <main
           className={cn(
-            'flex w-full flex-1 flex-col',
+            'relative z-[1] flex w-full flex-1 flex-col',
             contentClassName ?? appPageContentClassName,
           )}>
           {children}
@@ -318,12 +320,13 @@ export function AppSidebarProvider({
         <AppSidebar role={role} />
 
         <SidebarInset
-          className={cn('min-w-0', appShellPageBgClassName)}
+          className={cn('relative min-w-0 flex-1 min-h-svh bg-paper-offwhite', appShellPageBgClassName)}
         >
+          <div aria-hidden className={appShellGridOverlayClassName} />
           <AppTopNavbar role={role} user={normalizedUser} onSignOut={onSignOut} />
           <div
             className={cn(
-              'flex w-full min-w-0 flex-col',
+              'relative z-[1] flex w-full min-w-0 flex-1 flex-col',
               contentClassName ?? appPageContentClassName,
             )}>
             {children}

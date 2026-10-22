@@ -100,7 +100,7 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
                   key={course.uid}
                   data={course}
                   variant={isInProgress ? "resume" : "non-resume"}
-                  size="lg"
+                  size="sm"
                 />
               );
             })}

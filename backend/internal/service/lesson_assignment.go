@@ -233,6 +233,33 @@ func UpdateLessonAssignmentFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment updated successfully", "data": existing, "error": nil})
 }
 
+func deleteLessonAssignmentWithCascadeTx(tx *gorm.DB, lessonUID uuid.UUID) error {
+	var assignmentIDs []uuid.UUID
+	if err := tx.Model(&entity.LessonAssignment{}).Where("lesson_uid = ?", lessonUID).Pluck("uid", &assignmentIDs).Error; err != nil {
+		return err
+	}
+
+	if len(assignmentIDs) == 0 {
+		return nil
+	}
+
+	var submissionIDs []uuid.UUID
+	if err := tx.Model(&entity.LessonAssignmentSubmission{}).Where("lesson_assignment_uid IN ?", assignmentIDs).Pluck("uid", &submissionIDs).Error; err != nil {
+		return err
+	}
+
+	if len(submissionIDs) > 0 {
+		if err := tx.Where("lesson_assignment_submission_uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmissionAttempt{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmission{}).Error; err != nil {
+			return err
+		}
+	}
+
+	return tx.Where("uid IN ?", assignmentIDs).Delete(&entity.LessonAssignment{}).Error
+}
+
 // @Summary      Delete lesson assignment (Admin/Mentor)
 // @Description  Delete assignment configuration for a lesson.
 // @Tags         Lesson Assignment
@@ -266,7 +293,9 @@ func DeleteLessonAssignmentFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAssignment{}).Error; err != nil {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return deleteLessonAssignmentWithCascadeTx(tx, lesson.Uid)
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}

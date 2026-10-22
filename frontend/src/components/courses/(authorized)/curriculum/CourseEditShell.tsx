@@ -24,6 +24,8 @@ import { CourseEditToolbar } from './CourseEditChrome'
 import { CourseLessonWorkspace } from './CourseLessonWorkspace'
 import { CurriculumOutline } from './CurriculumOutline'
 import { editLayout } from '@/lib/course-edit/edit-layout'
+import { appCardClassName } from '@/lib/design/app-shell-tokens'
+import { cn } from '@/lib/utils'
 import { UnsavedEditorTabDialog } from './UnsavedEditorTabDialog'
 
 type CourseEditShellProps = CourseEditNavigationActions & {
@@ -229,7 +231,16 @@ export function CourseEditShell({
         onDeleteAssignment={() => void onDeleteAssignment()}
       />
 
-      <div className={isCompact ? 'flex min-h-0 flex-1 flex-col' : editLayout.shell}>
+      <div
+        className={
+          isCompact
+            ? cn(
+                appCardClassName,
+                'flex min-h-0 flex-1 flex-col rounded-2xl p-4 shadow-paper sm:p-6',
+              )
+            : editLayout.shell
+        }
+      >
         {showOutline && (
           <div
             className={

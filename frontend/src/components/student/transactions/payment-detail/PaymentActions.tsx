@@ -60,7 +60,7 @@ export function PaymentActions({
       ) : null}
 
       <Button asChild variant="ghost" size="lg" className="min-h-11 w-full text-ink-600">
-        <Link to={ROUTES.student.transactions}>
+        <Link to={ROUTES.student.dashboard}>
           <History className="size-4" aria-hidden data-icon="inline-start" />
           Riwayat transaksi
         </Link>

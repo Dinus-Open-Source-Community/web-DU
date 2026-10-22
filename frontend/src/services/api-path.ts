@@ -89,7 +89,8 @@ export const API_ROUTES = {
     deleteByUid: (uid: Uid) => `/courses/${uid}`,
     getByUid: (uid: Uid) => `/courses/${uid}`,
     joinByUid: (uid: Uid) => `/courses/${uid}/join`,
-    getMentorByUid: (uid: Uid) => `/courses/${uid}/mentor`,
+    getMentorByUid: (uid: Uid, params?: IQueryParamsPayload) =>
+      withQuery(`/courses/${uid}/mentor`, params),
     createReviewByUid: (uid: Uid) => `/courses/${uid}/review`,
     replyReviewByUid: (courseUid: Uid, reviewUid: Uid) =>
       `/courses/${courseUid}/review/${reviewUid}/reply`,
@@ -193,6 +194,8 @@ export const API_ROUTES = {
     dashboard: {
       kpis: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/kpis`, params),
+      analytics: (params?: IQueryParamsPayload) =>
+        withQuery(`/admin/dashboard/analytics`, params),
       recentTransactions: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/recent-transactions`, params),
     },

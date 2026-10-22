@@ -1,4 +1,11 @@
-import type { ICourseDetailItem, ICourseItem, ICourseStudentListResponse, IAdminQaThread, IAdminReview } from '@/lib/types/course'
+import type {
+  ICourseDetailItem,
+  ICourseItem,
+  ICourseMentorListResponse,
+  ICourseStudentListResponse,
+  IAdminQaThread,
+  IAdminReview,
+} from '@/lib/types/course'
 import type { IManagedUsersListResponse } from '@/lib/types/features/user-manage'
 import type { IUserData } from '@/lib/types/user'
 import type { ManagedUserDetailApiResponse } from '@/lib/user-manage/user-detail-api-types'
@@ -84,6 +91,19 @@ export function applyResolvedImagesToCourseStudents(
     enrollments: (students.enrollments ?? []).map((student) => ({
       ...student,
       student_avatar_url: resolveReference(getDisplayUrl, student.student_avatar_url),
+    })),
+  }
+}
+
+export function applyResolvedImagesToCourseMentors(
+  mentorsResponse: ICourseMentorListResponse,
+  getDisplayUrl: ResolveDisplayUrl,
+): ICourseMentorListResponse {
+  return {
+    ...mentorsResponse,
+    mentors: (mentorsResponse.mentors ?? []).map((mentor) => ({
+      ...mentor,
+      avatar_url: resolveReference(getDisplayUrl, mentor.avatar_url) ?? '',
     })),
   }
 }

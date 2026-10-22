@@ -107,7 +107,7 @@ export default function CourseSection() {
                         <span className="text-ink-900 font-display text-lg leading-tight font-bold sm:text-2xl">
                           {item.title}
                         </span>
-                        <span className="text-brand-ink ml-3 hidden rounded-full border border-ink-900/20 bg-paper-panel px-2.5 py-0.5 text-[11px] font-extrabold tracking-wide uppercase sm:inline-block">
+                        <span className="text-brand-ink ml-3 hidden rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium sm:inline-block">
                           {item.level}
                         </span>
                       </span>

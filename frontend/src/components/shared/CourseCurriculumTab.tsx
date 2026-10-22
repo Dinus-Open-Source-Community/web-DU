@@ -122,7 +122,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <h4 className="truncate text-sm font-semibold text-ink-900 transition-colors group-hover:text-primary">{module.title}</h4>
-                        <span className="shrink-0 rounded-full bg-paper-paper px-2 py-0.5 text-[11px] font-semibold text-ink-500">{lessons.length} lesson</span>
+                        <span className="shrink-0 text-xs font-normal tabular-nums text-ink-500">· {lessons.length} lesson</span>
                       </div>
                     </div>
                     <ModuleChevron className="size-4 shrink-0 text-ink-400 transition-transform duration-200" />

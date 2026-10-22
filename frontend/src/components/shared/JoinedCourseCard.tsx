@@ -85,8 +85,8 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
         <div className="mb-5 flex flex-col">
           <div className="mb-3 flex items-center justify-between gap-3">
             <CourseLevelLabel level={data.level} />
-            <div className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-              <Check className="h-3.5 w-3.5" aria-hidden />
+            <div className="inline-flex min-w-0 items-center gap-1.5 text-xs font-medium text-emerald-700">
+              <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="line-clamp-1">Dapat diakses</span>
             </div>
           </div>
@@ -116,16 +116,17 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
           </div>
         )}
 
-        <div className="mt-auto border-t border-line-light pt-4">
+        <div className="mt-auto border-t border-line-light pt-3">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} /> : null}
+              {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} compact /> : null}
             </div>
 
             <Button
               asChild
-              className="h-9 shrink-0 rounded-sm px-5 text-sm font-semibold shadow-none"
-              variant="default">
+              variant="outline"
+              className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-paper-white px-3.5 text-xs font-semibold text-ink-900 shadow-none hover:border-ink-900/30 hover:bg-paper-paper active:scale-[0.98] transition-all"
+            >
               <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
             </Button>
           </div>

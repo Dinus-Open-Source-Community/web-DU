@@ -17,7 +17,7 @@ export function TransactionPaymentNotFound({ backHref }: { backHref?: string }) 
         Data pembayaran tidak tersedia. Kembali ke riwayat untuk memilih transaksi lain.
       </p>
       <Button asChild size="lg" className="mt-6 min-h-11 px-5">
-        <Link to={backHref ?? ROUTES.student.transactions}>
+        <Link to={backHref ?? ROUTES.student.dashboard}>
           <ArrowLeft className="size-4" aria-hidden data-icon="inline-start" />
           Kembali ke riwayat
         </Link>

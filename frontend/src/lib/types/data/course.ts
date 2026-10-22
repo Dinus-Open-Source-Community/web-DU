@@ -144,6 +144,23 @@ export interface ICourseStudentListResponse {
   meta: IPaginationMeta
 }
 
+export interface ICourseMentorAssignmentDetail {
+  status?: string | null
+  assigned_at?: string | null
+  joined_at?: string | null
+}
+
+export interface ICourseMentorListItem extends ICourseMentorItem {
+  assignment?: ICourseMentorAssignmentDetail | null
+}
+
+export interface ICourseMentorListResponse {
+  course_uid: string
+  course_title: string
+  mentors?: ICourseMentorListItem[] | null
+  meta: IPaginationMeta
+}
+
 export interface IMentorAssignmentSubmissionConfig {
   allowFile: boolean
   allowPlainText: boolean

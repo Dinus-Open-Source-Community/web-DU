@@ -25,7 +25,7 @@ export function AdminDashboardTransactionsEmpty({ className }: AdminDashboardTra
         Grafik dan daftar transaksi akan muncul setelah ada pembayaran kursus di platform.
       </p>
       <Link
-        to={ROUTES.admin.transactions}
+        to={ROUTES.admin.dashboard}
         className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
       >
         Buka halaman transaksi

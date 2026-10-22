@@ -49,7 +49,7 @@ export function RecentTransactions({
       subtitle={subtitle}
       action={
         <Link
-          to={ROUTES.admin.transactions}
+          to={ROUTES.admin.dashboard}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
         >
           Lihat semua

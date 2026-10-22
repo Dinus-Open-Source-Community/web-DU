@@ -151,7 +151,7 @@ export function GalleryManagementPanel() {
               </button>
               <div className="flex flex-1 flex-col gap-2 p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center rounded-full border border-ink-900/10 bg-paper-paper px-2.5 py-1 text-[11px] font-semibold text-ink-600">
+                  <span className="text-xs font-medium text-ink-600">
                     {variantLabel(item, index)}
                   </span>
                   <span className="text-[11px] font-medium text-ink-400">
