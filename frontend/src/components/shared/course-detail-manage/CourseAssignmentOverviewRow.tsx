@@ -2,9 +2,7 @@ import { memo } from 'react'
 import { ArrowRight, FileText, HelpCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { AssignmentSubmitterAvatarGroup } from '@/components/shared/course-detail-manage/AssignmentSubmitterAvatarGroup'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import type { CourseAssignmentOverviewItem } from '@/lib/course-detail/course-assignment-overview-presenter'
 import { AdminTaskTypeLabel } from '@/lib/admin/status-label'
 import { cn } from '@/lib/utils'
@@ -68,19 +66,7 @@ function CourseAssignmentOverviewRowBase({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-          {item.isParticipantsLoading ? (
-            <div className="space-y-2" aria-hidden>
-              <div className="flex -space-x-2">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <Skeleton key={index} className="size-8 rounded-full" />
-                ))}
-              </div>
-              <Skeleton className="h-3 w-28" />
-            </div>
-          ) : (
-            <AssignmentSubmitterAvatarGroup participants={item.participants} />
-          )}
+        <div className="flex items-center">
           <Button
             asChild
             type="button"

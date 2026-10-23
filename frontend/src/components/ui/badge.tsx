@@ -1,22 +1,15 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { type VariantProps } from 'class-variance-authority'
 import { BadgeVariants } from '../../lib/variant'
-import { AdminStatusLabel } from '@/lib/admin/status-label'
-import { paymentStatusLabels, type PaymentStatus } from '../../lib/types/transaction'
 import { cn } from '../../lib/utils'
 import { formatParticipantEnrollmentStatus } from '@/lib/course-detail/participant-enrollment-status'
-import type { BadgeVariant, ClassType, MentorCourseStudentStatus } from '../../lib/types/course'
+import type { ClassType, MentorCourseStudentStatus } from '../../lib/types/course'
 
 export type AppBadgeVariant = NonNullable<VariantProps<typeof BadgeVariants>['variant']>
 
 const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
-  free: 'Gratis',
-  premium: 'Premium',
   event: 'Event',
   draft: 'Draf',
-  paymentPaid: paymentStatusLabels.success,
-  paymentPending: paymentStatusLabels.pending,
-  paymentFailed: paymentStatusLabels.failed,
   assignmentDraft: 'Draf',
   assignmentPublished: 'Terbit',
   assignmentClosed: 'Ditutup',
@@ -43,17 +36,10 @@ const defaultLabel: Partial<Record<AppBadgeVariant, string>> = {
   severityHigh: 'Tinggi',
   severityMedium: 'Sedang',
   severityLow: 'Rendah',
-  payoutRequested: 'Diminta',
-  payoutApproved: 'Disetujui',
-  payoutPaid: 'Dibayar',
-  payoutRejected: 'Ditolak',
   auditCreate: 'CREATE',
   auditUpdate: 'UPDATE',
   auditDelete: 'DELETE',
   auditView: 'VIEW',
-  couponActive: 'Aktif',
-  couponExpired: 'Kedaluwarsa',
-  couponScheduled: 'Terjadwal',
   coursePublished: 'Terbit',
   courseDraft: 'Draf',
   coursePending: 'Menunggu',
@@ -74,43 +60,6 @@ export function Badge({ variant, className, children, ...props }: BadgeProps) {
     <span className={cn(BadgeVariants({ variant }), className)} {...props}>
       {text}
     </span>
-  )
-}
-
-/** Kompatibilitas: varian kursus dari `BadgeVariant` (free | premium | event | draft) */
-export function CourseBadge({ variant, className }: { variant: BadgeVariant; className?: string }) {
-  return <Badge variant={variant} className={className} />
-}
-
-const paymentStatusTone: Record<PaymentStatus, 'success' | 'warning' | 'danger'> = {
-  success: 'success',
-  pending: 'warning',
-  failed: 'danger',
-}
-
-/** Status pembayaran — `dot` untuk tabel admin (tanpa chip), default badge untuk area lain. */
-export function PaymentBadge({
-  status,
-  className,
-  presentation = 'badge',
-}: {
-  status: PaymentStatus
-  className?: string
-  presentation?: 'badge' | 'dot'
-}) {
-  if (presentation === 'dot') {
-    return (
-      <AdminStatusLabel tone={paymentStatusTone[status]} className={className}>
-        {paymentStatusLabels[status]}
-      </AdminStatusLabel>
-    )
-  }
-
-  const v = status === 'success' ? 'paymentPaid' : status === 'pending' ? 'paymentPending' : 'paymentFailed'
-  return (
-    <Badge variant={v} className={className}>
-      {paymentStatusLabels[status]}
-    </Badge>
   )
 }
 

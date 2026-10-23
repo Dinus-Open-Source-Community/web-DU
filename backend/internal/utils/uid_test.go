@@ -24,9 +24,9 @@ func TestShortenUIDsInJSON(t *testing.T) {
 			want: `{"cover_url":"/files/courses/c62d9b2b-dd3e-4bc3-9248-31f0565cf9ab.png"}`,
 		},
 		{
-			name: "uid in invoice path filename is not modified",
-			in:   `{"invoice_url":"http://x/files/invoices/c62d9b2b-dd3e-4bc3-9248-31f0565cf9ab__a1b2c3d4-1111-2222-3333-444455556666__20231025.pdf"}`,
-			want: `{"invoice_url":"http://x/files/invoices/c62d9b2b-dd3e-4bc3-9248-31f0565cf9ab__a1b2c3d4-1111-2222-3333-444455556666__20231025.pdf"}`,
+			name: "uid in attachment path filename is not modified",
+			in:   `{"file_url":"http://x/files/attachments/c62d9b2b-dd3e-4bc3-9248-31f0565cf9ab__a1b2c3d4-1111-2222-3333-444455556666__20231025.pdf"}`,
+			want: `{"file_url":"http://x/files/attachments/c62d9b2b-dd3e-4bc3-9248-31f0565cf9ab__a1b2c3d4-1111-2222-3333-444455556666__20231025.pdf"}`,
 		},
 		{
 			name: "uid in array",

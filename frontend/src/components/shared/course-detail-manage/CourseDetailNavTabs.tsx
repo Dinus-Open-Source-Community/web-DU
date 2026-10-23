@@ -61,14 +61,14 @@ type CourseDetailNavTabsProps = {
   onChange: (value: CourseDetailTabValue) => void
 }
 
-/** Tab garis bawah brand-blue — sama pola PeriodSelector dashboard. */
+/** Tab segmented pill brand-blue — selaras tab kursus dan filter admin. */
 export function CourseDetailNavTabs({ isAdmin, value, onChange }: CourseDetailNavTabsProps) {
   const tabs = getCourseDetailTabs(isAdmin)
 
   return (
-    <div className={manageDetailLayout.tabScroll}>
+    <div className={cn(manageDetailLayout.tabScroll, 'py-0.5')}>
       <div
-        className="inline-flex h-auto w-max min-w-full flex-nowrap border-b-2 border-ink-900/10"
+        className="inline-flex w-max items-center gap-1 rounded-lg border-2 border-ink-900/10 bg-paper-paper p-1"
         role="tablist"
         aria-label="Navigasi detail kursus"
       >
@@ -82,13 +82,16 @@ export function CourseDetailNavTabs({ isAdmin, value, onChange }: CourseDetailNa
               aria-selected={isActive}
               onClick={() => onChange(tab.value)}
               className={cn(
-                '-mb-0.5 inline-flex min-h-11 shrink-0 snap-start items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:min-h-10 sm:px-4',
+                'inline-flex h-9 shrink-0 snap-start items-center justify-center gap-2 rounded-md px-3.5 text-sm transition-all sm:px-4',
                 isActive
-                  ? 'border-brand-blue text-ink-900'
-                  : 'border-transparent text-ink-500 hover:text-ink-800',
+                  ? 'bg-brand-blue font-bold text-white shadow-none'
+                  : 'font-semibold text-ink-500 hover:bg-paper-white hover:text-ink-800',
               )}
             >
-              <tab.icon className="size-4 opacity-70" aria-hidden />
+              <tab.icon
+                className={cn('size-4 transition-opacity', isActive ? 'opacity-100 text-white' : 'opacity-70')}
+                aria-hidden
+              />
               <span className="sm:hidden">{tab.shortLabel}</span>
               <span className="hidden sm:inline">{tab.label}</span>
             </button>

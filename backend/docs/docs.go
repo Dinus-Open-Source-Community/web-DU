@@ -15,6 +15,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/dashboard/analytics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get rich analytics data for admin dashboard (charts, distributions, trends).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get admin dashboard analytics",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Days for trend (default: 30)",
+                        "name": "days",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Analytics data retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/dashboard/kpis": {
             "get": {
                 "security": [
@@ -44,107 +95,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Dashboard KPIs retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/dashboard/recent-transactions": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve recent transactions for the admin dashboard.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Get recent admin transactions",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Number of items (default: 5)",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Recent transactions retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/financial/summary": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Revenue analytics for the admin financial page.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Get admin financial summary",
-                "responses": {
-                    "200": {
-                        "description": "Financial summary retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -453,242 +403,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Review not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/transactions": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    },
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve paginated admin transaction list with summary counts.\nAggregate payment counts and gross revenue for admin dashboards.",
-                "consumes": [
-                    "application/json",
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json",
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin",
-                    "Admin"
-                ],
-                "summary": "Get admin transactions summary",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (default: 10, max: 100)",
-                        "name": "per_page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by payment status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search by reference, course, or student",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_to",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by payment status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search by reference, course, or student",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Transaction summary retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/transactions/summary": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    },
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve paginated admin transaction list with summary counts.\nAggregate payment counts and gross revenue for admin dashboards.",
-                "consumes": [
-                    "application/json",
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json",
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin",
-                    "Admin"
-                ],
-                "summary": "Get admin transactions summary",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (default: 10, max: 100)",
-                        "name": "per_page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by payment status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search by reference, course, or student",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_to",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by payment status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search by reference, course, or student",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD or RFC3339)",
-                        "name": "date_to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Transaction summary retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1455,7 +1169,7 @@ const docTemplate = `{
         },
         "/courses": {
             "get": {
-                "description": "Retrieve paginated list of courses with optional filters (mentor_id, title, price, is_premium)",
+                "description": "Retrieve paginated list of courses with optional filters (mentor_id, title)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1490,18 +1204,6 @@ const docTemplate = `{
                         "description": "Search by title (case-insensitive)",
                         "name": "title",
                         "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Filter by exact price",
-                        "name": "price",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Filter by premium status",
-                        "name": "is_premium",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1527,7 +1229,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, pricing, and learning points. Requires Super Admin or Admin.",
+                "description": "Create a new course with cover, title, subtitle/header, dynamic category, dynamic class type, level, and learning points. Requires Super Admin or Admin.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1592,19 +1294,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "number",
-                        "description": "Course selling price",
-                        "name": "price",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "Displayed strike-through/original price",
-                        "name": "price_strike",
-                        "in": "formData"
-                    },
-                    {
                         "type": "string",
                         "description": "JSON array of strings, e.g. [\\",
                         "name": "what_you_learn",
@@ -1622,12 +1311,6 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Course slot capacity (0 = unlimited)",
                         "name": "slot",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Whether course is premium (default: false)",
-                        "name": "is_premium",
                         "in": "formData"
                     },
                     {
@@ -1735,7 +1418,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an existing course metadata (cover, title, subtitle, category, class type, level, pricing, learning points). Only sent fields are updated. Requires Super Admin or Admin.",
+                "description": "Update an existing course metadata (cover, title, subtitle, category, class type, level, learning points). Only sent fields are updated. Requires Super Admin or Admin.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1803,18 +1486,6 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "number",
-                        "description": "Course selling price",
-                        "name": "price",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Displayed strike-through/original price",
-                        "name": "price_strike",
-                        "in": "formData"
-                    },
-                    {
                         "type": "string",
                         "description": "JSON array of strings, e.g. [\\",
                         "name": "what_you_learn",
@@ -1830,12 +1501,6 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Course slot capacity (0 = unlimited)",
                         "name": "slot",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Whether course is premium",
-                        "name": "is_premium",
                         "in": "formData"
                     }
                 ],
@@ -2847,78 +2512,115 @@ const docTemplate = `{
                 }
             }
         },
-        "/invoices/url": {
+        "/galleries": {
             "get": {
+                "description": "Public endpoint to retrieve gallery documentation items with pagination, search, and variant filtering.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Get all gallery items (Public)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 15, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by caption",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by variant (all, auto, 0..5)",
+                        "name": "variant",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Galleries retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve galleries",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve invoice URL by providing enrollment_id, user_id, and course_id as query parameters. Accessible by super admin, admin, assigned/joined mentor for the course, or the enrolled student (self).",
+                "description": "Upload photo to Garage S3 and create a new gallery documentation item.",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Invoice"
+                    "Gallery"
                 ],
-                "summary": "Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)",
+                "summary": "Create gallery item (Super Admin \u0026 Admin)",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Enrollment UID",
-                        "name": "enrollment_id",
-                        "in": "query",
+                        "type": "file",
+                        "description": "Gallery photo file (PNG, JPG, JPEG, WebP, max 5MB)",
+                        "name": "image",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "User UID",
-                        "name": "user_id",
-                        "in": "query",
+                        "description": "Photo story caption (max 200 chars)",
+                        "name": "caption",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Course UID",
-                        "name": "course_id",
-                        "in": "query",
-                        "required": true
+                        "description": "Scrapbook card variant (auto or 0..5)",
+                        "name": "variant",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Invoice URL retrieved successfully",
+                    "201": {
+                        "description": "Gallery item created successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Missing required parameters",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
+                        "description": "Invalid input",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Enrollment not found",
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2934,57 +2636,185 @@ const docTemplate = `{
                 }
             }
         },
-        "/invoices/{enrollment_id}": {
+        "/galleries/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve or generate invoice for a specific enrollment",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Public endpoint to retrieve a single gallery item by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Course"
+                    "Gallery"
                 ],
-                "summary": "Get course enrollment invoice (All Roles)",
+                "summary": "Get gallery item by ID (Public)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Enrollment UID",
-                        "name": "enrollment_id",
+                        "description": "Gallery UID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice retrieved successfully",
+                        "description": "Gallery item retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "400": {
+                        "description": "Invalid gallery uid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Enrollment not found",
+                        "description": "Gallery item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update gallery photo, caption, or variant.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Update gallery item (Super Admin \u0026 Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Gallery UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "New gallery photo file (optional)",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Photo story caption",
+                        "name": "caption",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Scrapbook card variant (auto or 0..5)",
+                        "name": "variant",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gallery item updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Gallery item not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Failed to retrieve invoice",
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a gallery item by uid and remove its object from Garage S3.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Delete gallery item (Super Admin \u0026 Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Gallery UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gallery item deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid gallery uid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Gallery item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5579,177 +5409,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/payment/create": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Create a new payment request to Tripay for a course enrollment",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Create Payment (All Roles)",
-                "parameters": [
-                    {
-                        "description": "Payment Request",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.CreatePaymentRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Payment created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.APIResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request or validation failed",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/payment/method": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Mengambil daftar channel pembayaran langsung dari Tripay API.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Get Payment Channels (Tripay)",
-                "responses": {
-                    "200": {
-                        "description": "Tripay payment channels",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "502": {
-                        "description": "Failed to fetch from Tripay",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/payment/tripay": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get payment details directly from Tripay by reference or merchant_ref",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payment"
-                ],
-                "summary": "Get Payment (Tripay)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tripay Reference",
-                        "name": "reference",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Tripay Merchant Reference",
-                        "name": "merchant_ref",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tripay payment details",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Reference parameter is missing",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing JWT token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Payment not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/register": {
             "post": {
                 "description": "Register a new user with name, email, and password. Returns JWT token on success.",
@@ -5874,7 +5533,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve own detailed user data including profile, joined courses, enrollment invoices (same structure as GET /invoices/{enrollment_id}, with invoice_url and filename per enrollment), transaction history, course reviews, enrollment summary, and mentored courses.",
+                "description": "Retrieve own detailed user data including profile, joined courses, course reviews, enrollment summary, and mentored courses.",
                 "consumes": [
                     "application/json"
                 ],
@@ -6146,7 +5805,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update authenticated user's profile information including name, email, and description. All fields are optional and encrypted before storage.",
+                "description": "Update authenticated user's profile information including name and email. All fields are optional and encrypted before storage.",
                 "consumes": [
                     "application/json"
                 ],
@@ -6192,6 +5851,81 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Email already registered",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/role/batch": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Assign target role (admin, mentor, or student) to one or more users at once. Only super_admin may assign the admin role or modify existing admin/super_admin users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Batch update user roles (Super Admin / Admin)",
+                "parameters": [
+                    {
+                        "description": "User UIDs and target role",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BatchUpdateUserRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User roles updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or role value",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "One or more users not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -6364,20 +6098,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.APIResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dto.CreatePaymentResponse"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
         "dto.AssignMentorsToCourseRequest": {
             "type": "object",
             "required": [
@@ -6385,6 +6105,26 @@ const docTemplate = `{
             ],
             "properties": {
                 "mentor_uids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.BatchUpdateUserRoleRequest": {
+            "type": "object",
+            "required": [
+                "role",
+                "user_uids"
+            ],
+            "properties": {
+                "role": {
+                    "type": "string",
+                    "example": "mentor"
+                },
+                "user_uids": {
                     "type": "array",
                     "minItems": 1,
                     "items": {
@@ -6521,127 +6261,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Module 1"
-                }
-            }
-        },
-        "dto.CreatePaymentRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "method",
-                "order_items"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "integer"
-                },
-                "enrollment_uid": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string",
-                    "enum": [
-                        "PERMATAVA",
-                        "BNIVA",
-                        "BRIVA",
-                        "MANDIRIVA",
-                        "BCAVA",
-                        "MUAMALATVA",
-                        "CIMBVA",
-                        "BSIVA",
-                        "OCBCVA",
-                        "DANAMONVA",
-                        "OVO",
-                        "DANA",
-                        "QRIS2"
-                    ]
-                },
-                "order_items": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "$ref": "#/definitions/dto.OrderItem"
-                    }
-                },
-                "return_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.CreatePaymentResponse": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "integer"
-                },
-                "amount_received": {
-                    "type": "integer"
-                },
-                "callback_url": {
-                    "type": "string"
-                },
-                "checkout_url": {
-                    "type": "string"
-                },
-                "customer_email": {
-                    "type": "string"
-                },
-                "customer_name": {
-                    "type": "string"
-                },
-                "customer_phone": {
-                    "type": "string"
-                },
-                "expired_time": {
-                    "type": "integer"
-                },
-                "fee_customer": {
-                    "type": "integer"
-                },
-                "fee_merchant": {
-                    "type": "integer"
-                },
-                "instructions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.PaymentInstruction"
-                    }
-                },
-                "merchant_ref": {
-                    "type": "string"
-                },
-                "order_items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.OrderItemResponse"
-                    }
-                },
-                "pay_code": {
-                    "type": "string"
-                },
-                "pay_url": {},
-                "payment_method": {
-                    "type": "string"
-                },
-                "payment_name": {
-                    "type": "string"
-                },
-                "payment_selection_type": {
-                    "type": "string"
-                },
-                "qr_string": {},
-                "qr_url": {},
-                "reference": {
-                    "type": "string"
-                },
-                "return_url": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "total_fee": {
-                    "type": "integer"
                 }
             }
         },
@@ -6853,74 +6472,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OrderItem": {
-            "type": "object",
-            "required": [
-                "name",
-                "price",
-                "quantity"
-            ],
-            "properties": {
-                "image_url": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "product_url": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "sku": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.OrderItemResponse": {
-            "type": "object",
-            "properties": {
-                "image_url": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "product_url": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "sku": {
-                    "type": "string"
-                },
-                "subtotal": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.PaymentInstruction": {
-            "type": "object",
-            "properties": {
-                "steps": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.RegisterRequest": {
             "type": "object",
             "required": [
@@ -6993,9 +6544,6 @@ const docTemplate = `{
         "dto.UpdateUserProfileRequest": {
             "type": "object",
             "properties": {
-                "description": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },

@@ -6,7 +6,7 @@ import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { ConfirmDialog } from './ConfirmDialog'
-import { Pagination } from './Pagination'
+import { TablePaginationFooter } from './TablePaginationFooter'
 import { CourseDetailTabSectionIntro } from '@/components/shared/course-detail-manage/CourseDetailTabSectionIntro'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
@@ -85,14 +85,15 @@ export function CourseMentorTable({
 }: CourseMentorTableProps) {
   const canUnassign = isAdmin && Boolean(onRequestUnassignMentor)
   const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     setCurrentPage(1)
   }, [courseUid])
 
-  const { data: mentorsResponse, isLoading, isFetching } = useCourseMentors(
+  const { data: mentorsResponse, isLoading } = useCourseMentors(
     courseUid ?? '',
-    courseUid ? { page: currentPage, per_page: 8 } : undefined,
+    courseUid ? { page: currentPage, per_page: pageSize } : undefined,
   )
 
   const displayedMentors: ICourseMentorItem[] =
@@ -103,7 +104,7 @@ export function CourseMentorTable({
 
   const totalPages =
     mentorsResponse?.meta?.total_pages ??
-    Math.max(1, Math.ceil(totalCount / 8))
+    Math.max(1, Math.ceil(totalCount / pageSize))
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages)
@@ -117,19 +118,9 @@ export function CourseMentorTable({
         title="Tim mentor"
         description="Lihat mentor yang ditugaskan untuk mengajar kursus ini."
         aside={
-          <div className={manageDetailLayout.tabCountBadge}>
-            <span className={manageDetailLayout.tabCountDot} aria-hidden />
-            <span>Total</span>
-            <span className={manageDetailLayout.tabCountNumber}>{totalCount}</span>
-            <span>mentor</span>
-            {isFetching && !isLoading ? (
-              <Loader2 className="size-3.5 animate-spin text-ink-400" aria-label="Memuat data..." />
-            ) : null}
-          </div>
+            isAdmin && assignAction ? assignAction : null
         }
       />
-
-      {isAdmin && assignAction ? <div className="mb-4 flex justify-end">{assignAction}</div> : null}
 
       <section className={manageDetailLayout.tableSurface}>
       {isLoading && !mentorsResponse && courseUid ? (
@@ -157,7 +148,6 @@ export function CourseMentorTable({
                 <TableRow className={manageDetailLayout.tableHeaderRow}>
                   <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Nama mentor</TableHead>
                   <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Peran di kursus</TableHead>
-                  <TableHead className={cn('px-5 py-3', manageDetailLayout.tableHead)}>Deskripsi</TableHead>
                   {canUnassign ? (
                     <TableHead className={cn('px-5 py-3 text-right', manageDetailLayout.tableHead)}>Kelola</TableHead>
                   ) : null}
@@ -171,9 +161,6 @@ export function CourseMentorTable({
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       <AdminMetaLabel>{mentor.role || 'Mentor'}</AdminMetaLabel>
-                    </TableCell>
-                    <TableCell className="max-w-md px-5 py-4">
-                      <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
                     </TableCell>
                     {canUnassign ? (
                       <TableCell className="px-5 py-4 text-right">
@@ -204,7 +191,6 @@ export function CourseMentorTable({
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{mentor.description || 'Belum ada deskripsi mentor.'}</p>
                 {canUnassign ? (
                   <UnassignMentorButton
                     mentor={mentor}
@@ -216,20 +202,23 @@ export function CourseMentorTable({
               </article>
             ))}
           </div>
+
+          <TablePaginationFooter
+            page={currentPage}
+            totalPages={totalPages}
+            total={totalCount}
+            totalLabel="mentor"
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize)
+              setCurrentPage(1)
+            }}
+          />
         </>
       )}
       </section>
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex justify-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            variant={isAdmin ? 'admin' : 'default'}
-          />
-        </div>
-      )}
 
       {pendingUnassignMentor ? (
         <ConfirmDialog

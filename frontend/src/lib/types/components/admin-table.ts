@@ -16,6 +16,10 @@ export interface IAdminDataTableProps<T> {
   page?: number
   totalPages?: number
   onPageChange?: (page: number) => void
+  total?: number
+  pageSize?: number
+  pageSizeOptions?: number[]
+  onPageSizeChange?: (pageSize: number) => void
   emptyState?: ReactNode
   tableClassName?: string
   wrapperClassName?: string

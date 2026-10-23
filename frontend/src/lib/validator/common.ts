@@ -15,12 +15,6 @@ export const userNameSchema = requiredStringSchema('Nama')
   .min(2, 'Nama minimal 2 karakter')
   .max(150, 'Nama maksimal 150 karakter')
 
-/** Selaras `entity.User.Description` — type text (batas FE konservatif). */
-export const userDescriptionSchema = z
-  .string()
-  .trim()
-  .max(10_000, 'Deskripsi maksimal 10000 karakter')
-
 /** Selaras `entity.Module.Title` / `entity.Lesson.Title` — varchar(200). */
 export const moduleTitleSchema = requiredStringSchema('Judul modul').max(200, 'Judul modul maksimal 200 karakter')
 
@@ -89,45 +83,6 @@ export const nonNegativeIntSchema = z
   .number({ message: 'Nilai harus berupa angka' })
   .int('Nilai harus bilangan bulat')
   .min(0, 'Nilai tidak boleh negatif')
-
-/** Selaras `dto.CreatePaymentRequest.Method` — binding oneof Tripay. */
-export const PAYMENT_METHOD_CODES = [
-  'PERMATAVA',
-  'BNIVA',
-  'BRIVA',
-  'MANDIRIVA',
-  'BCAVA',
-  'MUAMALATVA',
-  'CIMBVA',
-  'BSIVA',
-  'OCBCVA',
-  'DANAMONVA',
-  'OVO',
-  'DANA',
-  'QRIS2',
-] as const
-
-export const paymentMethodCodeSchema = z.enum(PAYMENT_METHOD_CODES, {
-  message: 'Metode pembayaran tidak valid',
-})
-
-export const returnUrlSchema = z
-  .string()
-  .trim()
-  .max(2048, 'Return URL terlalu panjang')
-  .refine(
-    (value) => {
-      if (!value) return true
-      try {
-        const parsed = new URL(value)
-        return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-      } catch {
-        return false
-      }
-    },
-    'Return URL harus http(s) yang valid',
-  )
-  .optional()
 
 /** Selaras `utils.MaxLessonAssignmentSubmissionAttachmentBytes` di BE — 10 MiB per file. */
 export const MAX_LESSON_ASSIGNMENT_SUBMISSION_FILE_BYTES = 10 * 1024 * 1024

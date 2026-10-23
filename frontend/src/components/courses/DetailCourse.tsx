@@ -4,8 +4,6 @@ import { Award, Infinity as InfinityIcon } from 'lucide-react'
 import type { ICourseDetailItem, ICourseItem } from '@/lib/types/course'
 import { detailLayout } from '@/lib/course-detail/detail-layout'
 import { resolveCourseProfiles } from '@/lib/course-detail/course-profile'
-import { buildDiscountLabel } from '@/lib/course-detail/pricing'
-import { FormatRupiah } from '@/lib/func/func'
 import { cn } from '@/lib/utils'
 import { CourseDetailHero } from './detail/detailHero'
 import { CourseWhatYouLearn } from './detail/detailWhatYouLearn'
@@ -41,9 +39,6 @@ function buildCourseIncludes() {
 }
 
 export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) {
-  const formattedPrice = FormatRupiah(data.price) as string
-  const formattedStrikePrice = data.price_strike ? (FormatRupiah(data.price_strike) as string) : undefined
-  const discountLabel = buildDiscountLabel(data.price, data.price_strike)
   const includes = buildCourseIncludes()
   const totalReviews = data.totalReviews || data.reviews?.length || 0
   const instructors = resolveCourseProfiles(data)
@@ -68,9 +63,6 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
       >
         <CourseDetailMobileSummary
           previewImage={data.cover_url}
-          price={formattedPrice}
-          strikePrice={formattedStrikePrice}
-          discountLabel={discountLabel}
           rating={data.rating}
           totalReviews={totalReviews}
         />
@@ -92,7 +84,6 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
                 name={instructor.name}
                 role={instructor.role ?? 'Instruktur'}
                 avatar={instructor.avatar_url}
-                desc={instructor.description ?? ''}
               />
             ))}
 
@@ -104,9 +95,6 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
           <div className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
             <CourseDetailSidebar
               previewImage={data.cover_url}
-              price={formattedPrice}
-              strikePrice={formattedStrikePrice}
-              discountLabel={discountLabel}
               includes={includes}
             >
               {data.sidebarCta}
@@ -119,11 +107,7 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
         </div>
       </div>
 
-      <CourseDetailMobileCta
-        price={formattedPrice}
-        strikePrice={formattedStrikePrice}
-        discountLabel={discountLabel}
-      >
+      <CourseDetailMobileCta>
         {data.sidebarCta}
       </CourseDetailMobileCta>
     </div>

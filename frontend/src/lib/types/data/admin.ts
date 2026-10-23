@@ -1,5 +1,3 @@
-import type { AdminStatus } from '../common/domain'
-
 export interface IAdminStudent {
   uid: string
   name: string
@@ -8,10 +6,7 @@ export interface IAdminStudent {
   joinedAt: string
   enrolledCourses: number
   averageProgress: number
-  status: AdminStatus
-  totalSpent: number
-  phone?: string
-  lastActive: string
+  isVerified: boolean
 }
 
 export interface IAdminMentor {
@@ -23,8 +18,7 @@ export interface IAdminMentor {
   totalCourses: number
   rating: number
   totalReviews: number
-  status: AdminStatus
-  bio?: string
+  isVerified: boolean
   studentsCount: number
 }
 
@@ -33,9 +27,8 @@ export interface IAdminAdministrator {
   name: string
   email: string
   avatar: string
-  role: 'Super Admin' | 'Admin' | 'Finance' | 'Content Moderator' | 'Support'
-  lastActive: string
-  status: AdminStatus
+  role: 'Super Admin' | 'Admin'
+  isVerified: boolean
   createdAt: string
 }
 

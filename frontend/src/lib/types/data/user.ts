@@ -1,17 +1,14 @@
 import type { CourseApiLevel, CoursePublishStatus, EnrollmentStatus, UserRole } from '../common/domain'
-import type { ITransactionHistory } from './transaction'
 import type { IJoinedCourseAssignmentEntry } from './enrollment-assignment'
 
 export interface ICourseMentorItem {
   avatar_url: string
   created_at: string
-  description: string
   email: string
   is_verified: boolean
   name: string
   role: string
   uid: string
-  updated_at: string
 }
 
 export interface IAuthorCourseItem {
@@ -30,7 +27,6 @@ export interface IUpdatePasswordPayload {
 export interface IUpdateProfilePayload {
   name?: string
   email?: string
-  description?: string
 }
 
 export interface IUser {
@@ -46,10 +42,8 @@ export interface IMentor {
   email: string
   avatar_url: string
   role: UserRole
-  description: string
   is_verified: boolean
   created_at: string
-  updated_at: string
 }
 
 export interface ICourseCreator {
@@ -60,7 +54,7 @@ export interface ICourseCreator {
   is_verified: boolean
 }
 
-/** Ringkasan kursus untuk nested object di review/invoice. */
+/** Ringkasan kursus untuk nested object di review. */
 export interface ICourseSummary {
   uid: string
   title: string
@@ -78,9 +72,6 @@ export interface ICourseEnrollmentDetail {
   level: CourseApiLevel
   status: CoursePublishStatus
   is_published: boolean
-  is_premium: boolean
-  price: number
-  price_strike?: number
   description?: string
   category_uid?: string
   course_type_uid?: string
@@ -94,16 +85,6 @@ export interface ICourseEnrollmentDetail {
   what_you_learn?: string[]
   rating?: number
   total_reviews?: number
-}
-
-export interface IEnrollmentInvoice {
-  enrollment_uid: string
-  course_uid: string
-  user_uid: string
-  enrolled_at: string
-  enrollment_status: EnrollmentStatus
-  progress: number
-  course: ICourseEnrollmentDetail
 }
 
 export interface IJoinedCourse extends ICourseEnrollmentDetail {
@@ -141,17 +122,13 @@ export interface IUserData {
   email: string
   avatar_url: string
   role: UserRole
-  description: string
   is_verified: boolean
   created_at: string
-  updated_at: string
   enrollment_summary: IEnrollmentSummary
   review_summary: IReviewSummary
-  enrollment_invoices: IEnrollmentInvoice[]
   joined_courses: IJoinedCourse[]
   mentored_courses: ICourseEnrollmentDetail[]
   course_reviews: ICourseReview[]
-  transaction_history: ITransactionHistory[]
 }
 
 /** Alias backward-compat. */
@@ -160,6 +137,5 @@ export type JoinedCourse = IJoinedCourse
 export type CourseCreator = ICourseCreator
 export type CourseSummary = ICourseSummary
 export type CourseReview = ICourseReview
-export type EnrollmentInvoice = IEnrollmentInvoice
 export type EnrollmentSummary = IEnrollmentSummary
 export type ReviewSummary = IReviewSummary

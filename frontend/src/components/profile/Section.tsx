@@ -63,7 +63,6 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
     onNewPasswordChange,
     confirmPassword,
     onConfirmPasswordChange,
-    lastUpdatedLabel,
     isPhotoPending,
     isProfilePending,
     isPasswordPending,
@@ -160,11 +159,6 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
               <div className="flex sm:justify-end">
                 <span className={settingsLayout.roleBadge}>{roleLabel}</span>
               </div>
-            </PersonalRow>
-            <PersonalRow label="Terakhir diperbarui">
-              <p className={settingsLayout.personalRowValue}>
-                {lastUpdatedLabel || '-'}
-              </p>
             </PersonalRow>
           </div>
           <FormActions>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, UserCog } from 'lucide-react'
+import { AlertTriangle, Check, UserCog } from 'lucide-react'
 
 import { UserIdentityCell } from '@/components/admin/user-manage/UserIdentityCell'
 import { Button } from '@/components/ui/button'
@@ -52,20 +52,24 @@ export function UserManageRoleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="border-b border-line-light px-6 py-5">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <UserCog className="size-5 text-primary" aria-hidden />
-            Ubah role user
-          </DialogTitle>
-          <DialogDescription>
+      <DialogContent className="gap-0 overflow-hidden rounded-2xl border-2 border-ink-900/10 bg-paper-white p-0 text-ink-900 shadow-paper ring-0 sm:max-w-lg">
+        <DialogHeader className="border-b border-line-light bg-paper-white px-6 py-5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-ink-900/10 bg-brand-soft text-brand-ink">
+              <UserCog className="size-4" aria-hidden />
+            </span>
+            <DialogTitle className="text-lg font-bold tracking-tight text-ink-900">
+              Ubah Role Pengguna
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs font-medium leading-relaxed text-ink-500">
             Pilih role baru untuk akun ini. Perubahan berlaku segera setelah disimpan.
           </DialogDescription>
         </DialogHeader>
 
         {user ? (
-          <div className="space-y-5 px-6 py-5">
-            <div className="rounded-2xl border border-ink-900/10 bg-paper-paper/60 px-4 py-3">
+          <div className="space-y-5 bg-paper-white px-6 py-5">
+            <div className="rounded-xl border-2 border-ink-900/10 bg-paper-paper px-4 py-3">
               <UserIdentityCell
                 name={user.name}
                 email={user.email}
@@ -74,9 +78,11 @@ export function UserManageRoleDialog({
               />
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-ink-900">Role tujuan</p>
-              <div className="space-y-2">
+            <div className="space-y-2.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-500">
+                Role Tujuan
+              </p>
+              <div className="space-y-2.5">
                 {roleTargets.map((role) => {
                   const selected = selectedRole === role
                   return (
@@ -91,17 +97,19 @@ export function UserManageRoleDialog({
                     >
                       <span
                         className={cn(
-                          'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border',
-                          selected ? 'border-primary bg-primary' : 'border-line-medium bg-paper-white',
+                          'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-sm border-2 shadow-none transition-all',
+                          selected
+                            ? 'border-ink-900/10 bg-primary text-white'
+                            : 'border-line-medium bg-paper-white text-transparent',
                         )}
                       >
-                        {selected ? <span className="size-2 rounded-full bg-paper-white" /> : null}
+                        <Check className={cn('size-3.5 stroke-[2.5]', selected ? 'opacity-100' : 'opacity-0')} />
                       </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-ink-900">
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold text-ink-900">
                           {ROLE_LABELS[role]}
                         </span>
-                        <span className="mt-0.5 block text-xs leading-5 text-ink-500">
+                        <span className="mt-0.5 block text-xs font-medium leading-relaxed text-ink-500">
                           {ROLE_DESCRIPTIONS[role]}
                         </span>
                       </span>
@@ -112,22 +120,23 @@ export function UserManageRoleDialog({
             </div>
 
             {selectedRole === 'admin' ? (
-              <div className="flex gap-3 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-900">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <div className="flex items-start gap-3 rounded-xl border-2 border-ink-900/10 border-l-4 border-l-note-peach bg-note-yellow/45 px-4 py-3 text-xs font-medium leading-relaxed text-ink-800">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-ink-900" aria-hidden />
                 <p>
-                  Hanya super admin yang dapat menetapkan role administrator. Jika Anda bukan super
-                  admin, permintaan ini akan ditolak oleh sistem.
+                  Hanya <strong className="font-bold text-ink-900">Super Admin</strong> yang dapat
+                  menetapkan role administrator. Jika Anda bukan Super Admin, permintaan ini akan
+                  ditolak oleh sistem.
                 </p>
               </div>
             ) : null}
           </div>
         ) : null}
 
-        <DialogFooter className="border-t border-line-light px-6 py-4">
+        <DialogFooter className="border-t border-line-light bg-paper-white px-6 py-4">
           <Button
             type="button"
             variant="outline"
-            className="h-10 rounded-sm"
+            className="h-11 rounded-sm border-2 border-ink-900/10 bg-paper-white px-5 font-semibold text-ink-700 shadow-none hover:bg-paper-paper hover:text-ink-900"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -135,11 +144,11 @@ export function UserManageRoleDialog({
           </Button>
           <Button
             type="button"
-            className="h-10 rounded-sm"
+            className="h-11 shrink-0 gap-2 rounded-sm border-2 border-ink-900/10 bg-primary px-5 font-semibold text-white shadow-none hover:bg-brand-hover"
             onClick={() => void handleConfirm()}
             disabled={!user || !selectedRole || isSubmitting}
           >
-            Simpan perubahan
+            {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
           </Button>
         </DialogFooter>
       </DialogContent>

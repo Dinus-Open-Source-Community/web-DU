@@ -4,7 +4,6 @@ import {
   ClipboardList,
   FileText,
   GraduationCap,
-  LayoutDashboard,
   Layers3,
   MessageSquareText,
   UsersRound,
@@ -29,7 +28,6 @@ import { cn } from '@/lib/utils'
 
 import type { CourseDetailTabValue } from './CourseDetailNavTabs'
 import { CourseDetailInfoCard } from './CourseDetailInfoCard'
-import { CourseDetailTabSectionIntro } from './CourseDetailTabSectionIntro'
 import { StatCard } from '@/components/shared/StatCard'
 
 const OVERVIEW_KPI_ACCENTS = [
@@ -113,12 +111,6 @@ export function CourseDetailOverviewTab({
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
-      <CourseDetailTabSectionIntro
-        icon={LayoutDashboard}
-        title="Ringkasan kursus"
-        description="Lihat statistik singkat, deskripsi, dan cuplikan aktivitas kursus ini."
-      />
-
       <div className={manageDetailLayout.overviewGrid}>
       <div className={cn('lg:order-2', manageDetailLayout.overviewInfoSticky)}>
         <CourseDetailInfoCard course={course} isPublished={isPublished} />

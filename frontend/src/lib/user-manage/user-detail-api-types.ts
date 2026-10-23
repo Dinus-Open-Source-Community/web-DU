@@ -1,5 +1,4 @@
-import type { EnrollmentStatus, PaymentStatus } from '@/lib/types/common/domain'
-import type { IEnrollmentInvoice } from '@/lib/types/user'
+import type { EnrollmentStatus } from '@/lib/types/common/domain'
 
 export type ManagedUserDetailApiCourseRef = {
   uid: string
@@ -7,11 +6,18 @@ export type ManagedUserDetailApiCourseRef = {
   slug: string
 }
 
+export type ManagedUserDetailApiMentorRef = {
+  uid: string
+  name: string
+  email?: string
+  avatar_url?: string
+}
+
 export type ManagedUserDetailApiAssignment = {
   submission_uid: string
   attempt_count: number
   score_percent: number | null
-  passed: boolean
+  passed: boolean | null
   is_auto_graded: boolean
   submitted_at: string
   graded_at: string | null
@@ -42,10 +48,12 @@ export type ManagedUserDetailApiJoinedCourse = {
   thumbnail_url?: string
   cover_url?: string
   level: string
+  status?: string
   enrollment_status: EnrollmentStatus
   progress: number
   enrolled_at: string
   is_published: boolean
+  mentors?: ManagedUserDetailApiMentorRef[]
   assignments?: ManagedUserDetailApiAssignment[]
 }
 
@@ -56,8 +64,6 @@ export type ManagedUserDetailApiMentoredCourse = {
   slug: string
   level: string
   status: string
-  price: number
-  is_premium: boolean
   is_published: boolean
   created_at: string
 }
@@ -70,20 +76,6 @@ export type ManagedUserDetailApiReview = {
   course: ManagedUserDetailApiCourseRef | null
 }
 
-export type ManagedUserDetailApiTransaction = {
-  uid: string
-  reference: string
-  amount: number
-  payment_method: string
-  payment_status: PaymentStatus
-  checkout_url?: string
-  paid_at: string | null
-  transaction_at: string
-  enrollment_uid: string
-  enrollment_status: EnrollmentStatus
-  course: ManagedUserDetailApiCourseRef | null
-}
-
 export type ManagedUserDetailApiResponse = {
   uid: string
   name: string
@@ -91,9 +83,7 @@ export type ManagedUserDetailApiResponse = {
   avatar_url: string
   role: string
   is_verified: boolean
-  description: string
   created_at: string
-  updated_at: string
   joined_courses: ManagedUserDetailApiJoinedCourse[]
   course_reviews: ManagedUserDetailApiReview[]
   review_summary: {
@@ -106,7 +96,5 @@ export type ManagedUserDetailApiResponse = {
     completed: number
     cancelled: number
   }
-  enrollment_invoices: IEnrollmentInvoice[]
   mentored_courses: ManagedUserDetailApiMentoredCourse[]
-  transaction_history: ManagedUserDetailApiTransaction[]
 }

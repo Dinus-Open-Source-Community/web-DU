@@ -7,7 +7,6 @@ export type CourseProfile = {
   name: string
   avatar_url?: string
   role?: string
-  description?: string
 }
 
 export type CourseProfileSource = {
@@ -16,8 +15,8 @@ export type CourseProfileSource = {
 }
 
 function isUsableProfile(
-  person?: Partial<{ uid?: string; name?: string; avatar_url?: string; role?: string; description?: string }> | null,
-): person is { name: string; uid?: string; avatar_url?: string; role?: string; description?: string } {
+  person?: Partial<{ uid?: string; name?: string; avatar_url?: string; role?: string }> | null,
+): person is { name: string; uid?: string; avatar_url?: string; role?: string } {
   return Boolean(person?.name?.trim())
 }
 
@@ -30,7 +29,6 @@ export function resolveCourseProfiles(source: CourseProfileSource): CourseProfil
       name: mentor.name.trim(),
       avatar_url: mentor.avatar_url,
       role: mentor.role,
-      description: mentor.description,
     }))
   }
 

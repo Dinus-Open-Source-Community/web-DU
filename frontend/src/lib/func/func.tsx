@@ -21,24 +21,6 @@ export const EvaluatePassword = (password: string) => {
 
 /** Format angka, tanggal, dan countdown untuk tampilan ID. */
 
-export const FormatRupiah = (value: number | string, format: 'currency' | 'display' | 'parse' = 'currency'): number | string => {
-  if (format === 'display') {
-    if (value === 0) return 'Rp 0'
-    return 'Rp ' + (value as number).toLocaleString('id-ID')
-  }
-
-  if (format === 'parse') {
-    const digits = (value as string).replace(/[^\d]/g, '')
-    return digits ? parseInt(digits, 10) : 0
-  }
-
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value as number)
-}
-
 export const FormatDateTime = (isoDate: string) => {
   const date = new Date(isoDate)
   if (Number.isNaN(date.getTime())) return isoDate
@@ -60,16 +42,6 @@ export const FormatCountdown = (seconds: number) => {
   return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
 }
 
-export const FormatPaymentDate = (purchasedAt: string): string => {
-  return new Intl.DateTimeFormat('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(purchasedAt))
-}
-
 export const CreateSlug = (text: string) => {
   return slugify(text, { lower: true, strict: true })
 }
@@ -79,14 +51,6 @@ export const FormatTrend = (value?: number) => {
   const abs = Math.abs(value)
   const rounded = abs >= 10 ? abs.toFixed(0) : abs.toFixed(1)
   return `${rounded}%`
-}
-
-export const CurrencyCompact = (v: number) => {
-  const abs = Math.abs(v)
-  if (abs >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}M`
-  if (abs >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}jt`
-  if (abs >= 1_000) return `${(v / 1_000).toFixed(0)}rb`
-  return v.toLocaleString('id-ID')
 }
 
 export const Initials = (name: string) => {

@@ -54,9 +54,9 @@ export function buildUserManageColumns({
       ),
     },
     {
-      id: 'status',
-      header: 'Status',
-      cell: (row: ManagedUserRow) => <UserStatusBadge status={row.status} />,
+      id: 'verified',
+      header: 'Verifikasi Email',
+      cell: (row: ManagedUserRow) => <UserStatusBadge isVerified={row.isVerified} />,
     },
   ]
 
@@ -76,13 +76,10 @@ export function buildUserManageColumns({
             header: 'Progres rata-rata',
             cell: (row: ManagedUserRow) => <ProgressCell value={row.averageProgress ?? 0} />,
           },
-        ]
-      : kind === 'mentor'
-        ? [
-            {
-              id: 'joined',
-              header: 'Bergabung',
-              cell: (row: ManagedUserRow) => (
+          {
+            id: 'joined',
+            header: 'Bergabung',
+            cell: (row: ManagedUserRow) => (
               <span className="text-muted-foreground">{row.joinedAt}</span>
             ),
           },
@@ -95,14 +92,7 @@ export function buildUserManageColumns({
               <span className="text-muted-foreground">{row.joinedAt}</span>
             ),
           },
-          {
-            id: 'lastActive',
-            header: 'Terakhir aktif',
-            cell: (row: ManagedUserRow) => (
-              <span className="text-muted-foreground">{row.lastActive ?? '-'}</span>
-              ),
-            },
-          ]
+        ]
 
   const actionColumn = {
     id: 'actions',

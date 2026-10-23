@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from 'react'
+import { UserPlus } from 'lucide-react'
 
 import { UserManagePageShell } from '@/components/admin/user-manage/UserManagePageShell'
 import { UserManagePanel } from '@/components/admin/user-manage/UserManagePanel'
+import { UserPromoteDialog } from '@/components/admin/user-manage/UserPromoteDialog'
 import { useAdminUserPage } from '@/hooks/use-admin-user-page'
 import { useManagedUsers } from '@/hooks/use-managed-users'
 import {
@@ -49,16 +51,32 @@ export default function AdminAdministratorsPage() {
   }, [mentorsQuery.data?.users, studentsQuery.data?.users])
 
   const handlePromoteToAdmin = useCallback(
-    async (uid: string) => {
-      await adminsPage.onUpdateRole(uid, 'admin')
+    async (uids: string[]) => {
+      await adminsPage.onBatchUpdateRole(uids, 'admin')
     },
     [adminsPage],
   )
 
   const isInitialLoading = adminsPage.isLoading && rows.length === 0
 
+  const promoteAction = (
+    <UserPromoteDialog
+      triggerLabel="Jadikan Admin"
+      triggerIcon={UserPlus}
+      title="Jadikan Admin"
+      description="Pilih satu atau beberapa pengguna dari daftar mentor atau siswa untuk dipromosikan menjadi admin."
+      confirmLabel="Tetapkan sebagai Admin"
+      searchPlaceholder="Cari mentor atau siswa..."
+      emptyTitle="Tidak ada calon admin"
+      emptyDescription="Semua pengguna yang memenuhi syarat sudah menjadi admin."
+      footerHint={(name) => `${name} akan mendapatkan hak akses administratif penuh.`}
+      candidates={promoteCandidates}
+      onConfirm={handlePromoteToAdmin}
+    />
+  )
+
   return (
-    <UserManagePageShell kind="admin" isLoading={isInitialLoading}>
+    <UserManagePageShell kind="admin" isLoading={isInitialLoading} action={promoteAction}>
       <UserManagePanel
         kind="admin"
         rows={rows}
@@ -66,13 +84,13 @@ export default function AdminAdministratorsPage() {
         isLoading={adminsPage.isLoading}
         page={adminsPage.page}
         totalPages={adminsPage.totalPages}
+        pageSize={adminsPage.pageSize}
+        onPageSizeChange={adminsPage.setPageSize}
         onPageChange={adminsPage.setPage}
         onSearch={adminsPage.onSearch}
         onUpdateRole={adminsPage.onUpdateRole}
         onDeleteUser={adminsPage.onDeleteUser}
         isMutating={adminsPage.isMutating}
-        promoteCandidates={promoteCandidates}
-        onPromote={handlePromoteToAdmin}
       />
     </UserManagePageShell>
   )

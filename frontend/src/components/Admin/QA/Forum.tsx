@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MessageSquare, Send } from 'lucide-react'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { QaLottieIllustration } from '@/components/playful/QaLottieIllustration'
+import { TablePaginationFooter } from '@/components/shared/TablePaginationFooter'
 import { AdminMetaLabel, AdminQaStatusLabel } from '@/lib/admin/status-label'
 import { appCardClassName, appSoftCardClassName } from '@/lib/design/app-shell-tokens'
 import { Button } from '@/components/ui/button'
@@ -21,9 +22,24 @@ const roleLabel: Record<'student' | 'mentor' | 'admin', string> = {
 type QaForumProps = {
   threads: AdminQaThread[]
   isLoading?: boolean
+  page?: number
+  totalPages?: number
+  total?: number
+  pageSize?: number
+  onPageChange?: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
 }
 
-export function QaForum({ threads, isLoading = false }: QaForumProps) {
+export function QaForum({
+  threads,
+  isLoading = false,
+  page,
+  totalPages,
+  total,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+}: QaForumProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   if (isLoading) {
@@ -59,45 +75,57 @@ export function QaForum({ threads, isLoading = false }: QaForumProps) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      {threads.map((item) => (
-        <button
-          key={item.uid}
-          type="button"
-          onClick={() => setSelectedId(item.uid)}
-          className={cn(
-            appSoftCardClassName,
-            'group flex items-start gap-4 p-5 text-left transition-colors hover:border-ink-900/20 hover:bg-paper-paper/80',
-          )}
-        >
-          <UserAvatarImage
-            src={item.authorAvatar}
-            alt={item.author}
-            size={40}
-            className="ring-1 ring-border"
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <h3 className="line-clamp-1 text-base font-semibold text-ink-900 group-hover:text-primary">
-                {item.title}
-              </h3>
-              <AdminQaStatusLabel answered={item.status === 'answered'} />
+    <section className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col')}>
+      <div className="flex flex-col divide-y divide-line-light">
+        {threads.map((item) => (
+          <button
+            key={item.uid}
+            type="button"
+            onClick={() => setSelectedId(item.uid)}
+            className="group flex w-full items-start gap-4 p-5 text-left transition-colors hover:bg-paper-paper/60"
+          >
+            <UserAvatarImage
+              src={item.authorAvatar}
+              alt={item.author}
+              size={40}
+              className="ring-1 ring-border"
+            />
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <h3 className="line-clamp-1 text-base font-semibold text-ink-900 group-hover:text-primary">
+                  {item.title}
+                </h3>
+                <AdminQaStatusLabel answered={item.status === 'answered'} />
+              </div>
+              <p className="line-clamp-2 text-sm text-ink-500">{item.body}</p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
+                <span className="font-medium text-ink-600">{item.author}</span>
+                <span>•</span>
+                <span>{item.courseTitle}</span>
+                <span>•</span>
+                <span>{item.createdAt}</span>
+                <span>•</span>
+                <span className="inline-flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" aria-hidden /> {item.repliesCount} balasan
+                </span>
+              </div>
             </div>
-            <p className="line-clamp-2 text-sm text-ink-500">{item.body}</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
-              <span className="font-medium text-ink-600">{item.author}</span>
-              <span>•</span>
-              <span>{item.courseTitle}</span>
-              <span>•</span>
-              <span>{item.createdAt}</span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1">
-                <MessageSquare className="h-3 w-3" aria-hidden /> {item.repliesCount} balasan
-              </span>
-            </div>
-          </div>
-        </button>
-      ))}
+          </button>
+        ))}
+      </div>
+
+      {page !== undefined && totalPages !== undefined && onPageChange ? (
+        <TablePaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          totalLabel="pertanyaan"
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
+      ) : null}
     </section>
   )
 }

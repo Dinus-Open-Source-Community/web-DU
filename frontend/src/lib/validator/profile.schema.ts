@@ -4,7 +4,6 @@ import {
   currentPasswordSchema,
   emailSchema,
   passwordSchema,
-  userDescriptionSchema,
   userNameSchema,
 } from './common'
 
@@ -23,9 +22,8 @@ export const updateProfileSchema = z
       const trimmed = value.trim()
       return trimmed === '' ? undefined : trimmed
     }, emailSchema.optional()),
-    description: optionalProfileString.pipe(userDescriptionSchema.optional()),
   })
-  .refine((data) => data.name !== undefined || data.email !== undefined || data.description !== undefined, {
+  .refine((data) => data.name !== undefined || data.email !== undefined, {
     message: 'Minimal satu data profil harus diisi',
   })
 

@@ -15,8 +15,6 @@ export function courseDetailToFormValues(course: ICourseDetailItem): CourseFormV
     categoryUid: course.category?.uid ?? '',
     courseTypeUid: course.course_type?.uid ?? '',
     level: normalizeApiLevel(course.level),
-    price: course.price ?? 0,
-    strikePrice: course.price_strike > 0 ? course.price_strike : '',
     whatYouLearn: Array.isArray(course.what_you_learn) ? course.what_you_learn : [],
     slot: course.slot > 0 ? course.slot : '',
     coverFile: null,
@@ -25,8 +23,6 @@ export function courseDetailToFormValues(course: ICourseDetailItem): CourseFormV
 }
 
 export function formValuesToCreatePayload(values: CourseFormValues): CreateCoursePayload {
-  const price = typeof values.price === 'number' ? values.price : 0
-  const strikePrice = typeof values.strikePrice === 'number' ? values.strikePrice : undefined
   const slot = typeof values.slot === 'number' ? values.slot : undefined
 
   return {
@@ -36,19 +32,14 @@ export function formValuesToCreatePayload(values: CourseFormValues): CreateCours
     category_uid: values.categoryUid,
     course_type_uid: values.courseTypeUid,
     level: values.level,
-    price,
-    price_strike: strikePrice,
     what_you_learn: values.whatYouLearn,
     slot,
-    is_premium: price > 0,
     is_published: COURSE_CREATE_AS_DRAFT,
     cover: values.coverFile ?? undefined,
   }
 }
 
 export function formValuesToUpdatePayload(values: CourseFormValues): UpdateCoursePayload {
-  const price = typeof values.price === 'number' ? values.price : 0
-  const strikePrice = typeof values.strikePrice === 'number' ? values.strikePrice : undefined
   const slot = typeof values.slot === 'number' ? values.slot : undefined
 
   return {
@@ -58,11 +49,8 @@ export function formValuesToUpdatePayload(values: CourseFormValues): UpdateCours
     category_uid: values.categoryUid,
     course_type_uid: values.courseTypeUid,
     level: values.level,
-    price,
-    price_strike: strikePrice,
     what_you_learn: values.whatYouLearn,
     slot,
-    is_premium: price > 0,
     cover: values.coverFile ?? undefined,
   }
 }

@@ -21,8 +21,6 @@ func CreateAllEnums(db *gorm.DB) {
 	createUserRoleEnum(db)
 	createEnrollmentStatusEnum(db)
 	createAttendanceStatusEnum(db)
-	createPaymentMethodEnum(db)
-	createPaymentStatusEnum(db)
 	createCourseLevelEnum(db)
 	createCourseStatusEnum(db)
 	migrateLessonAttendanceStatusEnum(db)
@@ -144,38 +142,6 @@ END $$;`
 	}
 
 	log.Println("[Success] lesson_attendances.status migrated to attendance_status")
-}
-
-// createPaymentMethodEnum digunakan untuk membuat ENUM bernama `payment_method`
-// di database PostgreSQL.
-//
-// ENUM ini berisi tiga nilai tetap:
-// - 'credit_card'   → untuk metode pembayaran menggunakan kartu kredit
-// - 'bank_transfer' → untuk metode pembayaran melalui transfer bank
-// - 'ewallet'       → untuk metode pembayaran menggunakan dompet digital
-//
-// Parameter:
-//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
-func createPaymentMethodEnum(db *gorm.DB) {
-	ensureEnumType(db, "payment_method", []string{"PERMATAVA", "BNIVA", "BRIVA", "MANDIRIVA", "BCAVA", "MUAMALATVA", "CIMBVA", "BSIVA", "OCBCVA", "DANAMONVA", "OVO", "DANA", "QRIS2"})
-
-	log.Println("[Success] ENUM payment_method is ready for use")
-}
-
-// createPaymentStatusEnum digunakan untuk membuat ENUM bernama `payment_status`
-// di database PostgreSQL.
-//
-// ENUM ini berisi tiga nilai tetap:
-// - 'pending' → untuk status pembayaran yang sedang diproses
-// - 'success' → untuk status pembayaran yang berhasil
-// - 'failed'  → untuk status pembayaran yang gagal
-//
-// Parameter:
-//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
-func createPaymentStatusEnum(db *gorm.DB) {
-	ensureEnumType(db, "payment_status", []string{"pending", "success", "failed"})
-
-	log.Println("[Success] ENUM payment_status is ready for use")
 }
 
 func createCourseLevelEnum(db *gorm.DB) {

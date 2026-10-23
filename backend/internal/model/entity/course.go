@@ -44,10 +44,7 @@ type Course struct {
 	ThumbnailURL string          `gorm:"type:varchar(255)" json:"thumbnail_url"`
 	Level        CourseLevel     `gorm:"type:course_level;default:'PEMULA';not null" json:"level"`
 	Status       CourseStatus    `gorm:"type:course_status;default:'DRAFT';not null" json:"status"`
-	Price        float64         `gorm:"type:decimal(10,2)" json:"price"`
-	PriceStrike  float64         `gorm:"type:decimal(10,2);default:0" json:"price_strike"`
 	WhatYouLearn json.RawMessage `gorm:"type:jsonb" json:"what_you_learn"`
-	IsPremium    bool            `gorm:"default:false" json:"is_premium"`
 	IsPublished  bool            `gorm:"default:false" json:"is_published"`
 	CreatedAt    time.Time       `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
@@ -67,7 +64,7 @@ type Course struct {
 }
 
 // AfterFind otomatis mendekripsi kolom teks sensitif setelah data dimuat.
-// Slug, cover_url, thumbnail_url, level, status, harga, jsonb what_you_learn,
+// Slug, cover_url, thumbnail_url, level, status, jsonb what_you_learn,
 // dan timestamps tidak dienkripsi karena bukan data sensitif atau dibutuhkan
 // apa adanya untuk routing/listing.
 func (c *Course) AfterFind(_ *gorm.DB) error {

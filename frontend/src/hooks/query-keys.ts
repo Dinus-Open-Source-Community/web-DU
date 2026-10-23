@@ -52,12 +52,6 @@ export const attendanceKeys = {
   byLesson: (lessonUid: string) => ['lesson-attendances', 'lesson', lessonUid] as const,
 }
 
-export const paymentKeys = {
-  all: ['payment'] as const,
-  tripayDetail: (reference: string, merchantRef: string) =>
-    ['payment', 'tripay', 'detail', reference, merchantRef] as const,
-}
-
 export const adminDashboardKeys = {
   all: ['admin-dashboard'] as const,
   kpis: (period: string) => ['admin-dashboard', 'kpis', period] as const,

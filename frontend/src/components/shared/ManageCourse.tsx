@@ -98,8 +98,9 @@ export default function ManageCourseSection({
             className="mb-0 space-y-2"
           />
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <AdminUnderlineTabs<CourseFilter>
+              variant="pill"
               items={filters.map((f) => ({ value: f, label: f }))}
               value={activeFilter}
               onChange={setActiveFilter}

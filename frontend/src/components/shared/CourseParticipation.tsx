@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { BarChart3, CheckCircle, ClipboardList, Loader2, Users } from 'lucide-react'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 import { Initials } from '../../lib/func/func'
-import { Pagination } from './Pagination'
+import { TablePaginationFooter } from './TablePaginationFooter'
 import { AttendanceBar, ProgressBar } from '../ui/bar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { AdminParticipantStatusLabel } from '@/lib/admin/status-label'
@@ -24,14 +24,15 @@ export function CourseParticipantsSection({
   adminStatusLabels = false,
 }: CourseParticipantsSectionProps) {
   const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     setCurrentPage(1)
   }, [courseUid])
 
-  const { data: studentsResponse, isLoading, isFetching } = useCourseStudents(
+  const { data: studentsResponse, isLoading } = useCourseStudents(
     courseUid,
-    { page: currentPage, per_page: 8 },
+    { page: currentPage, per_page: pageSize },
   )
 
   const studentsList: IMentorCourseStudent[] =
@@ -43,7 +44,7 @@ export function CourseParticipantsSection({
 
   const totalPages =
     studentsResponse?.meta?.total_pages ??
-    Math.max(1, Math.ceil(totalCount / 8))
+    Math.max(1, Math.ceil(totalCount / pageSize))
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages)
@@ -56,17 +57,6 @@ export function CourseParticipantsSection({
         icon={Users}
         title="Peserta kursus"
         description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
-        aside={
-          <div className={manageDetailLayout.tabCountBadge}>
-            <span className={manageDetailLayout.tabCountDot} aria-hidden />
-            <span>Total</span>
-            <span className={manageDetailLayout.tabCountNumber}>{totalCount}</span>
-            <span>peserta</span>
-            {isFetching && !isLoading ? (
-              <Loader2 className="size-3.5 animate-spin text-ink-400" aria-label="Memuat data..." />
-            ) : null}
-          </div>
-        }
       />
 
       {isLoading && !studentsResponse ? (
@@ -137,51 +127,71 @@ export function CourseParticipantsSection({
                 ))}
               </TableBody>
             </Table>
+            <TablePaginationFooter
+              page={currentPage}
+              totalPages={totalPages}
+              total={totalCount}
+              totalLabel="peserta"
+              pageSize={pageSize}
+              pageSizeOptions={[5, 10, 25, 50]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize)
+                setCurrentPage(1)
+              }}
+            />
           </div>
 
-          <ul className="flex flex-col gap-3 md:hidden">
-            {studentsList.map((student) => (
-              <li key={student.student_uid} className={cn(manageDetailLayout.sectionCard, 'p-4 shadow-paper')}>
-                <div className="flex items-start gap-3">
-                  {student.student_avatar_url ? (
-                    <img src={student.student_avatar_url} width={40} height={40} loading="lazy" alt={student.student_name} className="size-10 rounded-full object-cover ring-1 ring-border/50" />
-                  ) : (
-                    <span className="flex size-10 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{Initials(student.student_name)}</span>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-foreground">{student.student_name}</p>
-                    <div className="mt-3 flex flex-col gap-1">
-                      <p className={manageDetailLayout.tableHead}>Status pendaftaran</p>
-                      {adminStatusLabels ? (
-                        <AdminParticipantStatusLabel status={student.status} />
-                      ) : (
-                        <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
-                      )}
-                    </div>
-                    <div className="mt-3 flex flex-col gap-1">
-                      <p className={manageDetailLayout.tableHead}>Kemajuan belajar</p>
-                      <ProgressBar value={student.progress} />
-                    </div>
-                    <div className="mt-3 flex flex-col gap-1">
-                      <p className={manageDetailLayout.tableHead}>Kehadiran</p>
-                      <AttendanceBar student={student} />
+          <div className="flex flex-col gap-3 md:hidden">
+            <ul className="flex flex-col gap-3">
+              {studentsList.map((student) => (
+                <li key={student.student_uid} className={cn(manageDetailLayout.sectionCard, 'p-4 shadow-paper')}>
+                  <div className="flex items-start gap-3">
+                    {student.student_avatar_url ? (
+                      <img src={student.student_avatar_url} width={40} height={40} loading="lazy" alt={student.student_name} className="size-10 rounded-full object-cover ring-1 ring-border/50" />
+                    ) : (
+                      <span className="flex size-10 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{Initials(student.student_name)}</span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground">{student.student_name}</p>
+                      <div className="mt-3 flex flex-col gap-1">
+                        <p className={manageDetailLayout.tableHead}>Status pendaftaran</p>
+                        {adminStatusLabels ? (
+                          <AdminParticipantStatusLabel status={student.status} />
+                        ) : (
+                          <CourseParticipantStatusBadge status={student.status} className="max-w-36" />
+                        )}
+                      </div>
+                      <div className="mt-3 flex flex-col gap-1">
+                        <p className={manageDetailLayout.tableHead}>Kemajuan belajar</p>
+                        <ProgressBar value={student.progress} />
+                      </div>
+                      <div className="mt-3 flex flex-col gap-1">
+                        <p className={manageDetailLayout.tableHead}>Kehadiran</p>
+                        <AttendanceBar student={student} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
 
-          {totalPages > 1 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
+            <div className={cn(manageDetailLayout.tableSurface, 'overflow-hidden')}>
+              <TablePaginationFooter
+                page={currentPage}
                 totalPages={totalPages}
+                total={totalCount}
+                totalLabel="peserta"
+                pageSize={pageSize}
+                pageSizeOptions={[5, 10, 25, 50]}
                 onPageChange={setCurrentPage}
-                variant={adminStatusLabels ? 'admin' : 'default'}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize)
+                  setCurrentPage(1)
+                }}
               />
             </div>
-          )}
+          </div>
         </>
       )}
     </div>

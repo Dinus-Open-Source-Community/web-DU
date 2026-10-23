@@ -4,15 +4,9 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
   variants: {
     variant: {
       // Course (kartu kursus / browse)
-      free: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/40 dark:text-emerald-300',
-      premium: 'rounded-md border border-sky-200/80 bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:border-sky-800/40 dark:text-sky-300',
       event: 'rounded-md border border-purple-200/80 bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300',
       draft: 'rounded-md border border-line-light bg-paper-paper px-2.5 py-0.5 text-xs font-medium text-ink-600 dark:border-ink-800 dark:text-ink-300',
       outline: 'rounded-md border border-line-light bg-transparent px-2.5 py-0.5 text-xs font-medium text-ink-700',
-      // Payment (transaksi)
-      paymentPaid: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
-      paymentPending: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
-      paymentFailed: 'rounded-md border border-rose-200/80 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-800',
       // Mentor — siklus tugas
       assignmentDraft: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
       assignmentPublished: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
@@ -32,9 +26,6 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       classOnline: 'rounded-md border border-sky-200/80 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800',
       classOffline: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
       // Admin — pengguna
-      userActive: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
-      userInactive: 'rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-600',
-      userPending: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
       userRole: 'rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-700',
       // Progress / selesai (kartu resume)
       progressComplete: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800',
@@ -54,20 +45,11 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
       severityHigh: 'rounded-md border border-rose-200/80 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-800',
       severityMedium: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
       severityLow: 'rounded-md border border-sky-200/80 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800',
-      // Admin — payout
-      payoutRequested: 'rounded-md border border-sky-200/80 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800',
-      payoutApproved: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
-      payoutPaid: 'rounded-md border border-indigo-200/80 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-800',
-      payoutRejected: 'rounded-md border border-rose-200/80 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-800',
       // Admin — audit
       auditCreate: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
       auditUpdate: 'rounded-md border border-sky-200/80 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800',
       auditDelete: 'rounded-md border border-rose-200/80 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-800',
       auditView: 'rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-600',
-      // Admin — coupons
-      couponActive: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
-      couponExpired: 'rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-600',
-      couponScheduled: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
       // Admin — course status
       coursePublished: 'rounded-md border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800',
       courseDraft: 'rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800',
@@ -87,6 +69,6 @@ export const BadgeVariants = cva('inline-flex items-center justify-center font-m
     },
   },
   defaultVariants: {
-    variant: 'free',
+    variant: 'outline',
   },
 })

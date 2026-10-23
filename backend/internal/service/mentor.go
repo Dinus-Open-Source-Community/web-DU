@@ -567,17 +567,14 @@ func mentorListToGinH(mentors []entity.User) ([]gin.H, error) {
 	for _, mentor := range mentors {
 		name, _ := utils.Decrypt(mentor.Name)
 		email, _ := utils.Decrypt(mentor.Email)
-		description, _ := utils.Decrypt(mentor.Description)
 		summary := summaryMap[mentor.Uid]
 		result = append(result, gin.H{
 			"uid":                  mentor.Uid,
 			"name":                 name,
 			"email":                email,
 			"avatar_url":           mentor.AvatarURL,
-			"description":          description,
 			"is_verified":          mentor.IsVerified,
 			"created_at":           mentor.CreatedAt,
-			"updated_at":           mentor.UpdatedAt,
 			"assigned_courses":     summary.Assigned,
 			"joined_teach_courses": summary.Joined,
 		})
@@ -837,7 +834,6 @@ func GetMentorDetailFunc(c *gin.Context) {
 
 	nameDecrypted, _ := utils.Decrypt(mentor.Name)
 	emailDecrypted, _ := utils.Decrypt(mentor.Email)
-	descriptionDecrypted, _ := utils.Decrypt(mentor.Description)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -849,9 +845,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 			"avatar_url":  mentor.AvatarURL,
 			"role":        mentor.Role,
 			"is_verified": mentor.IsVerified,
-			"description": descriptionDecrypted,
 			"created_at":  mentor.CreatedAt,
-			"updated_at":  mentor.UpdatedAt,
 			"assignments": assignedCourses,
 			"review_summary": gin.H{
 				"total_reviews":  len(reviewData),

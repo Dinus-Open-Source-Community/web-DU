@@ -19,9 +19,6 @@ export const detailLayout = {
   sectionSubtitle: appKpiLabelClassName,
   body: 'text-sm leading-relaxed text-ink-600 sm:text-[15px]',
   meta: 'text-xs font-medium text-ink-500',
-  price: 'text-xl font-bold tracking-tight text-ink-900 sm:text-2xl',
-  strikePrice: 'text-sm text-ink-400 line-through sm:text-base',
-  discount: 'text-xs font-medium text-rose-600 dark:text-rose-400',
   backLink:
     'inline-flex min-h-11 items-center gap-1 rounded-lg px-1 text-sm font-medium text-white/90 transition-colors hover:text-white active:scale-[0.98]',
   stickyBar:

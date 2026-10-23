@@ -21,7 +21,6 @@ export function isHomeworkConfigured(lesson: EditableLesson): boolean {
 
   return (
     stripHtml(lesson.homeworkDescriptionHtml ?? '').length > 0 ||
-    (lesson.homeworkTitle ?? '').trim().length > 0 ||
     (lesson.homeworkRules?.instructionAttachments?.length ?? 0) > 0
   )
 }

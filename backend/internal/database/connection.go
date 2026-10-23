@@ -50,9 +50,11 @@ func ConnectDB() {
 
 	// Buat semua enum (jika ada) dan lakukan migrasi tabel model
 	CreateAllEnums(DB)
+	hadGalleriesTable := DB.Migrator().HasTable(&entity.Gallery{})
 	DB.AutoMigrate(
 		&entity.User{},
 		&entity.Event{},
+		&entity.Gallery{},
 		&entity.CourseCategory{},
 		&entity.ClassType{},
 		&entity.Course{},
@@ -63,8 +65,6 @@ func ConnectDB() {
 		&entity.LessonAssignmentSubmission{},
 		&entity.LessonAssignmentSubmissionAttempt{},
 		&entity.Enrollment{},
-		&entity.Payment{},
-		&entity.PaymentMethodConfig{},
 		&entity.CourseReview{},
 		&entity.CourseReviewReply{},
 		&entity.CourseAnnouncement{},
@@ -73,6 +73,10 @@ func ConnectDB() {
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},
 	)
+
+	if !hadGalleriesTable {
+		seedGalleries(DB)
+	}
 
 	log.Println("[Success] Berhasil terhubung ke database")
 }

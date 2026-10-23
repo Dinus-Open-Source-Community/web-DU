@@ -107,8 +107,10 @@ export function MentorsTable({
               </div>
 
               <div className="rounded-2xl bg-paper-paper/70 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Status</p>
-                <p className="mt-1 text-sm font-semibold capitalize text-ink-900">{mentor.status}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Verifikasi Email</p>
+                <p className="mt-1 text-sm font-semibold text-ink-900">
+                  {mentor.isVerified ? 'Terverifikasi' : 'Belum terverifikasi'}
+                </p>
               </div>
 
               <div className="mt-auto flex items-center justify-end gap-3">

@@ -1,5 +1,4 @@
-import type { EnrollmentStatus, PaymentStatus } from '@/lib/types/common/domain'
-import type { AdminStatus } from '@/lib/types/user'
+import type { EnrollmentStatus } from '@/lib/types/common/domain'
 
 export type ManagedUserDetailCourseRef = {
   uid: string
@@ -11,9 +10,14 @@ export type ManagedUserDetailAssignment = {
   submissionUid: string
   attemptCount: number
   scorePercent: number | null
-  passed: boolean
+  passed: boolean | null
+  isAutoGraded: boolean
   submittedAtLabel: string
+  gradedAtLabel: string | null
   assignmentTitle: string
+  taskType: string
+  taskTypeLabel: string
+  deadlineAtLabel: string | null
   lessonTitle: string
   moduleTitle: string
 }
@@ -25,6 +29,8 @@ export type ManagedUserDetailJoinedCourse = {
   slug: string
   thumbnailUrl: string
   level: string
+  levelLabel: string
+  mentorNamesLabel: string | null
   enrollmentStatus: EnrollmentStatus
   enrollmentStatusLabel: string
   progressPercent: number
@@ -41,9 +47,10 @@ export type ManagedUserDetailMentoredCourse = {
   subtitle: string
   slug: string
   level: string
+  levelLabel: string
   status: string
+  statusLabel: string
   isPublished: boolean
-  priceLabel: string
   createdAtLabel: string
   adminCourseHref: string
 }
@@ -57,18 +64,6 @@ export type ManagedUserDetailReview = {
   courseSlug: string | null
 }
 
-export type ManagedUserDetailTransaction = {
-  uid: string
-  reference: string
-  amountLabel: string
-  paymentMethod: string
-  paymentStatus: PaymentStatus
-  transactionAtLabel: string
-  paidAtLabel: string | null
-  enrollmentStatus: EnrollmentStatus
-  courseTitle: string
-}
-
 export type ManagedUserDetailProfile = {
   uid: string
   name: string
@@ -76,11 +71,8 @@ export type ManagedUserDetailProfile = {
   avatar: string
   role: string
   roleLabel: string
-  status: AdminStatus
   isVerified: boolean
-  description: string | null
   createdAtLabel: string
-  updatedAtLabel: string
 }
 
 export type ManagedUserDetailStat = {
@@ -89,7 +81,7 @@ export type ManagedUserDetailStat = {
   value: string
 }
 
-export type ManagedUserDetailTab = 'courses' | 'mentored' | 'reviews' | 'transactions' | 'profile'
+export type ManagedUserDetailTab = 'courses' | 'mentored' | 'reviews' | 'profile'
 
 export type ManagedUserDetailViewModel = {
   profile: ManagedUserDetailProfile
@@ -108,5 +100,4 @@ export type ManagedUserDetailViewModel = {
     completed: number
     cancelled: number
   }
-  transactions: ManagedUserDetailTransaction[]
 }

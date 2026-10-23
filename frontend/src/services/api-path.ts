@@ -5,8 +5,6 @@ export interface IQueryParamsPayload {
   per_page?: number;
   mentor_id?: string;
   title?: string;
-  price?: string | number;
-  is_premium?: boolean;
   course_category_id?: string;
   course_type_id?: string;
   class_type_id?: string;
@@ -71,6 +69,7 @@ export const API_ROUTES = {
       withQuery(`/user/manage/all`, params),
     deleteManagedUserByUid: (uid: Uid) => `/user/manage/${uid}`,
     updateUserRoleByUid: (uid: Uid) => `/user/role/${uid}`,
+    batchUpdateUserRole: `/user/role/batch`,
     getUserByUid: (uid: Uid) => `/user/${uid}`,
   },
   mentor: {
@@ -124,6 +123,14 @@ export const API_ROUTES = {
     getByUid: (uid: Uid) => `/course-types/${uid}`,
     updateByUid: (uid: Uid) => `/course-types/${uid}`,
     deleteByUid: (uid: Uid) => `/course-types/${uid}`,
+  },
+  galleries: {
+    getAll: (params?: IQueryParamsPayload) =>
+      withQuery(`/galleries`, params),
+    create: `/galleries`,
+    getByUid: (uid: Uid) => `/galleries/${uid}`,
+    updateByUid: (uid: Uid) => `/galleries/${uid}`,
+    deleteByUid: (uid: Uid) => `/galleries/${uid}`,
   },
   modules: {
     create: `/modules`,
@@ -185,29 +192,12 @@ export const API_ROUTES = {
         withQuery(`/lessons/attendances/lesson/${lessonUid}`, params),
     },
   },
-  invoices: {
-    getInvoiceUrl: (params?: IQueryParamsPayload) =>
-      withQuery(`/invoices/url`, params),
-    getByEnrollmentUid: (enrollmentUid: Uid) => `/invoices/${enrollmentUid}`,
-  },
   admin: {
     dashboard: {
       kpis: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/kpis`, params),
       analytics: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/analytics`, params),
-      recentTransactions: (params?: IQueryParamsPayload) =>
-        withQuery(`/admin/dashboard/recent-transactions`, params),
-    },
-    transactions: {
-      list: (params?: IQueryParamsPayload) =>
-        withQuery(`/admin/transactions`, params),
-      summary: (params?: IQueryParamsPayload) =>
-        withQuery(`/admin/transactions/summary`, params),
-    },
-    financial: {
-      summary: (params?: IQueryParamsPayload) =>
-        withQuery(`/admin/financial/summary`, params),
     },
     moderation: {
       reviews: (params?: IQueryParamsPayload & { courseUid?: string }) =>
@@ -217,13 +207,6 @@ export const API_ROUTES = {
         withQuery(`/admin/qna`, params),
       replyQna: (threadUid: Uid) => `/admin/qna/${threadUid}/replies`,
     },
-  },
-  payment: {
-    create: `/payment/create`,
-    getAll: (params?: IQueryParamsPayload) => withQuery(`/payment`, params),
-    method: `/payment/method`,
-    tripay: (params?: IQueryParamsPayload) =>
-      withQuery(`/payment/tripay`, params),
   },
   swagger: {
     ui: `/swagger/index.html`,

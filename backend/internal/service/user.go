@@ -22,7 +22,7 @@ import (
 )
 
 // @Summary      Get current authenticated user detail (Self)
-// @Description  Retrieve own detailed user data including profile, joined courses, enrollment invoices (same structure as GET /invoices/{enrollment_id}, with invoice_url and filename per enrollment), transaction history, course reviews, enrollment summary, and mentored courses.
+// @Description  Retrieve own detailed user data including profile, joined courses, course reviews, enrollment summary, and mentored courses.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -106,7 +106,7 @@ func GetUserDetailByIDService(c *gin.Context) {
 
 func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	var userData entity.User
-	if err := database.DB.Select("uid", "name", "email", "avatar_url", "role", "is_verified", "description", "created_at", "updated_at").First(&userData, targetUID).Error; err != nil {
+	if err := database.DB.Select("uid", "name", "email", "avatar_url", "role", "is_verified", "created_at").First(&userData, targetUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "User not found",
@@ -118,7 +118,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 
 	nameDecrypted, _ := utils.Decrypt(userData.Name)
 	emailDecrypted, _ := utils.Decrypt(userData.Email)
-	descriptionDecrypted, _ := utils.Decrypt(userData.Description)
 
 	var enrollments []entity.Enrollment
 	if err := database.DB.
@@ -135,26 +134,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			"error":   err.Error(),
 		})
 		return
-	}
-
-	enrollmentInvoices := make([]gin.H, 0, len(enrollments))
-	for _, en := range enrollments {
-		filename := dto.GenerateInvoiceFilename(
-			en.Uid,
-			en.UserUid,
-			en.CourseUid,
-			en.EnrolledAt,
-		)
-		invoiceURL := utils.GetPublicURL(utils.GetBucketInvoices(), filename)
-
-		enrollmentInvoices = append(enrollmentInvoices, gin.H{
-			"enrollment_uid": en.Uid,
-			"user_uid":       en.UserUid,
-			"course_uid":     en.CourseUid,
-			"filename":       filename,
-			"invoice_url":    invoiceURL,
-			"enrolled_at":    en.EnrolledAt,
-		})
 	}
 
 	courses := make([]gin.H, 0, len(enrollments))
@@ -227,13 +206,63 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		readCountByEnrollment[row.EnrollmentUID] = row.ReadCount
 	}
 
-	// Hitung progress (0.0 – 1.0) per enrollment
+	// Total tugas terbit per course (satu query)
+	type assignmentCountRow struct {
+		CourseUID        uuid.UUID `gorm:"column:course_uid"`
+		TotalAssignments int64     `gorm:"column:total_assignments"`
+	}
+	var assignmentCountRows []assignmentCountRow
+	if len(courseUIDs) > 0 {
+		database.DB.Table("lesson_assignments la").
+			Select("m.course_uid AS course_uid, COUNT(la.uid) AS total_assignments").
+			Joins("JOIN lessons l ON l.uid = la.lesson_uid").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("m.course_uid IN ? AND la.status = ?", courseUIDs, entity.LessonAssignmentStatusTerbit).
+			Group("m.course_uid").
+			Scan(&assignmentCountRows)
+	}
+	totalAssignmentByCourse := make(map[uuid.UUID]int64, len(assignmentCountRows))
+	for _, row := range assignmentCountRows {
+		totalAssignmentByCourse[row.CourseUID] = row.TotalAssignments
+	}
+
+	// Tugas yang sudah disubmit user per course (satu query)
+	type submittedAssignmentRow struct {
+		CourseUID      uuid.UUID `gorm:"column:course_uid"`
+		SubmittedCount int64     `gorm:"column:submitted_count"`
+	}
+	var submittedAssignmentRows []submittedAssignmentRow
+	if len(courseUIDs) > 0 {
+		database.DB.Table("lesson_assignment_submissions sub").
+			Select("m.course_uid AS course_uid, COUNT(DISTINCT sub.lesson_assignment_uid) AS submitted_count").
+			Joins("JOIN lesson_assignments la ON la.uid = sub.lesson_assignment_uid").
+			Joins("JOIN lessons l ON l.uid = la.lesson_uid").
+			Joins("JOIN modules m ON m.uid = l.module_uid").
+			Where("m.course_uid IN ? AND sub.user_uid = ? AND la.status = ?", courseUIDs, targetUID, entity.LessonAssignmentStatusTerbit).
+			Group("m.course_uid").
+			Scan(&submittedAssignmentRows)
+	}
+	submittedByCourse := make(map[uuid.UUID]int64, len(submittedAssignmentRows))
+	for _, row := range submittedAssignmentRows {
+		submittedByCourse[row.CourseUID] = row.SubmittedCount
+	}
+
+	// Hitung progress (0.0 – 1.0) per enrollment (gabungan lesson & assignment)
 	progressByEnrollment := make(map[uuid.UUID]float64, len(enrollmentKeys))
 	for _, key := range enrollmentKeys {
-		total := totalLessonByCourse[key.CourseUID]
+		totalLessons := totalLessonByCourse[key.CourseUID]
+		totalAssignments := totalAssignmentByCourse[key.CourseUID]
 		read := readCountByEnrollment[key.EnrollmentUID]
-		if total > 0 {
-			progressByEnrollment[key.EnrollmentUID] = float64(read) / float64(total)
+		submitted := submittedByCourse[key.CourseUID]
+
+		totalItems := totalLessons + totalAssignments
+		completedItems := read + submitted
+		if totalItems > 0 {
+			prog := float64(completedItems) / float64(totalItems)
+			if prog > 1.0 {
+				prog = 1.0
+			}
+			progressByEnrollment[key.EnrollmentUID] = prog
 		} else {
 			progressByEnrollment[key.EnrollmentUID] = 0.0
 		}
@@ -327,7 +356,13 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	// --- akhir batch query assignment ---
 
 	for _, enrollment := range enrollments {
-		switch enrollment.Status {
+		calculatedProgress := progressByEnrollment[enrollment.Uid]
+		effectiveStatus := enrollment.Status
+		if effectiveStatus == entity.EnrollmentCompleted && calculatedProgress < 0.9999 {
+			effectiveStatus = entity.EnrollmentActive
+		}
+
+		switch effectiveStatus {
 		case entity.EnrollmentPending:
 			enrollmentSummary["pending"] = enrollmentSummary["pending"].(int) + 1
 		case entity.EnrollmentActive:
@@ -347,8 +382,9 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		}
 
 		seenCourses[enrollment.Course.Uid] = struct{}{}
-		calculatedProgress := progressByEnrollment[enrollment.Uid]
-		courseItem := joinedCourseListItemResponse(*enrollment.Course, enrollment, calculatedProgress)
+		enrollmentCopy := enrollment
+		enrollmentCopy.Status = effectiveStatus
+		courseItem := joinedCourseListItemResponse(*enrollment.Course, enrollmentCopy, calculatedProgress)
 		assignments := assignmentsByCourse[enrollment.Course.Uid]
 		if assignments == nil {
 			assignments = []gin.H{}
@@ -433,88 +469,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		averageRating = math.Round((float64(totalRating)/float64(len(reviewRows)))*10) / 10
 	}
 
-	type transactionRow struct {
-		PaymentUID      uuid.UUID               `gorm:"column:payment_uid"`
-		Reference       string                  `gorm:"column:reference"`
-		Amount          float64                 `gorm:"column:amount"`
-		PaymentMethod   entity.PaymentMethod    `gorm:"column:payment_method"`
-		PaymentStatus   entity.PaymentStatus    `gorm:"column:payment_status"`
-		CheckoutURL     string                  `gorm:"column:checkout_url"`
-		PaidAt          *time.Time              `gorm:"column:paid_at"`
-		TransactionAt   time.Time               `gorm:"column:transaction_at"`
-		EnrollmentUID   uuid.UUID               `gorm:"column:enrollment_uid"`
-		EnrollmentState entity.EnrollmentStatus `gorm:"column:enrollment_state"`
-		CourseUID       *uuid.UUID              `gorm:"column:course_uid"`
-		CourseTitle     *string                 `gorm:"column:course_title"`
-		CourseSlug      *string                 `gorm:"column:course_slug"`
-	}
-
-	var transactionRows []transactionRow
-	if err := database.DB.Table("payments AS p").
-		Select(`
-			p.uid AS payment_uid,
-			p.transaction_id AS reference,
-			p.amount AS amount,
-			p.method AS payment_method,
-			p.status AS payment_status,
-			p.checkout_url AS checkout_url,
-			p.paid_at AS paid_at,
-			p.created_at AS transaction_at,
-			e.uid AS enrollment_uid,
-			e.status AS enrollment_state,
-			c.uid AS course_uid,
-			c.title AS course_title,
-			c.slug AS course_slug`).
-		Joins("INNER JOIN enrollments AS e ON e.uid = p.enrollment_uid").
-		Joins("LEFT JOIN courses AS c ON c.uid = e.course_uid").
-		Where("e.user_uid = ?", targetUID).
-		Order("p.created_at DESC").
-		Scan(&transactionRows).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve transaction history",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	transactions := make([]gin.H, 0, len(transactionRows))
-	for _, trx := range transactionRows {
-		var courseData any
-		if trx.CourseUID != nil {
-			courseTitle := ""
-			if trx.CourseTitle != nil {
-				courseTitle = utils.DecryptOrSelf(*trx.CourseTitle)
-			}
-
-			courseSlug := ""
-			if trx.CourseSlug != nil {
-				courseSlug = *trx.CourseSlug
-			}
-
-			courseData = gin.H{
-				"uid":   *trx.CourseUID,
-				"title": courseTitle,
-				"slug":  courseSlug,
-			}
-		}
-
-		transactions = append(transactions, gin.H{
-			"uid":               trx.PaymentUID,
-			"reference":         trx.Reference,
-			"amount":            trx.Amount,
-			"payment_method":    trx.PaymentMethod,
-			"payment_status":    trx.PaymentStatus,
-			"checkout_url":      trx.CheckoutURL,
-			"paid_at":           trx.PaidAt,
-			"transaction_at":    trx.TransactionAt,
-			"enrollment_uid":    trx.EnrollmentUID,
-			"enrollment_status": trx.EnrollmentState,
-			"course":            courseData,
-		})
-	}
-
 	type mentoredCourseRow struct {
 		CourseUID   uuid.UUID           `gorm:"column:course_uid"`
 		Title       string              `gorm:"column:title"`
@@ -522,8 +476,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		Slug        string              `gorm:"column:slug"`
 		Level       entity.CourseLevel  `gorm:"column:level"`
 		Status      entity.CourseStatus `gorm:"column:status"`
-		Price       float64             `gorm:"column:price"`
-		IsPremium   bool                `gorm:"column:is_premium"`
 		IsPublished bool                `gorm:"column:is_published"`
 		CreatedAt   time.Time           `gorm:"column:created_at"`
 	}
@@ -537,8 +489,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			c.slug,
 			c.level,
 			c.status,
-			c.price,
-			c.is_premium,
 			c.is_published,
 			c.created_at`).
 		Joins("LEFT JOIN course_mentors cm ON cm.course_uid = c.uid AND cm.mentor_uid = ? AND cm.status = 'joined'", targetUID).
@@ -564,8 +514,6 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			"slug":         course.Slug,
 			"level":        course.Level,
 			"status":       course.Status,
-			"price":        course.Price,
-			"is_premium":   course.IsPremium,
 			"is_published": course.IsPublished,
 			"created_at":   course.CreatedAt,
 		})
@@ -581,26 +529,22 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			"avatar_url":     userData.AvatarURL,
 			"role":           userData.Role,
 			"is_verified":    userData.IsVerified,
-			"description":    descriptionDecrypted,
 			"created_at":     userData.CreatedAt,
-			"updated_at":     userData.UpdatedAt,
 			"joined_courses": courses,
 			"course_reviews": reviews,
 			"review_summary": gin.H{
 				"total_reviews":  len(reviewRows),
 				"average_rating": averageRating,
 			},
-			"enrollment_summary":   enrollmentSummary,
-			"enrollment_invoices":  enrollmentInvoices,
-			"mentored_courses":     mentoredCourseList,
-			"transaction_history":  transactions,
+			"enrollment_summary": enrollmentSummary,
+			"mentored_courses":   mentoredCourseList,
 		},
 		"error": nil,
 	})
 }
 
 // @Summary      Update user profile (All Roles)
-// @Description  Update authenticated user's profile information including name, email, and description. All fields are optional and encrypted before storage.
+// @Description  Update authenticated user's profile information including name and email. All fields are optional and encrypted before storage.
 // @Tags         User
 // @Accept       json
 // @Produce      json
@@ -626,7 +570,7 @@ func UpdateUserProfileService(c *gin.Context) {
 		return
 	}
 
-	if req.Name == nil && req.Email == nil && req.Description == nil {
+	if req.Name == nil && req.Email == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "No profile fields provided",
@@ -729,25 +673,6 @@ func UpdateUserProfileService(c *gin.Context) {
 		updateData["email_hash"] = emailHash
 	}
 
-	if req.Description != nil {
-		description := strings.TrimSpace(*req.Description)
-		if description == "" {
-			updateData["description"] = ""
-		} else {
-			encDescription, err := utils.Encrypt(description)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"success": false,
-					"message": "Failed to encrypt description",
-					"data":    nil,
-					"error":   err.Error(),
-				})
-				return
-			}
-			updateData["description"] = encDescription
-		}
-	}
-
 	if err := database.DB.Model(&user).Updates(updateData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -770,7 +695,6 @@ func UpdateUserProfileService(c *gin.Context) {
 
 	nameDecrypted, _ := utils.Decrypt(user.Name)
 	emailDecrypted, _ := utils.Decrypt(user.Email)
-	descriptionDecrypted, _ := utils.Decrypt(user.Description)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -782,9 +706,7 @@ func UpdateUserProfileService(c *gin.Context) {
 			"avatar_url":  user.AvatarURL,
 			"role":        user.Role,
 			"is_verified": user.IsVerified,
-			"description": descriptionDecrypted,
 			"created_at":  user.CreatedAt,
-			"updated_at":  user.UpdatedAt,
 		},
 		"error": nil,
 	})
@@ -1020,7 +942,202 @@ func UpdateUserRoleService(c *gin.Context) {
 			"role":        newRole,
 			"is_verified": targetUser.IsVerified,
 			"created_at":  targetUser.CreatedAt,
-			"updated_at":  targetUser.UpdatedAt,
+		},
+		"error": nil,
+	})
+}
+
+// @Summary      Batch update user roles (Super Admin / Admin)
+// @Description  Assign target role (admin, mentor, or student) to one or more users at once. Only super_admin may assign the admin role or modify existing admin/super_admin users.
+// @Tags         User Management
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body  body      dto.BatchUpdateUserRoleRequest   true  "User UIDs and target role"
+// @Success      200   {object}  map[string]any                   "User roles updated successfully"
+// @Failure      400   {object}  map[string]any                   "Invalid request or role value"
+// @Failure      401   {object}  map[string]any                   "Unauthorized"
+// @Failure      403   {object}  map[string]any                   "Forbidden"
+// @Failure      404   {object}  map[string]any                   "One or more users not found"
+// @Failure      500   {object}  map[string]any                   "Internal server error"
+// @Router       /user/role/batch [patch]
+func BatchUpdateUserRoleService(c *gin.Context) {
+	adminID, _ := c.Get(middleware.UIDCK)
+	adminUid := adminID.(uuid.UUID)
+
+	var adminData entity.User
+	if err := database.DB.First(&adminData, adminUid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Admin user not found",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if !hasAdminAccess(adminData.Role) {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: Super Admin or Admin only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	var req dto.BatchUpdateUserRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid request",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	validRoles := map[string]entity.UserRole{
+		"admin":   entity.AdminRole,
+		"mentor":  entity.MentorRole,
+		"student": entity.StudentRole,
+	}
+
+	newRole, exists := validRoles[strings.ToLower(strings.TrimSpace(req.Role))]
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid role. Must be one of: admin, mentor, student",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	if newRole == entity.AdminRole && adminData.Role != entity.SuperAdminRole {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Only super_admin can assign the admin role",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	resolvedUIDs, err := database.ResolveUIDs("users", req.UserUids)
+	if err != nil {
+		status := http.StatusBadRequest
+		msg := "Invalid user uid"
+		if errors.Is(err, database.ErrUIDNotFound) {
+			status = http.StatusNotFound
+			msg = "One or more target users not found"
+		} else if errors.Is(err, database.ErrUIDAmbiguous) {
+			msg = "Ambiguous user uid prefix"
+		}
+		c.JSON(status, gin.H{
+			"success": false,
+			"message": msg,
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	uniqueUIDs := make([]uuid.UUID, 0, len(resolvedUIDs))
+	seen := make(map[uuid.UUID]struct{}, len(resolvedUIDs))
+	for _, id := range resolvedUIDs {
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		uniqueUIDs = append(uniqueUIDs, id)
+	}
+
+	if len(uniqueUIDs) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "At least one user uid is required",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	var targetUsers []entity.User
+	if err := database.DB.Where("uid IN ?", uniqueUIDs).Find(&targetUsers).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to fetch target users",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if len(targetUsers) != len(uniqueUIDs) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "One or more target users not found",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	for _, targetUser := range targetUsers {
+		if (targetUser.Role == entity.AdminRole || targetUser.Role == entity.SuperAdminRole) && adminData.Role != entity.SuperAdminRole {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "Only super admin can change role for admin/super_admin users",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+		if targetUser.Uid == adminUid && adminData.Role == entity.AdminRole {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "Admin cannot change their own role",
+				"data":    nil,
+				"error":   nil,
+			})
+			return
+		}
+	}
+
+	if err := database.DB.Model(&entity.User{}).
+		Where("uid IN ?", uniqueUIDs).
+		Updates(map[string]any{"role": newRole}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update user roles",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	updatedItems := make([]gin.H, 0, len(targetUsers))
+	for _, u := range targetUsers {
+		nameDecrypted, _ := utils.Decrypt(u.Name)
+		emailDecrypted, _ := utils.Decrypt(u.Email)
+		updatedItems = append(updatedItems, gin.H{
+			"uid":         u.Uid,
+			"name":        nameDecrypted,
+			"email":       emailDecrypted,
+			"avatar_url":  u.AvatarURL,
+			"role":        newRole,
+			"is_verified": u.IsVerified,
+			"created_at":  u.CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "User roles updated successfully",
+		"data": gin.H{
+			"updated_count": len(updatedItems),
+			"users":         updatedItems,
 		},
 		"error": nil,
 	})
@@ -1250,7 +1367,6 @@ func GetAllUsersService(c *gin.Context) {
 				"is_verified": u.IsVerified,
 				"enrollments": u.Enrollments,
 				"created_at":  u.CreatedAt,
-				"updated_at":  u.UpdatedAt,
 			})
 		}
 
@@ -1351,7 +1467,6 @@ func GetAllUsersService(c *gin.Context) {
 			"is_verified": u.IsVerified,
 			"enrollments": u.Enrollments,
 			"created_at":  u.CreatedAt,
-			"updated_at":  u.UpdatedAt,
 		})
 	}
 

@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/select'
 import { CourseFormCoverField } from '@/components/shared/course-form/CourseFormCoverField'
 import { DynamicListField } from '@/components/shared/DynamicField'
-import { RupiahInput } from '@/components/shared/InputRupiah'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import { apiLevelToUi, COURSE_FORM_LEVELS, uiLevelToApi } from '@/lib/course-form/level'
 import { courseDetailToFormValues } from '@/lib/course-form/mappers'
@@ -332,34 +331,6 @@ export function CourseFormDialog({
                     }}
                     placeholder="0 = tanpa batas"
                     className={courseFormLayout.input}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h3 className={courseFormLayout.sectionTitle}>Harga</h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="course-form-price" className={courseFormLayout.label}>
-                    Harga
-                  </label>
-                  <RupiahInput
-                    id="course-form-price"
-                    value={values.price}
-                    onChange={(price) => setValues((current) => ({ ...current, price }))}
-                    placeholder="Contoh: 150000"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="course-form-strike" className={courseFormLayout.label}>
-                    Harga Coret (opsional)
-                  </label>
-                  <RupiahInput
-                    id="course-form-strike"
-                    value={values.strikePrice}
-                    onChange={(strikePrice) => setValues((current) => ({ ...current, strikePrice }))}
-                    placeholder="Harga sebelum diskon"
                   />
                 </div>
               </div>
