@@ -53,7 +53,7 @@ export const ROUTES = {
   gallery: '/gallery',
   mentors: '/mentors',
   dashboard: DASHBOARD_PATH,
-  profile: '/profile',
+  profile: '/settings',
   courses: '/course',
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
   viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,

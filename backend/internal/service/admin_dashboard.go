@@ -67,20 +67,6 @@ func parseDashboardPeriod(raw string) dashboardPeriod {
 	}
 }
 
-// parseOptionalDashboardPeriod mem-parsing nilai `period` dari query string.
-// Mengembalikan ok=false bila parameter kosong atau nilainya tidak dikenal,
-// sehingga pemanggil bisa memakai rentang default sendiri.
-//
-// Nilai yang dikenali: 7d, 30d, 90d, 12m.
-func parseOptionalDashboardPeriod(raw string) (dashboardPeriod, bool) {
-	switch strings.ToLower(strings.TrimSpace(raw)) {
-	case "7d", "30d", "90d", "12m":
-		return parseDashboardPeriod(raw), true
-	default:
-		return dashboardPeriod{}, false
-	}
-}
-
 func trendDirection(current, previous float64) string {
 	switch {
 	case current > previous:
@@ -387,49 +373,5 @@ func GetAdminDashboardAnalyticsFunc(c *gin.Context) {
 			"recent_enrollments":            recentEnroll,
 		},
 		"error": nil,
-	})
-}
-
-// @Summary      Get recent admin transactions
-// @Description  Retrieve recent transactions for the admin dashboard.
-// @Tags         Admin
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        limit  query  int     false  "Number of items (default: 5)"
-// @Param        period query  string  false  "Period shorthand: 7d, 30d, 90d, 12m (used when no explicit date range)"
-// @Success      200  {object}  map[string]any  "Recent transactions retrieved successfully"
-// @Failure      401  {object}  map[string]any  "Unauthorized"
-// @Failure      403  {object}  map[string]any  "Forbidden"
-// @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /admin/dashboard/recent-transactions [get]
-func GetAdminRecentTransactionsFunc(c *gin.Context) {
-	if _, ok := requireAdminAccess(c); !ok {
-		return
-	}
-
-	limit := 5
-	if raw := c.Query("limit"); raw != "" {
-		if parsed, err := strconv.Atoi(raw); err == nil && parsed > 0 {
-			limit = parsed
-		}
-	}
-
-	items, err := fetchRecentAdminTransactions(limit, strings.TrimSpace(c.Query("period")))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve recent transactions",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Recent transactions retrieved successfully",
-		"data":    items,
-		"error":   nil,
 	})
 }

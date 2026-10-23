@@ -21,7 +21,7 @@ import { formatAssignmentDeadlineRelative } from '@/lib/student-assignments/form
 import type { StudentAssignmentRow } from '@/lib/student-assignments/assignment-row-model'
 import { buildStudentAssignmentHref } from '@/lib/student-assignments/assignment-navigation'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
-import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
+import { PublicLottieIllustration } from '@/components/playful/PublicLottieIllustration'
 
 type StudentAssignmentsSectionProps = {
   view: StudentAssignmentListViewModel
@@ -93,13 +93,44 @@ function categoryEmptyTitle(category: StudentAssignmentFeedCategory): string {
     case 'todo':
       return 'Belum ada tugas yang perlu dikumpulkan.'
     case 'pending_review':
-      return 'Belum ada tugas yang menunggu review.'
+      return 'Tidak ada tugas yang perlu ditunggu'
     case 'done':
-      return 'Belum ada tugas yang selesai dinilai.'
+      return 'Belum ada nilai tugas yang tersedia.'
     case 'late':
-      return 'Belum ada tugas terlambat.'
+      return 'Tidak ada tugas terlambat.'
     default:
       return 'Belum ada tugas yang bisa ditampilkan.'
+  }
+}
+
+function getAssignmentNotFoundText(category: StudentAssignmentFeedCategory): string {
+  switch (category) {
+    case 'todo':
+      return 'Belum ada tugas yang perlu dikumpulkan.'
+    case 'pending_review':
+      return 'Tidak ada tugas yang perlu ditunggu'
+    case 'done':
+      return 'Belum ada nilai tugas yang tersedia.'
+    case 'late':
+      return 'Tidak ada tugas terlambat.'
+    case 'all':
+    default:
+      return 'Tugas yang Anda cari tidak ditemukan.'
+  }
+}
+
+function getAssignmentCategoryLottieSrc(category: StudentAssignmentFeedCategory): string {
+  switch (category) {
+    case 'todo':
+      return '/lotties/happy-nothave-task.json'
+    case 'pending_review':
+      return '/lotties/waiting-review.json'
+    case 'done':
+      return '/lotties/no-graded.json'
+    case 'late':
+      return '/lotties/calm-duedate-task.json'
+    default:
+      return '/lotties/nothing.json'
   }
 }
 
@@ -112,21 +143,32 @@ function AssignmentEmptyState({
   categoryMatchCount: number
   category: StudentAssignmentFeedCategory
 }) {
-  const title =
-    scopedCount === 0
+  const isSpecificTab = category !== 'all'
+  const notFoundText = getAssignmentNotFoundText(category)
+
+  const title = isSpecificTab
+    ? categoryMatchCount === 0
+      ? categoryEmptyTitle(category)
+      : notFoundText
+    : scopedCount === 0
       ? 'Belum ada tugas yang bisa ditampilkan.'
       : categoryMatchCount === 0
         ? categoryEmptyTitle(category)
-        : 'Tidak ada tugas yang cocok dengan pencarian.'
+        : notFoundText
 
   const description =
-    scopedCount === 0
+    !isSpecificTab && scopedCount === 0
       ? 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah diterbitkan.'
       : undefined
 
+  const lottieSrc = getAssignmentCategoryLottieSrc(category)
+
   return (
     <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
-      <NothingLottieIllustration className="mb-1 max-w-[12rem]" />
+      <PublicLottieIllustration
+        src={lottieSrc}
+        className="mb-1 max-w-[12rem]"
+      />
       <h3 className="mb-2 text-xl font-bold text-ink-900">{title}</h3>
       {description ? (
         <p className="max-w-md text-sm font-medium leading-relaxed text-ink-500">{description}</p>

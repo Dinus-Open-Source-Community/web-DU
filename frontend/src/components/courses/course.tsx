@@ -9,8 +9,6 @@ import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 
 const filter = [
   { name: 'Semua', key: 'All' },
-  { name: 'Gratis', key: 'Free' },
-  { name: 'Premium', key: 'Premium' },
   { name: 'Event Berjalan', key: 'Ongoing Event' },
 ] as const
 
@@ -31,8 +29,6 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
 
       const matchTopFilter =
         isActiveFilter === 'All' ||
-        (isActiveFilter === 'Free' && !course.is_premium) ||
-        (isActiveFilter === 'Premium' && course.is_premium) ||
         (isActiveFilter === 'Ongoing Event' && Boolean(course.event_uid))
 
       const matchCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category_uid)
@@ -99,11 +95,9 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
                       title: data.title,
                       description: data.description,
                       thumbnail_url: data.thumbnail_url,
-                      is_premium: data.is_premium,
                       mentors: data.mentors,
                       rating: data.rating,
                       total_reviews: data.total_reviews,
-                      price: data.price,
                       detailHref: `/course/${data.uid}`,
                       category_uid: data.category_uid,
                       uid: data.uid,

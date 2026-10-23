@@ -1,9 +1,17 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Camera, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
-import { GALLERY_IMAGES, type GalleryImage } from '@/lib/landing/gallery'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { type GalleryImage } from '@/lib/landing/gallery'
+import { useDummyGallery } from '@/lib/gallery/dummy-gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 /**
@@ -36,23 +44,23 @@ const COL_SPANS = {
 /** Baris bento: tiap sub-array = komposisi kolom yang totalnya 12 (md). */
 const BENTO_ROWS: RowSlot[][] = [
   [
-    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-7', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/10]' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/11]', tilt: 'rotate-1', mobileAspect: 'aspect-[16/10]' },
   ],
   [
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-4', aspect: 'aspect-square', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-1', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-2', mobileAspect: 'aspect-[4/3]' },
   ],
   [
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: 'rotate-2', mobileAspect: 'aspect-[16/10]' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: '-rotate-2', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-[4/3]' },
   ],
   [
-    { cols: 'md:col-span-3', aspect: 'aspect-[4/5]', tilt: '-rotate-1', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-square' },
-    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-3', aspect: 'aspect-[4/3]', tilt: '-rotate-1', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-4', aspect: 'aspect-[4/3]', tilt: 'rotate-1', mobileAspect: 'aspect-[4/3]' },
+    { cols: 'md:col-span-5', aspect: 'aspect-[16/10]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/10]' },
   ],
 ]
 
@@ -82,17 +90,18 @@ type PhotoProps = {
 function Photo({ img, aspect, mobileAspect }: PhotoProps) {
   const aspectCls = mobileAspect ? cn(mobileAspect, `md:${aspect}`) : aspect
   return (
-    <img
-      src={img.src}
-      alt={img.alt}
-      loading="lazy"
-      decoding="async"
-      // width/height intrinsik + aspect container mencegah layout-shift
-      className={cn(
-        'w-full object-cover',
-        aspectCls,
-      )}
-    />
+    <div className="relative overflow-hidden">
+      <img
+        src={img.src}
+        alt={img.alt}
+        loading="lazy"
+        decoding="async"
+        className={cn(
+          'w-full object-cover object-center transition-transform duration-300 group-hover:scale-105',
+          aspectCls,
+        )}
+      />
+    </div>
   )
 }
 
@@ -291,6 +300,21 @@ export const GALLERY_PREVIEW_COUNT = 5
 
 /** Grid bento scrapbook — dipakai beranda (pratinjau) & halaman galeri (penuh). */
 export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (activeIdx === null) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setActiveIdx((prev) => (prev !== null && prev > 0 ? prev - 1 : photos.length - 1))
+      } else if (e.key === 'ArrowRight') {
+        setActiveIdx((prev) => (prev !== null && prev < photos.length - 1 ? prev + 1 : 0))
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeIdx, photos.length])
+
   const rowSizes = BENTO_ROWS.map((r) => r.length)
   const rows = chunkRows(photos, rowSizes)
 
@@ -314,47 +338,175 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
   }
 
   return (
-    <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
-      {rows.map((rowPhotos, rowIdx) => {
-        const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
-        return (
-          <div
-            key={rowIdx}
-            className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7"
-          >
-            {rowPhotos.map((img, i) => {
-              const gIdx = rowStartIdx[rowIdx] + i
-              const slot: RowSlot =
-                rowPhotos.length === 1
-                  ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/9]' }
-                  : (slotDefs[i % slotDefs.length] ?? {
-                      cols: COL_SPANS[4],
-                      aspect: 'aspect-[4/3]',
-                      tilt: 'rotate-1',
-                      mobileAspect: 'aspect-square',
-                    })
-              const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
-              return (
-                <Reveal
-                  key={`${img.src}-${rowIdx}-${i}`}
-                  delay={(i % 3) * 0.08}
-                  className={cn(
-                    'h-full col-span-1',
-                    isLastOdd && 'col-span-2',
-                    slot.cols,
-                  )}
-                >
-                  {/* Rotasi di luar (kulit) — scrapbook miring halus */}
-                  <div className={cn('h-full', slot.tilt)}>
-                    <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} mobileAspect={slot.mobileAspect} />
-                  </div>
-                </Reveal>
-              )
-            })}
-          </div>
-        )
-      })}
-    </div>
+    <>
+      <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
+        {rows.map((rowPhotos, rowIdx) => {
+          const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
+          return (
+            <div
+              key={rowIdx}
+              className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7"
+            >
+              {rowPhotos.map((img, i) => {
+                const gIdx = rowStartIdx[rowIdx] + i
+                const slot: RowSlot =
+                  rowPhotos.length === 1
+                    ? { cols: COL_SPANS[12], aspect: 'aspect-[16/9]', tilt: '-rotate-1', mobileAspect: 'aspect-[16/9]' }
+                    : (slotDefs[i % slotDefs.length] ?? {
+                        cols: COL_SPANS[4],
+                        aspect: 'aspect-[4/3]',
+                        tilt: 'rotate-1',
+                        mobileAspect: 'aspect-square',
+                      })
+                const isLastOdd = rowPhotos.length % 2 === 1 && i === rowPhotos.length - 1
+                return (
+                  <Reveal
+                    key={`${img.src}-${rowIdx}-${i}`}
+                    delay={(i % 3) * 0.08}
+                    className={cn(
+                      'h-full col-span-1',
+                      isLastOdd && 'col-span-2',
+                      slot.cols,
+                    )}
+                  >
+                    {/* Rotasi di luar (kulit) — scrapbook miring halus + interaktif klik untuk lihat detail */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setActiveIdx(gIdx)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setActiveIdx(gIdx)
+                        }
+                      }}
+                      className={cn(
+                        'h-full cursor-pointer rounded-xl transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue',
+                        slot.tilt,
+                      )}
+                      title={`Klik untuk melihat detail foto: ${img.caption}`}
+                    >
+                      <ScrapbookCard img={img} globalIdx={gIdx} aspect={slot.aspect} mobileAspect={slot.mobileAspect} />
+                    </div>
+                  </Reveal>
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Modal Popup Pratinjau Detail Foto — Immersive Cinematic Lightbox */}
+      {activeIdx !== null && photos[activeIdx] && (
+        <Dialog open={activeIdx !== null} onOpenChange={(open) => !open && setActiveIdx(null)}>
+          <DialogContent className="flex max-h-[94vh] w-[96vw] sm:max-w-[92vw] md:max-w-4xl lg:max-w-5xl xl:max-w-6xl flex-col gap-0 overflow-hidden rounded-2xl border-2 border-ink-900 bg-paper-white p-0 shadow-[0_20px_50px_rgba(5,9,20,0.3)]">
+            <DialogHeader className="flex shrink-0 flex-row items-center justify-between border-b-2 border-ink-900/10 bg-paper-white px-5 py-3 sm:px-6 sm:py-3.5 pr-14 sm:pr-16">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-8 items-center justify-center rounded-lg border border-ink-900/15 bg-brand-soft text-brand-ink shadow-xs">
+                  <Camera className="size-4" aria-hidden />
+                </span>
+                <DialogTitle className="line-clamp-1 text-sm font-extrabold uppercase tracking-wide text-ink-900 sm:text-base">
+                  Dokumentasi DOSCOM
+                </DialogTitle>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="rounded-full border border-ink-900/15 bg-note-yellow px-3 py-1 font-mono text-xs font-bold text-ink-900 shadow-xs">
+                  {activeIdx + 1} / {photos.length}
+                </span>
+              </div>
+            </DialogHeader>
+
+            {/* Stage: Dark Navy Blueprint Canvas for Crisp Photo Display */}
+            <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#0A101D]">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)',
+                  backgroundSize: '24px 24px',
+                }}
+              />
+
+              {/* Main Photo: Large & 100% Uncropped */}
+              <div className="relative z-[1] flex min-h-[48vh] max-h-[66vh] w-full flex-1 items-center justify-center p-3 sm:p-6 md:p-8">
+                <img
+                  src={photos[activeIdx].src}
+                  alt={photos[activeIdx].alt}
+                  className="max-h-[58vh] sm:max-h-[62vh] w-auto max-w-full rounded-xl border border-white/15 object-contain shadow-[0_16px_48px_rgba(0,0,0,0.7)]"
+                />
+
+                {/* Left Arrow Button */}
+                {photos.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setActiveIdx((prev) => (prev !== null && prev > 0 ? prev - 1 : photos.length - 1))
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center rounded-full border-2 border-ink-900 bg-paper-white text-ink-900 shadow-button transition hover:bg-brand-blue hover:text-white hover:scale-105 active:scale-95 sm:left-6"
+                    aria-label="Foto sebelumnya"
+                  >
+                    <ChevronLeft className="size-6 stroke-[2.5]" />
+                  </button>
+                )}
+
+                {/* Right Arrow Button */}
+                {photos.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setActiveIdx((prev) => (prev !== null && prev < photos.length - 1 ? prev + 1 : 0))
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center rounded-full border-2 border-ink-900 bg-paper-white text-ink-900 shadow-button transition hover:bg-brand-blue hover:text-white hover:scale-105 active:scale-95 sm:right-6"
+                    aria-label="Foto berikutnya"
+                  >
+                    <ChevronRight className="size-6 stroke-[2.5]" />
+                  </button>
+                )}
+              </div>
+
+              {/* Bottom Thumbnail Strip (Quick Thumbnails Bar) */}
+              {photos.length > 1 && (
+                <div className="relative z-[1] flex w-full items-center justify-center gap-2 overflow-x-auto border-t border-white/10 bg-black/40 px-4 py-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {photos.map((p, pIdx) => {
+                    const isCurrent = pIdx === activeIdx
+                    return (
+                      <button
+                        key={`${p.src}-${pIdx}`}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveIdx(pIdx)
+                        }}
+                        className={cn(
+                          'relative aspect-video h-11 shrink-0 overflow-hidden rounded-md border-2 transition-all',
+                          isCurrent
+                            ? 'border-brand-blue scale-105 opacity-100 ring-2 ring-brand-blue/50'
+                            : 'border-white/20 opacity-50 hover:opacity-90 hover:border-white/50',
+                        )}
+                        title={`Lihat foto ${pIdx + 1}: ${p.caption}`}
+                      >
+                        <img src={p.src} alt={p.alt} className="size-full object-cover" />
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer: Caption Details */}
+            <div className="shrink-0 border-t-2 border-ink-900/10 bg-paper-white px-5 py-3.5 sm:px-6 sm:py-4">
+              <p className="font-sans text-base font-extrabold text-ink-900 sm:text-lg leading-snug">
+                {photos[activeIdx].caption}
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   )
 }
 
@@ -362,11 +514,28 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
-  const photos = GALLERY_IMAGES.slice(0, GALLERY_PREVIEW_COUNT)
+  const { items } = useDummyGallery()
+  const photos: GalleryImage[] = useMemo(() => {
+    return items.slice(0, GALLERY_PREVIEW_COUNT).map((item) => ({
+      src: item.src,
+      alt: item.alt,
+      caption: item.caption,
+      variant: item.variant ?? undefined,
+    }))
+  }, [items])
 
   return (
     <section id="galeri" className="relative overflow-hidden bg-paper-white">
-      <div className="relative mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, rgba(5,9,20,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(5,9,20,0.045) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+      />
+      <div className="relative z-[1] mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
         <SectionHeader
           eyebrow={gallery.eyebrow}
           title={gallery.title}

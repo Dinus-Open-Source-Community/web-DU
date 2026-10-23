@@ -1,19 +1,20 @@
 import { Link } from 'react-router-dom'
+import { Check } from 'lucide-react'
+
 import { Button } from '../ui/button'
 import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
 import { CourseCardProfiles } from './CourseCardProfiles'
-import type { JoinedCourse } from '@/lib/types/user'
-import { Check } from 'lucide-react'
-import { ROUTES } from '@/lib/routes'
-import {
-  resolveCourseProfiles,
-} from '@/lib/course-detail/course-profile'
 import { CourseLevelLabel } from './CourseLevel'
+import { appCourseCardClassName } from '@/lib/design/app-shell-tokens'
 import {
   formatLearningProgressLabel,
   isLearningProgressComplete,
   toLearningProgressPercent,
 } from '@/lib/learning/progress'
+import { resolveCourseProfiles } from '@/lib/course-detail/course-profile'
+import { ROUTES } from '@/lib/routes'
+import type { JoinedCourse } from '@/lib/types/user'
+import { cn } from '@/lib/utils'
 
 export type JoinedCourseCardVariant = 'resume' | 'non-resume'
 export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
@@ -22,55 +23,63 @@ interface JoinedCourseCardProps {
   data: JoinedCourse
   variant?: JoinedCourseCardVariant
   size?: JoinedCourseCardSize
+  className?: string
 }
 
 const sizes = {
-  container: {
-    sm: 'w-full max-w-full',
-    md: 'w-full max-w-full',
-    lg: 'w-full max-w-full',
-  },
   imageWrapper: {
-    sm: 'min-h-[160px]',
-    md: 'min-h-[203px]',
-    lg: 'min-h-[250px]',
+    sm: 'h-36 sm:h-40',
+    md: 'h-40 sm:h-44',
+    lg: 'h-44 sm:h-48',
   },
   contentWrapper: {
-    sm: 'min-h-[160px] p-4 -mt-5',
-    md: 'min-h-[208px] p-5 -mt-5',
-    lg: 'min-h-[250px] p-6 -mt-6',
+    sm: 'p-3.5 sm:p-4',
+    md: 'p-4 sm:p-5',
+    lg: 'p-5 sm:p-6',
   },
   title: {
-    sm: 'text-base',
-    md: 'text-lg',
-    lg: 'text-xl',
+    sm: 'text-sm sm:text-base',
+    md: 'text-base sm:text-[17px]',
+    lg: 'text-lg sm:text-xl',
   },
   description: {
-    sm: 'text-sm',
-    md: 'text-sm',
-    lg: 'text-base',
-  },
-  progress: {
-    sm: 'px-3 py-2.5',
-    md: 'px-4 py-3',
-    lg: 'px-4 py-3',
+    sm: 'text-xs',
+    md: 'text-xs sm:text-sm',
+    lg: 'text-sm',
   },
 }
 
-const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedCourseCardProps) => {
+const JoinedCourseCard = ({
+  data,
+  variant = 'non-resume',
+  size = 'md',
+  className,
+}: JoinedCourseCardProps) => {
   const progress = toLearningProgressPercent(data.progress)
   const progressLabel = formatLearningProgressLabel(data.progress)
-  const isComplete = isLearningProgressComplete(data.progress)
-  const isResume = variant === 'resume'
-  const showProgress = isResume || isComplete
+  const isComplete =
+    isLearningProgressComplete(data.progress) && data.enrollment_status === 'completed'
+  const isResume =
+    variant === 'resume' || (data.enrollment_status === 'active' && progress > 0)
+  const showProgress = isResume || isComplete || progress > 0
   const image = data.cover_url || data.thumbnail_url
-  const actionLabel = isComplete ? 'Belajar lagi' : isResume ? 'Lanjut' : 'Mulai'
+  const actionLabel = isComplete ? 'Belajar lagi' : 'Lanjut'
   const profiles = resolveCourseProfiles(data)
 
   return (
     <div
-      className={`group flex h-full ${sizes.container[size]} flex-col overflow-hidden rounded-[10px] border border-ink-900/10 bg-paper-white shadow-sm transition-all duration-300 hover:border-line-medium/90 hover:shadow-md`}>
-      <CourseCardCoverFrame className={sizes.imageWrapper[size]}>
+      className={cn(
+        appCourseCardClassName,
+        'group flex h-full w-full max-w-full flex-col overflow-hidden',
+        className,
+      )}
+    >
+      <CourseCardCoverFrame
+        className={cn(
+          'relative w-full shrink-0 overflow-hidden rounded-none border-b border-line-light aspect-auto',
+          sizes.imageWrapper[size],
+        )}
+      >
         <CourseCardCover
           src={image}
           alt={data.title}
@@ -78,26 +87,40 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
           sizes="(max-width: 768px) 100vw, 384px"
           imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-ink-900/45 to-transparent" />
       </CourseCardCoverFrame>
 
-      <div className={`relative z-10 flex grow flex-col rounded-xl border border-line-light/70 bg-paper-white shadow-[0_-8px_24px_rgba(15,23,42,0.04)] ${sizes.contentWrapper[size]}`}>
-        <div className="mb-5 flex flex-col">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <CourseLevelLabel level={data.level} />
-            <div className="inline-flex min-w-0 items-center gap-1.5 text-xs font-medium text-emerald-700">
-              <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="line-clamp-1">Dapat diakses</span>
-            </div>
+      <div className={cn('flex flex-1 flex-col', sizes.contentWrapper[size])}>
+        <div className="mb-2.5 flex items-center justify-between gap-2">
+          <CourseLevelLabel level={data.level} compact />
+          <div className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+            <Check className="size-3.5 shrink-0" aria-hidden />
+            <span className="line-clamp-1">Dapat diakses</span>
           </div>
-          <h3 className={`mb-2 line-clamp-2 font-bold leading-snug text-ink-900 ${sizes.title[size]}`}>{data.title}</h3>
-          <p className={`line-clamp-2 font-normal leading-[1.55] text-ink-500 ${sizes.description[size]}`}>{data.description || data.subtitle}</p>
+        </div>
+
+        <div className="mb-4 flex flex-col gap-1.5">
+          <h3
+            className={cn(
+              'line-clamp-2 font-bold leading-snug text-ink-900 transition-colors group-hover:text-ink-950',
+              sizes.title[size],
+            )}
+          >
+            {data.title}
+          </h3>
+          <p
+            className={cn(
+              'line-clamp-2 font-normal leading-relaxed text-ink-500',
+              sizes.description[size],
+            )}
+          >
+            {data.description || data.subtitle}
+          </p>
         </div>
 
         {showProgress && (
-          <div className={`mt-auto mb-5 w-full rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper ${sizes.progress[size]}`}>
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-ink-500">Progres Belajar</span>
+          <div className="mt-auto mb-4 w-full rounded-lg border border-line-light bg-paper-paper p-3">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-ink-600">Progres Belajar</span>
               <span className="text-xs font-bold tabular-nums text-ink-900">{progressLabel}</span>
             </div>
             <div
@@ -106,10 +129,13 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label={`Progres belajar ${progressLabel}`}
-              className="h-2 w-full overflow-hidden rounded-full border border-ink-900/10 bg-paper-paper"
+              className="h-2 w-full overflow-hidden rounded-full border border-ink-900/10 bg-paper-white"
             >
               <div
-                className={`h-full rounded-full transition-all duration-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] ${isComplete ? 'bg-emerald-500' : 'bg-brand-blue'}`}
+                className={cn(
+                  'h-full rounded-full transition-all duration-500',
+                  isComplete ? 'bg-emerald-500' : 'bg-brand-blue',
+                )}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -119,15 +145,21 @@ const JoinedCourseCard = ({ data, variant = 'non-resume', size = 'md' }: JoinedC
         <div className="mt-auto border-t border-line-light pt-3">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              {profiles.length > 0 ? <CourseCardProfiles profiles={profiles} compact /> : null}
+              {profiles.length > 0 ? (
+                <CourseCardProfiles profiles={profiles} compact />
+              ) : (
+                <div className="text-xs font-medium text-ink-400">Doscom University</div>
+              )}
             </div>
 
             <Button
               asChild
-              variant="outline"
-              className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-paper-white px-3.5 text-xs font-semibold text-ink-900 shadow-none hover:border-ink-900/30 hover:bg-paper-paper active:scale-[0.98] transition-all"
+              size="sm"
+              className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-primary px-3.5 text-xs font-semibold !text-white shadow-none hover:bg-brand-hover active:scale-[0.98] transition-all"
             >
-              <Link to={ROUTES.student.learningCourse(data.uid)}>{actionLabel}</Link>
+              <Link to={ROUTES.student.learningCourse(data.uid)} className="!text-white font-semibold">
+                {actionLabel}
+              </Link>
             </Button>
           </div>
         </div>

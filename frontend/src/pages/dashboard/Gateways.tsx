@@ -14,8 +14,6 @@ import AdminAssignmentSubmissions from '@/pages/admin/AssignmentSubmissions'
 import MentorAssignmentSubmissions from '@/pages/mentor/AssignmentSubmissions'
 import AdminAssignmentSubmissionDetail from '@/pages/admin/AssignmentSubmissionDetail'
 import MentorAssignmentSubmissionDetail from '@/pages/mentor/AssignmentSubmissionDetail'
-import Transactions from '@/pages/admin/Transactions'
-import StudentTransactions from '@/pages/student/Transactions'
 
 function staffCourseRole(role: string | null | undefined): 'admin' | 'mentor' | null {
   if (role === 'admin' || role === 'super_admin') return 'admin'
@@ -61,12 +59,5 @@ export function DashboardAssignmentSubmissionDetailGateway() {
   const staff = staffCourseRole(role)
   if (staff === 'admin') return <AdminAssignmentSubmissionDetail />
   if (staff === 'mentor') return <MentorAssignmentSubmissionDetail />
-  return <Navigate to={DASHBOARD_PATH} replace />
-}
-
-export function DashboardTransactionsGateway() {
-  const { role } = useAuth()
-  if (role === 'student') return <StudentTransactions />
-  if (role === 'admin' || role === 'super_admin') return <Transactions />
   return <Navigate to={DASHBOARD_PATH} replace />
 }

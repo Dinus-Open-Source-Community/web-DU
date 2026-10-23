@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } fr
 
 import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/hooks/use-user'
 import type { IUserData } from '@/lib/types/user'
-import { formatProfileLastUpdatedLabel } from '@/lib/profile/profile-formatters'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 import {
   avatarFileSchema,
@@ -28,7 +27,6 @@ export function useProfileSectionView({
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [lastUpdatedLabel, setLastUpdatedLabel] = useState('')
 
   const { mutateAsync: updatePhoto, isPending: isPhotoPending } = useUpdateProfilePhoto()
   const { mutateAsync: updateProfile, isPending: isProfilePending } = useUpdateProfile()
@@ -93,10 +91,6 @@ export function useProfileSectionView({
   )
 
   useEffect(() => {
-    setLastUpdatedLabel(formatProfileLastUpdatedLabel())
-  }, [])
-
-  useEffect(() => {
     setDisplayName(user.name)
   }, [user.name])
 
@@ -110,7 +104,6 @@ export function useProfileSectionView({
     onNewPasswordChange: setNewPassword,
     confirmPassword,
     onConfirmPasswordChange: setConfirmPassword,
-    lastUpdatedLabel,
     isPhotoPending,
     isProfilePending,
     isPasswordPending,

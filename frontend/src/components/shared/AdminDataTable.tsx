@@ -2,11 +2,10 @@ import type { AdminDataTableProps } from '../../lib/types/api'
 import {
   appCardClassName,
   appCardHeaderClassName,
-  appKpiLabelClassName,
 } from '@/lib/design/app-shell-tokens'
 import { cn } from '../../lib/utils'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Pagination } from './Pagination'
+import { TablePaginationFooter } from './TablePaginationFooter'
 
 export function AdminDataTable<T>({
   columns,
@@ -15,6 +14,10 @@ export function AdminDataTable<T>({
   page,
   totalPages,
   onPageChange,
+  total,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   emptyState,
   tableClassName,
   wrapperClassName,
@@ -87,21 +90,15 @@ export function AdminDataTable<T>({
         </Table>
       </div>
       {page !== undefined && totalPages !== undefined && onPageChange ? (
-        <div className="flex flex-col items-center gap-3 border-t border-line-light bg-paper-paper/60 px-5 py-4 sm:flex-row sm:justify-between">
-          <p className={cn('text-sm', appKpiLabelClassName)}>
-            Halaman{' '}
-            <span className="font-semibold tabular-nums text-ink-900">{page}</span> dari{' '}
-            <span className="font-semibold tabular-nums text-ink-900">
-              {Math.max(totalPages, 1)}
-            </span>
-          </p>
-          <Pagination
-            currentPage={page}
-            totalPages={Math.max(totalPages, 1)}
-            onPageChange={onPageChange}
-            className="mt-0"
-          />
-        </div>
+        <TablePaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
       ) : null}
     </section>
   )

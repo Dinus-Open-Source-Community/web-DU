@@ -5,7 +5,6 @@ import { PageHeader } from '@/components/shared/Header'
 import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
 import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
 import { MentorKpiGrid } from '@/components/mentor/dashboard/MentorKpiGrid'
-import { MentorQuickLinks } from '@/components/mentor/dashboard/MentorQuickLinks'
 import { useMentorDashboard } from '@/hooks/use-mentor-dashboard'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { mentorDashboardLayout } from '@/lib/layout/mentor-dashboard-layout'
@@ -54,8 +53,6 @@ export default function MentorDashboardPage() {
       ) : (
         <MentorKpiGrid stats={kpis.data} isLoading={kpis.isLoading} />
       )}
-
-      <MentorQuickLinks />
 
       <ChartCard title="Beban Jadwal Mentor" subtitle="Jumlah sesi dan peserta terjadwal per hari">
         {schedules.isError ? (

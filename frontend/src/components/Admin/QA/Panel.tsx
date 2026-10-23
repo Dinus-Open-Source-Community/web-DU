@@ -4,6 +4,7 @@ import { Loader2, MessageSquare, SendHorizontal, Star } from 'lucide-react'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ReviewLottieIllustration } from '@/components/playful/ReviewLottieIllustration'
+import { TablePaginationFooter } from '@/components/shared/TablePaginationFooter'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { formatCourseRatingLabel } from '@/lib/course-detail/course-rating'
 import { appCardClassName, appCardHeaderClassName } from '@/lib/design/app-shell-tokens'
@@ -25,9 +26,25 @@ type ReviewsPanelProps = {
   courseUid?: string
   reviews: AdminReview[]
   isLoading?: boolean
+  page?: number
+  totalPages?: number
+  total?: number
+  pageSize?: number
+  onPageChange?: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
 }
 
-export function ReviewsPanel({ courseUid, reviews, isLoading = false }: ReviewsPanelProps) {
+export function ReviewsPanel({
+  courseUid,
+  reviews,
+  isLoading = false,
+  page,
+  totalPages,
+  total,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+}: ReviewsPanelProps) {
   if (isLoading) {
     return (
       <div
@@ -80,6 +97,19 @@ export function ReviewsPanel({ courseUid, reviews, isLoading = false }: ReviewsP
           </tbody>
         </table>
       </div>
+
+      {page !== undefined && totalPages !== undefined && onPageChange ? (
+        <TablePaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          totalLabel="ulasan"
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
+      ) : null}
     </section>
   )
 }

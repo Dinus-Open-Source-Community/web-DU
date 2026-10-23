@@ -25,6 +25,8 @@ export default function AdminStudentsPage() {
         isLoading={pageState.isLoading}
         page={pageState.page}
         totalPages={pageState.totalPages}
+        pageSize={pageState.pageSize}
+        onPageSizeChange={pageState.setPageSize}
         onPageChange={pageState.setPage}
         onSearch={pageState.onSearch}
         onUpdateRole={pageState.onUpdateRole}

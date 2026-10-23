@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { resolveParticipantEnrollmentStatus } from '@/lib/course-detail/participant-enrollment-status'
-import type { AdminStatus } from '@/lib/types/user'
 import type { AttendanceStatusValue } from '@/lib/types/features/course-detail-assignments'
 import { cn } from '@/lib/utils'
 
@@ -42,15 +41,12 @@ export function AdminMetaLabel({
   return <span className={cn('text-xs font-medium text-ink-500', className)}>{children}</span>
 }
 
-const USER_STATUS: Record<AdminStatus, { tone: AdminStatusTone; label: string }> = {
-  active: { tone: 'success', label: 'Aktif' },
-  inactive: { tone: 'neutral', label: 'Nonaktif' },
-  pending: { tone: 'warning', label: 'Menunggu verifikasi' },
-}
-
-export function AdminUserStatusLabel({ status }: { status: AdminStatus }) {
-  const { tone, label } = USER_STATUS[status]
-  return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
+export function AdminEmailVerificationLabel({ isVerified }: { isVerified: boolean }) {
+  return (
+    <AdminStatusLabel tone={isVerified ? 'success' : 'warning'}>
+      {isVerified ? 'Terverifikasi' : 'Belum terverifikasi'}
+    </AdminStatusLabel>
+  )
 }
 
 const SEVERITY: Record<'high' | 'medium' | 'low', { tone: AdminStatusTone; label: string }> = {

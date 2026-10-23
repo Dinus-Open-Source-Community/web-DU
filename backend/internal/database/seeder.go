@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -49,7 +51,6 @@ func RunSeeder(db *gorm.DB) {
 	seedClassTypes(db)
 	seedCourses(db)
 	seedEnrollments(db)
-	seedPayments(db)
 	seedCourseReviews(db)
 	seedCourseQaThreads(db)
 	seedModules(db)
@@ -58,6 +59,7 @@ func RunSeeder(db *gorm.DB) {
 	seedLessonReadings(db)
 	seedLessonAttendances(db)
 	seedLessonAssignmentSubmissions(db)
+	seedGalleries(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
 }
@@ -117,87 +119,78 @@ func seedUsers(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Users...")
 
 	type seedUser struct {
-		Name        string
-		Email       string
-		Password    string
-		Role        entity.UserRole
-		IsVerified  bool
-		AvatarURL   string
-		Description string
+		Name       string
+		Email      string
+		Password   string
+		Role       entity.UserRole
+		IsVerified bool
+		AvatarURL  string
 	}
 
 	users := []seedUser{
 		{
-			Name:        "Super Admin User",
-			Email:       "superadmin@doscom.id",
-			Password:    "superadmin123",
-			Role:        entity.SuperAdminRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=12",
-			Description: "Super administrator dari platform DU",
+			Name:       "Super Admin User",
+			Email:      "superadmin@doscom.id",
+			Password:   "superadmin123",
+			Role:       entity.SuperAdminRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=12",
 		},
 		{
-			Name:        "Admin User",
-			Email:       "admin@doscom.id",
-			Password:    "admin123",
-			Role:        entity.AdminRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=32",
-			Description: "Administrator dari platform DU",
+			Name:       "Admin User",
+			Email:      "admin@doscom.id",
+			Password:   "admin123",
+			Role:       entity.AdminRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=32",
 		},
 		{
-			Name:        "Budi Santoso",
-			Email:       "budi@doscom.id",
-			Password:    "student123",
-			Role:        entity.StudentRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=14",
-			Description: "Mahasiswa Dinus yang aktif belajar",
+			Name:       "Budi Santoso",
+			Email:      "budi@doscom.id",
+			Password:   "student123",
+			Role:       entity.StudentRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=14",
 		},
 		{
-			Name:        "Siti Nurhaliza",
-			Email:       "siti@doscom.id",
-			Password:    "student123",
-			Role:        entity.StudentRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=47",
-			Description: "Mahasiswa berprestasi di bidang teknologi",
+			Name:       "Siti Nurhaliza",
+			Email:      "siti@doscom.id",
+			Password:   "student123",
+			Role:       entity.StudentRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=47",
 		},
 		{
-			Name:        "Andi Pratama",
-			Email:       "andi.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=15",
-			Description: "Mentor backend dan arsitektur sistem",
+			Name:       "Andi Pratama",
+			Email:      "andi.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=15",
 		},
 		{
-			Name:        "Rina Kurnia",
-			Email:       "rina.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=44",
-			Description: "Mentor frontend dan UI engineering",
+			Name:       "Rina Kurnia",
+			Email:      "rina.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=44",
 		},
 		{
-			Name:        "Dimas Saputra",
-			Email:       "dimas.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=11",
-			Description: "Mentor DevOps dan cloud deployment",
+			Name:       "Dimas Saputra",
+			Email:      "dimas.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=11",
 		},
 		{
-			Name:        "Nadia Putri",
-			Email:       "nadia.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=49",
-			Description: "Mentor database dan data engineering",
+			Name:       "Nadia Putri",
+			Email:      "nadia.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=49",
 		},
 	}
 
@@ -213,11 +206,6 @@ func seedUsers(db *gorm.DB) {
 		var existing entity.User
 		err = db.Where("email_hash = ?", emailHash).First(&existing).Error
 		if err == nil {
-			// User sudah ada — sinkronkan field penting menggunakan db.Save agar
-			// hook BeforeSave pada User mengenkripsi ulang Name/Email/Description
-			// secara konsisten. AfterFind sudah men-dekripsi field saat First()
-			// di atas sehingga existing.Name/Email/Description berbentuk plaintext;
-			// kita timpa langsung dengan plaintext baru lalu Save.
 			existing.Name = u.Name
 			existing.Email = u.Email
 			existing.EmailHash = emailHash
@@ -225,7 +213,6 @@ func seedUsers(db *gorm.DB) {
 			existing.Role = u.Role
 			existing.IsVerified = u.IsVerified
 			existing.AvatarURL = u.AvatarURL
-			existing.Description = u.Description
 
 			if err := db.Save(&existing).Error; err != nil {
 				log.Printf("[Warning] Gagal update user seed %s: %v", u.Name, err)
@@ -239,18 +226,14 @@ func seedUsers(db *gorm.DB) {
 			continue
 		}
 
-		// User belum ada — buat baru. Hook BeforeSave akan mengenkripsi
-		// Name/Email/Description sebelum data ditulis ke DB; kita cukup
-		// mengirim plaintext.
 		user := entity.User{
-			Name:        u.Name,
-			Email:       u.Email,
-			EmailHash:   emailHash,
-			Password:    hashedPassword,
-			Role:        u.Role,
-			IsVerified:  u.IsVerified,
-			AvatarURL:   u.AvatarURL,
-			Description: u.Description,
+			Name:       u.Name,
+			Email:      u.Email,
+			EmailHash:  emailHash,
+			Password:   hashedPassword,
+			Role:       u.Role,
+			IsVerified: u.IsVerified,
+			AvatarURL:  u.AvatarURL,
 		}
 
 		if err := db.Create(&user).Error; err != nil {
@@ -307,9 +290,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        299000,
-			PriceStrike:  399000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         30,
@@ -327,9 +307,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        349000,
-			PriceStrike:  449000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         25,
@@ -347,9 +324,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        279000,
-			PriceStrike:  329000,
-			IsPremium:    false,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         40,
@@ -367,9 +341,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        299000,
-			PriceStrike:  379000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         35,
@@ -387,9 +358,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        329000,
-			PriceStrike:  429000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         20,
@@ -440,17 +408,16 @@ func seedEnrollments(db *gorm.DB) {
 		Status       entity.EnrollmentStatus
 	}
 
-	// Budi di-enroll ke 3 course aktif, Siti ke 4 course aktif + 1 pending checkout.
 	enrollments := []seedEnrollment{
 		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", Progress: 75, Status: entity.EnrollmentActive},
 		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", Progress: 40, Status: entity.EnrollmentActive},
 		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", Progress: 55, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", Progress: 0, Status: entity.EnrollmentPending},
+		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", Progress: 0, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", Progress: 90, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", Progress: 65, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", Progress: 30, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", Progress: 15, Status: entity.EnrollmentActive},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", Progress: 0, Status: entity.EnrollmentPending},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", Progress: 0, Status: entity.EnrollmentActive},
 	}
 
 	for _, item := range enrollments {
@@ -499,93 +466,6 @@ func seedEnrollments(db *gorm.DB) {
 		} else {
 			log.Printf("[Success] Enrollment %s untuk course %s berhasil dibuat", item.StudentEmail, item.CourseSlug)
 		}
-	}
-}
-
-// seedPayments membuat riwayat transaksi dummy untuk halaman admin (transactions,
-// financial, dashboard). Idempoten: lookup transaction_id.
-func seedPayments(db *gorm.DB) {
-	log.Println("[Seeder] Seeding Payments...")
-
-	now := time.Now()
-
-	type seedPayment struct {
-		StudentEmail  string
-		CourseSlug    string
-		TransactionID string
-		Method        entity.PaymentMethod
-		Status        entity.PaymentStatus
-		DaysAgo       int
-	}
-
-	payments := []seedPayment{
-		// Transaksi sukses tersebar 12 bulan terakhir untuk chart financial
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250108-001", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 330},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250215-002", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 290},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250320-003", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 250},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250405-004", Method: "BRIVA", Status: entity.PaymentSuccess, DaysAgo: 210},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250510-005", Method: "PERMATAVA", Status: entity.PaymentSuccess, DaysAgo: 170},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250601-006", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 120},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250718-007", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 75},
-		// Transaksi terbaru untuk dashboard recent-transactions
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250820-008", Method: "BNIVA", Status: entity.PaymentSuccess, DaysAgo: 14},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250902-009", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 7},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250910-010", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 3},
-		// Pending & failed untuk ratio chart admin transactions
-		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250915-011", Method: "PERMATAVA", Status: entity.PaymentPending, DaysAgo: 2},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250916-012", Method: "BCAVA", Status: entity.PaymentFailed, DaysAgo: 1},
-	}
-
-	for _, item := range payments {
-		var existing entity.Payment
-		if err := db.Where("transaction_id = ?", item.TransactionID).First(&existing).Error; err == nil {
-			continue
-		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("[Error] Gagal cek payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		enrollment, err := findSeedEnrollment(db, item.StudentEmail, item.CourseSlug)
-		if err != nil {
-			log.Printf("[Error] Enrollment tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		course, err := findSeedCourseBySlug(db, item.CourseSlug)
-		if err != nil {
-			log.Printf("[Error] Course tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		createdAt := now.AddDate(0, 0, -item.DaysAgo)
-		enrollmentUID := enrollment.Uid
-		payment := entity.Payment{
-			EnrollmentUid: &enrollmentUID,
-			Amount:        course.Price,
-			Method:        item.Method,
-			Status:        item.Status,
-			TransactionID: item.TransactionID,
-			CheckoutURL:   "https://tripay.co.id/checkout/seed-" + item.TransactionID,
-			CreatedAt:     createdAt,
-		}
-		if item.Status == entity.PaymentSuccess {
-			paidAt := createdAt.Add(2 * time.Hour)
-			payment.PaidAt = &paidAt
-		}
-
-		if err := db.Create(&payment).Error; err != nil {
-			log.Printf("[Error] Gagal membuat payment %s: %v", item.TransactionID, err)
-			continue
-		}
-		// Pastikan timestamp historis tidak ditimpa autoCreateTime.
-		updates := map[string]any{"created_at": createdAt}
-		if payment.PaidAt != nil {
-			updates["paid_at"] = *payment.PaidAt
-		}
-		if err := db.Model(&payment).Updates(updates).Error; err != nil {
-			log.Printf("[Warning] Gagal set timestamp payment %s: %v", item.TransactionID, err)
-		}
-		log.Printf("[Success] Payment %s (%s) berhasil dibuat", item.TransactionID, item.Status)
 	}
 }
 
@@ -924,20 +804,6 @@ func seedQaThreadExists(db *gorm.DB, authorUID, courseUID uuid.UUID, seedKey str
 		}
 	}
 	return false
-}
-
-func findSeedEnrollment(db *gorm.DB, studentEmail, courseSlug string) (entity.Enrollment, error) {
-	student, err := findSeedUserByEmail(db, studentEmail)
-	if err != nil {
-		return entity.Enrollment{}, err
-	}
-	course, err := findSeedCourseBySlug(db, courseSlug)
-	if err != nil {
-		return entity.Enrollment{}, err
-	}
-	var enrollment entity.Enrollment
-	err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&enrollment).Error
-	return enrollment, err
 }
 
 func findSeedUserByEmail(db *gorm.DB, email string) (entity.User, error) {
@@ -1709,5 +1575,126 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 		}
 		log.Printf("[Success] Submission %s untuk assignment di course=%s (module=%d, lesson=%d) berhasil dibuat",
 			item.StudentEmail, item.CourseSlug, item.ModuleOrderIndex, item.LessonOrderIndex)
+	}
+}
+
+func resolveSeedImageFile(filename string) string {
+	candidates := []string{
+		filepath.Join("/app/seed-images", filename),
+		filepath.Join("../frontend/public/images", filename),
+		filepath.Join("frontend/public/images", filename),
+	}
+	for _, p := range candidates {
+		if st, err := os.Stat(p); err == nil && !st.IsDir() {
+			return p
+		}
+	}
+	return ""
+}
+
+func seedGalleries(db *gorm.DB) {
+	log.Println("[Seeder] Seeding Galleries...")
+
+	var existingCount int64
+	if err := db.Model(&entity.Gallery{}).Count(&existingCount).Error; err != nil {
+		log.Printf("[Error] Gagal menghitung data galleries: %v", err)
+		return
+	}
+	if existingCount > 0 {
+		log.Printf("[Seeder] Tabel galleries sudah berisi %d item, melewati seeding awal.", existingCount)
+		return
+	}
+
+	intPtr := func(v int) *int { return &v }
+
+	type seedGalleryItem struct {
+		Filename string
+		Caption  string
+		Variant  *int
+	}
+
+	items := []seedGalleryItem{
+		{
+			Filename: "panit1.webp",
+			Caption:  "Tim di balik layar — yang bikin acara jalan tanpa drama.",
+			Variant:  intPtr(3),
+		},
+		{
+			Filename: "crevmed1.webp",
+			Caption:  "Kelas UI/UX: dari coretan kertas sampai wireframe yang klikable.",
+			Variant:  nil,
+		},
+		{
+			Filename: "crevmed2.webp",
+			Caption:  "Revisi desain ke-7 — yang penting user nggak bingung.",
+			Variant:  nil,
+		},
+		{
+			Filename: "crevmed3.webp",
+			Caption:  "Prototipe dipresentasikan, feedback langsung — bukan tebak-tebakan.",
+			Variant:  nil,
+		},
+		{
+			Filename: "web.webp",
+			Caption:  "Kelas web: dari HTML sampai deploy — bareng-bareng.",
+			Variant:  nil,
+		},
+		{
+			Filename: "random.webp",
+			Caption:  "Random tapi ngena — tawa paling jujur setelah sprint.",
+			Variant:  nil,
+		},
+		{
+			Filename: "random2.webp",
+			Caption:  "Selesai sprint, waktunya ngobrol santai dan tukeran cerita.",
+			Variant:  nil,
+		},
+		{
+			Filename: "closed.webp",
+			Caption:  "Penutupan bukan perpisahan — sampai jumpa di sprint berikutnya.",
+			Variant:  nil,
+		},
+		{
+			Filename: "awward.webp",
+			Caption:  "Peserta terbaik — yang paling konsisten dari sprint pertama sampai akhir, akhirnya dipanggil ke panggung penghargaan.",
+			Variant:  nil,
+		},
+	}
+
+	if utils.MinioClient == nil {
+		_ = utils.InitMinio()
+	}
+
+	bucket := utils.GetBucketGalleries()
+	baseTime := time.Now().Add(-time.Duration(len(items)+1) * time.Minute)
+
+	for idx, item := range items {
+		imageURL := "/images/" + item.Filename
+		if localPath := resolveSeedImageFile(item.Filename); localPath != "" {
+			if f, err := os.Open(localPath); err == nil {
+				if st, statErr := f.Stat(); statErr == nil {
+					if uploadedURL, upErr := utils.UploadFileFromReader(f, st.Size(), bucket, item.Filename, "image/webp"); upErr == nil {
+						imageURL = uploadedURL
+					} else {
+						log.Printf("[Warning] Gagal unggah seed image %s ke Garage S3: %v", item.Filename, upErr)
+					}
+				}
+				_ = f.Close()
+			}
+		}
+
+		stamp := baseTime.Add(time.Duration(len(items)-idx) * time.Minute)
+		row := entity.Gallery{
+			ImageURL:  imageURL,
+			Caption:   item.Caption,
+			Variant:   item.Variant,
+			CreatedAt: stamp,
+			UpdatedAt: stamp,
+		}
+		if err := db.Create(&row).Error; err != nil {
+			log.Printf("[Error] Gagal membuat gallery seed %s: %v", item.Filename, err)
+			continue
+		}
+		log.Printf("[Success] Gallery seed %s berhasil dibuat (%s)", item.Filename, imageURL)
 	}
 }

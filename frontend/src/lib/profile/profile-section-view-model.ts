@@ -12,7 +12,6 @@ export type ProfileSectionViewModel = {
   onNewPasswordChange: (value: string) => void
   confirmPassword: string
   onConfirmPasswordChange: (value: string) => void
-  lastUpdatedLabel: string
   isPhotoPending: boolean
   isProfilePending: boolean
   isPasswordPending: boolean

@@ -1,6 +1,5 @@
 import { Trash2, UserCog } from 'lucide-react'
 
-import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
@@ -40,12 +39,13 @@ export function UserDetailProfileHeader({
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className={userDetailLayout.profileName}>{profile.name}</h1>
-              <AdminMetaLabel>{profile.roleLabel}</AdminMetaLabel>
-              <UserStatusBadge status={profile.status} />
+              <AdminMetaLabel className="inline-flex items-center rounded-md border border-ink-900/10 bg-paper-paper px-2.5 py-0.5 text-xs font-bold text-ink-800">
+                {profile.roleLabel}
+              </AdminMetaLabel>
             </div>
             <p className={userDetailLayout.profileEmail}>{profile.email}</p>
             <p className={userDetailLayout.cardMeta}>
-              Bergabung {profile.createdAtLabel} · Terakhir aktif {profile.updatedAtLabel}
+              Bergabung {profile.createdAtLabel}
             </p>
           </div>
         </div>

@@ -14,6 +14,18 @@ interface ReviewsQaTabsProps {
   qnaThreads: AdminQaThread[]
   isLoadingReviews?: boolean
   isLoadingQna?: boolean
+  reviewsPage?: number
+  reviewsTotalPages?: number
+  reviewsTotal?: number
+  reviewsPageSize?: number
+  onReviewsPageChange?: (page: number) => void
+  onReviewsPageSizeChange?: (pageSize: number) => void
+  qnaPage?: number
+  qnaTotalPages?: number
+  qnaTotal?: number
+  qnaPageSize?: number
+  onQnaPageChange?: (page: number) => void
+  onQnaPageSizeChange?: (pageSize: number) => void
 }
 
 export function ReviewsQaTabs({
@@ -22,6 +34,18 @@ export function ReviewsQaTabs({
   qnaThreads,
   isLoadingReviews = false,
   isLoadingQna = false,
+  reviewsPage,
+  reviewsTotalPages,
+  reviewsTotal,
+  reviewsPageSize,
+  onReviewsPageChange,
+  onReviewsPageSizeChange,
+  qnaPage,
+  qnaTotalPages,
+  qnaTotal,
+  qnaPageSize,
+  onQnaPageChange,
+  onQnaPageSizeChange,
 }: ReviewsQaTabsProps) {
   const [activeTab, setActiveTab] = useQueryStateEnum(
     'section',
@@ -34,6 +58,8 @@ export function ReviewsQaTabs({
   return (
     <div className="flex flex-col gap-4">
       <AdminUnderlineTabs
+        variant="pill"
+        className="w-fit"
         value={tab}
         ariaLabel="Ulasan dan tanya jawab"
         items={[
@@ -44,9 +70,28 @@ export function ReviewsQaTabs({
       />
 
       {tab === 'reviews' ? (
-        <ReviewsPanel courseUid={courseUid} reviews={reviews} isLoading={isLoadingReviews} />
+        <ReviewsPanel
+          courseUid={courseUid}
+          reviews={reviews}
+          isLoading={isLoadingReviews}
+          page={reviewsPage}
+          totalPages={reviewsTotalPages}
+          total={reviewsTotal}
+          pageSize={reviewsPageSize}
+          onPageChange={onReviewsPageChange}
+          onPageSizeChange={onReviewsPageSizeChange}
+        />
       ) : (
-        <QaForum threads={qnaThreads} isLoading={isLoadingQna} />
+        <QaForum
+          threads={qnaThreads}
+          isLoading={isLoadingQna}
+          page={qnaPage}
+          totalPages={qnaTotalPages}
+          total={qnaTotal}
+          pageSize={qnaPageSize}
+          onPageChange={onQnaPageChange}
+          onPageSizeChange={onQnaPageSizeChange}
+        />
       )}
     </div>
   )

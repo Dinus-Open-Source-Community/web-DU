@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+
 import { ReviewsQaTabs } from '@/components/Admin/QA/ReviewsTabs'
 import { PageHeader } from '@/components/shared/Header'
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { useAdminQnaThreads, useAdminReviews } from '@/hooks/use-admin-moderation'
 import { useAdminAppSidebar, useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useAuth } from '@/providers/auth-provider'
-import { useSearchParams } from 'react-router-dom'
 
 export default function ReviewsQaPage() {
   const { role: authRole } = useAuth()
@@ -17,15 +19,32 @@ export default function ReviewsQaPage() {
   const [searchParams] = useSearchParams()
   const courseUid = searchParams.get('courseUid')?.trim() || undefined
 
+  const [reviewsPage, setReviewsPage] = useState(1)
+  const [reviewsPageSize, setReviewsPageSize] = useState(10)
+  const [qnaPage, setQnaPage] = useState(1)
+  const [qnaPageSize, setQnaPageSize] = useState(10)
+
+  useEffect(() => {
+    setReviewsPage(1)
+    setQnaPage(1)
+  }, [courseUid])
+
   const reviewsQuery = useAdminReviews({
-    per_page: 50,
+    page: reviewsPage,
+    per_page: reviewsPageSize,
     ...(courseUid ? { courseUid } : {}),
   })
 
   const qnaQuery = useAdminQnaThreads({
-    per_page: 50,
+    page: qnaPage,
+    per_page: qnaPageSize,
     ...(courseUid ? { courseUid } : {}),
   })
+
+  const reviewsTotalPages = reviewsQuery.data?.meta.total_pages ?? 1
+  const reviewsTotal = reviewsQuery.data?.meta.total ?? 0
+  const qnaTotalPages = qnaQuery.data?.meta.total_pages ?? 1
+  const qnaTotal = qnaQuery.data?.meta.total ?? 0
 
   return (
     <AppSidebarProvider
@@ -48,6 +67,24 @@ export default function ReviewsQaPage() {
           qnaThreads={qnaQuery.data?.threads ?? []}
           isLoadingReviews={reviewsQuery.isLoading}
           isLoadingQna={qnaQuery.isLoading}
+          reviewsPage={reviewsPage}
+          reviewsTotalPages={reviewsTotalPages}
+          reviewsTotal={reviewsTotal}
+          reviewsPageSize={reviewsPageSize}
+          onReviewsPageChange={setReviewsPage}
+          onReviewsPageSizeChange={(newSize) => {
+            setReviewsPageSize(newSize)
+            setReviewsPage(1)
+          }}
+          qnaPage={qnaPage}
+          qnaTotalPages={qnaTotalPages}
+          qnaTotal={qnaTotal}
+          qnaPageSize={qnaPageSize}
+          onQnaPageChange={setQnaPage}
+          onQnaPageSizeChange={(newSize) => {
+            setQnaPageSize(newSize)
+            setQnaPage(1)
+          }}
         />
       </div>
     </AppSidebarProvider>

@@ -31,7 +31,6 @@ func applyCreatorFields(item gin.H, course entity.Course) {
 func userToMentorResponse(user entity.User) gin.H {
 	name, _ := utils.Decrypt(user.Name)
 	email, _ := utils.Decrypt(user.Email)
-	description, _ := utils.Decrypt(user.Description)
 
 	return gin.H{
 		"uid":         user.Uid,
@@ -40,9 +39,7 @@ func userToMentorResponse(user entity.User) gin.H {
 		"role":        user.Role,
 		"is_verified": user.IsVerified,
 		"avatar_url":  user.AvatarURL,
-		"description": description,
 		"created_at":  user.CreatedAt,
-		"updated_at":  user.UpdatedAt,
 	}
 }
 
@@ -114,10 +111,7 @@ func courseResponse(course entity.Course) gin.H {
 		"thumbnail_url":   course.ThumbnailURL,
 		"level":           course.Level,
 		"status":          course.Status,
-		"price":           course.Price,
-		"price_strike":    course.PriceStrike,
 		"what_you_learn":  course.WhatYouLearn,
-		"is_premium":      course.IsPremium,
 		"is_published":    course.IsPublished,
 		"created_at":      course.CreatedAt,
 		"updated_at":      course.UpdatedAt,
@@ -145,10 +139,7 @@ func courseListItemResponse(course entity.Course, summary courseReviewSummary) g
 		"thumbnail_url":   course.ThumbnailURL,
 		"level":           course.Level,
 		"status":          course.Status,
-		"price":           course.Price,
-		"price_strike":    course.PriceStrike,
 		"what_you_learn":  course.WhatYouLearn,
-		"is_premium":      course.IsPremium,
 		"is_published":    course.IsPublished,
 		"created_at":      course.CreatedAt,
 		"updated_at":      course.UpdatedAt,
@@ -215,10 +206,7 @@ func courseDetailResponse(course entity.Course, reviews []entity.CourseReview) g
 		"thumbnail_url":  course.ThumbnailURL,
 		"level":          course.Level,
 		"status":         course.Status,
-		"price":          course.Price,
-		"price_strike":   course.PriceStrike,
 		"what_you_learn": parseWhatYouLearnResponse(course.WhatYouLearn),
-		"is_premium":     course.IsPremium,
 		"is_published":   course.IsPublished,
 		"created_at":     course.CreatedAt,
 		"updated_at":     course.UpdatedAt,

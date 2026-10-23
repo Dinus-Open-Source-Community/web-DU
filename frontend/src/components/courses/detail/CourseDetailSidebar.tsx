@@ -14,9 +14,6 @@ interface IncludeItem {
 
 interface CourseDetailSidebarProps {
   previewImage?: string
-  price: string
-  strikePrice?: string
-  discountLabel?: string
   children: ReactNode
   includes?: IncludeItem[]
   className?: string
@@ -33,9 +30,6 @@ const defaultIncludes: IncludeItem[] = [
 
 export function CourseDetailSidebar({
   previewImage,
-  price,
-  strikePrice,
-  discountLabel,
   children,
   includes = defaultIncludes,
   className,
@@ -52,14 +46,6 @@ export function CourseDetailSidebar({
       </CourseCardCoverFrame>
 
       <div className="flex flex-col gap-4 p-4 sm:p-5">
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span className={detailLayout.price}>{price}</span>
-            {strikePrice ? <span className={detailLayout.strikePrice}>{strikePrice}</span> : null}
-          </div>
-          {discountLabel ? <p className={detailLayout.discount}>{discountLabel}</p> : null}
-        </div>
-
         <div className="flex flex-col gap-2 [&_button]:min-h-11 [&_button]:w-full [&_button]:rounded-xl [&_button]:text-sm [&_button]:font-semibold">
           {children}
         </div>

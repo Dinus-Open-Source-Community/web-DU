@@ -44,11 +44,12 @@ type DialogState =
 
 type DeleteState = { uid: string; name: string } | null
 
-const PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50]
 
 export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }) {
   const labels = COURSE_MASTER_LABELS[kind]
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
   const [committedSearch, setCommittedSearch] = useState('')
   const [dialogState, setDialogState] = useState<DialogState>({ mode: 'closed' })
@@ -56,7 +57,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
 
   const { items, meta, isLoading } = useCourseMasterList(kind, {
     page,
-    per_page: PAGE_SIZE,
+    per_page: pageSize,
     ...(committedSearch ? { name: committedSearch } : {}),
   })
 
@@ -167,6 +168,11 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
     }
   }
 
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setPage(1)
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <SearchForm
@@ -209,7 +215,11 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         keyField={(row) => row.uid}
         page={page}
         totalPages={totalPages}
+        total={meta?.total}
+        pageSize={pageSize}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
         onPageChange={setPage}
+        onPageSizeChange={handlePageSizeChange}
         emptyState={
           isLoading ? (
             <p className={appKpiLabelClassName}>Memuat data...</p>

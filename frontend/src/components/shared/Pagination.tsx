@@ -9,6 +9,9 @@ export interface PaginationProps {
   className?: string
   /** @deprecated Semua variant memakai token app shell (ink/paper). */
   variant?: 'default' | 'admin'
+  /** Jika true, pagination tetap ditampilkan meskipun totalPages <= 1 */
+  alwaysShow?: boolean
+  size?: 'sm' | 'default'
 }
 
 export const Pagination = ({
@@ -16,21 +19,33 @@ export const Pagination = ({
   totalPages,
   onPageChange,
   className,
+  alwaysShow = false,
+  size = 'default',
 }: PaginationProps) => {
-  if (totalPages <= 1) return null
+  const safeTotalPages = Math.max(1, totalPages)
+  if (totalPages <= 1 && !alwaysShow) return null
+
+  const isSm = size === 'sm'
 
   return (
-    <div className={cn('flex items-center justify-center gap-3', className)}>
+    <div className={cn('flex items-center justify-center gap-2', className)}>
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1}
-        className="rounded-lg border-2 border-ink-900/10 bg-paper-white p-2 text-ink-600 transition-all hover:border-ink-900/20 hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={currentPage <= 1}
+        className={cn(
+          'rounded-lg border-2 border-ink-900/10 bg-paper-white text-ink-600 transition-all hover:border-ink-900/20 hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50',
+          isSm ? 'flex size-[38px] items-center justify-center' : 'p-2',
+        )}
         aria-label="Halaman sebelumnya">
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className={isSm ? 'size-4' : 'h-5 w-5'} />
       </button>
 
-      <div className="flex w-max max-w-full items-center gap-1 overflow-x-auto rounded-lg border-2 border-ink-900/10 bg-paper-paper p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {Array.from({ length: totalPages }).map((_, i) => {
+      <div
+        className={cn(
+          'flex w-max max-w-full items-center gap-1 overflow-x-auto rounded-lg border-2 border-ink-900/10 bg-paper-paper [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          isSm ? 'p-1' : 'p-1.5',
+        )}>
+        {Array.from({ length: safeTotalPages }).map((_, i) => {
           const isActive = currentPage === i + 1
           return (
             <button
@@ -39,10 +54,13 @@ export const Pagination = ({
               aria-label={`Halaman ${i + 1}`}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'flex h-9 min-w-9 shrink-0 items-center justify-center rounded-lg px-2 text-sm transition-colors',
+                'shrink-0 items-center justify-center transition-colors',
+                isSm
+                  ? 'flex h-7 min-w-7 rounded-md px-2 text-xs'
+                  : 'flex h-9 min-w-9 rounded-lg px-2 text-sm',
                 isActive
-                  ? 'bg-brand-blue font-bold text-ink-900'
-                  : 'font-medium text-ink-500 hover:bg-paper-white hover:text-ink-800',
+                  ? 'bg-brand-blue font-bold text-white'
+                  : 'font-semibold text-ink-500 hover:bg-paper-white hover:text-ink-800',
               )}
             >
               {i + 1}
@@ -52,11 +70,14 @@ export const Pagination = ({
       </div>
 
       <button
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages}
-        className="rounded-lg border-2 border-ink-900/10 bg-paper-white p-2 text-ink-600 transition-all hover:border-ink-900/20 hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
+        disabled={currentPage >= safeTotalPages}
+        className={cn(
+          'rounded-lg border-2 border-ink-900/10 bg-paper-white text-ink-600 transition-all hover:border-ink-900/20 hover:bg-paper-paper disabled:cursor-not-allowed disabled:opacity-50',
+          isSm ? 'flex size-[38px] items-center justify-center' : 'p-2',
+        )}
         aria-label="Halaman berikutnya">
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className={isSm ? 'size-4' : 'h-5 w-5'} />
       </button>
     </div>
   )

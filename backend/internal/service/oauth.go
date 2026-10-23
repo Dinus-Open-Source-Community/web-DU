@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -195,7 +194,6 @@ func CallbackHandler(c *gin.Context) {
 		user.Email = encEmail
 		user.AvatarURL = gu.Picture
 		user.IsVerified = gu.VerifiedEmail
-		user.UpdatedAt = time.Now()
 
 		if err := database.DB.Save(&user).Error; err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -222,7 +220,6 @@ func CallbackHandler(c *gin.Context) {
 			"role":        user.Role,
 			"is_verified": user.IsVerified,
 			"created_at":  user.CreatedAt,
-			"updated_at":  user.UpdatedAt,
 		},
 		"error": nil,
 	})

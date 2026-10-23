@@ -5,10 +5,14 @@ import type { ICourseDetailItem, ICourseDetailModule } from '@/lib/types/course'
 import type {
   CourseDetailLesson,
   IQuiz,
+  LessonDetailAssignment,
   LessonPayloadInput,
 } from '@/lib/types/lesson'
 import type { EditableLesson, EditableModule, LessonApiItem } from './types'
-import { createDefaultHomeworkRules } from '@/lib/course-edit/homework-rules'
+import {
+  createDefaultHomeworkRules,
+  mapAssignmentToHomeworkRules,
+} from '@/lib/course-edit/homework-rules'
 import {
   resolveTextContentHtml,
   resolveVideoFields,
@@ -88,8 +92,6 @@ export function toMentorCourse(course: ICourseDetailItem): Partial<ICourseDetail
     category: category?.name ? category : undefined,
     level: course.level ?? undefined,
     course_type: courseType?.name ? courseType : undefined,
-    price: typeof course.price === 'number' ? course.price : undefined,
-    price_strike: typeof course.price_strike === 'number' ? course.price_strike : undefined,
     what_you_learn: Array.isArray(course.what_you_learn)
       ? course.what_you_learn.filter((item): item is string => typeof item === 'string')
       : undefined,
@@ -101,19 +103,27 @@ export function toLesson(item: LessonApiItem, fallbackOrder: number): EditableLe
   const lessonContentType =
     item.content_type === 'video' || Boolean(item.video_url) ? 'video' : 'text'
 
+  const assignment = item.assignment
+  const hasAssignment = Boolean(assignment?.uid)
+
   const base = {
     id: item.uid ?? `lesson-${fallbackOrder}`,
     uid: item.uid,
     title: item.title ?? `Lesson ${fallbackOrder}`,
     order: Number(item.order_index ?? fallbackOrder) || fallbackOrder,
     durationMinutes: 10,
-    hasHomework: false,
-    homeworkTitle: item.title ?? `Lesson ${fallbackOrder}`,
-    homeworkAssignmentUid: null,
-    homeworkType: 'text' as const,
-    homeworkDescriptionHtml: '<p></p>',
-    homeworkQuiz: createDefaultQuiz(),
-    homeworkRules: createDefaultHomeworkRules('text'),
+    hasHomework: hasAssignment,
+    homeworkTitle: assignment?.title ?? item.title ?? `Lesson ${fallbackOrder}`,
+    homeworkAssignmentUid: assignment?.uid ?? null,
+    homeworkType: assignment?.task_type ?? ('text' as const),
+    homeworkDescriptionHtml:
+      typeof assignment?.task_description?.contentHtml === 'string'
+        ? assignment.task_description.contentHtml
+        : '<p></p>',
+    homeworkQuiz: assignment?.quiz_payload ?? createDefaultQuiz(),
+    homeworkRules: assignment
+      ? mapAssignmentToHomeworkRules(assignment as unknown as LessonDetailAssignment)
+      : createDefaultHomeworkRules('text'),
   }
 
   const contentHtml = parsedContent.contentHtml
@@ -146,13 +156,13 @@ export function mergeLessonDetailFromApi(
     ...hydrated,
     id: existing.id,
     uid: existing.uid ?? lessonUid,
-    hasHomework: existing.hasHomework,
-    homeworkTitle: existing.homeworkTitle,
-    homeworkAssignmentUid: existing.homeworkAssignmentUid,
-    homeworkType: existing.homeworkType,
-    homeworkDescriptionHtml: existing.homeworkDescriptionHtml,
-    homeworkQuiz: existing.homeworkQuiz,
-    homeworkRules: existing.homeworkRules,
+    hasHomework: existing.hasHomework || hydrated.hasHomework,
+    homeworkTitle: existing.homeworkTitle || hydrated.homeworkTitle,
+    homeworkAssignmentUid: existing.homeworkAssignmentUid ?? hydrated.homeworkAssignmentUid,
+    homeworkType: existing.homeworkType ?? hydrated.homeworkType,
+    homeworkDescriptionHtml: existing.homeworkDescriptionHtml ?? hydrated.homeworkDescriptionHtml,
+    homeworkQuiz: existing.homeworkQuiz ?? hydrated.homeworkQuiz,
+    homeworkRules: existing.homeworkRules ?? hydrated.homeworkRules,
   }
 }
 

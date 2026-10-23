@@ -30,15 +30,6 @@ export const Message = {
     passwordUpdated: 'Kata sandi berhasil diubah.',
     passwordUpdateFailed: 'Kata sandi gagal diubah. Silakan coba lagi.',
   },
-  payment: {
-    created: 'Pembayaran berhasil dibuat.',
-    processFailed: 'Pembayaran gagal diproses. Silakan coba lagi.',
-  },
-  invoice: {
-    downloadSuccess: 'Tagihan berhasil diunduh.',
-    downloadFailed: 'Tagihan gagal diunduh. Silakan coba lagi.',
-    loginRequired: 'Anda perlu masuk untuk mengunduh tagihan.',
-  },
   course: {
     createdDraft: 'Kursus disimpan sebagai draf. Terbitkan lewat tombol Terbit.',
     createFailed: 'Kursus gagal dibuat. Silakan coba lagi.',

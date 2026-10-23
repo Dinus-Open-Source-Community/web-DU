@@ -1,14 +1,13 @@
 import type { AdminAdministrator, AdminMentor } from '@/lib/types/api'
-import type { AdminStatus, AdminStudent } from '@/lib/types/user'
+import type { AdminStudent } from '@/lib/types/user'
 
 export type ManagedUserRow = {
   uid: string
   name: string
   email: string
   avatar: string
-  status: AdminStatus
+  isVerified: boolean
   joinedAt: string
-  lastActive?: string
   enrolledCourses?: number
   averageProgress?: number
   roleLabel?: string
@@ -20,9 +19,8 @@ export function studentToRow(student: AdminStudent): ManagedUserRow {
     name: student.name,
     email: student.email,
     avatar: student.avatar,
-    status: student.status,
+    isVerified: student.isVerified,
     joinedAt: student.joinedAt,
-    lastActive: student.lastActive,
     enrolledCourses: student.enrolledCourses,
     averageProgress: student.averageProgress,
   }
@@ -34,7 +32,7 @@ export function mentorToRow(mentor: AdminMentor): ManagedUserRow {
     name: mentor.name,
     email: mentor.email,
     avatar: mentor.avatar,
-    status: mentor.status,
+    isVerified: mentor.isVerified,
     joinedAt: mentor.joinedAt,
   }
 }
@@ -45,9 +43,8 @@ export function administratorToRow(admin: AdminAdministrator): ManagedUserRow {
     name: admin.name,
     email: admin.email,
     avatar: admin.avatar,
-    status: admin.status,
+    isVerified: admin.isVerified,
     joinedAt: admin.createdAt,
-    lastActive: admin.lastActive,
     roleLabel: admin.role,
   }
 }

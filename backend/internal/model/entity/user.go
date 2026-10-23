@@ -20,17 +20,15 @@ const (
 
 // Model User Migrations
 type User struct {
-	Uid         uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
-	Name        string    `gorm:"type:varchar(150);not null" json:"name"`
-	Email       string    `gorm:"type:varchar(150);unique;not null" json:"email"`
-	EmailHash   string    `gorm:"type:varchar(150);unique;not null" json:"email_hash"`
-	Password    string    `gorm:"type:varchar(255)" json:"-"`
-	Role        UserRole  `gorm:"type:user_role;default:'student';not null" json:"role"`
-	IsVerified  bool      `gorm:"default:false" json:"is_verified"`
-	AvatarURL   string    `gorm:"type:varchar(255)" json:"avatar_url"`
-	Description string    `gorm:"type:text" json:"description"`
-	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Uid        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
+	Name       string    `gorm:"type:varchar(150);not null" json:"name"`
+	Email      string    `gorm:"type:varchar(150);unique;not null" json:"email"`
+	EmailHash  string    `gorm:"type:varchar(150);unique;not null" json:"email_hash"`
+	Password   string    `gorm:"type:varchar(255)" json:"-"`
+	Role       UserRole  `gorm:"type:user_role;default:'student';not null" json:"role"`
+	IsVerified bool      `gorm:"default:false" json:"is_verified"`
+	AvatarURL  string    `gorm:"type:varchar(255)" json:"avatar_url"`
+	CreatedAt  time.Time `gorm:"autoCreateTime" json:"created_at"`
 
 	// Relations
 	Courses             []Course       `gorm:"foreignKey:MentorUid" json:"courses"`
@@ -47,7 +45,7 @@ type User struct {
 // tidak dienkripsi karena bukan data informatif personal atau dibutuhkan apa adanya
 // untuk operasi (lookup blind index, hashing password, URL gambar, dsb).
 func (u *User) AfterFind(_ *gorm.DB) error {
-	utils.DecryptFields(&u.Name, &u.Email, &u.Description)
+	utils.DecryptFields(&u.Name, &u.Email)
 	return nil
 }
 
@@ -55,13 +53,13 @@ func (u *User) AfterFind(_ *gorm.DB) error {
 // idempotent: jika field sudah berupa ciphertext (kasus service yang sudah
 // melakukan Encrypt secara eksplisit), enkripsi ulang dilewati.
 func (u *User) BeforeSave(_ *gorm.DB) error {
-	return utils.EncryptFieldsIfNeeded(&u.Name, &u.Email, &u.Description)
+	return utils.EncryptFieldsIfNeeded(&u.Name, &u.Email)
 }
 
 // AfterSave mengembalikan field model ke plaintext setelah operasi simpan agar
 // pemanggil service dapat langsung mengembalikan entitas ke client tanpa perlu
 // dekripsi manual. Database tetap menyimpan ciphertext.
 func (u *User) AfterSave(_ *gorm.DB) error {
-	utils.DecryptFields(&u.Name, &u.Email, &u.Description)
+	utils.DecryptFields(&u.Name, &u.Email)
 	return nil
 }

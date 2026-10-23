@@ -90,7 +90,7 @@ export function SettingsThemeSection() {
       <div
         className={cn(
           appSegmentedControlClassName,
-          'grid w-full grid-cols-1 gap-2 p-2 sm:grid-cols-2',
+          'grid w-full grid-cols-1 gap-2 rounded-xl p-2 sm:grid-cols-2',
         )}
         role="radiogroup"
         aria-label="Pilih tema aplikasi"

@@ -5,11 +5,16 @@ type UpdateUserRoleRequest struct {
 	Role string `json:"role" binding:"required" example:"mentor"`
 }
 
+// BatchUpdateUserRoleRequest is the body for PATCH /user/role/batch.
+type BatchUpdateUserRoleRequest struct {
+	UserUids []string `json:"user_uids" binding:"required,min=1"`
+	Role     string   `json:"role" binding:"required" example:"mentor"`
+}
+
 // UpdateUserProfileRequest represents profile update payload
 type UpdateUserProfileRequest struct {
-	Name        *string `json:"name"`
-	Email       *string `json:"email"`
-	Description *string `json:"description"`
+	Name  *string `json:"name"`
+	Email *string `json:"email"`
 }
 
 // ChangePasswordRequest represents change password payload

@@ -1,7 +1,5 @@
 import type {
-  BadgeVariant,
   ClassType,
-  CourseClassType,
   MentorAssignmentLifecycleStatus,
   MentorAssignmentTaskType,
   MentorCourseStudentStatus,
@@ -20,12 +18,9 @@ export interface ICourseItem {
   created_by?: IAuthorCourseItem
   description: string
   event_uid: string | null
-  is_premium?: boolean
   is_published?: boolean
   level?: string
   mentors?: ICourseMentorItem[]
-  price: number
-  price_strike?: number
   rating?: number
   slot?: number
   slug: string
@@ -106,13 +101,10 @@ export interface ICourseDetailItem {
   created_by: IAuthorCourseItem
   description: string
   event_uid: string | null
-  is_premium: boolean
   is_published: boolean
   level: string
   mentors: ICourseMentorItem[]
   modules?: ICourseDetailModule[]
-  price: number
-  price_strike: number
   rating: number
   reviews: ICourseDetailReview[]
   slot: number
@@ -280,6 +272,8 @@ export interface ICourseReadingProgress {
   course_uid: string
   total_lessons: number
   lessons_read: number
+  total_assignments?: number
+  assignments_submitted?: number
   progress: number
   enrollment_uid?: string | null
   enrollment_status?: string | null
@@ -306,4 +300,4 @@ export type AdminQaThread = IAdminQaThread
 export type MentorAssignmentSubmissionConfig = IMentorAssignmentSubmissionConfig
 export type CourseReadingProgress = ICourseReadingProgress
 export type StudentEnrolledCourse = IStudentEnrolledCourse
-export type { BadgeVariant, ClassType, CourseClassType }
+export type { ClassType }

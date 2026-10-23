@@ -143,7 +143,6 @@ export async function deleteCourse(uid: string) {
 
 export interface JoinCourseResponse {
   enrollment: { uid: string; user_uid: string; course_uid: string; status: string }
-  invoice_url: string
 }
 
 export async function joinCourse(courseUid: string) {

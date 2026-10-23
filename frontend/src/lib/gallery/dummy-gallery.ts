@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { GALLERY_IMAGES } from '@/lib/landing/gallery'
+import {
+  createGalleryItem,
+  deleteGalleryItem,
+  fetchGalleries,
+  updateGalleryItem,
+  type IGalleryApiItem,
+} from '@/services/gallery'
 
 export type DummyGalleryVariant = 0 | 1 | 2 | 3 | 4 | 5
 
@@ -17,115 +23,135 @@ export type DummyGalleryItem = {
 
 export type DummyGalleryFormValues = {
   src: string
-  alt: string
+  file?: File | null
+  alt?: string
   caption: string
   variant: DummyGalleryVariant | null
 }
 
 export const EMPTY_GALLERY_FORM: DummyGalleryFormValues = {
   src: '',
+  file: null,
   alt: '',
   caption: '',
   variant: null,
 }
 
-const STORAGE_KEY = 'du.dummy-gallery.v1'
+const CHANGE_EVENT = 'du:gallery-changed'
 
-function seedItems(): DummyGalleryItem[] {
-  const now = new Date().toISOString()
-  return GALLERY_IMAGES.map((img, index) => ({
-    uid: `seed-${index}`,
-    src: img.src,
-    alt: img.alt,
-    caption: img.caption,
-    variant: img.variant ?? null,
-    createdAt: now,
-    updatedAt: now,
-  }))
-}
+let cachedGalleryItems: DummyGalleryItem[] | null = null
 
-function loadItems(): DummyGalleryItem[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return seedItems()
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return seedItems()
-    return parsed as DummyGalleryItem[]
-  } catch {
-    return seedItems()
+function mapApiToGalleryItem(item: IGalleryApiItem): DummyGalleryItem {
+  const validVariant =
+    typeof item.variant === 'number' && item.variant >= 0 && item.variant <= 5
+      ? (item.variant as DummyGalleryVariant)
+      : null
+  return {
+    uid: item.uid,
+    src: item.image_url,
+    alt: item.caption,
+    caption: item.caption,
+    variant: validVariant,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
   }
 }
 
-function newUid(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID()
+function broadcastGalleryChange() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(CHANGE_EVENT))
   }
-  return `local-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`
 }
 
 export function validateDummyGalleryForm(values: DummyGalleryFormValues): string | null {
   if (!values.caption.trim()) return 'Caption wajib diisi.'
-  if (!values.alt.trim()) return 'Alt text wajib diisi (untuk aksesibilitas).'
-  if (!values.src.trim()) return 'Gambar wajib ada — unggah file atau isi URL gambar.'
+  if (!values.file && !values.src.trim()) return 'Gambar wajib dipilih atau diunggah.'
   return null
 }
 
 /**
- * Store dummy galeri (localStorage) — pengganti sementara sampai backend tersedia.
- * API dibuat semirip mungkin dengan mutasi server (create/update/remove) agar
- * mudah diganti ke react-query + service API nantinya.
+ * Hook data galeri yang terhubung ke backend `/galleries` & Garage S3 Storage.
  */
 export function useDummyGallery() {
-  const [items, setItems] = useState<DummyGalleryItem[]>(loadItems)
+  const [items, setItems] = useState<DummyGalleryItem[]>(() => cachedGalleryItems ?? [])
+  const [isLoading, setIsLoading] = useState<boolean>(() => cachedGalleryItems === null)
+
+  const reload = useCallback(async () => {
+    try {
+      const res = await fetchGalleries({ per_page: 100 })
+      const mapped = (res.galleries ?? []).map(mapApiToGalleryItem)
+      cachedGalleryItems = mapped
+      setItems(mapped)
+    } catch {
+      // Keep existing state if backend request fails temporarily
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-    } catch {
-      // storage penuh / diblokir — abaikan, state in-memory tetap jalan.
+    void reload()
+
+    const handleCustom = () => {
+      if (cachedGalleryItems) {
+        setItems(cachedGalleryItems)
+      }
+      void reload()
     }
-  }, [items])
 
-  const create = useCallback((values: DummyGalleryFormValues) => {
-    const now = new Date().toISOString()
-    setItems((current) => [
-      {
-        uid: newUid(),
-        src: values.src.trim(),
-        alt: values.alt.trim(),
-        caption: values.caption.trim(),
-        variant: values.variant,
-        createdAt: now,
-        updatedAt: now,
-      },
-      ...current,
-    ])
+    window.addEventListener(CHANGE_EVENT, handleCustom)
+    return () => {
+      window.removeEventListener(CHANGE_EVENT, handleCustom)
+    }
+  }, [reload])
+
+  const create = useCallback(async (values: DummyGalleryFormValues) => {
+    const created = await createGalleryItem({
+      file: values.file,
+      src: values.src,
+      caption: values.caption,
+      variant: values.variant,
+    })
+    const mapped = mapApiToGalleryItem(created)
+    setItems((current) => {
+      const next = [mapped, ...current]
+      cachedGalleryItems = next
+      return next
+    })
+    broadcastGalleryChange()
+    return mapped
   }, [])
 
-  const update = useCallback((uid: string, values: DummyGalleryFormValues) => {
-    setItems((current) =>
-      current.map((item) =>
-        item.uid === uid
-          ? {
-              ...item,
-              src: values.src.trim(),
-              alt: values.alt.trim(),
-              caption: values.caption.trim(),
-              variant: values.variant,
-              updatedAt: new Date().toISOString(),
-            }
-          : item,
-      ),
-    )
+  const update = useCallback(async (uid: string, values: DummyGalleryFormValues) => {
+    const updated = await updateGalleryItem(uid, {
+      file: values.file,
+      src: values.src,
+      caption: values.caption,
+      variant: values.variant,
+    })
+    const mapped = mapApiToGalleryItem(updated)
+    setItems((current) => {
+      const next = current.map((item) => (item.uid === mapped.uid || item.uid === uid ? mapped : item))
+      cachedGalleryItems = next
+      return next
+    })
+    broadcastGalleryChange()
+    return mapped
   }, [])
 
-  const remove = useCallback((uid: string) => {
-    setItems((current) => current.filter((item) => item.uid !== uid))
+  const remove = useCallback(async (uid: string) => {
+    await deleteGalleryItem(uid)
+    setItems((current) => {
+      const next = current.filter((item) => item.uid !== uid)
+      cachedGalleryItems = next
+      return next
+    })
+    broadcastGalleryChange()
   }, [])
 
-  const resetToSeed = useCallback(() => {
-    setItems(seedItems())
-  }, [])
+  const resetToSeed = useCallback(async () => {
+    await reload()
+  }, [reload])
 
-  return { items, create, update, remove, resetToSeed }
+  return { items, isLoading, reload, create, update, remove, resetToSeed }
 }
