@@ -46,6 +46,7 @@ export const dashboardMenu = {
   learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
   assignments: dash('assignments'),
   certificates: dash('certificates'),
+  redeem: dash('redeem'),
 }
 
 export const ROUTES = {
@@ -99,6 +100,7 @@ export const ROUTES = {
     learningCourse: dashboardMenu.learningCourse,
     assignments: dashboardMenu.assignments,
     certificates: dashboardMenu.certificates,
+    redeem: dashboardMenu.redeem,
   },
 } as const
 
@@ -160,5 +162,6 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
+    { name: 'Redeem Code', path: ROUTES.student.redeem },
   ],
 }

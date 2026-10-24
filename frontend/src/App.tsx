@@ -75,8 +75,10 @@ const StudentLearningCourse = React.lazy(
 const StudentAssignments = React.lazy(
   () => import("./pages/student/Assignments.tsx"),
 );
+const StudentRedeem = React.lazy(
+  () => import("./pages/student/Redeem.tsx"),
+);
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
-const RedeemPage = React.lazy(() => import("./pages/redeem/Redeem.tsx"));
 
 type RouteConfig = {
   path: string;
@@ -202,9 +204,10 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.redeem,
-    element: <RedeemPage />,
-    public: true,
-    lazy: true,
+    element: <Navigate to={ROUTES.student.redeem} replace />,
+    public: false,
+    lazy: false,
+    roles: ["student"],
   },
   {
     path: ROUTES.profile,
@@ -353,6 +356,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.student.assignments,
     element: <StudentAssignments />,
+    public: false,
+    lazy: true,
+    roles: ["student"],
+  },
+  {
+    path: ROUTES.student.redeem,
+    element: <StudentRedeem />,
     public: false,
     lazy: true,
     roles: ["student"],

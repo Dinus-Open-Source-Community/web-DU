@@ -73,6 +73,8 @@ func ConnectDB() {
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},
 		&entity.OTP{},
+		&entity.RedeemCode{},
+		&entity.RedeemCodeUsage{},
 	)
 
 	if !hadGalleriesTable {
