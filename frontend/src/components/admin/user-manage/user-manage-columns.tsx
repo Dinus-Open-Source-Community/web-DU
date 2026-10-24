@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/routes'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
 import type { ManagedUserRow } from '@/lib/user-manage/view-models'
-import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 import { userManageLayout } from '@/lib/user-manage/layout'
 
 type BuildColumnsOptions = {
@@ -16,21 +15,6 @@ type BuildColumnsOptions = {
   onChangeRole: (user: ManagedUserRow) => void
   onDelete: (user: ManagedUserRow) => void
   disabled?: boolean
-}
-
-function ProgressCell({ value }: { value: number }) {
-  const progressPercent = toLearningProgressPercent(value)
-  return (
-    <div className="flex min-w-[120px] flex-col gap-1.5">
-      <span className="text-xs font-semibold text-muted-foreground tabular-nums">{formatLearningProgressLabel(value)}</span>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-200"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
-    </div>
-  )
 }
 
 export function buildUserManageColumns({
@@ -70,11 +54,6 @@ export function buildUserManageColumns({
             cell: (row: ManagedUserRow) => (
               <span className="tabular-nums text-foreground">{row.enrolledCourses ?? 0}</span>
             ),
-          },
-          {
-            id: 'progress',
-            header: 'Progres rata-rata',
-            cell: (row: ManagedUserRow) => <ProgressCell value={row.averageProgress ?? 0} />,
           },
           {
             id: 'joined',

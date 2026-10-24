@@ -20,8 +20,6 @@ import type {
 const ENROLLMENT_TONE_MAP: Record<EnrollmentStatus, AdminStatusTone> = {
   active: 'info',
   completed: 'success',
-  pending: 'warning',
-  cancelled: 'danger',
 }
 
 export function UserDetailJoinedCourseCard({ course }: { course: ManagedUserDetailJoinedCourse }) {

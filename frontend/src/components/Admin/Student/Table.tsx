@@ -13,7 +13,10 @@ import type { AdminStudent } from '../../../lib/types/user'
 import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 import { ROUTES } from '@/lib/routes'
 
-function ProgressCell({ value }: { value: number }) {
+function ProgressCell({ value }: { value?: number }) {
+  if (value == null) {
+    return <span className="text-xs text-muted-foreground">-</span>
+  }
   const progressPercent = toLearningProgressPercent(value)
   return (
     <div className="flex flex-col gap-1">

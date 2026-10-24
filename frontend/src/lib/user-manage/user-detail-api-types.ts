@@ -91,10 +91,9 @@ export type ManagedUserDetailApiResponse = {
     average_rating: number
   }
   enrollment_summary: {
-    pending: number
+    total?: number
     active: number
     completed: number
-    cancelled: number
   }
   mentored_courses: ManagedUserDetailApiMentoredCourse[]
 }

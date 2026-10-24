@@ -41,7 +41,10 @@ export function MentorsTable({
     name: student.name,
     email: student.email,
     avatar: student.avatar,
-    detail: `${student.enrolledCourses} kursus • progres rata-rata ${student.averageProgress}%`,
+    detail:
+      (student.enrolledCourses ?? 0) > 0
+        ? `${student.enrolledCourses} kursus • progres rata-rata ${student.averageProgress ?? 0}%`
+        : `Bergabung ${student.joinedAt}`,
     meta: <AdminMetaLabel>Student</AdminMetaLabel>,
   }))
 

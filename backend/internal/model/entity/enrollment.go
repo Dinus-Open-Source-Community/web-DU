@@ -9,10 +9,8 @@ import (
 type EnrollmentStatus string
 
 const (
-	EnrollmentPending   EnrollmentStatus = "pending"
 	EnrollmentActive    EnrollmentStatus = "active"
 	EnrollmentCompleted EnrollmentStatus = "completed"
-	EnrollmentCancelled EnrollmentStatus = "cancelled"
 )
 
 type Enrollment struct {
