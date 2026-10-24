@@ -340,12 +340,19 @@ func buildLessonAssignmentModel(lessonUID uuid.UUID, req dto.LessonAssignmentUps
 		return entity.LessonAssignment{}, errors.New("status must be one of: DRAFT, TERBIT (published), DITUTUP (closed)")
 	}
 
-	if !req.AllowFileSubmission && !req.AllowPlainTextSubmission && !req.AllowRichTextSubmission {
-		return entity.LessonAssignment{}, errors.New("at least one submit option must be enabled")
-	}
+	if taskType == entity.LessonAssignmentTaskTypeText {
+		if !req.AllowFileSubmission && !req.AllowPlainTextSubmission && !req.AllowRichTextSubmission {
+			return entity.LessonAssignment{}, errors.New("at least one submit option must be enabled")
+		}
 
-	if req.RequireFileDescription && !req.AllowFileSubmission {
-		return entity.LessonAssignment{}, errors.New("require_file_description can only be true when allow_file_submission is true")
+		if req.RequireFileDescription && !req.AllowFileSubmission {
+			return entity.LessonAssignment{}, errors.New("require_file_description can only be true when allow_file_submission is true")
+		}
+	} else {
+		req.AllowFileSubmission = false
+		req.AllowPlainTextSubmission = false
+		req.AllowRichTextSubmission = false
+		req.RequireFileDescription = false
 	}
 
 	if req.AllowResubmit {
