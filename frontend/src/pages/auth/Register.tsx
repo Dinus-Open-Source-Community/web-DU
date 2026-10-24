@@ -14,6 +14,7 @@ import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
 import { Message, resolveActionError } from '@/lib/Message'
+import { ROUTES } from '@/lib/routes'
 import { parseRegisterFormValues } from '@/lib/validator/auth'
 import { useAuth } from '@/providers/auth-provider'
 
@@ -41,9 +42,11 @@ export default function RegisterPage() {
         { name, email, password, confirmPassword },
         Message.common.validationFailed,
       )
-      const { redirectPath } = await signUp(payload)
-      navigate(redirectPath)
-      toast.success(Message.auth.registerSuccess)
+      await signUp(payload)
+      toast.success('Pendaftaran berhasil! Silakan periksa email kamu untuk kode OTP verifikasi.')
+      navigate(ROUTES.verifyOtp, {
+        state: { email: payload.email },
+      })
     } catch (err) {
       toast.error(
         resolveActionError(

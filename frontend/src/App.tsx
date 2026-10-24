@@ -24,6 +24,7 @@ import type { UserRole } from "./lib/types/user.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
+const VerifyOtpPage = React.lazy(() => import("./pages/auth/VerifyOtp.tsx"));
 const OAuthCallbackPage = React.lazy(() => import("./pages/auth/Oauth.tsx"));
 const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
 const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
@@ -104,6 +105,7 @@ const LOCKDOWN_ALLOWLIST: ReadonlySet<string> = new Set<string>([
   ROUTES.courseDetail(':courseUid'),
   ROUTES.login,
   ROUTES.register,
+  ROUTES.verifyOtp,
   ROUTES.redeem,
   ROUTES.oauthCallback,
   ROUTES.forgotPassword,
@@ -166,6 +168,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.register,
     element: <RegisterPage />,
+    public: true,
+    lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
+  },
+  {
+    path: ROUTES.verifyOtp,
+    element: <VerifyOtpPage />,
     public: true,
     lazy: true,
     fallback: AUTH_PAGE_FALLBACK,

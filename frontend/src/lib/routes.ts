@@ -60,6 +60,7 @@ export const ROUTES = {
   courseLessons: (courseUid: string) => `/course/${courseUid}/lessons`,
   login: '/auth/login',
   register: '/auth/register',
+  verifyOtp: '/auth/verify-otp',
   redeem: '/redeem',
   oauthCallback: '/auth/oauth/callback',
   forgotPassword: '/auth/forgot-password',

@@ -6,6 +6,7 @@ import (
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -63,6 +64,28 @@ func PostLoginFunc(c *gin.Context) {
 			"message": "Invalid credentials",
 			"data":    nil,
 			"error":   "Authentication failed",
+		})
+		return
+	}
+
+	// Cek apakah email user sudah diverifikasi melalui OTP
+	if !userData.IsVerified {
+		// Otomatis kirim OTP verifikasi ke email user jika akun belum terverifikasi
+		userForMail := userData
+		userForMail.Email = req.Email
+		if err := GenerateAndSendOTP(&userForMail, entity.PurposeVerifyAccount); err != nil {
+			log.Printf("[login] Info/Warning saat kirim OTP ke %s: %v", req.Email, err)
+		}
+
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Email kamu belum diverifikasi. Kode verifikasi OTP telah dikirimkan ke email kamu.",
+			"data": gin.H{
+				"email":                 req.Email,
+				"is_verified":           false,
+				"requires_verification": true,
+			},
+			"error": "Email not verified",
 		})
 		return
 	}

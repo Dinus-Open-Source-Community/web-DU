@@ -32,8 +32,8 @@ func ConnectDB() {
 	// Fungsi pembantu untuk membuka koneksi ke database dengan error handling otomatis
 	openOrFatal := func(dsn string) *gorm.DB {
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk Development
-			// Logger: logger.Default.LogMode(logger.Silent), // Gunakan untuk production agar log tidak bising
+			// Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk Development
+			Logger: logger.Default.LogMode(logger.Silent), // Gunakan untuk production agar log tidak bising
 		})
 		if err != nil {
 			log.Fatal("[Error] Gagal terhubung ke database:", err)
@@ -72,6 +72,7 @@ func ConnectDB() {
 		&entity.LessonReading{},
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},
+		&entity.OTP{},
 	)
 
 	if !hadGalleriesTable {

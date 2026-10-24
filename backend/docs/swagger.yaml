@@ -1,5 +1,21 @@
 basePath: /
 definitions:
+  dto.AddCourseParticipantsRequest:
+    properties:
+      student_uids:
+        example:
+        - '["f47ac10b"'
+        - '"550e8400-e29b-41d4-a716-446655440000"]'
+        items:
+          type: string
+        type: array
+      user_uids:
+        example:
+        - '["f47ac10b"]'
+        items:
+          type: string
+        type: array
+    type: object
   dto.AssignMentorsToCourseRequest:
     properties:
       mentor_uids:
@@ -113,6 +129,30 @@ definitions:
     - course_uid
     - order_index
     - title
+    type: object
+  dto.GenerateRedeemCodeRequest:
+    properties:
+      code:
+        example: CUSTOM-CODE-2026
+        type: string
+      course_uid:
+        example: e61b7f94-9128-4444-a4f6-7b830d12e431
+        type: string
+      expires_at:
+        type: string
+      is_active:
+        type: boolean
+      max_uses:
+        example: 1
+        type: integer
+      prefix:
+        example: REACT
+        type: string
+      target_email:
+        example: buyer@external.com
+        type: string
+    required:
+    - course_uid
     type: object
   dto.LessonAssignmentSubmissionGradeRequest:
     properties:
@@ -257,6 +297,16 @@ definitions:
     required:
     - email
     - password
+    type: object
+  dto.RedeemCodeRequest:
+    properties:
+      code:
+        example: KURSUS-REACT-2026
+        maxLength: 64
+        minLength: 4
+        type: string
+    required:
+    - code
     type: object
   dto.RegisterRequest:
     properties:
@@ -489,6 +539,110 @@ paths:
       security:
       - BearerAuth: []
       summary: Reply to a Q&A thread (Admin)
+      tags:
+      - Admin
+  /admin/redeem-codes:
+    get:
+      description: Retrieve a paginated list of generated redeem codes with optional
+        filters for course and active status.
+      parameters:
+      - description: Filter by course UID
+        in: query
+        name: course_uid
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of redeem codes retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Mentors/Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List redeem codes (Admin / Mentor)
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Create or auto-generate a new course redeem code with custom usage
+        limits, expiration date, and optional target user or email restrictions.
+      parameters:
+      - description: Generate redeem code request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GenerateRedeemCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Redeem code successfully created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input or parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Mentors/Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or target user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Redeem code already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate redeem code (Admin / Mentor)
       tags:
       - Admin
   /admin/reviews:
@@ -1469,6 +1623,50 @@ paths:
       summary: List assignments in a course (Admin/Mentor)
       tags:
       - Course
+  /courses/{id}/candidate-students:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil daftar user dengan role student yang belum terdaftar
+        di kursus ini, lengkap dengan data progres dan kursus yang diikuti. (Super
+        Admin, Admin, dan Mentor penanggung jawab).
+      parameters:
+      - description: Course UID or prefix
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Candidate students retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin, Admin, or assigned mentor only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get candidate students for a course
+      tags:
+      - Courses
   /courses/{id}/join:
     post:
       consumes:
@@ -1679,6 +1877,60 @@ paths:
       summary: Unassign mentors from course (Super Admin / Admin)
       tags:
       - Course
+  /courses/{id}/participants:
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan satu atau beberapa siswa ke dalam kursus (Enrollment
+        active).
+      parameters:
+      - description: Course UID or prefix
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: List of student UIDs to enroll
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddCourseParticipantsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Participants added successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request or quota exceeded
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin, Admin, or assigned mentor only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add participants to a course
+      tags:
+      - Courses
   /courses/{id}/progress:
     get:
       consumes:
@@ -4004,8 +4256,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a new user with name, email, and password. Returns JWT
-        token on success.
+      description: Register a new user with name, email, and password. Requires OTP
+        verification before login.
       parameters:
       - description: Register payload
         in: body
@@ -4017,7 +4269,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: User registered successfully
+          description: User registered successfully, OTP sent
           schema:
             additionalProperties: true
             type: object
@@ -4048,10 +4300,14 @@ paths:
         in: query
         name: page
         type: integer
-      - description: 'Items per page (default: 20, max: 100)'
+      - description: 'Items per page (default: 10, max: 100)'
         in: query
         name: per_page
         type: integer
+      - description: Filter by course UID
+        in: query
+        name: course_uid
+        type: string
       produces:
       - application/json
       responses:
@@ -4078,6 +4334,59 @@ paths:
       security:
       - BearerAuth: []
       summary: List my assignments (Student)
+      tags:
+      - Student
+  /students/redeem:
+    post:
+      consumes:
+      - application/json
+      description: Redeem a voucher/token code to enroll into a course. Enforces strict
+        validations (active status, expiration, max usage, target user restrictions,
+        and duplicate enrollment checks).
+      parameters:
+      - description: Redeem code request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RedeemCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course code successfully redeemed
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request, expired code, max usage exceeded, or already
+            enrolled
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Not targeted for this user or students only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Redeem code or course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Redeem course code (Student)
       tags:
       - Student
   /user/{id}:
