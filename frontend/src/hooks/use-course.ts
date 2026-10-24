@@ -11,10 +11,12 @@ import {
   collectCourseListImageReferences,
   collectCourseMentorsImageReferences,
   collectCourseStudentsImageReferences,
+  collectManagedUsersListImageReferences,
 } from '@/lib/files'
 import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
 import {
   fetchCourseByUid,
+  fetchCourseCandidateStudents,
   fetchCourseCategories,
   fetchCourseCategoryByUid,
   fetchCourses,
@@ -137,6 +139,40 @@ export function useCourseStudents(courseUid: string, params?: IQueryParamsPayloa
   const data = useMemo(() => {
     if (!query.data) return undefined
     return applyResolvedImagesToCourseStudents(query.data, fileMap.getDisplayUrl)
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseCandidateStudents(courseUid: string, options: { enabled?: boolean } = {}) {
+  const query = useQuery({
+    queryKey: courseKeys.candidateStudents(courseUid),
+    enabled: !!courseUid && (options.enabled ?? true),
+    queryFn: () => fetchCourseCandidateStudents(courseUid),
+  })
+
+  const imageReferences = useMemo(
+    () => collectManagedUsersListImageReferences(query.data?.users),
+    [query.data?.users],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return {
+      ...query.data,
+      users: query.data.users.map((user) => ({
+        ...user,
+        avatar_url: (user.avatar_url ? fileMap.getDisplayUrl(user.avatar_url) : undefined) || user.avatar_url,
+      })),
+    }
   }, [fileMap.getDisplayUrl, query.data])
 
   return {
