@@ -14,7 +14,7 @@ import type { StudentAssignmentFeedCategory, StudentAssignmentSectionItem } from
 
 export type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
 
-const DEFAULT_ITEMS_PER_PAGE = 6
+const DEFAULT_ITEMS_PER_PAGE = 10
 
 type UseStudentAssignmentListViewOptions = {
   items: StudentAssignmentSectionItem[]
@@ -36,6 +36,7 @@ export function useStudentAssignmentListView({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(itemsPerPage)
 
   const rows = useMemo(() => toStudentAssignmentRows(items, now), [items, now])
   const scopedRows = useMemo(
@@ -52,8 +53,8 @@ export function useStudentAssignmentListView({
     [filteredRows, searchQuery],
   )
   const { paginated, totalPages, safePage } = useMemo(
-    () => paginateStudentAssignmentRows(searchFilteredRows, currentPage, itemsPerPage),
-    [searchFilteredRows, currentPage, itemsPerPage],
+    () => paginateStudentAssignmentRows(searchFilteredRows, currentPage, pageSize),
+    [searchFilteredRows, currentPage, pageSize],
   )
 
   const onCategoryChange = useCallback((nextCategory: StudentAssignmentFeedCategory) => {
@@ -74,6 +75,11 @@ export function useStudentAssignmentListView({
     setCurrentPage(page)
   }, [])
 
+  const onPageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize)
+    setCurrentPage(1)
+  }, [])
+
   return {
     now,
     courseUidFilter,
@@ -90,6 +96,9 @@ export function useStudentAssignmentListView({
     hasVisibleRows: searchFilteredRows.length > 0,
     currentPage: safePage,
     totalPages,
+    total: searchFilteredRows.length,
+    pageSize,
     onPageChange,
+    onPageSizeChange,
   }
 }

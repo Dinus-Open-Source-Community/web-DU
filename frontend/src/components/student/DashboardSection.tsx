@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ChartCard } from '@/components/shared/ChartCard'
@@ -6,11 +7,17 @@ import FeedbackCard from '@/components/shared/Feedback'
 import { PageHeader } from '@/components/shared/Header'
 import { Button } from '@/components/ui/button'
 import { StudentKpiGrid } from '@/components/student/dashboard/StudentKpiGrid'
-import { isLearningProgressInProgress } from '@/lib/learning/progress'
+import { PublicLottieIllustration } from '@/components/playful/PublicLottieIllustration'
+import { appToolbarPrimaryButtonClassName } from '@/lib/design/app-shell-tokens'
+import {
+  isLearningProgressInProgress,
+  toLearningProgressPercent,
+} from '@/lib/learning/progress'
 import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
 import { gridCardsClassName, gridMainSidebarClassName } from '@/lib/layout/page-layout'
 import { ROUTES } from '@/lib/routes'
 import type { IUserData } from '@/lib/types/user'
+import { cn } from '@/lib/utils'
 
 const feedbackDateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',
@@ -23,9 +30,18 @@ type DashboardSectionProps = {
 }
 
 const DashboardSection = ({ Data }: DashboardSectionProps) => {
-  const resumeCourses = (Data?.joined_courses ?? []).filter((course) =>
-    isLearningProgressInProgress(course.progress),
-  )
+  const resumeCourses = useMemo(() => {
+    return (Data?.joined_courses ?? [])
+      .filter((course) => isLearningProgressInProgress(course.progress))
+      .sort((a, b) => {
+        const diff =
+          toLearningProgressPercent(a.progress) -
+          toLearningProgressPercent(b.progress)
+        if (diff !== 0) return diff
+        return (a.title ?? '').localeCompare(b.title ?? '')
+      })
+      .slice(0, 3)
+  }, [Data?.joined_courses])
   const recentFeedback = Data.course_reviews.slice(0, 3).map((review) => ({
     status: (review.rating >= 4 ? 'Lulus' : 'Perlu Revisi') as 'Lulus' | 'Perlu Revisi',
     time: feedbackDateFormatter.format(new Date(review.created_at)),
@@ -47,7 +63,7 @@ const DashboardSection = ({ Data }: DashboardSectionProps) => {
 
       <StudentKpiGrid summary={Data.enrollment_summary} />
 
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-4 rounded-xl border-2 border-ink-900/10 bg-paper-white p-5 sm:p-6 shadow-paper">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-0.5">
             <h2 className="text-lg font-bold tracking-tight text-ink-900 sm:text-xl">
@@ -59,9 +75,9 @@ const DashboardSection = ({ Data }: DashboardSectionProps) => {
           </div>
           <Button
             asChild
-            variant="outline"
-            size="sm"
-            className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-paper-white px-3.5 text-xs font-semibold text-ink-900 shadow-none hover:border-ink-900/30 hover:bg-paper-paper active:scale-[0.98] transition-all"
+            variant="default"
+            size="default"
+            className={cn(appToolbarPrimaryButtonClassName, 'shrink-0 self-start')}
           >
             <Link to={ROUTES.student.learning}>Semua kursus</Link>
           </Button>
@@ -74,23 +90,39 @@ const DashboardSection = ({ Data }: DashboardSectionProps) => {
             ))}
           </div>
         ) : (
-          <div className={studentDashboardLayout.emptyBlock}>
-            Belum ada kursus untuk dilanjutkan.
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <PublicLottieIllustration
+              src="/lotties/nothing.json"
+              height="180px"
+              maxWidthClassName="max-w-[12rem] sm:max-w-[14rem]"
+              className="mb-2"
+            />
+            <p className="text-sm font-medium text-ink-500">
+              Belum ada kursus untuk dilanjutkan.
+            </p>
           </div>
         )}
       </section>
 
       <div className={gridMainSidebarClassName}>
         <ChartCard title="Tenggat Waktu" subtitle="Deadline tugas dan pengumpulan mendatang">
-          <div className={studentDashboardLayout.emptyBlock}>
-            Tidak ada tenggat waktu saat ini.
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <PublicLottieIllustration
+              src="/lotties/calm-duedate-task.json"
+              height="160px"
+              maxWidthClassName="max-w-[11rem] sm:max-w-[13rem]"
+              className="mb-2"
+            />
+            <p className="text-sm font-medium text-ink-500">
+              Tidak ada tenggat waktu saat ini.
+            </p>
           </div>
         </ChartCard>
 
         <ChartCard title="Umpan Balik" subtitle="Ulasan kursus dan catatan terbaru">
-          <div className="space-y-3">
-            {recentFeedback.length > 0 ? (
-              recentFeedback.map((fb, i) => (
+          {recentFeedback.length > 0 ? (
+            <div className="space-y-3">
+              {recentFeedback.map((fb, i) => (
                 <FeedbackCard
                   key={i}
                   status={fb.status}
@@ -99,13 +131,21 @@ const DashboardSection = ({ Data }: DashboardSectionProps) => {
                   comment={fb.comment}
                   instructor={fb.instructor}
                 />
-              ))
-            ) : (
-              <div className={studentDashboardLayout.emptyBlock}>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <PublicLottieIllustration
+                src="/lotties/review.json"
+                height="160px"
+                maxWidthClassName="max-w-[11rem] sm:max-w-[13rem]"
+                className="mb-2"
+              />
+              <p className="text-sm font-medium text-ink-500">
                 Belum ada umpan balik terbaru.
-              </div>
-            )}
-          </div>
+              </p>
+            </div>
+          )}
         </ChartCard>
       </div>
     </>

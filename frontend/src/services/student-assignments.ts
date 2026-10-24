@@ -26,8 +26,11 @@ export async function fetchStudentMyAssignments(
 }
 
 /** Ambil seluruh halaman tugas student (BE max `per_page` = 100). */
-export async function fetchAllStudentMyAssignments(): Promise<IStudentMyAssignmentsResponse> {
+export async function fetchAllStudentMyAssignments(
+  params?: IQueryParamsPayload,
+): Promise<IStudentMyAssignmentsResponse> {
   const firstPage = await fetchStudentMyAssignments({
+    ...params,
     page: 1,
     per_page: STUDENT_ASSIGNMENTS_MAX_PER_PAGE,
   })
@@ -40,6 +43,7 @@ export async function fetchAllStudentMyAssignments(): Promise<IStudentMyAssignme
   for (let page = 2; page <= totalPages; page += 1) {
     try {
       const nextPage = await fetchStudentMyAssignments({
+        ...params,
         page,
         per_page: STUDENT_ASSIGNMENTS_MAX_PER_PAGE,
       })

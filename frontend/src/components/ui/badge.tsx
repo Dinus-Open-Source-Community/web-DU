@@ -87,12 +87,7 @@ function courseParticipantStatusVariant(status?: string): Extract<AppBadgeVarian
     normalized === 'not_started' ||
     normalized === 'not started' ||
     normalized === 'registered' ||
-    normalized === 'terdaftar' ||
-    normalized === 'pending' ||
-    normalized === 'menunggu' ||
-    normalized === 'cancelled' ||
-    normalized === 'canceled' ||
-    normalized === 'dibatalkan'
+    normalized === 'terdaftar'
   ) {
     return 'courseParticipantNotStarted'
   }

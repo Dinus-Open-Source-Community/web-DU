@@ -41,12 +41,12 @@ const CardMentor = ({
       )}
     >
       {/* 1. Course Image Frame */}
-      <CourseCardCoverFrame className="relative h-36 sm:h-40 w-full shrink-0 overflow-hidden rounded-none border-b border-line-light aspect-auto">
+      <CourseCardCoverFrame className="relative h-36 sm:h-40 w-full shrink-0 overflow-hidden rounded-t-xl rounded-b-none border-b border-line-light aspect-auto">
         <CourseCardCover
           src={image}
           alt={data.title}
           fill
-          imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+          imgClassName="rounded-t-xl rounded-b-none transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </CourseCardCoverFrame>
 
@@ -100,11 +100,12 @@ const CardMentor = ({
               {detailHref && (
                 <Button
                   asChild
-                  variant="outline"
                   size="sm"
-                  className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-paper-white px-3 text-xs font-semibold text-ink-900 shadow-none hover:border-ink-900/30 hover:bg-paper-paper active:scale-[0.98] transition-all"
+                  className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-primary px-3.5 text-xs font-semibold !text-white shadow-none hover:bg-brand-hover active:scale-[0.98] transition-all"
                 >
-                  <Link to={detailHref}>Kelola Kursus</Link>
+                  <Link to={detailHref} className="!text-white font-semibold">
+                    Kelola Kursus
+                  </Link>
                 </Button>
               )}
               {onStatusClick && (
