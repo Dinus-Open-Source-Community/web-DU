@@ -241,7 +241,7 @@ func GetAllLessonsFunc(c *gin.Context) {
 				Joins("JOIN enrollments e ON e.course_uid = m.course_uid").
 				Where("e.user_uid = ? AND e.status IN ?",
 					userData.Uid,
-					[]entity.EnrollmentStatus{entity.EnrollmentPending, entity.EnrollmentActive, entity.EnrollmentCompleted},
+					[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
 				),
 		)
 	}

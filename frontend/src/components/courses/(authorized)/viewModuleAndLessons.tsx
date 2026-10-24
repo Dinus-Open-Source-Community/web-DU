@@ -27,6 +27,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     isLessonLoading,
     isAssignmentLoading,
     readLessonIds,
+    submittedAssignmentIds,
     progressPercent,
     effectiveExpandedModules,
     isRightSidebarOpen,
@@ -78,7 +79,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
 
       <div
         className={cn(
-          'transition-[margin-left] duration-200 ease-out',
+          'transition-[margin-left] duration-300 ease-in-out',
           isContentShifted && 'lg:ml-[348px]',
         )}>
         {showLessonContent ? (
@@ -157,6 +158,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         activePane={viewerPane}
         assignmentByLessonUid={assignmentByLessonUid}
         readLessonIds={readLessonIds}
+        submittedAssignmentIds={submittedAssignmentIds}
         progressPercent={progressPercent}
         expandedModules={effectiveExpandedModules}
         isOpen={isRightSidebarOpen}

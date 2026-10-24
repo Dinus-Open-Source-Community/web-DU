@@ -62,7 +62,7 @@ func canReadCourseByRole(user entity.User, courseUID uuid.UUID) (bool, error) {
 }
 
 // canSubmitLessonAssignmentAsEnrolledParticipant is true only when the user has an enrollment on the course
-// (pending, active, or completed). Mentors and admins are not allowed to submit via this check unless they
+// (active or completed). Mentors and admins are not allowed to submit via this check unless they
 // are also enrolled as course participants.
 func canSubmitLessonAssignmentAsEnrolledParticipant(userUID, courseUID uuid.UUID) (bool, error) {
 	var enrollmentCount int64
@@ -70,7 +70,7 @@ func canSubmitLessonAssignmentAsEnrolledParticipant(userUID, courseUID uuid.UUID
 		Where("user_uid = ? AND course_uid = ? AND status IN ?",
 			userUID,
 			courseUID,
-			[]entity.EnrollmentStatus{entity.EnrollmentPending, entity.EnrollmentActive, entity.EnrollmentCompleted},
+			[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
 		).
 		Count(&enrollmentCount).Error
 	if err != nil {

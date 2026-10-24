@@ -43,6 +43,7 @@ export type CourseModuleViewerViewModel = {
   isLessonLoading: boolean
   isAssignmentLoading: boolean
   readLessonIds: ReadonlySet<string>
+  submittedAssignmentIds: ReadonlySet<string>
   completedLessonsCount: number
   progressPercent: number
   effectiveExpandedModules: Set<string>
