@@ -35,6 +35,7 @@ import { isAssignmentVisibleToStudent } from '@/lib/lesson-assignment/submission
 import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/submission-draft'
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
 import { useAppTheme } from '@/providers/theme-provider'
+import { useStudentMyAssignments } from '@/hooks/student-assignments/use-student-my-assignments'
 
 export type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 export type {
@@ -76,6 +77,10 @@ export function useCourseModuleViewer({
 
   const trackLessonReading = variant === 'student'
   const isStudent = variant === 'student'
+  const studentAssignmentsQuery = useStudentMyAssignments(
+    { course_uid: courseUid },
+    { fetchAll: true, enabled: isStudent && Boolean(courseUid) },
+  )
   const courseTitle = mentorCourse?.title ?? repoCourse?.title ?? ''
   const modulesState = useMemo(() => storedModules ?? [], [storedModules])
   const lessonEntries = useMemo(() => flattenLessons(modulesState), [modulesState])
@@ -256,8 +261,12 @@ export function useCourseModuleViewer({
     }
   }, [initialLessonUid, initialViewerPane, lessonEntries])
 
+  const lastMarkedLessonIdRef = useRef<string | null>(null)
+
   useEffect(() => {
     if (!trackLessonReading || !effectiveActiveLessonId) return
+    if (lastMarkedLessonIdRef.current === effectiveActiveLessonId) return
+    lastMarkedLessonIdRef.current = effectiveActiveLessonId
     void markLessonIfUnread(effectiveActiveLessonId)
   }, [effectiveActiveLessonId, markLessonIfUnread, trackLessonReading])
 
@@ -428,6 +437,32 @@ export function useCourseModuleViewer({
 
   const isAssignmentReadOnly = !isStudent
 
+  const submittedAssignmentIds = useMemo(() => {
+    const ids = new Set<string>()
+
+    // 1. From student assignments query (live list)
+    const assignmentItems = studentAssignmentsQuery.data?.assignments ?? []
+    for (const item of assignmentItems) {
+      if (item.latest_submission) {
+        if (item.assignment?.uid) ids.add(item.assignment.uid)
+        if (item.assignment?.lesson_uid) ids.add(item.assignment.lesson_uid)
+      }
+    }
+
+    // 2. From active assignmentState submission
+    if (assignmentState.submission) {
+      if (assignmentState.assignment?.uid) ids.add(assignmentState.assignment.uid)
+      if (assignmentLesson?.uid) ids.add(assignmentLesson.uid)
+    }
+
+    return ids
+  }, [
+    studentAssignmentsQuery.data?.assignments,
+    assignmentState.submission,
+    assignmentState.assignment?.uid,
+    assignmentLesson?.uid,
+  ])
+
   return {
     courseUid,
     variant,
@@ -444,6 +479,7 @@ export function useCourseModuleViewer({
       : lessonDetailQuery.isLoading && !lessonDetailQuery.data,
     isAssignmentLoading,
     readLessonIds,
+    submittedAssignmentIds,
     completedLessonsCount,
     progressPercent,
     effectiveExpandedModules,

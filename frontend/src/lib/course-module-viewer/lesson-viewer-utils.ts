@@ -2,6 +2,7 @@ import { FileText, Film } from 'lucide-react'
 
 import type { AppTheme } from '@/lib/theme/app-theme'
 import type { IModulesDetail, LessonDeliveryType, LessonDetailItem } from '@/lib/types/course'
+import type { LessonDetailAssignment } from '@/lib/types/lesson'
 
 /** Sama dengan tema app (Settings → Tema). */
 export type LessonThemeMode = AppTheme
@@ -65,17 +66,48 @@ export function flattenLessons(modules: IModulesDetail[]): LessonEntry[] {
   )
 }
 
-export function moduleProgress(mod: IModulesDetail, readLessonIds: ReadonlySet<string>) {
+export function moduleProgress(
+  mod: IModulesDetail,
+  readLessonIds: ReadonlySet<string>,
+  assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>,
+  submittedAssignmentIds?: ReadonlySet<string>,
+) {
   const lessons = moduleLessons(mod)
-  const completedCount = lessons.filter((lesson) => readLessonIds.has(lesson.uid)).length
+  let totalCount = lessons.length
+  let completedCount = lessons.filter((lesson) => readLessonIds.has(lesson.uid)).length
+
+  if (assignmentByLessonUid) {
+    for (const lesson of lessons) {
+      const assignment = assignmentByLessonUid.get(lesson.uid)
+      if (assignment) {
+        totalCount += 1
+        if (
+          submittedAssignmentIds?.has(assignment.uid) ||
+          submittedAssignmentIds?.has(lesson.uid)
+        ) {
+          completedCount += 1
+        }
+      }
+    }
+  }
 
   return {
     completedCount,
-    totalCount: lessons.length,
+    totalCount,
   }
 }
 
-export function isModuleComplete(mod: IModulesDetail, readLessonIds: ReadonlySet<string>) {
-  const { completedCount, totalCount } = moduleProgress(mod, readLessonIds)
+export function isModuleComplete(
+  mod: IModulesDetail,
+  readLessonIds: ReadonlySet<string>,
+  assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>,
+  submittedAssignmentIds?: ReadonlySet<string>,
+) {
+  const { completedCount, totalCount } = moduleProgress(
+    mod,
+    readLessonIds,
+    assignmentByLessonUid,
+    submittedAssignmentIds,
+  )
   return totalCount > 0 && completedCount === totalCount
 }

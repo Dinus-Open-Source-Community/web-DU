@@ -24,6 +24,7 @@ import type { UserRole } from "./lib/types/user.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
+const VerifyOtpPage = React.lazy(() => import("./pages/auth/VerifyOtp.tsx"));
 const OAuthCallbackPage = React.lazy(() => import("./pages/auth/Oauth.tsx"));
 const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
 const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
@@ -74,8 +75,10 @@ const StudentLearningCourse = React.lazy(
 const StudentAssignments = React.lazy(
   () => import("./pages/student/Assignments.tsx"),
 );
+const StudentRedeem = React.lazy(
+  () => import("./pages/student/Redeem.tsx"),
+);
 const ProfilePage = React.lazy(() => import("./pages/profile/Profile.tsx"));
-const RedeemPage = React.lazy(() => import("./pages/redeem/Redeem.tsx"));
 
 type RouteConfig = {
   path: string;
@@ -104,6 +107,7 @@ const LOCKDOWN_ALLOWLIST: ReadonlySet<string> = new Set<string>([
   ROUTES.courseDetail(':courseUid'),
   ROUTES.login,
   ROUTES.register,
+  ROUTES.verifyOtp,
   ROUTES.redeem,
   ROUTES.oauthCallback,
   ROUTES.forgotPassword,
@@ -171,6 +175,13 @@ const routeConfig: RouteConfig[] = [
     fallback: AUTH_PAGE_FALLBACK,
   },
   {
+    path: ROUTES.verifyOtp,
+    element: <VerifyOtpPage />,
+    public: true,
+    lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
+  },
+  {
     path: ROUTES.oauthCallback,
     element: <OAuthCallbackPage />,
     public: true,
@@ -193,9 +204,10 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.redeem,
-    element: <RedeemPage />,
-    public: true,
-    lazy: true,
+    element: <Navigate to={ROUTES.student.redeem} replace />,
+    public: false,
+    lazy: false,
+    roles: ["student"],
   },
   {
     path: ROUTES.profile,
@@ -344,6 +356,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.student.assignments,
     element: <StudentAssignments />,
+    public: false,
+    lazy: true,
+    roles: ["student"],
+  },
+  {
+    path: ROUTES.student.redeem,
+    element: <StudentRedeem />,
     public: false,
     lazy: true,
     roles: ["student"],

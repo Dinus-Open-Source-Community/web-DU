@@ -6,6 +6,7 @@ import { courseKeys } from './query-keys'
 import type { AssignMentorsToCoursePayload } from '@/lib/course-mentor/types'
 import type { CreateCourseReviewReplyPayload } from '@/lib/course-review/types'
 import {
+  addCourseParticipants,
   assignMentorsToCourse,
   unassignMentorsFromCourse,
   createCourse,
@@ -13,6 +14,7 @@ import {
   replyToCourseReview,
   updateCourse,
   updateCourseStatus,
+  type AddCourseParticipantsPayload,
   type CreateCoursePayload,
   type UpdateCoursePayload,
   type UpdateCourseStatusRequest,
@@ -150,3 +152,28 @@ export function useUnassignMentorsFromCourse() {
     },
   })
 }
+
+export function useAddCourseParticipants() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      courseUid,
+      payload,
+    }: {
+      courseUid: string
+      payload: AddCourseParticipantsPayload
+    }) => addCourseParticipants(courseUid, payload),
+    onSuccess: (data, { courseUid }) => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.all })
+      void queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+      void queryClient.invalidateQueries({ queryKey: ['course-students', courseUid] })
+      void queryClient.invalidateQueries({ queryKey: courseKeys.candidateStudents(courseUid) })
+      toast.success(data?.added_count ? `Berhasil menambahkan ${data.added_count} peserta ke kursus` : 'Peserta berhasil ditambahkan ke kursus')
+    },
+    onError: (error: Error) => {
+      toast.error(resolveActionError(error, 'Gagal menambahkan peserta ke kursus'))
+    },
+  })
+}
+

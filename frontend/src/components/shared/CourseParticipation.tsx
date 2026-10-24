@@ -11,18 +11,27 @@ import { cn } from '@/lib/utils'
 import { CourseParticipantStatusBadge } from '../ui/badge'
 import { CourseDetailTabSectionIntro } from './course-detail-manage/CourseDetailTabSectionIntro'
 import { useCourseStudents } from '@/hooks/use-course'
+import { AddCourseParticipantDialog } from './AddCourseParticipantDialog'
+import { useAuth } from '@/providers/auth-provider'
 
 type CourseParticipantsSectionProps = {
   courseUid: string
   studentsData?: IMentorCourseStudent[]
   adminStatusLabels?: boolean
+  canManageParticipants?: boolean
 }
 
 export function CourseParticipantsSection({
   courseUid,
   studentsData,
   adminStatusLabels = false,
+  canManageParticipants = true,
 }: CourseParticipantsSectionProps) {
+  const { role } = useAuth()
+  const isAuthorizedRole =
+    role === 'super_admin' || role === 'admin' || role === 'mentor'
+  const isManageAllowed = Boolean(canManageParticipants && isAuthorizedRole)
+
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
@@ -55,8 +64,13 @@ export function CourseParticipantsSection({
       <CourseDetailTabSectionIntro
         className="mb-4"
         icon={Users}
-        title="Peserta kursus"
+        title="Peserta Kursus"
         description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
+        aside={
+          isManageAllowed ? (
+            <AddCourseParticipantDialog courseUid={courseUid} />
+          ) : null
+        }
       />
 
       {isLoading && !studentsResponse ? (

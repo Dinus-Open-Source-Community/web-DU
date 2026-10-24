@@ -3,6 +3,7 @@ package service
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"backend/internal/database"
 	"backend/internal/model/entity"
@@ -229,14 +230,60 @@ func GetCourseAssignmentsFunc(c *gin.Context) {
 }
 
 type studentAssignmentRow struct {
-	courseAssignmentListRow
-	SubmissionUID      *uuid.UUID `gorm:"column:submission_uid"`
-	AttemptCount       *int       `gorm:"column:attempt_count"`
-	ScorePercent       *float64   `gorm:"column:score_percent"`
-	Passed             *bool      `gorm:"column:passed"`
-	IsAutoGraded       *bool      `gorm:"column:is_auto_graded"`
-	SubmittedAt        *string    `gorm:"column:submitted_at"`
-	GradedAt           *string    `gorm:"column:graded_at"`
+	AssignmentUID       uuid.UUID  `gorm:"column:assignment_uid"`
+	AssignmentTitle     string     `gorm:"column:assignment_title"`
+	TaskType            string     `gorm:"column:task_type"`
+	AssignmentStatus    string     `gorm:"column:assignment_status"`
+	DeadlineAt          string     `gorm:"column:deadline_at"`
+	AllowFileSubmission bool       `gorm:"column:allow_file_submission"`
+	AllowPlainText      bool       `gorm:"column:allow_plain_text_submission"`
+	AllowRichText       bool       `gorm:"column:allow_rich_text_submission"`
+	RequireFileDesc     bool       `gorm:"column:require_file_description"`
+	AutoCloseAfter      bool       `gorm:"column:auto_close_after_deadline"`
+	AllowResubmit       bool       `gorm:"column:allow_resubmit"`
+	MaxResubmitCount    *int       `gorm:"column:max_resubmit_count"`
+	LessonUID           uuid.UUID  `gorm:"column:lesson_uid"`
+	LessonTitle         string     `gorm:"column:lesson_title"`
+	LessonOrderIndex    int        `gorm:"column:lesson_order_index"`
+	ModuleUID           uuid.UUID  `gorm:"column:module_uid"`
+	ModuleTitle         string     `gorm:"column:module_title"`
+	ModuleOrderIndex    int        `gorm:"column:module_order_index"`
+	CourseUID           uuid.UUID  `gorm:"column:course_uid"`
+	CourseTitle         string     `gorm:"column:course_title"`
+	SubmissionCount     int64      `gorm:"column:submission_count"`
+	SubmissionUID       *uuid.UUID `gorm:"column:submission_uid"`
+	AttemptCount        *int       `gorm:"column:attempt_count"`
+	ScorePercent        *float64   `gorm:"column:score_percent"`
+	Passed              *bool      `gorm:"column:passed"`
+	IsAutoGraded        *bool      `gorm:"column:is_auto_graded"`
+	SubmittedAt         *string    `gorm:"column:submitted_at"`
+	GradedAt            *string    `gorm:"column:graded_at"`
+}
+
+func (r studentAssignmentRow) toCourseAssignmentListRow() courseAssignmentListRow {
+	return courseAssignmentListRow{
+		AssignmentUID:       r.AssignmentUID,
+		AssignmentTitle:     r.AssignmentTitle,
+		TaskType:            r.TaskType,
+		AssignmentStatus:    r.AssignmentStatus,
+		DeadlineAt:          r.DeadlineAt,
+		AllowFileSubmission: r.AllowFileSubmission,
+		AllowPlainText:      r.AllowPlainText,
+		AllowRichText:       r.AllowRichText,
+		RequireFileDesc:     r.RequireFileDesc,
+		AutoCloseAfter:      r.AutoCloseAfter,
+		AllowResubmit:       r.AllowResubmit,
+		MaxResubmitCount:    r.MaxResubmitCount,
+		LessonUID:           r.LessonUID,
+		LessonTitle:         r.LessonTitle,
+		LessonOrderIndex:    r.LessonOrderIndex,
+		ModuleUID:           r.ModuleUID,
+		ModuleTitle:         r.ModuleTitle,
+		ModuleOrderIndex:    r.ModuleOrderIndex,
+		CourseUID:           r.CourseUID,
+		CourseTitle:         r.CourseTitle,
+		SubmissionCount:     r.SubmissionCount,
+	}
 }
 
 // @Summary      List my assignments (Student)
@@ -244,8 +291,9 @@ type studentAssignmentRow struct {
 // @Tags         Student
 // @Produce      json
 // @Security     BearerAuth
-// @Param        page      query  int     false  "Page number (default: 1)"
-// @Param        per_page  query  int     false  "Items per page (default: 20, max: 100)"
+// @Param        page       query  int     false  "Page number (default: 1)"
+// @Param        per_page   query  int     false  "Items per page (default: 10, max: 100)"
+// @Param        course_uid query  string  false  "Filter by course UID"
 // @Success      200  {object}  map[string]any  "Student assignments retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Students only"
@@ -268,19 +316,27 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "20"))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
 	if page < 1 {
 		page = 1
 	}
 	if perPage < 1 {
-		perPage = 20
+		perPage = 10
 	}
 	if perPage > 100 {
 		perPage = 100
 	}
 
+	var resolvedCourseUID *uuid.UUID
+	if courseUIDStr := strings.TrimSpace(c.Query("course_uid")); courseUIDStr != "" {
+		uid, ok := resolveUIDValue(c, "courses", courseUIDStr, "course")
+		if !ok {
+			return
+		}
+		resolvedCourseUID = &uid
+	}
+
 	enrolledStatuses := []entity.EnrollmentStatus{
-		entity.EnrollmentPending,
 		entity.EnrollmentActive,
 		entity.EnrollmentCompleted,
 	}
@@ -291,6 +347,10 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 		Joins("JOIN enrollments e ON e.course_uid = m.course_uid AND e.user_uid = ?", user.Uid).
 		Where("e.status IN ?", enrolledStatuses).
 		Where("la.status = ?", entity.LessonAssignmentStatusTerbit)
+
+	if resolvedCourseUID != nil {
+		countDB = countDB.Where("m.course_uid = ?", *resolvedCourseUID)
+	}
 
 	var total int64
 	if err := countDB.Count(&total).Error; err != nil {
@@ -304,8 +364,8 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 	}
 
 	offset := (page - 1) * perPage
-	var rows []studentAssignmentRow
-	if err := database.DB.Table("lesson_assignments AS la").
+
+	queryDB := database.DB.Table("lesson_assignments AS la").
 		Select(`
 			la.uid AS assignment_uid,
 			la.title AS assignment_title,
@@ -341,7 +401,14 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 		Joins("JOIN enrollments e ON e.course_uid = m.course_uid AND e.user_uid = ?", user.Uid).
 		Joins("LEFT JOIN lesson_assignment_submissions sub ON sub.lesson_assignment_uid = la.uid AND sub.user_uid = ?", user.Uid).
 		Where("e.status IN ?", enrolledStatuses).
-		Where("la.status = ?", entity.LessonAssignmentStatusTerbit).
+		Where("la.status = ?", entity.LessonAssignmentStatusTerbit)
+
+	if resolvedCourseUID != nil {
+		queryDB = queryDB.Where("m.course_uid = ?", *resolvedCourseUID)
+	}
+
+	var rows []studentAssignmentRow
+	if err := queryDB.
 		Order("la.deadline_at ASC").
 		Limit(perPage).
 		Offset(offset).
@@ -360,7 +427,7 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 		item := gin.H{
 			"course_uid":   row.CourseUID,
 			"course_title": utils.DecryptOrSelf(row.CourseTitle),
-			"assignment":   mapCourseAssignmentListRow(row.courseAssignmentListRow),
+			"assignment":   mapCourseAssignmentListRow(row.toCourseAssignmentListRow()),
 			"latest_submission": nil,
 		}
 		if row.SubmissionUID != nil {

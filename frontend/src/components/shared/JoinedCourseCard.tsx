@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
 
 import { Button } from '../ui/button'
 import { CourseCardCover, CourseCardCoverFrame } from './CourseCardCover'
@@ -76,7 +75,7 @@ const JoinedCourseCard = ({
     >
       <CourseCardCoverFrame
         className={cn(
-          'relative w-full shrink-0 overflow-hidden rounded-none border-b border-line-light aspect-auto',
+          'relative w-full shrink-0 overflow-hidden rounded-t-xl rounded-b-none border-b border-line-light aspect-auto',
           sizes.imageWrapper[size],
         )}
       >
@@ -85,17 +84,13 @@ const JoinedCourseCard = ({
           alt={data.title}
           fill
           sizes="(max-width: 768px) 100vw, 384px"
-          imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+          imgClassName="rounded-t-xl rounded-b-none transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </CourseCardCoverFrame>
 
       <div className={cn('flex flex-1 flex-col', sizes.contentWrapper[size])}>
-        <div className="mb-2.5 flex items-center justify-between gap-2">
+        <div className="mb-2.5 flex items-center gap-2">
           <CourseLevelLabel level={data.level} compact />
-          <div className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-            <Check className="size-3.5 shrink-0" aria-hidden />
-            <span className="line-clamp-1">Dapat diakses</span>
-          </div>
         </div>
 
         <div className="mb-4 flex flex-col gap-1.5">

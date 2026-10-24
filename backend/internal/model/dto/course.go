@@ -16,3 +16,19 @@ type AdminCourseRequest struct {
 	MentorUid    string   `form:"mentor_uid"`
 	EventUid     string   `form:"event_uid"`
 }
+
+// AddCourseParticipantsRequest menerima daftar UID siswa untuk didaftarkan ke kursus.
+// Mendukung student_uids maupun user_uids (menerima full UUID maupun 8-char prefix).
+type AddCourseParticipantsRequest struct {
+	StudentUids []string `json:"student_uids" example:"[\"f47ac10b\",\"550e8400-e29b-41d4-a716-446655440000\"]"`
+	UserUids    []string `json:"user_uids" example:"[\"f47ac10b\"]"`
+}
+
+// AddCourseParticipantsResponse adalah response data setelah penambahan peserta ke kursus.
+type AddCourseParticipantsResponse struct {
+	CourseUid    string   `json:"course_uid" example:"a1b2c3d4"`
+	AddedCount   int      `json:"added_count" example:"2"`
+	SkippedCount int      `json:"skipped_count" example:"0"`
+	AddedUids    []string `json:"added_uids" example:"[\"f47ac10b\",\"550e8400-e29b-41d4-a716-446655440000\"]"`
+}
+

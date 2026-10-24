@@ -8,10 +8,8 @@ function buildStudentStats(
   reviewSummary: ReturnType<typeof mapManagedUserDetail>['reviewSummary'],
 ): ManagedUserDetailViewModel['stats'] {
   const totalEnrollments =
-    enrollmentSummary.pending +
-    enrollmentSummary.active +
-    enrollmentSummary.completed +
-    enrollmentSummary.cancelled
+    enrollmentSummary.total ??
+    (enrollmentSummary.active + enrollmentSummary.completed)
 
   return [
     { id: 'enrollments', label: 'Total kursus', value: String(totalEnrollments) },

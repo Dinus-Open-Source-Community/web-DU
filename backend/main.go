@@ -41,7 +41,9 @@ import (
 func init() {
 	// Load .env file (hanya untuk development lokal tanpa docker)
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using system environment variables")
+		if err := godotenv.Load("../.env"); err != nil {
+			log.Println("No .env file found, using system environment variables")
+		}
 	}
 
 	// Initialize MinIO
@@ -51,8 +53,11 @@ func init() {
 }
 
 func main() {
+	// Jalankan Gin di mode release agar log debug tidak muncul di produksi
+	gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
-	
+
 	r.RedirectTrailingSlash = false
 
 	// CORS harus didaftarkan paling awal supaya ikut jalan pada semua

@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 import { PageHeader } from '../shared/Header'
 import { SearchForm } from '../shared/SearchForm'
 import { UnderlineTabList } from '../shared/UnderlineTabList'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
 import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
 import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
-import { Pagination } from '../shared/Pagination'
+import { TablePaginationFooter } from '../shared/TablePaginationFooter'
 import { format, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
 import type { StudentAssignmentFeedCategory, StudentAssignmentRowKind } from '@/lib/types/student-assignments'
@@ -77,12 +77,25 @@ function TaskBadges({ row }: { row: StudentAssignmentRow }) {
 
 function AssignmentListSkeleton() {
   return (
-    <div className="flex flex-col gap-4" aria-hidden>
+    <div className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col divide-y divide-line-light')} aria-hidden>
       {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-[220px] animate-pulse rounded-xl border-2 border-ink-900/10 bg-paper-paper/70"
-        />
+        <div key={index} className="grid min-h-[200px] animate-pulse bg-paper-paper/40 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="flex flex-col justify-between p-5 sm:p-6 gap-6">
+            <div className="flex flex-col gap-3">
+              <div className="h-4 w-40 rounded bg-paper-paper" />
+              <div className="h-6 w-3/4 rounded bg-paper-paper" />
+              <div className="h-4 w-1/2 rounded bg-paper-paper" />
+            </div>
+            <div className="flex gap-2">
+              <div className="h-7 w-24 rounded-lg bg-paper-paper" />
+              <div className="h-7 w-24 rounded-lg bg-paper-paper" />
+            </div>
+          </div>
+          <div className="hidden border-l border-line-light bg-paper-paper/60 p-5 sm:p-6 lg:flex flex-col justify-between">
+            <div className="h-20 rounded-xl bg-paper-paper" />
+            <div className="h-11 rounded-sm bg-paper-paper" />
+          </div>
+        </div>
       ))}
     </div>
   )
@@ -208,7 +221,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
-    <article className="group overflow-hidden rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper transition-colors duration-200 hover:border-ink-900/20">
+    <article className="group overflow-hidden bg-paper-white transition-colors duration-200">
       <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
@@ -307,7 +320,10 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
     hasVisibleRows,
     currentPage,
     totalPages,
+    total,
+    pageSize,
     onPageChange,
+    onPageSizeChange,
   } = view
 
   return (
@@ -341,19 +357,19 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
         />
 
         <UnderlineTabList
+          variant="pill"
           value={category}
           options={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
           onChange={onCategoryChange}
           ariaLabel="Kategori tugas"
-          className="w-max max-w-full"
         />
       </div>
 
       {isLoading ? (
         <AssignmentListSkeleton />
       ) : hasVisibleRows ? (
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
+        <section className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col')}>
+          <div className="flex flex-col divide-y divide-line-light">
             {paginatedRows.map((row, index) => (
               <AssignmentRowCard
                 key={buildAssignmentRowKey(row, index)}
@@ -363,8 +379,17 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
             ))}
           </div>
 
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-        </div>
+          <TablePaginationFooter
+            page={currentPage}
+            totalPages={totalPages}
+            total={total}
+            totalLabel="tugas"
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </section>
       ) : (
         <AssignmentEmptyState
           scopedCount={scopedCount}

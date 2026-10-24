@@ -544,12 +544,10 @@ func seedCourseReviews(db *gorm.DB) {
 			continue
 		}
 
-		// Validasi: user harus memiliki enrollment yang bukan pending untuk course ini.
-		// Hanya user dengan enrollment active/completed/cancelled yang boleh memberikan review
-		// (status pending berarti pembayaran belum selesai diverifikasi).
+		// Validasi: user harus memiliki enrollment untuk course ini.
 		var activeEnrollment entity.Enrollment
-		enrollErr := db.Where("user_uid = ? AND course_uid = ? AND status != ?",
-			student.Uid, course.Uid, entity.EnrollmentPending).
+		enrollErr := db.Where("user_uid = ? AND course_uid = ?",
+			student.Uid, course.Uid).
 			First(&activeEnrollment).Error
 		if errors.Is(enrollErr, gorm.ErrRecordNotFound) {
 			log.Printf("[Seeder] User %s tidak memiliki enrollment aktif untuk course %s, review dilewati", item.StudentEmail, item.CourseSlug)

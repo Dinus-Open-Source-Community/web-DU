@@ -18,5 +18,8 @@ export type StudentAssignmentListViewModel = {
   hasVisibleRows: boolean
   currentPage: number
   totalPages: number
+  total: number
+  pageSize: number
   onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }

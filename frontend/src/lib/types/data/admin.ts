@@ -5,7 +5,7 @@ export interface IAdminStudent {
   avatar: string
   joinedAt: string
   enrolledCourses: number
-  averageProgress: number
+  averageProgress?: number
   isVerified: boolean
 }
 

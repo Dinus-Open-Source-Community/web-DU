@@ -33,6 +33,9 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                          // Super Admin / Admin
 		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)                  // Super Admin / Admin
 		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)              // Super Admin / Admin
+		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc)          // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)                    // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)                        // Alias
 		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                         // Admin / Mentor
 
 		authCourseGroup.POST("/", service.PostAdminCourseFunc)        // Super Admin / Admin

@@ -255,6 +255,159 @@
                 }
             }
         },
+        "/admin/redeem-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a paginated list of generated redeem codes with optional filters for course and active status.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List redeem codes (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by course UID",
+                        "name": "course_uid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by active status",
+                        "name": "is_active",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of redeem codes retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Mentors/Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or auto-generate a new course redeem code with custom usage limits, expiration date, and optional target user or email restrictions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Generate redeem code (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "description": "Generate redeem code request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GenerateRedeemCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Redeem code successfully created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Mentors/Admins only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or target user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Redeem code already exists",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/reviews": {
             "get": {
                 "security": [
@@ -1686,6 +1839,67 @@
                 }
             }
         },
+        "/courses/{id}/candidate-students": {
+            "get": {
+                "description": "Mengambil daftar user dengan role student yang belum terdaftar di kursus ini, lengkap dengan data progres dan kursus yang diikuti. (Super Admin, Admin, dan Mentor penanggung jawab).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get candidate students for a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID or prefix",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Candidate students retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Super Admin, Admin, or assigned mentor only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{id}/join": {
             "post": {
                 "security": [
@@ -1973,6 +2187,83 @@
                     },
                     "403": {
                         "description": "Access denied: Super Admin or Admin only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{id}/participants": {
+            "post": {
+                "description": "Menambahkan satu atau beberapa siswa ke dalam kursus (Enrollment active).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Add participants to a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID or prefix",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "List of student UIDs to enroll",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddCourseParticipantsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Participants added successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or quota exceeded",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Super Admin, Admin, or assigned mentor only",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5405,7 +5696,7 @@
         },
         "/register": {
             "post": {
-                "description": "Register a new user with name, email, and password. Returns JWT token on success.",
+                "description": "Register a new user with name, email, and password. Requires OTP verification before login.",
                 "consumes": [
                     "application/json"
                 ],
@@ -5429,7 +5720,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "User registered successfully",
+                        "description": "User registered successfully, OTP sent",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5483,8 +5774,14 @@
                     },
                     {
                         "type": "integer",
-                        "description": "Items per page (default: 20, max: 100)",
+                        "description": "Items per page (default: 10, max: 100)",
                         "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by course UID",
+                        "name": "course_uid",
                         "in": "query"
                     }
                 ],
@@ -5505,6 +5802,81 @@
                     },
                     "403": {
                         "description": "Access denied: Students only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/students/redeem": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Redeem a voucher/token code to enroll into a course. Enforces strict validations (active status, expiration, max usage, target user restrictions, and duplicate enrollment checks).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Redeem course code (Student)",
+                "parameters": [
+                    {
+                        "description": "Redeem code request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RedeemCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course code successfully redeemed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, expired code, max usage exceeded, or already enrolled",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Not targeted for this user or students only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Redeem code or course not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -6092,6 +6464,30 @@
         }
     },
     "definitions": {
+        "dto.AddCourseParticipantsRequest": {
+            "type": "object",
+            "properties": {
+                "student_uids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"f47ac10b\"",
+                        "\"550e8400-e29b-41d4-a716-446655440000\"]"
+                    ]
+                },
+                "user_uids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"f47ac10b\"]"
+                    ]
+                }
+            }
+        },
         "dto.AssignMentorsToCourseRequest": {
             "type": "object",
             "required": [
@@ -6255,6 +6651,40 @@
                 "title": {
                     "type": "string",
                     "example": "Module 1"
+                }
+            }
+        },
+        "dto.GenerateRedeemCodeRequest": {
+            "type": "object",
+            "required": [
+                "course_uid"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "CUSTOM-CODE-2026"
+                },
+                "course_uid": {
+                    "type": "string",
+                    "example": "e61b7f94-9128-4444-a4f6-7b830d12e431"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "max_uses": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "prefix": {
+                    "type": "string",
+                    "example": "REACT"
+                },
+                "target_email": {
+                    "type": "string",
+                    "example": "buyer@external.com"
                 }
             }
         },
@@ -6463,6 +6893,20 @@
                 "password": {
                     "type": "string",
                     "example": "StrongPassword123"
+                }
+            }
+        },
+        "dto.RedeemCodeRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 4,
+                    "example": "KURSUS-REACT-2026"
                 }
             }
         },

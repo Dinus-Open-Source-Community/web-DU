@@ -68,7 +68,7 @@ export function rowsToPromoteCandidates(
     email: row.email,
     avatar: row.avatar,
     detail:
-      row.enrolledCourses != null
+      row.enrolledCourses != null && row.enrolledCourses > 0
         ? `${row.enrolledCourses} kursus • progres rata-rata ${row.averageProgress ?? 0}%`
         : `Bergabung ${row.joinedAt}`,
     sourceRoleLabel,

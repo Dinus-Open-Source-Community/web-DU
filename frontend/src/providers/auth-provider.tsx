@@ -1,8 +1,8 @@
 import Cookies from 'js-cookie'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth } from '../services/auth'
+import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth, verifyOtp } from '../services/auth'
 import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services/axios'
-import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
+import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload, IRegisterResponse, IVerifyOtpPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
 import type { JwtPayload } from '@/lib/types/auth/jwt-payload'
 import { dashboardPathForUserRole } from '@/lib/dashboard-route'
@@ -23,7 +23,8 @@ interface AuthContextValue {
   isResolvingImages: boolean
   profile: IUserData | null
   signIn: (payload: ILoginPayload) => Promise<IAuthResult>
-  signUp: (payload: IRegisterPayload) => Promise<IAuthResult>
+  signUp: (payload: IRegisterPayload) => Promise<IRegisterResponse>
+  verifyOtp: (payload: IVerifyOtpPayload) => Promise<IAuthResult>
   signInWithToken: (token: string, expiresAt?: string) => Promise<IAuthResult>
   signOut: () => void
   refreshUser: () => Promise<IAuthSessionUser | null>
@@ -214,7 +215,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(
     async ({ name, email, password }: IRegisterPayload) => {
       const payload = { name, email, password }
-      const auth = await registerWithEmail(payload)
+      return registerWithEmail(payload)
+    },
+    [],
+  )
+
+  const verifyOtpHandler = useCallback(
+    async (payload: IVerifyOtpPayload) => {
+      const auth = await verifyOtp(payload)
       return signInWithToken(auth.token, auth.expires_at)
     },
     [signInWithToken],
@@ -247,6 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isResolvingImages,
       signIn,
       signUp,
+      verifyOtp: verifyOtpHandler,
       signInWithToken,
       signOut,
       refreshUser,
@@ -265,6 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       token,
       user,
+      verifyOtpHandler,
     ],
   )
 

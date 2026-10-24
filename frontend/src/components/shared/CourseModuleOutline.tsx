@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, type KeyboardEvent } from 'react'
-import { Check, ChevronDown, ChevronRight, FileText, Film, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Check, ChevronDown, FileText, Film, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react'
 import type { IModulesData } from '../../lib/types/module'
 import type { CourseDetailLesson, LessonDeliveryType } from '../../lib/types/lesson'
 
@@ -247,7 +247,12 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                   type="button"
                   onClick={() => toggleExpand(mod.uid)}
                   className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-muted/60 hover:text-ink-600">
-                  {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                  <ChevronDown
+                    className={cn(
+                      'size-3.5 transition-transform duration-200 ease-in-out',
+                      isExpanded ? 'rotate-0 text-ink-600' : '-rotate-90 text-ink-400',
+                    )}
+                  />
                 </button>
 
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-paper-paper text-[10px] font-bold text-ink-500">{mi + 1}</span>
@@ -306,8 +311,16 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
               </div>
 
               {/* Expanded lesson list */}
-              {isExpanded && (
-                <div className="ml-4.5 border-l-2 border-line-light pb-1 pl-3 pr-2">
+              <div
+                className={cn(
+                  'grid transition-all duration-300 ease-in-out',
+                  isExpanded
+                    ? 'grid-rows-[1fr] opacity-100'
+                    : 'grid-rows-[0fr] pointer-events-none opacity-0',
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="ml-4.5 border-l-2 border-line-light pb-1 pl-3 pr-2">
                   <div className="space-y-0.5 pt-0.5">
                     {moduleLessons(mod).map((lesson) => {
                       const isActive = lesson.uid === activeLessonId
@@ -395,7 +408,8 @@ export function CourseModuleOutline({ modules, activeLessonId, onSelectLesson, o
                     Tambah lesson
                   </button>
                 </div>
-              )}
+              </div>
+            </div>
             </div>
           )
         })}

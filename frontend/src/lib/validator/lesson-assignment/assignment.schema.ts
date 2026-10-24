@@ -150,24 +150,26 @@ type AssignmentUpsertShape = {
 }
 
 function validateAssignmentBusinessRules(data: AssignmentUpsertShape, ctx: z.RefinementCtx) {
-  if (
-    !data.allow_file_submission &&
-    !data.allow_plain_text_submission &&
-    !data.allow_rich_text_submission
-  ) {
-    ctx.addIssue({
-      code: 'custom',
-      message: 'Minimal satu metode pengumpulan jawaban harus diaktifkan',
-      path: ['allow_file_submission'],
-    })
-  }
+  if (data.task_type === 'text') {
+    if (
+      !data.allow_file_submission &&
+      !data.allow_plain_text_submission &&
+      !data.allow_rich_text_submission
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Minimal satu metode pengumpulan jawaban harus diaktifkan',
+        path: ['allow_file_submission'],
+      })
+    }
 
-  if (data.require_file_description && !data.allow_file_submission) {
-    ctx.addIssue({
-      code: 'custom',
-      message: 'require_file_description hanya boleh true jika allow_file_submission true',
-      path: ['require_file_description'],
-    })
+    if (data.require_file_description && !data.allow_file_submission) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'require_file_description hanya boleh true jika allow_file_submission true',
+        path: ['require_file_description'],
+      })
+    }
   }
 
   if (data.allow_resubmit) {

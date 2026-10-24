@@ -115,16 +115,18 @@ export function validateHomeworkForSave(lesson: EditableLesson): string | null {
   const taskType = lesson.homeworkType ?? 'text'
   const rules = ensureHomeworkRules(lesson)
 
-  if (
-    !rules.allowFileSubmission &&
-    !rules.allowPlainTextSubmission &&
-    !rules.allowRichTextSubmission
-  ) {
-    return Message.assignment.submitMethodRequired
-  }
+  if (taskType === 'text') {
+    if (
+      !rules.allowFileSubmission &&
+      !rules.allowPlainTextSubmission &&
+      !rules.allowRichTextSubmission
+    ) {
+      return Message.assignment.submitMethodRequired
+    }
 
-  if (rules.requireFileDescription && !rules.allowFileSubmission) {
-    return Message.assignment.fileDescriptionRequiresUpload
+    if (rules.requireFileDescription && !rules.allowFileSubmission) {
+      return Message.assignment.fileDescriptionRequiresUpload
+    }
   }
 
   if (rules.allowResubmit) {
@@ -173,10 +175,13 @@ export function buildAssignmentUpsertPayload(
         ? toRichTextEnvelope(lesson.homeworkDescriptionHtml ?? '<p></p>')
         : null,
     quiz: taskType === 'quiz' ? (lesson.homeworkQuiz ?? null) : null,
-    allow_file_submission: rules.allowFileSubmission,
-    allow_plain_text_submission: rules.allowPlainTextSubmission,
-    allow_rich_text_submission: rules.allowRichTextSubmission,
-    require_file_description: rules.requireFileDescription,
+    allow_file_submission: taskType === 'quiz' ? false : rules.allowFileSubmission,
+    allow_plain_text_submission:
+      taskType === 'quiz' ? false : rules.allowPlainTextSubmission,
+    allow_rich_text_submission:
+      taskType === 'quiz' ? false : rules.allowRichTextSubmission,
+    require_file_description:
+      taskType === 'quiz' ? false : rules.requireFileDescription,
     instruction_attachments: sanitizeInstructionAttachmentsForPayload(
       rules.instructionAttachments,
     ),

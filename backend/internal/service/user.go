@@ -140,10 +140,8 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	seenCourses := make(map[uuid.UUID]struct{}, len(enrollments))
 	enrollmentSummary := gin.H{
 		"total":     len(enrollments),
-		"pending":   0,
 		"active":    0,
 		"completed": 0,
-		"cancelled": 0,
 	}
 
 	// --- kalkulasi progress lesson per enrollment (satu query batch) ---
@@ -363,14 +361,10 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 		}
 
 		switch effectiveStatus {
-		case entity.EnrollmentPending:
-			enrollmentSummary["pending"] = enrollmentSummary["pending"].(int) + 1
 		case entity.EnrollmentActive:
 			enrollmentSummary["active"] = enrollmentSummary["active"].(int) + 1
 		case entity.EnrollmentCompleted:
 			enrollmentSummary["completed"] = enrollmentSummary["completed"].(int) + 1
-		case entity.EnrollmentCancelled:
-			enrollmentSummary["cancelled"] = enrollmentSummary["cancelled"].(int) + 1
 		}
 
 		if enrollment.Course == nil {

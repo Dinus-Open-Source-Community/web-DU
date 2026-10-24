@@ -19,7 +19,7 @@ export type CoursePublishStatus = 'DRAFT' | 'PUBLISHED'
 export type ClassType = 'online' | 'offline'
 
 export type UserRole = 'student' | 'mentor' | 'admin' | 'super_admin'
-export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'cancelled'
+export type EnrollmentStatus = 'active' | 'completed'
 
 export type LessonAssignmentStatus = 'DRAFT' | 'TERBIT' | 'DITUTUP'
 export type MentorAssignmentLifecycleStatus = 'draft' | 'published' | 'closed'

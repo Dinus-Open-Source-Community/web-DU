@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, ChevronRight, Circle, ClipboardList } from 'lucide-react'
+import { CheckCircle2, ChevronDown, Circle, ClipboardList } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
@@ -19,6 +19,7 @@ type LessonSidebarPanelProps = {
   activePane?: CourseViewerPane
   assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>
   readLessonIds: ReadonlySet<string>
+  submittedAssignmentIds?: ReadonlySet<string>
   progressPercent: number
   expandedModules: Set<string>
   theme: LessonThemeMode
@@ -36,6 +37,7 @@ export function LessonSidebarPanel({
   activePane,
   assignmentByLessonUid,
   readLessonIds,
+  submittedAssignmentIds,
   progressPercent,
   expandedModules,
   theme,
@@ -73,34 +75,46 @@ export function LessonSidebarPanel({
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 sm:px-3 sm:py-3">
         {modules.map((mod) => {
           const isExpanded = expandedModules.has(mod.uid)
-          const progress = moduleProgress(mod, readLessonIds)
-          const moduleDone = isModuleComplete(mod, readLessonIds)
+          const progress = moduleProgress(
+            mod,
+            readLessonIds,
+            assignmentByLessonUid,
+            submittedAssignmentIds,
+          )
+          const moduleDone = isModuleComplete(
+            mod,
+            readLessonIds,
+            assignmentByLessonUid,
+            submittedAssignmentIds,
+          )
           const isCurrentModule = activeModuleId === mod.uid
-          const ModuleChevron = isExpanded ? ChevronDown : ChevronRight
 
           return (
             <section
               key={mod.uid}
               className={cn(
-                'border-b py-2 last:border-b-0',
+                'border-b py-2 last:border-b-0 transition-colors duration-200 ease-in-out',
                 isDark ? 'border-zinc-800' : 'border-line-light',
                 isCurrentModule && (isDark ? 'bg-zinc-800/60' : 'bg-paper-paper'),
               )}>
               <button
                 type="button"
                 onClick={() => onToggleModule(mod.uid)}
+                aria-expanded={isExpanded}
                 className={cn(
-                  'flex w-full items-start gap-3 px-3 py-3 text-left transition',
+                  'flex w-full items-start gap-3 rounded-md px-3 py-3 text-left transition-colors duration-200 ease-in-out',
                   isDark ? 'hover:bg-zinc-800' : 'hover:bg-paper-paper',
                 )}>
-                <ModuleChevron aria-hidden className={cn('mt-1 h-4 w-4 shrink-0', isDark ? 'text-zinc-400' : 'text-ink-400')} />
+                <ChevronDown
+                  aria-hidden
+                  className={cn(
+                    'mt-1 h-4 w-4 shrink-0 transition-transform duration-200 ease-in-out',
+                    isExpanded
+                      ? cn('rotate-0', isDark ? 'text-zinc-200' : 'text-ink-700')
+                      : cn('-rotate-90', isDark ? 'text-zinc-400' : 'text-ink-400'),
+                  )}
+                />
                 <span className="flex min-w-0 flex-1 items-start gap-2">
-                  {moduleDone ? (
-                    <CheckCircle2
-                      aria-hidden
-                      className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-                    />
-                  ) : null}
                   <span className={cn('min-w-0 text-sm font-semibold leading-6', isDark ? 'text-zinc-100' : 'text-ink-900')}>
                     {mod.title}
                   </span>
@@ -112,66 +126,44 @@ export function LessonSidebarPanel({
                   )}
                   aria-label={
                     moduleDone
-                      ? `Modul selesai, ${progress.completedCount} dari ${progress.totalCount} lesson`
-                      : `${progress.completedCount} dari ${progress.totalCount} lesson selesai`
+                      ? `Modul selesai, ${progress.completedCount} dari ${progress.totalCount} materi & tugas`
+                      : `${progress.completedCount} dari ${progress.totalCount} materi & tugas selesai`
                   }>
                   {progress.completedCount}/{progress.totalCount}
                 </span>
               </button>
 
-              {isExpanded && (
-                <div className={cn('ml-6 border-l pb-2 pl-4', isDark ? 'border-zinc-700' : 'border-line-light')}>
-                  {(mod.lessons ?? []).map((lesson, lessonIndex) => {
-                    const isLessonActive = lesson.uid === activeLessonId && !isAssignmentPane
-                    const isDone = readLessonIds.has(lesson.uid)
-                    const LessonIcon = getLessonIcon(lesson.content_type)
-                    const assignment = assignmentByLessonUid?.get(lesson.uid)
-                    const isAssignmentActive = Boolean(assignment) && lesson.uid === activeLessonId && isAssignmentPane
+              <div
+                className={cn(
+                  'grid transition-all duration-300 ease-in-out',
+                  isExpanded
+                    ? 'grid-rows-[1fr] opacity-100'
+                    : 'grid-rows-[0fr] pointer-events-none opacity-0',
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className={cn('ml-6 border-l pb-2 pl-4', isDark ? 'border-zinc-700' : 'border-line-light')}>
+                    {(mod.lessons ?? []).map((lesson, lessonIndex) => {
+                      const isLessonActive = lesson.uid === activeLessonId && !isAssignmentPane
+                      const isDone = readLessonIds.has(lesson.uid)
+                      const LessonIcon = getLessonIcon(lesson.content_type)
+                      const assignment = assignmentByLessonUid?.get(lesson.uid)
+                      const isAssignmentActive = Boolean(assignment) && lesson.uid === activeLessonId && isAssignmentPane
+                      const isAssignmentSubmitted = Boolean(
+                        assignment && (
+                          submittedAssignmentIds?.has(assignment.uid) ||
+                          submittedAssignmentIds?.has(lesson.uid)
+                        )
+                      )
 
-                    return (
-                      <div key={lesson.uid}>
-                        <button
-                          type="button"
-                          onClick={() => onSelectLesson(lesson.uid, mod.uid)}
-                          className={cn(
-                            'relative flex w-full items-start gap-3 px-3 py-2 text-left text-sm leading-6 transition',
-                            isLessonActive
-                              ? isDark
-                                ? 'bg-zinc-800 font-semibold text-zinc-50'
-                                : 'bg-paper-paper font-semibold text-ink-900'
-                              : isDark
-                                ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-                                : 'text-ink-500 hover:bg-paper-paper hover:text-ink-900',
-                          )}>
-                          <span
-                            className={cn(
-                              'absolute -left-[23px] top-3 flex h-3.5 w-3.5 items-center justify-center',
-                              isDark ? (isCurrentModule ? 'bg-zinc-800' : 'bg-zinc-900') : isCurrentModule ? 'bg-paper-paper' : 'bg-paper-white',
-                            )}>
-                            {isDone ? (
-                              <CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-primary" />
-                            ) : (
-                              <Circle
-                                aria-hidden
-                                className={cn('h-2.5 w-2.5', isDark ? 'fill-muted-foreground text-muted-foreground' : 'fill-ink-400 text-ink-400')}
-                              />
-                            )}
-                          </span>
-                          <LessonIcon
-                            aria-hidden
-                            className={cn('mt-1 h-4 w-4 shrink-0', isLessonActive ? 'text-primary' : isDark ? 'text-zinc-500' : 'text-ink-400')}
-                          />
-                          <span className="min-w-0 flex-1">{lesson.title}</span>
-                          <span className="sr-only">Lesson {lessonIndex + 1}</span>
-                        </button>
-                        {assignment ? (
+                      return (
+                        <div key={lesson.uid}>
                           <button
                             type="button"
-                            onClick={() => onSelectAssignment?.(lesson.uid, mod.uid)}
-                            aria-current={isAssignmentActive ? 'page' : undefined}
+                            onClick={() => onSelectLesson(lesson.uid, mod.uid)}
                             className={cn(
                               'relative flex w-full items-start gap-3 px-3 py-2 text-left text-sm leading-6 transition',
-                              isAssignmentActive
+                              isLessonActive
                                 ? isDark
                                   ? 'bg-zinc-800 font-semibold text-zinc-50'
                                   : 'bg-paper-paper font-semibold text-ink-900'
@@ -179,19 +171,70 @@ export function LessonSidebarPanel({
                                   ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
                                   : 'text-ink-500 hover:bg-paper-paper hover:text-ink-900',
                             )}>
-                            <ClipboardList
+                            <span
+                              className={cn(
+                                'absolute -left-[23px] top-3 flex h-3.5 w-3.5 items-center justify-center',
+                                isDark ? (isCurrentModule ? 'bg-zinc-800' : 'bg-zinc-900') : isCurrentModule ? 'bg-paper-paper' : 'bg-paper-white',
+                              )}>
+                              {isDone ? (
+                                <CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-primary" />
+                              ) : (
+                                <Circle
+                                  aria-hidden
+                                  className={cn('h-2.5 w-2.5', isDark ? 'fill-muted-foreground text-muted-foreground' : 'fill-ink-400 text-ink-400')}
+                                />
+                              )}
+                            </span>
+                            <LessonIcon
                               aria-hidden
-                              className={cn('mt-1 h-4 w-4 shrink-0', isAssignmentActive ? 'text-primary' : isDark ? 'text-zinc-500' : 'text-ink-400')}
+                              className={cn('mt-1 h-4 w-4 shrink-0', isLessonActive ? 'text-primary' : isDark ? 'text-zinc-500' : 'text-ink-400')}
                             />
-                            <span className="min-w-0 flex-1">{assignment.title}</span>
-                            <span className="sr-only">Tugas {lesson.title}</span>
+                            <span className="min-w-0 flex-1">{lesson.title}</span>
+                            <span className="sr-only">Lesson {lessonIndex + 1}</span>
                           </button>
-                        ) : null}
-                      </div>
-                    )
-                  })}
+                          {assignment ? (
+                            <button
+                              type="button"
+                              onClick={() => onSelectAssignment?.(lesson.uid, mod.uid)}
+                              aria-current={isAssignmentActive ? 'page' : undefined}
+                              className={cn(
+                                'relative flex w-full items-start gap-3 px-3 py-2 text-left text-sm leading-6 transition',
+                                isAssignmentActive
+                                  ? isDark
+                                    ? 'bg-zinc-800 font-semibold text-zinc-50'
+                                    : 'bg-paper-paper font-semibold text-ink-900'
+                                  : isDark
+                                    ? 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                                    : 'text-ink-500 hover:bg-paper-paper hover:text-ink-900',
+                              )}>
+                              <span
+                                className={cn(
+                                  'absolute -left-[23px] top-3 flex h-3.5 w-3.5 items-center justify-center',
+                                  isDark ? (isCurrentModule ? 'bg-zinc-800' : 'bg-zinc-900') : isCurrentModule ? 'bg-paper-paper' : 'bg-paper-white',
+                                )}>
+                                {isAssignmentSubmitted ? (
+                                  <CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-primary" />
+                                ) : (
+                                  <Circle
+                                    aria-hidden
+                                    className={cn('h-2.5 w-2.5', isDark ? 'fill-muted-foreground text-muted-foreground' : 'fill-ink-400 text-ink-400')}
+                                  />
+                                )}
+                              </span>
+                              <ClipboardList
+                                aria-hidden
+                                className={cn('mt-1 h-4 w-4 shrink-0', isAssignmentActive ? 'text-primary' : isDark ? 'text-zinc-500' : 'text-ink-400')}
+                              />
+                              <span className="min-w-0 flex-1">{assignment.title}</span>
+                              <span className="sr-only">Tugas {lesson.title}</span>
+                            </button>
+                          ) : null}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              )}
+              </div>
             </section>
           )
         })}

@@ -14,8 +14,9 @@ func init() {
 
 func StartStudentRoutes(r *gin.Engine) {
 	studentGroup := r.Group("/students")
-	studentGroup.Use(middleware.AuthMiddleware())
+	studentGroup.Use(middleware.AuthMiddleware(), middleware.StudentOnlyMiddleware())
 	{
 		studentGroup.GET("/me/assignments", service.GetStudentMyAssignmentsFunc) // Students only
+		studentGroup.POST("/redeem", service.RedeemCourseCodeFunc)              // Students only
 	}
 }

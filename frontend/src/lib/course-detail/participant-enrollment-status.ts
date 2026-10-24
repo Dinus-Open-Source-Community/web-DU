@@ -9,9 +9,6 @@ const BY_API_STATUS: Record<string, ParticipantEnrollmentPresentation> = {
   active: { label: 'Aktif', tone: 'success' },
   completed: { label: 'Selesai', tone: 'info' },
   complete: { label: 'Selesai', tone: 'info' },
-  pending: { label: 'Menunggu', tone: 'warning' },
-  cancelled: { label: 'Dibatalkan', tone: 'neutral' },
-  canceled: { label: 'Dibatalkan', tone: 'neutral' },
   late: { label: 'Terlambat', tone: 'warning' },
   not_started: { label: 'Belum mulai', tone: 'neutral' },
   registered: { label: 'Terdaftar', tone: 'neutral' },
@@ -23,8 +20,6 @@ const BY_INDONESIAN_LABEL: Record<string, ParticipantEnrollmentPresentation> = {
   terlambat: { label: 'Terlambat', tone: 'warning' },
   'belum mulai': { label: 'Belum mulai', tone: 'neutral' },
   terdaftar: { label: 'Terdaftar', tone: 'neutral' },
-  menunggu: { label: 'Menunggu', tone: 'warning' },
-  dibatalkan: { label: 'Dibatalkan', tone: 'neutral' },
 }
 
 export function resolveParticipantEnrollmentStatus(

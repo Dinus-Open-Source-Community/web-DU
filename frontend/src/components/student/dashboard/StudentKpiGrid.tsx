@@ -25,7 +25,7 @@ export function StudentKpiGrid({ summary }: StudentKpiGridProps) {
   }
 
   return (
-    <section className={cn(gridStatsClassName, 'lg:grid-cols-5')}>
+    <section className={cn(gridStatsClassName, 'lg:grid-cols-3')}>
       {STUDENT_ENROLLMENT_KPI_ORDER.map((key) => {
         const value = summary[key as StudentEnrollmentKpiKey]
         if (value === undefined) return null

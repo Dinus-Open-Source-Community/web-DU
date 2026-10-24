@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Mail, Images, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Mail, Images, Ticket, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/components/navigation'
 
@@ -95,6 +95,11 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Kursus', path: ROUTES.student.learning },
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
+    },
+    {
+      name: 'Redeem Code',
+      icon: Ticket,
+      path: ROUTES.student.redeem,
     },
   ],
 }

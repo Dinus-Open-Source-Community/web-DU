@@ -3,7 +3,14 @@ import { unwrapApiResponse, withApiErrorHandling } from './api-error'
 import { API_BASE_URL, api } from './axios'
 import { parseLoginPayload, parseRegisterPayload } from '@/lib/validator/auth'
 import type { IResponse } from '../lib/types/api'
-import type { IAuthTokenResponse, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
+import type {
+  IAuthTokenResponse,
+  ILoginPayload,
+  IRegisterPayload,
+  IRegisterResponse,
+  IResendOtpPayload,
+  IVerifyOtpPayload,
+} from '../lib/types/auth'
 import type { IUserData } from '../lib/types/user'
 
 const buildApiUrl = (path: string) => `${API_BASE_URL}${path}`
@@ -18,12 +25,26 @@ export async function loginWithEmail(payload: ILoginPayload): Promise<IAuthToken
 
 export async function registerWithEmail(
   payload: Omit<IRegisterPayload, 'confirmPassword'>,
-): Promise<IAuthTokenResponse> {
+): Promise<IRegisterResponse> {
   const validated = parseRegisterPayload(payload)
   return withApiErrorHandling(async () => {
-    const response = await api.post<IResponse<IAuthTokenResponse>>(API_ROUTES.auth.register, validated)
+    const response = await api.post<IResponse<IRegisterResponse>>(API_ROUTES.auth.register, validated)
     return unwrapApiResponse(response.data, 'Registrasi gagal')
   }, 'Registrasi gagal')
+}
+
+export async function verifyOtp(payload: IVerifyOtpPayload): Promise<IAuthTokenResponse> {
+  return withApiErrorHandling(async () => {
+    const response = await api.post<IResponse<IAuthTokenResponse>>(API_ROUTES.auth.verifyOtp, payload)
+    return unwrapApiResponse(response.data, 'Verifikasi OTP gagal')
+  }, 'Verifikasi OTP gagal')
+}
+
+export async function resendOtp(payload: IResendOtpPayload): Promise<void> {
+  return withApiErrorHandling(async () => {
+    const response = await api.post<IResponse<null>>(API_ROUTES.auth.resendOtp, payload)
+    unwrapApiResponse(response.data, 'Gagal mengirim ulang kode OTP')
+  }, 'Gagal mengirim ulang kode OTP')
 }
 
 export async function getAuthenticatedUser(): Promise<IUserData> {

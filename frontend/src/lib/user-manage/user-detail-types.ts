@@ -95,9 +95,8 @@ export type ManagedUserDetailViewModel = {
     averageRatingLabel: string
   }
   enrollmentSummary: {
-    pending: number
+    total: number
     active: number
     completed: number
-    cancelled: number
   }
 }

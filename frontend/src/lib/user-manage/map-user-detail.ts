@@ -32,10 +32,8 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ENROLLMENT_STATUS_LABELS: Record<EnrollmentStatus, string> = {
-  pending: 'Menunggu',
   active: 'Aktif',
   completed: 'Selesai',
-  cancelled: 'Dibatalkan',
 }
 
 const COURSE_LEVEL_LABELS: Record<string, string> = {
@@ -202,10 +200,11 @@ export function mapManagedUserDetail(data: ManagedUserDetailApiResponse) {
       averageRatingLabel: (data.review_summary?.average_rating ?? 0).toFixed(1),
     },
     enrollmentSummary: {
-      pending: data.enrollment_summary?.pending ?? 0,
+      total:
+        data.enrollment_summary?.total ??
+        (data.enrollment_summary?.active ?? 0) + (data.enrollment_summary?.completed ?? 0),
       active: data.enrollment_summary?.active ?? 0,
       completed: data.enrollment_summary?.completed ?? 0,
-      cancelled: data.enrollment_summary?.cancelled ?? 0,
     },
   }
 }

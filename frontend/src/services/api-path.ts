@@ -48,6 +48,8 @@ export const API_ROUTES = {
   auth: {
     login: `/login`,
     register: `/register`,
+    verifyOtp: `/verify-otp`,
+    resendOtp: `/resend-otp`,
     oauth: {
       googleLogin: `/oauth/google`,
       googleCallback: `/oauth/google/callback`,
@@ -99,6 +101,8 @@ export const API_ROUTES = {
     getProgressByUid: (uid: Uid) => `/courses/${uid}/progress`,
     getStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) =>
       withQuery(`/courses/${uid}/students`, params),
+    getCandidateStudentsByUid: (uid: Uid) => `/courses/${uid}/candidate-students`,
+    addParticipantsByUid: (uid: Uid) => `/courses/${uid}/participants`,
     assignments: {
       getAllByCourseUid: (courseUid: Uid, params?: IQueryParamsPayload) =>
         withQuery(`/courses/${courseUid}/assignments`, params),
@@ -107,6 +111,7 @@ export const API_ROUTES = {
   students: {
     getMyAssignments: (params?: IQueryParamsPayload) =>
       withQuery(`/students/me/assignments`, params),
+    redeem: `/students/redeem`,
   },
   courseCategories: {
     getAll: (params?: IQueryParamsPayload) =>
