@@ -26,7 +26,6 @@ Doscom Web is a comprehensive learning management system featuring:
 - **User Management**: Registration, authentication (JWT + OAuth Google), user profiles & avatars
 - **Course Management**: Create, manage, and organize courses with modules and lessons
 - **Enrollment System**: Students can enroll in courses and track progress
-- **Payment Integration**: Seamless payment processing via Tripay gateway
 - **Course Reviews**: Students can review and rate courses
 - **Responsive Design**: Modern UI with Tailwind CSS
 
@@ -48,7 +47,6 @@ Doscom Web is a comprehensive learning management system featuring:
 - **ORM**: [GORM](https://gorm.io/)
 - **Authentication**: JWT + Google OAuth
 - **API Documentation**: Swagger/OpenAPI
-- **Payment Gateway**: [Tripay API](https://tripay.co.id/)
 
 ### Infrastructure
 
@@ -143,10 +141,6 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 # Encryption
 AES_KEY=your_aes_key_32_chars_long
 
-# Tripay Payment Gateway
-TRIPAY_API_KEY=your_tripay_api_key
-TRIPAY_PRIVATE_KEY=your_tripay_private_key
-TRIPAY_MERCHANT_CODE=your_merchant_code
 HMAC_KEY=your_hmac_key
 
 # Frontend
@@ -213,7 +207,6 @@ The API documentation is available via Swagger/OpenAPI:
 
 - `POST /api/payments` - Create payment
 - `GET /api/payments/:id` - Get payment status
-- `POST /api/payments/callback` - Tripay webhook callback
 
 #### Lessons & Modules
 
@@ -371,14 +364,3 @@ Authorization: Bearer YOUR_JWT_TOKEN
 Sign in with Google account for seamless authentication. Requires valid `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
 
 ---
-
-## 💳 Payment Integration
-
-This project integrates with **Tripay** payment gateway for course payments. Features include:
-
-- Multiple payment methods support
-- Real-time payment status updates
-- Webhook callback handling
-- HMAC signature verification for security
-
-Refer to [Tripay Documentation](https://docs.tripay.co.id/) for more details.
