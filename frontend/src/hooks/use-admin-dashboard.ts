@@ -1,12 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { adminDashboardKeys } from './query-keys'
-import {
-  fetchDashboardKpis,
-} from '@/services/admin-dashboard'
-import {
-  fetchAdminDashboardAnalytics,
-} from '@/services/admin-dashboard-analytics'
+import { fetchDashboardKpis } from '@/services/admin-dashboard'
+import { fetchAdminDashboardAnalytics } from '@/services/admin-dashboard-analytics'
 
 const PERIOD_OPTIONS: { value: string; label: string }[] = [
   { value: '7d', label: '7 Hari' },

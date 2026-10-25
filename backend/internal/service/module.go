@@ -157,9 +157,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	offset := (page - 1) * perPage
 
 	var modules []entity.Module
-	if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
-	}).Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
+	if err := db.Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve modules",

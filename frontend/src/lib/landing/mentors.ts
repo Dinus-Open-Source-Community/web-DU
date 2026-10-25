@@ -6,53 +6,27 @@ export type MentorSocial = {
 }
 
 export type LandingMentor = {
+  uid: string
   name: string
+  email: string
   role: string
-  /** Foto profil persegi (public/). */
   photo: string
-  /** Course yang diajar — tampil sebagai chip di kartu & daftar di modal. */
   courses: string[]
-  /** Sosmed mentor (platform + URL). URL '#' = placeholder sampai ada akun asli. */
+  assignedCourses: number
+  joinedTeachingCourses: number
+  isVerified: boolean
+  createdAt: string
   socials: MentorSocial[]
+  assignments?: {
+    course_uid: string
+    course_title: string
+    status: string
+    cover_url: string
+    thumbnail_url: string
+  }[]
 }
 
 // TODO: ganti url '#' dengan akun asli tiap mentor sebelum launch.
-export const LANDING_MENTORS: LandingMentor[] = [
-  {
-    name: 'alfi',
-    role: 'Pengembang Next.js',
-    photo: '/images/alfi.webp',
-    courses: ['Pengembangan Web: Next.js'],
-    socials: [
-      { platform: 'github', url: '#' },
-      { platform: 'instagram', url: '#' },
-      { platform: 'linkedin', url: '#' },
-    ],
-  },
-  {
-    name: 'nafan',
-    role: 'Pengembang Laravel',
-    photo: '/images/nafan.webp',
-    courses: ['Pengembangan Web: Laravel'],
-    socials: [
-      { platform: 'github', url: '#' },
-      { platform: 'instagram', url: '#' },
-      { platform: 'linkedin', url: '#' },
-    ],
-  },
-  {
-    name: 'jariz',
-    role: 'Pengembang Next.js',
-    photo: '/images/jariz.webp',
-    courses: ['Pengembangan Web: Next.js'],
-    socials: [
-      { platform: 'github', url: '#' },
-      { platform: 'instagram', url: '#' },
-      { platform: 'linkedin', url: '#' },
-    ],
-  },
-]
-
 export function mentorInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '?'

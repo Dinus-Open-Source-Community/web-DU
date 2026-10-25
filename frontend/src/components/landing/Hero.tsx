@@ -5,26 +5,9 @@ import {
   GraduationCap,
   HeartHandshake,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import Footprints from "@/components/playful/Footprints";
 import Reveal from "@/components/playful/Reveal";
 import { LANDING_COPY } from "@/lib/landing/copy";
-
-const NOTE_BG = [
-  "bg-note-yellow",
-  "bg-note-mint",
-  "bg-note-peach",
-  "bg-note-pink",
-  "bg-note-sky",
-  "bg-note-lavender",
-] as const;
-
-type HeroNoteProps = {
-  title: string;
-  icon: React.ReactNode;
-  index: number;
-  className?: string;
-};
 
 const NOTE_ICONS = [
   GitBranch,
@@ -34,41 +17,12 @@ const NOTE_ICONS = [
   HeartHandshake,
 ] as const;
 
-/** Sticky note — sekarang statis (diam). Tanpa drag/hover/bob/parallax. */
-function HeroNote({ title, icon, index, className }: HeroNoteProps) {
-  const slot = index % NOTE_BG.length;
-  return (
-    <div
-      className={cn(
-        "shadow-paper relative px-5 pt-6 pb-4 select-none",
-        NOTE_BG[slot],
-        className,
-      )}
-    >
-      <span
-        aria-hidden
-        className="absolute -top-2.5 left-1/2 h-[18px] w-[62px] -translate-x-1/2 -rotate-3 bg-[rgba(111,119,128,0.28)]"
-      />
-      <div className="text-ink-900 flex items-center gap-2">
-        <span className="shrink-0 [&_svg]:size-6">{icon}</span>
-        <p className="text-lg leading-snug font-extrabold">{title}</p>
-      </div>
-    </div>
-  );
-}
-
-type NoteOrbit = {
-  noteIndex: number;
-  wrapClass: string;
-  tiltClass: string;
-};
-
-const NOTE_ORBITS: NoteOrbit[] = [
-  { noteIndex: 0, wrapClass: "top-[16%] left-[4%]", tiltClass: "-rotate-3" },
-  { noteIndex: 1, wrapClass: "top-[24%] right-[5%]", tiltClass: "rotate-2" },
-  { noteIndex: 2, wrapClass: "bottom-[30%] left-[6%]", tiltClass: "-rotate-2" },
-  { noteIndex: 3, wrapClass: "right-[6%] bottom-[24%]", tiltClass: "rotate-3" },
-];
+const BENEFIT_STYLES = [
+  "bg-note-yellow -rotate-2",
+  "bg-note-mint rotate-2",
+  "bg-note-peach -rotate-1",
+  "bg-note-pink rotate-2",
+] as const;
 
 export default function Hero() {
   const { hero, notes } = LANDING_COPY;
@@ -108,34 +62,22 @@ export default function Hero() {
               {hero.sub}
             </p>
             <Footprints className="mt-4 justify-center opacity-60 [&_svg]:w-4" />
+            <div className="mt-8 flex max-w-3xl flex-wrap justify-center gap-3 sm:gap-4">
+              {notes.slice(0, 4).map((note, index) => {
+                const Icon = NOTE_ICONS[index];
+                return (
+                  <span
+                    key={note.title}
+                    className={`text-ink-900 inline-flex items-center gap-2 rounded-full border-2 border-ink-900 px-4 py-2 text-xs font-extrabold shadow-button transition-transform duration-200 hover:-translate-y-1 sm:px-5 sm:py-2.5 sm:text-sm ${BENEFIT_STYLES[index]}`}
+                  >
+                    <Icon aria-hidden className="size-4 sm:size-[18px]" />
+                    {note.title}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </Reveal>
-      </div>
-
-      {/* Gugusan notes — statis (diam) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 hidden lg:block"
-      >
-        {NOTE_ORBITS.map((orbit) => {
-          const note = notes[orbit.noteIndex];
-          return (
-            <div
-              key={orbit.noteIndex}
-              className={cn("absolute", orbit.wrapClass)}
-            >
-              <HeroNote
-                title={note.title}
-                icon={(() => {
-                  const Icon = NOTE_ICONS[orbit.noteIndex % NOTE_ICONS.length];
-                  return <Icon />;
-                })()}
-                index={orbit.noteIndex}
-                className={orbit.tiltClass}
-              />
-            </div>
-          );
-        })}
       </div>
     </section>
   );

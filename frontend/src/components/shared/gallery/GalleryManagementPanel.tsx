@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   Camera,
   Eye,
@@ -43,7 +43,6 @@ import {
   useDummyGallery,
   type DummyGalleryFormValues,
   type DummyGalleryItem,
-  type DummyGalleryVariant,
 } from '@/lib/gallery/dummy-gallery'
 import { cn } from '@/lib/utils'
 
@@ -55,45 +54,26 @@ type DialogState =
 type DeleteState = { uid: string; caption: string } | null
 
 export function GalleryManagementPanel() {
-  const { items, create, update, remove } = useDummyGallery()
   const [search, setSearch] = useState('')
   const [variantFilter, setVariantFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(15)
 
+  const { items, meta, create, update, remove } = useDummyGallery({
+    page,
+    perPage: pageSize,
+    search,
+    variant: variantFilter,
+  })
+
   const [dialogState, setDialogState] = useState<DialogState>({ mode: 'closed' })
   const [deleteTarget, setDeleteTarget] = useState<DeleteState>(null)
   const [previewItem, setPreviewItem] = useState<DummyGalleryItem | null>(null)
 
-  // Filter items
-  const filtered = useMemo(() => {
-    let result = items
-    const query = search.trim().toLowerCase()
-    if (query) {
-      result = result.filter((item) =>
-        item.caption.toLowerCase().includes(query),
-      )
-    }
-
-    if (variantFilter !== 'all') {
-      if (variantFilter === 'auto') {
-        result = result.filter((item) => item.variant === null)
-      } else {
-        const vNum = Number(variantFilter) as DummyGalleryVariant
-        result = result.filter((item) => item.variant === vNum)
-      }
-    }
-
-    return result
-  }, [items, search, variantFilter])
-
-  // Pagination slice
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const paginatedItems = useMemo(() => {
-    const start = (page - 1) * pageSize
-    return filtered.slice(start, start + pageSize)
-  }, [filtered, page, pageSize])
+  const filtered = items
+  const totalPages = meta?.total_pages ?? 1
+  const paginatedItems = items
 
   const closeDialog = () => setDialogState({ mode: 'closed' })
 
@@ -325,7 +305,7 @@ export function GalleryManagementPanel() {
             <TablePaginationFooter
               page={page}
               totalPages={totalPages}
-              total={filtered.length}
+              total={meta?.total ?? items.length}
               totalLabel="foto dokumentasi"
               pageSize={pageSize}
               pageSizeOptions={[10, 15, 25, 50]}
@@ -428,7 +408,7 @@ export function GalleryManagementPanel() {
           <TablePaginationFooter
             page={page}
             totalPages={totalPages}
-            total={filtered.length}
+            total={meta?.total ?? items.length}
             totalLabel="foto dokumentasi"
             pageSize={pageSize}
             pageSizeOptions={[10, 15, 25, 50]}

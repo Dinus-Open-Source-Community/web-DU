@@ -7,8 +7,8 @@ export const courseKeys = {
   detail: (uid: string) => ['courses', uid] as const,
   students: (courseUid: string, params?: IQueryParamsPayload) =>
     ['course-students', courseUid, params] as const,
-  candidateStudents: (courseUid: string) =>
-    ['course-candidate-students', courseUid] as const,
+  candidateStudents: (courseUid: string, params?: IQueryParamsPayload) =>
+    ['course-candidate-students', courseUid, params] as const,
   mentors: (courseUid: string, params?: IQueryParamsPayload) =>
     ['course-mentors', courseUid, params] as const,
   categories: (params?: IQueryParamsPayload) => ['course-categories', params] as const,

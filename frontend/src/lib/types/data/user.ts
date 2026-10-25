@@ -27,6 +27,7 @@ export interface IUpdatePasswordPayload {
 export interface IUpdateProfilePayload {
   name?: string
   email?: string
+  social_links?: SocialLinkItem[]
 }
 
 export interface IUser {
@@ -119,6 +120,7 @@ export interface IUserData {
   name: string
   email: string
   avatar_url: string
+  social_links?: SocialLinkItem[]
   role: UserRole
   is_verified: boolean
   created_at: string
@@ -128,6 +130,8 @@ export interface IUserData {
   mentored_courses: ICourseEnrollmentDetail[]
   course_reviews: ICourseReview[]
 }
+
+import type { SocialLinkItem } from '@/lib/profile/social-links'
 
 /** Alias backward-compat. */
 export type CourseDetail = ICourseEnrollmentDetail

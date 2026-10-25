@@ -239,7 +239,7 @@ export default function VerifyOtpPage() {
                   onChange={(e) => handleDigitChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   disabled={isSubmitting}
-                  className="h-14 w-11 sm:h-16 sm:w-13 rounded-xl border-2 border-ink-900/15 bg-paper-white text-center font-mono text-2xl font-extrabold text-ink-900 shadow-[0_2px_0_#050914] transition-all hover:border-ink-900/30 focus:border-brand-blue focus:shadow-[0_4px_0_#050914] focus:outline-none disabled:opacity-50"
+                  className="h-14 w-11 sm:h-16 sm:w-13 rounded-xl border-2 border-ink-900/15 bg-paper-white text-center font-mono text-2xl font-extrabold text-ink-900 shadow-none transition-all hover:border-ink-900/30 focus:border-brand-blue focus:shadow-none focus:outline-none disabled:opacity-50"
                   aria-label={`Digit ke ${index + 1}`}
                 />
               ))}

@@ -15,6 +15,13 @@ type PersonSelectionDialogProps<T extends PersonSelectionItem> = {
   confirmLabel: string
   searchPlaceholder: string
   items: T[]
+  itemsCount?: number
+  isLoading?: boolean
+  isLoadingMore?: boolean
+  hasMore?: boolean
+  onLoadMore?: () => void
+  onOpenChange?: (open: boolean) => void
+  onSearchChange?: (value: string) => void
   emptyTitle: string
   emptyDescription: string
   onConfirm: (item: T) => void | Promise<void>
@@ -29,6 +36,13 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
   confirmLabel,
   searchPlaceholder,
   items,
+  itemsCount,
+  isLoading = false,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore,
+  onOpenChange,
+  onSearchChange,
   emptyTitle,
   emptyDescription,
   onConfirm,
@@ -54,7 +68,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
 
     setQuery('')
     setSelectedId(items[0]?.uid ?? '')
-  }, [items, open])
+  }, [open])
 
   useEffect(() => {
     if (filteredItems.length === 0) return
@@ -76,7 +90,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); onOpenChange?.(nextOpen) }}>
       <DialogTrigger asChild>
         <Button className="h-10 shrink-0 rounded-sm px-4">
           <TriggerIcon className="mr-1.5 h-4 w-4" aria-hidden />
@@ -92,17 +106,19 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
         <div className="flex flex-col gap-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={searchPlaceholder} className="h-11 rounded-xl pl-10" />
+            <Input value={query} onChange={(event) => { const value = event.target.value; setQuery(value); onSearchChange?.(value) }} placeholder={searchPlaceholder} className="h-11 rounded-xl pl-10" />
           </div>
 
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-input bg-muted px-4 py-3 text-xs text-muted-foreground">
-            <span>{filteredItems.length} hasil cocok</span>
+            <span>{itemsCount ?? filteredItems.length} hasil cocok</span>
             <span>Pilih satu item lalu lanjutkan</span>
           </div>
 
-          <DialogScrollArea className="h-[420px] rounded-2xl border border-input bg-muted/50 p-2">
+          <DialogScrollArea className="h-[420px] rounded-2xl border border-input bg-muted/50 p-2" onScroll={(event) => { const element = event.currentTarget; if (element.scrollTop + element.clientHeight >= element.scrollHeight - 72 && hasMore && !isLoadingMore) onLoadMore?.() }}>
             <div className="flex flex-col gap-2 p-1">
-              {filteredItems.length === 0 ? (
+              {isLoading ? (
+                <div className="flex min-h-[320px] items-center justify-center px-6 text-center"><p className="text-sm text-muted-foreground">Memuat data...</p></div>
+              ) : filteredItems.length === 0 ? (
                 <div className="flex min-h-[320px] flex-col items-center justify-center gap-2 px-6 text-center">
                   <p className="text-sm font-semibold text-foreground">{emptyTitle}</p>
                   <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{emptyDescription}</p>
@@ -142,6 +158,7 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
                   )
                 })
               )}
+              {isLoadingMore ? <div className="py-3 text-center text-xs text-muted-foreground" aria-live="polite">Memuat data berikutnya...</div> : null}
             </div>
           </DialogScrollArea>
 

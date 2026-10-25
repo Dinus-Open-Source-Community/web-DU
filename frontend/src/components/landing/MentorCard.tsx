@@ -2,7 +2,7 @@ import { DialogTrigger } from '@/components/ui/dialog'
 import { SOCIAL_ICONS } from '@/components/profile/SettingsSocialSection'
 import Reveal from '@/components/playful/Reveal'
 import MentorDetailModal from '@/components/landing/MentorDetailModal'
-import { mentorInitials, type LandingMentor } from '@/lib/landing/mentors'
+import type { LandingMentor } from '@/lib/landing/mentors'
 import { socialPlatformLabel } from '@/lib/profile/social-links'
 import { cn } from '@/lib/utils'
 
@@ -32,12 +32,6 @@ export default function MentorCard({ mentor, index = 0, className }: MentorCardP
             >
               {/* Foto profil persegi */}
               <div className={cn('relative aspect-square w-full border-b-2 border-ink-900', FALLBACK_BG[index % FALLBACK_BG.length])}>
-                <span
-                  aria-hidden
-                  className="font-display absolute inset-0 grid place-items-center text-6xl font-bold text-ink-900/20"
-                >
-                  {mentorInitials(mentor.name)}
-                </span>
                 <img
                   src={mentor.photo}
                   alt=""
@@ -54,10 +48,9 @@ export default function MentorCard({ mentor, index = 0, className }: MentorCardP
                   {mentor.name}
                 </h3>
                 <p className="mt-0.5 text-xs font-bold text-brand-ink sm:text-sm">{mentor.role}</p>
-
                 {/* Course yang diajar */}
                 <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={`Course yang diajar ${mentor.name}`}>
-                  {mentor.courses.map((course) => (
+                {mentor.courses.map((course) => (
                     <li
                       key={course}
                       className="rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-700"

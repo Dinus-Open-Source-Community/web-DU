@@ -101,7 +101,7 @@ export const API_ROUTES = {
     getProgressByUid: (uid: Uid) => `/courses/${uid}/progress`,
     getStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) =>
       withQuery(`/courses/${uid}/students`, params),
-    getCandidateStudentsByUid: (uid: Uid) => `/courses/${uid}/candidate-students`,
+    getCandidateStudentsByUid: (uid: Uid, params?: IQueryParamsPayload) => withQuery(`/courses/${uid}/candidate-students`, params),
     addParticipantsByUid: (uid: Uid) => `/courses/${uid}/participants`,
     assignments: {
       getAllByCourseUid: (courseUid: Uid, params?: IQueryParamsPayload) =>
@@ -167,6 +167,7 @@ export const API_ROUTES = {
       createByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment`,
       updateByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment`,
       deleteByLessonUid: (lessonUid: Uid) => `/lessons/${lessonUid}/assignment`,
+      uploadImage: `/lessons/assignment/upload-image`,
       submission: {
         getByLessonUid: (lessonUid: Uid) =>
           `/lessons/${lessonUid}/assignment/submission`,

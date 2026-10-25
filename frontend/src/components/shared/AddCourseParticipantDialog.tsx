@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UserPlus } from 'lucide-react'
 
 import { UserPromoteDialog } from '@/components/admin/user-manage/UserPromoteDialog'
@@ -16,14 +16,42 @@ export function AddCourseParticipantDialog({
   courseUid,
   triggerClassName,
 }: AddCourseParticipantDialogProps) {
-  const candidatesQuery = useCourseCandidateStudents(courseUid)
+  const [open, setOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [candidates, setCandidates] = useState<ReturnType<typeof rowsToPromoteCandidates>>([])
+  const candidatesQuery = useCourseCandidateStudents(courseUid, {
+    page,
+    per_page: 20,
+    search: search || undefined,
+  }, { enabled: open })
   const addParticipants = useAddCourseParticipants()
 
-  const candidates = useMemo(() => {
+  const loadedCandidates = useMemo(() => {
     const rawUsers = candidatesQuery.data?.users ?? []
     const students = mapManagedUsers(rawUsers, toAdminStudent).map(studentToRow)
     return rowsToPromoteCandidates(students, 'Siswa')
   }, [candidatesQuery.data?.users])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setSearch(searchInput.trim()), 300)
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
+
+  useEffect(() => {
+    setPage(1)
+    setCandidates([])
+  }, [search])
+
+  useEffect(() => {
+    if (!open || !candidatesQuery.data) return
+    setCandidates((current) => {
+      if (page === 1) return loadedCandidates
+      const existing = new Set(current.map((candidate) => candidate.uid))
+      return [...current, ...loadedCandidates.filter((candidate) => !existing.has(candidate.uid))]
+    })
+  }, [candidatesQuery.data, loadedCandidates, open, page])
 
   const handleConfirm = useCallback(
     async (uids: string[]) => {
@@ -52,6 +80,22 @@ export function AddCourseParticipantDialog({
       }
       footerHint={(name) => `${name} akan didaftarkan sebagai peserta kursus ini.`}
       candidates={candidates}
+      candidateCount={candidatesQuery.data?.total}
+      candidatesLoading={candidatesQuery.isLoading}
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) {
+          setSearch('')
+          setSearchInput('')
+          setPage(1)
+          setCandidates([])
+        }
+      }}
+      onSearchChange={setSearchInput}
+      hasMore={page < (candidatesQuery.data?.total_pages ?? 1)}
+      isLoadingMore={candidatesQuery.isFetching && !candidatesQuery.isLoading}
+      onLoadMore={() => setPage((current) => current + 1)}
       onConfirm={handleConfirm}
     />
   )

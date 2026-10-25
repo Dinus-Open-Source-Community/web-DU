@@ -251,6 +251,9 @@ export { fetchModulesByCourseUid }
 export interface CourseCandidateStudentsResponse {
   users: ManagedUserItem[]
   total: number
+  current_page?: number
+  per_page?: number
+  total_pages?: number
 }
 
 export interface AddCourseParticipantsPayload {
@@ -264,10 +267,10 @@ export interface AddCourseParticipantsResponse {
   added_uids: string[]
 }
 
-export async function fetchCourseCandidateStudents(courseUid: string) {
+export async function fetchCourseCandidateStudents(courseUid: string, params?: IQueryParamsPayload) {
   const validatedUid = parseCourseUidParam(courseUid)
   const response = await api.get<IResponse<CourseCandidateStudentsResponse>>(
-    API_ROUTES.courses.getCandidateStudentsByUid(validatedUid),
+    API_ROUTES.courses.getCandidateStudentsByUid(validatedUid, params),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil kandidat peserta kursus')
 }

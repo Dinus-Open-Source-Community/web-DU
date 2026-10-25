@@ -37,12 +37,12 @@ export function useCourseDetailManageView({
   const deleteCourseMutation = useDeleteCourse()
   const replyCourseReview = useReplyCourseReview()
   const updateCourse = useUpdateCourse()
-  const formOptions = useCourseFormOptions()
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [submittingReviewUid, setSubmittingReviewUid] = useState<string | null>(null)
+  const formOptions = useCourseFormOptions(editOpen)
 
   const course = Array.isArray(dataCourse) ? dataCourse[0] : dataCourse
   const isAdmin = role === 'admin'

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import ManageCourseSection from '../../components/shared/ManageCourse'
 import { useCreateCourseActions } from '@/hooks/course-form/use-create-course-actions'
@@ -8,7 +9,8 @@ import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 const Courses = () => {
   const { data } = useCourses()
   const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
-  const formOptions = useCourseFormOptions()
+  const [createOpen, setCreateOpen] = useState(false)
+  const formOptions = useCourseFormOptions(createOpen)
   const createCourse = useCreateCourseActions()
 
   return (
@@ -22,6 +24,8 @@ const Courses = () => {
           data={data?.courses || []}
           formOptions={formOptions}
           createCourse={createCourse}
+          createOpen={createOpen}
+          onCreateOpenChange={setCreateOpen}
         />
       </div>
     </AppSidebarProvider>

@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/shared/Header'
 import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
 import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
 import { MentorKpiGrid } from '@/components/mentor/dashboard/MentorKpiGrid'
+import { useCallback } from 'react'
 import { useMentorDashboard } from '@/hooks/use-mentor-dashboard'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { mentorDashboardLayout } from '@/lib/layout/mentor-dashboard-layout'
@@ -29,13 +30,18 @@ function ChartSkeleton({ height = 280 }: { height?: number }) {
   )
 }
 
-function CalendarSkeleton() {
-  return <div className={mentorDashboardLayout.calendarSkeleton} />
-}
-
 export default function MentorDashboardPage() {
   const sidebarUser = useSidebarUser('mentor')
-  const { kpis, schedules, scheduleTimeline } = useMentorDashboard()
+  const { kpis, schedules, scheduleTimeline, setCalendarRange } = useMentorDashboard()
+  const handleCalendarRangeChange = useCallback(
+    (from: string, to: string) => {
+      setCalendarRange((current) => {
+        if (current.from === from && current.to === to) return current
+        return { ...current, from, to }
+      })
+    },
+    [setCalendarRange],
+  )
 
   return (
     <MentorAppPageShell user={sidebarUser}>
@@ -78,10 +84,11 @@ export default function MentorDashboardPage() {
             message={schedules.error?.message ?? 'Terjadi kesalahan saat memuat jadwal'}
             onRetry={() => schedules.refetch()}
           />
-        ) : schedules.isLoading ? (
-          <CalendarSkeleton />
         ) : (
-          <CalendarView schedules={schedules.data ?? []} />
+          <CalendarView
+            schedules={schedules.data ?? []}
+            onVisibleRangeChange={handleCalendarRangeChange}
+          />
         )}
       </ChartCard>
     </MentorAppPageShell>

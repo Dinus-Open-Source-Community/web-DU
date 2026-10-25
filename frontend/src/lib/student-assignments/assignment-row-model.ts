@@ -30,18 +30,47 @@ export function getEffectiveAssignmentStatus(
   return assignment.status
 }
 
-export function getDeadlineUrgency(assignment: IMentorCourseAssignment, now: Date): DeadlineUrgency {
-  const effective = getEffectiveAssignmentStatus(assignment, now)
-  if (effective === 'closed' || assignment.status === 'draft') {
-    return effective === 'draft' ? 'ok' : 'closed'
-  }
+export function getDeadlineUrgency(
+  assignment: IMentorCourseAssignment,
+  now: Date,
+  submission?: IMentorAssignmentSubmission | null,
+): DeadlineUrgency {
+  if (assignment.status === 'draft') return 'ok'
 
   const deadline = parseDeadlineTimestamp(assignment.deadlineAt)
-  if (deadline == null) return 'ok'
 
-  const current = now.getTime()
-  if (current > deadline) return 'overdue'
-  if (deadline - current <= DUE_SOON_MS) return 'due_soon'
+  // 1. Jika deadline lewat
+  if (deadline != null && now.getTime() > deadline) {
+    // Jika tugas sudah dinilai mentor (selesai), tidak perlu ditandai terlambat/overdue
+    if (submission?.reviewStatus === 'graded') {
+      return 'ok'
+    }
+
+    // Jika siswa mengumpulkan sebelum atau tepat saat deadline (tepat waktu)
+    if (submission?.submittedAt) {
+      const submittedTime = parseDeadlineTimestamp(submission.submittedAt)
+      if (submittedTime != null && submittedTime <= deadline) {
+        return 'ok'
+      }
+    }
+
+    // Siswa belum mengumpulkan ATAU mengumpulkan terlambat
+    return 'overdue'
+  }
+
+  // 2. Jika status ditutup secara manual oleh mentor tanpa deadline lewat
+  if (assignment.status === 'closed') {
+    return 'closed'
+  }
+
+  // 3. Jika mendekati tenggat (<= 72 jam) dan belum selesai
+  if (deadline != null && deadline - now.getTime() <= DUE_SOON_MS) {
+    if (submission?.reviewStatus === 'graded') {
+      return 'ok'
+    }
+    return 'due_soon'
+  }
+
   return 'ok'
 }
 
@@ -69,7 +98,7 @@ export function toStudentAssignmentRows(
     .map((item) => ({
       ...item,
       latestSubmission: item.latestSubmission ?? null,
-      deadlineUrgency: getDeadlineUrgency(item.assignment, now),
+      deadlineUrgency: getDeadlineUrgency(item.assignment, now, item.latestSubmission),
       rowKind: getRowKind(item.latestSubmission),
     }))
     .sort((a, b) => {

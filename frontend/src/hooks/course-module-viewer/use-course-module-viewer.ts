@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { toShortUid } from '@/lib/routes'
 
 import {
   flattenLessons,
@@ -19,6 +20,9 @@ import {
   resolveActiveLessonDetail,
 } from '@/lib/course-module-viewer/resolve-active-lesson'
 import { useLessonDetails } from '@/hooks/course-module-viewer/use-lesson-details'
+import { useQueries } from '@tanstack/react-query'
+import { fetchLessonsByModuleUid } from '@/services/lessons'
+import { lessonKeys } from '@/hooks/query-keys'
 import {
   buildLessonSearchItems,
   filterLessonSearchItems,
@@ -36,6 +40,30 @@ import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/subm
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
 import { useAppTheme } from '@/providers/theme-provider'
 import { useStudentMyAssignments } from '@/hooks/student-assignments/use-student-my-assignments'
+
+export function getViewerPath(
+  pathname: string,
+  courseUid: string,
+  lessonUid?: string | null,
+  pane?: CourseViewerPane | null,
+): string {
+  const shortCourse = toShortUid(courseUid)
+  const shortLesson = lessonUid ? toShortUid(lessonUid) : null
+  const isDashboard = pathname.startsWith('/dashboard/learning/courses')
+
+  let targetPath = isDashboard
+    ? shortLesson
+      ? `/dashboard/learning/courses/${shortCourse}/${shortLesson}`
+      : `/dashboard/learning/courses/${shortCourse}`
+    : shortLesson
+      ? `/course/${shortCourse}/view/${shortLesson}`
+      : `/course/${shortCourse}/view`
+
+  if (pane && pane !== 'lesson') {
+    targetPath += '?pane=assignment'
+  }
+  return targetPath
+}
 
 export type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 export type {
@@ -62,18 +90,19 @@ export function useCourseModuleViewer({
   onSubmitAssignmentError,
 }: UseCourseModuleViewerOptions): CourseModuleViewerViewModel {
   const hasAppliedInitialUrlState = useRef(false)
+  const location = useLocation()
   const navigate = useNavigate()
   const searchContext = useOptionalNavbarSearch()
   const localSearchInputRef = useRef<HTMLInputElement>(null)
   const { theme } = useAppTheme()
 
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [viewerPane, setViewerPane] = useState<CourseViewerPane>('lesson')
+  const initialLessonQuery = useLessonByUid(initialLessonUid ?? '')
 
   const trackLessonReading = variant === 'student'
   const isStudent = variant === 'student'
@@ -82,14 +111,50 @@ export function useCourseModuleViewer({
     { fetchAll: true, enabled: isStudent && Boolean(courseUid) },
   )
   const courseTitle = mentorCourse?.title ?? repoCourse?.title ?? ''
-  const modulesState = useMemo(() => storedModules ?? [], [storedModules])
+  const moduleIdsToLoad = useMemo(() => {
+    const firstModuleId = storedModules?.[0]?.uid
+    const ids = new Set(expandedModules)
+    const initialModuleId = initialLessonQuery.data?.module_uid
+    if (initialModuleId) ids.add(initialModuleId)
+    if (firstModuleId && ids.size === 0) ids.add(firstModuleId)
+    return [...ids]
+  }, [expandedModules, initialLessonQuery.data?.module_uid, storedModules])
+  const loadedModuleQueries = useQueries({
+    queries: moduleIdsToLoad.map((moduleUid) => ({
+      queryKey: lessonKeys.byModule(moduleUid, { per_page: 100 }),
+      queryFn: () => fetchLessonsByModuleUid(moduleUid, { per_page: 100 }),
+      enabled: Boolean(moduleUid),
+    })),
+  })
+  const modulesState = useMemo(
+    () =>
+      (storedModules ?? []).map((module) => ({
+        ...module,
+        lessons:
+          loadedModuleQueries[moduleIdsToLoad.indexOf(module.uid)]?.data?.lessons ?? module.lessons ?? [],
+      })),
+    [loadedModuleQueries, moduleIdsToLoad, storedModules],
+  )
   const lessonEntries = useMemo(() => flattenLessons(modulesState), [modulesState])
   const lessonUids = useMemo(
     () => lessonEntries.map((entry) => entry.lesson.uid),
     [lessonEntries],
   )
-  const lessonDetails = useLessonDetails(lessonUids, true)
-  const effectiveActiveLessonId = activeLessonId ?? lessonEntries[0]?.lesson.uid ?? null
+  const lessonDetails = useLessonDetails(lessonUids, !isStudent)
+  const matchedEntry = useMemo(() => {
+    if (!initialLessonUid || lessonEntries.length === 0) return null
+    return (
+      lessonEntries.find(
+        (entry) =>
+          toShortUid(entry.lesson.uid) === toShortUid(initialLessonUid) ||
+          entry.lesson.uid === initialLessonUid,
+      ) ?? null
+    )
+  }, [initialLessonUid, lessonEntries])
+
+  // Single source of truth: URL > fallback ke materi pertama
+  const effectiveActiveLessonId =
+    matchedEntry?.lesson.uid ?? (initialLessonUid ? null : lessonEntries[0]?.lesson.uid ?? null)
   const hasCachedActiveLessonDetail = Boolean(
     effectiveActiveLessonId && lessonDetails.detailsByUid.has(effectiveActiveLessonId),
   )
@@ -167,20 +232,44 @@ export function useCourseModuleViewer({
     return firstModuleId ? new Set([firstModuleId]) : expandedModules
   }, [activeEntry?.module.uid, expandedModules, modulesState])
 
+  const handleViewerPaneChange = useCallback(
+    (nextPane: CourseViewerPane) => {
+      setViewerPane(nextPane)
+      if (effectiveActiveLessonId) {
+        const targetUrl = getViewerPath(
+          location.pathname,
+          courseUid,
+          effectiveActiveLessonId,
+          nextPane,
+        )
+        const currentUrl = location.pathname + (location.search || '')
+        if (currentUrl !== targetUrl) {
+          navigate(targetUrl, { replace: true })
+        }
+      }
+    },
+    [courseUid, effectiveActiveLessonId, location.pathname, location.search, navigate],
+  )
+
   const selectLesson = useCallback(
     (lessonId: string, moduleId?: string) => {
       const targetModuleId =
         moduleId ?? lessonEntries.find((entry) => entry.lesson.uid === lessonId)?.module.uid
 
-      setActiveLessonId(lessonId)
       setViewerPane('lesson')
       if (targetModuleId) {
         setExpandedModules(new Set([targetModuleId]))
       }
       setIsLocalSearchOpen(false)
       setSearchQuery('')
+
+      const targetUrl = getViewerPath(location.pathname, courseUid, lessonId, 'lesson')
+      const currentUrl = location.pathname + (location.search || '')
+      if (currentUrl !== targetUrl) {
+        navigate(targetUrl)
+      }
     },
-    [lessonEntries],
+    [courseUid, lessonEntries, location.pathname, location.search, navigate],
   )
 
   const selectAssignment = useCallback(
@@ -188,15 +277,20 @@ export function useCourseModuleViewer({
       const targetModuleId =
         moduleId ?? lessonEntries.find((entry) => entry.lesson.uid === lessonId)?.module.uid
 
-      setActiveLessonId(lessonId)
       setViewerPane('assignment')
       if (targetModuleId) {
         setExpandedModules(new Set([targetModuleId]))
       }
       setIsLocalSearchOpen(false)
       setSearchQuery('')
+
+      const targetUrl = getViewerPath(location.pathname, courseUid, lessonId, 'assignment')
+      const currentUrl = location.pathname + (location.search || '')
+      if (currentUrl !== targetUrl) {
+        navigate(targetUrl)
+      }
     },
-    [lessonEntries],
+    [courseUid, lessonEntries, location.pathname, location.search, navigate],
   )
 
   const navigateToLessonEntry = useCallback(
@@ -237,29 +331,73 @@ export function useCourseModuleViewer({
 
   const footerHandlers = useMemo(
     () => ({
-      setViewerPane,
+      setViewerPane: handleViewerPaneChange,
       navigateToLessonEntry,
       navigateToAssignmentEntry,
       ...(isStudent ? { navigateToLearningHome } : {}),
     }),
-    [isStudent, navigateToAssignmentEntry, navigateToLearningHome, navigateToLessonEntry],
+    [handleViewerPaneChange, isStudent, navigateToAssignmentEntry, navigateToLearningHome, navigateToLessonEntry],
   )
 
+  // Otomatis buka accordion modul yang memuat materi aktif
   useEffect(() => {
-    if (hasAppliedInitialUrlState.current || lessonEntries.length === 0) return
-    if (!initialLessonUid) return
+    if (!matchedEntry) return
+    setExpandedModules((prev) =>
+      prev.has(matchedEntry.module.uid) ? prev : new Set([...prev, matchedEntry.module.uid]),
+    )
+  }, [matchedEntry])
 
-    const entry = lessonEntries.find((item) => item.lesson.uid === initialLessonUid)
-    if (!entry) return
-
-    hasAppliedInitialUrlState.current = true
-    setActiveLessonId(initialLessonUid)
-    setExpandedModules(new Set([entry.module.uid]))
-
-    if (initialViewerPane === 'assignment') {
-      setViewerPane('assignment')
+  // Inisialisasi pane jika ada query param ?pane=assignment pada URL
+  useEffect(() => {
+    if (!hasAppliedInitialUrlState.current) {
+      hasAppliedInitialUrlState.current = true
+      if (initialViewerPane === 'assignment') {
+        setViewerPane('assignment')
+      }
     }
-  }, [initialLessonUid, initialViewerPane, lessonEntries])
+  }, [initialViewerPane])
+
+  // Redirect otomatis hanya jika URL belum memuat lessonUid, atau lessonUid tidak valid
+  useEffect(() => {
+    if (lessonEntries.length === 0) return
+
+    // 1. Jika URL tidak memuat lessonUid, arahkan ke lesson pertama dengan short UID
+    if (!initialLessonUid) {
+      const firstLessonUid = lessonEntries[0]?.lesson.uid
+      if (firstLessonUid) {
+        const targetUrl = getViewerPath(
+          location.pathname,
+          courseUid,
+          firstLessonUid,
+          initialViewerPane,
+        )
+        navigate(targetUrl, { replace: true })
+      }
+      return
+    }
+
+    // 2. Jika URL memuat lessonUid tetapi tidak cocok dengan lesson manapun, fallback ke lesson pertama
+    if (!matchedEntry) {
+      const firstLessonUid = lessonEntries[0]?.lesson.uid
+      if (firstLessonUid) {
+        const targetUrl = getViewerPath(
+          location.pathname,
+          courseUid,
+          firstLessonUid,
+          initialViewerPane,
+        )
+        navigate(targetUrl, { replace: true })
+      }
+    }
+  }, [
+    courseUid,
+    initialLessonUid,
+    initialViewerPane,
+    lessonEntries,
+    location.pathname,
+    matchedEntry,
+    navigate,
+  ])
 
   const lastMarkedLessonIdRef = useRef<string | null>(null)
 
@@ -511,7 +649,7 @@ export function useCourseModuleViewer({
     onSelectAssignment: selectAssignment,
     onSearchQueryChange: setSearchQuery,
     onCloseSearch: () => setIsLocalSearchOpen(false),
-    onViewerPaneChange: setViewerPane,
+    onViewerPaneChange: handleViewerPaneChange,
     onSubmitAssignment: handleSubmitAssignment,
     mentorCourse,
     repoCourse,

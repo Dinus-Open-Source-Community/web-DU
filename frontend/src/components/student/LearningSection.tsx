@@ -5,7 +5,7 @@ import { UnderlineTabList } from "../shared/UnderlineTabList";
 import { Pagination } from "../shared/Pagination";
 import type { IUserData } from "@/lib/types/user";
 import JoinedCourseCard from "../shared/JoinedCourseCard";
-import { PublicLottieIllustration } from "@/components/playful/PublicLottieIllustration";
+import { PlayfulEmptyIllustration, type PlayfulEmptyVariant } from "@/components/playful/PublicLottieIllustration";
 import { appCardClassName } from "@/lib/design/app-shell-tokens";
 import { studentDashboardLayout } from "@/lib/layout/student-dashboard-layout";
 import { gridCardsClassName } from "@/lib/layout/page-layout";
@@ -48,23 +48,23 @@ function getCourseNotFoundText(filter: CourseFilterType): string {
   }
 }
 
-function getCourseCategoryLottieSrc(
+function getCourseCategoryVariant(
   filter: CourseFilterType,
   hasSearchMismatch: boolean,
-): string {
+): PlayfulEmptyVariant {
   if (hasSearchMismatch) {
-    return "/lotties/nothing.json";
+    return "nothing";
   }
   switch (filter) {
     case "Sedang Berjalan":
-      return "/lotties/waiting-review.json";
+      return "pending_review";
     case "Baru":
-      return "/lotties/happy-nothave-task.json";
+      return "todo";
     case "Selesai":
-      return "/lotties/no-graded.json";
+      return "done";
     case "Semua":
     default:
-      return "/lotties/nothing.json";
+      return "nothing";
   }
 }
 
@@ -124,7 +124,7 @@ function LearningCourseEmptyState({
     hasSearchMismatch,
   );
 
-  const lottieSrc = getCourseCategoryLottieSrc(filter, hasSearchMismatch);
+  const variant = getCourseCategoryVariant(filter, hasSearchMismatch);
 
   return (
     <div
@@ -133,8 +133,8 @@ function LearningCourseEmptyState({
         "flex flex-col items-center px-6 py-16 text-center",
       )}
     >
-      <PublicLottieIllustration
-        src={lottieSrc}
+      <PlayfulEmptyIllustration
+        variant={variant}
         className="mb-1 max-w-[12rem]"
       />
       <h3 className="mb-2 text-xl font-bold text-ink-900">{title}</h3>

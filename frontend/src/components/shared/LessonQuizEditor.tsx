@@ -2,11 +2,8 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, GripVertical, CheckCircle2 } from 'lucide-react'
-import type { IRichTextEnvelope, IQuiz, IQuizOption, IQuizQuestion } from '../../lib/types/course'
-
-function promptToEditableText(prompt: string | IRichTextEnvelope): string {
-  return typeof prompt === 'string' ? prompt : prompt.contentHtml
-}
+import type { IQuiz, IQuizOption, IQuizQuestion } from '../../lib/types/course'
+import { QuizQuestionTiptapEditor } from './QuizQuestionTiptapEditor'
 import { Button } from '../ui/button'
 
 type LessonQuizEditorProps = {
@@ -87,16 +84,21 @@ export function LessonQuizEditor({ quiz, onChange }: LessonQuizEditorProps) {
           <div className="flex items-start gap-2">
             <GripVertical className="mt-2 size-3.5 shrink-0 text-ink-400" />
             <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="shrink-0 text-xs font-bold text-ink-500">Q{qi + 1}</span>
-                <input
-                  type="text"
-                  value={promptToEditableText(q.prompt)}
-                  onChange={(e) => updateQuestion(q.id, (x) => ({ ...x, prompt: e.target.value }))}
+              <div className="flex items-start gap-2">
+                <span className="shrink-0 pt-2 text-xs font-bold text-ink-500">Q{qi + 1}</span>
+                <QuizQuestionTiptapEditor
+                  key={q.id}
+                  value={q.prompt}
+                  onChange={(envelope) => updateQuestion(q.id, (x) => ({ ...x, prompt: envelope }))}
                   placeholder="Tulis pertanyaan..."
-                  className="flex-1 rounded-lg border border-line-light bg-paper-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/30"
+                  className="flex-1 min-w-0"
                 />
-                <button type="button" onClick={() => removeQuestion(q.id)} className="shrink-0 rounded p-1 text-ink-400 hover:bg-red-50 hover:text-red-500" title="Hapus pertanyaan">
+                <button
+                  type="button"
+                  onClick={() => removeQuestion(q.id)}
+                  className="mt-2 shrink-0 rounded p-1 text-ink-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  title="Hapus pertanyaan"
+                >
                   <Trash2 className="size-3.5" />
                 </button>
               </div>

@@ -40,9 +40,10 @@ export function CourseDetailOverviewSection({
         </div>
         <Button
           type="button"
-          variant="outline"
-          size="sm"
-          className={cn(manageDetailLayout.actionButton, 'h-9 shrink-0 px-3 text-xs')}
+          className={cn(
+            'h-11 shrink-0 gap-2 rounded-sm border-2 border-ink-900/10 bg-primary px-5 font-semibold text-white shadow-none hover:bg-brand-hover',
+            manageDetailLayout.actionButton,
+          )}
           onClick={() => onNavigateToTab(tab)}
         >
           {tabLabel}

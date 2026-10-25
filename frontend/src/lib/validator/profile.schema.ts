@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SOCIAL_PLATFORM_OPTIONS, type SocialPlatform } from '@/lib/profile/social-links'
 import {
   avatarUploadFileSchema,
   currentPasswordSchema,
@@ -22,6 +23,13 @@ export const updateProfileSchema = z
       const trimmed = value.trim()
       return trimmed === '' ? undefined : trimmed
     }, emailSchema.optional()),
+    social_links: z.array(z.object({
+      id: z.string(),
+      platform: z.custom<SocialPlatform>((value) =>
+        typeof value === 'string' && SOCIAL_PLATFORM_OPTIONS.some((option) => option.value === value),
+      ),
+      url: z.string().url(),
+    })).optional(),
   })
   .refine((data) => data.name !== undefined || data.email !== undefined, {
     message: 'Minimal satu data profil harus diisi',

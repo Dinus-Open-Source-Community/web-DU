@@ -72,22 +72,42 @@ export function validateDummyGalleryForm(values: DummyGalleryFormValues): string
 /**
  * Hook data galeri yang terhubung ke backend `/galleries` & Garage S3 Storage.
  */
-export function useDummyGallery() {
-  const [items, setItems] = useState<DummyGalleryItem[]>(() => cachedGalleryItems ?? [])
-  const [isLoading, setIsLoading] = useState<boolean>(() => cachedGalleryItems === null)
+type GalleryQueryOptions = {
+  page?: number
+  perPage?: number
+  search?: string
+  variant?: string
+}
+
+type GalleryMeta = {
+  total: number
+  total_pages: number
+}
+
+export function useDummyGallery(options: GalleryQueryOptions = {}) {
+  const isPaginated = options.page !== undefined || options.perPage !== undefined || Boolean(options.search) || Boolean(options.variant && options.variant !== 'all')
+  const [items, setItems] = useState<DummyGalleryItem[]>(() => !isPaginated ? (cachedGalleryItems ?? []) : [])
+  const [isLoading, setIsLoading] = useState<boolean>(() => isPaginated || cachedGalleryItems === null)
+  const [meta, setMeta] = useState<GalleryMeta | undefined>(undefined)
 
   const reload = useCallback(async () => {
     try {
-      const res = await fetchGalleries({ per_page: 100 })
+      const res = await fetchGalleries({
+        page: options.page,
+        per_page: isPaginated ? options.perPage : 100,
+        search: options.search || undefined,
+        variant: options.variant && options.variant !== 'all' ? options.variant : undefined,
+      })
       const mapped = (res.galleries ?? []).map(mapApiToGalleryItem)
-      cachedGalleryItems = mapped
+      if (!isPaginated) cachedGalleryItems = mapped
       setItems(mapped)
+      setMeta({ total: res.meta.total, total_pages: res.meta.total_pages })
     } catch {
       // Keep existing state if backend request fails temporarily
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [isPaginated, options.page, options.perPage, options.search, options.variant])
 
   useEffect(() => {
     void reload()
@@ -153,5 +173,5 @@ export function useDummyGallery() {
     await reload()
   }, [reload])
 
-  return { items, isLoading, reload, create, update, remove, resetToSeed }
+  return { items, isLoading, meta, reload, create, update, remove, resetToSeed }
 }

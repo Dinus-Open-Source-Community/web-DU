@@ -133,15 +133,6 @@ export function LessonAssignmentWork({
 
         {isQuiz ? (
           <section className="space-y-8 border-t border-input pt-6">
-            <h2
-              className={cn(
-                "text-sm font-semibold",
-                isDark ? "text-zinc-200" : "text-foreground",
-              )}
-            >
-              Soal
-            </h2>
-
             {quiz?.questions.length ? (
               <div className="space-y-8">
                 {quiz.questions.map((question, index) => (

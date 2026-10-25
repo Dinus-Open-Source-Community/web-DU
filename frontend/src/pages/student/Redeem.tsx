@@ -97,7 +97,7 @@ export default function StudentRedeemPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className={cn(appCardClassName, 'p-6 sm:p-8 lg:col-span-2')}>
             <div className="flex items-start gap-4">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border-2 border-ink-900 bg-note-yellow shadow-button">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border-2 border-ink-900 bg-note-yellow">
                 <Ticket className="size-6 text-ink-900" aria-hidden />
               </div>
               <div>

@@ -23,6 +23,7 @@ interface JoinedCourseCardProps {
   variant?: JoinedCourseCardVariant
   size?: JoinedCourseCardSize
   className?: string
+  showProgress?: boolean
 }
 
 const sizes = {
@@ -50,17 +51,15 @@ const sizes = {
 
 const JoinedCourseCard = ({
   data,
-  variant = 'non-resume',
+  variant: _variant = 'non-resume',
   size = 'md',
   className,
+  showProgress = true,
 }: JoinedCourseCardProps) => {
   const progress = toLearningProgressPercent(data.progress)
   const progressLabel = formatLearningProgressLabel(data.progress)
   const isComplete =
     isLearningProgressComplete(data.progress) && data.enrollment_status === 'completed'
-  const isResume =
-    variant === 'resume' || (data.enrollment_status === 'active' && progress > 0)
-  const showProgress = isResume || isComplete || progress > 0
   const image = data.cover_url || data.thumbnail_url
   const actionLabel = isComplete ? 'Belajar lagi' : 'Lanjut'
   const profiles = resolveCourseProfiles(data)

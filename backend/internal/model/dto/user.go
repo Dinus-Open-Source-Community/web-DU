@@ -1,5 +1,7 @@
 package dto
 
+import "encoding/json"
+
 // UpdateUserRoleRequest is the body for PATCH /user/role/{id}. Allowed JSON role values: admin (callers must be super_admin), mentor, student. super_admin cannot be assigned via this route.
 type UpdateUserRoleRequest struct {
 	Role string `json:"role" binding:"required" example:"mentor"`
@@ -13,8 +15,9 @@ type BatchUpdateUserRoleRequest struct {
 
 // UpdateUserProfileRequest represents profile update payload
 type UpdateUserProfileRequest struct {
-	Name  *string `json:"name"`
-	Email *string `json:"email"`
+	Name        *string         `json:"name"`
+	Email       *string         `json:"email"`
+	SocialLinks json.RawMessage `json:"social_links"`
 }
 
 // ChangePasswordRequest represents change password payload

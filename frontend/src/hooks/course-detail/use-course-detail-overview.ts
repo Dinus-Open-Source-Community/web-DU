@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { courseKeys } from '@/hooks/query-keys'
 import { fetchCourseAssignments } from '@/services/course-assignments'
 
-const OVERVIEW_ASSIGNMENTS_PARAMS = { per_page: 100 } as const
+const OVERVIEW_ASSIGNMENTS_PARAMS = { page: 1, per_page: 5 } as const
 
 export function useCourseDetailOverviewAssignments(courseUid: string, enabled: boolean) {
   const query = useQuery({
