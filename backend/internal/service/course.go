@@ -878,8 +878,6 @@ func GetCourseByIDFunc(c *gin.Context) {
 	var course entity.Course
 	if err := database.DB.Preload("Modules", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
-	}).Preload("Modules.Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
 	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -1120,16 +1118,16 @@ func JoinCourseFunc(c *gin.Context) {
 }
 
 type CourseStudentSafeItem struct {
-	EnrollmentUid       uuid.UUID               `json:"enrollment_uid"`
-	StudentUid          uuid.UUID               `json:"student_uid"`
-	StudentName         string                  `json:"student_name"`
-	StudentAvatarURL    string                  `json:"student_avatar_url,omitempty"`
-	EnrolledAt          time.Time               `json:"enrolled_at"`
-	Progress            float64                 `json:"progress"`
-	Status              entity.EnrollmentStatus `json:"status"`
-	AttendancePresent   int                     `json:"attendance_present"`
-	AttendanceTotal     int                     `json:"attendance_total"`
-	LastActiveAt        *time.Time              `json:"last_active_at,omitempty"`
+	EnrollmentUid     uuid.UUID               `json:"enrollment_uid"`
+	StudentUid        uuid.UUID               `json:"student_uid"`
+	StudentName       string                  `json:"student_name"`
+	StudentAvatarURL  string                  `json:"student_avatar_url,omitempty"`
+	EnrolledAt        time.Time               `json:"enrolled_at"`
+	Progress          float64                 `json:"progress"`
+	Status            entity.EnrollmentStatus `json:"status"`
+	AttendancePresent int                     `json:"attendance_present"`
+	AttendanceTotal   int                     `json:"attendance_total"`
+	LastActiveAt      *time.Time              `json:"last_active_at,omitempty"`
 }
 
 func countCourseLessons(courseUID uuid.UUID) int {

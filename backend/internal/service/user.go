@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
 	"net/http"
@@ -106,7 +107,7 @@ func GetUserDetailByIDService(c *gin.Context) {
 
 func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	var userData entity.User
-	if err := database.DB.Select("uid", "name", "email", "avatar_url", "role", "is_verified", "created_at").First(&userData, targetUID).Error; err != nil {
+	if err := database.DB.Select("uid", "name", "email", "avatar_url", "social_links", "role", "is_verified", "created_at").First(&userData, targetUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "User not found",
@@ -268,32 +269,32 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 	// --- akhir kalkulasi progress ---
 
 	// --- batch query: assignment submission per course ---
-	// Ambil semua submission assignment milik user di course-course yang diikuti,
+	// Ambil semua assignment (termasuk yang belum dikumpulkan) milik user di course-course yang diikuti,
 	// beserta info module dan lesson tempat assignment itu berada.
 	type assignmentSubmissionRow struct {
-		SubmissionUID        uuid.UUID  `gorm:"column:submission_uid"`
-		AttemptCount        int        `gorm:"column:attempt_count"`
-		ScorePercent        *float64   `gorm:"column:score_percent"`
-		Passed              *bool      `gorm:"column:passed"`
-		IsAutoGraded        bool       `gorm:"column:is_auto_graded"`
-		SubmittedAt         time.Time  `gorm:"column:submitted_at"`
-		GradedAt            *time.Time `gorm:"column:graded_at"`
-		AssignmentUID       uuid.UUID  `gorm:"column:assignment_uid"`
-		AssignmentTitle     string     `gorm:"column:assignment_title"`
-		AssignmentStatus    string     `gorm:"column:assignment_status"`
-		AssignmentTaskType  string     `gorm:"column:assignment_task_type"`
-		AssignmentDeadline  time.Time  `gorm:"column:assignment_deadline"`
-		LessonUID           uuid.UUID  `gorm:"column:lesson_uid"`
-		LessonTitle         string     `gorm:"column:lesson_title"`
-		LessonOrderIndex    int        `gorm:"column:lesson_order_index"`
-		ModuleUID           uuid.UUID  `gorm:"column:module_uid"`
-		ModuleTitle         string     `gorm:"column:module_title"`
-		ModuleOrderIndex    int        `gorm:"column:module_order_index"`
-		CourseUID           uuid.UUID  `gorm:"column:course_uid"`
+		SubmissionUID      *uuid.UUID `gorm:"column:submission_uid"`
+		AttemptCount       *int       `gorm:"column:attempt_count"`
+		ScorePercent       *float64   `gorm:"column:score_percent"`
+		Passed             *bool      `gorm:"column:passed"`
+		IsAutoGraded       *bool      `gorm:"column:is_auto_graded"`
+		SubmittedAt        *time.Time `gorm:"column:submitted_at"`
+		GradedAt           *time.Time `gorm:"column:graded_at"`
+		AssignmentUID      uuid.UUID  `gorm:"column:assignment_uid"`
+		AssignmentTitle    string     `gorm:"column:assignment_title"`
+		AssignmentStatus   string     `gorm:"column:assignment_status"`
+		AssignmentTaskType string     `gorm:"column:assignment_task_type"`
+		AssignmentDeadline time.Time  `gorm:"column:assignment_deadline"`
+		LessonUID          uuid.UUID  `gorm:"column:lesson_uid"`
+		LessonTitle        string     `gorm:"column:lesson_title"`
+		LessonOrderIndex   int        `gorm:"column:lesson_order_index"`
+		ModuleUID          uuid.UUID  `gorm:"column:module_uid"`
+		ModuleTitle        string     `gorm:"column:module_title"`
+		ModuleOrderIndex   int        `gorm:"column:module_order_index"`
+		CourseUID          uuid.UUID  `gorm:"column:course_uid"`
 	}
 	var assignmentSubmissionRows []assignmentSubmissionRow
 	if len(courseUIDs) > 0 {
-		database.DB.Table("lesson_assignment_submissions AS sub").
+		database.DB.Table("lesson_assignments AS la").
 			Select(`
 				sub.uid AS submission_uid,
 				sub.attempt_count AS attempt_count,
@@ -314,29 +315,37 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 				m.title AS module_title,
 				m.order_index AS module_order_index,
 				m.course_uid AS course_uid`).
-			Joins("JOIN lesson_assignments la ON la.uid = sub.lesson_assignment_uid").
 			Joins("JOIN lessons l ON l.uid = la.lesson_uid").
 			Joins("JOIN modules m ON m.uid = l.module_uid").
-			Where("sub.user_uid = ? AND m.course_uid IN ?", targetUID, courseUIDs).
-			Order("sub.created_at DESC").
+			Joins("LEFT JOIN lesson_assignment_submissions sub ON sub.lesson_assignment_uid = la.uid AND sub.user_uid = ?", targetUID).
+			Where("m.course_uid IN ? AND la.status = ?", courseUIDs, entity.LessonAssignmentStatusTerbit).
+			Order("la.deadline_at ASC").
 			Scan(&assignmentSubmissionRows)
 	}
 	// Group submission per course_uid
 	assignmentsByCourse := make(map[uuid.UUID][]gin.H)
 	for _, row := range assignmentSubmissionRows {
+		attemptCount := 0
+		if row.AttemptCount != nil {
+			attemptCount = *row.AttemptCount
+		}
+		isAutoGraded := false
+		if row.IsAutoGraded != nil {
+			isAutoGraded = *row.IsAutoGraded
+		}
 		assignmentsByCourse[row.CourseUID] = append(assignmentsByCourse[row.CourseUID], gin.H{
-			"submission_uid":  row.SubmissionUID,
-			"attempt_count":   row.AttemptCount,
-			"score_percent":   row.ScorePercent,
-			"passed":          row.Passed,
-			"is_auto_graded":  row.IsAutoGraded,
-			"submitted_at":    row.SubmittedAt,
-			"graded_at":       row.GradedAt,
+			"submission_uid": row.SubmissionUID,
+			"attempt_count":  attemptCount,
+			"score_percent":  row.ScorePercent,
+			"passed":         row.Passed,
+			"is_auto_graded": isAutoGraded,
+			"submitted_at":   row.SubmittedAt,
+			"graded_at":      row.GradedAt,
 			"assignment": gin.H{
-				"uid":        row.AssignmentUID,
-				"title":      utils.DecryptOrSelf(row.AssignmentTitle),
-				"status":     row.AssignmentStatus,
-				"task_type":  row.AssignmentTaskType,
+				"uid":         row.AssignmentUID,
+				"title":       utils.DecryptOrSelf(row.AssignmentTitle),
+				"status":      row.AssignmentStatus,
+				"task_type":   row.AssignmentTaskType,
 				"deadline_at": row.AssignmentDeadline,
 			},
 			"lesson": gin.H{
@@ -521,6 +530,7 @@ func respondUserDetail(c *gin.Context, targetUID uuid.UUID) {
 			"name":           nameDecrypted,
 			"email":          emailDecrypted,
 			"avatar_url":     userData.AvatarURL,
+			"social_links":   json.RawMessage(userData.SocialLinks),
 			"role":           userData.Role,
 			"is_verified":    userData.IsVerified,
 			"created_at":     userData.CreatedAt,
@@ -564,7 +574,7 @@ func UpdateUserProfileService(c *gin.Context) {
 		return
 	}
 
-	if req.Name == nil && req.Email == nil {
+	if req.Name == nil && req.Email == nil && req.SocialLinks == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "No profile fields provided",
@@ -586,6 +596,14 @@ func UpdateUserProfileService(c *gin.Context) {
 	}
 
 	updateData := map[string]any{}
+	if req.SocialLinks != nil {
+		var links []map[string]string
+		if err := json.Unmarshal(req.SocialLinks, &links); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid social links", "data": nil, "error": err.Error()})
+			return
+		}
+		updateData["social_links"] = req.SocialLinks
+	}
 
 	if req.Name != nil {
 		name := strings.TrimSpace(*req.Name)

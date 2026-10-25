@@ -104,6 +104,7 @@ func mapCourseAssignmentListRow(row courseAssignmentListRow) gin.H {
 // @Param        page      query  int     false  "Page number (default: 1)"
 // @Param        per_page  query  int     false  "Items per page (default: 50, max: 100)"
 // @Param        status    query  string  false  "Filter by assignment status (DRAFT, TERBIT, DITUTUP)"
+// @Param        task_type query  string  false  "Filter by task type (quiz, text)"
 // @Success      200  {object}  map[string]any  "Course assignments retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied"
@@ -168,6 +169,9 @@ func GetCourseAssignmentsFunc(c *gin.Context) {
 	if statusFilter := c.Query("status"); statusFilter != "" {
 		db = db.Where("la.status = ?", statusFilter)
 	}
+	if taskTypeFilter := c.Query("task_type"); taskTypeFilter == "quiz" || taskTypeFilter == "text" {
+		db = db.Where("la.task_type = ?", taskTypeFilter)
+	}
 
 	var total int64
 	countDB := database.DB.Table("lesson_assignments AS la").
@@ -176,6 +180,9 @@ func GetCourseAssignmentsFunc(c *gin.Context) {
 		Where("m.course_uid = ?", courseUID)
 	if statusFilter := c.Query("status"); statusFilter != "" {
 		countDB = countDB.Where("la.status = ?", statusFilter)
+	}
+	if taskTypeFilter := c.Query("task_type"); taskTypeFilter == "quiz" || taskTypeFilter == "text" {
+		countDB = countDB.Where("la.task_type = ?", taskTypeFilter)
 	}
 	if err := countDB.Count(&total).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -425,9 +432,9 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 	items := make([]gin.H, 0, len(rows))
 	for _, row := range rows {
 		item := gin.H{
-			"course_uid":   row.CourseUID,
-			"course_title": utils.DecryptOrSelf(row.CourseTitle),
-			"assignment":   mapCourseAssignmentListRow(row.toCourseAssignmentListRow()),
+			"course_uid":        row.CourseUID,
+			"course_title":      utils.DecryptOrSelf(row.CourseTitle),
+			"assignment":        mapCourseAssignmentListRow(row.toCourseAssignmentListRow()),
 			"latest_submission": nil,
 		}
 		if row.SubmissionUID != nil {

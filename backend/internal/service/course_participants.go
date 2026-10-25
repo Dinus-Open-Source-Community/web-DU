@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"backend/internal/database"
@@ -103,16 +104,35 @@ func GetCourseCandidateStudentsFunc(c *gin.Context) {
 		return
 	}
 
-	// Ambil semua student yang BELUM terdaftar di kursus ini
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 {
+		perPage = 20
+	}
+	if perPage > 100 {
+		perPage = 100
+	}
+
+	// Ambil student yang BELUM terdaftar di kursus ini secara bertahap.
 	subQuery := database.DB.Table("enrollments").Select("user_uid").Where("course_uid = ? AND user_uid IS NOT NULL", course.Uid)
+	baseQuery := database.DB.Model(&entity.User{}).Where("role = ? AND uid NOT IN (?)", entity.StudentRole, subQuery)
+	var total int64
+	if err := baseQuery.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to count candidate students", "data": nil, "error": err.Error()})
+		return
+	}
 
 	var students []entity.User
-	if err := database.DB.Where("role = ? AND uid NOT IN (?)", entity.StudentRole, subQuery).
+	if err := baseQuery.
 		Preload("Enrollments", func(db *gorm.DB) *gorm.DB {
 			return db.Order("enrolled_at DESC")
 		}).
 		Preload("Enrollments.Course").
 		Order("created_at DESC").
+		Offset((page - 1) * perPage).Limit(perPage).
 		Find(&students).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -145,8 +165,11 @@ func GetCourseCandidateStudentsFunc(c *gin.Context) {
 		"success": true,
 		"message": "Candidate students retrieved successfully",
 		"data": gin.H{
-			"users": result,
-			"total": len(result),
+			"users":        result,
+			"total":        total,
+			"current_page": page,
+			"per_page":     perPage,
+			"total_pages":  (total + int64(perPage) - 1) / int64(perPage),
 		},
 		"error": nil,
 	})
