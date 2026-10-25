@@ -14,7 +14,7 @@ interface IFeedbackCardProps {
 
 export default function FeedbackCard({ status, time, title, comment, instructor }: IFeedbackCardProps) {
   return (
-    <div className={cn(appCardClassName, 'max-w-full overflow-hidden p-4 shadow-none transition-colors hover:bg-paper-paper')}>
+    <div className={cn(appCardClassName, 'min-h-[210px] max-w-full overflow-hidden p-4 shadow-none transition-colors hover:bg-paper-paper')}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div
           className={cn(

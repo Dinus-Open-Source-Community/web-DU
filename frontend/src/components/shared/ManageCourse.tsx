@@ -53,6 +53,8 @@ type CourseManagementSectionProps = {
   data: ICourseItem[] | null
   formOptions?: CourseFormOptionsViewModel
   createCourse?: CreateCourseActions
+  createOpen?: boolean
+  onCreateOpenChange?: (open: boolean) => void
 }
 
 export default function ManageCourseSection({
@@ -60,11 +62,15 @@ export default function ManageCourseSection({
   data,
   formOptions,
   createCourse,
+  createOpen: controlledCreateOpen,
+  onCreateOpenChange,
 }: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
   const [activeFilter, setActiveFilter] = useState<CourseFilter>('Semua')
   const [currentPage, setCurrentPage] = useState(1)
-  const [createOpen, setCreateOpen] = useState(false)
+  const [internalCreateOpen, setInternalCreateOpen] = useState(false)
+  const createOpen = controlledCreateOpen ?? internalCreateOpen
+  const setCreateOpen = onCreateOpenChange ?? setInternalCreateOpen
   const courses = useMemo(() => data ?? ([] as ICourseItem[]), [data])
 
   useEffect(() => {

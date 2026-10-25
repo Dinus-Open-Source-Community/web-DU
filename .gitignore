@@ -23,3 +23,6 @@ blob-report/
 /.impeccable/
 /.superpowers/
 /docs
+/tests/tokens.json
+/tests/assets.json
+/results/

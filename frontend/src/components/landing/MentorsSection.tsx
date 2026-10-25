@@ -4,8 +4,9 @@ import { ArrowRight } from 'lucide-react'
 import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
 import MentorCard from '@/components/landing/MentorCard'
-import { LANDING_MENTORS } from '@/lib/landing/mentors'
 import { LANDING_COPY } from '@/lib/landing/copy'
+import { usePublicMentors } from '@/hooks/use-public-mentors'
+import type { LandingMentor } from '@/lib/landing/mentors'
 
 /** Jumlah mentor pratinjau di beranda — selebihnya di halaman /mentors. */
 export const MENTOR_PREVIEW_COUNT = 4
@@ -16,7 +17,20 @@ export const MENTOR_PREVIEW_COUNT = 4
  */
 export default function MentorsSection() {
   const { mentors } = LANDING_COPY
-  const preview = LANDING_MENTORS.slice(0, MENTOR_PREVIEW_COUNT)
+  const { data, isLoading, isError } = usePublicMentors()
+  const preview: LandingMentor[] = data?.mentors.map((mentor) => ({
+    uid: mentor.uid,
+    name: mentor.name,
+    email: mentor.email,
+    role: mentor.role,
+    photo: mentor.avatar_url,
+    courses: [],
+    assignedCourses: mentor.assigned_courses,
+    joinedTeachingCourses: mentor.joined_teach_courses,
+    isVerified: mentor.is_verified,
+    createdAt: mentor.created_at,
+    socials: mentor.social_links ?? [],
+  })) ?? []
 
   return (
     <section id="mentor" className="relative overflow-hidden bg-paper-offwhite">
@@ -48,11 +62,17 @@ export default function MentorsSection() {
         </div>
 
         {/* Grid kartu profil kompak */}
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
-          {preview.map((mentor, i) => (
-            <MentorCard key={mentor.name} mentor={mentor} index={i} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5" aria-label="Memuat mentor">
+            {Array.from({ length: MENTOR_PREVIEW_COUNT }).map((_, i) => <div key={i} className="aspect-square animate-pulse rounded-[20px] bg-ink-900/10" />)}
+          </div>
+        ) : isError ? (
+          <p className="text-ink-600 mt-10 text-center">Data mentor belum dapat dimuat.</p>
+        ) : (
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
+            {preview.slice(0, MENTOR_PREVIEW_COUNT).map((mentor, i) => <MentorCard key={mentor.uid} mentor={mentor} index={i} />)}
+          </div>
+        )}
 
         <Reveal className="mt-10 flex justify-center sm:mt-14">
           <Link

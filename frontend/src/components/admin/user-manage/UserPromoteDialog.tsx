@@ -31,6 +31,14 @@ type UserPromoteDialogProps = {
   emptyDescription: string
   footerHint: (name: string) => string
   candidates: PromoteCandidate[]
+  candidateCount?: number
+  candidatesLoading?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onSearchChange?: (value: string) => void
+  hasMore?: boolean
+  isLoadingMore?: boolean
+  onLoadMore?: () => void
   onConfirm: (uids: string[]) => Promise<void>
 }
 
@@ -53,12 +61,26 @@ export function UserPromoteDialog({
   emptyDescription,
   footerHint,
   candidates,
+  candidateCount,
+  candidatesLoading = false,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  onSearchChange,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
   onConfirm,
 }: UserPromoteDialogProps) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedUids, setSelectedUids] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const open = openProp ?? internalOpen
+
+  const setOpen = (nextOpen: boolean) => {
+    if (openProp === undefined) setInternalOpen(nextOpen)
+    onOpenChangeProp?.(nextOpen)
+  }
 
   const filteredCandidates = useMemo(() => {
     const normalized = query.toLowerCase().trim()
@@ -173,7 +195,11 @@ export function UserPromoteDialog({
             />
             <Input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value
+                setQuery(value)
+                onSearchChange?.(value)
+              }}
               placeholder={searchPlaceholder}
               className="h-10 rounded-xl border-2 border-ink-900/10 bg-paper-paper pl-10 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus-visible:border-brand-blue focus-visible:bg-paper-white focus-visible:ring-brand-blue/25"
             />
@@ -181,7 +207,9 @@ export function UserPromoteDialog({
 
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-light bg-paper-paper px-4 py-2.5 text-xs font-medium text-ink-600">
             <div className="flex items-center gap-2">
-              <span>{filteredCandidates.length} kandidat cocok</span>
+              <span>
+                {candidateCount ?? filteredCandidates.length} kandidat cocok
+              </span>
               <span className="text-ink-400" aria-hidden>
                 •
               </span>
@@ -225,9 +253,18 @@ export function UserPromoteDialog({
             role="listbox"
             aria-multiselectable="true"
             aria-label="Daftar kandidat"
+            onScroll={(event) => {
+              const element = event.currentTarget
+              const reachedBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 72
+              if (reachedBottom && hasMore && !isLoadingMore && onLoadMore) onLoadMore()
+            }}
           >
             <div className="space-y-2 p-1">
-              {filteredCandidates.length === 0 ? (
+              {candidatesLoading ? (
+                <div className="flex min-h-[260px] items-center justify-center rounded-lg border border-dashed border-line-medium bg-paper-white px-6 text-center">
+                  <p className="text-sm font-medium text-ink-500">Memuat kandidat siswa...</p>
+                </div>
+              ) : filteredCandidates.length === 0 ? (
                 <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-line-medium bg-paper-white px-6 text-center">
                   <p className="text-sm font-bold text-ink-800">{emptyTitle}</p>
                   <p className="max-w-sm text-xs font-medium leading-relaxed text-ink-500">
@@ -276,6 +313,12 @@ export function UserPromoteDialog({
                   )
                 })
               )}
+              {isLoadingMore ? (
+                <div className="flex items-center justify-center gap-2 py-3 text-xs font-medium text-ink-500" aria-live="polite">
+                  <span className="size-3 animate-spin rounded-full border-2 border-line-medium border-t-brand-blue" aria-hidden />
+                  Memuat kandidat berikutnya...
+                </div>
+              ) : null}
             </div>
           </DialogScrollArea>
 

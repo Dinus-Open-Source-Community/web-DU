@@ -14,6 +14,11 @@ export const AUTH_COOKIE_EXPIRES_AT = 'du_auth_expires_at'
 const DEFAULT_SESSION_DAYS = 1
 const AUTH_CHANGE_EVENT = 'du-auth-change'
 
+let inFlightProfileRequest: {
+  token: string
+  promise: Promise<IUserData>
+} | null = null
+
 interface AuthContextValue {
   user: IAuthSessionUser | null
   role: UserRole | null
@@ -110,6 +115,16 @@ function getAuthToken() {
   return getApiAuthToken()
 }
 
+function getAuthenticatedUserOnce(token: string): Promise<IUserData> {
+  if (inFlightProfileRequest?.token === token) return inFlightProfileRequest.promise
+
+  const promise = getAuthenticatedUser().finally(() => {
+    if (inFlightProfileRequest?.promise === promise) inFlightProfileRequest = null
+  })
+  inFlightProfileRequest = { token, promise }
+  return promise
+}
+
 function setAuthUser(user: IAuthSessionUser) {
   Cookies.set(AUTH_COOKIE_USER, JSON.stringify(user), {
     expires: DEFAULT_SESSION_DAYS,
@@ -178,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const nextProfile = await getAuthenticatedUser()
+      const nextProfile = await getAuthenticatedUserOnce(currentToken)
       const sessionUser = toSessionUser(nextProfile)
       applySession(sessionUser, nextProfile)
       return nextProfile

@@ -15,15 +15,17 @@ import { useAuth } from '@/providers/auth-provider'
 import type { ICourseDetailItem, IModulesDetail } from '@/lib/types/course'
 
 export default function CourseViewPage() {
-  const { courseUid } = useParams()
+  const { courseUid, lessonUid } = useParams()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
 
-  const initialLessonUid = searchParams.get('lesson')
+  const initialLessonUid = lessonUid ?? searchParams.get('lesson')
   const initialViewerPane: CourseViewerPane | null =
     searchParams.get('pane') === 'assignment' ? 'assignment' : null
 
-  const { courseDetail, modules, lessonsByModule, isLoading } = useCourseEditData(courseUid ?? '')
+  const { courseDetail, modules, lessonsByModule, isLoading } = useCourseEditData(courseUid ?? '', {
+    loadLessons: false,
+  })
 
   const storedModules = useMemo<IModulesDetail[]>(
     () =>

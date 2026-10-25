@@ -98,10 +98,11 @@ export function useCourseDetail(uid: string) {
   }
 }
 
-export function useCourseCategories(params?: IQueryParamsPayload) {
+export function useCourseCategories(params?: IQueryParamsPayload, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: courseKeys.categories(params),
     queryFn: () => fetchCourseCategories(params),
+    enabled: options.enabled ?? true,
   })
 }
 
@@ -113,10 +114,11 @@ export function useCourseCategory(uid: string) {
   })
 }
 
-export function useCourseTypes(params?: IQueryParamsPayload) {
+export function useCourseTypes(params?: IQueryParamsPayload, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: courseKeys.types(params),
     queryFn: () => fetchCourseTypes(params),
+    enabled: options.enabled ?? true,
   })
 }
 
@@ -148,11 +150,11 @@ export function useCourseStudents(courseUid: string, params?: IQueryParamsPayloa
   }
 }
 
-export function useCourseCandidateStudents(courseUid: string, options: { enabled?: boolean } = {}) {
+export function useCourseCandidateStudents(courseUid: string, params: IQueryParamsPayload = {}, options: { enabled?: boolean } = {}) {
   const query = useQuery({
-    queryKey: courseKeys.candidateStudents(courseUid),
+    queryKey: courseKeys.candidateStudents(courseUid, params),
     enabled: !!courseUid && (options.enabled ?? true),
-    queryFn: () => fetchCourseCandidateStudents(courseUid),
+    queryFn: () => fetchCourseCandidateStudents(courseUid, params),
   })
 
   const imageReferences = useMemo(
@@ -244,7 +246,8 @@ export function useCourseDetailWithCategories(uid: string) {
 export function useCourseDetailAdminAndMentor(uid: string) {
   const courseDetail = useCourseDetail(uid)
   const userCourse = useCourseStudents(uid)
-  const moduleCourse = useModulesByCourse(uid, { per_page: 100 })
+  // Ringkasan hanya membutuhkan preview; tab Kurikulum mengambil daftar lengkap saat dibuka.
+  const moduleCourse = useModulesByCourse(uid, { page: 1, per_page: 5 })
 
   const isLoading =
     courseDetail.isLoading || userCourse.isLoading || moduleCourse.isLoading
@@ -300,9 +303,10 @@ export function useCourseEditModules(courseUid: string) {
   }
 }
 
-export function useCourseEditData(courseUid: string) {
+export function useCourseEditData(courseUid: string, options: { loadLessons?: boolean } = {}) {
   const courseDetail = useCourseDetail(courseUid)
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
+  const loadLessons = options.loadLessons ?? true
 
   const moduleList = useMemo(() => modulesQuery.data?.modules ?? [], [modulesQuery.data?.modules])
   const moduleUids = useMemo(
@@ -314,7 +318,7 @@ export function useCourseEditData(courseUid: string) {
     queries: moduleUids.map((moduleUid) => ({
       queryKey: lessonKeys.byModule(moduleUid, { per_page: 100 }),
       queryFn: () => fetchLessonsByModuleUid(moduleUid, { per_page: 100 }),
-      enabled: Boolean(courseUid) && modulesQuery.isSuccess && !!moduleUid,
+      enabled: loadLessons && Boolean(courseUid) && modulesQuery.isSuccess && !!moduleUid,
     })),
   })
 
@@ -330,7 +334,7 @@ export function useCourseEditData(courseUid: string) {
 
   const isLoadingLessons = lessonQueries.some((query) => query.isLoading)
   const isLoading =
-    courseDetail.isLoading || modulesQuery.isLoading || isLoadingLessons
+    courseDetail.isLoading || modulesQuery.isLoading || (loadLessons && isLoadingLessons)
   const error =
     courseDetail.error ||
     modulesQuery.error ||

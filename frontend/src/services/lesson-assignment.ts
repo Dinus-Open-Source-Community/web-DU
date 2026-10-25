@@ -140,3 +140,23 @@ export async function submitLessonAssignment(
     }
   }, 'Gagal mengumpulkan tugas')
 }
+
+export async function uploadLessonAssignmentImage(file: File): Promise<string> {
+  return withApiErrorHandling(async () => {
+    const formData = new FormData()
+    formData.append('image', file)
+
+    const response = await api.post<IResponse<{ url: string }>>(
+      API_ROUTES.lessons.assignment.uploadImage,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+    const data = unwrapApiResponse(response.data, 'Gagal mengunggah gambar')
+    return data.url
+  }, 'Gagal mengunggah gambar')
+}
+

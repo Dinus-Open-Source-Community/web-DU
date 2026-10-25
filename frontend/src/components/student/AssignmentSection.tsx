@@ -21,7 +21,7 @@ import { formatAssignmentDeadlineRelative } from '@/lib/student-assignments/form
 import type { StudentAssignmentRow } from '@/lib/student-assignments/assignment-row-model'
 import { buildStudentAssignmentHref } from '@/lib/student-assignments/assignment-navigation'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
-import { PublicLottieIllustration } from '@/components/playful/PublicLottieIllustration'
+import { PlayfulEmptyIllustration, type PlayfulEmptyVariant } from '@/components/playful/PublicLottieIllustration'
 
 type StudentAssignmentsSectionProps = {
   view: StudentAssignmentListViewModel
@@ -132,18 +132,18 @@ function getAssignmentNotFoundText(category: StudentAssignmentFeedCategory): str
   }
 }
 
-function getAssignmentCategoryLottieSrc(category: StudentAssignmentFeedCategory): string {
+function getAssignmentCategoryVariant(category: StudentAssignmentFeedCategory): PlayfulEmptyVariant {
   switch (category) {
     case 'todo':
-      return '/lotties/happy-nothave-task.json'
+      return 'todo'
     case 'pending_review':
-      return '/lotties/waiting-review.json'
+      return 'pending_review'
     case 'done':
-      return '/lotties/no-graded.json'
+      return 'done'
     case 'late':
-      return '/lotties/calm-duedate-task.json'
+      return 'late'
     default:
-      return '/lotties/nothing.json'
+      return 'nothing'
   }
 }
 
@@ -174,12 +174,12 @@ function AssignmentEmptyState({
       ? 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah diterbitkan.'
       : undefined
 
-  const lottieSrc = getAssignmentCategoryLottieSrc(category)
+  const variant = getAssignmentCategoryVariant(category)
 
   return (
     <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
-      <PublicLottieIllustration
-        src={lottieSrc}
+      <PlayfulEmptyIllustration
+        variant={variant}
         className="mb-1 max-w-[12rem]"
       />
       <h3 className="mb-2 text-xl font-bold text-ink-900">{title}</h3>

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { fetchSelfUserData, updateUserProfile } from '@/services/user'
 
 import {
   MAX_SOCIAL_LINKS,
@@ -14,16 +15,34 @@ export type AddSocialLinkOutcome =
   | { ok: true; warning?: string }
   | { ok: false; error: string }
 
-/** CRUD tautan sosial per user (localStorage). Persist otomatis tiap berubah. */
+/** CRUD tautan sosial per user. Persist ke backend dan localStorage sebagai fallback. */
 export function useSocialLinks(userUid: string) {
   const [links, setLinks] = useState<SocialLinkItem[]>([])
+  const hydrated = useRef(false)
 
   useEffect(() => {
-    setLinks(loadSocialLinks(userUid))
+    hydrated.current = false
+    let active = true
+    void fetchSelfUserData()
+      .then((profile) => {
+        if (!active) return
+        setLinks(profile.social_links ?? loadSocialLinks(userUid))
+        hydrated.current = true
+      })
+      .catch(() => {
+        if (active) setLinks(loadSocialLinks(userUid))
+        hydrated.current = true
+      })
+    return () => {
+      active = false
+    }
   }, [userUid])
 
   useEffect(() => {
     persistSocialLinks(userUid, links)
+    if (userUid && hydrated.current) {
+      void updateUserProfile({ social_links: links })
+    }
   }, [links, userUid])
 
   const addSocialLink = useCallback(

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { IScheduleItem } from '@/lib/types/utils'
 import type { ClassType } from '@/lib/types/course'
 import {
@@ -7,6 +7,9 @@ import {
   convertScheduleToCalendarEvents,
   normalizeCalendarEvents,
   sortCalendarEvents,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
   type MentorCalendarEvent,
 } from '@/lib/func/calendar'
 import { CalendarControls } from '@/components/shared/Calendar/CalendarControls'
@@ -15,16 +18,47 @@ import { SessionDetailModal } from './SessionDetailModal'
 
 interface CalendarViewProps {
   schedules: IScheduleItem[]
+  onVisibleRangeChange?: (from: string, to: string) => void
 }
 
 export type CalendarViewMode = 'month' | 'week' | 'day' | 'agenda'
 export type CalendarClassFilter = 'all' | ClassType
 
-export default function CalendarView({ schedules }: CalendarViewProps) {
+export default function CalendarView({ schedules, onVisibleRangeChange }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<CalendarViewMode>('month')
   const [cursorDate, setCursorDate] = useState(new Date())
   const [classFilter, setClassFilter] = useState<CalendarClassFilter>('all')
   const [selectedSession, setSelectedSession] = useState<MentorCalendarEvent | null>(null)
+
+  useEffect(() => {
+    if (!onVisibleRangeChange) return
+
+    let rangeStart: Date
+    let rangeEnd: Date
+
+    if (viewMode === 'month') {
+      const monthStart = startOfMonth(cursorDate)
+      rangeStart = startOfWeek(monthStart)
+      rangeEnd = addDays(rangeStart, 41)
+    } else if (viewMode === 'week') {
+      rangeStart = startOfWeek(cursorDate)
+      rangeEnd = addDays(rangeStart, 6)
+    } else if (viewMode === 'day') {
+      rangeStart = startOfDay(cursorDate)
+      rangeEnd = rangeStart
+    } else {
+      rangeStart = startOfDay(cursorDate)
+      rangeEnd = addDays(rangeStart, 13)
+    }
+
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+    onVisibleRangeChange(formatDate(rangeStart), formatDate(rangeEnd))
+  }, [cursorDate, onVisibleRangeChange, viewMode])
 
   const events = useMemo(() => {
     return normalizeCalendarEvents(convertScheduleToCalendarEvents(schedules, 'backend'))
@@ -40,16 +74,16 @@ export default function CalendarView({ schedules }: CalendarViewProps) {
 
   const moveCursor = (direction: 1 | -1) => {
     if (viewMode === 'month') {
-      setCursorDate(addMonths(cursorDate, direction))
+      setCursorDate((current) => addMonths(current, direction))
       return
     }
 
     if (viewMode === 'day') {
-      setCursorDate(addDays(cursorDate, direction))
+      setCursorDate((current) => addDays(current, direction))
       return
     }
 
-    setCursorDate(addDays(cursorDate, direction * 7))
+    setCursorDate((current) => addDays(current, direction * 7))
   }
 
   return (

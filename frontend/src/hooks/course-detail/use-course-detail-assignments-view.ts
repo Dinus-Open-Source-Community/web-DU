@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
 
 import { useQueryStateEnum } from '@/lib/nuqs-react-router'
 import { useQueryClient } from '@tanstack/react-query'
@@ -39,15 +39,26 @@ export function useCourseDetailAssignmentsView({
   const activeTaskFilter: CourseAssignmentTaskFilter =
     taskFilter ?? DEFAULT_ASSIGNMENT_TASK_FILTER
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const deferredSearchQuery = useDeferredValue(searchQuery)
 
   const {
     sources,
+    meta,
     isLoading,
     isHydratingSubmissions,
     isError,
     error,
-  } = useCourseAssignmentsOverview(courseUid, enabled)
+  } = useCourseAssignmentsOverview(courseUid, enabled, {
+    page,
+    per_page: pageSize,
+    task_type: activeTaskFilter,
+  })
+
+  useEffect(() => {
+    setPage(1)
+  }, [activeTaskFilter, searchQuery])
 
   const itemsForTaskType = useMemo(() => {
     const overviewItems = toAssignmentOverviewItems(sources, role, courseUid, students)
@@ -111,5 +122,14 @@ export function useCourseDetailAssignmentsView({
     assignmentItems,
     itemsForTaskType,
     prefetchSubmissionRoster,
+    page,
+    pageSize,
+    total: meta?.total ?? 0,
+    totalPages: Math.max(meta?.total_pages ?? 1, 1),
+    onPageChange: setPage,
+    onPageSizeChange: (nextPageSize: number) => {
+      setPageSize(nextPageSize)
+      setPage(1)
+    },
   }
 }

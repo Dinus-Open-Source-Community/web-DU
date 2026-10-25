@@ -97,6 +97,10 @@ export function useCourseEditController({
 
   const [course, setCourse] = useState<Partial<ICourseDetailItem> | null>(null);
   const [modules, setModules] = useState<EditableModule[]>([]);
+  const modulesRef = useRef<EditableModule[]>(modules);
+  useEffect(() => {
+    modulesRef.current = modules;
+  }, [modules]);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loadedModuleIds, setLoadedModuleIds] = useState<Set<string>>(
@@ -400,94 +404,98 @@ export function useCourseEditController({
 
   const patchLocalLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
-      let hadRealChange = false;
-      let isChanged = false;
-
-      setModules((previous) => {
-        const next = previous.map((module) => ({
-          ...module,
-          lessons: module.lessons.map((lesson) => {
-            const lessonKey = getLessonKey(lesson);
-            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
-            const updated = updater(lesson);
-            if (isLessonContentEqual(lesson, updated)) return lesson;
-
-            hadRealChange = true;
-            let baseline = lessonBaselinesRef.current.get(lessonId);
-            if (!baseline) {
-              baseline = createLessonContentBaseline(lesson);
-              lessonBaselinesRef.current.set(lessonId, baseline);
-            }
-            isChanged = isLessonContentChanged(updated, baseline);
-            return updated;
-          }),
-        }));
-
-        if (!hadRealChange) {
-          return previous;
-        }
-
-        return next;
-      });
-
-      if (hadRealChange) {
-        setModifiedLessons((prev) => {
-          const nextSet = new Set(prev);
-          if (isChanged) {
-            nextSet.add(lessonId);
-          } else {
-            nextSet.delete(lessonId);
+      let currentLesson: EditableLesson | null = null;
+      for (const moduleItem of modulesRef.current) {
+        for (const item of moduleItem.lessons) {
+          if (getLessonKey(item) === lessonId || item.id === lessonId) {
+            currentLesson = item;
+            break;
           }
-          return nextSet;
-        });
+        }
+        if (currentLesson) break;
       }
+
+      if (!currentLesson) return;
+
+      const updated = updater(currentLesson);
+      if (isLessonContentEqual(currentLesson, updated)) return;
+
+      let baseline = lessonBaselinesRef.current.get(lessonId);
+      if (!baseline) {
+        baseline = createLessonContentBaseline(currentLesson);
+        lessonBaselinesRef.current.set(lessonId, baseline);
+      }
+      const isChanged = isLessonContentChanged(updated, baseline);
+
+      modulesRef.current = modulesRef.current.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+          return updated;
+        }),
+      }));
+
+      setModules(modulesRef.current);
+
+      setModifiedLessons((prev) => {
+        const nextSet = new Set(prev);
+        if (isChanged) {
+          nextSet.add(lessonId);
+        } else {
+          nextSet.delete(lessonId);
+        }
+        return nextSet;
+      });
     },
     [],
   );
 
   const patchAssignmentLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
-      let hadRealChange = false;
-      let isChanged = false;
-
-      setModules((previous) => {
-        const next = previous.map((module) => ({
-          ...module,
-          lessons: module.lessons.map((lesson) => {
-            const lessonKey = getLessonKey(lesson);
-            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
-            const updated = updater(lesson);
-            if (isAssignmentEqual(lesson, updated)) return lesson;
-
-            hadRealChange = true;
-            let baseline = assignmentBaselinesRef.current.get(lessonId);
-            if (!baseline) {
-              baseline = createAssignmentBaseline(lesson);
-              assignmentBaselinesRef.current.set(lessonId, baseline);
-            }
-            isChanged = isAssignmentChanged(updated, baseline);
-            return updated;
-          }),
-        }));
-
-        if (!hadRealChange) {
-          return previous;
-        }
-
-        return next;
-      });
-
-      if (hadRealChange) {
-        setModifiedAssignmentLessons((prev) => {
-          const nextSet = new Set(prev);
-          if (isChanged) {
-            nextSet.add(lessonId);
-          } else {
-            nextSet.delete(lessonId);
+      let currentLesson: EditableLesson | null = null;
+      for (const moduleItem of modulesRef.current) {
+        for (const item of moduleItem.lessons) {
+          if (getLessonKey(item) === lessonId || item.id === lessonId) {
+            currentLesson = item;
+            break;
           }
-          return nextSet;
-        });
+        }
+        if (currentLesson) break;
       }
+
+      if (!currentLesson) return;
+
+      const updated = updater(currentLesson);
+      if (isAssignmentEqual(currentLesson, updated)) return;
+
+      let baseline = assignmentBaselinesRef.current.get(lessonId);
+      if (!baseline) {
+        baseline = createAssignmentBaseline(currentLesson);
+        assignmentBaselinesRef.current.set(lessonId, baseline);
+      }
+      const isChanged = isAssignmentChanged(updated, baseline);
+
+      modulesRef.current = modulesRef.current.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+          return updated;
+        }),
+      }));
+
+      setModules(modulesRef.current);
+
+      setModifiedAssignmentLessons((prev) => {
+        const nextSet = new Set(prev);
+        if (isChanged) {
+          nextSet.add(lessonId);
+        } else {
+          nextSet.delete(lessonId);
+        }
+        return nextSet;
+      });
     },
     [],
   );
@@ -798,29 +806,35 @@ export function useCourseEditController({
           lesson: homeworkLesson,
         });
 
-        setModules((previous) =>
-          previous.map((module) => ({
-            ...module,
-            lessons: module.lessons.map((item) => {
-              const lessonKey = getLessonKey(item);
-              if (lessonKey !== lessonId && item.id !== lessonId) {
-                return item;
-              }
+        const nextHomeworkLesson: EditableLesson = {
+          ...homeworkLesson,
+          homeworkAssignmentUid: result.assignmentUid,
+          hasHomework: Boolean(
+            result.assignmentUid && isHomeworkConfigured(homeworkLesson),
+          ),
+        };
 
-              return {
-                ...item,
-                homeworkAssignmentUid: result.assignmentUid,
-                hasHomework: Boolean(
-                  result.assignmentUid && isHomeworkConfigured(homeworkLesson),
-                ),
-              };
-            }),
-          })),
-        );
+        const nextModules = modulesRef.current.map((module) => ({
+          ...module,
+          lessons: module.lessons.map((item) => {
+            const lessonKey = getLessonKey(item);
+            if (lessonKey !== lessonId && item.id !== lessonId) {
+              return item;
+            }
+
+            return {
+              ...item,
+              ...nextHomeworkLesson,
+            };
+          }),
+        }));
+
+        modulesRef.current = nextModules;
+        setModules(nextModules);
 
         assignmentBaselinesRef.current.set(
           lessonId,
-          createAssignmentBaseline(homeworkLesson),
+          createAssignmentBaseline(nextHomeworkLesson),
         );
 
         setModifiedAssignmentLessons((previous) => {

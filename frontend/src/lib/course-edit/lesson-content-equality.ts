@@ -155,8 +155,11 @@ export function normalizeQuiz(quiz?: EditableLesson['homeworkQuiz'] | null): str
   return JSON.stringify({
     passingScore: quiz.passingScore ?? 70,
     questions: quiz.questions.map((q) => ({
-      prompt: typeof q.prompt === 'string' ? q.prompt.trim() : (q.prompt?.contentHtml ?? '').trim(),
+      id: q.id,
+      prompt: normalizeRichText(typeof q.prompt === 'string' ? q.prompt : q.prompt?.contentHtml),
+      explanation: (q.explanation ?? '').trim(),
       options: (q.options ?? []).map((o) => ({
+        id: o.id,
         label: (o.label ?? '').trim(),
       })),
       correctOptionId: q.correctOptionId,

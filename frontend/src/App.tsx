@@ -154,6 +154,13 @@ const routeConfig: RouteConfig[] = [
     roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
+    path: ROUTES.viewModuleAndLessons(":courseUid", ":lessonUid"),
+    element: <ViewModuleAndLessons />,
+    public: false,
+    lazy: true,
+    roles: ["student", "mentor", "admin", "super_admin"],
+  },
+  {
     path: ROUTES.courseLessons(":courseUid"),
     element: <CourseLessonsPage />,
     public: false,
@@ -344,14 +351,21 @@ const routeConfig: RouteConfig[] = [
     element: <StudentLearning />,
     public: false,
     lazy: true,
-    roles: ["student"],
+    roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.student.learningCourse(":courseUid"),
     element: <StudentLearningCourse />,
     public: false,
     lazy: true,
-    roles: ["student"],
+    roles: ["student", "mentor", "admin", "super_admin"],
+  },
+  {
+    path: ROUTES.student.learningCourse(":courseUid", ":lessonUid"),
+    element: <StudentLearningCourse />,
+    public: false,
+    lazy: true,
+    roles: ["student", "mentor", "admin", "super_admin"],
   },
   {
     path: ROUTES.student.assignments,

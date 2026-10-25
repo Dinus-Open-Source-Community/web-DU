@@ -1,5 +1,15 @@
 import { DASHBOARD_PATH } from './dashboard-route'
 
+/**
+ * Mempersingkat UID ke format 8 karakter (standar prefix UID web-DU).
+ * Mengabaikan parameter rute placeholder seperti ':courseUid' atau ':lessonUid'.
+ */
+export function toShortUid(uid?: string | null): string {
+  if (!uid) return ''
+  if (uid.startsWith(':')) return uid
+  return uid.replace(/-/g, '').slice(0, 8)
+}
+
 export interface RouteChildItem {
   name: string
   path: string
@@ -43,7 +53,10 @@ export const dashboardMenu = {
   ) => dash('courses', courseUid, 'assignments', lessonUid, 'submissions', submissionUid),
   reviewsAndQa: dash('reviews-and-qa'),
   learning: dash('learning'),
-  learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
+  learningCourse: (courseUid: string, lessonUid?: string) =>
+    lessonUid
+      ? dash('learning', 'courses', toShortUid(courseUid), toShortUid(lessonUid))
+      : dash('learning', 'courses', toShortUid(courseUid)),
   assignments: dash('assignments'),
   certificates: dash('certificates'),
   redeem: dash('redeem'),
@@ -57,7 +70,10 @@ export const ROUTES = {
   profile: '/settings',
   courses: '/course',
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
-  viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
+  viewModuleAndLessons: (courseUid: string, lessonUid?: string) =>
+    lessonUid
+      ? `/course/${toShortUid(courseUid)}/view/${toShortUid(lessonUid)}`
+      : `/course/${toShortUid(courseUid)}/view`,
   courseLessons: (courseUid: string) => `/course/${courseUid}/lessons`,
   login: '/auth/login',
   register: '/auth/register',
