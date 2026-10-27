@@ -97,7 +97,7 @@ function Photo({ img, aspect, mobileAspect }: PhotoProps) {
         loading="lazy"
         decoding="async"
         className={cn(
-          'w-full object-cover object-center transition-transform duration-300 group-hover:scale-105',
+          'w-full object-cover object-center',
           aspectCls,
         )}
       />
@@ -381,7 +381,7 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
                         }
                       }}
                       className={cn(
-                        'h-full cursor-pointer rounded-xl transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue',
+                        'h-full cursor-pointer rounded-xl transition-[translate] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:hover:translate-y-0 motion-reduce:transition-none',
                         slot.tilt,
                       )}
                       title={`Klik untuk melihat detail foto: ${img.caption}`}
@@ -514,7 +514,7 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
-  const { items } = useDummyGallery()
+  const { items } = useDummyGallery({ page: 1, perPage: GALLERY_PREVIEW_COUNT })
   const photos: GalleryImage[] = useMemo(() => {
     return items.slice(0, GALLERY_PREVIEW_COUNT).map((item) => ({
       src: item.src,

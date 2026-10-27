@@ -50,7 +50,6 @@ dist-ssr
 dist
 # Gatsby files
 .cache
-package-lock.json
 *.lock
 # Playwright / MCP browser artifacts
 .playwright-mcp/

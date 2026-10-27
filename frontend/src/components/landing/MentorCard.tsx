@@ -13,53 +13,59 @@ type MentorCardProps = {
   mentor: LandingMentor
   index?: number
   className?: string
+  showRole?: boolean
 }
 
 /**
- * Kartu mentor persegi ala profil — foto, nama, course yang diajar, sosmed.
+ * Kartu profil mentor portrait 3:4 — foto, nama, course yang diajar, sosmed.
  * Klik area kartu (foto/nama/course) membuka modal detail.
  */
-export default function MentorCard({ mentor, index = 0, className }: MentorCardProps) {
+export default function MentorCard({ mentor, index = 0, className, showRole = true }: MentorCardProps) {
   return (
-    <Reveal delay={(index % 3) * 0.08} className={cn('h-full', className)}>
-      <article className="group flex h-full flex-col overflow-hidden rounded-[20px] border-2 border-ink-900 bg-paper-white shadow-paper transition-transform duration-300 ease-out hover:-translate-y-1">
+    <Reveal delay={(index % 3) * 0.08} className={cn('w-full', className)}>
+      <article className="flex aspect-[3/4] w-full min-w-0 flex-col overflow-hidden rounded-[20px] border-2 border-ink-900 bg-paper-white shadow-paper transition-[translate] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 motion-reduce:transition-none">
         <MentorDetailModal mentor={mentor} index={index}>
           <DialogTrigger asChild>
             <button
               type="button"
-              aria-label={`Lihat detail ${mentor.name} — ${mentor.role}`}
-              className="block w-full cursor-pointer text-left outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50 focus-visible:ring-inset"
+              aria-label={showRole ? `Lihat detail ${mentor.name} — ${mentor.role}` : `Lihat detail profil ${mentor.name}`}
+              className="flex min-h-0 w-full flex-1 cursor-pointer flex-col text-left outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50 focus-visible:ring-inset"
             >
-              {/* Foto profil persegi */}
-              <div className={cn('relative aspect-square w-full border-b-2 border-ink-900', FALLBACK_BG[index % FALLBACK_BG.length])}>
+              {/* Foto profil mengisi ruang portrait card */}
+              <div className={cn('relative min-h-0 w-full flex-1 overflow-hidden border-b-2 border-ink-900', FALLBACK_BG[index % FALLBACK_BG.length])}>
                 <img
                   src={mentor.photo}
                   alt=""
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'
                   }}
                 />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-3 pb-3 pt-10 sm:px-4 sm:pb-4">
+                  <h3 className="font-sans text-lg leading-tight font-bold text-white sm:text-xl">
+                    {mentor.name}
+                  </h3>
+                </div>
               </div>
 
-              <div className="p-3 sm:p-4">
-                <h3 className="font-display text-lg leading-tight font-bold text-ink-900">
-                  {mentor.name}
-                </h3>
-                <p className="mt-0.5 text-xs font-bold text-brand-ink sm:text-sm">{mentor.role}</p>
-                {/* Course yang diajar */}
-                <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={`Course yang diajar ${mentor.name}`}>
-                {mentor.courses.map((course) => (
-                    <li
-                      key={course}
-                      className="rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-700"
-                    >
-                      {course}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {showRole || mentor.courses.length > 0 ? (
+                <div className="p-3 sm:p-4">
+                  {showRole ? <p className="text-xs font-bold text-brand-ink sm:text-sm">{mentor.role}</p> : null}
+                  {mentor.courses.length > 0 ? (
+                    <ul className={cn('flex flex-wrap gap-1.5', showRole ? 'mt-2' : '')} aria-label={`Course yang diajar ${mentor.name}`}>
+                      {mentor.courses.map((course) => (
+                        <li
+                          key={course}
+                          className="rounded-md border border-line-light bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-700"
+                        >
+                          {course}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
             </button>
           </DialogTrigger>
         </MentorDetailModal>
@@ -88,7 +94,7 @@ export default function MentorCard({ mentor, index = 0, className }: MentorCardP
                   rel="noopener noreferrer"
                   aria-label={`${label} ${mentor.name} (buka di tab baru)`}
                   title={label}
-                  className="text-ink-900 inline-grid size-8 place-items-center rounded-lg border-2 border-ink-900 bg-paper-white shadow-button outline-none transition-all hover:-translate-y-0.5 hover:bg-note-yellow focus-visible:ring-3 focus-visible:ring-ring/30"
+                  className="text-ink-900 inline-grid size-8 place-items-center rounded-lg border-2 border-ink-900 bg-paper-white shadow-button outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
                 >
                   <Icon className="size-3.5" />
                 </a>

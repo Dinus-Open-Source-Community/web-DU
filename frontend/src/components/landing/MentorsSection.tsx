@@ -9,7 +9,7 @@ import { usePublicMentors } from '@/hooks/use-public-mentors'
 import type { LandingMentor } from '@/lib/landing/mentors'
 
 /** Jumlah mentor pratinjau di beranda — selebihnya di halaman /mentors. */
-export const MENTOR_PREVIEW_COUNT = 4
+export const MENTOR_PREVIEW_COUNT = 8
 
 /**
  * Mentors — grid kartu profil persegi: foto, nama, course yang diajar,
@@ -17,7 +17,7 @@ export const MENTOR_PREVIEW_COUNT = 4
  */
 export default function MentorsSection() {
   const { mentors } = LANDING_COPY
-  const { data, isLoading, isError } = usePublicMentors()
+  const { data, isLoading, isError } = usePublicMentors(MENTOR_PREVIEW_COUNT)
   const preview: LandingMentor[] = data?.mentors.map((mentor) => ({
     uid: mentor.uid,
     name: mentor.name,
@@ -64,13 +64,13 @@ export default function MentorsSection() {
         {/* Grid kartu profil kompak */}
         {isLoading ? (
           <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5" aria-label="Memuat mentor">
-            {Array.from({ length: MENTOR_PREVIEW_COUNT }).map((_, i) => <div key={i} className="aspect-square animate-pulse rounded-[20px] bg-ink-900/10" />)}
+            {Array.from({ length: MENTOR_PREVIEW_COUNT }).map((_, i) => <div key={i} className="aspect-[3/4] animate-pulse rounded-[20px] bg-ink-900/10" />)}
           </div>
         ) : isError ? (
           <p className="text-ink-600 mt-10 text-center">Data mentor belum dapat dimuat.</p>
         ) : (
           <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
-            {preview.slice(0, MENTOR_PREVIEW_COUNT).map((mentor, i) => <MentorCard key={mentor.uid} mentor={mentor} index={i} />)}
+            {preview.slice(0, MENTOR_PREVIEW_COUNT).map((mentor, i) => <MentorCard key={mentor.uid} mentor={mentor} index={i} showRole={false} />)}
           </div>
         )}
 

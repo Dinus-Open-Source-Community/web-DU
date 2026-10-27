@@ -40,6 +40,22 @@ export const EMPTY_GALLERY_FORM: DummyGalleryFormValues = {
 const CHANGE_EVENT = 'du:gallery-changed'
 
 let cachedGalleryItems: DummyGalleryItem[] | null = null
+const inFlightGalleryRequests = new Map<
+  string,
+  Promise<Awaited<ReturnType<typeof fetchGalleries>>>
+>()
+
+function fetchGalleriesOnce(params: NonNullable<Parameters<typeof fetchGalleries>[0]>) {
+  const key = JSON.stringify(params)
+  const existingRequest = inFlightGalleryRequests.get(key)
+  if (existingRequest) return existingRequest
+
+  const request = fetchGalleries(params).finally(() => {
+    inFlightGalleryRequests.delete(key)
+  })
+  inFlightGalleryRequests.set(key, request)
+  return request
+}
 
 function mapApiToGalleryItem(item: IGalleryApiItem): DummyGalleryItem {
   const validVariant =
@@ -92,7 +108,7 @@ export function useDummyGallery(options: GalleryQueryOptions = {}) {
 
   const reload = useCallback(async () => {
     try {
-      const res = await fetchGalleries({
+      const res = await fetchGalleriesOnce({
         page: options.page,
         per_page: isPaginated ? options.perPage : 100,
         search: options.search || undefined,
