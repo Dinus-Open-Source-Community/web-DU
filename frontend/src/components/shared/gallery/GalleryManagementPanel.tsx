@@ -17,6 +17,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { PageHeader } from '@/components/shared/Header'
 import { TablePaginationFooter } from '@/components/shared/TablePaginationFooter'
 import { GalleryFormDialog } from '@/components/shared/gallery/GalleryFormDialog'
+import { GallerySkeleton } from '@/components/shared/gallery/GallerySkeleton'
 import { NothingGalleryLottieIllustration } from '@/components/playful/NothingGalleryLottieIllustration'
 import { ScrapbookCard } from '@/components/landing/GallerySection'
 import { Button } from '@/components/ui/button'
@@ -60,7 +61,7 @@ export function GalleryManagementPanel() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(15)
 
-  const { items, meta, create, update, remove } = useDummyGallery({
+  const { items, meta, isLoading, create, update, remove } = useDummyGallery({
     page,
     perPage: pageSize,
     search,
@@ -189,7 +190,9 @@ export function GalleryManagementPanel() {
       </div>
 
       {/* Content Area */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <GallerySkeleton viewMode={viewMode} count={pageSize} />
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper px-6">
           <NothingGalleryLottieIllustration className="mb-4" />
           <h3 className="mb-2 text-xl font-bold text-ink-900">

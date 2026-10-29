@@ -7,6 +7,7 @@ import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
 import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
 import { CreateCourseDialog } from './CreateCourse'
+import { CourseCardSkeletonGrid } from './CourseCardSkeleton'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import type { CourseFormValues } from '@/lib/course-form/types'
@@ -51,6 +52,8 @@ type CreateCourseActions = {
 type CourseManagementSectionProps = {
   role: 'mentor' | 'admin'
   data: ICourseItem[] | null
+  /** Saat true, tampilkan skeleton kartu — jangan empty state. */
+  isLoading?: boolean
   formOptions?: CourseFormOptionsViewModel
   createCourse?: CreateCourseActions
   createOpen?: boolean
@@ -60,6 +63,7 @@ type CourseManagementSectionProps = {
 export default function ManageCourseSection({
   role = 'mentor',
   data,
+  isLoading = false,
   formOptions,
   createCourse,
   createOpen: controlledCreateOpen,
@@ -125,7 +129,9 @@ export default function ManageCourseSection({
           </div>
         </div>
 
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <CourseCardSkeletonGrid count={ITEMS_PER_PAGE} />
+        ) : filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-8">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedCourses.map((c) => (

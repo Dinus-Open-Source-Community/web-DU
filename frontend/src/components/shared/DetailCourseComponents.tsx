@@ -110,7 +110,6 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
           <TabsContent value="kurikulum" className="mt-0 animate-in fade-in duration-300">
             <CourseCurriculumTab
               modules={modules}
-              courseUid={courseUid}
               editHref={editHref}
               editNavigationState={curriculumEditNavigationState}
             />

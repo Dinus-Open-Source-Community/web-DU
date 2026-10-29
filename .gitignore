@@ -26,3 +26,4 @@ blob-report/
 /tests/tokens.json
 /tests/assets.json
 /results/
+/.codex/config.toml

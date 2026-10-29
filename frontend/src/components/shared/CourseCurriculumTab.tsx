@@ -8,11 +8,9 @@ import { appCardHeaderClassName, appToolbarPrimaryButtonClassName } from '@/lib/
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
 import { CourseDetailTabSectionIntro } from '@/components/shared/course-detail-manage/CourseDetailTabSectionIntro'
-import { useModulesByCourse } from '@/hooks/use-modules'
 
 type CourseCurriculumTabProps = {
   modules: Array<ICourseDetailModule | IModulesData>
-  courseUid: string
   editHref: string
   editNavigationState?: CourseEditNavigationState
 }
@@ -22,10 +20,9 @@ const LESSON_TYPE_CONFIG = {
   text: { icon: FileText, label: 'Teks', className: 'bg-sky-50 text-sky-600' },
 } as const
 
-export function CourseCurriculumTab({ modules, courseUid, editHref, editNavigationState }: CourseCurriculumTabProps) {
-  const fullModulesQuery = useModulesByCourse(courseUid, { page: 1, per_page: 100 })
-  const displayModules = fullModulesQuery.data?.modules ?? modules
-  const totalModules = fullModulesQuery.data?.meta.total ?? displayModules.length
+export function CourseCurriculumTab({ modules, editHref, editNavigationState }: CourseCurriculumTabProps) {
+  const displayModules = modules
+  const totalModules = displayModules.length
   const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(() => new Set(displayModules[0] ? [displayModules[0].uid] : []))
 
   const totalLessons = useMemo(() => displayModules.reduce((total, module) => total + (module.lessons?.length ?? 0), 0), [displayModules])

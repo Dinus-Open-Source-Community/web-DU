@@ -16,6 +16,7 @@ import { ForgotPasswordPages } from "./pages/auth/ForgotPass.tsx";
 import { FormResetPassword } from "./pages/auth/ResetPass.tsx";
 import { NotFoundContent } from "./components/shared/Error.tsx";
 import { PageSkeleton } from "./components/shared/PageSkeleton.tsx";
+import { GallerySkeleton } from "./components/shared/gallery/GallerySkeleton.tsx";
 import { AuthPageSkeleton } from "./components/auth/AuthPageSkeleton.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
 import { RouterErrorBoundary } from "./components/shared/Error.tsx";
@@ -91,6 +92,18 @@ type RouteConfig = {
 };
 
 const AUTH_PAGE_FALLBACK = <AuthPageSkeleton />;
+
+/**
+ * Fallback lazy-load halaman Galeri admin. Sengaja memakai `GallerySkeleton`
+ * (bukan `PageSkeleton` generik) agar saat chunk halaman diunduh pengguna tidak
+ * melihat dua skeleton berbeda berurutan — cukup satu skeleton berbentuk galeri,
+ * menyambung mulus dengan skeleton saat data `/galleries` dimuat.
+ */
+const ADMIN_GALLERY_FALLBACK = (
+  <div className="mx-auto flex w-full min-w-0 flex-col gap-5 px-4 pt-5 pb-4 sm:gap-6 sm:px-5 sm:pt-6 sm:pb-5 md:px-6 md:pt-7 md:pb-6 lg:px-8 lg:pt-8 lg:pb-6">
+    <GallerySkeleton viewMode="grid" />
+  </div>
+);
 
 /**
  * Lockdown landing: saat true, hanya halaman publik inti yang bisa diakses
@@ -299,6 +312,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["admin", "super_admin"],
+    fallback: ADMIN_GALLERY_FALLBACK,
   },
   {
     path: ROUTES.dashboardMenu.courseAssignmentHub(":courseUid"),
