@@ -15,6 +15,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// preloadModuleLessons memuat lesson ringkas per modul. Kolom `content` (jsonb)
+// sengaja tidak diambil agar payload tetap kecil; detail lesson tetap diambil
+// lewat endpoint /lessons/module/{module_id}.
+func preloadModuleLessons(db *gorm.DB) *gorm.DB {
+	return db.
+		Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").
+		Order("order_index ASC")
+}
+
 // @Summary      Get all modules by course (Super Admin/Admin/Mentor/Enrollment User)
 // @Description  Retrieve all modules for a specific course ordered by sequence
 // @Tags         Module
@@ -94,9 +103,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	// AfterFind mendekripsi judul modul.
 	if nameFilter != "" {
 		var allModules []entity.Module
-		if err := db.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-			return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
-		}).Order("order_index ASC").Find(&allModules).Error; err != nil {
+		if err := db.Preload("Lessons", preloadModuleLessons).Order("order_index ASC").Find(&allModules).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
 				"message": "Failed to retrieve modules for search",
@@ -157,7 +164,7 @@ func GetAllModulesFunc(c *gin.Context) {
 	offset := (page - 1) * perPage
 
 	var modules []entity.Module
-	if err := db.Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
+	if err := db.Preload("Lessons", preloadModuleLessons).Order("order_index ASC").Limit(perPage).Offset(offset).Find(&modules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Failed to retrieve modules",
@@ -209,9 +216,7 @@ func GetModuleByIDFunc(c *gin.Context) {
 	}
 
 	var module entity.Module
-	if err := database.DB.Preload("Lessons", func(db *gorm.DB) *gorm.DB {
-		return db.Select("uid, module_uid, title, content_type, video_url, start_time, end_time, order_index, created_at, updated_at").Order("order_index ASC")
-	}).First(&module, moduleUID).Error; err != nil {
+	if err := database.DB.Preload("Lessons", preloadModuleLessons).First(&module, moduleUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Module not found",

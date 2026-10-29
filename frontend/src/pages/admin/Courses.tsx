@@ -7,7 +7,7 @@ import { useCourses } from '@/hooks/use-course'
 import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 
 const Courses = () => {
-  const { data } = useCourses()
+  const { data, isLoading } = useCourses()
   const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const [createOpen, setCreateOpen] = useState(false)
   const formOptions = useCourseFormOptions(createOpen)
@@ -22,6 +22,7 @@ const Courses = () => {
         <ManageCourseSection
           role="admin"
           data={data?.courses || []}
+          isLoading={isLoading}
           formOptions={formOptions}
           createCourse={createCourse}
           createOpen={createOpen}
