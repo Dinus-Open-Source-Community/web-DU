@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, Settings, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
@@ -14,6 +14,9 @@ import type { UserRole } from '../../lib/types/user'
 import { ROUTES } from '../../lib/routes'
 import { greetingForUser, navbarUserRoleLabel } from '@/lib/layout/navbar-user-display'
 import { cn } from '../../lib/utils'
+
+/** Menyimpan koordinat X glider terakhir agar transisi antar-halaman tetap meluncur tanpa terpengaruh scroll Y. */
+let prevGliderPos: { left: number; width: number } | null = null
 
 function userInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -106,6 +109,9 @@ function GuestAuthActions({
 
 export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navContainerRef = useRef<HTMLDivElement | null>(null)
+  const [initialPos] = useState(() => prevGliderPos)
+  const [target, setTarget] = useState<{ left: number; width: number } | null>(null)
   const reduceMotion = useReducedMotion()
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
@@ -119,6 +125,33 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
     if (cleanHref === '/') return pathname === '/'
     return pathname === cleanHref || pathname.startsWith(`${cleanHref}/`)
   }
+
+  useLayoutEffect(() => {
+    const container = navContainerRef.current
+    if (!container) return
+
+    const updateCoords = () => {
+      const activeEl = container.querySelector<HTMLElement>('[data-active="true"]')
+      if (activeEl) {
+        const containerRect = container.getBoundingClientRect()
+        const activeRect = activeEl.getBoundingClientRect()
+        const left = activeRect.left - containerRect.left
+        const width = activeRect.width
+        const next = { left, width }
+        setTarget(next)
+        prevGliderPos = next
+      } else {
+        setTarget(null)
+        prevGliderPos = null
+      }
+    }
+
+    updateCoords()
+
+    const ro = new ResizeObserver(updateCoords)
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [pathname])
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -174,35 +207,49 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
           </Link>
         </div>
 
-        {/* Desktop & Tablet Links (>= md) with Glider Animation on Route Change */}
-        <div className="hidden items-center gap-1.5 md:flex lg:gap-2">
+        {/* Desktop & Tablet Links (>= md) with Smooth Glider on Route Change */}
+        <div
+          ref={navContainerRef}
+          className="relative hidden items-center gap-1.5 md:flex lg:gap-2"
+        >
+          {target && (
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-10"
+              initial={
+                initialPos
+                  ? { x: initialPos.left, width: initialPos.width }
+                  : false
+              }
+              animate={{ x: target.left, width: target.width }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 30,
+                    }
+              }
+            >
+              <div className="size-full rounded-xl border-2 border-ink-900 bg-note-yellow shadow-[2px_2px_0px_#050914] -rotate-1" />
+            </motion.div>
+          )}
+
           {navLinks.map((navLink) => {
             const active = isActive(navLink.href)
             return (
               <Link
                 key={navLink.href}
                 to={navLink.href}
+                data-active={active}
                 className={cn(
                   'relative inline-flex h-9 items-center justify-center rounded-xl px-3.5 text-xs font-extrabold uppercase tracking-wider select-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-blue lg:text-sm',
-                  active ? 'text-ink-900' : 'text-ink-800 hover:text-ink-900 hover:bg-paper-panel/60',
+                  active
+                    ? 'text-ink-900'
+                    : 'text-ink-800 hover:text-ink-900 hover:bg-paper-panel/60',
                 )}
               >
-                {active && (
-                  <motion.span
-                    layoutId="desktop-navbar-glider"
-                    className="absolute inset-0 -z-10 rounded-xl border-2 border-ink-900 bg-note-yellow shadow-[2px_2px_0px_#050914] -rotate-1"
-                    transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : {
-                            type: 'spring',
-                            stiffness: 420,
-                            damping: 32,
-                            mass: 0.8,
-                          }
-                    }
-                  />
-                )}
                 <span className="relative z-10">{navLink.label}</span>
               </Link>
             )
@@ -357,14 +404,9 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
                   )}
                 >
                   {active && (
-                    <motion.span
-                      layoutId="mobile-navbar-glider"
+                    <span
+                      aria-hidden="true"
                       className="absolute inset-0 -z-10 rounded-xl border-2 border-ink-900 bg-note-yellow shadow-[3px_3px_0px_#050914] -rotate-0.5"
-                      transition={
-                        reduceMotion
-                          ? { duration: 0 }
-                          : { type: 'spring', stiffness: 420, damping: 32 }
-                      }
                     />
                   )}
                   <span className="relative z-10">{navLink.label}</span>
