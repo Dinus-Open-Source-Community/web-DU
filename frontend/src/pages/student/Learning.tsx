@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import LearningSection from '@/components/student/LearningSection'
+import { StudentLearningSkeleton } from '@/components/student/dashboard/StudentLearningSkeletons'
 import { useResolvedProfileJoinedCourses } from '@/hooks/files/use-resolved-profile-joined-courses'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IUserData } from '@/lib/types/user'
@@ -20,7 +21,14 @@ const Learning = () => {
     }
   }, [joinedCourses, profile])
 
-  if (!profileWithResolvedCourses) return null
+  // Selama profil belum siap, tampilkan skeleton "Kursus Saya" — bukan layar kosong.
+  if (!profileWithResolvedCourses) {
+    return (
+      <StudentAppPageShell user={sidebarUser}>
+        <StudentLearningSkeleton />
+      </StudentAppPageShell>
+    )
+  }
 
   return (
     <StudentAppPageShell user={sidebarUser}>

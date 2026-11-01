@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 
 import { CourseDetailLayout } from '@/components/courses/DetailCourse'
 import GuestLayout from '@/components/layouts/GuestLayouts'
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { Button } from '@/components/ui/button'
 import { authKeys, courseKeys } from '@/hooks/query-keys'
 import { useCourseDetailWithCategories } from '@/hooks/use-course'
@@ -52,12 +51,16 @@ export default function PublicCourseDetailPage() {
   }, [courseDetail.data, isAuthenticated, joinMutation, navigate])
 
   if (isLoading) {
-    return <PageSkeleton message="Memuat course..." />
+    return (
+      <GuestLayout navbarAuthVariant="home">
+        <main className="min-h-[100dvh] bg-[#f5f5f5]" />
+      </GuestLayout>
+    )
   }
 
   if (!courseDetail.data || !isCoursePublished(courseDetail.data)) {
     return (
-      <GuestLayout>
+      <GuestLayout navbarAuthVariant="home">
         <main className="min-h-[100dvh] bg-[#f5f5f5]">
           <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-4 text-center text-ink-600 sm:px-6">
             {Message.course.notFound}
@@ -82,7 +85,7 @@ export default function PublicCourseDetailPage() {
   )
 
   return (
-    <GuestLayout>
+    <GuestLayout navbarAuthVariant="home">
       <main className="min-h-[100dvh] bg-[#f5f5f5]">
         <CourseDetailLayout
           data={{

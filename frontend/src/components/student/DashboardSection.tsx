@@ -10,6 +10,7 @@ import FeedbackCard from '@/components/shared/Feedback'
 import { PageHeader } from '@/components/shared/Header'
 import { Button } from '@/components/ui/button'
 import { StudentKpiGrid } from '@/components/student/dashboard/StudentKpiGrid'
+import { DeadlineCardSkeleton } from '@/components/student/dashboard/StudentDashboardSkeletons'
 import { PlayfulEmptyIllustration } from '@/components/playful/PublicLottieIllustration'
 import { appCardClassName, appToolbarPrimaryButtonClassName } from '@/lib/design/app-shell-tokens'
 import {
@@ -243,11 +244,8 @@ const DashboardSection = ({ Data }: DashboardSectionProps) => {
         >
           {isAssignmentsLoading ? (
             <div className="space-y-3">
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-28 animate-pulse rounded-xl border-2 border-ink-900/10 bg-paper-paper/60"
-                />
+              {[1, 2, 3].map((i) => (
+                <DeadlineCardSkeleton key={i} />
               ))}
             </div>
           ) : urgentDeadlines.length > 0 ? (

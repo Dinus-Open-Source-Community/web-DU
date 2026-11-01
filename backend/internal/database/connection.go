@@ -73,6 +73,7 @@ func ConnectDB() {
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},
 		&entity.OTP{},
+		&entity.EmailChangeRequest{},
 		&entity.RedeemCode{},
 		&entity.RedeemCodeUsage{},
 	)

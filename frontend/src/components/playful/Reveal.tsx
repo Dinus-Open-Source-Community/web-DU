@@ -6,14 +6,20 @@ type RevealProps = {
   className?: string
   delay?: number
   y?: number
+  once?: boolean
 }
 
 /**
- * Reveal — animasi masuk satu kali saat elemen pertama kali memasuki viewport
- * (bukan in/out berulang). Margin -48px vertikal: animasi mulai saat elemen
- * sudah sedikit masuk viewport. Reduced-motion: konten statis.
+ * Reveal — animasi masuk ke atas saat elemen memasuki viewport.
+ * Reduced-motion: konten statis.
  */
-export default function Reveal({ children, className, delay = 0, y = 36 }: RevealProps) {
+export default function Reveal({
+  children,
+  className,
+  delay = 0,
+  y = 36,
+  once = true,
+}: RevealProps) {
   const reduceMotion = useReducedMotion()
   if (reduceMotion) return <div className={className}>{children}</div>
   return (
@@ -21,8 +27,8 @@ export default function Reveal({ children, className, delay = 0, y = 36 }: Revea
       className={className}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once, margin: '-60px' }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>

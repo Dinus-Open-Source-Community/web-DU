@@ -9,6 +9,7 @@ type SectionHeaderProps = {
   align?: 'center' | 'left'
   dark?: boolean
   className?: string
+  once?: boolean
 }
 
 export default function SectionHeader({
@@ -18,9 +19,12 @@ export default function SectionHeader({
   align = 'center',
   dark = false,
   className,
+  once = true,
 }: SectionHeaderProps) {
   return (
     <Reveal
+      once={once}
+      y={44}
       className={cn(
         'max-w-3xl',
         align === 'center' ? 'mx-auto text-center' : 'text-left',

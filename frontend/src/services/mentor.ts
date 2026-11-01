@@ -43,9 +43,9 @@ export type MentorDetail = MentorApiItem & {
   social_links?: MentorApiItem['social_links']
 }
 
-export async function fetchPublicMentors(perPage = 100) {
+export async function fetchPublicMentors(perPage = 8, page = 1) {
   const response = await api.get<IResponse<MentorListData>>(
-    API_ROUTES.mentor.getAll({ page: 1, per_page: perPage }),
+    API_ROUTES.mentor.getAll({ page, per_page: perPage }),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil daftar mentor')
 }

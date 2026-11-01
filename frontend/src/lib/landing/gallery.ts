@@ -24,8 +24,8 @@ export const GALLERY_IMAGES: GalleryImage[] = [
   },
   {
     src: '/images/crevmed1.webp',
-    alt: 'Peserta kelas UI/UX merancang wireframe di Figma',
-    caption: 'Kelas UI/UX: dari coretan kertas sampai wireframe yang klikable.',
+    alt: 'Peserta kelas merancang konsep ide dan wireframe',
+    caption: 'Sesi perancangan ide: dari coretan kertas sampai prototipe interaktif.',
   },
   {
     src: '/images/crevmed2.webp',

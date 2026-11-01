@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import CourseSection1 from '../../components/courses/course'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import { useCombinedCourseCategoriesAndTypes } from '@/hooks/use-course'
@@ -9,22 +8,20 @@ import { useAuth } from '@/providers/auth-provider'
 import { filterAvailableCourses } from '@/lib/course-catalog/available-courses'
 
 export default function CoursePage() {
-  const { isLoading: isAuthLoading, profile } = useAuth()
+  const { profile } = useAuth()
   const { courses, courseCategories, isLoading } = useCombinedCourseCategoriesAndTypes()
   const availableCourses = useMemo(
     () => filterAvailableCourses(courses?.courses ?? [], profile?.joined_courses),
     [courses?.courses, profile?.joined_courses],
   )
 
-  if (isLoading || isAuthLoading) {
-    return <PageSkeleton message="Memuat kursus..." />
-  }
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
-      <GuestLayout>
+      <GuestLayout navbarAuthVariant="home">
         <CourseSection1
           Data={availableCourses as ICourseItem[]}
           Categories={(courseCategories?.course_categories ?? []) as ICategoryItem[]}
+          isLoading={isLoading}
         />
       </GuestLayout>
     </main>

@@ -120,7 +120,12 @@ export default function AdminAdministratorsPage() {
   )
 
   return (
-    <UserManagePageShell kind="admin" isLoading={isInitialLoading} action={promoteAction}>
+    <UserManagePageShell
+      kind="admin"
+      isLoading={isInitialLoading}
+      skeletonRows={adminsPage.pageSize}
+      action={promoteAction}
+    >
       <UserManagePanel
         kind="admin"
         rows={rows}

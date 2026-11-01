@@ -35,6 +35,7 @@ import type {
 } from '@/lib/course-module-viewer/course-module-viewer-view-model'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
 import { shouldOpenAssignmentAfterLesson } from '@/lib/lesson-assignment/navigation'
+import { mapLessonDetailAssignment } from '@/lib/lesson-assignment/assignment-mapper'
 import { isAssignmentVisibleToStudent } from '@/lib/lesson-assignment/submission-status'
 import type { SubmitLessonAssignmentPayload } from '@/lib/lesson-assignment/submission-draft'
 import { useOptionalNavbarSearch } from '@/providers/navbar-search-provider'
@@ -140,7 +141,7 @@ export function useCourseModuleViewer({
     () => lessonEntries.map((entry) => entry.lesson.uid),
     [lessonEntries],
   )
-  const lessonDetails = useLessonDetails(lessonUids, !isStudent)
+  const lessonDetails = useLessonDetails(lessonUids, true)
   const matchedEntry = useMemo(() => {
     if (!initialLessonUid || lessonEntries.length === 0) return null
     return (
@@ -313,8 +314,34 @@ export function useCourseModuleViewer({
 
   const assignmentByLessonUid = useMemo(() => {
     const map = new Map<string, NonNullable<LessonEntry['lesson']['assignment']>>()
+
+    // 1. Dari daftar tugas kursus student (mencakup seluruh modul/lesson sekaligus saat reload)
+    const studentAssignmentItems = studentAssignmentsQuery.data?.assignments ?? []
+    for (const item of studentAssignmentItems) {
+      const raw = item.assignment
+      const lessonUid = raw?.lesson_uid
+      if (!raw?.uid || !lessonUid) continue
+      const matchedLessonEntry = lessonEntries.find(
+        (entry) =>
+          entry.lesson.uid === lessonUid ||
+          toShortUid(entry.lesson.uid) === toShortUid(lessonUid),
+      )
+      const targetLessonUid = matchedLessonEntry?.lesson.uid ?? lessonUid
+      const mapped = mapLessonDetailAssignment({
+        ...raw,
+        lesson_uid: targetLessonUid,
+      })
+      if (!mapped) continue
+      if (isStudent ? isAssignmentVisibleToStudent(mapped) : true) {
+        map.set(targetLessonUid, mapped)
+      }
+    }
+
+    // 2. Dari detail per-lesson (memuat task_description, quiz_payload, serta draf untuk mentor/admin)
     for (const entry of lessonEntries) {
-      const detailed = lessonDetails.detailsByUid.get(entry.lesson.uid)
+      const detailed =
+        lessonDetails.detailsByUid.get(entry.lesson.uid) ??
+        (lessonDetailQuery.data?.uid === entry.lesson.uid ? lessonDetailQuery.data : undefined)
       const candidate = detailed?.assignment ?? entry.lesson.assignment
       if (!candidate) continue
       // Student hanya melihat tugas yang terbit; mentor/admin melihat semua (termasuk draf) untuk pratinjau.
@@ -323,7 +350,13 @@ export function useCourseModuleViewer({
       }
     }
     return map
-  }, [isStudent, lessonEntries, lessonDetails.detailsByUid])
+  }, [
+    isStudent,
+    lessonDetailQuery.data,
+    lessonEntries,
+    lessonDetails.detailsByUid,
+    studentAssignmentsQuery.data?.assignments,
+  ])
 
   const previousEntryAssignment = previousEntry
     ? (assignmentByLessonUid.get(previousEntry.lesson.uid) ?? null)

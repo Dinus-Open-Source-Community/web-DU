@@ -66,6 +66,8 @@ export const API_ROUTES = {
   user: {
     updateProfile: `/user/profile`,
     changePassword: `/user/password`,
+    requestEmailChange: `/user/email/change-request`,
+    confirmEmailChange: `/user/email/confirm`,
     getSelfData: `/user/data`,
     getAllManagedUsers: (params?: IQueryParamsPayload) =>
       withQuery(`/user/manage/all`, params),

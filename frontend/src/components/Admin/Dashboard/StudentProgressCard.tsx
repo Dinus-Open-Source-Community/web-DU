@@ -1,5 +1,6 @@
 import type { StudentProgressDistribution } from '@/services/admin-dashboard-analytics'
 import { ChartBarIncreasing } from 'lucide-react'
+import { StudentProgressCardSkeleton } from './DashboardSkeletons'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
 import { cn } from '@/lib/utils'
 
@@ -34,17 +35,7 @@ export function StudentProgressCard({ data, isLoading }: StudentProgressProps) {
   const total = data?.reduce((sum, item) => sum + item.count, 0) || 0
 
   if (isLoading) {
-    return (
-      <div className={cn(appCardClassName, 'p-4 sm:p-6')}>
-        <div className="animate-pulse space-y-3">
-          <div className="h-5 w-44 rounded bg-line-light" />
-          <div className="h-3.5 w-60 rounded bg-line-light" />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-10 rounded-lg bg-paper-panel" />
-          ))}
-        </div>
-      </div>
-    )
+    return <StudentProgressCardSkeleton />
   }
 
   return (

@@ -5,6 +5,7 @@ import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { QaLottieIllustration } from '@/components/playful/QaLottieIllustration'
 import { TablePaginationFooter } from '@/components/shared/TablePaginationFooter'
+import { QaForumSkeleton } from '@/components/Admin/QA/ModerationSkeletons'
 import { AdminMetaLabel, AdminQaStatusLabel } from '@/lib/admin/status-label'
 import { appCardClassName, appSoftCardClassName } from '@/lib/design/app-shell-tokens'
 import { Button } from '@/components/ui/button'
@@ -43,16 +44,7 @@ export function QaForum({
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   if (isLoading) {
-    return (
-      <div
-        className={cn(
-          appCardClassName,
-          'flex min-h-48 items-center justify-center',
-        )}
-      >
-        <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden />
-      </div>
-    )
+    return <QaForumSkeleton rows={pageSize ?? 10} />
   }
 
   if (threads.length === 0) {

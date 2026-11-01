@@ -1,5 +1,6 @@
 import type { TopCourse } from '@/services/admin-dashboard-analytics'
 import { GraduationCap } from 'lucide-react'
+import { TopCoursesCardSkeleton } from './DashboardSkeletons'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
 import { cn } from '@/lib/utils'
 
@@ -10,17 +11,7 @@ interface TopCoursesProps {
 
 export function TopCoursesCard({ courses, isLoading }: TopCoursesProps) {
   if (isLoading) {
-    return (
-      <div className={cn(appCardClassName, 'p-4 sm:p-6')}>
-        <div className="animate-pulse space-y-3">
-          <div className="h-5 w-44 rounded bg-line-light" />
-          <div className="h-3.5 w-60 rounded bg-line-light" />
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-11 rounded-lg bg-paper-panel" />
-          ))}
-        </div>
-      </div>
-    )
+    return <TopCoursesCardSkeleton />
   }
 
   return (

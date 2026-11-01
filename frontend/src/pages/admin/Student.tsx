@@ -17,7 +17,11 @@ export default function AdminStudentsPage() {
   const isInitialLoading = pageState.isLoading && rows.length === 0
 
   return (
-    <UserManagePageShell kind="student" isLoading={isInitialLoading}>
+    <UserManagePageShell
+      kind="student"
+      isLoading={isInitialLoading}
+      skeletonRows={pageState.pageSize}
+    >
       <UserManagePanel
         kind="student"
         rows={rows}

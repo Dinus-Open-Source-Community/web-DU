@@ -1,9 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Camera, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { cn } from '@/lib/utils'
-import SectionHeader from '@/components/playful/SectionHeader'
 import Reveal from '@/components/playful/Reveal'
+import {
+  StickerStar,
+  StickerSquiggle,
+  StickerSparkle,
+} from '@/components/playful/Stickers'
 import {
   Dialog,
   DialogContent,
@@ -299,7 +304,13 @@ export function ScrapbookCard({
 export const GALLERY_PREVIEW_COUNT = 5
 
 /** Grid bento scrapbook — dipakai beranda (pratinjau) & halaman galeri (penuh). */
-export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
+export function GalleryBentoGrid({
+  photos,
+  isLoading = false,
+}: {
+  photos: GalleryImage[]
+  isLoading?: boolean
+}) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
 
   useEffect(() => {
@@ -330,6 +341,9 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
   }
 
   if (rows.length === 0) {
+    if (isLoading) {
+      return <div className="mt-10 min-h-[55vh] sm:mt-16" aria-hidden />
+    }
     return (
       <p className="text-ink-500 mt-10 text-center text-sm font-bold uppercase tracking-[0.2em] sm:mt-16">
         Dokumentasi segera hadir.
@@ -339,7 +353,7 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
 
   return (
     <>
-      <div className="mt-10 flex flex-col gap-6 sm:mt-16 md:gap-8">
+      <div className="mt-10 flex flex-col gap-6 sm:mt-12 md:gap-8">
         {rows.map((rowPhotos, rowIdx) => {
           const slotDefs = BENTO_ROWS[rowIdx % BENTO_ROWS.length]
           return (
@@ -362,6 +376,8 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
                 return (
                   <Reveal
                     key={`${img.src}-${rowIdx}-${i}`}
+                    once={false}
+                    y={44}
                     delay={(i % 3) * 0.08}
                     className={cn(
                       'h-full col-span-1',
@@ -411,7 +427,7 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="rounded-full border border-ink-900/15 bg-note-yellow px-3 py-1 font-mono text-xs font-bold text-ink-900 shadow-xs">
+                <span className="border-2 border-ink-900 bg-note-yellow px-2.5 py-0.5 font-mono text-xs font-bold text-ink-900 shadow-button">
                   {activeIdx + 1} / {photos.length}
                 </span>
               </div>
@@ -514,7 +530,16 @@ export function GalleryBentoGrid({ photos }: { photos: GalleryImage[] }) {
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
-  const { items } = useDummyGallery({ page: 1, perPage: GALLERY_PREVIEW_COUNT })
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const reduceMotion = useReducedMotion()
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'start 0.25'],
+  })
+  const rawY = useTransform(scrollYProgress, [0, 1], [72, 0])
+  const y = useSpring(rawY, { stiffness: 120, damping: 24, mass: 0.35 })
+
+  const { items, isLoading } = useDummyGallery({ page: 1, perPage: GALLERY_PREVIEW_COUNT })
   const photos: GalleryImage[] = useMemo(() => {
     return items.slice(0, GALLERY_PREVIEW_COUNT).map((item) => ({
       src: item.src,
@@ -525,7 +550,11 @@ export default function GallerySection() {
   }, [items])
 
   return (
-    <section id="galeri" className="relative overflow-hidden bg-paper-white">
+    <section ref={sectionRef} id="galeri" className="relative overflow-hidden bg-paper-white">
+      {/* Garis pemisah atas dengan aksen tinta tegas */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-ink-900/80" />
+
+      {/* Grid grafik kertas — berbagi pola dengan hero sesuai izin pengguna */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
@@ -535,26 +564,53 @@ export default function GallerySection() {
           backgroundSize: '24px 24px',
         }}
       />
-      <div className="relative z-[1] mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-24 lg:py-28">
-        <SectionHeader
-          eyebrow={gallery.eyebrow}
-          title={gallery.title}
-          copy={gallery.copy}
-          className="mx-auto max-w-3xl"
-        />
 
-        <GalleryBentoGrid photos={photos} />
+      {/* Dekorasi stiker / doodle taktil di pinggir canvas */}
+      <StickerStar className="pointer-events-none absolute right-[4%] top-10 hidden size-10 rotate-12 opacity-80 md:block" />
+      <StickerSparkle className="pointer-events-none absolute left-[3%] top-32 hidden size-8 -rotate-12 opacity-70 md:block" />
 
-        <Reveal className="mt-10 flex justify-center sm:mt-14">
-          <Link
-            to={gallery.allHref}
-            className="group/btn text-ink-900 hover:bg-note-yellow focus-visible:ring-brand-blue/50 inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase shadow-button outline-none transition-all focus-visible:ring-4"
-          >
-            {gallery.allLabel}
-            <ArrowRight className="size-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
-          </Link>
-        </Reveal>
+      {/* Stiker catatan kecil di sudut atas */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-10 top-20 hidden lg:flex items-center gap-2 rounded-sm border-2 border-ink-900/30 bg-note-yellow/60 px-3 py-1.5 rotate-3 text-xs font-mono font-bold text-ink-800 shadow-2xs"
+      >
+        <span>📸</span>
+        <span>Jepretan Asli Komunitas</span>
       </div>
+
+      <motion.div
+        style={reduceMotion ? undefined : { y }}
+        className="relative z-[1] mx-auto max-w-6xl px-6 py-16 will-change-transform md:px-10 md:py-24 lg:py-28"
+      >
+        {/* Header Asimetris: Eyebrow ticket, Title display besar, Subtitle, Squiggle, CTA kanan */}
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <Reveal once={false} y={32} className="max-w-2xl">
+            <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-peach px-3.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button rotate-1">
+              {gallery.eyebrow}
+            </span>
+            <h2 className="mt-5 font-display text-[clamp(2.25rem,6vw,4.5rem)] font-bold leading-[0.98] text-ink-900 [text-wrap:balance]">
+              {gallery.title}
+            </h2>
+            <p className="mt-3 text-sm text-ink-600 sm:text-base">
+              {gallery.copy}
+            </p>
+            <StickerSquiggle className="mt-3 h-4 w-44" />
+          </Reveal>
+
+          <Reveal once={false} y={32} delay={0.1} className="shrink-0">
+            <Link
+              to={gallery.allHref}
+              className="group/btn inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase text-ink-900 shadow-button outline-none transition-all hover:bg-note-yellow focus-visible:ring-4 focus-visible:ring-brand-blue/50"
+            >
+              {gallery.allLabel}
+              <ArrowRight className="size-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+            </Link>
+          </Reveal>
+        </div>
+
+        {/* Grid Bento Scrapbook */}
+        <GalleryBentoGrid photos={photos} isLoading={isLoading} />
+      </motion.div>
     </section>
   )
 }

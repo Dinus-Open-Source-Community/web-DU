@@ -1,43 +1,158 @@
+import { useEffect, useMemo, useRef } from 'react'
+import { Loader2 } from 'lucide-react'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import MentorCard from '@/components/landing/MentorCard'
-import SectionHeader from '@/components/playful/SectionHeader'
-import { usePublicMentors } from '@/hooks/use-public-mentors'
+import Reveal from '@/components/playful/Reveal'
+import {
+  StickerStar,
+  StickerSparkle,
+} from '@/components/playful/Stickers'
+import { cn } from '@/lib/utils'
+import { useInfinitePublicMentors } from '@/hooks/use-public-mentors'
 import type { LandingMentor } from '@/lib/landing/mentors'
-import { LANDING_COPY } from '@/lib/landing/copy'
+
+const TILTS = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as const
+const MENTORS_PER_PAGE = 2
 
 export default function MentorsPage() {
-  const { mentors } = LANDING_COPY
-  const { data, isLoading, isError } = usePublicMentors()
-  const mentorItems: LandingMentor[] = data?.mentors.map((mentor) => ({
-    uid: mentor.uid,
-    name: mentor.name,
-    email: mentor.email,
-    role: mentor.role,
-    photo: mentor.avatar_url,
-    courses: [],
-    assignedCourses: mentor.assigned_courses,
-    joinedTeachingCourses: mentor.joined_teach_courses,
-    isVerified: mentor.is_verified,
-    createdAt: mentor.created_at,
-    socials: mentor.social_links ?? [],
-  })) ?? []
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfinitePublicMentors(MENTORS_PER_PAGE)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+
+  const mentorItems: LandingMentor[] = useMemo(() => {
+    const pages = data?.pages ?? []
+    const seen = new Set<string>()
+    const list: LandingMentor[] = []
+    for (const page of pages) {
+      for (const mentor of page.mentors ?? []) {
+        if (seen.has(mentor.uid)) continue
+        seen.add(mentor.uid)
+        list.push({
+          uid: mentor.uid,
+          name: mentor.name,
+          email: mentor.email,
+          role: mentor.role,
+          photo: mentor.avatar_url,
+          courses: [],
+          assignedCourses: mentor.assigned_courses,
+          joinedTeachingCourses: mentor.joined_teach_courses,
+          isVerified: mentor.is_verified,
+          createdAt: mentor.created_at,
+          socials: mentor.social_links ?? [],
+        })
+      }
+    }
+    return list
+  }, [data?.pages])
+
+  useEffect(() => {
+    if (!hasNextPage || isLoading || isFetchingNextPage) return
+
+    const checkBottomReached = () => {
+      if (window.scrollY <= 0) return
+      const doc = document.documentElement
+      const scrolledToPageBottom =
+        window.innerHeight + window.scrollY >= doc.scrollHeight - 120
+
+      const sentinel = sentinelRef.current
+      const scrolledToGridBottom = sentinel
+        ? sentinel.getBoundingClientRect().top <= window.innerHeight - 20 &&
+          window.scrollY >= 60
+        : false
+
+      if (scrolledToPageBottom || scrolledToGridBottom) {
+        void fetchNextPage()
+      }
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY <= 0) return
+      const doc = document.documentElement
+      if (doc.scrollHeight <= window.innerHeight + 10) {
+        void fetchNextPage()
+      }
+    }
+
+    window.addEventListener('scroll', checkBottomReached, { passive: true })
+    window.addEventListener('wheel', handleWheel, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', checkBottomReached)
+      window.removeEventListener('wheel', handleWheel)
+    }
+  }, [hasNextPage, isLoading, isFetchingNextPage, fetchNextPage])
 
   return (
     <GuestLayout navbarAuthVariant="home" marketingSurface>
       <main className="w-full">
-        <section className="relative overflow-hidden bg-paper-offwhite">
-          <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-16 md:px-10 md:pt-28 md:pb-24">
-            <SectionHeader
-              eyebrow={mentors.eyebrow}
-              title={mentors.title}
-              copy={mentors.copy}
-              className="mx-auto max-w-3xl"
-            />
+        <section className="relative min-h-dvh overflow-hidden bg-paper-panel">
+          {/* Garis pemisah atas beraksen tinta tegas */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-ink-900/80" />
 
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
-              {isLoading ? <p>Memuat mentor...</p> : isError ? <p>Data mentor belum dapat dimuat.</p> : mentorItems.map((mentor, i) => (
-                <MentorCard key={mentor.name} mentor={mentor} index={i} />
-              ))}
+          {/* Garis horizontal bergaris buku tulis (ruled lines) khas seksi mentor */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage: 'linear-gradient(to bottom, #050914 1px, transparent 1px)',
+              backgroundSize: '100% 28px',
+            }}
+          />
+
+          {/* Stiker & doodle dekorasi */}
+          <StickerStar className="pointer-events-none absolute right-[5%] top-24 hidden size-10 rotate-12 opacity-80 md:block" />
+          <StickerSparkle className="pointer-events-none absolute left-[4%] top-40 hidden size-8 -rotate-12 opacity-70 md:block" />
+
+          <div className="relative z-[1] mx-auto max-w-7xl px-6 pt-24 pb-16 md:px-10 md:pt-28 md:pb-24">
+            {/* Header: Title Rapi & Enak Dilihat */}
+            <div className="max-w-3xl">
+              <Reveal once={false} y={32}>
+                <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.15] [text-wrap:balance]">
+                  Direktori <span className="text-brand-blue">Mentor</span> Praktisi
+                </h1>
+              </Reveal>
+            </div>
+
+            {/* Konten Grid Kartu Mentor Polaroid */}
+            {isLoading && mentorItems.length === 0 ? (
+              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5 sm:mt-14">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-80 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3.5 shadow-paper animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : isError && mentorItems.length === 0 ? (
+              <p className="text-ink-600 mt-10 min-h-[40vh] text-center">
+                Data mentor belum dapat dimuat.
+              </p>
+            ) : (
+              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5 sm:mt-14">
+                {mentorItems.map((mentor, i) => (
+                  <MentorCard
+                    key={mentor.uid}
+                    mentor={mentor}
+                    index={i}
+                    className={cn(TILTS[i % TILTS.length])}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Loader Infinite Scroll */}
+            <div ref={sentinelRef} className="mt-10 flex justify-center">
+              {isFetchingNextPage && (
+                <div className="inline-flex items-center gap-2.5 rounded-2xl border-2 border-ink-900 bg-note-yellow px-5 py-2.5 text-xs font-extrabold tracking-wider text-ink-900 uppercase shadow-button">
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  <span>Memuat mentor lainnya...</span>
+                </div>
+              )}
             </div>
           </div>
         </section>

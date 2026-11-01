@@ -100,7 +100,12 @@ export default function AdminMentorsPage() {
   )
 
   return (
-    <UserManagePageShell kind="mentor" isLoading={isInitialLoading} action={promoteAction}>
+    <UserManagePageShell
+      kind="mentor"
+      isLoading={isInitialLoading}
+      skeletonRows={mentorsPage.pageSize}
+      action={promoteAction}
+    >
       <UserManagePanel
         kind="mentor"
         rows={rows}
