@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
+import { DashboardRouteFallback } from '@/components/dashboard/DashboardRouteFallback'
 import {
   DASHBOARD_PATH,
   dashboardShellRoleForUser,
@@ -12,12 +12,12 @@ const AdminDashboard = lazy(() => import('./admin/Dashboard.tsx'))
 const MentorDashboard = lazy(() => import('./mentor/Dashboard.tsx'))
 const StudentDashboard = lazy(() => import('./student/Dashboard.tsx'))
 
-const dashboardFallback = (
-  <PageSkeleton
-    message="Memuat dashboard..."
-    className="min-h-dvh justify-center px-4 sm:px-6 lg:px-8"
-  />
-)
+/**
+ * Fallback sama dengan fallback route `/dashboard` di App: admin/super admin
+ * melihat skeleton dasbor (chrome + KPI + kartu analitik), role lain memakai
+ * skeleton generik. Dipakai juga saat chunk dasbor per-role masih diunduh.
+ */
+const dashboardFallback = <DashboardRouteFallback />
 
 export default function DashboardGateway() {
   const { role } = useAuth()

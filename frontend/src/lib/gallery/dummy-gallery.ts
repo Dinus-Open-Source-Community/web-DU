@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   createGalleryItem,
@@ -97,33 +97,117 @@ type GalleryQueryOptions = {
 
 type GalleryMeta = {
   total: number
+  per_page: number
+  current_page: number
   total_pages: number
 }
 
+const DEFAULT_INFINITE_PER_PAGE = 5
+let cachedFirstPageMeta: GalleryMeta | null = null
+
 export function useDummyGallery(options: GalleryQueryOptions = {}) {
-  const isPaginated = options.page !== undefined || options.perPage !== undefined || Boolean(options.search) || Boolean(options.variant && options.variant !== 'all')
-  const [items, setItems] = useState<DummyGalleryItem[]>(() => !isPaginated ? (cachedGalleryItems ?? []) : [])
-  const [isLoading, setIsLoading] = useState<boolean>(() => isPaginated || cachedGalleryItems === null)
-  const [meta, setMeta] = useState<GalleryMeta | undefined>(undefined)
+  const isInfinite = options.page === undefined
+  const effectivePerPage = options.perPage ?? DEFAULT_INFINITE_PER_PAGE
+  const isDefaultFirstPage =
+    (options.page === undefined || options.page === 1) &&
+    effectivePerPage === DEFAULT_INFINITE_PER_PAGE &&
+    !options.search &&
+    (!options.variant || options.variant === 'all')
+
+  const [items, setItems] = useState<DummyGalleryItem[]>(() =>
+    isDefaultFirstPage && cachedGalleryItems
+      ? cachedGalleryItems.slice(0, DEFAULT_INFINITE_PER_PAGE)
+      : [],
+  )
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () => !(isDefaultFirstPage && cachedGalleryItems && cachedGalleryItems.length > 0),
+  )
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
+  const [meta, setMeta] = useState<GalleryMeta | undefined>(() =>
+    isDefaultFirstPage && cachedFirstPageMeta ? cachedFirstPageMeta : undefined,
+  )
+
+  const currentPageRef = useRef<number>(options.page ?? 1)
+  const totalPagesRef = useRef<number>(
+    isDefaultFirstPage && cachedFirstPageMeta ? cachedFirstPageMeta.total_pages : 1,
+  )
+  const isFetchingRef = useRef<boolean>(false)
 
   const reload = useCallback(async () => {
+    const targetPage = options.page ?? 1
+    isFetchingRef.current = true
+    if (!(isDefaultFirstPage && cachedGalleryItems && cachedGalleryItems.length > 0)) {
+      setIsLoading(true)
+    }
     try {
       const res = await fetchGalleriesOnce({
-        page: options.page,
-        per_page: isPaginated ? options.perPage : 100,
+        page: targetPage,
+        per_page: effectivePerPage,
         search: options.search || undefined,
         variant: options.variant && options.variant !== 'all' ? options.variant : undefined,
       })
       const mapped = (res.galleries ?? []).map(mapApiToGalleryItem)
-      if (!isPaginated) cachedGalleryItems = mapped
+      const nextMeta: GalleryMeta = {
+        total: res.meta.total,
+        per_page: res.meta.per_page,
+        current_page: res.meta.current_page,
+        total_pages: res.meta.total_pages,
+      }
+      if (isDefaultFirstPage) {
+        cachedGalleryItems = mapped
+        cachedFirstPageMeta = nextMeta
+      }
+      currentPageRef.current = res.meta.current_page ?? targetPage
+      totalPagesRef.current = res.meta.total_pages ?? 1
       setItems(mapped)
-      setMeta({ total: res.meta.total, total_pages: res.meta.total_pages })
+      setMeta(nextMeta)
     } catch {
       // Keep existing state if backend request fails temporarily
     } finally {
+      isFetchingRef.current = false
       setIsLoading(false)
     }
-  }, [isPaginated, options.page, options.perPage, options.search, options.variant])
+  }, [effectivePerPage, isDefaultFirstPage, options.page, options.search, options.variant])
+
+  const loadMore = useCallback(async () => {
+    if (!isInfinite || isFetchingRef.current) return
+    if (currentPageRef.current >= totalPagesRef.current) return
+
+    const nextPage = currentPageRef.current + 1
+    isFetchingRef.current = true
+    setIsLoadingMore(true)
+    try {
+      const res = await fetchGalleriesOnce({
+        page: nextPage,
+        per_page: effectivePerPage,
+        search: options.search || undefined,
+        variant: options.variant && options.variant !== 'all' ? options.variant : undefined,
+      })
+      const mapped = (res.galleries ?? []).map(mapApiToGalleryItem)
+      currentPageRef.current = res.meta.current_page ?? nextPage
+      totalPagesRef.current = res.meta.total_pages ?? totalPagesRef.current
+      setItems((prev) => {
+        const existingUids = new Set(prev.map((item) => item.uid))
+        const appended = mapped.filter((item) => !existingUids.has(item.uid))
+        const next = [...prev, ...appended]
+        cachedGalleryItems = next
+        return next
+      })
+      setMeta({
+        total: res.meta.total,
+        per_page: res.meta.per_page,
+        current_page: res.meta.current_page,
+        total_pages: res.meta.total_pages,
+      })
+    } catch {
+      // Ignore transient loadMore error; user can scroll again to retry
+    } finally {
+      isFetchingRef.current = false
+      setIsLoadingMore(false)
+    }
+  }, [effectivePerPage, isInfinite, options.search, options.variant])
+
+  const hasMore = isInfinite && Boolean(meta && meta.current_page < meta.total_pages)
 
   useEffect(() => {
     void reload()
@@ -189,5 +273,17 @@ export function useDummyGallery(options: GalleryQueryOptions = {}) {
     await reload()
   }, [reload])
 
-  return { items, isLoading, meta, reload, create, update, remove, resetToSeed }
+  return {
+    items,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    meta,
+    reload,
+    create,
+    update,
+    remove,
+    resetToSeed,
+  }
 }

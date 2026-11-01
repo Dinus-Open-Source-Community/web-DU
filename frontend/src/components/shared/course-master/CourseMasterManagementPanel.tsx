@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { FolderTree, Layers3, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
@@ -6,6 +7,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/Header'
 import { SearchForm } from '@/components/shared/SearchForm'
+import { CourseMasterPageSkeleton } from '@/components/shared/course-master/CourseMasterSkeletons'
 import { AdminActiveStatusLabel } from '@/lib/admin/status-label'
 import { Button } from '@/components/ui/button'
 import { useCourseMasterList } from '@/hooks/use-course-master-list'
@@ -24,6 +26,10 @@ import type {
   CourseMasterKind,
 } from '@/lib/course-master/types'
 import { COURSE_MASTER_LABELS } from '@/lib/course-master/types'
+import {
+  COURSE_MASTER_COLUMN_SPECS,
+  type CourseMasterColumnId,
+} from '@/lib/course-master/table-columns'
 import { CourseMasterFormDialog } from './CourseMasterFormDialog'
 import {
   appKpiLabelClassName,
@@ -68,76 +74,58 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
   const totalPages = meta?.total_pages ?? 1
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
-  const columns = useMemo(
-    () => [
-      {
-        id: 'name',
-        header: 'Nama',
-        cell: (row: CourseMasterItem) => (
-          <div className="min-w-[180px]">
-            <p className="font-semibold text-ink-900">{row.name}</p>
-            {row.description ? (
-              <p className="mt-0.5 line-clamp-1 text-xs font-medium text-ink-500">{row.description}</p>
-            ) : null}
-          </div>
-        ),
-      },
-      {
-        id: 'status',
-        header: 'Status',
-        cell: (row: CourseMasterItem) => (
-          <AdminActiveStatusLabel active={row.is_active} />
-        ),
-      },
-      {
-        id: 'courses',
-        header: 'Kursus',
-        align: 'center' as const,
-        cell: (row: CourseMasterItem) => (
-          <span className="tabular-nums font-medium text-ink-700">{row.courses?.length ?? 0}</span>
-        ),
-      },
-      {
-        id: 'updated',
-        header: 'Diperbarui',
-        cell: (row: CourseMasterItem) => (
-          <span className="text-sm font-medium text-ink-600">
-            {row.updated_at ? dateFormatter.format(new Date(row.updated_at)) : '-'}
-          </span>
-        ),
-      },
-      {
-        id: 'actions',
-        header: 'Aksi',
-        align: 'right' as const,
-        cell: (row: CourseMasterItem) => (
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-ink-700 shadow-none"
-              onClick={() => setDialogState({ mode: 'edit', item: row })}
-            >
-              <Pencil className="mr-1.5 size-3.5" aria-hidden />
-              Edit
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
-              onClick={() => setDeleteTarget({ uid: row.uid, name: row.name })}
-            >
-              <Trash2 className="mr-1.5 size-3.5" aria-hidden />
-              Hapus
-            </Button>
-          </div>
-        ),
-      },
-    ],
-    [],
-  )
+  const columns = useMemo(() => {
+    const cells: Record<CourseMasterColumnId, (row: CourseMasterItem) => ReactNode> = {
+      name: (row) => (
+        <div className="min-w-[180px]">
+          <p className="font-semibold text-ink-900">{row.name}</p>
+          {row.description ? (
+            <p className="mt-0.5 line-clamp-1 text-xs font-medium text-ink-500">{row.description}</p>
+          ) : null}
+        </div>
+      ),
+      status: (row) => <AdminActiveStatusLabel active={row.is_active} />,
+      courses: (row) => (
+        <span className="tabular-nums font-medium text-ink-700">{row.courses?.length ?? 0}</span>
+      ),
+      updated: (row) => (
+        <span className="text-sm font-medium text-ink-600">
+          {row.updated_at ? dateFormatter.format(new Date(row.updated_at)) : '-'}
+        </span>
+      ),
+      actions: (row) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-ink-700 shadow-none"
+            onClick={() => setDialogState({ mode: 'edit', item: row })}
+          >
+            <Pencil className="mr-1.5 size-3.5" aria-hidden />
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-sm border-2 border-ink-900/10 px-3 text-xs font-semibold text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700"
+            onClick={() => setDeleteTarget({ uid: row.uid, name: row.name })}
+          >
+            <Trash2 className="mr-1.5 size-3.5" aria-hidden />
+            Hapus
+          </Button>
+        </div>
+      ),
+    }
+
+    return COURSE_MASTER_COLUMN_SPECS.map((spec) => ({
+      id: spec.id,
+      header: spec.header,
+      align: spec.align,
+      cell: cells[spec.id],
+    }))
+  }, [])
 
   const closeDialog = () => setDialogState({ mode: 'closed' })
 
@@ -171,6 +159,12 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize)
     setPage(1)
+  }
+
+  // Skeleton berbentuk tabel (judul + tombol + header kolom + baris + paginasi):
+  // mencegah empty state "Memuat data..." dan menjaga layout tidak melompat.
+  if (isLoading && items.length === 0) {
+    return <CourseMasterPageSkeleton kind={kind} rows={pageSize} />
   }
 
   return (

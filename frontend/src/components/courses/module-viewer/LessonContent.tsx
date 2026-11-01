@@ -5,6 +5,7 @@ import type { LessonDetailItem } from '@/lib/types/course'
 import { parseLessonContent } from '@/lib/rich-text'
 import { resolveSafeEmbedUrl, resolveSafeExternalHref } from '@/lib/security/safe-external-url'
 import { cn } from '@/lib/utils'
+import { LessonContentSkeleton } from './LessonViewerSkeleton'
 
 import { type LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
@@ -12,15 +13,12 @@ type LessonContentProps = {
   lesson: LessonDetailItem | null
   theme: LessonThemeMode
   isLoading?: boolean
+  loadingType?: LessonDetailItem['content_type']
 }
 
-export function LessonContent({ lesson, theme, isLoading = false }: LessonContentProps) {
+export function LessonContent({ lesson, theme, isLoading = false, loadingType }: LessonContentProps) {
   if (isLoading) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center px-4 pb-24 pt-20 sm:px-6 sm:pb-28 sm:pt-24 lg:pt-26">
-        <p className={theme === 'dark' ? 'text-zinc-400' : 'text-ink-500'}>Memuat konten lesson...</p>
-      </main>
-    )
+    return <LessonContentSkeleton theme={theme} type={lesson?.content_type ?? loadingType} />
   }
 
   const isDark = theme === 'dark'

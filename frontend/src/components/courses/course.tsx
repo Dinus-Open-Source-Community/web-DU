@@ -14,7 +14,15 @@ const filter = [
 
 type TopFilterKey = (typeof filter)[number]['key']
 
-export default function CourseSection1({ Data, Categories }: { Data: ICourseItem[]; Categories: ICategoryItem[] }) {
+export default function CourseSection1({
+  Data,
+  Categories,
+  isLoading = false,
+}: {
+  Data: ICourseItem[]
+  Categories: ICategoryItem[]
+  isLoading?: boolean
+}) {
   const [isActiveFilter, setIsActiveFilter] = useState<TopFilterKey>('All')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -83,7 +91,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
           />
 
           {/*Card Course*/}
-          <div className="relative h-full w-full">
+          <div className="relative h-full min-h-[420px] w-full">
             <h5 className="align-middle text-2xl leading-[1.3] font-semibold">Kursus Tersedia</h5>
             <div className="mt-3 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {filteredCourses.length > 0 ? (
@@ -116,7 +124,7 @@ export default function CourseSection1({ Data, Categories }: { Data: ICourseItem
                     }}
                   />
                 ))
-              ) : (
+              ) : isLoading ? null : (
                 <p className="col-span-full px-6 py-12 text-center text-base text-ink-500">Tidak ada kursus yang cocok dengan filter saat ini.</p>
               )}
             </div>

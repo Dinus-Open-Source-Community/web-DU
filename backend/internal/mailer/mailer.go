@@ -16,6 +16,9 @@ import (
 //go:embed templates/otp_email.html
 var otpEmailHTML string
 
+//go:embed templates/email_change_confirm.html
+var emailChangeConfirmHTML string
+
 type Mailer struct {
 	host        string
 	port        string
@@ -90,18 +93,45 @@ func (m *Mailer) SendOTP(to, name, code string, expiresMinutes int) error {
 	body = strings.ReplaceAll(body, "{{.Code}}", code)
 	body = strings.ReplaceAll(body, "{{.ExpiresMinutes}}", fmt.Sprintf("%d", expiresMinutes))
 
+	if err := m.sendHTML(to, "Kode Verifikasi Akun DOSCOM University", body); err != nil {
+		return err
+	}
+	log.Printf("[mailer] Successfully sent OTP email to %s", to)
+	return nil
+}
+
+// SendEmailChangeConfirmation mengirim tautan konfirmasi pergantian alamat email ke inbox email lama pengguna.
+func (m *Mailer) SendEmailChangeConfirmation(toOldEmail, name, newEmail, confirmURL string, expiresMinutes int) error {
+	if !m.Configured() {
+		log.Printf("[mailer] SMTP not configured. Email change link for %s -> %s (%s): %s", toOldEmail, newEmail, name, confirmURL)
+		return nil
+	}
+
+	body := emailChangeConfirmHTML
+	body = strings.ReplaceAll(body, "{{.Name}}", name)
+	body = strings.ReplaceAll(body, "{{.OldEmail}}", toOldEmail)
+	body = strings.ReplaceAll(body, "{{.NewEmail}}", newEmail)
+	body = strings.ReplaceAll(body, "{{.ConfirmURL}}", confirmURL)
+	body = strings.ReplaceAll(body, "{{.ExpiresMinutes}}", fmt.Sprintf("%d", expiresMinutes))
+
+	if err := m.sendHTML(toOldEmail, "Konfirmasi Perubahan Alamat Email — DOSCOM University", body); err != nil {
+		return err
+	}
+	log.Printf("[mailer] Successfully sent email-change confirmation to %s (new: %s)", toOldEmail, newEmail)
+	return nil
+}
+
+func (m *Mailer) sendHTML(to, subject, body string) error {
 	fromHeader := m.from
 	if m.fromName != "" {
 		fromHeader = fmt.Sprintf("%s <%s>", m.fromName, m.from)
 	}
 
-	subject := "Kode Verifikasi Akun DOSCOM University"
-
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s",
 		fromHeader, to, subject, body)
 	msg = normalizeCRLF(msg)
 
-	addr := fmt.Sprintf("%s:%s", m.host, m.port)
+	addr := net.JoinHostPort(m.host, m.port)
 	auth := smtp.PlainAuth("", m.user, m.pass, m.host)
 
 	if m.implicitTLS {
@@ -145,7 +175,6 @@ func (m *Mailer) SendOTP(to, name, code string, expiresMinutes int) error {
 			log.Printf("[mailer] close writer failed: %v", err)
 			return err
 		}
-		log.Printf("[mailer] Successfully sent OTP email to %s", to)
 		return nil
 	}
 
@@ -154,6 +183,5 @@ func (m *Mailer) SendOTP(to, name, code string, expiresMinutes int) error {
 		log.Printf("[mailer] SendMail failed: %v", err)
 		return err
 	}
-	log.Printf("[mailer] Successfully sent OTP email to %s", to)
 	return nil
 }

@@ -16,7 +16,7 @@ type GuestLayoutProps = {
 
 const GuestLayout = ({
   children,
-  navbarAuthVariant = 'default',
+  navbarAuthVariant = 'home',
   marketingSurface = false,
 }: GuestLayoutProps) => {
   const auth = useNavbarAuth()
@@ -34,7 +34,10 @@ const GuestLayout = ({
       <Navbar auth={auth} authActionsVariant={navbarAuthVariant} />
       <div
         id="main-content"
-        className={cn('relative z-10', marketingSurface ? 'bg-transparent' : 'bg-background')}
+        className={cn(
+          'relative z-10 min-h-dvh',
+          marketingSurface ? 'bg-paper-offwhite' : 'bg-background',
+        )}
       >
         {children}
       </div>

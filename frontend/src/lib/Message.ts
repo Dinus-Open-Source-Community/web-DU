@@ -29,6 +29,10 @@ export const Message = {
     updateFailed: 'Profil gagal diperbarui. Silakan coba lagi.',
     passwordUpdated: 'Kata sandi berhasil diubah.',
     passwordUpdateFailed: 'Kata sandi gagal diubah. Silakan coba lagi.',
+    emailChangeRequested: 'Tautan konfirmasi telah dikirim ke inbox email lama Anda.',
+    emailChangeRequestFailed: 'Gagal mengajukan perubahan email. Silakan coba lagi.',
+    emailConfirmed: 'Alamat email berhasil diperbarui.',
+    emailConfirmFailed: 'Tautan konfirmasi email tidak valid atau sudah kedaluwarsa.',
   },
   course: {
     createdDraft: 'Kursus disimpan sebagai draf. Terbitkan lewat tombol Terbit.',

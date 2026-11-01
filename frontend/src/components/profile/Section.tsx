@@ -63,12 +63,19 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
     onNewPasswordChange,
     confirmPassword,
     onConfirmPasswordChange,
+    newEmail,
+    onNewEmailChange,
+    emailPassword,
+    onEmailPasswordChange,
+    pendingEmailConfirmationTo,
     isPhotoPending,
     isProfilePending,
     isPasswordPending,
+    isEmailPending,
     onPhotoChange,
     onSubmitProfile,
     onSubmitPassword,
+    onSubmitEmail,
   } = view
 
   const roleLabel = navbarUserRoleLabel[user.role]
@@ -181,6 +188,82 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
       <div className={settingsLayout.securityGrid}>
         <div className={settingsLayout.cardLg}>
           <SettingsCardHeader
+            title="Alamat email"
+            description="Tautan konfirmasi untuk mengganti ke alamat email baru akan dikirim ke inbox email lama Anda."
+          />
+          <form onSubmit={onSubmitEmail} className={settingsLayout.formStack}>
+            <div className={settingsLayout.formSingleColumn}>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-old-email">
+                  Alamat email lama
+                </label>
+                <Input
+                  id="settings-old-email"
+                  type="email"
+                  value={user.email}
+                  readOnly
+                  aria-readonly="true"
+                  className={settingsLayout.readOnlyInput}
+                />
+                <p className={settingsLayout.personalRowHint}>
+                  Link konfirmasi pergantian ke email baru akan dikirim ke inbox email lama ini.
+                </p>
+              </div>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-new-email">
+                  Alamat email baru
+                </label>
+                <Input
+                  id="settings-new-email"
+                  type="email"
+                  placeholder="nama@emailbaru.com"
+                  value={newEmail}
+                  onChange={(event) => onNewEmailChange(event.target.value)}
+                  autoComplete="email"
+                  className={settingsLayout.input}
+                />
+              </div>
+              <div className={settingsLayout.fieldStack}>
+                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-email-pw">
+                  Password saat ini
+                </label>
+                <Input
+                  id="settings-email-pw"
+                  type="password"
+                  placeholder="Verifikasi identitas Anda"
+                  value={emailPassword}
+                  onChange={(event) => onEmailPasswordChange(event.target.value)}
+                  autoComplete="current-password"
+                  className={settingsLayout.input}
+                />
+              </div>
+              {pendingEmailConfirmationTo ? (
+                <div
+                  role="status"
+                  className="rounded-xl border-2 border-ink-900/10 bg-note-mint/40 px-3.5 py-3 text-xs font-medium leading-relaxed text-ink-900"
+                >
+                  Tautan konfirmasi perubahan ke{' '}
+                  <span className="font-bold">{pendingEmailConfirmationTo}</span> telah dikirim
+                  ke inbox email lama Anda (<span className="font-bold">{user.email}</span>).
+                  Buka tautan tersebut untuk menyelesaikan pergantian alamat email.
+                </div>
+              ) : null}
+            </div>
+            <FormActions>
+              <Button
+                type="submit"
+                disabled={isEmailPending}
+                className={settingsLayout.primaryButton}
+              >
+                {isEmailPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                Ajukan perubahan email
+              </Button>
+            </FormActions>
+          </form>
+        </div>
+
+        <div className={settingsLayout.cardLg}>
+          <SettingsCardHeader
             title="Kata sandi"
             description="Gunakan password unik yang sulit ditebak."
           />
@@ -241,45 +324,6 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
               >
                 {isPasswordPending ? <Loader2 className="size-4 animate-spin" /> : null}
                 Perbarui password
-              </Button>
-            </FormActions>
-          </form>
-        </div>
-
-        <div className={settingsLayout.cardLg}>
-          <SettingsCardHeader
-            title="Alamat email"
-            description="Konfirmasi lewat link di inbox email baru Anda."
-          />
-          <form className={settingsLayout.formStack}>
-            <div className={settingsLayout.formSingleColumn}>
-              <div className={settingsLayout.fieldStack}>
-                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-new-email">
-                  Email baru
-                </label>
-                <Input
-                  id="settings-new-email"
-                  type="email"
-                  placeholder="nama@email.com"
-                  className={settingsLayout.input}
-                />
-              </div>
-              <div className={settingsLayout.fieldStack}>
-                <label className={settingsLayout.fieldLabelMd} htmlFor="settings-email-pw">
-                  Password saat ini
-                </label>
-                <Input
-                  id="settings-email-pw"
-                  type="password"
-                  placeholder="Verifikasi identitas Anda"
-                  autoComplete="current-password"
-                  className={settingsLayout.input}
-                />
-              </div>
-            </div>
-            <FormActions>
-              <Button type="button" className={settingsLayout.primaryButton}>
-                Ajukan perubahan email
               </Button>
             </FormActions>
           </form>

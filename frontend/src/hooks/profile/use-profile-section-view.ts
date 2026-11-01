@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 
-import { useUpdatePassword, useUpdateProfile, useUpdateProfilePhoto } from '@/hooks/use-user'
+import {
+  useRequestEmailChange,
+  useUpdatePassword,
+  useUpdateProfile,
+  useUpdateProfilePhoto,
+} from '@/hooks/use-user'
 import type { IUserData } from '@/lib/types/user'
 import type { IAuthSessionUser } from '@/lib/types/auth'
 import {
   avatarFileSchema,
   changePasswordFormSchema,
   getValidationMessage,
+  updateEmailSchema,
   updateProfileSchema,
 } from '@/lib/validator'
 
@@ -27,10 +33,14 @@ export function useProfileSectionView({
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [emailPassword, setEmailPassword] = useState('')
+  const [pendingEmailConfirmationTo, setPendingEmailConfirmationTo] = useState<string | null>(null)
 
   const { mutateAsync: updatePhoto, isPending: isPhotoPending } = useUpdateProfilePhoto()
   const { mutateAsync: updateProfile, isPending: isProfilePending } = useUpdateProfile()
   const { mutateAsync: updatePassword, isPending: isPasswordPending } = useUpdatePassword()
+  const { mutateAsync: requestEmailChange, isPending: isEmailPending } = useRequestEmailChange()
 
   const onPhotoChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -90,9 +100,45 @@ export function useProfileSectionView({
     [confirmPassword, currentPassword, isPasswordPending, newPassword, onValidationError, updatePassword],
   )
 
+  const onSubmitEmail = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (isEmailPending) return
+
+      const trimmedNewEmail = newEmail.trim().toLowerCase()
+      const currentEmail = user.email.trim().toLowerCase()
+      if (trimmedNewEmail && trimmedNewEmail === currentEmail) {
+        onValidationError?.('Alamat email baru tidak boleh sama dengan alamat email lama')
+        return
+      }
+
+      const validation = updateEmailSchema.safeParse({
+        email: newEmail,
+        password: emailPassword,
+      })
+      if (!validation.success) {
+        onValidationError?.(getValidationMessage(validation.error, 'Data perubahan email tidak valid'))
+        return
+      }
+
+      const result = await requestEmailChange({
+        new_email: validation.data.email,
+        password: validation.data.password,
+      })
+      setPendingEmailConfirmationTo(result.new_email || validation.data.email)
+      setNewEmail('')
+      setEmailPassword('')
+    },
+    [emailPassword, isEmailPending, newEmail, onValidationError, requestEmailChange, user.email],
+  )
+
   useEffect(() => {
     setDisplayName(user.name)
   }, [user.name])
+
+  useEffect(() => {
+    setPendingEmailConfirmationTo(null)
+  }, [user.email])
 
   return {
     user,
@@ -104,11 +150,18 @@ export function useProfileSectionView({
     onNewPasswordChange: setNewPassword,
     confirmPassword,
     onConfirmPasswordChange: setConfirmPassword,
+    newEmail,
+    onNewEmailChange: setNewEmail,
+    emailPassword,
+    onEmailPasswordChange: setEmailPassword,
+    pendingEmailConfirmationTo,
     isPhotoPending,
     isProfilePending,
     isPasswordPending,
+    isEmailPending,
     onPhotoChange,
     onSubmitProfile,
     onSubmitPassword,
+    onSubmitEmail,
   }
 }

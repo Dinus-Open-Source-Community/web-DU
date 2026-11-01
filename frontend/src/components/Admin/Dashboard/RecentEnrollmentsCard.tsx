@@ -1,5 +1,6 @@
 import type { RecentEnrollment } from '@/services/admin-dashboard-analytics'
 import { UserPlus } from 'lucide-react'
+import { RecentEnrollmentsCardSkeleton } from './DashboardSkeletons'
 import { format, parseISO, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
@@ -23,17 +24,7 @@ interface RecentEnrollmentsProps {
 
 export function RecentEnrollmentsCard({ enrollments, isLoading }: RecentEnrollmentsProps) {
   if (isLoading) {
-    return (
-      <div className={cn(appCardClassName, 'p-4 sm:p-6')}>
-        <div className="animate-pulse space-y-3">
-          <div className="h-5 w-44 rounded bg-line-light" />
-          <div className="h-3.5 w-60 rounded bg-line-light" />
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-11 rounded-lg bg-paper-panel" />
-          ))}
-        </div>
-      </div>
-    )
+    return <RecentEnrollmentsCardSkeleton />
   }
 
   return (

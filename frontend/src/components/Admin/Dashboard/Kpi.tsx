@@ -4,18 +4,7 @@ import { localizeAdminKpis } from '@/lib/admin/localize-admin-kpi'
 import { cn } from '@/lib/utils'
 
 import { StatCard } from '../../shared/StatCard'
-
-function KpiSkeleton() {
-  return (
-    <div className="flex w-full animate-pulse flex-col items-start gap-2.5 rounded-xl border border-line-light bg-paper-white p-4.5">
-      <div className="flex w-full flex-col gap-2">
-        <div className="h-3 w-20 rounded bg-line-light" />
-        <div className="h-7 w-28 rounded bg-line-light" />
-      </div>
-      <div className="h-3 w-40 max-w-full rounded bg-line-light" />
-    </div>
-  )
-}
+import { AdminKpiCardsSkeleton } from './DashboardSkeletons'
 
 export function KpiGrid({ 
   adminKpis, 
@@ -30,13 +19,7 @@ export function KpiGrid({
   const filteredKpis = localizedKpis
 
   if (isLoading) {
-    return (
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <KpiSkeleton key={i} />
-        ))}
-      </section>
-    )
+    return <AdminKpiCardsSkeleton />
   }
 
   return (

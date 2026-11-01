@@ -27,3 +27,4 @@ blob-report/
 /tests/assets.json
 /results/
 /.codex/config.toml
+/.claude/skills/karpathy-guidelines/

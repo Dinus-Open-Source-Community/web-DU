@@ -13,12 +13,15 @@ export function RouteGuard({ children, allowedRoles }: RouteGuardProps) {
   const location = useLocation()
   const { isLoading, token, role, signOut } = useAuth()
   const tokenExpired = isAuthTokenExpired(token)
+  // Sesi (token + role) sudah terbaca dari cookie sebelum `/user/data` selesai.
+  // Selama itu, biarkan route merender skeleton-nya sendiri daripada layar kosong.
+  const hasSessionFromCookie = Boolean(token) && Boolean(role) && !tokenExpired
 
   useEffect(() => {
     if (token && tokenExpired) signOut()
   }, [signOut, token, tokenExpired])
 
-  if (isLoading) return null
+  if (isLoading && !hasSessionFromCookie) return null
 
   if (!token || tokenExpired) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />

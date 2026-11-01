@@ -18,19 +18,31 @@ import { NotFoundContent } from "./components/shared/Error.tsx";
 import { PageSkeleton } from "./components/shared/PageSkeleton.tsx";
 import { GallerySkeleton } from "./components/shared/gallery/GallerySkeleton.tsx";
 import { AuthPageSkeleton } from "./components/auth/AuthPageSkeleton.tsx";
+import { UserManagePageFallback } from "./components/admin/user-manage/UserManagePageSkeleton.tsx";
+import {
+  CourseMasterRouteFallback,
+} from "./components/shared/course-master/CourseMasterSkeletons.tsx";
+import { ReviewsQaRouteFallback } from "./components/Admin/QA/ModerationSkeletons.tsx";
+import { DashboardRouteFallback } from "./components/dashboard/DashboardRouteFallback.tsx";
+import { StudentLearningRouteFallback } from "./components/student/dashboard/StudentLearningSkeletons.tsx";
+import { StudentAssignmentsRouteFallback } from "./components/student/dashboard/StudentAssignmentSkeletons.tsx";
+import { LessonViewerRouteFallback } from "./components/courses/module-viewer/LessonViewerSkeleton.tsx";
+import { ProfileRouteFallback } from "./components/profile/ProfileSkeleton.tsx";
 import { RouteGuard } from "./providers/route-guard.tsx";
 import { RouterErrorBoundary } from "./components/shared/Error.tsx";
 import ScrollManager from "./components/shared/ScrollManager.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
+import Home from "./pages/landing/Home.tsx";
+import GalleryPage from "./pages/landing/Gallery.tsx";
+import MentorsPage from "./pages/landing/Mentors.tsx";
+import CoursePage from "./pages/landing/Course.tsx";
+import CourseDetail from "./pages/courses/detail.tsx";
+
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
 const VerifyOtpPage = React.lazy(() => import("./pages/auth/VerifyOtp.tsx"));
 const OAuthCallbackPage = React.lazy(() => import("./pages/auth/Oauth.tsx"));
-const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
-const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
-const MentorsPage = React.lazy(() => import("./pages/landing/Mentors.tsx"));
-const CoursePage = React.lazy(() => import("./pages/landing/Course.tsx"));
 const ViewModuleAndLessons = React.lazy(
   () => import("./pages/courses/view.tsx"),
 );
@@ -61,7 +73,6 @@ const AdminCourseTypes = React.lazy(
 const AdminGalleryPage = React.lazy(
   () => import("./pages/admin/Gallery.tsx"),
 );
-const CourseDetail = React.lazy(() => import("./pages/courses/detail.tsx"));
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
 const MentorAssignments = React.lazy(
@@ -106,6 +117,61 @@ const ADMIN_GALLERY_FALLBACK = (
 );
 
 /**
+ * Fallback lazy-load halaman manajemen user (siswa/mentor/administrator).
+ * Sama seperti kasus Galeri: pakai skeleton yang bentuknya identik dengan
+ * kondisi loading di dalam `UserManagePageShell` (lengkap dengan sidebar),
+ * sehingga saat refresh pengguna hanya melihat SATU skeleton — bukan skeleton
+ * generik tanpa sidebar lalu berganti ke skeleton halaman.
+ */
+const ADMIN_USERS_FALLBACK = <UserManagePageFallback kind="student" />;
+const ADMIN_MENTORS_FALLBACK = <UserManagePageFallback kind="mentor" />;
+const ADMIN_ADMINISTRATORS_FALLBACK = <UserManagePageFallback kind="admin" />;
+
+/**
+ * Fallback lazy-load master data kursus (kategori/tipe) dan Ulasan & Tanya Jawab.
+ * Bentuknya sama dengan skeleton di dalam halamannya (judul asli + tabel/forum),
+ * jadi saat refresh tetap hanya satu skeleton tanpa pergeseran layout.
+ */
+const ADMIN_COURSE_CATEGORIES_FALLBACK = (
+  <CourseMasterRouteFallback kind="category" />
+);
+const ADMIN_COURSE_TYPES_FALLBACK = <CourseMasterRouteFallback kind="type" />;
+const ADMIN_REVIEWS_QA_FALLBACK = <ReviewsQaRouteFallback />;
+
+/**
+ * Fallback `/dashboard`. Admin/super admin memakai skeleton dasbor yang sama
+ * dengan halamannya (chrome + judul + KPI + kartu analitik); mentor/siswa tetap
+ * memakai skeleton generik.
+ */
+const DASHBOARD_FALLBACK = <DashboardRouteFallback />;
+
+/**
+ * Fallback lazy-load halaman "Kursus Saya" (student): chrome siswa + skeleton
+ * grid kartu kursus, sama bentuknya dengan halaman akhirnya.
+ */
+const STUDENT_LEARNING_FALLBACK = <StudentLearningRouteFallback />;
+
+/**
+ * Fallback lazy-load halaman "Tugas" (student): chrome siswa + skeleton daftar
+ * tugas, sama bentuknya dengan halaman akhirnya.
+ */
+const STUDENT_ASSIGNMENTS_FALLBACK = <StudentAssignmentsRouteFallback />;
+
+/**
+ * Fallback lazy-load pembaca modul & materi (`/dashboard/learning/courses/:courseUid(/:lessonUid)`
+ * dan `/course/:courseUid/view(/:lessonUid)`): langsung merender `LessonViewerSkeleton`
+ * (bukan `PageSkeleton` generik) agar tidak muncul dua skeleton berbeda berurutan.
+ */
+const LESSON_VIEWER_FALLBACK = <LessonViewerRouteFallback />;
+
+/**
+ * Fallback lazy-load halaman Pengaturan (`/settings`): langsung merender
+ * `ProfileSectionSkeleton` di dalam `AppNavbarProvider` + `AdminPageShell`
+ * (bukan `PageSkeleton` generik 6 kartu tanpa navbar).
+ */
+const PROFILE_PAGE_FALLBACK = <ProfileRouteFallback />;
+
+/**
  * Lockdown landing: saat true, hanya halaman publik inti yang bisa diakses
  * (home, katalog kursus, detail kursus, dan auth). Route lain tetap
  * di-redirect ke home. Ubah ke false untuk membuka kembali seluruh aplikasi.
@@ -133,31 +199,31 @@ const routeConfig: RouteConfig[] = [
     path: ROUTES.home,
     element: <Home />,
     public: true,
-    lazy: true,
+    lazy: false,
   },
   {
     path: ROUTES.gallery,
     element: <GalleryPage />,
     public: true,
-    lazy: true,
+    lazy: false,
   },
   {
     path: ROUTES.mentors,
     element: <MentorsPage />,
     public: true,
-    lazy: true,
+    lazy: false,
   },
   {
     path: ROUTES.courses,
     element: <CoursePage />,
     public: true,
-    lazy: true,
+    lazy: false,
   },
   {
     path: ROUTES.courseDetail(":courseUid"),
     element: <CourseDetail />,
     public: true,
-    lazy: true,
+    lazy: false,
   },
   {
     path: ROUTES.viewModuleAndLessons(":courseUid"),
@@ -165,6 +231,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: LESSON_VIEWER_FALLBACK,
   },
   {
     path: ROUTES.viewModuleAndLessons(":courseUid", ":lessonUid"),
@@ -172,6 +239,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: LESSON_VIEWER_FALLBACK,
   },
   {
     path: ROUTES.courseLessons(":courseUid"),
@@ -235,6 +303,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: PROFILE_PAGE_FALLBACK,
   },
   {
     path: ROUTES.dashboard,
@@ -242,6 +311,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: DASHBOARD_FALLBACK,
   },
   {
     path: ROUTES.admin.users.students,
@@ -249,6 +319,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["super_admin"],
+    fallback: ADMIN_USERS_FALLBACK,
   },
   {
     path: `${ROUTES.admin.users.students}/:userUid`,
@@ -263,6 +334,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["super_admin"],
+    fallback: ADMIN_MENTORS_FALLBACK,
   },
   {
     path: `${ROUTES.admin.users.mentors}/:userUid`,
@@ -277,6 +349,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["super_admin"],
+    fallback: ADMIN_ADMINISTRATORS_FALLBACK,
   },
   {
     path: `${ROUTES.admin.users.administrators}/:userUid`,
@@ -298,6 +371,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["admin", "super_admin"],
+    fallback: ADMIN_COURSE_CATEGORIES_FALLBACK,
   },
   {
     path: ROUTES.admin.courseTypes,
@@ -305,6 +379,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["admin", "super_admin"],
+    fallback: ADMIN_COURSE_TYPES_FALLBACK,
   },
   {
     path: ROUTES.admin.gallery,
@@ -359,6 +434,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["admin", "super_admin", "mentor"],
+    fallback: ADMIN_REVIEWS_QA_FALLBACK,
   },
   {
     path: ROUTES.student.learning,
@@ -366,6 +442,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: STUDENT_LEARNING_FALLBACK,
   },
   {
     path: ROUTES.student.learningCourse(":courseUid"),
@@ -373,6 +450,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: LESSON_VIEWER_FALLBACK,
   },
   {
     path: ROUTES.student.learningCourse(":courseUid", ":lessonUid"),
@@ -380,6 +458,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: LESSON_VIEWER_FALLBACK,
   },
   {
     path: ROUTES.student.assignments,
@@ -387,6 +466,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student"],
+    fallback: STUDENT_ASSIGNMENTS_FALLBACK,
   },
   {
     path: ROUTES.student.redeem,
@@ -412,7 +492,9 @@ function renderRouteElement(route: RouteConfig) {
   return route.lazy ? (
     <Suspense
       fallback={
-        route.fallback ?? (
+        route.fallback !== undefined ? (
+          route.fallback
+        ) : (
           <PageSkeleton
             message="Memuat halaman..."
             className="min-h-dvh justify-center px-4 sm:px-6 lg:px-8"

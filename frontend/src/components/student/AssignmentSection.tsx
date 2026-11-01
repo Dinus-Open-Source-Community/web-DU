@@ -4,6 +4,7 @@ import { Button } from '../ui/button'
 import { PageHeader } from '../shared/Header'
 import { SearchForm } from '../shared/SearchForm'
 import { UnderlineTabList } from '../shared/UnderlineTabList'
+import { StudentAssignmentListSkeleton } from '@/components/student/dashboard/StudentAssignmentSkeletons'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
 import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
 import { cn } from '@/lib/utils'
@@ -71,32 +72,6 @@ function TaskBadges({ row }: { row: StudentAssignmentRow }) {
         {meta.label}
       </span>
       <DeadlineUrgencyBadges urgency={row.deadlineUrgency} />
-    </div>
-  )
-}
-
-function AssignmentListSkeleton() {
-  return (
-    <div className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col divide-y divide-line-light')} aria-hidden>
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="grid min-h-[200px] animate-pulse bg-paper-paper/40 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="flex flex-col justify-between p-5 sm:p-6 gap-6">
-            <div className="flex flex-col gap-3">
-              <div className="h-4 w-40 rounded bg-paper-paper" />
-              <div className="h-6 w-3/4 rounded bg-paper-paper" />
-              <div className="h-4 w-1/2 rounded bg-paper-paper" />
-            </div>
-            <div className="flex gap-2">
-              <div className="h-7 w-24 rounded-lg bg-paper-paper" />
-              <div className="h-7 w-24 rounded-lg bg-paper-paper" />
-            </div>
-          </div>
-          <div className="hidden border-l border-line-light bg-paper-paper/60 p-5 sm:p-6 lg:flex flex-col justify-between">
-            <div className="h-20 rounded-xl bg-paper-paper" />
-            <div className="h-11 rounded-sm bg-paper-paper" />
-          </div>
-        </div>
-      ))}
     </div>
   )
 }
@@ -366,7 +341,7 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
       </div>
 
       {isLoading ? (
-        <AssignmentListSkeleton />
+        <StudentAssignmentListSkeleton rows={pageSize} />
       ) : hasVisibleRows ? (
         <section className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col')}>
           <div className="flex flex-col divide-y divide-line-light">

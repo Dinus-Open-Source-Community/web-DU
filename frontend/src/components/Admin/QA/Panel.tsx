@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Loader2, MessageSquare, SendHorizontal, Star } from 'lucide-react'
+import { MessageSquare, Loader2, SendHorizontal, Star } from 'lucide-react'
 
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ReviewLottieIllustration } from '@/components/playful/ReviewLottieIllustration'
+import { ReviewsTableSkeleton } from '@/components/Admin/QA/ModerationSkeletons'
 import { TablePaginationFooter } from '@/components/shared/TablePaginationFooter'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
 import { formatCourseRatingLabel } from '@/lib/course-detail/course-rating'
@@ -46,16 +47,7 @@ export function ReviewsPanel({
   onPageSizeChange,
 }: ReviewsPanelProps) {
   if (isLoading) {
-    return (
-      <div
-        className={cn(
-          appCardClassName,
-          'flex min-h-48 items-center justify-center',
-        )}
-      >
-        <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden />
-      </div>
-    )
+    return <ReviewsTableSkeleton rows={pageSize ?? 10} />
   }
 
   if (reviews.length === 0) {

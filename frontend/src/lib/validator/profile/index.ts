@@ -3,9 +3,11 @@ import {
   avatarUploadFileSchema,
   changePasswordFormSchema,
   changePasswordPayloadSchema,
+  updateEmailSchema,
   updateProfileSchema,
   type ChangePasswordFormValues,
   type ChangePasswordPayloadValues,
+  type UpdateEmailValues,
   type UpdateProfileValues,
 } from '../profile.schema'
 
@@ -16,6 +18,13 @@ export function parseUpdateProfilePayload(
   fallback = 'Data profil tidak valid',
 ) {
   return parseWithValidationMessage(updateProfileSchema, payload, fallback)
+}
+
+export function parseUpdateEmailPayload(
+  payload: UpdateEmailValues,
+  fallback = 'Data perubahan email tidak valid',
+) {
+  return parseWithValidationMessage(updateEmailSchema, payload, fallback)
 }
 
 export function parseChangePasswordPayload(

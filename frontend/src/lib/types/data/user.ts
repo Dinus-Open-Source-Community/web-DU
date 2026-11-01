@@ -24,6 +24,31 @@ export interface IUpdatePasswordPayload {
   new_password: string
 }
 
+export interface IRequestEmailChangePayload {
+  new_email: string
+  password: string
+}
+
+export interface IRequestEmailChangeResponse {
+  old_email: string
+  new_email: string
+  expires_in_minutes: number
+}
+
+export interface IConfirmEmailChangePayload {
+  token: string
+}
+
+export interface IConfirmEmailChangeResponse {
+  uid: string
+  name: string
+  email: string
+  avatar_url: string
+  role: UserRole
+  token: string
+  expires_at: string
+}
+
 export interface IUpdateProfilePayload {
   name?: string
   email?: string

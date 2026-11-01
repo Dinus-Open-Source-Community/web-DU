@@ -168,10 +168,10 @@ export const socialLinks: BrandSocialLink[] = [
   { label: 'Email', href: '#', icon: Mail },
 ]
 
-/** Anchor navigasi landing — semua menuju section di halaman home. */
+/** Link navigasi utama halaman publik berdasarkan rute halaman. */
 export const navLinks = [
-  { label: 'Beranda', href: '/#top' },
-  { label: 'Mentor', href: '/#mentor' },
-  { label: 'Kursus', href: '/#kursus' },
+  { label: 'Beranda', href: ROUTES.home },
+  { label: 'Mentor', href: ROUTES.mentors },
+  { label: 'Kursus', href: ROUTES.courses },
   { label: 'Galeri', href: ROUTES.gallery },
 ]

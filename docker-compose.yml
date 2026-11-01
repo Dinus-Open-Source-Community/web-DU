@@ -98,6 +98,9 @@ services:
     environment:
       GARAGE_DEFAULT_ACCESS_KEY: ${GARAGE_ACCESS_KEY}
       GARAGE_DEFAULT_SECRET_KEY: ${GARAGE_SECRET_KEY}
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN}
     command: /garage server --single-node --default-access-key
     volumes:
       - ./garage.toml:/etc/garage.toml:ro

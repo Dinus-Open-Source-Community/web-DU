@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import DashboardSection from '@/components/student/DashboardSection'
 import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
+import { StudentDashboardSkeleton } from '@/components/student/dashboard/StudentDashboardSkeletons'
 import { useResolvedProfileJoinedCourses } from '@/hooks/files/use-resolved-profile-joined-courses'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import type { IUserData } from '@/lib/types/user'
@@ -20,7 +21,14 @@ export default function StudentDashboard() {
     }
   }, [joinedCourses, profile])
 
-  if (!profileWithResolvedCourses) return null
+  // Selama profil belum siap, tampilkan skeleton dasbor — bukan layar kosong.
+  if (!profileWithResolvedCourses) {
+    return (
+      <StudentAppPageShell user={sidebarUser}>
+        <StudentDashboardSkeleton userName={sidebarUser.name} />
+      </StudentAppPageShell>
+    )
+  }
 
   return (
     <StudentAppPageShell user={sidebarUser}>
