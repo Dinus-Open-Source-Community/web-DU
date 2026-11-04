@@ -5,12 +5,12 @@ import MentorsSection from '../../components/landing/MentorsSection'
 import GallerySection from '../../components/landing/GallerySection'
 import { SplashSessionProvider } from '../../components/playful/SplashScreen'
 import ScrollVelocityTape from '../../components/playful/ScrollVelocityTape'
-import { useCombinedCourseCategoriesAndTypes } from '@/hooks/use-course'
+import { useCourses } from '@/hooks/use-course'
 import { LANDING_COPY } from '@/lib/landing/copy'
 
 export default function Home() {
-  // Prefetch kursus & kategori di latar belakang agar perpindahan ke /course langsung siap.
-  useCombinedCourseCategoriesAndTypes()
+  // Prefetch kursus di latar belakang agar perpindahan ke /course langsung siap.
+  useCourses({ status: 'ACTIVE', page: 1, per_page: 6 })
 
   return (
     <SplashSessionProvider>
