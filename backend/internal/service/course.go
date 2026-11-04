@@ -709,6 +709,10 @@ func applyCourseListFilters(db *gorm.DB, c *gin.Context) *gorm.DB {
 		db = db.Where("status = ?", statusFilter)
 	}
 
+	if levelFilter := strings.ToUpper(strings.TrimSpace(c.Query("level"))); levelFilter != "" {
+		db = db.Where("level = ?", levelFilter)
+	}
+
 	return db
 }
 

@@ -54,7 +54,7 @@ function GuestAuthActions({
         <Link to={ROUTES.login} onClick={onNavigate} className="w-full">
           <button
             type="button"
-            className="flex h-11 w-full items-center justify-center rounded-xl border border-ink-900/20 bg-paper-white text-sm font-bold text-ink-800 transition-all hover:border-ink-900/40 hover:bg-paper-panel hover:text-ink-900 active:scale-[0.98]"
+            className="flex h-11 w-full items-center justify-center rounded-xl border-2 border-ink-900 bg-paper-white text-sm font-bold text-ink-900 shadow-[2px_2px_0px_#050914] outline-none transition-all hover:bg-paper-panel active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             Masuk
           </button>
@@ -67,10 +67,10 @@ function GuestAuthActions({
           <button
             type="button"
             className={cn(
-              'flex h-11 w-full items-center justify-center rounded-xl text-sm font-bold transition-all active:scale-[0.98]',
+              'flex h-11 w-full items-center justify-center rounded-xl border-2 border-ink-900 text-sm font-bold shadow-[2px_2px_0px_#050914] outline-none transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue',
               variant === 'home'
-                ? 'border border-brand-blue bg-brand-blue text-white hover:bg-brand-blue/90'
-                : 'border border-ink-900/25 bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
+                ? 'bg-brand-blue text-ink-900 hover:bg-brand-hover'
+                : 'bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
             )}
           >
             {variant === 'home' ? 'Daftar' : 'Tukar Kode'}
@@ -81,11 +81,11 @@ function GuestAuthActions({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <Link to={ROUTES.login} onClick={onNavigate}>
         <button
           type="button"
-          className="inline-flex h-9 items-center justify-center rounded-xl border border-ink-900/20 bg-paper-white px-4 text-sm font-bold text-ink-800 transition-all hover:border-ink-900/40 hover:bg-paper-panel hover:text-ink-900 active:scale-[0.98]"
+          className="inline-flex h-9 items-center justify-center rounded-xl border-2 border-ink-900 bg-paper-white px-4 text-sm font-bold text-ink-900 shadow-[2px_2px_0px_#050914] outline-none transition-all hover:-translate-y-0.5 hover:bg-paper-panel hover:shadow-[2px_3px_0px_#050914] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           Masuk
         </button>
@@ -94,10 +94,10 @@ function GuestAuthActions({
         <button
           type="button"
           className={cn(
-            'inline-flex h-9 items-center justify-center rounded-xl px-4.5 text-sm font-bold transition-all active:scale-[0.98]',
+            'inline-flex h-9 items-center justify-center rounded-xl border-2 border-ink-900 px-4.5 text-sm font-bold shadow-[2px_2px_0px_#050914] outline-none transition-all hover:-translate-y-0.5 hover:shadow-[2px_3px_0px_#050914] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue',
             variant === 'home'
-              ? 'border border-brand-blue bg-brand-blue text-white hover:bg-brand-blue/90'
-              : 'border border-ink-900/25 bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
+              ? 'bg-brand-blue text-ink-900 hover:bg-brand-hover'
+              : 'bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
           )}
         >
           {variant === 'home' ? 'Daftar' : 'Tukar Kode'}

@@ -1,4 +1,6 @@
 import type { ICategoryItem } from '@/lib/types/course'
+import { Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import {
   Select,
   SelectContent,
@@ -34,27 +36,27 @@ export function CourseCategoryFilter({
 
   return (
     <>
-      {/* Mobile */}
-      <div className="rounded-xl border border-input bg-card p-5 lg:hidden">
+      {/* Mobile Selector */}
+      <div className="rounded-2xl border-2 border-ink-900 bg-paper-white p-4 shadow-paper lg:hidden">
         <label
           htmlFor="course-category-filter"
-          className="mb-3 block text-xl font-semibold tracking-tight text-foreground"
+          className="mb-2 block font-display text-base font-bold text-ink-900"
         >
           {title}
         </label>
         <Select value={selectedValue} onValueChange={handleSelect}>
           <SelectTrigger
             id="course-category-filter"
-            className="w-full rounded-xl"
+            className="w-full rounded-xl border-2 border-ink-900 bg-paper-white font-bold text-ink-900 shadow-2xs"
             aria-label={title}
           >
             <SelectValue placeholder={`Semua ${title}`} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="border-2 border-ink-900 bg-paper-white shadow-paper">
             <SelectGroup>
-              <SelectItem value="all">Semua {title}</SelectItem>
+              <SelectItem value="all" className="font-bold">Semua {title}</SelectItem>
               {items.map((category) => (
-                <SelectItem key={category.uid} value={category.uid}>
+                <SelectItem key={category.uid} value={category.uid} className="font-bold">
                   {category.name}
                 </SelectItem>
               ))}
@@ -63,47 +65,61 @@ export function CourseCategoryFilter({
         </Select>
       </div>
 
-      {/* Desktop */}
-      <div className="hidden h-fit w-full rounded-xl border border-input bg-card p-5 sm:p-6 lg:sticky lg:top-24 lg:block lg:max-w-[280px] lg:shrink-0 lg:p-8">
-        <h2 className="mb-5 text-2xl font-semibold tracking-tight text-foreground sm:mb-7 sm:text-[28px]">
-          {title}
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-5">
-          {items.map((category) => (
-            <label
-              key={category.uid}
-              className="group flex min-h-11 items-center gap-4"
+      {/* Desktop Sidebar */}
+      <div className="hidden h-fit w-full rounded-2xl border-2 border-ink-900 bg-paper-white p-5 shadow-paper sm:p-6 lg:sticky lg:top-24 lg:block lg:max-w-[280px] lg:shrink-0">
+        <div className="mb-4 flex items-center justify-between border-b-2 border-dashed border-ink-900/15 pb-3">
+          <h2 className="font-display text-lg font-bold text-ink-900 sm:text-xl">
+            {title}
+          </h2>
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              className="font-mono text-xs font-bold text-brand-ink hover:underline"
             >
-              <div className="relative flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(category.uid)}
-                  onChange={() => handleToggle(category.uid)}
-                  className="peer sr-only"
-                />
-                <div className="absolute inset-0 rounded-[6px] border-[2.5px] border-ink-900 bg-transparent"></div>
-                <svg
-                  className="absolute text-foreground opacity-0 transition-opacity peer-checked:opacity-100"
-                  width="14"
-                  height="11"
-                  viewBox="0 0 14 11"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M1.5 5.5L5 9L12.5 1.5"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              Reset ({selected.length})
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          {items.map((category) => {
+            const isChecked = selected.includes(category.uid)
+            return (
+              <label
+                key={category.uid}
+                className={cn(
+                  'group flex cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2.5 transition-all select-none',
+                  isChecked
+                    ? 'border-ink-900 bg-note-yellow/40 text-ink-900 shadow-2xs'
+                    : 'border-transparent text-ink-700 hover:border-ink-900/20 hover:bg-paper-panel hover:text-ink-900',
+                )}
+              >
+                <div className="relative flex size-5 shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleToggle(category.uid)}
+                    className="peer sr-only"
                   />
-                </svg>
-              </div>
-              <span className="text-base leading-[1.3] font-normal">
-                {category.name}
-              </span>
-            </label>
-          ))}
+                  <div
+                    className={cn(
+                      'size-5 rounded-md border-2 border-ink-900 transition-colors',
+                      isChecked ? 'bg-note-yellow' : 'bg-paper-white',
+                    )}
+                  />
+                  <Check
+                    className={cn(
+                      'pointer-events-none absolute size-3.5 stroke-[3] text-ink-900 transition-opacity',
+                      isChecked ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                </div>
+                <span className="text-sm font-bold leading-tight">
+                  {category.name}
+                </span>
+              </label>
+            )
+          })}
         </div>
       </div>
     </>

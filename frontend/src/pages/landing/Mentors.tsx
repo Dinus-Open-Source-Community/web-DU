@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import MentorCard from '@/components/landing/MentorCard'
-import Reveal from '@/components/playful/Reveal'
+import HandUnderline from '@/components/playful/HandUnderline'
 import {
   StickerStar,
   StickerSparkle,
@@ -90,7 +90,7 @@ export default function MentorsPage() {
   return (
     <GuestLayout navbarAuthVariant="home" marketingSurface>
       <main className="w-full">
-        <section className="relative min-h-dvh overflow-hidden bg-paper-panel">
+        <section className="relative min-h-dvh overflow-hidden bg-paper-offwhite">
           {/* Garis pemisah atas beraksen tinta tegas */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-ink-900/80" />
 
@@ -108,14 +108,24 @@ export default function MentorsPage() {
           <StickerStar className="pointer-events-none absolute right-[5%] top-24 hidden size-10 rotate-12 opacity-80 md:block" />
           <StickerSparkle className="pointer-events-none absolute left-[4%] top-40 hidden size-8 -rotate-12 opacity-70 md:block" />
 
-          <div className="relative z-[1] mx-auto max-w-7xl px-6 pt-24 pb-16 md:px-10 md:pt-28 md:pb-24">
-            {/* Header: Title Rapi & Enak Dilihat */}
-            <div className="max-w-3xl">
-              <Reveal once={false} y={32}>
-                <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.15] [text-wrap:balance]">
-                  Direktori <span className="text-brand-blue">Mentor</span> Praktisi
-                </h1>
-              </Reveal>
+          <div className="relative z-[1] container mx-auto px-4 pt-20 pb-16 sm:px-6 md:pt-24 md:pb-24 lg:px-10">
+            {/* Header Hero Section */}
+            <div className="mx-auto max-w-4xl text-center">
+              <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-yellow px-3.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button -rotate-1">
+                Direktori Mentor
+              </span>
+
+              <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.15] [text-wrap:balance]">
+                Belajar Langsung dari{' '}
+                <span className="relative inline-block text-brand-blue">
+                  Mentor Praktisi
+                  <HandUnderline draw className="absolute -bottom-2.5 left-0 w-full" />
+                </span>
+              </h1>
+
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ink-600 sm:text-base md:text-lg">
+                Mentormu praktisi berpengalaman yang siap membimbing langkah belajarmu — bukan sekadar nama di brosur.
+              </p>
             </div>
 
             {/* Konten Grid Kartu Mentor Polaroid */}
