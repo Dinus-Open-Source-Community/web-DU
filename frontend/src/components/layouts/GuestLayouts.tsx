@@ -5,6 +5,7 @@ import { landingSurfaceClassName } from '@/lib/landing/landing-surface'
 import { cn } from '@/lib/utils'
 import Footer from '../shared/Footer'
 import Navbar from '../shared/Navbar'
+import { SimulationToggle } from '../shared/SimulationToggle'
 
 type GuestLayoutProps = {
   children: ReactNode
@@ -41,6 +42,7 @@ const GuestLayout = ({
       >
         {children}
       </div>
+      <SimulationToggle />
       <Footer />
     </div>
   )

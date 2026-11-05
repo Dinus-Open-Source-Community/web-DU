@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Users } from 'lucide-react'
 import GuestLayout from '../../components/layouts/GuestLayouts'
 import MentorCard from '@/components/landing/MentorCard'
 import HandUnderline from '@/components/playful/HandUnderline'
@@ -9,12 +9,14 @@ import {
 } from '@/components/playful/Stickers'
 import { cn } from '@/lib/utils'
 import { useInfinitePublicMentors } from '@/hooks/use-public-mentors'
+import { useSimulateEmpty } from '@/lib/simulation'
 import type { LandingMentor } from '@/lib/landing/mentors'
 
 const TILTS = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as const
-const MENTORS_PER_PAGE = 2
+const MENTORS_PER_PAGE = 8
 
 export default function MentorsPage() {
+  const [simulateEmpty] = useSimulateEmpty()
   const {
     data,
     isLoading,
@@ -26,6 +28,7 @@ export default function MentorsPage() {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   const mentorItems: LandingMentor[] = useMemo(() => {
+    if (simulateEmpty) return []
     const pages = data?.pages ?? []
     const seen = new Set<string>()
     const list: LandingMentor[] = []
@@ -54,37 +57,20 @@ export default function MentorsPage() {
   useEffect(() => {
     if (!hasNextPage || isLoading || isFetchingNextPage) return
 
-    const checkBottomReached = () => {
-      if (window.scrollY <= 0) return
-      const doc = document.documentElement
-      const scrolledToPageBottom =
-        window.innerHeight + window.scrollY >= doc.scrollHeight - 120
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
 
-      const sentinel = sentinelRef.current
-      const scrolledToGridBottom = sentinel
-        ? sentinel.getBoundingClientRect().top <= window.innerHeight - 20 &&
-          window.scrollY >= 60
-        : false
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage()
+        }
+      },
+      { rootMargin: '200px' },
+    )
 
-      if (scrolledToPageBottom || scrolledToGridBottom) {
-        void fetchNextPage()
-      }
-    }
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY <= 0) return
-      const doc = document.documentElement
-      if (doc.scrollHeight <= window.innerHeight + 10) {
-        void fetchNextPage()
-      }
-    }
-
-    window.addEventListener('scroll', checkBottomReached, { passive: true })
-    window.addEventListener('wheel', handleWheel, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', checkBottomReached)
-      window.removeEventListener('wheel', handleWheel)
-    }
+    observer.observe(sentinel)
+    return () => observer.disconnect()
   }, [hasNextPage, isLoading, isFetchingNextPage, fetchNextPage])
 
   return (
@@ -142,6 +128,18 @@ export default function MentorsPage() {
               <p className="text-ink-600 mt-10 min-h-[40vh] text-center">
                 Data mentor belum dapat dimuat.
               </p>
+            ) : mentorItems.length === 0 ? (
+              <div className="mx-auto my-12 max-w-md py-10 text-center">
+                <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-yellow text-ink-900">
+                  <Users className="size-6 text-ink-900" />
+                </div>
+                <h3 className="font-display text-xl font-bold text-ink-900">
+                  Belum Ada Mentor
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-600">
+                  Daftar mentor praktisi sedang dalam proses kurasi dan akan segera hadir untuk membimbing langkah belajarmu.
+                </p>
+              </div>
             ) : (
               <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5 sm:mt-14">
                 {mentorItems.map((mentor, i) => (

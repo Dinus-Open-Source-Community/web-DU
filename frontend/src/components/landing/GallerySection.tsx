@@ -18,6 +18,7 @@ import {
 import { type GalleryImage } from '@/lib/landing/gallery'
 import { useDummyGallery } from '@/lib/gallery/dummy-gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
+import { useSimulateEmpty } from '@/lib/simulation'
 
 /**
  * GallerySection — papan tempel bento ala scrapbook sungguhan. Enam "kulit"
@@ -345,9 +346,19 @@ export function GalleryBentoGrid({
       return <div className="mt-10 min-h-[55vh] sm:mt-16" aria-hidden />
     }
     return (
-      <p className="text-ink-500 mt-10 text-center text-sm font-bold uppercase tracking-[0.2em] sm:mt-16">
-        Dokumentasi segera hadir.
-      </p>
+      <Reveal once={false} y={24} className="mt-10 sm:mt-12">
+        <div className="mx-auto max-w-md py-10 text-center">
+          <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-peach text-ink-900">
+            <Camera className="size-6 text-ink-900" />
+          </div>
+          <h3 className="font-display text-xl font-bold text-ink-900">
+            Dokumentasi Segera Hadir
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-ink-600">
+            Belum ada foto kegiatan yang diunggah saat ini. Potret keseruan belajar dan kumpul komunitas akan segera dibagikan di sini.
+          </p>
+        </div>
+      </Reveal>
     )
   }
 
@@ -530,6 +541,7 @@ export function GalleryBentoGrid({
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
+  const [simulateEmpty] = useSimulateEmpty()
   const sectionRef = useRef<HTMLElement | null>(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({
@@ -541,13 +553,14 @@ export default function GallerySection() {
 
   const { items, isLoading } = useDummyGallery({ page: 1, perPage: GALLERY_PREVIEW_COUNT })
   const photos: GalleryImage[] = useMemo(() => {
+    if (simulateEmpty) return []
     return items.slice(0, GALLERY_PREVIEW_COUNT).map((item) => ({
       src: item.src,
       alt: item.alt,
       caption: item.caption,
       variant: item.variant ?? undefined,
     }))
-  }, [items])
+  }, [items, simulateEmpty])
 
   return (
     <section ref={sectionRef} id="galeri" className="relative overflow-hidden bg-paper-white">
