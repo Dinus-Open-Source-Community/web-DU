@@ -202,7 +202,7 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
               DU
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-ink-900 sm:text-xl">
-              Doscom <span className="font-extrabold text-brand-blue">University</span>
+              Doscom University
             </span>
           </Link>
         </div>
@@ -263,18 +263,18 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
               <div className="group relative ml-2 cursor-pointer py-2 pl-2">
                 <div
                   tabIndex={0}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-ink-900/15 bg-paper-panel/60 px-3 py-1.5 outline-none transition-colors hover:border-ink-900/40 focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  className="flex cursor-pointer items-center gap-2.5 py-1 outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-brand-blue"
                   aria-haspopup="menu"
                 >
                   <span className="max-w-[8.5rem] min-w-0 text-right sm:max-w-[10rem]">
-                    <span className="block truncate text-xs font-extrabold leading-tight text-ink-900 sm:text-sm">
+                    <span className="block truncate text-xs font-bold leading-tight text-ink-900 sm:text-sm">
                       {userName}
                     </span>
-                    <span className="block truncate font-mono text-[10px] font-bold uppercase tracking-wider text-ink-500">
+                    <span className="block truncate text-xs font-medium text-ink-500">
                       {navbarUserRoleLabel[userRole]}
                     </span>
                   </span>
-                  <Avatar className="size-8 shrink-0 border-2 border-ink-900 shadow-xs">
+                  <Avatar className="size-9 shrink-0 border-2 border-ink-900 shadow-xs">
                     {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
                     <AvatarFallback className="bg-note-yellow text-xs font-bold text-ink-900">
                       {userInitials(userName)}
@@ -377,7 +377,7 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
               </Avatar>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-extrabold text-ink-900">{userName}</p>
-                <span className="mt-0.5 inline-block rounded-sm border border-ink-900/30 bg-note-mint px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-900">
+                <span className="mt-0.5 inline-block rounded-md border border-ink-900/20 bg-note-mint px-2 py-0.5 text-[11px] font-semibold text-ink-900">
                   {navbarUserRoleLabel[userRole]}
                 </span>
               </div>

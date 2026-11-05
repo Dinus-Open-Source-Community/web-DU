@@ -49,17 +49,6 @@ export function AdminEmailVerificationLabel({ isVerified }: { isVerified: boolea
   )
 }
 
-const SEVERITY: Record<'high' | 'medium' | 'low', { tone: AdminStatusTone; label: string }> = {
-  high: { tone: 'danger', label: 'High' },
-  medium: { tone: 'warning', label: 'Medium' },
-  low: { tone: 'info', label: 'Low' },
-}
-
-export function AdminSeverityLabel({ severity }: { severity: 'high' | 'medium' | 'low' }) {
-  const { tone, label } = SEVERITY[severity]
-  return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
-}
-
 export function AdminQaStatusLabel({ answered }: { answered: boolean }) {
   return (
     <AdminStatusLabel tone={answered ? 'success' : 'warning'}>

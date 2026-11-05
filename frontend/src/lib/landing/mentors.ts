@@ -1,4 +1,5 @@
 import type { SocialPlatform } from '@/lib/profile/social-links'
+import type { MentorApiItem } from '@/services/mentor'
 
 export type MentorSocial = {
   platform: SocialPlatform
@@ -26,10 +27,18 @@ export type LandingMentor = {
   }[]
 }
 
-// TODO: ganti url '#' dengan akun asli tiap mentor sebelum launch.
-export function mentorInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+export function toLandingMentor(mentor: MentorApiItem): LandingMentor {
+  return {
+    uid: mentor.uid,
+    name: mentor.name,
+    email: mentor.email,
+    role: mentor.role,
+    photo: mentor.avatar_url,
+    courses: [],
+    assignedCourses: mentor.assigned_courses,
+    joinedTeachingCourses: mentor.joined_teach_courses,
+    isVerified: mentor.is_verified,
+    createdAt: mentor.created_at,
+    socials: mentor.social_links ?? [],
+  }
 }

@@ -15,7 +15,6 @@ import Reveal from '@/components/playful/Reveal'
 import { StickerTape, StickerStar, StickerSquiggle, StickerSparkle } from '@/components/playful/Stickers'
 import { LANDING_COPY } from '@/lib/landing/copy'
 import { useCourses } from '@/hooks/use-course'
-import { useSimulateEmpty } from '@/lib/simulation'
 import { apiLevelToUi } from '@/lib/course-form/level'
 import { ROUTES } from '@/lib/routes'
 
@@ -48,9 +47,8 @@ export default function CourseSection() {
   const rawY = useTransform(scrollYProgress, [0, 1], [72, 0])
   const y = useSpring(rawY, { stiffness: 120, damping: 24, mass: 0.35 })
 
-  const [simulateEmpty] = useSimulateEmpty()
   const { data, isLoading, isError } = useCourses(COURSES_QUERY_PARAMS)
-  const courses = simulateEmpty ? [] : (data?.courses?.slice(0, 4) ?? [])
+  const courses = data?.courses?.slice(0, 4) ?? []
 
   return (
     <section ref={sectionRef} id="program" className="relative overflow-hidden bg-paper-white">
@@ -74,7 +72,7 @@ export default function CourseSection() {
         style={reduceMotion ? undefined : { y }}
         className="relative mx-auto max-w-7xl px-6 py-16 will-change-transform md:px-10 md:py-24 lg:py-28"
       >
-        {/* Header asimetris: judul besar kiri + CTA kanan */}
+        {/* Header asimetris: judul besar */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <Reveal once={false} y={32} className="max-w-2xl">
             <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-yellow px-3.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button -rotate-2">
@@ -84,15 +82,6 @@ export default function CourseSection() {
               {course.title}
             </h2>
             <StickerSquiggle className="mt-3 h-4 w-40" />
-          </Reveal>
-          <Reveal once={false} y={32} delay={0.1} className="shrink-0">
-            <Link
-              to={course.allHref}
-              className="group/btn inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase text-ink-900 shadow-button outline-none transition-all hover:bg-note-yellow focus-visible:ring-4 focus-visible:ring-brand-blue/50"
-            >
-              {course.allLabel}
-              <ArrowRight className="size-5 transition-transform duration-200 group-hover/btn:translate-x-1" />
-            </Link>
           </Reveal>
         </div>
 
@@ -138,13 +127,6 @@ export default function CourseSection() {
                   ? 'Terjadi kendala saat menghubungkan ke server. Silakan muat ulang halaman atau jelajahi katalog kursus.'
                   : 'Program belajar terbaru sedang dalam proses kurasi. Silakan lihat katalog lengkap kami.'}
               </p>
-              <Link
-                to={course.allHref}
-                className="group/btn mt-6 inline-flex h-11 items-center gap-2 rounded-xl border-2 border-ink-900 bg-brand-blue px-5 text-xs font-extrabold uppercase tracking-wider text-ink-900 shadow-button transition-all hover:bg-brand-hover focus-visible:ring-4 focus-visible:ring-brand-blue/50"
-              >
-                {course.allLabel}
-                <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
-              </Link>
             </div>
           </Reveal>
         ) : (

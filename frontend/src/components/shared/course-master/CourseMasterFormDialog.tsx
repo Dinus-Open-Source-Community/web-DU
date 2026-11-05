@@ -23,7 +23,7 @@ import type {
   CourseMasterKind,
 } from '@/lib/course-master/types'
 import { COURSE_MASTER_LABELS, EMPTY_COURSE_MASTER_FORM } from '@/lib/course-master/types'
-import { validateCourseMasterForm } from '@/lib/course-master/validation'
+import { getCourseMasterFormValidationMessage } from '@/lib/validator/course-master'
 import { courseMasterLayout } from '@/lib/course-master/layout'
 
 type CourseMasterFormDialogProps = {
@@ -63,7 +63,7 @@ export function CourseMasterFormDialog({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const validationError = validateCourseMasterForm(values)
+    const validationError = getCourseMasterFormValidationMessage(values)
     if (validationError) {
       toast.error(validationError)
       return

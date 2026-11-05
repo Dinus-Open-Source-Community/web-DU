@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router-dom'
 
 import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
 import { StudentAssignmentsSection } from '@/components/student/AssignmentSection'
-import { useStudentAssignmentItems } from '@/hooks/student-assignments/use-student-assignment-items'
 import { useStudentAssignmentListView } from '@/hooks/student-assignments/use-student-assignment-list-view'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useAuth } from '@/providers/auth-provider'
@@ -12,10 +11,8 @@ const Assignments = () => {
   const courseUidFilter = searchParams.get('courseUid')
   const { profile, isLoading: isAuthLoading } = useAuth()
   const sidebarUser = useSidebarUser('student')
-  const { items: assignmentItems, isLoading: isAssignmentsLoading } =
-    useStudentAssignmentItems(profile)
   const assignmentListView = useStudentAssignmentListView({
-    items: assignmentItems,
+    profile,
     courseUidFilter,
   })
 
@@ -26,7 +23,7 @@ const Assignments = () => {
     <StudentAppPageShell user={sidebarUser}>
       <StudentAssignmentsSection
         view={assignmentListView}
-        isLoading={isAuthLoading || isAssignmentsLoading}
+        isLoading={isAuthLoading || Boolean(assignmentListView.isLoading)}
       />
     </StudentAppPageShell>
   )

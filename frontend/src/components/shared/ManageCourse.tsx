@@ -6,7 +6,7 @@ import { AdminUnderlineTabs } from '@/components/admin/AdminUnderlineTabs'
 import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
 import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
-import { CreateCourseDialog } from './CreateCourse'
+import { CourseFormDialog } from '@/components/shared/course-form/CourseFormDialog'
 import { CourseCardSkeletonGrid } from './CourseCardSkeleton'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
@@ -180,9 +180,10 @@ export default function ManageCourseSection({
       </div>
 
       {isAdmin && formOptions && createCourse ? (
-        <CreateCourseDialog
+        <CourseFormDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
+          mode="create"
           submitting={createCourse.submitting}
           onSubmitCreate={createCourse.onSubmit}
           categories={formOptions.categories}

@@ -18,7 +18,6 @@ import {
 import { type GalleryImage } from '@/lib/landing/gallery'
 import { useDummyGallery } from '@/lib/gallery/dummy-gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
-import { useSimulateEmpty } from '@/lib/simulation'
 
 /**
  * GallerySection — papan tempel bento ala scrapbook sungguhan. Enam "kulit"
@@ -541,7 +540,6 @@ export function GalleryBentoGrid({
 
 export default function GallerySection() {
   const { gallery } = LANDING_COPY
-  const [simulateEmpty] = useSimulateEmpty()
   const sectionRef = useRef<HTMLElement | null>(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({
@@ -553,14 +551,13 @@ export default function GallerySection() {
 
   const { items, isLoading } = useDummyGallery({ page: 1, perPage: GALLERY_PREVIEW_COUNT })
   const photos: GalleryImage[] = useMemo(() => {
-    if (simulateEmpty) return []
     return items.slice(0, GALLERY_PREVIEW_COUNT).map((item) => ({
       src: item.src,
       alt: item.alt,
       caption: item.caption,
       variant: item.variant ?? undefined,
     }))
-  }, [items, simulateEmpty])
+  }, [items])
 
   return (
     <section ref={sectionRef} id="galeri" className="relative overflow-hidden bg-paper-white">

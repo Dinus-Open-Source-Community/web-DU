@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Mail, Images, Ticket, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Images, Ticket, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/components/navigation'
 
@@ -157,15 +157,29 @@ export type BrandSocialLink = {
   href: string
   /** LucideIcon atau komponen ikon inline apa pun yang menerima className. */
   icon: LucideIcon | ComponentType<SVGProps<SVGSVGElement>>
+  colorClass?: string
 }
 
-/** Ikon brand asli (bukan Globe generik). Href sengaja placeholder sampai ada akun resmi. */
+/** Ikon brand resmi komunitas DOSCOM. */
 export const socialLinks: BrandSocialLink[] = [
-  // TODO: ganti '#' dengan akun DOSCOM resmi (github.com/doscom-university, dll) sebelum launch.
-  { label: 'GitHub', href: '#', icon: BrandGithubIcon },
-  { label: 'LinkedIn', href: '#', icon: BrandLinkedinIcon },
-  { label: 'Instagram', href: '#', icon: BrandInstagramIcon },
-  { label: 'Email', href: '#', icon: Mail },
+  {
+    label: 'GitHub',
+    href: 'https://github.com/Dinus-Open-Source-Community',
+    icon: BrandGithubIcon,
+    colorClass: 'text-[#181717]',
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/doscomedia',
+    icon: BrandLinkedinIcon,
+    colorClass: 'text-[#0A66C2]',
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/doscomedia/',
+    icon: BrandInstagramIcon,
+    colorClass: 'text-[#E4405F]',
+  },
 ]
 
 /** Link navigasi utama halaman publik berdasarkan rute halaman. */

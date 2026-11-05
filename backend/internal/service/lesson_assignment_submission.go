@@ -17,6 +17,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const maxLessonAssignmentSubmissionAttachmentBytes int64 = 10 * 1024 * 1024
+
 type submissionPayload struct {
 	PlainText       string
 	RichText        json.RawMessage
@@ -113,7 +115,7 @@ func CreateLessonAssignmentSubmissionFunc(c *gin.Context) {
 	fileURL := ""
 	origName := ""
 	if payload.File != nil {
-		if payload.File.Size > utils.MaxLessonAssignmentSubmissionAttachmentBytes {
+		if payload.File.Size > maxLessonAssignmentSubmissionAttachmentBytes {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"success": false, "message": "File exceeds maximum size of 10MB", "data": nil, "error": nil})
 			return
 		}
@@ -273,7 +275,7 @@ func UpdateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		newFileOriginalName = ""
 	}
 	if payload.File != nil {
-		if payload.File.Size > utils.MaxLessonAssignmentSubmissionAttachmentBytes {
+		if payload.File.Size > maxLessonAssignmentSubmissionAttachmentBytes {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"success": false, "message": "File exceeds maximum size of 10MB", "data": nil, "error": nil})
 			return
 		}
@@ -712,7 +714,7 @@ func validateSubmissionAgainstAssignment(a *entity.LessonAssignment, p *submissi
 		if p.File != nil && !a.AllowFileSubmission {
 			return errors.New("file submission is not allowed for this assignment")
 		}
-		if p.File != nil && p.File.Size > utils.MaxLessonAssignmentSubmissionAttachmentBytes {
+		if p.File != nil && p.File.Size > maxLessonAssignmentSubmissionAttachmentBytes {
 			return errors.New("file exceeds maximum size of 10MB")
 		}
 		hasPlain := len(strings.TrimSpace(p.PlainText)) > 0
