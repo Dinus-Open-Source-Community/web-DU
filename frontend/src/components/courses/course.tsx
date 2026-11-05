@@ -33,6 +33,7 @@ import type { ICategoryItem, ICourseItem } from '@/lib/types/course'
 import { useCourses } from '@/hooks/use-course'
 import { filterAvailableCourses } from '@/lib/course-catalog/available-courses'
 import { useAuth } from '@/providers/auth-provider'
+import { useSimulateEmpty } from '@/lib/simulation'
 
 const CARD_ACCENTS = [
   { bg: 'bg-note-mint' },
@@ -61,6 +62,7 @@ export default function CourseSection1({
   isLoading?: boolean
 } = {}) {
   const { profile } = useAuth()
+  const [simulateEmpty] = useSimulateEmpty()
   const [selectedLevels, setSelectedLevels] = useState<CourseUiLevel[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('')
@@ -97,6 +99,17 @@ export default function CourseSection1({
   const isLoading = initialIsLoading || (Boolean(!initialData) && isQueryLoading)
 
   const { paginatedCourses, totalCourses, totalPages, safeCurrentPage, startIndex, endIndex } = useMemo(() => {
+    if (simulateEmpty) {
+      return {
+        paginatedCourses: [],
+        totalCourses: 0,
+        totalPages: 1,
+        safeCurrentPage: 1,
+        startIndex: 0,
+        endIndex: 0,
+      }
+    }
+
     if (initialData) {
       const keyword = debouncedSearchQuery.trim().toLowerCase()
       const filtered = initialData.filter((course) => {
@@ -156,6 +169,7 @@ export default function CourseSection1({
       endIndex: end,
     }
   }, [
+    simulateEmpty,
     initialData,
     debouncedSearchQuery,
     selectedLevels,
@@ -428,8 +442,8 @@ export default function CourseSection1({
               </div>
             ) : totalCourses === 0 ? (
               /* Empty State */
-              <div className="mx-auto my-12 max-w-md rounded-[24px] border-2 border-dashed border-ink-900/30 bg-paper-white p-8 text-center shadow-paper">
-                <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl border-2 border-ink-900 bg-note-yellow shadow-button">
+              <div className="mx-auto my-12 max-w-md py-10 text-center">
+                <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-yellow text-ink-900">
                   <BookOpen className="size-6 text-ink-900" />
                 </div>
                 <h3 className="font-display text-xl font-bold text-ink-900">

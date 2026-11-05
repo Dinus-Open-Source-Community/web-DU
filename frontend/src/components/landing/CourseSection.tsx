@@ -15,6 +15,7 @@ import Reveal from '@/components/playful/Reveal'
 import { StickerTape, StickerStar, StickerSquiggle, StickerSparkle } from '@/components/playful/Stickers'
 import { LANDING_COPY } from '@/lib/landing/copy'
 import { useCourses } from '@/hooks/use-course'
+import { useSimulateEmpty } from '@/lib/simulation'
 import { apiLevelToUi } from '@/lib/course-form/level'
 import { ROUTES } from '@/lib/routes'
 
@@ -47,8 +48,9 @@ export default function CourseSection() {
   const rawY = useTransform(scrollYProgress, [0, 1], [72, 0])
   const y = useSpring(rawY, { stiffness: 120, damping: 24, mass: 0.35 })
 
+  const [simulateEmpty] = useSimulateEmpty()
   const { data, isLoading, isError } = useCourses(COURSES_QUERY_PARAMS)
-  const courses = data?.courses?.slice(0, 4) ?? []
+  const courses = simulateEmpty ? [] : (data?.courses?.slice(0, 4) ?? [])
 
   return (
     <section ref={sectionRef} id="program" className="relative overflow-hidden bg-paper-white">
@@ -124,8 +126,8 @@ export default function CourseSection() {
           </div>
         ) : isError || courses.length === 0 ? (
           <Reveal once={false} y={24} className="mt-10 sm:mt-12">
-            <div className="mx-auto max-w-lg rounded-[24px] border-2 border-dashed border-ink-900/30 bg-paper-white p-8 text-center shadow-paper">
-              <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl border-2 border-ink-900 bg-note-yellow shadow-button">
+            <div className="mx-auto max-w-md py-10 text-center">
+              <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-yellow text-ink-900">
                 <BookOpen className="size-6 text-ink-900" />
               </div>
               <h3 className="font-display text-xl font-bold text-ink-900">

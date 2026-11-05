@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
 import MentorCard from '@/components/landing/MentorCard'
 import { LANDING_COPY } from '@/lib/landing/copy'
 import { usePublicMentors } from '@/hooks/use-public-mentors'
+import { useSimulateEmpty } from '@/lib/simulation'
 import type { LandingMentor } from '@/lib/landing/mentors'
 
 const TILTS = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as const
@@ -14,21 +15,23 @@ export const MENTOR_PREVIEW_COUNT = 4
 
 export default function MentorsSection() {
   const { mentors } = LANDING_COPY
+  const [simulateEmpty] = useSimulateEmpty()
   const { data, isLoading, isError } = usePublicMentors(MENTOR_PREVIEW_COUNT)
-  const preview: LandingMentor[] =
-    data?.mentors.map((mentor) => ({
-      uid: mentor.uid,
-      name: mentor.name,
-      email: mentor.email,
-      role: mentor.role,
-      photo: mentor.avatar_url,
-      courses: [],
-      assignedCourses: mentor.assigned_courses,
-      joinedTeachingCourses: mentor.joined_teach_courses,
-      isVerified: mentor.is_verified,
-      createdAt: mentor.created_at,
-      socials: mentor.social_links ?? [],
-    })) ?? []
+  const preview: LandingMentor[] = simulateEmpty
+    ? []
+    : (data?.mentors.map((mentor) => ({
+        uid: mentor.uid,
+        name: mentor.name,
+        email: mentor.email,
+        role: mentor.role,
+        photo: mentor.avatar_url,
+        courses: [],
+        assignedCourses: mentor.assigned_courses,
+        joinedTeachingCourses: mentor.joined_teach_courses,
+        isVerified: mentor.is_verified,
+        createdAt: mentor.created_at,
+        socials: mentor.social_links ?? [],
+      })) ?? [])
 
   return (
     <section id="mentor" className="relative overflow-hidden bg-paper-panel">
@@ -77,8 +80,29 @@ export default function MentorsSection() {
               />
             ))}
           </div>
-        ) : isError ? (
-          <p className="text-ink-600 mt-10 text-center">Data mentor belum dapat dimuat.</p>
+        ) : isError || preview.length === 0 ? (
+          <Reveal once={false} y={24} className="mt-10 sm:mt-12">
+            <div className="mx-auto max-w-md py-10 text-center">
+              <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-mint text-ink-900">
+                <Users className="size-6 text-ink-900" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-ink-900">
+                {isError ? 'Gagal Memuat Mentor' : 'Mentor Sedang Disiapkan'}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-600">
+                {isError
+                  ? 'Terjadi kendala saat menghubungkan ke server. Silakan coba beberapa saat lagi.'
+                  : 'Daftar mentor praktisi yang akan membimbingmu sedang dalam proses kurasi dan akan segera hadir.'}
+              </p>
+              <Link
+                to={mentors.allHref}
+                className="group/btn mt-6 inline-flex h-11 items-center gap-2 rounded-xl border-2 border-ink-900 bg-note-yellow px-5 text-xs font-extrabold uppercase tracking-wider text-ink-900 shadow-button transition-all hover:bg-yellow-300 focus-visible:ring-4 focus-visible:ring-brand-blue/50"
+              >
+                {mentors.allLabel}
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
+              </Link>
+            </div>
+          </Reveal>
         ) : (
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
             {preview.slice(0, 4).map((mentor, i) => (

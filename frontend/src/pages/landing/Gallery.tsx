@@ -8,22 +8,25 @@ import {
   StickerSparkle,
 } from '@/components/playful/Stickers'
 import { useDummyGallery } from '@/lib/gallery/dummy-gallery'
+import { useSimulateEmpty } from '@/lib/simulation'
 import type { GalleryImage } from '@/lib/landing/gallery'
 
 export default function GalleryPage() {
+  const [simulateEmpty] = useSimulateEmpty()
   const { items, isLoading, isLoadingMore, hasMore, loadMore } = useDummyGallery({
     perPage: GALLERY_PREVIEW_COUNT,
   })
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   const photos: GalleryImage[] = useMemo(() => {
+    if (simulateEmpty) return []
     return items.map((item) => ({
       src: item.src,
       alt: item.alt,
       caption: item.caption,
       variant: item.variant ?? undefined,
     }))
-  }, [items])
+  }, [items, simulateEmpty])
 
   useEffect(() => {
     if (!hasMore || isLoading || isLoadingMore) return
