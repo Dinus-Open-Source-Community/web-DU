@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"backend/internal/model/dto"
 	"os"
 	"time"
 
@@ -9,6 +8,11 @@ import (
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
+
+type Claims struct {
+	Key string
+	jwt.RegisteredClaims
+}
 
 type errorMsg struct {
 	Msg string
@@ -34,7 +38,7 @@ func (e *errorMsg) Error() string {
 // - Subject ("user_auth")
 func GenerateJWT(key string, expiresAt time.Time) (string, error) {
 	// Membuat claims yang berisi data user dan informasi waktu.
-	claims := dto.Claims{
+	claims := Claims{
 		Key: key,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),  // waktu token berakhir
@@ -53,9 +57,9 @@ func GenerateJWT(key string, expiresAt time.Time) (string, error) {
 // ParseToken digunakan untuk memvalidasi dan membaca token JWT yang dikirim oleh client.
 // Parameter:
 //   - tokenStr: string token JWT yang diterima (biasanya dari header Authorization).
-func ParseToken(tokenStr string) (*dto.Claims, error) {
+func ParseToken(tokenStr string) (*Claims, error) {
 	// Membuat objek untuk menampung claims hasil parsing token.
-	claims := &dto.Claims{}
+	claims := &Claims{}
 
 	// Melakukan parsing token menggunakan claims yang disediakan.
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {

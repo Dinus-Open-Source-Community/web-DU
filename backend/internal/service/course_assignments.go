@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"backend/internal/database"
 	"backend/internal/model/entity"
@@ -293,6 +294,28 @@ func (r studentAssignmentRow) toCourseAssignmentListRow() courseAssignmentListRo
 	}
 }
 
+func parseTimeFlex(s string) (time.Time, bool) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return time.Time{}, false
+	}
+	layouts := []string{
+		time.RFC3339,
+		time.RFC3339Nano,
+		"2006-01-02 15:04:05-07:00",
+		"2006-01-02 15:04:05-07",
+		"2006-01-02 15:04:05Z07:00",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+	}
+	for _, l := range layouts {
+		if t, err := time.Parse(l, s); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
+}
+
 // @Summary      List my assignments (Student)
 // @Description  Retrieve all published assignments across courses the authenticated student is enrolled in, with latest submission if any.
 // @Tags         Student
@@ -301,6 +324,8 @@ func (r studentAssignmentRow) toCourseAssignmentListRow() courseAssignmentListRo
 // @Param        page       query  int     false  "Page number (default: 1)"
 // @Param        per_page   query  int     false  "Items per page (default: 10, max: 100)"
 // @Param        course_uid query  string  false  "Filter by course UID"
+// @Param        search     query  string  false  "Search by assignment title or course title"
+// @Param        category   query  string  false  "Filter by category (all, todo, pending_review, done, late)"
 // @Success      200  {object}  map[string]any  "Student assignments retrieved successfully"
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Access denied: Students only"
@@ -334,6 +359,12 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 		perPage = 100
 	}
 
+	search := strings.TrimSpace(c.Query("search"))
+	category := strings.TrimSpace(strings.ToLower(c.Query("category")))
+	if category == "all" {
+		category = ""
+	}
+
 	var resolvedCourseUID *uuid.UUID
 	if courseUIDStr := strings.TrimSpace(c.Query("course_uid")); courseUIDStr != "" {
 		uid, ok := resolveUIDValue(c, "courses", courseUIDStr, "course")
@@ -357,17 +388,6 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 
 	if resolvedCourseUID != nil {
 		countDB = countDB.Where("m.course_uid = ?", *resolvedCourseUID)
-	}
-
-	var total int64
-	if err := countDB.Count(&total).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to count student assignments",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
 	}
 
 	offset := (page - 1) * perPage
@@ -415,18 +435,108 @@ func GetStudentMyAssignmentsFunc(c *gin.Context) {
 	}
 
 	var rows []studentAssignmentRow
-	if err := queryDB.
-		Order("la.deadline_at ASC").
-		Limit(perPage).
-		Offset(offset).
-		Scan(&rows).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve student assignments",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
+	var total int64
+
+	if search != "" || category != "" {
+		// When searching or filtering by category, retrieve candidate rows for student
+		// to decrypt titles and perform accurate status/urgency filtering before slicing.
+		var allRows []studentAssignmentRow
+		if err := queryDB.Order("la.deadline_at ASC").Scan(&allRows).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve student assignments",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		now := time.Now()
+		var filteredRows []studentAssignmentRow
+		searchLower := strings.ToLower(search)
+
+		for _, row := range allRows {
+			courseTitle := utils.DecryptOrSelf(row.CourseTitle)
+			assignmentTitle := utils.DecryptOrSelf(row.AssignmentTitle)
+
+			if search != "" {
+				if !strings.Contains(strings.ToLower(courseTitle), searchLower) &&
+					!strings.Contains(strings.ToLower(assignmentTitle), searchLower) {
+					continue
+				}
+			}
+
+			if category != "" {
+				isSubmitted := row.SubmissionUID != nil
+				isGraded := isSubmitted && row.GradedAt != nil
+				isPendingReview := isSubmitted && row.GradedAt == nil
+
+				deadlineTime, hasDeadline := parseTimeFlex(row.DeadlineAt)
+				isOverdue := hasDeadline && now.After(deadlineTime)
+				isSubmittedOnTime := false
+				if row.SubmittedAt != nil && hasDeadline {
+					if subTime, ok := parseTimeFlex(*row.SubmittedAt); ok && !subTime.After(deadlineTime) {
+						isSubmittedOnTime = true
+					}
+				}
+				isLate := isOverdue && !isGraded && !isSubmittedOnTime
+
+				match := false
+				switch category {
+				case "todo":
+					match = !isSubmitted
+				case "pending_review":
+					match = isPendingReview
+				case "done":
+					match = isGraded
+				case "late":
+					match = isLate
+				default:
+					match = true
+				}
+				if !match {
+					continue
+				}
+			}
+
+			filteredRows = append(filteredRows, row)
+		}
+
+		total = int64(len(filteredRows))
+		start := offset
+		if start > len(filteredRows) {
+			start = len(filteredRows)
+		}
+		end := start + perPage
+		if end > len(filteredRows) {
+			end = len(filteredRows)
+		}
+		rows = filteredRows[start:end]
+	} else {
+		// Pure database-level count and pagination when no search/category filter active.
+		if err := countDB.Count(&total).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to count student assignments",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		if err := queryDB.
+			Order("la.deadline_at ASC").
+			Limit(perPage).
+			Offset(offset).
+			Scan(&rows).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve student assignments",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
 	}
 
 	items := make([]gin.H, 0, len(rows))

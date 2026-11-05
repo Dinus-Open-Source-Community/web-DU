@@ -9,14 +9,12 @@ import {
 } from '@/components/playful/Stickers'
 import { cn } from '@/lib/utils'
 import { useInfinitePublicMentors } from '@/hooks/use-public-mentors'
-import { useSimulateEmpty } from '@/lib/simulation'
-import type { LandingMentor } from '@/lib/landing/mentors'
+import { toLandingMentor, type LandingMentor } from '@/lib/landing/mentors'
 
 const TILTS = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as const
 const MENTORS_PER_PAGE = 8
 
 export default function MentorsPage() {
-  const [simulateEmpty] = useSimulateEmpty()
   const {
     data,
     isLoading,
@@ -28,7 +26,6 @@ export default function MentorsPage() {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   const mentorItems: LandingMentor[] = useMemo(() => {
-    if (simulateEmpty) return []
     const pages = data?.pages ?? []
     const seen = new Set<string>()
     const list: LandingMentor[] = []
@@ -36,19 +33,7 @@ export default function MentorsPage() {
       for (const mentor of page.mentors ?? []) {
         if (seen.has(mentor.uid)) continue
         seen.add(mentor.uid)
-        list.push({
-          uid: mentor.uid,
-          name: mentor.name,
-          email: mentor.email,
-          role: mentor.role,
-          photo: mentor.avatar_url,
-          courses: [],
-          assignedCourses: mentor.assigned_courses,
-          joinedTeachingCourses: mentor.joined_teach_courses,
-          isVerified: mentor.is_verified,
-          createdAt: mentor.created_at,
-          socials: mentor.social_links ?? [],
-        })
+        list.push(toLandingMentor(mentor))
       }
     }
     return list

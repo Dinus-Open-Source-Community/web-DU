@@ -7,11 +7,16 @@ import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { Button } from '@/components/ui/button'
 import { navbarUserRoleLabel } from '@/lib/layout/navbar-user-display'
-import { initialsFromName } from '@/lib/profile/profile-formatters'
 import type { ProfileSectionShellProps } from '@/lib/profile/profile-section-view-model'
 import { settingsLayout } from '@/lib/profile/settings-layout'
 import { cn } from '@/lib/utils'
 import { Input } from '../ui/input'
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  return name.slice(0, 2).toUpperCase() || '?'
+}
 
 function SettingsCardHeader({
   title,

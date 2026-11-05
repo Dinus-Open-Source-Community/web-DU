@@ -1,10 +1,21 @@
 import type { IMentorStats } from '@/lib/types/utils'
-import { mentorKpiAccentClassName, type MentorKpiMetric } from '@/lib/mentor/mentor-kpi-accent'
 import { cn } from '@/lib/utils'
 
 import { MentorKpiCardsSkeleton } from '@/components/mentor/dashboard/MentorDashboardSkeletons'
-
 import { StatCard } from '@/components/shared/StatCard'
+
+type MentorKpiMetric =
+  | 'pendingGrading'
+  | 'unansweredQA'
+  | 'activeStudents'
+  | 'totalCourses'
+
+const mentorKpiAccentClassName: Record<MentorKpiMetric, string> = {
+  pendingGrading: 'border-l-brand-blue',
+  unansweredQA: 'border-l-[#D7CBFF]',
+  activeStudents: 'border-l-[#A8EFCF]',
+  totalCourses: 'border-l-[#FFC4A6]',
+}
 
 const MENTOR_KPI_ITEMS: { key: MentorKpiMetric; label: string }[] = [
   { key: 'pendingGrading', label: 'Menunggu dinilai' },

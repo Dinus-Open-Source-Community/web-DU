@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { cn } from "../../lib/utils";
 import { socialLinks } from "../../lib/navigation";
 
 export default function Footer() {
@@ -32,24 +33,17 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-3">
             {socialLinks.map((social) => {
               const Icon = social.icon;
-              const isPlaceholder = social.href === "#";
-              return isPlaceholder ? (
-                <span
-                  key={social.label}
-                  aria-disabled="true"
-                  title={`${social.label} — segera hadir`}
-                  className="border-paper-white/25 bg-paper-white/10 text-paper-white/40 grid size-10 cursor-not-allowed place-items-center rounded-full border-2 border-dashed lg:size-11"
-                >
-                  <Icon className="size-5" />
-                </span>
-              ) : (
+              return (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="text-ink-900 hover:text-brand-blue shadow-button hover:shadow-button-hover border-ink-900 bg-paper-white focus-visible:ring-paper-white/80 grid size-10 place-items-center rounded-full border-2 transition outline-none focus-visible:ring-3 lg:size-11"
+                  className={cn(
+                    "grid size-10 place-items-center rounded-full border-2 border-ink-900 bg-paper-white shadow-button outline-none focus-visible:ring-3 focus-visible:ring-paper-white/80 lg:size-11",
+                    social.colorClass
+                  )}
                 >
                   <Icon className="size-5" />
                 </a>

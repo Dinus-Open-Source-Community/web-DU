@@ -2,7 +2,6 @@ package service
 
 import (
 	"backend/internal/database"
-	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"context"
@@ -149,8 +148,15 @@ func CallbackHandler(c *gin.Context) {
 		return
 	}
 
+	type googleUserMinimal struct {
+		Email         string `json:"email"`
+		VerifiedEmail bool   `json:"verified_email"`
+		Name          string `json:"name"`
+		Picture       string `json:"picture"`
+	}
+
 	// Unmarshal only the fields we care about
-	var gu dto.GoogleUserMinimal
+	var gu googleUserMinimal
 	if err := json.Unmarshal(contents, &gu); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"success": false,
