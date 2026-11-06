@@ -87,3 +87,10 @@ export const mentorDashboardKeys = {
   schedules: (params?: IQueryParamsPayload) =>
     ['mentor-dashboard', 'schedules', params] as const,
 }
+
+export const redeemCodeKeys = {
+  all: ['redeem-codes'] as const,
+  list: (params?: IQueryParamsPayload) => ['redeem-codes', params] as const,
+  candidateStudents: (courseUid?: string, params?: IQueryParamsPayload) =>
+    ['redeem-candidate-students', courseUid, params] as const,
+}

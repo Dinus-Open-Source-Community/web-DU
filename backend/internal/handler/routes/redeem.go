@@ -26,6 +26,7 @@ func StartRedeemRoutes(r *gin.Engine) {
 	{
 		adminRedeemGroup.POST("", service.GenerateRedeemCodeFunc)
 		adminRedeemGroup.GET("", service.ListRedeemCodesFunc)
+		adminRedeemGroup.GET("/candidate-students", service.GetRedeemCandidateStudentsFunc)
 	}
 
 	// Alias route alternatif untuk generate

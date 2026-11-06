@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   Compass,
   Layers,
   Rocket,
@@ -45,70 +43,20 @@ interface PopularCoursesStripProps {
   className?: string
   itemsPerPage?: number
   isSidebar?: boolean
-}
-
-function useResponsiveItemsPerPage(fallback = 3) {
-  const [itemsPerPage, setItemsPerPage] = useState(fallback)
-
-  useEffect(() => {
-    const mediaSm = window.matchMedia('(min-width: 640px)')
-    const mediaLg = window.matchMedia('(min-width: 1024px)')
-
-    const updateItemsPerPage = () => {
-      if (mediaLg.matches) {
-        setItemsPerPage(3)
-        return
-      }
-
-      if (mediaSm.matches) {
-        setItemsPerPage(2)
-        return
-      }
-
-      setItemsPerPage(1)
-    }
-
-    updateItemsPerPage()
-    mediaSm.addEventListener('change', updateItemsPerPage)
-    mediaLg.addEventListener('change', updateItemsPerPage)
-
-    return () => {
-      mediaSm.removeEventListener('change', updateItemsPerPage)
-      mediaLg.removeEventListener('change', updateItemsPerPage)
-    }
-  }, [])
-
-  return itemsPerPage
+  limit?: number
 }
 
 export function PopularCoursesStrip({
-  title = 'Kursus populer',
+  title = 'Kursus Populer',
   items,
+  baseHref,
   className,
-  itemsPerPage: itemsPerPageOverride,
   isSidebar = false,
+  limit = 3,
 }: PopularCoursesStripProps) {
-  const responsiveItemsPerPage = useResponsiveItemsPerPage()
-  const itemsPerPage = itemsPerPageOverride ?? (isSidebar ? 2 : responsiveItemsPerPage)
-  const [currentPage, setCurrentPage] = useState(1)
-  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage))
+  const displayItems = useMemo(() => items.slice(0, limit), [items, limit])
 
-  const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    return items.slice(startIndex, startIndex + itemsPerPage)
-  }, [currentPage, items, itemsPerPage])
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [itemsPerPage])
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(Math.max(1, totalPages))
-    }
-  }, [currentPage, totalPages])
-
-  if (items.length === 0) return null
+  if (displayItems.length === 0) return null
 
   return (
     <section
@@ -118,15 +66,25 @@ export function PopularCoursesStrip({
         className,
       )}
     >
-      <h2
-        className={cn(
-          isSidebar
-            ? 'mb-5 font-display text-lg sm:text-xl font-bold tracking-tight text-ink-900'
-            : cn(detailLayout.sectionTitle, 'mb-6'),
-        )}
-      >
-        {title}
-      </h2>
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h2
+          className={cn(
+            isSidebar
+              ? 'font-display text-lg sm:text-xl font-bold tracking-tight text-ink-900'
+              : cn(detailLayout.sectionTitle),
+          )}
+        >
+          {title}
+        </h2>
+
+        <Link
+          to={baseHref ?? ROUTES.courses}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-ink-900 bg-paper-white px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button transition-all hover:bg-note-yellow active:translate-x-[1px] active:translate-y-[1px]"
+        >
+          <span>Liat lebih</span>
+          <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
 
       <div
         className={cn(
@@ -134,7 +92,7 @@ export function PopularCoursesStrip({
           !isSidebar && 'sm:grid-cols-2 lg:grid-cols-3',
         )}
       >
-        {paginatedItems.map((course, i) => {
+        {displayItems.map((course, i) => {
           const accent = CARD_ACCENTS[i % CARD_ACCENTS.length]
           const FallbackIcon = FALLBACK_ICONS[i % FALLBACK_ICONS.length]
           const tapeClass = TAPE_POSITIONS[i % TAPE_POSITIONS.length]
@@ -210,92 +168,39 @@ export function PopularCoursesStrip({
               {/* Bottom Bar: Primary Mentor & Action Arrow Button */}
               <div className="mt-4 flex items-center justify-between border-t border-dashed border-ink-900/15 pt-3">
                 {primaryMentor ? (
-                  <div className="flex min-w-0 items-center gap-2">
-                    <div className="size-6 shrink-0 overflow-hidden rounded-full border border-ink-900/30 bg-note-yellow/60">
-                      {primaryMentor.avatar_url ? (
-                        <img
-                          src={primaryMentor.avatar_url}
-                          alt={primaryMentor.name}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="grid h-full w-full place-items-center font-mono text-[10px] font-bold text-ink-900">
-                          {primaryMentor.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <span className="truncate text-xs font-bold text-ink-700">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {primaryMentor.avatar_url ? (
+                      <img
+                        src={primaryMentor.avatar_url}
+                        alt={primaryMentor.name}
+                        className="size-5 shrink-0 rounded-full border border-ink-900 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    ) : (
+                      <div className="grid size-5 shrink-0 place-items-center rounded-full border border-ink-900 bg-note-yellow font-mono text-[9px] font-bold text-ink-900">
+                        {primaryMentor.name.slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="truncate text-xs font-bold text-ink-800">
                       {primaryMentor.name}
                     </span>
                   </div>
                 ) : (
-                  <span className="font-mono text-xs font-semibold text-ink-500">
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-ink-500">
                     Komunitas Doscom
                   </span>
                 )}
 
-                <div
-                  className="grid size-8 place-items-center rounded-lg border-2 border-ink-900 bg-note-yellow text-ink-900 shadow-2xs transition-all group-hover:bg-brand-blue"
-                  aria-hidden
-                >
-                  <ArrowRight className="size-4 -rotate-45 transition-transform duration-200 group-hover:rotate-0" />
-                </div>
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-ink-900 bg-paper-white text-ink-900 shadow-2xs transition-all duration-200 group-hover:bg-note-yellow group-hover:translate-x-0.5">
+                  <ArrowRight className="size-3.5" />
+                </span>
               </div>
             </Link>
           )
         })}
       </div>
-
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-1.5 border-t-2 border-dashed border-ink-900/15 pt-5">
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage <= 1}
-            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border-2 border-ink-900 bg-paper-white px-2 font-mono text-xs font-bold text-ink-900 shadow-2xs transition-all hover:bg-paper-panel active:translate-x-[1px] active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Halaman sebelumnya"
-          >
-            <ChevronLeft className="size-3.5" />
-            <span className={cn('hidden', !isSidebar && 'sm:inline')}>Sebelumnya</span>
-          </button>
-
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const pageNumber = i + 1
-              const isActive = currentPage === pageNumber
-              return (
-                <button
-                  key={pageNumber}
-                  type="button"
-                  onClick={() => setCurrentPage(pageNumber)}
-                  aria-label={`Halaman ${pageNumber}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={cn(
-                    'grid size-8 place-items-center rounded-lg border-2 border-ink-900 font-mono text-xs font-bold transition-all active:translate-x-[1px] active:translate-y-[1px]',
-                    isActive
-                      ? 'bg-note-yellow text-ink-900'
-                      : 'bg-paper-white text-ink-700 hover:bg-paper-panel hover:text-ink-900',
-                  )}
-                >
-                  {pageNumber}
-                </button>
-              )
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage >= totalPages}
-            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border-2 border-ink-900 bg-paper-white px-2 font-mono text-xs font-bold text-ink-900 shadow-2xs transition-all hover:bg-paper-panel active:translate-x-[1px] active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Halaman berikutnya"
-          >
-            <span className={cn('hidden', !isSidebar && 'sm:inline')}>Selanjutnya</span>
-            <ChevronRight className="size-3.5" />
-          </button>
-        </div>
-      )}
     </section>
   )
 }

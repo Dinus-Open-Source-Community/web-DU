@@ -60,6 +60,7 @@ export const dashboardMenu = {
   assignments: dash('assignments'),
   certificates: dash('certificates'),
   redeem: dash('redeem'),
+  redeemCodes: dash('redeem-codes'),
 }
 
 export const ROUTES = {
@@ -95,6 +96,7 @@ export const ROUTES = {
     assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
     courseEditAdmin: dashboardMenu.courseEdit,
     reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    redeemCodes: dashboardMenu.redeemCodes,
     reviewsAndQa: (courseUid?: string) =>
       `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
@@ -107,6 +109,7 @@ export const ROUTES = {
     courseEditMentor: dashboardMenu.courseEdit,
     assignments: dashboardMenu.courseAssignmentHub,
     reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    redeemCodes: dashboardMenu.redeemCodes,
     reviewsAndQa: (courseUid?: string) =>
       `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
@@ -130,6 +133,10 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Kategori', path: ROUTES.admin.courseCategories },
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
+    },
+    {
+      name: 'Kode Redeem',
+      path: ROUTES.admin.redeemCodes,
     },
     {
       name: 'Galeri',
@@ -158,6 +165,10 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
+    {
+      name: 'Kode Redeem',
+      path: ROUTES.admin.redeemCodes,
+    },
     { name: 'Galeri', path: ROUTES.admin.gallery },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.admin.reviewsAndQaPath },
   ],
@@ -166,6 +177,10 @@ export const routeGroups: Record<string, RouteItem[]> = {
     {
       name: 'Kursus',
       path: ROUTES.mentor.courses,
+    },
+    {
+      name: 'Kode Redeem',
+      path: ROUTES.mentor.redeemCodes,
     },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.mentor.reviewsAndQaPath },
   ],

@@ -115,32 +115,75 @@ func GetCourseCandidateStudentsFunc(c *gin.Context) {
 	if perPage > 100 {
 		perPage = 100
 	}
+	search := strings.TrimSpace(c.Query("search"))
 
 	// Ambil student yang BELUM terdaftar di kursus ini secara bertahap.
 	subQuery := database.DB.Table("enrollments").Select("user_uid").Where("course_uid = ? AND user_uid IS NOT NULL", course.Uid)
 	baseQuery := database.DB.Model(&entity.User{}).Where("role = ? AND uid NOT IN (?)", entity.StudentRole, subQuery)
-	var total int64
-	if err := baseQuery.Count(&total).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to count candidate students", "data": nil, "error": err.Error()})
-		return
-	}
 
+	var total int64
 	var students []entity.User
-	if err := baseQuery.
-		Preload("Enrollments", func(db *gorm.DB) *gorm.DB {
-			return db.Order("enrolled_at DESC")
-		}).
-		Preload("Enrollments.Course").
-		Order("created_at DESC").
-		Offset((page - 1) * perPage).Limit(perPage).
-		Find(&students).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve candidate students",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
+
+	if search != "" {
+		var allCandidates []entity.User
+		if err := baseQuery.
+			Preload("Enrollments", func(db *gorm.DB) *gorm.DB {
+				return db.Order("enrolled_at DESC")
+			}).
+			Preload("Enrollments.Course").
+			Order("created_at DESC").
+			Find(&allCandidates).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve candidate students",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		searchLower := strings.ToLower(search)
+		filtered := make([]entity.User, 0, len(allCandidates))
+		for _, u := range allCandidates {
+			nameDecrypted, _ := utils.Decrypt(u.Name)
+			emailDecrypted, _ := utils.Decrypt(u.Email)
+			if strings.Contains(strings.ToLower(nameDecrypted), searchLower) || strings.Contains(strings.ToLower(emailDecrypted), searchLower) {
+				filtered = append(filtered, u)
+			}
+		}
+
+		total = int64(len(filtered))
+		startIndex := (page - 1) * perPage
+		if startIndex > len(filtered) {
+			startIndex = len(filtered)
+		}
+		endIndex := startIndex + perPage
+		if endIndex > len(filtered) {
+			endIndex = len(filtered)
+		}
+		students = filtered[startIndex:endIndex]
+	} else {
+		if err := baseQuery.Count(&total).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to count candidate students", "data": nil, "error": err.Error()})
+			return
+		}
+
+		if err := baseQuery.
+			Preload("Enrollments", func(db *gorm.DB) *gorm.DB {
+				return db.Order("enrolled_at DESC")
+			}).
+			Preload("Enrollments.Course").
+			Order("created_at DESC").
+			Offset((page - 1) * perPage).Limit(perPage).
+			Find(&students).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Failed to retrieve candidate students",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
 	}
 
 	result := make([]gin.H, 0, len(students))
