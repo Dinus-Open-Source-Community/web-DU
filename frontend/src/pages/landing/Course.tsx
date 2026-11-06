@@ -31,7 +31,7 @@ import { ROUTES } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 import type { CourseUiLevel } from '@/lib/types'
 import { useCourses } from '@/hooks/use-course'
-import { filterAvailableCourses } from '@/lib/course-catalog/available-courses'
+import { filterPublishedCourses } from '@/lib/course-catalog/available-courses'
 import { useAuth } from '@/providers/auth-provider'
 
 const CARD_ACCENTS = [
@@ -84,10 +84,23 @@ export default function CoursePage() {
     level: apiLevel,
   })
 
+  const ownedCourseUids = useMemo(
+    () =>
+      new Set(
+        (profile?.joined_courses ?? [])
+          .filter(
+            (course) =>
+              course.enrollment_status === 'active' || course.enrollment_status === 'completed',
+          )
+          .map((course) => course.uid),
+      ),
+    [profile?.joined_courses],
+  )
+
   const { paginatedCourses, totalCourses, totalPages, safeCurrentPage, startIndex, endIndex } =
     useMemo(() => {
       const rawCourses = serverCoursesData?.courses ?? []
-      const available = filterAvailableCourses(rawCourses, profile?.joined_courses)
+      const available = filterPublishedCourses(rawCourses)
       const meta = serverCoursesData?.meta
       const total = meta?.total ?? available.length
       const pages = Math.max(1, meta?.total_pages ?? Math.ceil(total / itemsPerPage))
@@ -103,7 +116,7 @@ export default function CoursePage() {
         startIndex: start,
         endIndex: end,
       }
-    }, [serverCoursesData, profile?.joined_courses, itemsPerPage, currentPage])
+    }, [serverCoursesData, itemsPerPage, currentPage])
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
@@ -387,6 +400,7 @@ export default function CoursePage() {
                     const hasReviews = Boolean(ratingValue && ratingValue > 0 && course.total_reviews)
                     const primaryMentor =
                       course.mentors && course.mentors.length > 0 ? course.mentors[0] : null
+                    const isEnrolled = ownedCourseUids.has(course.uid)
 
                     return (
                       <Link
@@ -423,9 +437,16 @@ export default function CoursePage() {
 
                           {/* Metadata Bar (Level & Rating) */}
                           <div className="mt-3.5 flex items-center justify-between border-b border-ink-900/10 pb-2 text-xs font-bold">
-                            <span className="font-mono text-[11px] font-extrabold uppercase tracking-wider text-ink-600">
-                              {levelLabel}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono text-[11px] font-extrabold uppercase tracking-wider text-ink-600">
+                                {levelLabel}
+                              </span>
+                              {isEnrolled && (
+                                <span className="rounded border border-ink-900/30 bg-note-mint px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-900">
+                                  Terdaftar
+                                </span>
+                              )}
+                            </div>
                             {hasReviews ? (
                               <div className="flex items-center gap-1 text-ink-700">
                                 <Star className="fill-note-yellow size-3 text-ink-900" />

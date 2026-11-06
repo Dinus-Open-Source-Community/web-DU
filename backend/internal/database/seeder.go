@@ -145,7 +145,7 @@ func seedUsers(db *gorm.DB) {
 			AvatarURL:  "https://i.pravatar.cc/150?img=32",
 		},
 		{
-			Name:       "Budi Santoso",
+			Name:       "Budi Santoro",
 			Email:      "budi@doscom.id",
 			Password:   "student123",
 			Role:       entity.StudentRole,
@@ -408,11 +408,54 @@ func seedEnrollments(db *gorm.DB) {
 		Status       entity.EnrollmentStatus
 	}
 
+	// Pastikan student Budi (budi@doscom.id) tidak mengikuti kursus apapun.
+	// Bersihkan enrollment dan data terkait jika pernah dibuat sebelumnya.
+	if budi, err := findSeedUserByEmail(db, "budi@doscom.id"); err == nil {
+		var budiEnrollments []entity.Enrollment
+		if err := db.Where("user_uid = ?", budi.Uid).Find(&budiEnrollments).Error; err == nil && len(budiEnrollments) > 0 {
+			var budiEnrollmentUIDs []uuid.UUID
+			for _, e := range budiEnrollments {
+				budiEnrollmentUIDs = append(budiEnrollmentUIDs, e.Uid)
+			}
+			db.Exec("DELETE FROM payments WHERE enrollment_uid IN ?", budiEnrollmentUIDs)
+			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonAttendance{})
+			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonReading{})
+			db.Where("user_uid = ?", budi.Uid).Delete(&entity.Enrollment{})
+		}
+
+		var budiSubmissions []entity.LessonAssignmentSubmission
+		if db.Where("user_uid = ?", budi.Uid).Find(&budiSubmissions).Error == nil && len(budiSubmissions) > 0 {
+			var subUIDs []uuid.UUID
+			for _, s := range budiSubmissions {
+				subUIDs = append(subUIDs, s.Uid)
+			}
+			db.Where("lesson_assignment_submission_uid IN ?", subUIDs).Delete(&entity.LessonAssignmentSubmissionAttempt{})
+			db.Where("uid IN ?", subUIDs).Delete(&entity.LessonAssignmentSubmission{})
+		}
+
+		var budiReviews []entity.CourseReview
+		if db.Where("user_uid = ?", budi.Uid).Find(&budiReviews).Error == nil && len(budiReviews) > 0 {
+			var reviewUIDs []uuid.UUID
+			for _, r := range budiReviews {
+				reviewUIDs = append(reviewUIDs, r.Uid)
+			}
+			db.Where("course_review_uid IN ?", reviewUIDs).Delete(&entity.CourseReviewReply{})
+			db.Where("uid IN ?", reviewUIDs).Delete(&entity.CourseReview{})
+		}
+
+		var budiThreads []entity.CourseQaThread
+		if db.Where("author_uid = ?", budi.Uid).Find(&budiThreads).Error == nil && len(budiThreads) > 0 {
+			var threadUIDs []uuid.UUID
+			for _, t := range budiThreads {
+				threadUIDs = append(threadUIDs, t.Uid)
+			}
+			db.Where("thread_uid IN ?", threadUIDs).Delete(&entity.CourseQaReply{})
+			db.Where("uid IN ?", threadUIDs).Delete(&entity.CourseQaThread{})
+		}
+		log.Println("[Info] Siswa seed budi@doscom.id dipastikan tidak mengikuti kursus apapun (enrollment & aktivitas dibersihkan)")
+	}
+
 	enrollments := []seedEnrollment{
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", Progress: 75, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", Progress: 40, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", Progress: 55, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", Progress: 0, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", Progress: 90, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", Progress: 65, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", Progress: 30, Status: entity.EnrollmentActive},
@@ -483,34 +526,16 @@ func seedCourseReviews(db *gorm.DB) {
 
 	reviews := []seedReview{
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "golang-fundamentals",
-			Rating:       5,
-			Comment:      "Materi Golang dijelaskan bertahap dan sangat mudah diikuti.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
 			Rating:       4,
 			Comment:      "Contoh kodenya membantu, tinggal ditambah latihan mandiri lagi.",
 		},
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "web-development-nextjs",
-			Rating:       5,
-			Comment:      "Struktur modul Next.js-nya rapi, cocok untuk yang sudah kenal React.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "web-development-nextjs",
 			Rating:       5,
 			Comment:      "Penjelasan SSR dan routing App Router sangat jelas.",
-		},
-		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "database-design-sql",
-			Rating:       4,
-			Comment:      "Konsep normalisasi dan query SQL-nya praktis untuk proyek nyata.",
 		},
 		{
 			StudentEmail: "siti@doscom.id",
@@ -598,12 +623,6 @@ func seedCourseReviewReplies(db *gorm.DB) {
 
 	replies := []seedReply{
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "golang-fundamentals",
-			MentorEmail:  "andi.mentor@doscom.id",
-			Comment:      "Terima kasih Budi! Senang materinya membantu perjalanan belajarmu.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
 			MentorEmail:  "andi.mentor@doscom.id",
@@ -689,7 +708,7 @@ func seedCourseQaThreads(db *gorm.DB) {
 	threads := []seedThread{
 		{
 			SeedKey:      "qa-go-error-handling",
-			StudentEmail: "budi@doscom.id",
+			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
 			Title:        "Bagaimana cara menangani error di Go?",
 			Body:         "Saya bingung kapan pakai panic vs return error. Ada contoh praktisnya?",
@@ -715,7 +734,7 @@ func seedCourseQaThreads(db *gorm.DB) {
 		},
 		{
 			SeedKey:      "qa-sql-index",
-			StudentEmail: "budi@doscom.id",
+			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "database-design-sql",
 			Title:        "Kapan perlu menambahkan index di tabel?",
 			Body:         "Apakah semua kolom foreign key wajib di-index?",
@@ -1142,15 +1161,8 @@ func seedLessonReadings(db *gorm.DB) {
 		LessonOrderIndexes []int
 	}
 
-	// Budi sudah membaca lesson ber-order_index 1 dan 2 dari setiap course-nya.
 	// Siti baru membaca lesson pertama saja (sedang baru mulai).
 	readings := []seedReading{
-		// Budi — golang-fundamentals
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1, 2}},
-		// Budi — web-development-nextjs
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", LessonOrderIndexes: []int{1}},
-		// Budi — database-design-sql
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", LessonOrderIndexes: []int{1, 2}},
 		// Siti — golang-fundamentals
 		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1}},
 		// Siti — web-development-nextjs
@@ -1265,7 +1277,7 @@ func seedLessonAttendances(db *gorm.DB) {
 }
 
 // seedLessonAssignmentSubmissions membuat contoh submission assignment dari
-// student seed (Budi dan Siti) untuk beberapa assignment yang sudah ada di
+// student seed (Siti) untuk beberapa assignment yang sudah ada di
 // course yang mereka ikuti. Submission mencakup:
 //   - Text submission sudah dinilai mentor (scored + feedback)
 //   - Quiz submission auto-graded
@@ -1307,91 +1319,14 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 	boolTrue  := true
 	boolFalse := false
 
-	score100 := 100.0
-	score85  := 85.0
-	score70  := 70.0
-	score66  := 66.67
-	score33  := 33.33
+	score85 := 85.0
+	score70 := 70.0
+	score33 := 33.33
 
-	correct3 := 3
-	correct2 := 2
 	correct1 := 1
 	total3   := 3
 
 	submissions := []seedSubmission{
-		// ── BUDI ──────────────────────────────────────────────────────────────
-		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text assignment, dinilai sempurna
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya membuat program Hello World menggunakan Go. Program menampilkan teks ke console melalui fmt.Println tanpa dependensi eksternal karena memanfaatkan standard library bawaan Go.",
-			AttemptCount:     1,
-			ScorePercent:     &score100,
-			Passed:           &boolTrue,
-			IsAutoGraded:     false,
-			Feedback:         "Excellent! Implementasi sudah benar dan penjelasannya sangat jelas. Terus pertahankan!",
-		},
-		// golang-fundamentals, Module 2 (Syntax dan Tipe Data), Lesson 1 — quiz, auto-graded sempurna
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 2,
-			LessonOrderIndex: 1,
-			IsQuiz:           true,
-			QuizAnswers:      map[string]string{"q1": "a", "q2": "b", "q3": "b"},
-			AttemptCount:     1,
-			ScorePercent:     &score100,
-			Passed:           &boolTrue,
-			IsAutoGraded:     true,
-			QuizCorrect:      &correct3,
-			QuizTotal:        &total3,
-		},
-		// golang-fundamentals, Module 3 (Control Flow dan Functions), Lesson 1 — quiz, auto-graded tidak lulus
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 3,
-			LessonOrderIndex: 1,
-			IsQuiz:           true,
-			QuizAnswers:      map[string]string{"q1": "a", "q2": "a", "q3": "b"},
-			AttemptCount:     2,
-			ScorePercent:     &score66,
-			Passed:           &boolFalse,
-			IsAutoGraded:     true,
-			QuizCorrect:      &correct2,
-			QuizTotal:        &total3,
-		},
-		// web-development-nextjs, Module 1 (React Basics), Lesson 1 — text, dinilai baik
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "web-development-nextjs",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya membuat komponen React yang menampilkan daftar item menggunakan useState dan map. Setiap item memiliki key unik untuk performa optimal. Komponen menerima props berupa array dan merender elemen li untuk tiap item.",
-			AttemptCount:     1,
-			ScorePercent:     &score85,
-			Passed:           &boolTrue,
-			IsAutoGraded:     false,
-			Feedback:         "Bagus! Penggunaan key prop sudah benar. Coba tambahkan PropTypes untuk type checking yang lebih baik.",
-		},
-		// database-design-sql, Module 1 (SQL Basics), Lesson 1 — text, pending penilaian
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "database-design-sql",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya merancang skema database toko online dengan tabel: users, products, orders, dan order_items. Relasi antar tabel menggunakan foreign key, dan primary key setiap tabel menggunakan UUID untuk menghindari sequential ID exposure.",
-			AttemptCount:     1,
-			ScorePercent:     nil,
-			Passed:           nil,
-			IsAutoGraded:     false,
-		},
-
 		// ── SITI ──────────────────────────────────────────────────────────────
 		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text, dinilai baik
 		{

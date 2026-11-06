@@ -1,26 +1,19 @@
-import {
-  appKpiLabelClassName,
-  appPageTitleClassName,
-  appSoftCardClassName,
-} from '@/lib/design/app-shell-tokens'
-import { cn } from '@/lib/utils'
-
 /** Shared layout tokens for public course detail surfaces. */
 export const detailLayout = {
   page: 'mx-auto w-full max-w-6xl',
-  pageGutter: 'px-4 sm:px-5 md:px-6 lg:px-8',
-  pageSection: 'py-5 sm:py-6 md:py-8 lg:py-10',
-  pageBottomMobile: 'pb-28 lg:pb-10',
-  contentStack: 'flex flex-col gap-4 sm:gap-5',
-  mainGrid: 'grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_360px]',
-  sectionCard: appSoftCardClassName,
-  sectionPadding: 'p-4 sm:p-6',
-  sectionTitle: cn(appPageTitleClassName, 'text-base sm:text-lg'),
-  sectionSubtitle: appKpiLabelClassName,
-  body: 'text-sm leading-relaxed text-ink-600 sm:text-[15px]',
-  meta: 'text-xs font-medium text-ink-500',
+  pageGutter: 'px-4 sm:px-6 lg:px-8',
+  pageSection: 'py-6 sm:py-8 lg:py-10',
+  pageBottomMobile: 'pb-28 lg:pb-12',
+  contentStack: 'flex flex-col gap-6 sm:gap-8',
+  mainGrid: 'grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_360px]',
+  sectionCard: 'relative rounded-[20px] border-2 border-ink-900 bg-paper-white shadow-paper',
+  sectionPadding: 'p-5 sm:p-7 md:p-8',
+  sectionTitle: 'font-display text-xl sm:text-2xl font-bold tracking-tight text-ink-900',
+  sectionSubtitle: 'font-mono text-xs font-bold uppercase tracking-wider text-ink-500',
+  body: 'text-sm leading-relaxed text-ink-700 sm:text-base',
+  meta: 'font-mono text-xs font-bold text-ink-500',
   backLink:
-    'inline-flex min-h-11 items-center gap-1 rounded-lg px-1 text-sm font-medium text-white/90 transition-colors hover:text-white active:scale-[0.98]',
+    'inline-flex min-h-10 items-center gap-1.5 rounded-xl border-2 border-ink-900 bg-paper-white px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button transition-all hover:bg-note-yellow active:translate-x-[1px] active:translate-y-[1px]',
   stickyBar:
-    'fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-sm supports-backdrop-filter:bg-card/85 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden',
+    'fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink-900 bg-paper-white/95 backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden shadow-[0_-4px_16px_rgba(5,9,20,0.08)]',
 } as const
