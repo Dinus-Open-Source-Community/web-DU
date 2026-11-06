@@ -12,6 +12,7 @@ import (
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -481,9 +482,70 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 		finalCode = generated
 	}
 
-	// Validasi target email jika diberikan (TIDAK mewajibkan user sudah terdaftar di sistem)
+	// Penanganan Target Siswa / Email
+	var targetUserSummary *dto.TargetUserSummary
 	targetEmail := strings.ToLower(strings.TrimSpace(req.TargetEmail))
-	if targetEmail != "" {
+	targetUserUIDStr := strings.TrimSpace(req.TargetUserUID)
+
+	if targetUserUIDStr != "" {
+		targetUUID, err := uuid.Parse(targetUserUIDStr)
+		if err != nil || targetUUID == uuid.Nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Format target_user_uid tidak valid.",
+				"data":    nil,
+				"error":   "Invalid target user UID",
+			})
+			return
+		}
+
+		var targetUser entity.User
+		if err := database.DB.First(&targetUser, targetUUID).Error; err != nil || targetUser.Uid == uuid.Nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "User target tidak ditemukan.",
+				"data":    nil,
+				"error":   "Target user not found",
+			})
+			return
+		}
+
+		if targetUser.Role != entity.StudentRole {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Kode redeem kursus hanya dapat ditujukan untuk pengguna dengan peran siswa (student).",
+				"data":    nil,
+				"error":   "Target user must have student role",
+			})
+			return
+		}
+
+		// Validasi apakah siswa target sudah masuk / terdaftar di kursus ini
+		var existingEnrollment entity.Enrollment
+		errEnrollment := database.DB.Where(
+			"user_uid = ? AND course_uid = ? AND status IN ?",
+			targetUser.Uid,
+			courseUUID,
+			[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
+		).First(&existingEnrollment).Error
+		if errEnrollment == nil && existingEnrollment.Uid != uuid.Nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": fmt.Sprintf("Siswa \"%s\" sudah terdaftar dalam kursus ini.", targetUser.Name),
+				"data":    nil,
+				"error":   "Student already enrolled in this course",
+			})
+			return
+		}
+
+		targetEmail = strings.ToLower(strings.TrimSpace(targetUser.Email))
+		targetUserSummary = &dto.TargetUserSummary{
+			UID:       targetUser.Uid.String(),
+			Name:      targetUser.Name,
+			Email:     targetEmail,
+			AvatarURL: targetUser.AvatarURL,
+		}
+	} else if targetEmail != "" {
 		if !validEmailRegex.MatchString(targetEmail) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
@@ -492,6 +554,34 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 				"error":   "Invalid target email format",
 			})
 			return
+		}
+
+		// Jika user sudah ada di database, verifikasi bahwa dia belum terdaftar di kursus ini
+		var existingUser entity.User
+		blindIndex := utils.GenerateBlindIndex(targetEmail)
+		if err := database.DB.Where("email_hash = ?", blindIndex).First(&existingUser).Error; err == nil && existingUser.Uid != uuid.Nil {
+			var existingEnrollment entity.Enrollment
+			errEnrollment := database.DB.Where(
+				"user_uid = ? AND course_uid = ? AND status IN ?",
+				existingUser.Uid,
+				courseUUID,
+				[]entity.EnrollmentStatus{entity.EnrollmentActive, entity.EnrollmentCompleted},
+			).First(&existingEnrollment).Error
+			if errEnrollment == nil && existingEnrollment.Uid != uuid.Nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"message": fmt.Sprintf("Siswa dengan email \"%s\" sudah terdaftar dalam kursus ini.", targetEmail),
+					"data":    nil,
+					"error":   "Student already enrolled in this course",
+				})
+				return
+			}
+			targetUserSummary = &dto.TargetUserSummary{
+				UID:       existingUser.Uid.String(),
+				Name:      existingUser.Name,
+				Email:     existingUser.Email,
+				AvatarURL: existingUser.AvatarURL,
+			}
 		}
 	}
 
@@ -548,6 +638,7 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 		CourseUID:    course.Uid.String(),
 		CourseTitle:  course.Title,
 		TargetEmail:  newRedeemCode.TargetEmail,
+		TargetUser:   targetUserSummary,
 		MaxUses:      newRedeemCode.MaxUses,
 		UsedCount:    newRedeemCode.UsedCount,
 		IsActive:     newRedeemCode.IsActive,
@@ -660,12 +751,27 @@ func ListRedeemCodesFunc(c *gin.Context) {
 			createdByUIDStr = rc.CreatedByUid.String()
 		}
 
+		var targetUserSummary *dto.TargetUserSummary
+		if rc.TargetEmail != "" {
+			var targetUser entity.User
+			blindIndex := utils.GenerateBlindIndex(rc.TargetEmail)
+			if err := database.DB.Where("email_hash = ?", blindIndex).First(&targetUser).Error; err == nil && targetUser.Uid != uuid.Nil {
+				targetUserSummary = &dto.TargetUserSummary{
+					UID:       targetUser.Uid.String(),
+					Name:      targetUser.Name,
+					Email:     targetUser.Email,
+					AvatarURL: targetUser.AvatarURL,
+				}
+			}
+		}
+
 		items = append(items, dto.GenerateRedeemCodeResponse{
 			UID:          rc.Uid.String(),
 			Code:         rc.Code,
 			CourseUID:    rc.CourseUid.String(),
 			CourseTitle:  courseTitle,
 			TargetEmail:  rc.TargetEmail,
+			TargetUser:   targetUserSummary,
 			MaxUses:      rc.MaxUses,
 			UsedCount:    rc.UsedCount,
 			IsActive:     rc.IsActive,
@@ -689,5 +795,174 @@ func ListRedeemCodesFunc(c *gin.Context) {
 				"total_pages":  totalPages,
 			},
 		},
+	})
+}
+
+// @Summary      Get candidate students for redeem code (Admin / Mentor)
+// @Description  Mengambil daftar user role student yang belum terdaftar di kursus yang dipilih untuk keperluan generate kode redeem.
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        course_uid  query     string  false  "Course UID or prefix"
+// @Param        page        query     int     false  "Page number"
+// @Param        per_page    query     int     false  "Items per page"
+// @Param        search      query     string  false  "Search in student name or email"
+// @Success      200         {object}  map[string]any
+// @Router       /admin/redeem-codes/candidate-students [get]
+func GetRedeemCandidateStudentsFunc(c *gin.Context) {
+	user, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+
+	if !hasMentorAccess(user.Role) {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Akses ditolak: Hanya administrator atau mentor yang dapat melihat calon peserta",
+			"data":    nil,
+			"error":   "Forbidden access",
+		})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 {
+		perPage = 20
+	}
+	if perPage > 100 {
+		perPage = 100
+	}
+	search := strings.TrimSpace(c.Query("search"))
+	courseUIDStr := strings.TrimSpace(c.Query("course_uid"))
+	if courseUIDStr == "" {
+		courseUIDStr = strings.TrimSpace(c.Query("course_id"))
+	}
+
+	baseQuery := database.DB.Model(&entity.User{}).Where("role = ?", entity.StudentRole)
+
+	if courseUIDStr != "" {
+		courseUID, err := uuid.Parse(courseUIDStr)
+		if err != nil || courseUID == uuid.Nil {
+			var foundCourse entity.Course
+			if err := database.DB.Where("uid::text LIKE ?", courseUIDStr+"%").First(&foundCourse).Error; err == nil && foundCourse.Uid != uuid.Nil {
+				courseUID = foundCourse.Uid
+			} else {
+				c.JSON(http.StatusNotFound, gin.H{
+					"success": false,
+					"message": "Kursus tidak ditemukan.",
+					"data":    nil,
+					"error":   "Course not found",
+				})
+				return
+			}
+		}
+
+		if user.Role == entity.MentorRole {
+			allowed, err := canManageCourseByRole(user, courseUID)
+			if err != nil || !allowed {
+				c.JSON(http.StatusForbidden, gin.H{
+					"success": false,
+					"message": "Anda tidak memiliki hak akses untuk mengelola kursus ini.",
+					"data":    nil,
+					"error":   "Mentor cannot manage this course",
+				})
+				return
+			}
+		}
+
+		subQuery := database.DB.Table("enrollments").Select("user_uid").Where("course_uid = ? AND user_uid IS NOT NULL", courseUID)
+		baseQuery = baseQuery.Where("uid NOT IN (?)", subQuery)
+	}
+
+	var total int64
+	var students []entity.User
+
+	if search != "" {
+		var allCandidates []entity.User
+		if err := baseQuery.Order("created_at DESC").Find(&allCandidates).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal mengambil daftar siswa",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		searchLower := strings.ToLower(search)
+		filtered := make([]entity.User, 0, len(allCandidates))
+		for _, u := range allCandidates {
+			nameDecrypted, _ := utils.Decrypt(u.Name)
+			emailDecrypted, _ := utils.Decrypt(u.Email)
+			if strings.Contains(strings.ToLower(nameDecrypted), searchLower) || strings.Contains(strings.ToLower(emailDecrypted), searchLower) {
+				filtered = append(filtered, u)
+			}
+		}
+
+		total = int64(len(filtered))
+		startIndex := (page - 1) * perPage
+		if startIndex > len(filtered) {
+			startIndex = len(filtered)
+		}
+		endIndex := startIndex + perPage
+		if endIndex > len(filtered) {
+			endIndex = len(filtered)
+		}
+		students = filtered[startIndex:endIndex]
+	} else {
+		if err := baseQuery.Count(&total).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal menghitung jumlah siswa",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		if err := baseQuery.Order("created_at DESC").Offset((page - 1) * perPage).Limit(perPage).Find(&students).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal mengambil daftar siswa",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+	}
+
+	result := make([]gin.H, 0, len(students))
+	for _, u := range students {
+		nameDecrypted, _ := utils.Decrypt(u.Name)
+		emailDecrypted, _ := utils.Decrypt(u.Email)
+		result = append(result, gin.H{
+			"uid":         u.Uid,
+			"name":        nameDecrypted,
+			"email":       emailDecrypted,
+			"avatar_url":  u.AvatarURL,
+			"role":        u.Role,
+			"is_verified": u.IsVerified,
+			"created_at":  u.CreatedAt,
+		})
+	}
+
+	totalPages := int((total + int64(perPage) - 1) / int64(perPage))
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Daftar calon siswa berhasil diambil",
+		"data": gin.H{
+			"users":        result,
+			"total":        total,
+			"current_page": page,
+			"per_page":     perPage,
+			"total_pages":  totalPages,
+		},
+		"error": nil,
 	})
 }

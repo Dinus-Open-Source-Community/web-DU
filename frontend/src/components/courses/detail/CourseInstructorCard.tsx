@@ -116,7 +116,7 @@ export function CourseInstructorCard({
                       />
 
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="font-display text-xl font-bold text-ink-900 transition-colors group-hover:text-brand-blue sm:text-2xl">
+                        <span className="font-display text-lg font-medium text-ink-900 sm:text-xl">
                           {mentor.name}
                         </span>
                       </div>

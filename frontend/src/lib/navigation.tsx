@@ -31,6 +31,11 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
+    {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.admin.redeemCodes,
+    },
    {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
@@ -63,6 +68,11 @@ export const Navigation: Record<string, NavItem[]> = {
       ],
     },
     {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.admin.redeemCodes,
+    },
+    {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
       icon: Images,
@@ -79,6 +89,11 @@ export const Navigation: Record<string, NavItem[]> = {
       name: 'Kursus',
       icon: BookMarked,
       path: ROUTES.mentor.courses,
+    },
+    {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.mentor.redeemCodes,
     },
     {
       name: 'Ulasan & Tanya Jawab',

@@ -115,6 +115,13 @@ export const API_ROUTES = {
       withQuery(`/students/me/assignments`, params),
     redeem: `/students/redeem`,
   },
+  redeemCodes: {
+    getAll: (params?: IQueryParamsPayload) =>
+      withQuery(`/admin/redeem-codes`, params),
+    generate: `/admin/redeem-codes`,
+    candidateStudents: (params?: IQueryParamsPayload) =>
+      withQuery(`/admin/redeem-codes/candidate-students`, params),
+  },
   courseCategories: {
     getAll: (params?: IQueryParamsPayload) =>
       withQuery(`/course-categories`, params),

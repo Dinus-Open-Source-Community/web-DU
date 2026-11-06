@@ -4,7 +4,7 @@ export const detailLayout = {
   pageGutter: 'px-4 sm:px-6 lg:px-8',
   pageSection: 'py-6 sm:py-8 lg:py-10',
   pageBottomMobile: 'pb-28 lg:pb-12',
-  contentStack: 'flex flex-col gap-6 sm:gap-8',
+  contentStack: 'flex flex-col gap-5 sm:gap-6',
   mainGrid: 'grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_360px]',
   sectionCard: 'relative rounded-[20px] border-2 border-ink-900 bg-paper-white shadow-paper',
   sectionPadding: 'p-5 sm:p-7 md:p-8',

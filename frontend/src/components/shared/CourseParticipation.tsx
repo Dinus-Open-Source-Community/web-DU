@@ -12,6 +12,7 @@ import { CourseParticipantStatusBadge } from '../ui/badge'
 import { CourseDetailTabSectionIntro } from './course-detail-manage/CourseDetailTabSectionIntro'
 import { useCourseStudents } from '@/hooks/use-course'
 import { AddCourseParticipantDialog } from './AddCourseParticipantDialog'
+import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
 import { useAuth } from '@/providers/auth-provider'
 
 type CourseParticipantsSectionProps = {
@@ -68,7 +69,10 @@ export function CourseParticipantsSection({
         description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
         aside={
           isManageAllowed ? (
-            <AddCourseParticipantDialog courseUid={courseUid} />
+            <div className="flex flex-wrap items-center gap-2">
+              <GenerateRedeemCodeDialog initialCourseUid={courseUid} triggerLabel="Generate Kode Redeem" />
+              <AddCourseParticipantDialog courseUid={courseUid} />
+            </div>
           ) : null
         }
       />

@@ -63,9 +63,9 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
       </div>
 
       {/* Main Split-Hero Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
         {/* Left Column: Content Sections */}
-        <div className="flex flex-col gap-8 sm:gap-10">
+        <div className="flex flex-col gap-5 sm:gap-6">
           {/* Mobile Preview & CTA Card (Shown on small screens) */}
           <div className="lg:hidden">
             <CourseDetailSidebar {...sidebarProps}>
@@ -95,13 +95,16 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
           {/* Mobile Kursus Populer (Tampil di bagian bawah pada layar mobile) */}
           {popularCoursesList.length > 0 && (
             <div className="lg:hidden">
-              <PopularCoursesStrip items={popularCoursesList} />
+              <PopularCoursesStrip
+                items={popularCoursesList}
+                baseHref={data.popularBaseHref}
+              />
             </div>
           )}
         </div>
 
         {/* Right Column: Action Card + Kursus Populer di Bawahnya pada Desktop */}
-        <div className="hidden lg:flex lg:flex-col lg:gap-8 lg:self-start">
+        <div className="hidden lg:flex lg:flex-col lg:gap-5 lg:gap-y-6 lg:self-start">
           <CourseDetailSidebar {...sidebarProps}>
             {data.sidebarCta}
           </CourseDetailSidebar>
@@ -110,7 +113,7 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
             <PopularCoursesStrip
               items={popularCoursesList}
               isSidebar
-              itemsPerPage={2}
+              baseHref={data.popularBaseHref}
             />
           )}
         </div>
