@@ -80,15 +80,10 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
             items={data.what_you_learn}
           />
 
-          {/* Section 2: Instruktur Kursus */}
-          {instructors.map((instructor) => (
-            <CourseInstructorCard
-              key={instructor.uid ?? instructor.name}
-              name={instructor.name}
-              role={instructor.role ?? 'Instruktur'}
-              avatar={instructor.avatar_url}
-            />
-          ))}
+          {/* Section 2: Mentor Kursus */}
+          {instructors.length > 0 && (
+            <CourseInstructorCard mentors={instructors} />
+          )}
 
           {/* Section 3: Penilaian & Ulasan Terpadu */}
           <CourseUnifiedReviewHub

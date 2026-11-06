@@ -41,7 +41,13 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
     enabled: false,
   })
   const assignments = detailQuery.data?.assignments ?? mentor.assignments ?? []
-  const roleDisplay = mentor.role && mentor.role !== 'mentor' ? mentor.role : 'Mentor Praktisi'
+  const resolvedRole = detailQuery.data?.role || mentor.role
+  const roleDisplay = resolvedRole && resolvedRole !== 'mentor' ? resolvedRole : 'Mentor Praktisi'
+  const resolvedName = detailQuery.data?.name || mentor.name
+  const resolvedPhoto = detailQuery.data?.avatar_url || mentor.photo
+  const resolvedEmail = detailQuery.data?.email || mentor.email
+  const resolvedSocials = detailQuery.data?.social_links ?? mentor.socials ?? []
+  const isVerified = detailQuery.data?.is_verified ?? mentor.isVerified
 
   return (
     <Dialog onOpenChange={(open) => { if (open) void detailQuery.refetch() }}>
@@ -86,8 +92,8 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                   )}
                 >
                   <img
-                    src={mentor.photo}
-                    alt={`${mentor.name} — ${mentor.role}`}
+                    src={resolvedPhoto}
+                    alt={`${resolvedName} — ${resolvedRole}`}
                     loading="lazy"
                     className="h-full w-full object-cover object-[center_25%]"
                     onError={(e) => {
@@ -114,20 +120,22 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                 <p className="mt-0.5 font-display text-base font-bold text-ink-900">
                   {roleDisplay}
                 </p>
-                <p className="mt-1.5 font-mono text-xs text-ink-600 break-all">
-                  {mentor.email}
-                </p>
+                {resolvedEmail && (
+                  <p className="mt-1.5 font-mono text-xs text-ink-600 break-all">
+                    {resolvedEmail}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Kanal Sosial / Terhubung */}
-            {mentor.socials.length > 0 && (
+            {resolvedSocials.length > 0 && (
               <div className="relative mt-5 pt-4 border-t border-dashed border-ink-900/20">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-500">
                   Kanal Komunikasi
                 </p>
                 <ul className="mt-2 flex flex-wrap gap-2">
-                  {mentor.socials.map((social) => {
+                  {resolvedSocials.map((social) => {
                     const Icon = SOCIAL_ICONS[social.platform]
                     const isPlaceholder = social.url === '#'
                     const label = socialPlatformLabel(social.platform)
@@ -149,7 +157,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                             href={social.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`${label} ${mentor.name} (buka di tab baru)`}
+                            aria-label={`${label} ${resolvedName} (buka di tab baru)`}
                             className={cn(cls, 'bg-paper-white hover:bg-note-yellow hover:-translate-y-0.5')}
                           >
                             <Icon className="size-3.5" />
@@ -183,11 +191,11 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                 MENTOR DOSCOM UNIVERSITY
               </span>
               <DialogTitle className="mt-2.5 font-display text-3xl font-bold leading-tight text-ink-900 sm:text-4xl lg:text-5xl">
-                {mentor.name}
+                {resolvedName}
               </DialogTitle>
               <StickerSquiggle className="mt-2.5 h-3.5 w-36" />
               <DialogDescription className="sr-only">
-                Detail profil mentor {mentor.name}.
+                Detail profil mentor {resolvedName}.
               </DialogDescription>
             </div>
 
@@ -204,7 +212,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
                 <p className="mt-0.5 font-mono text-[10px] font-bold uppercase text-ink-800 sm:text-xs">Kelas Aktif</p>
               </div>
               <div className="-rotate-1 rounded-xl border-2 border-ink-900 bg-note-peach p-3 shadow-paper">
-                <p className="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{mentor.isVerified ? '100%' : 'Aktif'}</p>
+                <p className="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{isVerified ? '100%' : 'Aktif'}</p>
                 <p className="mt-0.5 font-mono text-[10px] font-bold uppercase text-ink-800 sm:text-xs">Verifikasi</p>
               </div>
             </div>

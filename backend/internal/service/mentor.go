@@ -740,7 +740,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 	}
 
 	var mentor entity.User
-	if err := database.DB.Where("uid = ? AND role = ?", mentorUID, entity.MentorRole).First(&mentor).Error; err != nil {
+	if err := database.DB.Where("uid = ? AND role IN ?", mentorUID, []entity.UserRole{entity.MentorRole, entity.AdminRole, entity.SuperAdminRole}).First(&mentor).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Mentor not found",
@@ -766,7 +766,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 	if err := database.DB.Table("courses AS c").
 		Select("COALESCE(cm.status, 'joined') as status, cm.joined_at, COALESCE(cm.created_at, c.created_at) as assigned_at, c.uid as course_uid, c.title as course_title, c.slug as course_slug, c.status as course_status, c.cover_url as course_cover_url, c.thumbnail_url as course_thumbnail_url").
 		Joins("LEFT JOIN course_mentors AS cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", mentorUID).
-		Where("c.mentor_uid = ? OR cm.mentor_uid IS NOT NULL", mentorUID).
+		Where("c.mentor_uid = ? OR cm.mentor_uid IS NOT NULL OR c.created_by_uid = ?", mentorUID, mentorUID).
 		Order("cm.created_at DESC").
 		Scan(&assignmentRows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
