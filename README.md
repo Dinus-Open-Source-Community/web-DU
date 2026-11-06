@@ -252,7 +252,7 @@ The seeder creates:
 - **3 Users**: 1 admin + 2 students with different roles
 
   - Admin User (admin@doscom.id / admin123)
-  - Budi Santoso (budi@doscom.id / student123)
+  - Budi Santoro (budi@doscom.id / student123) - Student (tidak mengikuti kursus)
   - Siti Nurhaliza (siti@doscom.id / student123)
 - **5 Courses**: Premium and free courses with realistic pricing
 

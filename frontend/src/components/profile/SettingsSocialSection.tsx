@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Globe, Link2, Mail, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -29,7 +29,8 @@ import {
 } from '@/lib/profile/social-links'
 import { settingsLayout } from '@/lib/profile/settings-layout'
 import { cn } from '@/lib/utils'
-import { fetchSelfUserData, updateUserProfile } from '@/services/user'
+import { useAuth } from '@/providers/auth-provider'
+import { updateUserProfile } from '@/services/user'
 
 type AddSocialLinkOutcome =
   | { ok: true; warning?: string }
@@ -37,33 +38,16 @@ type AddSocialLinkOutcome =
 
 /** CRUD tautan sosial per user. Persist ke backend dan localStorage sebagai fallback. */
 function useSocialLinks(userUid: string) {
-  const [links, setLinks] = useState<SocialLinkItem[]>([])
-  const hydrated = useRef(false)
+  const { profile, refreshProfile } = useAuth()
+  const [links, setLinks] = useState<SocialLinkItem[]>(
+    profile?.social_links ?? (userUid ? loadSocialLinks(userUid) : []),
+  )
 
   useEffect(() => {
-    hydrated.current = false
-    let active = true
-    void fetchSelfUserData()
-      .then((profile) => {
-        if (!active) return
-        setLinks(profile.social_links ?? loadSocialLinks(userUid))
-        hydrated.current = true
-      })
-      .catch(() => {
-        if (active) setLinks(loadSocialLinks(userUid))
-        hydrated.current = true
-      })
-    return () => {
-      active = false
+    if (profile?.social_links) {
+      setLinks(profile.social_links)
     }
-  }, [userUid])
-
-  useEffect(() => {
-    persistSocialLinks(userUid, links)
-    if (userUid && hydrated.current) {
-      void updateUserProfile({ social_links: links })
-    }
-  }, [links, userUid])
+  }, [profile?.social_links])
 
   const addSocialLink = useCallback(
     (platform: SocialPlatform, rawUrl: string): AddSocialLinkOutcome => {
@@ -76,16 +60,29 @@ function useSocialLinks(userUid: string) {
         return { ok: false, error: 'URL ini sudah ditambahkan.' }
       }
 
-      setLinks((prev) => [...prev, { id: createSocialLinkId(), platform, url: validation.url }])
+      const nextLinks = [...links, { id: createSocialLinkId(), platform, url: validation.url }]
+      setLinks(nextLinks)
+      persistSocialLinks(userUid, nextLinks)
+      if (userUid) {
+        void updateUserProfile({ social_links: nextLinks }).then(() => refreshProfile?.())
+      }
       if (validation.hostWarning) return { ok: true, warning: validation.hostWarning }
       return { ok: true }
     },
-    [links],
+    [links, refreshProfile, userUid],
   )
 
-  const removeSocialLink = useCallback((id: string) => {
-    setLinks((prev) => prev.filter((item) => item.id !== id))
-  }, [])
+  const removeSocialLink = useCallback(
+    (id: string) => {
+      const nextLinks = links.filter((item) => item.id !== id)
+      setLinks(nextLinks)
+      persistSocialLinks(userUid, nextLinks)
+      if (userUid) {
+        void updateUserProfile({ social_links: nextLinks }).then(() => refreshProfile?.())
+      }
+    },
+    [links, refreshProfile, userUid],
+  )
 
   return { links, addSocialLink, removeSocialLink }
 }
