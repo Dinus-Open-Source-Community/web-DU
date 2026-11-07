@@ -100,6 +100,7 @@ export interface ICourseDetailItem {
   created_at: string
   created_by: IAuthorCourseItem
   description: string
+  enrolled_count?: number
   event_uid: string | null
   is_published: boolean
   level: string

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 type CourseCardProfilesProps = {
   profiles: CourseProfile[]
   compact?: boolean
+  showCount?: boolean
   className?: string
 }
 
@@ -22,7 +23,7 @@ function buildMentorGroupLabel(profiles: CourseProfile[]) {
   return `${primary.name} +${rest.length} lainnya`
 }
 
-export function CourseCardProfiles({ profiles, compact = false, className }: CourseCardProfilesProps) {
+export function CourseCardProfiles({ profiles, compact = false, showCount = true, className }: CourseCardProfilesProps) {
   const [open, setOpen] = useState(false)
 
   if (profiles.length === 0) return null
@@ -71,15 +72,17 @@ export function CourseCardProfiles({ profiles, compact = false, className }: Cou
           >
             {label}
           </p>
-          <span
-            className={cn(
-              'shrink-0 bg-paper-paper font-medium text-ink-600',
-              compact ? 'ml-0.5 rounded-md border border-ink-900/10 px-1.5 py-0.5 text-[10px]' : 'ml-auto rounded-full px-2 py-0.5 text-xs',
-            )}
-          >
-            <Users className={cn('inline mr-0.5', compact ? 'size-2.5' : 'size-3')} />
-            {profiles.length}
-          </span>
+          {showCount && (
+            <span
+              className={cn(
+                'shrink-0 bg-paper-paper font-medium text-ink-600',
+                compact ? 'ml-0.5 rounded-md border border-ink-900/10 px-1.5 py-0.5 text-[10px]' : 'ml-auto rounded-full px-2 py-0.5 text-xs',
+              )}
+            >
+              <Users className={cn('inline mr-0.5', compact ? 'size-2.5' : 'size-3')} />
+              {profiles.length}
+            </span>
+          )}
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

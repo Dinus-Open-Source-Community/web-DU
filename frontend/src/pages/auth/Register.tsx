@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { AuthDivider } from '@/components/auth/AuthDivider'
 import { AuthFormPanel } from '@/components/auth/AuthFormPanel'
@@ -15,11 +15,13 @@ import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
 import { Message, resolveActionError } from '@/lib/Message'
 import { ROUTES } from '@/lib/routes'
+import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
 import { parseRegisterFormValues } from '@/lib/validator/auth'
 import { useAuth } from '@/providers/auth-provider'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signUp, startGoogleOAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -45,7 +47,7 @@ export default function RegisterPage() {
       await signUp(payload)
       toast.success('Pendaftaran berhasil! Silakan periksa email kamu untuk kode OTP verifikasi.')
       navigate(ROUTES.verifyOtp, {
-        state: { email: payload.email },
+        state: { email: payload.email, from: location.state?.from },
       })
     } catch (err) {
       toast.error(
@@ -147,6 +149,7 @@ export default function RegisterPage() {
             Sudah punya akun?{' '}
             <Link
               to="/auth/login"
+              state={location.state}
               className="font-semibold text-primary hover:underline"
             >
               Masuk
@@ -174,7 +177,11 @@ export default function RegisterPage() {
 
           <OauthButton
             isSubmitting={isSubmitting}
-            onGoogleSignIn={startGoogleOAuth}
+            onGoogleSignIn={() => {
+              const from = resolveSafeRedirectPath(location.state?.from, '')
+              if (from) sessionStorage.setItem('auth-redirect-path', from)
+              startGoogleOAuth()
+            }}
           />
         </form>
       </AuthFormPanel>

@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -7,19 +6,16 @@ import { CourseDetailLayout } from '@/components/courses/DetailCourse'
 import GuestLayout from '@/components/layouts/GuestLayouts'
 import { Button } from '@/components/ui/button'
 import { StickerStar, StickerSparkle } from '@/components/playful/Stickers'
-import { authKeys, courseKeys } from '@/hooks/query-keys'
 import { useCourseDetailWithCategories } from '@/hooks/use-course'
 import { filterPublishedCourses } from '@/lib/course-catalog/available-courses'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
-import { Message, resolveApiActionError } from '@/lib/Message'
+import { Message } from '@/lib/Message'
 import { ROUTES } from '@/lib/routes'
 import { useAuth } from '@/providers/auth-provider'
-import { joinCourse } from '@/services/course'
 
 export default function PublicCourseDetailPage() {
   const { courseUid } = useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { isAuthenticated, profile } = useAuth()
   const { courseCategories, courseDetail, popularCourses, isLoading } = useCourseDetailWithCategories(courseUid ?? '')
 
@@ -31,28 +27,18 @@ export default function PublicCourseDetailPage() {
           (c.enrollment_status === 'active' || c.enrollment_status === 'completed'),
       ),
   )
-
-  const joinMutation = useMutation({
-    mutationFn: (uid: string) => joinCourse(uid),
-    onSuccess: async (_data, uid) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: courseKeys.detail(uid) }),
-        queryClient.invalidateQueries({ queryKey: authKeys.session }),
-      ])
-      toast.success('Berhasil mendaftar kursus.')
-      navigate(ROUTES.student.learningCourse(uid))
-    },
-    onError: (error) => {
-      toast.error(resolveApiActionError(error, 'Gagal mendaftar kursus. Silakan coba lagi.'))
-    },
-  })
+  const isCourseFull = Boolean(
+    courseDetail.data?.slot &&
+      courseDetail.data.slot > 0 &&
+      (courseDetail.data.enrolled_count ?? 0) >= courseDetail.data.slot,
+  )
 
   const handleEnrollClick = useCallback(() => {
     if (!courseDetail.data) return
 
     if (!isAuthenticated) {
-      navigate(ROUTES.login, {
-        state: { from: { pathname: ROUTES.courseDetail(courseDetail.data.uid) } },
+      navigate(ROUTES.register, {
+        state: { from: { pathname: ROUTES.student.redeem } },
       })
       return
     }
@@ -62,8 +48,13 @@ export default function PublicCourseDetailPage() {
       return
     }
 
-    joinMutation.mutate(courseDetail.data.uid)
-  }, [courseDetail.data, isAuthenticated, isEnrolled, joinMutation, navigate])
+    if (profile?.role && profile.role !== 'student') {
+      toast.error('Gunakan akun siswa untuk menukarkan kode redeem.')
+      return
+    }
+
+    navigate(ROUTES.student.redeem)
+  }, [courseDetail.data, isAuthenticated, isCourseFull, isEnrolled, navigate, profile?.role])
 
   if (isLoading) {
     return (
@@ -115,14 +106,10 @@ export default function PublicCourseDetailPage() {
     <Button
       type="button"
       className="h-12 w-full rounded-xl border-2 border-ink-900 bg-brand-blue hover:bg-brand-hover text-white font-extrabold text-sm uppercase tracking-wider transition-all cursor-pointer"
-      disabled={joinMutation.isPending}
+      disabled={isCourseFull && !isEnrolled}
       onClick={handleEnrollClick}
     >
-      {joinMutation.isPending
-        ? 'Mendaftarkan...'
-        : isEnrolled
-          ? 'Lanjut Belajar'
-          : 'Daftar sekarang'}
+      {isEnrolled ? 'Lanjut Belajar' : isCourseFull ? 'Kuota Penuh' : 'Daftar sekarang'}
     </Button>
   )
 

@@ -14,6 +14,7 @@ interface CourseDetailSidebarProps {
   level?: string
   isEnrolled?: boolean
   previewImage?: string
+  enrolledCount?: number
   children: ReactNode
   slot?: number
   className?: string
@@ -27,6 +28,7 @@ export function CourseDetailSidebar({
   level,
   isEnrolled,
   previewImage,
+  enrolledCount = 0,
   children,
   slot,
   className,
@@ -103,10 +105,18 @@ export function CourseDetailSidebar({
           {children}
         </div>
 
-        {slot ? (
-          <div className="flex items-center justify-between rounded-xl border-2 border-ink-900/20 bg-paper-panel/60 px-3.5 py-2 font-mono text-xs font-bold text-ink-800">
-            <span className="text-ink-600">Kuota Batch:</span>
-            <span className="text-ink-900">{slot} Peserta</span>
+        {slot && slot > 0 ? (
+          <div
+            className={cn(
+              'flex items-center justify-between rounded-xl border-2 px-3.5 py-2 font-mono text-xs font-bold',
+              enrolledCount >= slot
+                ? 'border-destructive/40 bg-destructive/10 text-destructive'
+                : 'border-ink-900/20 bg-paper-panel/60 text-ink-800',
+            )}
+            aria-live="polite"
+          >
+            <span>{enrolledCount >= slot ? 'Kuota Penuh:' : 'Total Peserta:'}</span>
+            <span>{enrolledCount} / {slot} Peserta</span>
           </div>
         ) : null}
       </div>

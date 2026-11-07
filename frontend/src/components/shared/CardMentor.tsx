@@ -87,7 +87,7 @@ const CardMentor = ({
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               {profiles.length > 0 ? (
-                <CourseCardProfiles profiles={profiles} compact />
+                <CourseCardProfiles profiles={profiles} compact showCount={false} />
               ) : (
                 <div className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-md border border-ink-900/10 bg-paper-paper px-2 py-0.5 text-xs font-medium text-ink-500">
                   <UserX className="size-3.5 shrink-0 text-ink-400" aria-hidden />

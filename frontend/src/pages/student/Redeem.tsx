@@ -79,7 +79,7 @@ export default function StudentRedeemPage() {
                   <strong className="font-semibold text-emerald-950">{successResult.course.title}</strong>.
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Button asChild className="gap-2 font-bold shadow-button" variant="default">
+                  <Button asChild className="gap-2 font-bold" variant="neobrutalism">
                     <Link to={ROUTES.student.learningCourse(successResult.course.uid)}>
                       <BookOpen className="size-4" aria-hidden />
                       <span>Mulai Belajar</span>

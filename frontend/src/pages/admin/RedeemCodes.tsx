@@ -7,6 +7,7 @@ import {
   Search,
   Ticket,
   BookOpen,
+  ChevronDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -319,35 +320,41 @@ export default function AdminRedeemCodesPage() {
 
           {/* Filter Course */}
           <div className="flex items-center gap-2">
-            <select
-              value={selectedCourseFilter}
-              onChange={(e) => {
-                setSelectedCourseFilter(e.target.value)
-                setPage(1)
-              }}
-              className="h-10 rounded-xl border-2 border-ink-900/15 bg-paper-white px-3 text-xs font-semibold text-ink-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">Semua Kursus</option>
-              {courses.map((course) => (
-                <option key={course.uid} value={course.uid}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={selectedCourseFilter}
+                onChange={(e) => {
+                  setSelectedCourseFilter(e.target.value)
+                  setPage(1)
+                }}
+                className="h-10 appearance-none rounded-xl border-2 border-ink-900/15 bg-paper-white py-2 pl-3 pr-10 text-xs font-semibold text-ink-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Semua Kursus</option>
+                {courses.map((course) => (
+                  <option key={course.uid} value={course.uid}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
+            </div>
 
             {/* Filter Status */}
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value)
-                setPage(1)
-              }}
-              className="h-10 rounded-xl border-2 border-ink-900/15 bg-paper-white px-3 text-xs font-semibold text-ink-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">Semua Status</option>
-              <option value="true">Aktif</option>
-              <option value="false">Nonaktif</option>
-            </select>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value)
+                  setPage(1)
+                }}
+                className="h-10 appearance-none rounded-xl border-2 border-ink-900/15 bg-paper-white py-2 pl-3 pr-10 text-xs font-semibold text-ink-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Semua Status</option>
+                <option value="true">Aktif</option>
+                <option value="false">Nonaktif</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
+            </div>
           </div>
         </div>
 

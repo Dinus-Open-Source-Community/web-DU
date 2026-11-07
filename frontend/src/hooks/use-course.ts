@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query'
 import type { IQueryParamsPayload } from '@/services/api-path'
-import type { LessonDetailItem } from '@/lib/types/course'
+import type { ICourseItem, LessonDetailItem } from '@/lib/types/course'
 import {
   applyResolvedImagesToCourseDetail,
   applyResolvedImagesToCourseItem,
@@ -70,10 +70,59 @@ export function useCourses(
   }
 }
 
-export function useCourseDetail(uid: string) {
+export function useInfiniteCourses(
+  params?: IQueryParamsPayload,
+  options: UseCoursesOptions = {},
+) {
+  const query = useInfiniteQuery({
+    queryKey: courseKeys.infiniteList(params),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => fetchCourses({ ...params, page: pageParam }),
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.current_page < lastPage.meta.total_pages
+        ? lastPage.meta.current_page + 1
+        : undefined,
+    enabled: options.enabled,
+  })
+
+  const courses = useMemo(() => {
+    const seen = new Set<string>()
+    const list: ICourseItem[] = []
+    for (const page of query.data?.pages ?? []) {
+      for (const course of page.courses ?? []) {
+        if (seen.has(course.uid)) continue
+        seen.add(course.uid)
+        list.push(course)
+      }
+    }
+    return list
+  }, [query.data?.pages])
+
+  const imageReferences = useMemo(
+    () => collectCourseListImageReferences(courses),
+    [courses],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const resolvedCourses = useMemo(
+    () => courses.map((course) => applyResolvedImagesToCourseItem(course, fileMap.getDisplayUrl)),
+    [courses, fileMap.getDisplayUrl],
+  )
+
+  return {
+    ...query,
+    courses: resolvedCourses,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseDetail(uid: string, options: { enabled?: boolean } = {}) {
   const query = useQuery({
     queryKey: courseKeys.detail(uid),
-    enabled: !!uid,
+    enabled: options.enabled ?? !!uid,
     queryFn: () => fetchCourseByUid(uid),
   })
 

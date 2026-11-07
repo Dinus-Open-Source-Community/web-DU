@@ -192,7 +192,7 @@ func parseWhatYouLearnResponse(raw json.RawMessage) any {
 	return raw
 }
 
-func courseDetailResponse(course entity.Course, reviews []entity.CourseReview) gin.H {
+func courseDetailResponse(course entity.Course, reviews []entity.CourseReview, enrolledCount int) gin.H {
 	summary := computeCourseReviewSummary(reviews)
 	item := gin.H{
 		"uid":            course.Uid,
@@ -200,6 +200,7 @@ func courseDetailResponse(course entity.Course, reviews []entity.CourseReview) g
 		"title":          course.Title,
 		"subtitle":       course.Subtitle,
 		"slot":           course.Slot,
+		"enrolled_count": enrolledCount,
 		"slug":           course.Slug,
 		"description":    course.Description,
 		"cover_url":      course.CoverURL,

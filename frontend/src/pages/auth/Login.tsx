@@ -56,7 +56,11 @@ export default function LoginPage() {
       ) {
         toast.error(errorMsg)
         navigate(ROUTES.verifyOtp, {
-          state: { email },
+          state: {
+            email,
+            from: location.state?.from,
+            authChoice: location.state?.authChoice,
+          },
         })
         return
       }
@@ -128,12 +132,13 @@ export default function LoginPage() {
 
           <p className="text-sm text-muted-foreground">
             Belum punya akun?{' '}
-            <Link
-              to="/auth/register"
-              className="font-semibold text-primary hover:underline"
-            >
-              Daftar sekarang
-            </Link>
+          <Link
+            to="/auth/register"
+            state={location.state}
+            className="font-semibold text-primary hover:underline"
+          >
+            Daftar sekarang
+          </Link>
           </p>
 
           <Button
@@ -157,7 +162,11 @@ export default function LoginPage() {
 
           <OauthButton
             isSubmitting={isSubmitting}
-            onGoogleSignIn={startGoogleOAuth}
+            onGoogleSignIn={() => {
+              const from = resolveSafeRedirectPath(location.state?.from, '')
+              if (from) sessionStorage.setItem('auth-redirect-path', from)
+              startGoogleOAuth()
+            }}
           />
         </form>
       </AuthFormPanel>

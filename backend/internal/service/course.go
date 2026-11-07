@@ -903,10 +903,24 @@ func GetCourseByIDFunc(c *gin.Context) {
 		return
 	}
 
+	var enrolledCount int64
+	if err := database.DB.Table("enrollments e").
+		Joins("JOIN users u ON u.uid = e.user_uid").
+		Where("e.course_uid = ? AND u.role = ?", course.Uid, entity.StudentRole).
+		Count(&enrolledCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to count course enrollments",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Course retrieved successfully",
-		"data":    courseDetailResponse(course, reviews),
+		"data":    courseDetailResponse(course, reviews, int(enrolledCount)),
 		"error":   nil,
 	})
 }
@@ -999,125 +1013,11 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to join course"
 // @Router       /courses/{id}/join [post]
 func JoinCourseFunc(c *gin.Context) {
-	userID, _ := c.Get(middleware.UIDCK)
-
-	var userData entity.User
-	if err := database.DB.First(&userData, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if userData.Role != entity.StudentRole {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Access denied: only students may join courses; admins and mentors cannot enroll",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
-
-	courseID, ok := resolveUIDParam(c, "courses", "id", "course")
-	if !ok {
-		return
-	}
-
-	var course entity.Course
-	if err := database.DB.First(&course, courseID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "Course not found",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	// Reject enrollment for courses that are not published (DRAFT or TIDAK ACTIVE)
-	if course.Status != entity.CourseStatusActive {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Course is not available for enrollment",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
-
-	var existingEnrollment entity.Enrollment
-	err := database.DB.Where("user_uid = ? AND course_uid = ?", userData.Uid, course.Uid).First(&existingEnrollment).Error
-	if err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Already enrolled in this course",
-			"data":    nil,
-			"error":   nil,
-		})
-		return
-	}
-
-	if course.Slot > 0 {
-		var totalParticipants int64
-		if err := database.DB.Model(&entity.Enrollment{}).Where("course_uid = ?", course.Uid).Count(&totalParticipants).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Failed to check course quota",
-				"data":    nil,
-				"error":   err.Error(),
-			})
-			return
-		}
-
-		if int(totalParticipants) >= course.Slot {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": "Class is full",
-				"data":    nil,
-				"error":   nil,
-			})
-			return
-		}
-	}
-
-	enrollment := entity.Enrollment{
-		UserUid:   userData.Uid,
-		CourseUid: course.Uid,
-		Status:    entity.EnrollmentActive,
-		Progress:  0,
-	}
-
-	if err := database.DB.Create(&enrollment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to join course",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	if err := database.DB.First(&enrollment, enrollment.Uid).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Failed to retrieve enrollment",
-			"data":    nil,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "Successfully enrolled in course",
-		"data": gin.H{
-			"enrollment": enrollment,
-		},
-		"error": nil,
+	c.JSON(http.StatusForbidden, gin.H{
+		"success": false,
+		"message": "Gunakan kode redeem untuk masuk ke kursus.",
+		"data":    nil,
+		"error":   "Redeem code required",
 	})
 }
 

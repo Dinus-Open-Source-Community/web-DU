@@ -6,6 +6,8 @@ import { toast } from 'sonner'
 
 import { Loader2 } from 'lucide-react'
 import { getOAuthErrorMessage } from '@/lib/security/oauth-errors'
+import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
+import { ROUTES } from '@/lib/routes'
 import { Message, resolveApiActionError } from '@/lib/Message'
 import { parseOAuthCallbackParams } from '@/lib/validator/auth'
 import { useAuth } from '@/providers/auth-provider'
@@ -57,10 +59,14 @@ export default function OAuthCallbackPage() {
     }
 
     stripSensitiveQueryParams()
+    const requestedRedirect = sessionStorage.getItem('auth-redirect-path')
+    sessionStorage.removeItem('auth-redirect-path')
 
     void signInWithToken(token, callbackParams.expires_at)
       .then(({ redirectPath }) => {
-        navigate(redirectPath)
+        navigate(resolveSafeRedirectPath(requestedRedirect, redirectPath || ROUTES.dashboard), {
+          replace: true,
+        })
         toast.success(Message.auth.loginSuccess)
       })
       .catch((err) => {
