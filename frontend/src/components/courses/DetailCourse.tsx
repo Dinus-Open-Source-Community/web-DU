@@ -50,6 +50,7 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
     isEnrolled: data.isEnrolled,
     previewImage: data.cover_url,
     slot: data.slot,
+    enrolledCount: data.enrolled_count,
   }
 
   return (

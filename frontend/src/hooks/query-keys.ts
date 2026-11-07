@@ -4,6 +4,7 @@ import type { IQueryParamsPayload } from '@/services/api-path'
 export const courseKeys = {
   all: ['courses'] as const,
   list: (params?: IQueryParamsPayload) => ['courses', params] as const,
+  infiniteList: (params?: IQueryParamsPayload) => ['courses', 'infinite', params] as const,
   detail: (uid: string) => ['courses', uid] as const,
   students: (courseUid: string, params?: IQueryParamsPayload) =>
     ['course-students', courseUid, params] as const,

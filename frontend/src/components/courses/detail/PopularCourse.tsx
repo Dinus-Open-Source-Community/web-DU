@@ -79,9 +79,9 @@ export function PopularCoursesStrip({
 
         <Link
           to={baseHref ?? ROUTES.courses}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-ink-900 bg-paper-white px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button transition-all hover:bg-note-yellow active:translate-x-[1px] active:translate-y-[1px]"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-ink-900 bg-paper-white px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 transition-all hover:bg-note-yellow active:translate-x-[1px] active:translate-y-[1px]"
         >
-          <span>Liat lebih</span>
+          <span>Lihat Lebih</span>
           <ArrowRight className="size-3.5" />
         </Link>
       </div>

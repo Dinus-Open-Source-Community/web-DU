@@ -10,6 +10,7 @@ import { GlobalInput } from '@/components/shared/Input'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
 import { ROUTES } from '@/lib/routes'
+import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
 import { resendOtp } from '@/services/auth'
 import { getApiErrorMessage, resolveAppErrorSource } from '@/services/api-error'
 import { useAuth } from '@/providers/auth-provider'
@@ -116,7 +117,10 @@ export default function VerifyOtpPage() {
         otp: otpCode,
       })
       toast.success('Akun kamu berhasil diverifikasi! Selamat belajar.')
-      navigate(redirectPath || ROUTES.dashboard, { replace: true })
+      navigate(
+        resolveSafeRedirectPath(location.state?.from, redirectPath || ROUTES.dashboard),
+        { replace: true },
+      )
     } catch (err) {
       const appErr = resolveAppErrorSource(err instanceof Error ? err : null)
       const errorMsg = appErr

@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -257,6 +258,47 @@ func RedeemCourseCodeFunc(c *gin.Context) {
 		}
 	}()
 
+	// Serialize course redemptions before checking capacity to prevent overbooking.
+	var lockedCourse entity.Course
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&lockedCourse, course.Uid).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa kuota kursus.",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if lockedCourse.Slot > 0 {
+		var enrolledCount int64
+		if err := tx.Table("enrollments e").
+			Joins("JOIN users u ON u.uid = e.user_uid").
+			Where("e.course_uid = ? AND u.role = ?", lockedCourse.Uid, entity.StudentRole).
+			Count(&enrolledCount).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal memeriksa kuota kursus.",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		if enrolledCount >= int64(lockedCourse.Slot) {
+			tx.Rollback()
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"message": fmt.Sprintf("Kuota kursus \"%s\" sudah penuh.", course.Title),
+				"data":    nil,
+				"error":   "Course capacity reached",
+			})
+			return
+		}
+	}
+
 	// Increment UsedCount pada RedeemCode
 	if err := tx.Model(&entity.RedeemCode{}).
 		Where("uid = ?", redeemCode.Uid).
@@ -397,7 +439,7 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 		return
 	}
 
-	courseUUID, err := uuid.Parse(strings.TrimSpace(req.CourseUID))
+	courseUUID, err := database.ResolveUID("courses", req.CourseUID)
 	if err != nil || courseUUID == uuid.Nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -488,7 +530,7 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 	targetUserUIDStr := strings.TrimSpace(req.TargetUserUID)
 
 	if targetUserUIDStr != "" {
-		targetUUID, err := uuid.Parse(targetUserUIDStr)
+		targetUUID, err := database.ResolveUID("users", targetUserUIDStr)
 		if err != nil || targetUUID == uuid.Nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
