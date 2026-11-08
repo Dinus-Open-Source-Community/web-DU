@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 
 import { toLearningProgressPercent } from '@/lib/learning/progress'
 import {
@@ -7,6 +8,7 @@ import {
   revertLessonReadingInCache,
 } from '@/lib/lesson-reading/lesson-cache'
 import { findLessonModuleUid, mergeReadLessonIds } from '@/lib/lesson-reading/lesson-read-state'
+import { isForbiddenApiError } from '@/services/api-error'
 import type { IModulesDetail } from '@/lib/types/course'
 import { markLessonAsRead } from '@/services/lesson-reading'
 import { fetchCourseProgress } from '@/services/course'
@@ -24,26 +26,34 @@ export function useCourseLessonReading({
   enabled,
 }: UseCourseLessonReadingOptions) {
   const queryClient = useQueryClient()
-  const [markedLessonIds, setMarkedLessonIds] = useState<ReadonlySet<string>>(() => new Set())
-  const attemptedLessonsRef = useRef<Set<string>>(new Set())
-  const isForbiddenRef = useRef(false)
-
-  // Reset tracking state if course changes
-  const prevCourseUidRef = useRef(courseUid)
-  if (prevCourseUidRef.current !== courseUid) {
-    prevCourseUidRef.current = courseUid
-    attemptedLessonsRef.current.clear()
-    isForbiddenRef.current = false
-  }
+  const [markedLessonState, setMarkedLessonState] = useState(() => ({
+    courseUid,
+    ids: new Set<string>() as ReadonlySet<string>,
+  }))
+  const trackingRef = useRef({
+    courseUid,
+    attempted: new Set<string>(),
+    forbidden: false,
+  })
+  const markedLessonIds = useMemo(
+    () => markedLessonState.courseUid === courseUid ? markedLessonState.ids : new Set<string>(),
+    [courseUid, markedLessonState],
+  )
+  const getTracking = useCallback(() => {
+    if (trackingRef.current.courseUid !== courseUid) {
+      trackingRef.current = { courseUid, attempted: new Set(), forbidden: false }
+    }
+    return trackingRef.current
+  }, [courseUid])
 
   const progressQuery = useQuery({
     queryKey: courseKeys.progress(courseUid),
-    enabled: enabled && !!courseUid && !isForbiddenRef.current,
+    enabled: enabled && !!courseUid,
     queryFn: () => fetchCourseProgress(courseUid),
     staleTime: 60_000,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 403 || error?.response?.status === 403) {
-        isForbiddenRef.current = true
+    retry: (failureCount, error) => {
+      if (isAxiosError(error) && isForbiddenApiError(error)) {
+        getTracking().forbidden = true
         return false
       }
       return failureCount < 2
@@ -54,9 +64,16 @@ export function useCourseLessonReading({
     () => mergeReadLessonIds(modules, markedLessonIds),
     [markedLessonIds, modules],
   )
-
   const readLessonIdsRef = useRef(readLessonIds)
-  readLessonIdsRef.current = readLessonIds
+  const markMutationRef = useRef<UseMutationResult<Awaited<ReturnType<typeof markLessonAsRead>>, Error, string> | null>(null)
+
+  useEffect(() => {
+    trackingRef.current = { courseUid, attempted: new Set(), forbidden: false }
+  }, [courseUid])
+
+  useEffect(() => {
+    readLessonIdsRef.current = readLessonIds
+  }, [readLessonIds])
 
   const totalLessons = useMemo(
     () => modules.reduce((count, module) => count + (module.lessons?.length ?? 0), 0),
@@ -83,22 +100,24 @@ export function useCourseLessonReading({
         markLessonReadingInCache(queryClient, moduleUid, lessonUid)
       }
 
-      setMarkedLessonIds((current) => {
-        const next = new Set(current)
+      setMarkedLessonState((current) => {
+        const ids = current.courseUid === courseUid ? current.ids : new Set<string>()
+        if (ids.has(lessonUid)) return current
+        const next = new Set(ids)
         next.add(lessonUid)
-        return next
+        return { courseUid, ids: next }
       })
     },
-    onError: (error: any, lessonUid) => {
-      if (error?.status === 403 || error?.response?.status === 403) {
-        isForbiddenRef.current = true
+    onError: (error: Error, lessonUid) => {
+      if (isAxiosError(error) && isForbiddenApiError(error)) {
+        getTracking().forbidden = true
       }
 
-      setMarkedLessonIds((current) => {
-        if (!current.has(lessonUid)) return current
-        const next = new Set(current)
+      setMarkedLessonState((current) => {
+        if (current.courseUid !== courseUid || !current.ids.has(lessonUid)) return current
+        const next = new Set(current.ids)
         next.delete(lessonUid)
-        return next
+        return { courseUid, ids: next }
       })
 
       const moduleUid = findLessonModuleUid(modules, lessonUid)
@@ -114,24 +133,29 @@ export function useCourseLessonReading({
     },
   })
 
-  const markMutationRef = useRef(markMutation)
-  markMutationRef.current = markMutation
+  useEffect(() => {
+    markMutationRef.current = markMutation
+  }, [markMutation])
 
   const markLessonIfUnread = useCallback(
     async (lessonUid: string) => {
       if (!enabled || !lessonUid) return
-      if (isForbiddenRef.current) return
-      if (readLessonIdsRef.current.has(lessonUid)) return
-      if (attemptedLessonsRef.current.has(lessonUid)) return
+      const tracking = getTracking()
+      if (
+        tracking.forbidden ||
+        (isAxiosError(progressQuery.error) && isForbiddenApiError(progressQuery.error)) ||
+        readLessonIdsRef.current.has(lessonUid)
+      ) return
+      if (tracking.attempted.has(lessonUid)) return
 
-      attemptedLessonsRef.current.add(lessonUid)
+      tracking.attempted.add(lessonUid)
       try {
-        await markMutationRef.current.mutateAsync(lessonUid)
+        await markMutationRef.current?.mutateAsync(lessonUid)
       } catch {
         // Handled in onError callback; avoid unhandled rejection
       }
     },
-    [enabled],
+    [enabled, getTracking, progressQuery.error],
   )
 
   return {

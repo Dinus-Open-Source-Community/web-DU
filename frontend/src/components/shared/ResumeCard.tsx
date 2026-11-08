@@ -7,7 +7,7 @@ type ResumeCardProps = {
 }
 
 const ResumeCard = ({ data, size = 'md' }: ResumeCardProps) => (
-  <JoinedCourseCard data={data} variant="resume" size={size} />
+  <JoinedCourseCard data={data} size={size} />
 )
 
 export default ResumeCard

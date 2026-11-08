@@ -19,8 +19,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import type { TiptapEditorTheme } from '@/lib/types/rich-text'
-
 import {
   ToolbarMenuButton,
   type ToolbarControlSize,
@@ -29,7 +27,6 @@ import {
 type TipTapInsertMenuProps = {
   editor: Editor
   size?: ToolbarControlSize
-  theme?: TiptapEditorTheme
   onCaptureSelection?: () => void
   onInsertLink: () => void
   onInsertImage: () => void
@@ -39,7 +36,6 @@ type TipTapInsertMenuProps = {
 export function TipTapInsertMenu({
   editor,
   size = 'default',
-  theme = 'light',
   onCaptureSelection,
   onInsertLink,
   onInsertImage,
@@ -59,7 +55,6 @@ export function TipTapInsertMenu({
         <ToolbarMenuButton
           label="Sisipkan"
           controlSize={size}
-          theme={theme}
           icon={<Plus className={size === 'compact' ? 'size-3.5' : 'size-4'} aria-hidden />}
         />
       </DropdownMenuTrigger>

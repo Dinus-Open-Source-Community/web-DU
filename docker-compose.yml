@@ -2,17 +2,13 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: dev
+      target: runtime
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
     ports:
       - "3000:3000"
-    environment:
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
     depends_on:
       - backend
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/vite.config.ts:/app/vite.config.ts
 
   backend:
     build: ./backend

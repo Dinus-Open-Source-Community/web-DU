@@ -12,7 +12,7 @@ type ForbiddenContentProps = {
 
 export function ForbiddenContent({ userRole }: ForbiddenContentProps) {
   const navigate = useNavigate()
-  const dashboardHref = userRole ? dashboardPathForUserRole(userRole) : '/'
+  const dashboardHref = userRole ? dashboardPathForUserRole() : '/'
 
   return (
     <div className="flex min-h-dvh w-full flex-col items-center justify-center gap-6 px-4 py-10 text-center duration-500 animate-in fade-in">

@@ -64,13 +64,6 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
   }, [items, query])
 
   useEffect(() => {
-    if (!open) return
-
-    setQuery('')
-    setSelectedId(items[0]?.uid ?? '')
-  }, [open])
-
-  useEffect(() => {
     if (filteredItems.length === 0) return
     if (filteredItems.some((item) => item.uid === selectedId)) return
     setSelectedId(filteredItems[0].uid)
@@ -90,7 +83,17 @@ export function PersonSelectionDialog<T extends PersonSelectionItem>({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); onOpenChange?.(nextOpen) }}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (nextOpen) {
+          setQuery('')
+          setSelectedId(items[0]?.uid ?? '')
+        }
+        onOpenChange?.(nextOpen)
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="h-10 shrink-0 rounded-sm px-4">
           <TriggerIcon className="mr-1.5 h-4 w-4" aria-hidden />

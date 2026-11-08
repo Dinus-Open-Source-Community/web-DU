@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:alpine
+FROM node:alpine AS runtime
 RUN npm install -g serve@14.2.4
 WORKDIR /app
 COPY --from=builder /app/dist ./dist

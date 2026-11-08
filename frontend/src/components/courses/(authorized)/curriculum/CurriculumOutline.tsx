@@ -36,7 +36,6 @@ type CurriculumOutlineProps = Pick<
   | "onDeleteModule"
 > & {
   modules: IModulesData[];
-  loadedModuleIds: Set<string>;
   loadingModuleId: string | null;
   activeModuleId: string | null;
   activeLessonId: string | null;
@@ -89,7 +88,6 @@ type ModuleGroupProps = {
   module: IModulesData;
   moduleIndex: number;
   activeLessonId: string | null;
-  isLoaded: boolean;
   isLoading: boolean;
   onSelectModule: (moduleId: string) => void;
   onSelectLesson: (lessonId: string) => void;
@@ -103,7 +101,6 @@ function ModuleGroup({
   module,
   moduleIndex,
   activeLessonId,
-  isLoaded: _isLoaded,
   isLoading,
   onSelectModule,
   onSelectLesson,
@@ -233,7 +230,6 @@ function ModuleGroup({
 
 export function CurriculumOutline({
   modules,
-  loadedModuleIds,
   loadingModuleId,
   activeModuleId,
   activeLessonId,
@@ -321,7 +317,6 @@ export function CurriculumOutline({
                 module={module}
                 moduleIndex={index}
                 activeLessonId={activeLessonId}
-                isLoaded={loadedModuleIds.has(module.uid)}
                 isLoading={loadingModuleId === module.uid}
                 isActiveModule={module.uid === resolvedModuleId}
                 onSelectModule={onSelectModule}

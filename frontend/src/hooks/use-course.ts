@@ -52,7 +52,6 @@ export function useCourses(
   const fileMap = useProtectedFileMap(imageReferences, {
     enabled: query.isSuccess && imageReferences.length > 0,
   })
-
   const data = useMemo(() => {
     if (!query.data) return undefined
     return {
@@ -61,7 +60,7 @@ export function useCourses(
         applyResolvedImagesToCourseItem(course, fileMap.getDisplayUrl),
       ),
     }
-  }, [fileMap.getDisplayUrl, query.data])
+  }, [fileMap, query.data])
 
   return {
     ...query,
@@ -224,7 +223,7 @@ export function useCourseCandidateStudents(courseUid: string, params: IQueryPara
         avatar_url: (user.avatar_url ? fileMap.getDisplayUrl(user.avatar_url) : undefined) || user.avatar_url,
       })),
     }
-  }, [fileMap.getDisplayUrl, query.data])
+  }, [fileMap, query.data])
 
   return {
     ...query,

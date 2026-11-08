@@ -33,12 +33,11 @@ import { RouterErrorBoundary } from "./components/shared/Error.tsx";
 import ScrollManager from "./components/shared/ScrollManager.tsx";
 import type { UserRole } from "./lib/types/user.ts";
 
-import Home from "./pages/landing/Home.tsx";
-import GalleryPage from "./pages/landing/Gallery.tsx";
-import MentorsPage from "./pages/landing/Mentors.tsx";
-import CoursePage from "./pages/landing/Course.tsx";
-import CourseDetail from "./pages/courses/detail.tsx";
-
+const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
+const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
+const MentorsPage = React.lazy(() => import("./pages/landing/Mentors.tsx"));
+const CoursePage = React.lazy(() => import("./pages/landing/Course.tsx"));
+const CourseDetail = React.lazy(() => import("./pages/courses/detail.tsx"));
 const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
 const VerifyOtpPage = React.lazy(() => import("./pages/auth/VerifyOtp.tsx"));
@@ -202,31 +201,31 @@ const routeConfig: RouteConfig[] = [
     path: ROUTES.home,
     element: <Home />,
     public: true,
-    lazy: false,
+    lazy: true,
   },
   {
     path: ROUTES.gallery,
     element: <GalleryPage />,
     public: true,
-    lazy: false,
+    lazy: true,
   },
   {
     path: ROUTES.mentors,
     element: <MentorsPage />,
     public: true,
-    lazy: false,
+    lazy: true,
   },
   {
     path: ROUTES.courses,
     element: <CoursePage />,
     public: true,
-    lazy: false,
+    lazy: true,
   },
   {
     path: ROUTES.courseDetail(":courseUid"),
     element: <CourseDetail />,
     public: true,
-    lazy: false,
+    lazy: true,
   },
   {
     path: ROUTES.viewModuleAndLessons(":courseUid"),
