@@ -383,7 +383,7 @@ func GetCourseMentorsByCourseIDFunc(c *gin.Context) {
 	}
 
 	var course entity.Course
-	if err := database.DB.Select("uid", "title", "mentor_uid").First(&course, courseUID).Error; err != nil {
+	if err := database.DB.Select("uid", "title", "mentor_uid").Where("status = ?", entity.CourseStatusActive).First(&course, courseUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",

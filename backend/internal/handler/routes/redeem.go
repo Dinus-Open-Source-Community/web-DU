@@ -20,19 +20,20 @@ func StartRedeemRoutes(r *gin.Engine) {
 		redeemStudentGroup.POST("", service.RedeemCourseCodeFunc)
 	}
 
-	// Endpoint pembuatan & manajemen kode redeem (Khusus Admin / Mentor)
+	// Endpoint pembuatan dan pengelolaan kode redeem. Penghapusan khusus Admin.
 	adminRedeemGroup := r.Group("/admin/redeem-codes")
 	adminRedeemGroup.Use(middleware.AuthMiddleware())
 	{
 		adminRedeemGroup.POST("", service.GenerateRedeemCodeFunc)
 		adminRedeemGroup.GET("", service.ListRedeemCodesFunc)
 		adminRedeemGroup.GET("/candidate-students", service.GetRedeemCandidateStudentsFunc)
+		adminRedeemGroup.DELETE("/:id", service.DeleteRedeemCodeFunc)
 	}
 
-	// Alias route alternatif untuk generate
-	authRedeemGroup := r.Group("/redeem")
-	authRedeemGroup.Use(middleware.AuthMiddleware())
+	externalRedeemGroup := r.Group("/external/redeem-codes")
+	externalRedeemGroup.Use(middleware.ExternalAPIKeyMiddleware())
 	{
-		authRedeemGroup.POST("/generate", service.GenerateRedeemCodeFunc)
+		externalRedeemGroup.POST("", service.GenerateExternalRedeemCodeFunc)
 	}
+
 }

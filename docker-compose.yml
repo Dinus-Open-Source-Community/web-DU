@@ -29,6 +29,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_SSLMODE=${DB_SSLMODE}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - REDEEM_CODE_API_KEY=${REDEEM_CODE_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - SSO_BASE_URL=${SSO_BASE_URL}
@@ -59,8 +60,6 @@ services:
       - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME}
       - SEED=${SEED} # HAPUS SAJA PADA SAAT PRODUCTION
-    volumes:
-      - ./frontend/public/images:/app/seed-images:ro
     depends_on:
       db:
         condition: service_healthy

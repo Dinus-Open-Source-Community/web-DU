@@ -6,20 +6,21 @@ import {
   RefreshCw,
   Search,
   Ticket,
-  BookOpen,
   ChevronDown,
+  Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { AppSidebarProvider } from '@/components/shared/Sidebar'
 import { AdminPageShell } from '@/components/admin/AdminPageShell'
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
 import { UserIdentityCell } from '@/components/admin/user-manage/UserIdentityCell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
-import { useRedeemCodes } from '@/hooks/use-redeem-codes'
+import { useDeleteRedeemCode, useRedeemCodes } from '@/hooks/use-redeem-codes'
 import { useCourses } from '@/hooks/use-course'
 import { useMentorCourses } from '@/hooks/mentor-courses/use-mentor-courses'
 import { useAuth } from '@/providers/auth-provider'
@@ -46,10 +47,28 @@ const dateTimeFormatter = new Intl.DateTimeFormat('id-ID', {
   minute: '2-digit',
 })
 
+function StatusLabel({
+  label,
+  className,
+  dotClassName,
+}: {
+  label: string
+  className: string
+  dotClassName: string
+}) {
+  return (
+    <span className={cn('inline-flex items-center gap-2 text-xs font-semibold', className)}>
+      <span className={cn('size-2 shrink-0 rounded-full', dotClassName)} aria-hidden="true" />
+      {label}
+    </span>
+  )
+}
+
 export default function AdminRedeemCodesPage() {
   const { role: shellRole, user: sidebarUser } = useAdminAppSidebar()
   const { profile } = useAuth()
   const isMentor = profile?.role === 'mentor'
+  const canDelete = profile?.role === 'admin' || profile?.role === 'super_admin'
 
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -58,6 +77,8 @@ export default function AdminRedeemCodesPage() {
   const [searchInput, setSearchInput] = useState('')
   const [copiedUid, setCopiedUid] = useState<string | null>(null)
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<IRedeemCodeItem | null>(null)
+  const deleteMutation = useDeleteRedeemCode()
 
   // Fetch courses for filter dropdown
   const allCoursesQuery = useCourses({ per_page: 100 }, { enabled: !isMentor })
@@ -111,7 +132,7 @@ export default function AdminRedeemCodesPage() {
           const isCopied = copiedUid === item.uid
           return (
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold tracking-wider text-primary bg-primary/5 px-2.5 py-1 rounded-lg border border-primary/15">
+              <span className="font-mono text-sm font-semibold tracking-wide text-primary">
                 {item.code}
               </span>
               <Button
@@ -123,10 +144,10 @@ export default function AdminRedeemCodesPage() {
                   handleCopyCode(item.code, item.uid)
                 }}
                 className={cn(
-                  'size-7 p-0 rounded-md transition-all',
+                  'size-7 rounded-sm p-0 transition-colors',
                   isCopied
-                    ? 'text-emerald-600 bg-emerald-50'
-                    : 'text-ink-400 hover:text-ink-900 hover:bg-paper-paper',
+                    ? 'text-emerald-700'
+                    : 'text-ink-400 hover:bg-paper-paper hover:text-ink-900',
                 )}
                 title="Salin kode"
               >
@@ -140,9 +161,8 @@ export default function AdminRedeemCodesPage() {
         id: 'course',
         header: 'Kursus',
         cell: (item) => (
-          <div className="flex items-center gap-2 max-w-[240px]">
-            <BookOpen className="size-4 shrink-0 text-ink-400" />
-            <span className="truncate font-semibold text-ink-900" title={item.course_title}>
+          <div className="max-w-[240px]">
+            <span className="block truncate font-medium text-ink-900" title={item.course_title}>
               {item.course_title}
             </span>
           </div>
@@ -163,33 +183,31 @@ export default function AdminRedeemCodesPage() {
           }
           if (item.target_email) {
             return (
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-ink-800">{item.target_email}</span>
-                <span className="text-[10px] text-ink-400">(Email eksternal / belum login)</span>
+              <div className="flex min-w-0 flex-col">
+                <span className="max-w-[220px] truncate text-xs font-medium text-ink-800" title={item.target_email}>
+                  {item.target_email}
+                </span>
+                <span className="text-xs text-ink-500">Email tujuan</span>
               </div>
             )
           }
           return (
-            <span className="inline-flex items-center rounded-md bg-paper-paper px-2.5 py-1 text-xs font-medium text-ink-600 border border-ink-900/10">
-              Voucher Umum
-            </span>
+            <span className="text-sm text-ink-500">Tanpa target</span>
           )
         },
       },
       {
         id: 'usage',
         header: 'Penggunaan',
-        align: 'center',
+        align: 'right',
         cell: (item) => {
           const isExhausted = item.used_count >= item.max_uses && item.max_uses > 0
           return (
             <div className="inline-flex items-center gap-1.5">
               <span
                 className={cn(
-                  'rounded-md px-2 py-0.5 text-xs font-bold font-mono',
-                  isExhausted
-                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                    : 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                  'font-mono text-sm tabular-nums',
+                  isExhausted ? 'text-rose-700' : 'text-ink-700',
                 )}
               >
                 {item.used_count} / {item.max_uses}
@@ -201,42 +219,51 @@ export default function AdminRedeemCodesPage() {
       {
         id: 'status',
         header: 'Status',
-        align: 'center',
+        align: 'left',
         cell: (item) => {
           const isExpired = item.expires_at ? new Date(item.expires_at) < new Date() : false
           const isExhausted = item.used_count >= item.max_uses && item.max_uses > 0
 
           if (!item.is_active) {
             return (
-              <span className="inline-flex rounded-full bg-ink-100 px-2.5 py-0.5 text-xs font-semibold text-ink-600">
-                Nonaktif
-              </span>
+              <StatusLabel
+                label="Nonaktif"
+                className="text-ink-500"
+                dotClassName="bg-ink-300"
+              />
             )
           }
           if (isExpired) {
             return (
-              <span className="inline-flex rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-700">
-                Kedaluwarsa
-              </span>
+              <StatusLabel
+                label="Kedaluwarsa"
+                className="text-rose-700"
+                dotClassName="bg-rose-600"
+              />
             )
           }
           if (isExhausted) {
             return (
-              <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                Kuota Penuh
-              </span>
+              <StatusLabel
+                label="Kuota penuh"
+                className="text-amber-700"
+                dotClassName="bg-amber-600"
+              />
             )
           }
           return (
-            <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-              Aktif
-            </span>
+            <StatusLabel
+              label="Aktif"
+              className="text-emerald-700"
+              dotClassName="bg-emerald-600"
+            />
           )
         },
       },
       {
         id: 'expires_at',
         header: 'Masa Berlaku',
+        align: 'right',
         cell: (item) => {
           if (!item.expires_at) {
             return <span className="text-xs text-ink-400">Permanen</span>
@@ -251,15 +278,52 @@ export default function AdminRedeemCodesPage() {
       {
         id: 'created_at',
         header: 'Dibuat',
+        align: 'right',
         cell: (item) => (
           <span className="text-xs text-ink-500">
             {dateFormatter.format(new Date(item.created_at))}
           </span>
         ),
       },
+      ...(canDelete
+        ? [{
+            id: 'actions',
+            header: 'Aksi',
+            align: 'right' as const,
+            cell: (item: IRedeemCodeItem) => (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={item.used_count > 0}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setDeleteTarget(item)
+                }}
+                className="rounded-sm text-ink-500 shadow-none hover:bg-rose-50 hover:text-rose-700 disabled:cursor-not-allowed disabled:opacity-40"
+                title={item.used_count > 0 ? 'Kode yang pernah digunakan tidak dapat dihapus' : 'Hapus kode redeem'}
+                aria-label={`Hapus kode redeem ${item.code}`}
+              >
+                <Trash2 className="size-4" aria-hidden />
+              </Button>
+            ),
+          }]
+        : []),
     ],
-    [copiedUid],
+    [canDelete, copiedUid],
   )
+
+  const handleDelete = async () => {
+    if (!deleteTarget || deleteMutation.isPending) return
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.uid)
+      toast.success('Kode redeem berhasil dihapus.')
+      if ((redeemData?.items.length ?? 0) === 1 && page > 1) setPage((current) => current - 1)
+      setDeleteTarget(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menghapus kode redeem.')
+    }
+  }
 
   return (
     <AppSidebarProvider role={shellRole} user={sidebarUser}>
@@ -361,6 +425,7 @@ export default function AdminRedeemCodesPage() {
         {/* Data Table */}
         <AdminDataTable
           columns={columns}
+          variant="admin"
           data={filteredItems}
           keyField={(item) => item.uid}
           page={page}
@@ -403,6 +468,23 @@ export default function AdminRedeemCodesPage() {
               </div>
             )
           }
+        />
+        <ConfirmDialog
+          open={Boolean(deleteTarget)}
+          onOpenChange={(open) => {
+            if (!open && !deleteMutation.isPending) setDeleteTarget(null)
+          }}
+          title="Hapus kode redeem?"
+          description={deleteTarget
+            ? `Kode "${deleteTarget.code}" akan dihapus permanen. Kode yang pernah digunakan tidak dapat dihapus.`
+            : undefined}
+          confirmLabel={deleteMutation.isPending ? 'Menghapus...' : 'Hapus kode'}
+          cancelLabel="Batal"
+          variant="destructive"
+          onConfirm={(event) => {
+            event.preventDefault()
+            void handleDelete()
+          }}
         />
       </AdminPageShell>
     </AppSidebarProvider>

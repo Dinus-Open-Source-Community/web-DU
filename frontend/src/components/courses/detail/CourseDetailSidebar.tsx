@@ -118,7 +118,15 @@ export function CourseDetailSidebar({
             <span>{enrolledCount >= slot ? 'Kuota Penuh:' : 'Total Peserta:'}</span>
             <span>{enrolledCount} / {slot} Peserta</span>
           </div>
-        ) : null}
+        ) : (
+          <div
+            className="flex items-center justify-between rounded-xl border-2 border-ink-900/20 bg-paper-panel/60 px-3.5 py-2 font-mono text-xs font-bold text-ink-800"
+            aria-live="polite"
+          >
+            <span>Total Peserta:</span>
+            <span>{enrolledCount} Peserta</span>
+          </div>
+        )}
       </div>
     </aside>
   )

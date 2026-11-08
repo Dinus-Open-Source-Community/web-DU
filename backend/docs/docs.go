@@ -414,6 +414,131 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/redeem-codes/candidate-students": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mengambil daftar user role student yang belum terdaftar di kursus yang dipilih untuk keperluan generate kode redeem.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get candidate students for redeem code (Admin / Mentor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UID or prefix",
+                        "name": "course_uid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search in student name or email",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/redeem-codes/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Permanently delete a redeem code that has never been used.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete unused redeem code (Super Admin / Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Redeem code UID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redeem code deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied: Super Admin or Admin only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Redeem code not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Redeem code has already been used",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete redeem code",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/reviews": {
             "get": {
                 "security": [
@@ -1322,7 +1447,7 @@ const docTemplate = `{
         },
         "/courses": {
             "get": {
-                "description": "Retrieve paginated list of courses with optional filters (mentor_id, title)",
+                "description": "Retrieve paginated list of ACTIVE courses with optional filters (mentor_id, title)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1803,6 +1928,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Filter by assignment status (DRAFT, TERBIT, DITUTUP)",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by task type (quiz, text)",
+                        "name": "task_type",
                         "in": "query"
                     }
                 ],
@@ -2803,6 +2934,81 @@ const docTemplate = `{
                 }
             }
         },
+        "/external/redeem-codes": {
+            "post": {
+                "security": [
+                    {
+                        "ExternalAPIKey": []
+                    }
+                ],
+                "description": "Create a course redeem code using the external API key configured by REDEEM_CODE_API_KEY.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "External"
+                ],
+                "summary": "Generate redeem code for external applications",
+                "parameters": [
+                    {
+                        "description": "Generate redeem code request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GenerateRedeemCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Redeem code successfully created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Course or target user not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Redeem code already exists",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/galleries": {
             "get": {
                 "description": "Public endpoint to retrieve gallery documentation items with pagination, search, and variant filtering.",
@@ -3262,6 +3468,72 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to create lesson",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/assignment/upload-image": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload an image file to S3/MinIO for embedding in quiz questions or assignment rich text. Supported formats: JPG, PNG, WebP, GIF. Max 5MB.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lesson Assignment"
+                ],
+                "summary": "Upload image for lesson assignment/quiz (Admin/Mentor)",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Image file (max 5MB)",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image uploaded successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid image file",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to upload image",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -5789,6 +6061,18 @@ const docTemplate = `{
                         "description": "Filter by course UID",
                         "name": "course_uid",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by assignment title or course title",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category (all, todo, pending_review, done, late)",
+                        "name": "category",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6691,6 +6975,10 @@ const docTemplate = `{
                 "target_email": {
                     "type": "string",
                     "example": "buyer@external.com"
+                },
+                "target_user_uid": {
+                    "type": "string",
+                    "example": "7e484e3e-436e-44f3-b789-fdf2d0e653da"
                 }
             }
         },
@@ -6986,15 +7274,7 @@ const docTemplate = `{
             }
         },
         "dto.UpdateUserProfileRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "dto.UpdateUserRoleRequest": {
             "type": "object",
@@ -7014,6 +7294,12 @@ const docTemplate = `{
             "description": "Type \"Bearer\" followed by a space and JWT token.",
             "type": "apiKey",
             "name": "Authorization",
+            "in": "header"
+        },
+        "ExternalAPIKey": {
+            "description": "API key configured with REDEEM_CODE_API_KEY.",
+            "type": "apiKey",
+            "name": "X-API-Key",
             "in": "header"
         }
     }

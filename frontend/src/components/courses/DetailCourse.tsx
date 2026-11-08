@@ -94,14 +94,12 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
           />
 
           {/* Mobile Kursus Populer (Tampil di bagian bawah pada layar mobile) */}
-          {popularCoursesList.length > 0 && (
-            <div className="lg:hidden">
-              <PopularCoursesStrip
-                items={popularCoursesList}
-                baseHref={data.popularBaseHref}
-              />
-            </div>
-          )}
+          <div className="lg:hidden">
+            <PopularCoursesStrip
+              items={popularCoursesList}
+              baseHref={data.popularBaseHref}
+            />
+          </div>
         </div>
 
         {/* Right Column: Action Card + Kursus Populer di Bawahnya pada Desktop */}
@@ -110,13 +108,11 @@ export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) 
             {data.sidebarCta}
           </CourseDetailSidebar>
 
-          {popularCoursesList.length > 0 && (
-            <PopularCoursesStrip
-              items={popularCoursesList}
-              isSidebar
-              baseHref={data.popularBaseHref}
-            />
-          )}
+          <PopularCoursesStrip
+            items={popularCoursesList}
+            isSidebar
+            baseHref={data.popularBaseHref}
+          />
         </div>
       </div>
     </div>
