@@ -30,7 +30,6 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
     deleteModuleId,
     deleteModuleTitle,
     isModuleMutating,
-    loadedModuleIds,
     isModuleLessonsLoading,
     isLessonDetailLoading,
     isAssignmentLoading,
@@ -91,7 +90,6 @@ export function CourseEditClient({ view, isAdmin }: CourseEditClientShellProps) 
         hasUnsavedAssignment={activeAssignmentModified}
         canSaveAssignment={Boolean(activeLesson?.uid)}
         modules={outlineModules}
-        loadedModuleIds={loadedModuleIds}
         loadingModuleId={isModuleLessonsLoading ? activeModuleId : null}
         activeModuleId={activeModuleId ?? activeOutlineModule?.uid ?? null}
         activeLessonId={activeLessonId}

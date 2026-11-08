@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -25,7 +25,7 @@ export default function CourseViewPage() {
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const { theme } = useAppTheme()
-  const loadedCourseUidRef = useRef<string | null>(null)
+  const [loadedCourseUid, setLoadedCourseUid] = useState<string | null>(null)
 
   const initialLessonUid = lessonUid ?? searchParams.get('lesson')
   const initialViewerPane: CourseViewerPane | null =
@@ -77,7 +77,7 @@ export default function CourseViewPage() {
   )
 
   const isCourseLoading = courseDetail.isLoading || modulesQuery.isLoading
-  const hasLoadedCurrentCourse = Boolean(courseUid && loadedCourseUidRef.current === courseUid)
+  const hasLoadedCurrentCourse = Boolean(courseUid && loadedCourseUid === courseUid)
 
   const courseWithModules = useMemo<ICourseDetailItem | null>(() => {
     if (!courseUid || !courseDetail.data) return null
@@ -87,6 +87,12 @@ export default function CourseViewPage() {
       modules: storedModules,
     }
   }, [courseDetail.data, courseUid, storedModules])
+
+  useEffect(() => {
+    if (courseUid && !isCourseLoading && !isInitialLessonPending && courseWithModules) {
+      setLoadedCourseUid(courseUid)
+    }
+  }, [courseUid, courseWithModules, isCourseLoading, isInitialLessonPending])
 
   if (isCourseLoading || (!hasLoadedCurrentCourse && isInitialLessonPending)) {
     return (
@@ -113,8 +119,6 @@ export default function CourseViewPage() {
   if (isStudent && !isCoursePublished(courseWithModules)) {
     return <NotFoundContent />
   }
-
-  loadedCourseUidRef.current = courseUid
 
   return (
     <CourseViewPageContent

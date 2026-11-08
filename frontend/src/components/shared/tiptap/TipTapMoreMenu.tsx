@@ -24,7 +24,6 @@ import {
   type SavedTextSelection,
 } from '@/lib/tiptap-selection'
 import { selectTiptapToolbarState } from '@/lib/tiptap-toolbar-state'
-import type { TiptapEditorTheme } from '@/lib/types/rich-text'
 import { cn } from '@/lib/utils'
 
 import {
@@ -37,10 +36,9 @@ import {
 type TipTapMoreMenuProps = {
   editor: Editor
   size?: ToolbarControlSize
-  theme?: TiptapEditorTheme
 }
 
-export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: TipTapMoreMenuProps) {
+export function TipTapMoreMenu({ editor, size = 'default' }: TipTapMoreMenuProps) {
   const toolbar = useTiptapState(selectTiptapToolbarState)
   const savedSelectionRef = useRef<SavedTextSelection | null>(null)
 
@@ -64,7 +62,6 @@ export function TipTapMoreMenu({ editor, size = 'default', theme = 'light' }: Ti
         <ToolbarMenuButton
           label="Lainnya"
           controlSize={size}
-          theme={theme}
           showChevron={false}
           icon={<MoreHorizontal className={size === 'compact' ? 'size-3.5' : 'size-4'} aria-hidden />}
         />

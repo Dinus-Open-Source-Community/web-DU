@@ -25,19 +25,6 @@ const TIPTAP_DEPS = [
   '@tiptap/extension-youtube',
 ]
 
-function manualVendorChunk(id: string): string | undefined {
-  if (!id.includes('node_modules')) return undefined
-
-  if (id.includes('@tiptap') || id.includes('prosemirror')) return 'tiptap'
-  if (id.includes('recharts') || id.includes('d3-')) return 'recharts'
-  if (id.includes('@tanstack/react-query')) return 'query'
-  if (id.includes('react-router')) return 'router'
-  if (id.includes('radix-ui') || id.includes('@radix-ui')) return 'radix'
-  if (id.includes('lucide-react')) return 'icons'
-
-  return 'vendor'
-}
-
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -74,9 +61,19 @@ export default defineConfig(({ mode }) => {
       include: TIPTAP_DEPS,
     },
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          manualChunks: manualVendorChunk,
+          codeSplitting: {
+            groups: [
+              { name: 'tiptap', test: /node_modules[\\/](?:@tiptap|prosemirror)[\\/]/, priority: 20, maxSize: 450_000 },
+              { name: 'recharts', test: /node_modules[\\/](?:recharts|d3-[^\\/]+)[\\/]/, priority: 20 },
+              { name: 'query', test: /node_modules[\\/]@tanstack[\\/]react-query[\\/]/, priority: 20 },
+              { name: 'router', test: /node_modules[\\/]react-router[^\\/]*[\\/]/, priority: 20 },
+              { name: 'radix', test: /node_modules[\\/](?:radix-ui|@radix-ui)[\\/]/, priority: 20 },
+              { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 20 },
+              { name: 'vendor', test: /node_modules[\\/]/, priority: 10, maxSize: 450_000 },
+            ],
+          },
         },
       },
     },

@@ -38,7 +38,6 @@ type CourseEditShellProps = CourseEditNavigationActions & {
   hasUnsavedAssignment: boolean
   canSaveAssignment: boolean
   modules: IModulesData[]
-  loadedModuleIds: Set<string>
   loadingModuleId: string | null
   activeModuleId: string | null
   activeLessonId: string | null
@@ -74,7 +73,6 @@ export function CourseEditShell({
   hasUnsavedAssignment,
   canSaveAssignment,
   modules,
-  loadedModuleIds,
   loadingModuleId,
   activeModuleId,
   activeLessonId,
@@ -250,7 +248,6 @@ export function CourseEditShell({
             <CurriculumOutline
               layout={outlineLayout}
               modules={modules}
-              loadedModuleIds={loadedModuleIds}
               loadingModuleId={loadingModuleId}
               activeModuleId={activeModuleId}
               activeLessonId={activeLessonId}

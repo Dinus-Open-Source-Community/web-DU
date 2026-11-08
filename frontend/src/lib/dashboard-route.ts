@@ -5,7 +5,7 @@ export const DASHBOARD_PATH = '/dashboard'
 /** Peran untuk memilih komponen dashboard (bukan URL). */
 export type DashboardShellRole = 'student' | 'mentor' | 'admin'
 
-export function dashboardPathForUserRole(_userRole?: UserRole): string {
+export function dashboardPathForUserRole(): string {
   return DASHBOARD_PATH
 }
 

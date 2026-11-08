@@ -630,8 +630,8 @@ export function useCourseModuleViewer({
   }, [
     studentAssignmentsQuery.data?.assignments,
     assignmentState.submission,
-    assignmentState.assignment?.uid,
-    assignmentLesson?.uid,
+    assignmentState.assignment,
+    assignmentLesson,
   ])
 
   return {

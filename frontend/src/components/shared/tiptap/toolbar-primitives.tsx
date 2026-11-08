@@ -10,7 +10,6 @@ export type ToolbarControlSize = 'default' | 'compact' | 'bubble'
 export function ToolbarShell({
   children,
   className,
-  theme: _theme = 'light',
 }: {
   children: ReactNode
   className?: string
@@ -29,7 +28,6 @@ export function ToolbarShell({
 
 export function ToolbarDivider({
   dense,
-  theme: _theme = 'light',
 }: {
   dense?: boolean
   theme?: TiptapEditorTheme
@@ -45,7 +43,6 @@ export function ToolbarDivider({
 export function ToolbarGroup({
   children,
   surface,
-  theme: _theme = 'light',
 }: {
   children: ReactNode
   surface?: boolean
@@ -93,7 +90,6 @@ export function ToolbarIconButton({
   actionOnMouseDown = false,
   children,
   size = 'default',
-  theme: _theme = 'light',
 }: ToolbarIconButtonProps) {
   return (
     <Button
@@ -138,7 +134,6 @@ export function ToolbarMenuButton({
   icon,
   showChevron = true,
   controlSize = 'default',
-  theme = 'light',
   className,
   ...props
 }: ToolbarMenuButtonProps) {
