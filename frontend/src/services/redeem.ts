@@ -112,6 +112,15 @@ export async function generateRedeemCode(payload: IGenerateRedeemCodePayload): P
   }, 'Gagal membuat kode redeem')
 }
 
+export async function deleteRedeemCode(uid: string): Promise<void> {
+  return withApiErrorHandling(async () => {
+    const response = await api.delete<IResponse<null>>(API_ROUTES.redeemCodes.deleteByUid(uid))
+    if (response.data.success === false) {
+      throw new Error(response.data.message || response.data.error || 'Gagal menghapus kode redeem')
+    }
+  }, 'Gagal menghapus kode redeem')
+}
+
 export async function fetchCandidateStudentsForRedeem(params?: IQueryParamsPayload): Promise<ICandidateStudentsResponse> {
   return withApiErrorHandling(async () => {
     const response = await api.get<IResponse<ICandidateStudentsResponse>>(

@@ -119,6 +119,7 @@ export const API_ROUTES = {
     getAll: (params?: IQueryParamsPayload) =>
       withQuery(`/admin/redeem-codes`, params),
     generate: `/admin/redeem-codes`,
+    deleteByUid: (uid: Uid) => `/admin/redeem-codes/${uid}`,
     candidateStudents: (params?: IQueryParamsPayload) =>
       withQuery(`/admin/redeem-codes/candidate-students`, params),
   },

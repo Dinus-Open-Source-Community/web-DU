@@ -9,6 +9,10 @@
 // @in header
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
+// @securityDefinitions.apikey ExternalAPIKey
+// @in header
+// @name X-API-Key
+// @description API key configured with REDEEM_CODE_API_KEY.
 package main
 
 import (

@@ -101,6 +101,7 @@ export default function PublicCourseDetailPage() {
 
   const course = courseDetail.data
   const publishedPopularCourses = filterPublishedCourses(popularCourses.data?.courses ?? [])
+    .filter((popularCourse) => popularCourse.uid !== course.uid)
 
   const enrollButton = (
     <Button

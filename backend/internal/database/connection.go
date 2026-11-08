@@ -50,7 +50,6 @@ func ConnectDB() {
 
 	// Buat semua enum (jika ada) dan lakukan migrasi tabel model
 	CreateAllEnums(DB)
-	hadGalleriesTable := DB.Migrator().HasTable(&entity.Gallery{})
 	DB.AutoMigrate(
 		&entity.User{},
 		&entity.Event{},
@@ -77,11 +76,6 @@ func ConnectDB() {
 		&entity.RedeemCode{},
 		&entity.RedeemCodeUsage{},
 	)
-
-	if !hadGalleriesTable {
-		seedGalleries(DB)
-	}
-
 	log.Println("[Success] Berhasil terhubung ke database")
 }
 

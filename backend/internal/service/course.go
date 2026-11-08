@@ -673,7 +673,7 @@ func DeleteAdminCourseFunc(c *gin.Context) {
 // - title (string)        -> search by title (case-insensitive)
 //
 // @Summary      Get all courses with pagination and filters (Public)
-// @Description  Retrieve paginated list of courses with optional filters (mentor_id, title)
+// @Description  Retrieve paginated list of ACTIVE courses with optional filters (mentor_id, title)
 // @Tags         Course
 // @Accept       json
 // @Produce      json
@@ -752,7 +752,7 @@ func GetAllCoursesFunc(c *gin.Context) {
 	}
 
 	// Build query with filters
-	db := database.DB.Model(&entity.Course{})
+	db := database.DB.Model(&entity.Course{}).Where("status = ?", entity.CourseStatusActive)
 	db = applyCourseListFilters(db, c)
 
 	// Filter by mentor_uid (UUID atau 8-char prefix) across legacy primary mentor and new course_mentors assignments.
@@ -880,7 +880,7 @@ func GetCourseByIDFunc(c *gin.Context) {
 	}
 
 	var course entity.Course
-	if err := database.DB.Preload("Modules", func(db *gorm.DB) *gorm.DB {
+	if err := database.DB.Where("status = ?", entity.CourseStatusActive).Preload("Modules", func(db *gorm.DB) *gorm.DB {
 		return db.Order("order_index ASC")
 	}).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Preload("CourseMentors").First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -1314,7 +1314,7 @@ func GetCourseStudentsFunc(c *gin.Context) {
 
 	// Verify course exists
 	var course entity.Course
-	if err := database.DB.First(&course, courseID).Error; err != nil {
+	if err := database.DB.Where("status = ?", entity.CourseStatusActive).First(&course, courseID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",

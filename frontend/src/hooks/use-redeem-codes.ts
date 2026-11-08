@@ -5,6 +5,7 @@ import {
   fetchCandidateStudentsForRedeem,
   fetchRedeemCodes,
   generateRedeemCode,
+  deleteRedeemCode,
   type ICandidateStudentUser,
   type IGenerateRedeemCodePayload,
 } from '@/services/redeem'
@@ -64,6 +65,17 @@ export function useGenerateRedeemCode() {
 
   return useMutation({
     mutationFn: (payload: IGenerateRedeemCodePayload) => generateRedeemCode(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: redeemCodeKeys.all })
+    },
+  })
+}
+
+export function useDeleteRedeemCode() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (uid: string) => deleteRedeemCode(uid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: redeemCodeKeys.all })
     },

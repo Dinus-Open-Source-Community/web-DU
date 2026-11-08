@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -26,13 +24,13 @@ import (
 //   - UPDATE ringan pada beberapa seed lama (mis. user seed, patch course created_by_uid)
 //
 // Cara menjalankan ulang setelah mengubah seeder.go:
-//   1. CLI (disarankan):  cd backend && go run ./cmd/seed
-//   2. Saat startup app:  set SEED=true di .env lalu restart backend
+//  1. CLI (disarankan):  cd backend && go run ./cmd/seed
+//  2. Saat startup app:  set SEED=true di .env lalu restart backend
 //
 // Cara menambah data seed baru:
-//   1. Tambahkan entry di slice seed*() yang relevan
-//   2. Pastikan ada kunci idempoten (transaction_id unik, seed key Q&A, slug, order_index, …)
-//   3. Jalankan salah satu cara di atas — hanya data baru yang masuk
+//  1. Tambahkan entry di slice seed*() yang relevan
+//  2. Pastikan ada kunci idempoten (transaction_id unik, seed key Q&A, slug, order_index, …)
+//  3. Jalankan salah satu cara di atas — hanya data baru yang masuk
 //
 // Catatan terkait sistem enkripsi:
 //   - Field sensitif (User.Name/Email/Description, Course.Title/Subtitle/Description,
@@ -59,7 +57,6 @@ func RunSeeder(db *gorm.DB) {
 	seedLessonReadings(db)
 	seedLessonAttendances(db)
 	seedLessonAssignmentSubmissions(db)
-	seedGalleries(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
 }
@@ -278,9 +275,9 @@ func seedCourses(db *gorm.DB) {
 
 	courses := []entity.Course{
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[0].Uid,
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[0].Uid,
 			ClassTypeUid: &classTypes[0].Uid,
 			Title:        "Golang Fundamentals",
 			Subtitle:     "Belajar Go dari dasar hingga siap produksi",
@@ -295,11 +292,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         30,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[0].Uid,
-			ClassTypeUid:  &classTypes[1].Uid,
-			Title:         "Web Development dengan Next.js",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[0].Uid,
+			ClassTypeUid: &classTypes[1].Uid,
+			Title:        "Web Development dengan Next.js",
 			Subtitle:     "Bangun aplikasi modern dengan Next.js",
 			Slug:         "web-development-nextjs",
 			Description:  "Buat aplikasi web modern menggunakan Next.js dan React",
@@ -312,11 +309,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         25,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[1].Uid,
-			ClassTypeUid:  &classTypes[1].Uid,
-			Title:         "Database Design dan SQL",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[1].Uid,
+			ClassTypeUid: &classTypes[1].Uid,
+			Title:        "Database Design dan SQL",
 			Subtitle:     "Rancang skema DB yang scalable",
 			Slug:         "database-design-sql",
 			Description:  "Desain database yang efisien dan kuasai SQL untuk berbagai kebutuhan",
@@ -329,11 +326,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         40,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[1].Uid,
-			ClassTypeUid:  &classTypes[2].Uid,
-			Title:         "REST API Development",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[1].Uid,
+			ClassTypeUid: &classTypes[2].Uid,
+			Title:        "REST API Development",
 			Subtitle:     "Bangun API robust dan aman",
 			Slug:         "rest-api-development",
 			Description:  "Buat REST API yang robust dan scalable menggunakan best practices",
@@ -346,11 +343,11 @@ func seedCourses(db *gorm.DB) {
 			Slot:         35,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[2].Uid,
-			ClassTypeUid:  &classTypes[0].Uid,
-			Title:         "DevOps Essentials",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[2].Uid,
+			ClassTypeUid: &classTypes[0].Uid,
+			Title:        "DevOps Essentials",
 			Subtitle:     "Deploy aplikasi dengan pipeline modern",
 			Slug:         "devops-essentials",
 			Description:  "Pelajari deployment, Docker, dan CI/CD pipeline untuk production",
@@ -550,7 +547,6 @@ func seedCourseReviews(db *gorm.DB) {
 			Comment:      "Pipeline CI/CD dan Docker dijelaskan dengan contoh yang bisa langsung dicoba.",
 		},
 	}
-
 
 	for _, item := range reviews {
 		student, err := findSeedUserByEmail(db, item.StudentEmail)
@@ -1295,14 +1291,14 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 	}
 
 	type seedSubmission struct {
-		StudentEmail     string
-		CourseSlug       string
+		StudentEmail string
+		CourseSlug   string
 		// ModuleOrderIndex dan LessonOrderIndex dipakai untuk mencari lesson spesifik.
 		ModuleOrderIndex int
 		LessonOrderIndex int
 		// Jika IsQuiz true, submission dikirim sebagai quiz answers.
-		IsQuiz      bool
-		PlainText   string
+		IsQuiz    bool
+		PlainText string
 		// QuizAnswers: map[questionId]selectedOptionId
 		QuizAnswers  map[string]string
 		AttemptCount int
@@ -1316,7 +1312,7 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 		QuizTotal   *int
 	}
 
-	boolTrue  := true
+	boolTrue := true
 	boolFalse := false
 
 	score85 := 85.0
@@ -1324,7 +1320,7 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 	score33 := 33.33
 
 	correct1 := 1
-	total3   := 3
+	total3 := 3
 
 	submissions := []seedSubmission{
 		// ── SITI ──────────────────────────────────────────────────────────────
@@ -1508,126 +1504,5 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 		}
 		log.Printf("[Success] Submission %s untuk assignment di course=%s (module=%d, lesson=%d) berhasil dibuat",
 			item.StudentEmail, item.CourseSlug, item.ModuleOrderIndex, item.LessonOrderIndex)
-	}
-}
-
-func resolveSeedImageFile(filename string) string {
-	candidates := []string{
-		filepath.Join("/app/seed-images", filename),
-		filepath.Join("../frontend/public/images", filename),
-		filepath.Join("frontend/public/images", filename),
-	}
-	for _, p := range candidates {
-		if st, err := os.Stat(p); err == nil && !st.IsDir() {
-			return p
-		}
-	}
-	return ""
-}
-
-func seedGalleries(db *gorm.DB) {
-	log.Println("[Seeder] Seeding Galleries...")
-
-	var existingCount int64
-	if err := db.Model(&entity.Gallery{}).Count(&existingCount).Error; err != nil {
-		log.Printf("[Error] Gagal menghitung data galleries: %v", err)
-		return
-	}
-	if existingCount > 0 {
-		log.Printf("[Seeder] Tabel galleries sudah berisi %d item, melewati seeding awal.", existingCount)
-		return
-	}
-
-	intPtr := func(v int) *int { return &v }
-
-	type seedGalleryItem struct {
-		Filename string
-		Caption  string
-		Variant  *int
-	}
-
-	items := []seedGalleryItem{
-		{
-			Filename: "panit1.webp",
-			Caption:  "Tim di balik layar — yang bikin acara jalan tanpa drama.",
-			Variant:  intPtr(3),
-		},
-		{
-			Filename: "crevmed1.webp",
-			Caption:  "Kelas UI/UX: dari coretan kertas sampai wireframe yang klikable.",
-			Variant:  nil,
-		},
-		{
-			Filename: "crevmed2.webp",
-			Caption:  "Revisi desain ke-7 — yang penting user nggak bingung.",
-			Variant:  nil,
-		},
-		{
-			Filename: "crevmed3.webp",
-			Caption:  "Prototipe dipresentasikan, feedback langsung — bukan tebak-tebakan.",
-			Variant:  nil,
-		},
-		{
-			Filename: "web.webp",
-			Caption:  "Kelas web: dari HTML sampai deploy — bareng-bareng.",
-			Variant:  nil,
-		},
-		{
-			Filename: "random.webp",
-			Caption:  "Random tapi ngena — tawa paling jujur setelah sprint.",
-			Variant:  nil,
-		},
-		{
-			Filename: "random2.webp",
-			Caption:  "Selesai sprint, waktunya ngobrol santai dan tukeran cerita.",
-			Variant:  nil,
-		},
-		{
-			Filename: "closed.webp",
-			Caption:  "Penutupan bukan perpisahan — sampai jumpa di sprint berikutnya.",
-			Variant:  nil,
-		},
-		{
-			Filename: "awward.webp",
-			Caption:  "Peserta terbaik — yang paling konsisten dari sprint pertama sampai akhir, akhirnya dipanggil ke panggung penghargaan.",
-			Variant:  nil,
-		},
-	}
-
-	if utils.MinioClient == nil {
-		_ = utils.InitMinio()
-	}
-
-	bucket := utils.GetBucketGalleries()
-	baseTime := time.Now().Add(-time.Duration(len(items)+1) * time.Minute)
-
-	for idx, item := range items {
-		imageURL := "/images/" + item.Filename
-		if localPath := resolveSeedImageFile(item.Filename); localPath != "" {
-			if f, err := os.Open(localPath); err == nil {
-				if st, statErr := f.Stat(); statErr == nil {
-					if uploadedURL, upErr := utils.UploadFileFromReader(f, st.Size(), bucket, item.Filename, "image/webp"); upErr == nil {
-						imageURL = uploadedURL
-					} else {
-						log.Printf("[Warning] Gagal unggah seed image %s ke Garage S3: %v", item.Filename, upErr)
-					}
-				}
-				_ = f.Close()
-			}
-		}
-
-		stamp := baseTime.Add(time.Duration(len(items)-idx) * time.Minute)
-		row := entity.Gallery{
-			ImageURL:  imageURL,
-			Caption:   item.Caption,
-			Variant:   item.Variant,
-			CreatedAt: stamp,
-			UpdatedAt: stamp,
-		}
-		if err := db.Create(&row).Error; err != nil {
-			log.Printf("[Error] Gagal membuat gallery seed %s: %v", item.Filename, err)
-			continue
-		}
-		log.Printf("[Success] Gallery seed %s berhasil dibuat (%s)", item.Filename, imageURL)
 	}
 }

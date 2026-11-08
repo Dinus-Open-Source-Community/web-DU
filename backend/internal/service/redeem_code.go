@@ -25,6 +25,10 @@ var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
+func redeemCodeCanDelete(usedCount int, usageCount int64) bool {
+	return usedCount == 0 && usageCount == 0
+}
+
 func generateRandomRedeemCode(prefix string) (string, error) {
 	cleanPrefix := strings.ToUpper(strings.TrimSpace(prefix))
 	if cleanPrefix == "" {
@@ -299,16 +303,27 @@ func RedeemCourseCodeFunc(c *gin.Context) {
 		}
 	}
 
-	// Increment UsedCount pada RedeemCode
-	if err := tx.Model(&entity.RedeemCode{}).
-		Where("uid = ?", redeemCode.Uid).
-		Update("used_count", gorm.Expr("used_count + 1")).Error; err != nil {
+	// Increment UsedCount only if code still exists and has capacity.
+	usageUpdate := tx.Model(&entity.RedeemCode{}).
+		Where("uid = ? AND (max_uses <= 0 OR used_count < max_uses)", redeemCode.Uid).
+		Update("used_count", gorm.Expr("used_count + 1"))
+	if usageUpdate.Error != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Gagal memperbarui kuota penggunaan kode redeem.",
 			"data":    nil,
-			"error":   err.Error(),
+			"error":   usageUpdate.Error.Error(),
+		})
+		return
+	}
+	if usageUpdate.RowsAffected == 0 {
+		tx.Rollback()
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "Kode redeem sudah tidak tersedia atau telah mencapai kuota penggunaan maksimal.",
+			"data":    nil,
+			"error":   "Redeem code unavailable",
 		})
 		return
 	}
@@ -417,8 +432,29 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 	if !ok {
 		return
 	}
+	generateRedeemCode(c, user, false)
+}
 
-	if !hasMentorAccess(user.Role) {
+// @Summary      Generate redeem code for external applications
+// @Description  Create a course redeem code using the external API key configured by REDEEM_CODE_API_KEY.
+// @Tags         External
+// @Accept       json
+// @Produce      json
+// @Security     ExternalAPIKey
+// @Param        request  body      dto.GenerateRedeemCodeRequest  true  "Generate redeem code request payload"
+// @Success      201      {object}  map[string]any                 "Redeem code successfully created"
+// @Failure      400      {object}  map[string]any                 "Invalid input or parameters"
+// @Failure      401      {object}  map[string]any                 "Unauthorized"
+// @Failure      404      {object}  map[string]any                 "Course or target user not found"
+// @Failure      409      {object}  map[string]any                 "Redeem code already exists"
+// @Failure      500      {object}  map[string]any                 "Internal server error"
+// @Router       /external/redeem-codes [post]
+func GenerateExternalRedeemCodeFunc(c *gin.Context) {
+	generateRedeemCode(c, entity.User{}, true)
+}
+
+func generateRedeemCode(c *gin.Context, user entity.User, external bool) {
+	if !external && !hasMentorAccess(user.Role) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Akses ditolak: Hanya administrator atau mentor yang dapat membuat kode redeem",
@@ -648,14 +684,16 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 	}
 
 	newRedeemCode := entity.RedeemCode{
-		Code:         finalCode,
-		CourseUid:    courseUUID,
-		TargetEmail:  targetEmail,
-		MaxUses:      maxUses,
-		UsedCount:    0,
-		IsActive:     isActive,
-		ExpiresAt:    req.ExpiresAt,
-		CreatedByUid: &user.Uid,
+		Code:        finalCode,
+		CourseUid:   courseUUID,
+		TargetEmail: targetEmail,
+		MaxUses:     maxUses,
+		UsedCount:   0,
+		IsActive:    isActive,
+		ExpiresAt:   req.ExpiresAt,
+	}
+	if user.Uid != uuid.Nil {
+		newRedeemCode.CreatedByUid = &user.Uid
 	}
 
 	if err := database.DB.Create(&newRedeemCode).Error; err != nil {
@@ -674,6 +712,10 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 		formattedExpiry = &str
 	}
 
+	createdByUID := ""
+	if user.Uid != uuid.Nil {
+		createdByUID = user.Uid.String()
+	}
 	response := dto.GenerateRedeemCodeResponse{
 		UID:          newRedeemCode.Uid.String(),
 		Code:         newRedeemCode.Code,
@@ -685,7 +727,7 @@ func GenerateRedeemCodeFunc(c *gin.Context) {
 		UsedCount:    newRedeemCode.UsedCount,
 		IsActive:     newRedeemCode.IsActive,
 		ExpiresAt:    formattedExpiry,
-		CreatedByUID: user.Uid.String(),
+		CreatedByUID: createdByUID,
 		CreatedAt:    newRedeemCode.CreatedAt.Format(time.RFC3339),
 	}
 
@@ -837,6 +879,102 @@ func ListRedeemCodesFunc(c *gin.Context) {
 				"total_pages":  totalPages,
 			},
 		},
+	})
+}
+
+// @Summary      Delete unused redeem code (Super Admin / Admin)
+// @Description  Permanently delete a redeem code that has never been used.
+// @Tags         Admin
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Redeem code UID"
+// @Success      200  {object}  map[string]any  "Redeem code deleted successfully"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied: Super Admin or Admin only"
+// @Failure      404  {object}  map[string]any  "Redeem code not found"
+// @Failure      409  {object}  map[string]any  "Redeem code has already been used"
+// @Failure      500  {object}  map[string]any  "Failed to delete redeem code"
+// @Router       /admin/redeem-codes/{id} [delete]
+func DeleteRedeemCodeFunc(c *gin.Context) {
+	if _, ok := requireAdminAccess(c); !ok {
+		return
+	}
+
+	redeemCodeUID, ok := resolveUIDParam(c, "redeem_codes", "id", "redeem code")
+	if !ok {
+		return
+	}
+
+	tx := database.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memulai transaksi penghapusan kode redeem.",
+			"data":    nil,
+			"error":   tx.Error.Error(),
+		})
+		return
+	}
+
+	var redeemCode entity.RedeemCode
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&redeemCode, redeemCodeUID).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Kode redeem tidak ditemukan.",
+			"data":    nil,
+			"error":   "Redeem code not found",
+		})
+		return
+	}
+
+	var usageCount int64
+	if err := tx.Model(&entity.RedeemCodeUsage{}).Where("redeem_code_uid = ?", redeemCode.Uid).Count(&usageCount).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa riwayat penggunaan kode redeem.",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	if !redeemCodeCanDelete(redeemCode.UsedCount, usageCount) {
+		tx.Rollback()
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "Kode redeem yang pernah digunakan tidak dapat dihapus.",
+			"data":    nil,
+			"error":   "Redeem code already used",
+		})
+		return
+	}
+
+	if err := tx.Delete(&redeemCode).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal menghapus kode redeem.",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal menyimpan penghapusan kode redeem.",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Kode redeem berhasil dihapus.",
+		"data":    nil,
+		"error":   nil,
 	})
 }
 

@@ -151,6 +151,9 @@ definitions:
       target_email:
         example: buyer@external.com
         type: string
+      target_user_uid:
+        example: 7e484e3e-436e-44f3-b789-fdf2d0e653da
+        type: string
     required:
     - course_uid
     type: object
@@ -358,11 +361,6 @@ definitions:
         type: string
     type: object
   dto.UpdateUserProfileRequest:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
     type: object
   dto.UpdateUserRoleRequest:
     properties:
@@ -643,6 +641,89 @@ paths:
       security:
       - BearerAuth: []
       summary: Generate redeem code (Admin / Mentor)
+      tags:
+      - Admin
+  /admin/redeem-codes/{id}:
+    delete:
+      description: Permanently delete a redeem code that has never been used.
+      parameters:
+      - description: Redeem code UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redeem code deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin or Admin only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Redeem code not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Redeem code has already been used
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete redeem code
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete unused redeem code (Super Admin / Admin)
+      tags:
+      - Admin
+  /admin/redeem-codes/candidate-students:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil daftar user role student yang belum terdaftar di kursus
+        yang dipilih untuk keperluan generate kode redeem.
+      parameters:
+      - description: Course UID or prefix
+        in: query
+        name: course_uid
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Search in student name or email
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get candidate students for redeem code (Admin / Mentor)
       tags:
       - Admin
   /admin/reviews:
@@ -1265,8 +1346,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve paginated list of courses with optional filters (mentor_id,
-        title)
+      description: Retrieve paginated list of ACTIVE courses with optional filters
+        (mentor_id, title)
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -1589,6 +1670,10 @@ paths:
       - description: Filter by assignment status (DRAFT, TERBIT, DITUTUP)
         in: query
         name: status
+        type: string
+      - description: Filter by task type (quiz, text)
+        in: query
+        name: task_type
         type: string
       produces:
       - application/json
@@ -2278,6 +2363,57 @@ paths:
       summary: Get all enrolled students in a course (Public)
       tags:
       - Course
+  /external/redeem-codes:
+    post:
+      consumes:
+      - application/json
+      description: Create a course redeem code using the external API key configured
+        by REDEEM_CODE_API_KEY.
+      parameters:
+      - description: Generate redeem code request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GenerateRedeemCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Redeem code successfully created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input or parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or target user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Redeem code already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ExternalAPIKey: []
+      summary: Generate redeem code for external applications
+      tags:
+      - External
   /galleries:
     get:
       description: Public endpoint to retrieve gallery documentation items with pagination,
@@ -3356,6 +3492,51 @@ paths:
       summary: Mark lesson as read (Enrolled Student/Admin/Mentor)
       tags:
       - Lesson
+  /lessons/assignment/upload-image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'Upload an image file to S3/MinIO for embedding in quiz questions
+        or assignment rich text. Supported formats: JPG, PNG, WebP, GIF. Max 5MB.'
+      parameters:
+      - description: Image file (max 5MB)
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image uploaded successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid image file
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to upload image
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload image for lesson assignment/quiz (Admin/Mentor)
+      tags:
+      - Lesson Assignment
   /lessons/attendances:
     post:
       consumes:
@@ -4308,6 +4489,14 @@ paths:
         in: query
         name: course_uid
         type: string
+      - description: Search by assignment title or course title
+        in: query
+        name: search
+        type: string
+      - description: Filter by category (all, todo, pending_review, done, late)
+        in: query
+        name: category
+        type: string
       produces:
       - application/json
       responses:
@@ -4786,5 +4975,10 @@ securityDefinitions:
     description: Type "Bearer" followed by a space and JWT token.
     in: header
     name: Authorization
+    type: apiKey
+  ExternalAPIKey:
+    description: API key configured with REDEEM_CODE_API_KEY.
+    in: header
+    name: X-API-Key
     type: apiKey
 swagger: "2.0"

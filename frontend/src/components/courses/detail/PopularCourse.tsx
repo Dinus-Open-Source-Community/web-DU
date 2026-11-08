@@ -56,8 +56,6 @@ export function PopularCoursesStrip({
 }: PopularCoursesStripProps) {
   const displayItems = useMemo(() => items.slice(0, limit), [items, limit])
 
-  if (displayItems.length === 0) return null
-
   return (
     <section
       className={cn(
@@ -86,13 +84,14 @@ export function PopularCoursesStrip({
         </Link>
       </div>
 
-      <div
-        className={cn(
-          'grid grid-cols-1 gap-5',
-          !isSidebar && 'sm:grid-cols-2 lg:grid-cols-3',
-        )}
-      >
-        {displayItems.map((course, i) => {
+      {displayItems.length > 0 ? (
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-5',
+            !isSidebar && 'sm:grid-cols-2 lg:grid-cols-3',
+          )}
+        >
+          {displayItems.map((course, i) => {
           const accent = CARD_ACCENTS[i % CARD_ACCENTS.length]
           const FallbackIcon = FALLBACK_ICONS[i % FALLBACK_ICONS.length]
           const tapeClass = TAPE_POSITIONS[i % TAPE_POSITIONS.length]
@@ -199,8 +198,13 @@ export function PopularCoursesStrip({
               </div>
             </Link>
           )
-        })}
-      </div>
+          })}
+        </div>
+      ) : (
+        <p className="rounded-xl border-2 border-dashed border-ink-900/20 bg-paper-panel/60 px-4 py-6 text-center text-sm font-medium text-ink-600">
+          Belum ada kursus populer lainnya. Jelajahi kursus lain di katalog.
+        </p>
+      )}
     </section>
   )
 }
