@@ -10,6 +10,7 @@ import { HomeworkPanelActionBar } from './homework/HomeworkPanelActionBar'
 import { HomeworkSectionNav } from './homework/HomeworkSectionNav'
 import type { HomeworkPanelSection } from '@/lib/course-edit/homework-panel.constants'
 import { PanelTransition } from './PanelTransition'
+import { normalizeRichText } from '@/lib/course-edit/lesson-content-equality'
 
 type LessonHomeworkPanelProps = {
   lesson: EditableLesson
@@ -70,11 +71,20 @@ export function LessonHomeworkPanel({
               controller.homeworkLesson.homeworkDescriptionHtml ?? '<p></p>'
             }
             homeworkQuiz={controller.homeworkLesson.homeworkQuiz!}
-            onTitleChange={(title) => controller.patchHomework({ homeworkTitle: title })}
+            onTitleChange={(title) => {
+              if (title.trim() === (controller.homeworkLesson.homeworkTitle ?? '').trim()) return
+              controller.patchHomework({ homeworkTitle: title })
+            }}
             onTypeChange={controller.setHomeworkType}
-            onDescriptionChange={(html) =>
+            onDescriptionChange={(html) => {
+              if (
+                normalizeRichText(html) ===
+                normalizeRichText(controller.homeworkLesson.homeworkDescriptionHtml)
+              ) {
+                return
+              }
               controller.patchHomework({ homeworkDescriptionHtml: html })
-            }
+            }}
             onQuizChange={(quiz) => controller.patchHomework({ homeworkQuiz: quiz })}
             instructionAttachments={controller.rules.instructionAttachments}
             onInstructionAttachmentsChange={(attachments) =>

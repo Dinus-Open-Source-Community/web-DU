@@ -24,6 +24,7 @@ type LessonSidebarProps = {
   activePane?: CourseViewerPane
   assignmentByLessonUid?: ReadonlyMap<string, LessonDetailAssignment>
   readLessonIds: ReadonlySet<string>
+  submittedAssignmentIds?: ReadonlySet<string>
   progressPercent: number
   expandedModules: Set<string>
   isOpen: boolean
@@ -45,6 +46,7 @@ export function LessonSidebar({
   activePane,
   assignmentByLessonUid,
   readLessonIds,
+  submittedAssignmentIds,
   progressPercent,
   expandedModules,
   isOpen,
@@ -67,6 +69,7 @@ export function LessonSidebar({
     activePane,
     assignmentByLessonUid,
     readLessonIds,
+    submittedAssignmentIds,
     progressPercent,
     expandedModules,
     theme,
@@ -81,22 +84,10 @@ export function LessonSidebar({
     },
   }
 
-  const toggleTabClass = cn(
-    'absolute top-1/2 z-40 flex -translate-y-1/2 items-center justify-center',
-    'h-14 w-7 rounded-r-lg border border-l-0 shadow-md transition focus:outline-none focus:ring-2 focus:ring-primary/30',
-    isOpen
-      ? isDark
-        ? 'border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
-        : 'border-line-light bg-paper-white text-primary hover:bg-paper-white'
-      : isDark
-        ? 'border-zinc-600 bg-zinc-800 text-zinc-100 hover:bg-zinc-700'
-        : 'border-line-medium bg-paper-white text-primary hover:bg-paper-paper',
-  )
-
   return (
     <>
       <div
-        className="fixed top-16 left-0 z-30 hidden h-[calc(100dvh-4rem)] transition-transform duration-200 ease-out will-change-transform lg:block"
+        className="fixed top-16 left-0 z-30 hidden h-[calc(100dvh-4rem)] transition-transform duration-300 ease-in-out will-change-transform lg:block"
         style={{
           width: LESSON_SIDEBAR_WIDTH_PX + LESSON_SIDEBAR_TOGGLE_PX,
           transform: isOpen ? 'translateX(0)' : `translateX(-${LESSON_SIDEBAR_WIDTH_PX}px)`,
@@ -115,12 +106,23 @@ export function LessonSidebar({
         <button
           type="button"
           onClick={onToggleSidebar}
-          className={toggleTabClass}
-          style={{ left: LESSON_SIDEBAR_WIDTH_PX }}
+          className={cn(
+            'group absolute top-1/2 z-40 flex -translate-y-1/2 items-center justify-center',
+            'h-12 w-6 rounded-r-lg border border-l-0 transition-all duration-200',
+            'cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+            isDark
+              ? 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 shadow-[2px_0_6px_rgba(0,0,0,0.3)]'
+              : 'border-line-light bg-paper-white text-ink-400 hover:bg-paper-paper hover:text-ink-800 shadow-[2px_0_5px_rgba(15,23,42,0.06)]',
+          )}
+          style={{ left: LESSON_SIDEBAR_WIDTH_PX - 1 }}
           aria-label={isOpen ? 'Sembunyikan daftar modul' : 'Buka daftar modul'}
           aria-expanded={isOpen}
         >
-          {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+          {isOpen ? (
+            <ChevronLeft className="size-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+          ) : (
+            <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+          )}
         </button>
       </div>
 

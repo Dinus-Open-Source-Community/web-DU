@@ -1,19 +1,18 @@
 import { useMemo, useState } from 'react'
-import { Shield, UserPlus, UserRound, UsersRound } from 'lucide-react'
+import { Shield, UserRound, UsersRound } from 'lucide-react'
 
 import {
   buildUserManageColumns,
   getUserDetailPath,
 } from '@/components/admin/user-manage/user-manage-columns'
 import { UserManageRoleDialog } from '@/components/admin/user-manage/UserManageRoleDialog'
-import { UserPromoteDialog } from '@/components/admin/user-manage/UserPromoteDialog'
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { SearchForm } from '@/components/shared/SearchForm'
 import { getUserManageConfig, type UserManageKind } from '@/lib/user-manage/page-config'
 import type { AssignableUserRole } from '@/lib/user-manage/types'
-import type { ManagedUserRow, PromoteCandidate } from '@/lib/user-manage/view-models'
+import type { ManagedUserRow } from '@/lib/user-manage/view-models'
 
 type UserManagePanelProps = {
   kind: UserManageKind
@@ -22,13 +21,14 @@ type UserManagePanelProps = {
   isLoading?: boolean
   page: number
   totalPages: number
+  pageSize?: number
+  pageSizeOptions?: number[]
+  onPageSizeChange?: (size: number) => void
   onPageChange: (page: number) => void
   onSearch: (search: string) => void
   onUpdateRole: (uid: string, role: AssignableUserRole) => Promise<void>
   onDeleteUser: (uid: string) => Promise<void>
   isMutating?: boolean
-  promoteCandidates?: PromoteCandidate[]
-  onPromote?: (uid: string) => Promise<void>
 }
 
 type RoleDialogState = ManagedUserRow | null
@@ -47,13 +47,14 @@ export function UserManagePanel({
   isLoading = false,
   page,
   totalPages,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   onPageChange,
   onSearch,
   onUpdateRole,
   onDeleteUser,
   isMutating = false,
-  promoteCandidates = [],
-  onPromote,
 }: UserManagePanelProps) {
   const config = getUserManageConfig(kind)
   const [search, setSearch] = useState('')
@@ -82,44 +83,16 @@ export function UserManagePanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchForm
-            value={search}
-            onChange={(value) => {
-              setSearch(value)
-              if (value === '') onSearch('')
-            }}
-            onSubmit={() => onSearch(search)}
-            placeholder={config.searchPlaceholder}
-            submitLabel="Cari"
-            className="min-w-[240px] flex-1"
-          />
-
-          {config.promote && onPromote ? (
-            <UserPromoteDialog
-              triggerLabel={config.promote.triggerLabel}
-              triggerIcon={UserPlus}
-              title={config.promote.dialogTitle}
-              description={config.promote.dialogDescription}
-              confirmLabel={config.promote.confirmLabel}
-              searchPlaceholder={config.promote.searchPlaceholder}
-              emptyTitle={config.promote.emptyTitle}
-              emptyDescription={config.promote.emptyDescription}
-              footerHint={config.promote.footerHint}
-              candidates={promoteCandidates}
-              onConfirm={onPromote}
-            />
-          ) : null}
-        </div>
-
-        {totalUsers != null ? (
-          <span className="shrink-0 text-sm leading-none text-ink-500">
-            Total <span className="font-semibold tabular-nums text-ink-800">{totalUsers}</span>{' '}
-            {config.navLabel.toLowerCase()}
-          </span>
-        ) : null}
-      </div>
+      <SearchForm
+        value={search}
+        onChange={(value) => {
+          setSearch(value)
+          if (value === '') onSearch('')
+        }}
+        onSubmit={() => onSearch(search)}
+        placeholder={config.searchPlaceholder}
+        submitLabel="Cari"
+      />
 
       <AdminDataTable
         columns={columns}
@@ -127,7 +100,11 @@ export function UserManagePanel({
         keyField={(row) => row.uid}
         page={page}
         totalPages={totalPages}
+        total={totalUsers}
+        pageSize={pageSize}
+        pageSizeOptions={pageSizeOptions ?? [5, 10, 25, 50]}
         onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
         emptyState={
           isLoading ? (
             <p className="text-sm text-ink-500">Memuat data...</p>

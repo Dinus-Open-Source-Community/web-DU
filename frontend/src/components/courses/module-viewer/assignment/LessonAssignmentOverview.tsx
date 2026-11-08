@@ -1,16 +1,18 @@
-import { ClipboardList, ExternalLink } from 'lucide-react'
+import { CheckCircle2, ClipboardList, ExternalLink } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { SanitizedHtml } from '@/components/shared/SanitizedHtml'
 import { SafeExternalLink } from '@/components/shared/SafeExternalLink'
 import { getAssignmentDeadlineAt } from '@/lib/lesson-assignment/assignment-rules'
 import { formatAssignmentDeadlineLabel } from '@/lib/lesson-assignment/deadline-format'
+import { normalizeQuizPayload } from '@/lib/lesson-assignment/quiz-payload'
 import { parseLessonContent } from '@/lib/rich-text'
-import type { LessonDetailAssignment, LessonDetailItem } from '@/lib/types/lesson'
+import type { IQuiz, LessonDetailAssignment, LessonDetailItem } from '@/lib/types/lesson'
 import type { LessonAssignmentSubmissionRecord } from '@/lib/lesson-assignment/types'
 import { cn } from '@/lib/utils'
 
 import { AssignmentDeadlineTimer } from './AssignmentDeadlineTimer'
+import { AssignmentQuizPrompt } from './AssignmentQuizPrompt'
 import { AssignmentSubmissionHistorySection } from './AssignmentSubmissionHistorySection'
 import type { LessonThemeMode } from '@/lib/course-module-viewer/lesson-viewer-utils'
 
@@ -48,6 +50,11 @@ export function LessonAssignmentOverview({
   const deadlineLabel = useMemo(
     () => formatAssignmentDeadlineLabel(deadlineAt),
     [deadlineAt],
+  )
+  const isQuiz = assignment.task_type === 'quiz'
+  const quiz = useMemo(
+    () => (isQuiz ? normalizeQuizPayload(assignment.quiz_payload as IQuiz | null) : null),
+    [assignment.quiz_payload, isQuiz],
   )
 
   return (
@@ -95,7 +102,7 @@ export function LessonAssignmentOverview({
         </header>
 
         {instruction?.contentHtml || instructionAttachments.length > 0 ? (
-          <section className="space-y-3 border-t border-ink-900/10 pt-5">
+          <section className="space-y-3 border-t border-ink-900/10 dark:border-zinc-800 pt-5">
             <h2 className={cn('text-sm font-semibold', isDark ? 'text-zinc-200' : 'text-ink-800')}>
               Instruksi
             </h2>
@@ -129,6 +136,125 @@ export function LessonAssignmentOverview({
                 ))}
               </ul>
             ) : null}
+          </section>
+        ) : null}
+
+        {readOnly && isQuiz ? (
+          <section className="space-y-6 border-t border-ink-900/10 dark:border-zinc-800 pt-6">
+            <div className="flex flex-col gap-2 rounded-xl border border-line-light bg-paper-paper/60 p-4 dark:border-zinc-700 dark:bg-zinc-900/50 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className={cn('text-base font-semibold', isDark ? 'text-zinc-100' : 'text-ink-900')}>
+                  Pratinjau Soal Kuis
+                </h2>
+                <p className={cn('mt-0.5 text-xs', isDark ? 'text-zinc-400' : 'text-ink-500')}>
+                  {quiz?.questions.length ?? 0} soal · Standar kelulusan {quiz?.passingScore ?? 70}%
+                </p>
+              </div>
+              <span
+                className={cn(
+                  'inline-flex self-start rounded-full px-2.5 py-1 text-xs font-semibold sm:self-auto',
+                  isDark ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary',
+                )}
+              >
+                Mode Pratinjau
+              </span>
+            </div>
+
+            {quiz && quiz.questions.length > 0 ? (
+              <div className="space-y-5">
+                {quiz.questions.map((question, index) => (
+                  <article
+                    key={question.id}
+                    className={cn(
+                      'space-y-4 rounded-xl border p-4 sm:p-5',
+                      isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-line-light bg-paper-white shadow-xs',
+                    )}
+                  >
+                    <AssignmentQuizPrompt
+                      index={index}
+                      promptHtml={question.promptHtml}
+                      theme={theme}
+                    />
+
+                    <div className="space-y-2 pl-6 pt-1">
+                      {question.options.map((option, optIdx) => {
+                        const isCorrect = option.id === question.correctOptionId
+                        const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+                        const labelChar = optionLabels[optIdx] ?? String(optIdx + 1)
+                        return (
+                          <div
+                            key={option.id}
+                            className={cn(
+                              'flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm transition-colors',
+                              isCorrect
+                                ? isDark
+                                  ? 'border-emerald-700/60 bg-emerald-950/25 text-emerald-200'
+                                  : 'border-emerald-300 bg-emerald-50/70 text-emerald-900'
+                                : isDark
+                                  ? 'border-zinc-800 bg-zinc-900/30 text-zinc-300'
+                                  : 'border-line-light/80 bg-paper-paper/40 text-ink-700',
+                            )}
+                          >
+                            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                              <span
+                                className={cn(
+                                  'flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                                  isCorrect
+                                    ? isDark
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-emerald-500 text-white'
+                                    : isDark
+                                      ? 'bg-zinc-800 text-zinc-400'
+                                      : 'border border-line-medium bg-paper-paper text-ink-500',
+                                )}
+                              >
+                                {labelChar}
+                              </span>
+                              <span className="truncate">{option.label || <span className="italic text-ink-400">(Kosong)</span>}</span>
+                            </div>
+
+                            {isCorrect && (
+                              <span
+                                className={cn(
+                                  'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                  isDark ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700',
+                                )}
+                              >
+                                <CheckCircle2 className="size-3" aria-hidden />
+                                Kunci Jawaban
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {question.explanation && (
+                      <div
+                        className={cn(
+                          'mt-3 rounded-lg border p-3 text-xs leading-relaxed',
+                          isDark
+                            ? 'border-sky-800/40 bg-sky-950/20 text-sky-200'
+                            : 'border-sky-200 bg-sky-50/60 text-sky-900',
+                        )}
+                      >
+                        <p className="mb-0.5 font-semibold text-primary">Penjelasan:</p>
+                        <p>{question.explanation}</p>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  'rounded-xl border border-dashed p-8 text-center text-sm',
+                  isDark ? 'border-zinc-800 text-zinc-400' : 'border-line-medium text-ink-500',
+                )}
+              >
+                Kuis ini belum memiliki daftar pertanyaan.
+              </div>
+            )}
           </section>
         ) : null}
 

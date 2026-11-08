@@ -1,4 +1,4 @@
-import { PublicLottieIllustration } from './PublicLottieIllustration'
+import { PlayfulEmptyIllustration } from './PublicLottieIllustration'
 
 type ReviewLottieIllustrationProps = {
   className?: string
@@ -7,12 +7,10 @@ type ReviewLottieIllustrationProps = {
 
 export function ReviewLottieIllustration({
   className,
-  height = '200px',
 }: ReviewLottieIllustrationProps) {
   return (
-    <PublicLottieIllustration
-      src="/lotties/review.json"
-      height={height}
+    <PlayfulEmptyIllustration
+      variant="review"
       className={className}
     />
   )

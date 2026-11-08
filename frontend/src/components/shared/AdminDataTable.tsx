@@ -2,11 +2,10 @@ import type { AdminDataTableProps } from '../../lib/types/api'
 import {
   appCardClassName,
   appCardHeaderClassName,
-  appKpiLabelClassName,
 } from '@/lib/design/app-shell-tokens'
 import { cn } from '../../lib/utils'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Pagination } from './Pagination'
+import { TablePaginationFooter } from './TablePaginationFooter'
 
 export function AdminDataTable<T>({
   columns,
@@ -15,11 +14,16 @@ export function AdminDataTable<T>({
   page,
   totalPages,
   onPageChange,
+  total,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   emptyState,
   tableClassName,
   wrapperClassName,
   compact,
   onRowClick,
+  variant = 'default',
 }: AdminDataTableProps<T>) {
   return (
     <section
@@ -27,13 +31,25 @@ export function AdminDataTable<T>({
     >
       <div className="overflow-x-auto">
         <Table className={cn(compact ? 'text-[13px]' : 'text-sm', tableClassName)}>
-          <TableHeader className={cn('bg-paper-paper', appCardHeaderClassName)}>
-            <TableRow className="border-ink-900/10 hover:bg-paper-paper">
+          <TableHeader
+            className={cn(
+              variant === 'admin' ? 'bg-transparent' : 'bg-paper-paper',
+              appCardHeaderClassName,
+            )}
+          >
+            <TableRow
+              className={cn(
+                'border-ink-900/10 hover:bg-paper-paper',
+                variant === 'admin' && 'h-10 border-line-light hover:bg-transparent',
+              )}
+            >
               {columns.map((col) => (
                 <TableHead
                   key={col.id}
                   className={cn(
-                    'px-5 py-3 text-xs font-semibold uppercase tracking-wider text-ink-500',
+                    variant === 'admin'
+                      ? 'h-10 px-4 py-2 text-xs font-semibold normal-case tracking-normal text-ink-500'
+                      : 'px-5 py-3 text-xs font-semibold uppercase tracking-wider text-ink-500',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     col.headerClassName,
@@ -63,6 +79,7 @@ export function AdminDataTable<T>({
                   key={keyField(row)}
                   className={cn(
                     'border-b border-line-light transition-colors last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:0_56px] hover:bg-paper-paper/80',
+                    variant === 'admin' && 'min-h-[45px] hover:bg-paper-paper/50',
                     onRowClick && 'cursor-pointer hover:bg-paper-paper',
                   )}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -71,7 +88,9 @@ export function AdminDataTable<T>({
                     <td
                       key={col.id}
                       className={cn(
-                        'px-5 py-3.5 align-middle text-ink-700',
+                        variant === 'admin'
+                          ? 'px-4 py-3 align-middle text-ink-700'
+                          : 'px-5 py-3.5 align-middle text-ink-700',
                         col.align === 'right' && 'text-right',
                         col.align === 'center' && 'text-center',
                         col.className,
@@ -87,21 +106,15 @@ export function AdminDataTable<T>({
         </Table>
       </div>
       {page !== undefined && totalPages !== undefined && onPageChange ? (
-        <div className="flex flex-col items-center gap-3 border-t border-line-light bg-paper-paper/60 px-5 py-4 sm:flex-row sm:justify-between">
-          <p className={cn('text-sm', appKpiLabelClassName)}>
-            Halaman{' '}
-            <span className="font-semibold tabular-nums text-ink-900">{page}</span> dari{' '}
-            <span className="font-semibold tabular-nums text-ink-900">
-              {Math.max(totalPages, 1)}
-            </span>
-          </p>
-          <Pagination
-            currentPage={page}
-            totalPages={Math.max(totalPages, 1)}
-            onPageChange={onPageChange}
-            className="mt-0"
-          />
-        </div>
+        <TablePaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
       ) : null}
     </section>
   )

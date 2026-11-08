@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Globe, Link2, Mail, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -11,19 +11,81 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSocialLinks } from '@/hooks/profile/use-social-links'
 import {
   BrandGithubIcon,
   BrandInstagramIcon,
   BrandLinkedinIcon,
 } from '@/lib/navigation'
 import {
+  MAX_SOCIAL_LINKS,
   SOCIAL_PLATFORM_OPTIONS,
+  createSocialLinkId,
+  loadSocialLinks,
+  persistSocialLinks,
   socialPlatformLabel,
+  validateSocialLink,
+  type SocialLinkItem,
   type SocialPlatform,
 } from '@/lib/profile/social-links'
 import { settingsLayout } from '@/lib/profile/settings-layout'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/providers/auth-provider'
+import { updateUserProfile } from '@/services/user'
+
+type AddSocialLinkOutcome =
+  | { ok: true; warning?: string }
+  | { ok: false; error: string }
+
+/** CRUD tautan sosial per user. Persist ke backend dan localStorage sebagai fallback. */
+function useSocialLinks(userUid: string) {
+  const { profile, refreshProfile } = useAuth()
+  const [links, setLinks] = useState<SocialLinkItem[]>(
+    profile?.social_links ?? (userUid ? loadSocialLinks(userUid) : []),
+  )
+
+  useEffect(() => {
+    if (profile?.social_links) {
+      setLinks(profile.social_links)
+    }
+  }, [profile?.social_links])
+
+  const addSocialLink = useCallback(
+    (platform: SocialPlatform, rawUrl: string): AddSocialLinkOutcome => {
+      const validation = validateSocialLink(platform, rawUrl)
+      if (!validation.ok) return { ok: false, error: validation.error }
+      if (links.length >= MAX_SOCIAL_LINKS) {
+        return { ok: false, error: `Maksimal ${MAX_SOCIAL_LINKS} tautan sosial.` }
+      }
+      if (links.some((item) => item.url.toLowerCase() === validation.url.toLowerCase())) {
+        return { ok: false, error: 'URL ini sudah ditambahkan.' }
+      }
+
+      const nextLinks = [...links, { id: createSocialLinkId(), platform, url: validation.url }]
+      setLinks(nextLinks)
+      persistSocialLinks(userUid, nextLinks)
+      if (userUid) {
+        void updateUserProfile({ social_links: nextLinks }).then(() => refreshProfile?.())
+      }
+      if (validation.hostWarning) return { ok: true, warning: validation.hostWarning }
+      return { ok: true }
+    },
+    [links, refreshProfile, userUid],
+  )
+
+  const removeSocialLink = useCallback(
+    (id: string) => {
+      const nextLinks = links.filter((item) => item.id !== id)
+      setLinks(nextLinks)
+      persistSocialLinks(userUid, nextLinks)
+      if (userUid) {
+        void updateUserProfile({ social_links: nextLinks }).then(() => refreshProfile?.())
+      }
+    },
+    [links, refreshProfile, userUid],
+  )
+
+  return { links, addSocialLink, removeSocialLink }
+}
 
 /** Ikon brand inline (fill=currentColor) — pola yang sama dipakai di lib/navigation. */
 function brandIconPath(d: string): ComponentType<SVGProps<SVGSVGElement>> {

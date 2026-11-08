@@ -1,8 +1,21 @@
 import type { IMentorStats } from '@/lib/types/utils'
-import { mentorKpiAccentClassName, type MentorKpiMetric } from '@/lib/mentor/mentor-kpi-accent'
 import { cn } from '@/lib/utils'
 
+import { MentorKpiCardsSkeleton } from '@/components/mentor/dashboard/MentorDashboardSkeletons'
 import { StatCard } from '@/components/shared/StatCard'
+
+type MentorKpiMetric =
+  | 'pendingGrading'
+  | 'unansweredQA'
+  | 'activeStudents'
+  | 'totalCourses'
+
+const mentorKpiAccentClassName: Record<MentorKpiMetric, string> = {
+  pendingGrading: 'border-l-brand-blue',
+  unansweredQA: 'border-l-[#D7CBFF]',
+  activeStudents: 'border-l-[#A8EFCF]',
+  totalCourses: 'border-l-[#FFC4A6]',
+}
 
 const MENTOR_KPI_ITEMS: { key: MentorKpiMetric; label: string }[] = [
   { key: 'pendingGrading', label: 'Menunggu dinilai' },
@@ -11,18 +24,6 @@ const MENTOR_KPI_ITEMS: { key: MentorKpiMetric; label: string }[] = [
   { key: 'totalCourses', label: 'Total kursus' },
 ]
 
-function KpiSkeleton() {
-  return (
-    <div className="flex w-full animate-pulse flex-col items-start gap-3 rounded-xl border-2 border-l-4 border-ink-900/10 border-l-line-medium bg-paper-white p-4">
-      <div className="flex w-full flex-col gap-2">
-        <div className="h-3 w-20 rounded bg-line-light" />
-        <div className="h-7 w-28 rounded bg-line-light" />
-      </div>
-      <div className="h-3 w-40 max-w-full rounded bg-line-light" />
-    </div>
-  )
-}
-
 type MentorKpiGridProps = {
   stats?: IMentorStats
   isLoading?: boolean
@@ -30,13 +31,7 @@ type MentorKpiGridProps = {
 
 export function MentorKpiGrid({ stats, isLoading }: MentorKpiGridProps) {
   if (isLoading) {
-    return (
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <KpiSkeleton key={i} />
-        ))}
-      </section>
-    )
+    return <MentorKpiCardsSkeleton />
   }
 
   const values = stats ?? {

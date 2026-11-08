@@ -1,16 +1,10 @@
-import { lazy, Suspense } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { ErrorPageIllustration } from '@/components/playful/ErrorPageIllustration'
 import { dashboardPathForUserRole } from '@/lib/dashboard-route'
 import type { UserRole } from '@/lib/types/user'
-
-const ErrorPageIllustration = lazy(() =>
-  import('@/components/playful/ErrorPageIllustration').then((module) => ({
-    default: module.ErrorPageIllustration,
-  })),
-)
 
 type ForbiddenContentProps = {
   userRole?: UserRole | null
@@ -22,16 +16,7 @@ export function ForbiddenContent({ userRole }: ForbiddenContentProps) {
 
   return (
     <div className="flex min-h-dvh w-full flex-col items-center justify-center gap-6 px-4 py-10 text-center duration-500 animate-in fade-in">
-      <Suspense
-        fallback={
-          <div
-            className="w-full max-w-[20rem] animate-pulse rounded-2xl bg-muted/30 sm:max-w-[22rem] sm:min-h-[280px]"
-            aria-hidden
-          />
-        }
-      >
-        <ErrorPageIllustration variant="forbidden" />
-      </Suspense>
+      <ErrorPageIllustration variant="forbidden" />
 
       <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-2 text-center">
         <p className="text-sm font-semibold text-muted-foreground">403</p>

@@ -11,6 +11,11 @@ function patchLessonReadingFlag(lesson: LessonDetailItem, lessonUid: string) {
   return { ...lesson, is_reading: true }
 }
 
+function unpatchLessonReadingFlag(lesson: LessonDetailItem, lessonUid: string) {
+  if (lesson.uid !== lessonUid) return lesson
+  return { ...lesson, is_reading: false }
+}
+
 export function markLessonReadingInCache(
   queryClient: QueryClient,
   moduleUid: string,
@@ -30,5 +35,27 @@ export function markLessonReadingInCache(
   queryClient.setQueryData<LessonDetailItem>(lessonKeys.detail(lessonUid), (current) => {
     if (!current) return current
     return { ...current, is_reading: true }
+  })
+}
+
+export function revertLessonReadingInCache(
+  queryClient: QueryClient,
+  moduleUid: string,
+  lessonUid: string,
+) {
+  const moduleLessonsKey = lessonKeys.byModule(moduleUid, MODULE_LESSONS_QUERY_PARAMS)
+
+  queryClient.setQueryData<LessonDetailListResponse>(moduleLessonsKey, (current) => {
+    if (!current?.lessons?.length) return current
+
+    return {
+      ...current,
+      lessons: current.lessons.map((lesson) => unpatchLessonReadingFlag(lesson, lessonUid)),
+    }
+  })
+
+  queryClient.setQueryData<LessonDetailItem>(lessonKeys.detail(lessonUid), (current) => {
+    if (!current) return current
+    return { ...current, is_reading: false }
   })
 }

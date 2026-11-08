@@ -21,8 +21,7 @@ export function MentorAppPageShell({
   const user = userProp ?? defaultUser
 
   return (
-    <AppSidebarProvider role="mentor" user={user} contentClassName={mentorDashboardLayout.contentClassName}>
-      <div aria-hidden className={mentorDashboardLayout.gridOverlay} />
+    <AppSidebarProvider role="mentor" user={user}>
       <div
         className={cn(
           layout === 'stack' ? mentorDashboardLayout.pageStack : 'relative z-[1]',

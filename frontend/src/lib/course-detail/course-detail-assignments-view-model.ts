@@ -15,4 +15,10 @@ export type CourseDetailAssignmentsViewModel = {
   assignmentItems: CourseAssignmentOverviewItem[]
   itemsForTaskType: CourseAssignmentOverviewItem[]
   prefetchSubmissionRoster: (lessonUid: string) => void
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }

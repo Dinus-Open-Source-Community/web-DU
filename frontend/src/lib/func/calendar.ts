@@ -5,9 +5,9 @@ import type { ClassType } from '../types/course'
 export type CalendarSource = 'google' | 'backend' | 'local'
 
 export const VIEW_OPTIONS: Array<{ label: string; value: CalendarViewMode }> = [
-  { label: 'Bulan', value: 'month' },
-  { label: 'Minggu', value: 'week' },
-  { label: 'Hari', value: 'day' },
+  { label: 'Bulanan', value: 'month' },
+  { label: 'Mingguan', value: 'week' },
+  { label: 'Harian', value: 'day' },
   { label: 'Agenda', value: 'agenda' },
 ]
 

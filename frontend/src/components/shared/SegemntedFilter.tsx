@@ -1,10 +1,3 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
 import { cn } from "../../lib/utils";
 
 export type SegmentedItem<T extends string = string> = {
@@ -19,96 +12,44 @@ type SegmentedFilterProps<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   variant?: SegmentedFilterVariant;
+  ariaLabel?: string;
   className?: string;
 };
 
 const CONTAINER_CLASS =
-  "relative flex  items-center gap-1.5 rounded-lg bg-paper-paper p-1.5 shadow-inner w-max";
-
-const SCROLLBAR_HIDDEN =
-  "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  "inline-flex w-fit max-w-full flex-wrap items-center gap-1 rounded-lg border-2 border-ink-900/10 bg-paper-paper p-1";
 
 const TAB_CLASS =
-  "relative z-10 flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:h-10 sm:px-4 sm:text-sm";
+  "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm transition-all";
 
 export function SegmentedFilter<T extends string>({
   items,
   value,
   onChange,
-  variant = "scroll",
+  ariaLabel = "Filter tab",
   className,
 }: SegmentedFilterProps<T>) {
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const activeIndex = items.findIndex((t) => t.value === value);
-
-  const updateIndicator = useCallback(() => {
-    const activeTab = tabsRef.current[activeIndex];
-    if (activeTab) {
-      setIndicatorStyle({
-        left: activeTab.offsetLeft,
-        width: activeTab.offsetWidth,
-      });
-    }
-  }, [activeIndex]);
-
-  useLayoutEffect(() => {
-    updateIndicator();
-  }, [updateIndicator, items.length, value]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver(updateIndicator);
-    resizeObserver.observe(container);
-    window.addEventListener("resize", updateIndicator);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateIndicator);
-    };
-  }, [updateIndicator]);
-
   return (
     <div
-      ref={containerRef}
-      className={cn(
-        CONTAINER_CLASS,
-        variant === "scroll" && cn("overflow-x-auto", SCROLLBAR_HIDDEN),
-        variant === "wrap" && "flex-wrap",
-        className,
-      )}
+      role="tablist"
+      aria-label={ariaLabel}
+      className={cn(CONTAINER_CLASS, className)}
     >
-      <div
-        className="pointer-events-none absolute top-1.5 bottom-1.5 hidden rounded-lg border border-line-light bg-paper-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300 ease-in-out sm:block"
-        style={{
-          left: indicatorStyle.left,
-          width: indicatorStyle.width,
-          opacity: indicatorStyle.width > 0 ? 1 : 0,
-        }}
-      />
-
-      {items.map((item, index) => {
+      {items.map((item) => {
         const active = value === item.value;
 
         return (
           <button
             key={item.value}
             type="button"
-            ref={(el) => {
-              tabsRef.current[index] = el;
-            }}
+            role="tab"
+            aria-selected={active}
             onClick={() => onChange(item.value)}
             className={cn(
               TAB_CLASS,
               active
-                ? "text-primary font-semibold"
-                : "text-ink-500 hover:text-ink-800",
-              active &&
-                "bg-paper-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] ring-1 ring-line-light/70 sm:bg-transparent sm:shadow-none sm:ring-0",
+                ? "bg-brand-blue font-bold text-white shadow-none"
+                : "font-semibold text-ink-500 hover:bg-paper-white hover:text-ink-800",
             )}
           >
             {item.label}

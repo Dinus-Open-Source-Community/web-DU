@@ -21,10 +21,12 @@ const LESSON_TYPE_CONFIG = {
 } as const
 
 export function CourseCurriculumTab({ modules, editHref, editNavigationState }: CourseCurriculumTabProps) {
-  const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(() => new Set(modules[0] ? [modules[0].uid] : []))
+  const displayModules = modules
+  const totalModules = displayModules.length
+  const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(() => new Set(displayModules[0] ? [displayModules[0].uid] : []))
 
-  const totalLessons = useMemo(() => modules.reduce((total, module) => total + (module.lessons?.length ?? 0), 0), [modules])
-  const allExpanded = modules.length > 0 && expandedModuleIds.size === modules.length
+  const totalLessons = useMemo(() => displayModules.reduce((total, module) => total + (module.lessons?.length ?? 0), 0), [displayModules])
+  const allExpanded = displayModules.length > 0 && expandedModuleIds.size === displayModules.length
 
   const toggleModule = (moduleUid: string) => {
     setExpandedModuleIds((current) => {
@@ -36,7 +38,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
   }
 
   const toggleAll = () => {
-    setExpandedModuleIds(allExpanded ? new Set() : new Set(modules.map((module) => module.uid)))
+    setExpandedModuleIds(allExpanded ? new Set() : new Set(displayModules.map((module) => module.uid)))
   }
 
   const moduleEditorHref = (moduleUid: string) => `${editHref}?moduleId=${encodeURIComponent(moduleUid)}`
@@ -56,7 +58,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
           description="Lihat modul dan lesson yang tersusun dalam kursus ini."
           aside={
             <>
-              {modules.length > 0 ? (
+              {displayModules.length > 0 ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -80,7 +82,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
         <div className="flex flex-wrap items-center gap-8">
           <div className="flex items-center gap-3 text-sm font-bold text-ink-600">
             <Layers3 className="size-4 text-primary opacity-70" />
-            {modules.length} Modul
+            {totalModules} Modul
           </div>
           <div className="flex items-center gap-3 text-sm font-bold text-ink-600">
             <BookOpen className="size-4 text-primary opacity-70" />
@@ -89,7 +91,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
         </div>
       </div>
 
-      {modules.length === 0 ? (
+      {displayModules.length === 0 ? (
         <div className="px-4 py-12 text-center sm:px-5">
           <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-xl bg-paper-paper text-ink-400">
@@ -103,7 +105,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
         </div>
       ) : (
         <div className="divide-y divide-line-light">
-          {modules.map((module, moduleIndex) => {
+          {displayModules.map((module, moduleIndex) => {
             const lessons = module.lessons ?? []
             const expanded = expandedModuleIds.has(module.uid)
             const moduleNumber = module.order_index ?? moduleIndex + 1
@@ -122,7 +124,7 @@ export function CourseCurriculumTab({ modules, editHref, editNavigationState }: 
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <h4 className="truncate text-sm font-semibold text-ink-900 transition-colors group-hover:text-primary">{module.title}</h4>
-                        <span className="shrink-0 rounded-full bg-paper-paper px-2 py-0.5 text-[11px] font-semibold text-ink-500">{lessons.length} lesson</span>
+                        <span className="shrink-0 text-xs font-normal tabular-nums text-ink-500">· {lessons.length} lesson</span>
                       </div>
                     </div>
                     <ModuleChevron className="size-4 shrink-0 text-ink-400 transition-transform duration-200" />

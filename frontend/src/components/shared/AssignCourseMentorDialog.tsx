@@ -1,42 +1,41 @@
-import { useMemo } from 'react'
 import { UserPlus } from 'lucide-react'
 
-import { PersonSelectionDialog } from '@/components/shared/PersonSelection'
-import { Badge } from '@/components/ui/badge'
+import { UserPromoteDialog } from '@/components/admin/user-manage/UserPromoteDialog'
 import type { AssignCourseMentorDialogViewModel } from '@/lib/course-detail/assign-course-mentor-view-model'
 
 export function AssignCourseMentorDialog({
-  items,
+  candidates,
+  isLoading,
   emptyTitle,
   emptyDescription,
   onConfirm,
+  onOpenChange,
+  onSearchChange,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
+  candidateCount,
+  candidatesLoading,
 }: AssignCourseMentorDialogViewModel) {
-  const itemsWithMeta = useMemo(
-    () =>
-      items.map((item) => ({
-        ...item,
-        meta: <Badge variant="userRole">Mentor</Badge>,
-      })),
-    [items],
-  )
-
   return (
-    <PersonSelectionDialog
+    <UserPromoteDialog
       triggerLabel="Assign mentor"
       triggerIcon={UserPlus}
-      title="Tugaskan mentor"
-      description="Pilih mentor yang akan ditambahkan ke tim pengajar kursus ini."
-      confirmLabel="Tugaskan mentor"
-      searchPlaceholder="Cari nama, email, atau ID mentor..."
-      items={itemsWithMeta}
+      title="Tugaskan Mentor"
+      description="Pilih satu atau beberapa mentor dari daftar untuk ditambahkan ke kursus ini."
+      confirmLabel="Tugaskan Mentor"
+      searchPlaceholder="Cari mentor..."
       emptyTitle={emptyTitle}
       emptyDescription={emptyDescription}
-      renderFooterHint={(item) => (
-        <span>
-          <strong className="font-semibold text-ink-900">{item.name}</strong> akan ditugaskan sebagai
-          mentor kursus.
-        </span>
-      )}
+      footerHint={(name) => `${name} akan ditugaskan sebagai mentor kursus ini.`}
+      candidates={candidates}
+      candidateCount={candidateCount}
+      candidatesLoading={isLoading || candidatesLoading}
+      onOpenChange={onOpenChange}
+      onSearchChange={onSearchChange}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      onLoadMore={onLoadMore}
       onConfirm={onConfirm}
     />
   )

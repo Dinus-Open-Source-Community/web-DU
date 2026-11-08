@@ -1,38 +1,83 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Message } from '@/lib/Message'
 import { CourseModulePreview } from '@/components/courses/(authorized)/viewModuleAndLessons'
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { NotFoundContent } from '@/components/shared/Error'
+import { LessonViewerSkeleton } from '@/components/courses/module-viewer/LessonViewerSkeleton'
 import { useCourseModuleViewer } from '@/hooks/course-module-viewer/use-course-module-viewer'
-import { useCourseEditData } from '@/hooks/use-course'
+import { useCourseDetail } from '@/hooks/use-course'
+import { useLessonByUid } from '@/hooks/use-lessons'
+import { useModulesByCourse } from '@/hooks/use-modules'
+import { useStudentMyAssignments } from '@/hooks/student-assignments/use-student-my-assignments'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
+import { flattenLessons } from '@/lib/course-module-viewer/lesson-viewer-utils'
+import { getCourseModuleViewerBackHref, type CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
 import type { CourseViewerPane } from '@/lib/lesson-assignment/types'
-import type { CourseModulePreviewVariant } from '@/lib/course-module-viewer/navigation'
-import { useAuth } from '@/providers/auth-provider'
+import { toShortUid } from '@/lib/routes'
 import type { ICourseDetailItem, IModulesDetail } from '@/lib/types/course'
+import { useAuth } from '@/providers/auth-provider'
+import { useAppTheme } from '@/providers/theme-provider'
 
 export default function CourseViewPage() {
-  const { courseUid } = useParams()
+  const { courseUid, lessonUid } = useParams()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
+  const { theme } = useAppTheme()
+  const loadedCourseUidRef = useRef<string | null>(null)
 
-  const initialLessonUid = searchParams.get('lesson')
+  const initialLessonUid = lessonUid ?? searchParams.get('lesson')
   const initialViewerPane: CourseViewerPane | null =
     searchParams.get('pane') === 'assignment' ? 'assignment' : null
 
-  const { courseDetail, modules, lessonsByModule, isLoading } = useCourseEditData(courseUid ?? '')
+  const isStudent = user?.role === 'student'
+  const courseDetail = useCourseDetail(courseUid ?? '')
+  const modulesQuery = useModulesByCourse(courseUid ?? '', { per_page: 100 })
+  const initialLessonQuery = useLessonByUid(initialLessonUid ?? '')
+  useStudentMyAssignments(
+    { course_uid: courseUid ?? '' },
+    { fetchAll: true, enabled: isStudent && Boolean(courseUid) },
+  )
 
   const storedModules = useMemo<IModulesDetail[]>(
     () =>
-      modules.map((module) => ({
+      (modulesQuery.data?.modules ?? []).map((module) => ({
         ...module,
-        lessons: lessonsByModule[module.uid] ?? [],
+        lessons: module.lessons ?? [],
       })),
-    [modules, lessonsByModule],
+    [modulesQuery.data?.modules],
   )
+
+  const lessonEntries = useMemo(() => flattenLessons(storedModules), [storedModules])
+
+  const effectiveInitialLesson = useMemo(() => {
+    if (lessonEntries.length === 0) return null
+    if (initialLessonUid) {
+      const matched = lessonEntries.find(
+        (entry) =>
+          toShortUid(entry.lesson.uid) === toShortUid(initialLessonUid) ||
+          entry.lesson.uid === initialLessonUid,
+      )
+      if (matched) return matched.lesson
+    }
+    return lessonEntries[0]?.lesson ?? null
+  }, [initialLessonUid, lessonEntries])
+
+  const fallbackLessonUid =
+    effectiveInitialLesson?.uid && effectiveInitialLesson.uid !== initialLessonUid
+      ? effectiveInitialLesson.uid
+      : ''
+  const fallbackLessonQuery = useLessonByUid(fallbackLessonUid)
+
+  const initialLessonDetail = initialLessonQuery.data ?? fallbackLessonQuery.data
+  const isInitialLessonPending = Boolean(
+    (initialLessonUid && initialLessonQuery.isLoading) ||
+      (fallbackLessonUid && fallbackLessonQuery.isLoading),
+  )
+
+  const isCourseLoading = courseDetail.isLoading || modulesQuery.isLoading
+  const hasLoadedCurrentCourse = Boolean(courseUid && loadedCourseUidRef.current === courseUid)
 
   const courseWithModules = useMemo<ICourseDetailItem | null>(() => {
     if (!courseUid || !courseDetail.data) return null
@@ -43,18 +88,33 @@ export default function CourseViewPage() {
     }
   }, [courseDetail.data, courseUid, storedModules])
 
-  if (isLoading) {
-    return <PageSkeleton message="Memuat course..." />
+  if (isCourseLoading || (!hasLoadedCurrentCourse && isInitialLessonPending)) {
+    return (
+      <LessonViewerSkeleton
+        backHref={getCourseModuleViewerBackHref(
+          (user?.role ?? 'student') as CourseModulePreviewVariant,
+          courseUid ?? '',
+        )}
+        theme={theme}
+        lessonType={initialLessonDetail?.content_type ?? effectiveInitialLesson?.content_type}
+        pane={initialViewerPane ?? 'lesson'}
+        taskType={
+          initialLessonDetail?.assignment?.task_type ??
+          effectiveInitialLesson?.assignment?.task_type
+        }
+      />
+    )
   }
 
   if (!courseUid || !courseWithModules) {
     return <NotFoundContent />
   }
 
-  const isStudent = user?.role === 'student'
   if (isStudent && !isCoursePublished(courseWithModules)) {
     return <NotFoundContent />
   }
+
+  loadedCourseUidRef.current = courseUid
 
   return (
     <CourseViewPageContent

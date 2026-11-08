@@ -5,7 +5,11 @@ import { PageHeader } from '@/components/shared/Header'
 import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
 import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
 import { MentorKpiGrid } from '@/components/mentor/dashboard/MentorKpiGrid'
-import { MentorQuickLinks } from '@/components/mentor/dashboard/MentorQuickLinks'
+import {
+  CalendarContentSkeleton,
+  ScheduleChartAreaSkeleton,
+} from '@/components/mentor/dashboard/MentorDashboardSkeletons'
+import { useCallback } from 'react'
 import { useMentorDashboard } from '@/hooks/use-mentor-dashboard'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { mentorDashboardLayout } from '@/lib/layout/mentor-dashboard-layout'
@@ -16,27 +20,18 @@ const SCHEDULE_CHART_SERIES: TimelineSeries[] = [
   { dataKey: 'students', label: 'Peserta', color: '#10B981' },
 ]
 
-const SKELETON_BAR_HEIGHTS = [55, 72, 40, 85, 63, 48, 78, 36]
-
-function ChartSkeleton({ height = 280 }: { height?: number }) {
-  return (
-    <div className="animate-pulse" style={{ height }}>
-      <div className="flex h-full items-end gap-2 px-2 pb-4">
-        {SKELETON_BAR_HEIGHTS.map((h, i) => (
-          <div key={i} className="flex-1 rounded-t bg-muted" style={{ height: `${h}%` }} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function CalendarSkeleton() {
-  return <div className={mentorDashboardLayout.calendarSkeleton} />
-}
-
 export default function MentorDashboardPage() {
   const sidebarUser = useSidebarUser('mentor')
-  const { kpis, schedules, scheduleTimeline } = useMentorDashboard()
+  const { kpis, schedules, scheduleTimeline, setCalendarRange } = useMentorDashboard()
+  const handleCalendarRangeChange = useCallback(
+    (from: string, to: string) => {
+      setCalendarRange((current) => {
+        if (current.from === from && current.to === to) return current
+        return { ...current, from, to }
+      })
+    },
+    [setCalendarRange],
+  )
 
   return (
     <MentorAppPageShell user={sidebarUser}>
@@ -55,8 +50,6 @@ export default function MentorDashboardPage() {
         <MentorKpiGrid stats={kpis.data} isLoading={kpis.isLoading} />
       )}
 
-      <MentorQuickLinks />
-
       <ChartCard title="Beban Jadwal Mentor" subtitle="Jumlah sesi dan peserta terjadwal per hari">
         {schedules.isError ? (
           <DashboardError
@@ -64,7 +57,7 @@ export default function MentorDashboardPage() {
             onRetry={() => schedules.refetch()}
           />
         ) : schedules.isLoading ? (
-          <ChartSkeleton />
+          <ScheduleChartAreaSkeleton />
         ) : (
           <TimelineAreaChart data={scheduleTimeline} series={SCHEDULE_CHART_SERIES} height={280} />
         )}
@@ -82,9 +75,12 @@ export default function MentorDashboardPage() {
             onRetry={() => schedules.refetch()}
           />
         ) : schedules.isLoading ? (
-          <CalendarSkeleton />
+          <CalendarContentSkeleton />
         ) : (
-          <CalendarView schedules={schedules.data ?? []} />
+          <CalendarView
+            schedules={schedules.data ?? []}
+            onVisibleRangeChange={handleCalendarRangeChange}
+          />
         )}
       </ChartCard>
     </MentorAppPageShell>

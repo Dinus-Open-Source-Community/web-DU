@@ -1,5 +1,15 @@
 import { DASHBOARD_PATH } from './dashboard-route'
 
+/**
+ * Mempersingkat UID ke format 8 karakter (standar prefix UID web-DU).
+ * Mengabaikan parameter rute placeholder seperti ':courseUid' atau ':lessonUid'.
+ */
+export function toShortUid(uid?: string | null): string {
+  if (!uid) return ''
+  if (uid.startsWith(':')) return uid
+  return uid.replace(/-/g, '').slice(0, 8)
+}
+
 export interface RouteChildItem {
   name: string
   path: string
@@ -41,14 +51,16 @@ export const dashboardMenu = {
     lessonUid: string,
     submissionUid: string,
   ) => dash('courses', courseUid, 'assignments', lessonUid, 'submissions', submissionUid),
-  transactions: dash('transactions'),
-  transactionPayment: dash('transactions', 'payment'),
-  financial: dash('financial'),
   reviewsAndQa: dash('reviews-and-qa'),
   learning: dash('learning'),
-  learningCourse: (courseUid: string) => dash('learning', 'courses', courseUid),
+  learningCourse: (courseUid: string, lessonUid?: string) =>
+    lessonUid
+      ? dash('learning', 'courses', toShortUid(courseUid), toShortUid(lessonUid))
+      : dash('learning', 'courses', toShortUid(courseUid)),
   assignments: dash('assignments'),
   certificates: dash('certificates'),
+  redeem: dash('redeem'),
+  redeemCodes: dash('redeem-codes'),
 }
 
 export const ROUTES = {
@@ -56,13 +68,17 @@ export const ROUTES = {
   gallery: '/gallery',
   mentors: '/mentors',
   dashboard: DASHBOARD_PATH,
-  profile: '/profile',
+  profile: '/settings',
   courses: '/course',
   courseDetail: (courseUid: string) => `/course/${courseUid}`,
-  viewModuleAndLessons: (courseUid: string) => `/course/${courseUid}/view`,
+  viewModuleAndLessons: (courseUid: string, lessonUid?: string) =>
+    lessonUid
+      ? `/course/${toShortUid(courseUid)}/view/${toShortUid(lessonUid)}`
+      : `/course/${toShortUid(courseUid)}/view`,
   courseLessons: (courseUid: string) => `/course/${courseUid}/lessons`,
   login: '/auth/login',
   register: '/auth/register',
+  verifyOtp: '/auth/verify-otp',
   redeem: '/redeem',
   oauthCallback: '/auth/oauth/callback',
   forgotPassword: '/auth/forgot-password',
@@ -79,9 +95,8 @@ export const ROUTES = {
     assignmentSubmissions: dashboardMenu.assignmentSubmissions,
     assignmentSubmissionDetail: dashboardMenu.assignmentSubmissionDetail,
     courseEditAdmin: dashboardMenu.courseEdit,
-    transactions: dashboardMenu.transactions,
-    financial: dashboardMenu.financial,
     reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    redeemCodes: dashboardMenu.redeemCodes,
     reviewsAndQa: (courseUid?: string) =>
       `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
@@ -94,6 +109,7 @@ export const ROUTES = {
     courseEditMentor: dashboardMenu.courseEdit,
     assignments: dashboardMenu.courseAssignmentHub,
     reviewsAndQaPath: dashboardMenu.reviewsAndQa,
+    redeemCodes: dashboardMenu.redeemCodes,
     reviewsAndQa: (courseUid?: string) =>
       `${dashboardMenu.reviewsAndQa}${courseUid ? `?courseUid=${encodeURIComponent(courseUid)}` : ''}`,
   },
@@ -103,17 +119,7 @@ export const ROUTES = {
     learningCourse: dashboardMenu.learningCourse,
     assignments: dashboardMenu.assignments,
     certificates: dashboardMenu.certificates,
-    transactions: dashboardMenu.transactions,
-    transactionPaymentPath: dashboardMenu.transactionPayment,
-    transactionPayment: (query: { reference?: string; merchantRef?: string }) => {
-      const params = new URLSearchParams()
-      if (query.reference) params.set('reference', query.reference)
-      if (query.merchantRef) params.set('merchant_ref', query.merchantRef)
-      const queryString = params.toString()
-      return queryString
-        ? `${dashboardMenu.transactionPayment}?${queryString}`
-        : dashboardMenu.transactionPayment
-    },
+    redeem: dashboardMenu.redeem,
   },
 } as const
 
@@ -129,20 +135,16 @@ export const routeGroups: Record<string, RouteItem[]> = {
       ],
     },
     {
+      name: 'Kode Redeem',
+      path: ROUTES.admin.redeemCodes,
+    },
+    {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
     },
   ],
   SuperAdmin: [
@@ -163,16 +165,22 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tipe Kursus', path: ROUTES.admin.courseTypes },
       ],
     },
+    {
+      name: 'Kode Redeem',
+      path: ROUTES.admin.redeemCodes,
+    },
     { name: 'Galeri', path: ROUTES.admin.gallery },
-    { name: 'Transaksi', path: ROUTES.admin.transactions },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.admin.reviewsAndQaPath },
-    { name: 'Laporan Keuangan', path: ROUTES.admin.financial },
   ],
   Mentor: [
     { name: 'Dasbor', path: ROUTES.mentor.dashboard },
     {
       name: 'Kursus',
       path: ROUTES.mentor.courses,
+    },
+    {
+      name: 'Kode Redeem',
+      path: ROUTES.mentor.redeemCodes,
     },
     { name: 'Ulasan & Tanya Jawab', path: ROUTES.mentor.reviewsAndQaPath },
   ],
@@ -185,6 +193,6 @@ export const routeGroups: Record<string, RouteItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Transaksi', path: ROUTES.student.transactions },
+    { name: 'Redeem Code', path: ROUTES.student.redeem },
   ],
 }

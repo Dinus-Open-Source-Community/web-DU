@@ -1,6 +1,6 @@
 import { authOAuthButtonClassName } from '@/components/auth/constants'
 import { Button } from '../ui/button'
-import { GitHubIcon, GoogleIcon } from './icon'
+import { GoogleIcon } from './icon'
 
 type OauthButtonProps = {
   isSubmitting: boolean
@@ -26,8 +26,8 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
         className={authOAuthButtonClassName}
         disabled={isSubmitting}
       >
-        <GitHubIcon className="size-5" aria-hidden />
-        GitHub
+        <img src="/Logo.svg" alt="" className="size-5 object-contain" />
+        Doscom
       </Button>
     </div>
   )

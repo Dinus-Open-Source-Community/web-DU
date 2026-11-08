@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Trash2, UserCog } from 'lucide-react'
 
@@ -6,8 +7,11 @@ import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/routes'
 import type { UserManageKind } from '@/lib/user-manage/page-config'
+import {
+  getUserManageColumnSpecs,
+  type UserManageColumnId,
+} from '@/lib/user-manage/table-columns'
 import type { ManagedUserRow } from '@/lib/user-manage/view-models'
-import { formatLearningProgressLabel, toLearningProgressPercent } from '@/lib/learning/progress'
 import { userManageLayout } from '@/lib/user-manage/layout'
 
 type BuildColumnsOptions = {
@@ -18,21 +22,6 @@ type BuildColumnsOptions = {
   disabled?: boolean
 }
 
-function ProgressCell({ value }: { value: number }) {
-  const progressPercent = toLearningProgressPercent(value)
-  return (
-    <div className="flex min-w-[120px] flex-col gap-1.5">
-      <span className="text-xs font-semibold text-muted-foreground tabular-nums">{formatLearningProgressLabel(value)}</span>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-200"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
-    </div>
-  )
-}
-
 export function buildUserManageColumns({
   kind,
   detailPath,
@@ -40,75 +29,21 @@ export function buildUserManageColumns({
   onDelete,
   disabled = false,
 }: BuildColumnsOptions) {
-  const baseColumns = [
-    {
-      id: 'user',
-      header: 'User',
-      cell: (row: ManagedUserRow) => (
-        <UserIdentityCell
-          name={row.name}
-          email={row.email}
-          avatar={row.avatar}
-          meta={row.roleLabel}
-        />
-      ),
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: ManagedUserRow) => <UserStatusBadge status={row.status} />,
-    },
-  ]
-
-  const kindColumns =
-    kind === 'student'
-      ? [
-          {
-            id: 'courses',
-            header: 'Kursus',
-            align: 'center' as const,
-            cell: (row: ManagedUserRow) => (
-              <span className="tabular-nums text-foreground">{row.enrolledCourses ?? 0}</span>
-            ),
-          },
-          {
-            id: 'progress',
-            header: 'Progres rata-rata',
-            cell: (row: ManagedUserRow) => <ProgressCell value={row.averageProgress ?? 0} />,
-          },
-        ]
-      : kind === 'mentor'
-        ? [
-            {
-              id: 'joined',
-              header: 'Bergabung',
-              cell: (row: ManagedUserRow) => (
-              <span className="text-muted-foreground">{row.joinedAt}</span>
-            ),
-          },
-        ]
-      : [
-          {
-            id: 'joined',
-            header: 'Bergabung',
-            cell: (row: ManagedUserRow) => (
-              <span className="text-muted-foreground">{row.joinedAt}</span>
-            ),
-          },
-          {
-            id: 'lastActive',
-            header: 'Terakhir aktif',
-            cell: (row: ManagedUserRow) => (
-              <span className="text-muted-foreground">{row.lastActive ?? '-'}</span>
-              ),
-            },
-          ]
-
-  const actionColumn = {
-    id: 'actions',
-    header: 'Aksi',
-    align: 'right' as const,
-    cell: (row: ManagedUserRow) => (
+  const cells: Record<UserManageColumnId, (row: ManagedUserRow) => ReactNode> = {
+    user: (row) => (
+      <UserIdentityCell
+        name={row.name}
+        email={row.email}
+        avatar={row.avatar}
+        meta={row.roleLabel}
+      />
+    ),
+    verified: (row) => <UserStatusBadge isVerified={row.isVerified} />,
+    courses: (row) => (
+      <span className="tabular-nums text-foreground">{row.enrolledCourses ?? 0}</span>
+    ),
+    joined: (row) => <span className="text-muted-foreground">{row.joinedAt}</span>,
+    actions: (row) => (
       <div className="flex justify-end gap-2">
         <Button
           type="button"
@@ -145,11 +80,12 @@ export function buildUserManageColumns({
     ),
   }
 
-  if (kind === 'admin') {
-    return [...baseColumns, ...kindColumns, actionColumn]
-  }
-
-  return [...baseColumns, ...kindColumns, actionColumn]
+  return getUserManageColumnSpecs(kind).map((spec) => ({
+    id: spec.id,
+    header: spec.header,
+    align: spec.align,
+    cell: cells[spec.id],
+  }))
 }
 
 export function getUserDetailPath(kind: UserManageKind, uid: string) {

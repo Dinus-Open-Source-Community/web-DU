@@ -1,14 +1,9 @@
-import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Button } from '../ui/button'
-
-const ErrorPageIllustration = lazy(() =>
-  import('@/components/playful/ErrorPageIllustration').then((module) => ({
-    default: module.ErrorPageIllustration,
-  })),
-)
+import { ErrorPageIllustration } from '@/components/playful/ErrorPageIllustration'
 
 interface NotFoundContentProps {
   title?: string
@@ -31,16 +26,7 @@ export function NotFoundContent({
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center gap-6 px-4 py-10 text-center duration-500 animate-in fade-in">
-      <Suspense
-        fallback={
-          <div
-            className="w-full max-w-[20rem] animate-pulse rounded-2xl bg-muted/30 sm:max-w-[22rem] sm:min-h-[280px]"
-            aria-hidden
-          />
-        }
-      >
-        <ErrorPageIllustration variant={illustrationVariant} />
-      </Suspense>
+      <ErrorPageIllustration variant={illustrationVariant} />
 
       <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-2 text-center">
         {illustrationVariant === 'not-found' ? (

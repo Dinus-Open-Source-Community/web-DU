@@ -20,9 +20,8 @@ function toManagedUserRow(
     name: profile.name,
     email: profile.email,
     avatar: profile.avatar,
-    status: profile.status,
+    isVerified: profile.isVerified,
     joinedAt: profile.createdAtLabel,
-    lastActive: profile.updatedAtLabel,
     roleLabel: profile.roleLabel,
   }
 }

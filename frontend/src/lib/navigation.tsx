@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import { LayoutDashboard, Users2, GraduationCap, Wallet, LineChart, MessageSquare, BookMarked, Layers, ArrowRightLeft, LayoutGrid, Mail, Images, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users2, GraduationCap, MessageSquare, BookMarked, Layers, LayoutGrid, Images, Ticket, type LucideIcon } from 'lucide-react'
 import { ROUTES } from './routes.ts'
 import type { NavItem } from './types/components/navigation'
 
@@ -32,24 +32,19 @@ export const Navigation: Record<string, NavItem[]> = {
       ],
     },
     {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.admin.redeemCodes,
+    },
+   {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
       icon: Images,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-      icon: Wallet,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
       icon: MessageSquare,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
-      icon: LineChart,
     },
   ],
   SuperAdmin: [
@@ -73,24 +68,19 @@ export const Navigation: Record<string, NavItem[]> = {
       ],
     },
     {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.admin.redeemCodes,
+    },
+    {
       name: 'Galeri',
       path: ROUTES.admin.gallery,
       icon: Images,
     },
     {
-      name: 'Transaksi',
-      path: ROUTES.admin.transactions,
-      icon: Wallet,
-    },
-    {
       name: 'Ulasan & Tanya Jawab',
       path: ROUTES.admin.reviewsAndQaPath,
       icon: MessageSquare,
-    },
-    {
-      name: 'Laporan Keuangan',
-      path: ROUTES.admin.financial,
-      icon: LineChart,
     },
   ],
   Mentor: [
@@ -99,6 +89,11 @@ export const Navigation: Record<string, NavItem[]> = {
       name: 'Kursus',
       icon: BookMarked,
       path: ROUTES.mentor.courses,
+    },
+    {
+      name: 'Kode Redeem',
+      icon: Ticket,
+      path: ROUTES.mentor.redeemCodes,
     },
     {
       name: 'Ulasan & Tanya Jawab',
@@ -116,7 +111,11 @@ export const Navigation: Record<string, NavItem[]> = {
         { name: 'Tugas', path: ROUTES.student.assignments },
       ],
     },
-    { name: 'Transaksi', icon: ArrowRightLeft, path: ROUTES.student.transactions },
+    {
+      name: 'Redeem Code',
+      icon: Ticket,
+      path: ROUTES.student.redeem,
+    },
   ],
 }
 
@@ -173,21 +172,35 @@ export type BrandSocialLink = {
   href: string
   /** LucideIcon atau komponen ikon inline apa pun yang menerima className. */
   icon: LucideIcon | ComponentType<SVGProps<SVGSVGElement>>
+  colorClass?: string
 }
 
-/** Ikon brand asli (bukan Globe generik). Href sengaja placeholder sampai ada akun resmi. */
+/** Ikon brand resmi komunitas DOSCOM. */
 export const socialLinks: BrandSocialLink[] = [
-  // TODO: ganti '#' dengan akun DOSCOM resmi (github.com/doscom-university, dll) sebelum launch.
-  { label: 'GitHub', href: '#', icon: BrandGithubIcon },
-  { label: 'LinkedIn', href: '#', icon: BrandLinkedinIcon },
-  { label: 'Instagram', href: '#', icon: BrandInstagramIcon },
-  { label: 'Email', href: '#', icon: Mail },
+  {
+    label: 'GitHub',
+    href: 'https://github.com/Dinus-Open-Source-Community',
+    icon: BrandGithubIcon,
+    colorClass: 'text-[#181717]',
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/doscomedia',
+    icon: BrandLinkedinIcon,
+    colorClass: 'text-[#0A66C2]',
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/doscomedia/',
+    icon: BrandInstagramIcon,
+    colorClass: 'text-[#E4405F]',
+  },
 ]
 
-/** Anchor navigasi landing — semua menuju section di halaman home. */
+/** Link navigasi utama halaman publik berdasarkan rute halaman. */
 export const navLinks = [
-  { label: 'Beranda', href: '/#top' },
-  { label: 'Mentor', href: '/#mentor' },
-  { label: 'Kursus', href: '/#kursus' },
+  { label: 'Beranda', href: ROUTES.home },
+  { label: 'Mentor', href: ROUTES.mentors },
+  { label: 'Kursus', href: ROUTES.courses },
   { label: 'Galeri', href: ROUTES.gallery },
 ]

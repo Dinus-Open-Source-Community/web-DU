@@ -11,11 +11,11 @@ export function buildStudentAssignmentHref({
   lessonUid,
   openAssignmentPane = true,
 }: BuildAssignmentHrefInput): string {
-  const basePath = ROUTES.viewModuleAndLessons(courseUid)
+  const basePath = ROUTES.viewModuleAndLessons(courseUid, lessonUid)
   if (!lessonUid) return basePath
 
-  const params = new URLSearchParams({ lesson: lessonUid })
-  if (openAssignmentPane) params.set('pane', 'assignment')
-
-  return `${basePath}?${params.toString()}`
+  if (openAssignmentPane) {
+    return `${basePath}?pane=assignment`
+  }
+  return basePath
 }

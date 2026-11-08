@@ -2,7 +2,6 @@ package service
 
 import (
 	"backend/internal/database"
-	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 	"context"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -150,8 +148,15 @@ func CallbackHandler(c *gin.Context) {
 		return
 	}
 
+	type googleUserMinimal struct {
+		Email         string `json:"email"`
+		VerifiedEmail bool   `json:"verified_email"`
+		Name          string `json:"name"`
+		Picture       string `json:"picture"`
+	}
+
 	// Unmarshal only the fields we care about
-	var gu dto.GoogleUserMinimal
+	var gu googleUserMinimal
 	if err := json.Unmarshal(contents, &gu); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -195,7 +200,6 @@ func CallbackHandler(c *gin.Context) {
 		user.Email = encEmail
 		user.AvatarURL = gu.Picture
 		user.IsVerified = gu.VerifiedEmail
-		user.UpdatedAt = time.Now()
 
 		if err := database.DB.Save(&user).Error; err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -222,7 +226,6 @@ func CallbackHandler(c *gin.Context) {
 			"role":        user.Role,
 			"is_verified": user.IsVerified,
 			"created_at":  user.CreatedAt,
-			"updated_at":  user.UpdatedAt,
 		},
 		"error": nil,
 	})

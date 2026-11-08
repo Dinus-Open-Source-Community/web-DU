@@ -8,11 +8,11 @@ import { CourseCardCoverFallback } from './CourseCardCoverFallback'
 
 /** Frame default cover kursus — ratio 16:9. */
 export const COURSE_CARD_COVER_FRAME_CLASS =
-  'relative aspect-video w-full overflow-hidden rounded-[10px]'
+  'relative aspect-video w-full overflow-hidden rounded-t-xl rounded-b-none'
 
 /** Wrapper standar di card kursus (`CardCourse`, `JoinedCourseCard`, `CardMentor`, dll.). */
 export const COURSE_CARD_COVER_CARD_WRAPPER_CLASS =
-  'relative aspect-video w-full shrink-0 overflow-hidden rounded-[10px]'
+  'relative aspect-video w-full shrink-0 overflow-hidden rounded-t-xl rounded-b-none'
 
 /** Wrapper compact untuk thumbnail (transaksi, ringkasan, dll.). */
 export const COURSE_CARD_COVER_COMPACT_WRAPPER_CLASS =
@@ -20,7 +20,7 @@ export const COURSE_CARD_COVER_COMPACT_WRAPPER_CLASS =
 
 /** Gambar di dalam frame — ratio tetap, isi penuh. */
 export const COURSE_CARD_COVER_IMAGE_CLASS =
-  'h-full w-full rounded-[10px] object-cover object-center'
+  'h-full w-full rounded-t-xl rounded-b-none object-cover object-center'
 
 type CourseCardCoverFrameProps = {
   className?: string

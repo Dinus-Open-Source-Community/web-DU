@@ -1,23 +1,28 @@
 import { useMemo } from 'react'
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query'
 import type { IQueryParamsPayload } from '@/services/api-path'
-import type { LessonDetailItem } from '@/lib/types/course'
+import type { ICourseItem, LessonDetailItem } from '@/lib/types/course'
 import {
   applyResolvedImagesToCourseDetail,
   applyResolvedImagesToCourseItem,
+  applyResolvedImagesToCourseMentors,
   applyResolvedImagesToCourseStudents,
   collectCourseDetailImageReferences,
   collectCourseListImageReferences,
+  collectCourseMentorsImageReferences,
   collectCourseStudentsImageReferences,
+  collectManagedUsersListImageReferences,
 } from '@/lib/files'
 import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
 import {
   fetchCourseByUid,
+  fetchCourseCandidateStudents,
   fetchCourseCategories,
   fetchCourseCategoryByUid,
   fetchCourses,
   fetchCourseProgress,
   fetchCourseStudents,
+  fetchCourseMentors,
   fetchCourseTypes,
   stripLessonsFromModules,
 } from '@/services/course'
@@ -65,10 +70,59 @@ export function useCourses(
   }
 }
 
-export function useCourseDetail(uid: string) {
+export function useInfiniteCourses(
+  params?: IQueryParamsPayload,
+  options: UseCoursesOptions = {},
+) {
+  const query = useInfiniteQuery({
+    queryKey: courseKeys.infiniteList(params),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => fetchCourses({ ...params, page: pageParam }),
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.current_page < lastPage.meta.total_pages
+        ? lastPage.meta.current_page + 1
+        : undefined,
+    enabled: options.enabled,
+  })
+
+  const courses = useMemo(() => {
+    const seen = new Set<string>()
+    const list: ICourseItem[] = []
+    for (const page of query.data?.pages ?? []) {
+      for (const course of page.courses ?? []) {
+        if (seen.has(course.uid)) continue
+        seen.add(course.uid)
+        list.push(course)
+      }
+    }
+    return list
+  }, [query.data?.pages])
+
+  const imageReferences = useMemo(
+    () => collectCourseListImageReferences(courses),
+    [courses],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const resolvedCourses = useMemo(
+    () => courses.map((course) => applyResolvedImagesToCourseItem(course, fileMap.getDisplayUrl)),
+    [courses, fileMap.getDisplayUrl],
+  )
+
+  return {
+    ...query,
+    courses: resolvedCourses,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseDetail(uid: string, options: { enabled?: boolean } = {}) {
   const query = useQuery({
     queryKey: courseKeys.detail(uid),
-    enabled: !!uid,
+    enabled: options.enabled ?? !!uid,
     queryFn: () => fetchCourseByUid(uid),
   })
 
@@ -93,10 +147,11 @@ export function useCourseDetail(uid: string) {
   }
 }
 
-export function useCourseCategories(params?: IQueryParamsPayload) {
+export function useCourseCategories(params?: IQueryParamsPayload, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: courseKeys.categories(params),
     queryFn: () => fetchCourseCategories(params),
+    enabled: options.enabled ?? true,
   })
 }
 
@@ -108,18 +163,19 @@ export function useCourseCategory(uid: string) {
   })
 }
 
-export function useCourseTypes(params?: IQueryParamsPayload) {
+export function useCourseTypes(params?: IQueryParamsPayload, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: courseKeys.types(params),
     queryFn: () => fetchCourseTypes(params),
+    enabled: options.enabled ?? true,
   })
 }
 
-export function useCourseStudents(courseUid: string) {
+export function useCourseStudents(courseUid: string, params?: IQueryParamsPayload) {
   const query = useQuery({
-    queryKey: courseKeys.students(courseUid),
+    queryKey: courseKeys.students(courseUid, params),
     enabled: !!courseUid,
-    queryFn: () => fetchCourseStudents(courseUid),
+    queryFn: () => fetchCourseStudents(courseUid, params),
   })
 
   const imageReferences = useMemo(
@@ -134,6 +190,68 @@ export function useCourseStudents(courseUid: string) {
   const data = useMemo(() => {
     if (!query.data) return undefined
     return applyResolvedImagesToCourseStudents(query.data, fileMap.getDisplayUrl)
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseCandidateStudents(courseUid: string, params: IQueryParamsPayload = {}, options: { enabled?: boolean } = {}) {
+  const query = useQuery({
+    queryKey: courseKeys.candidateStudents(courseUid, params),
+    enabled: !!courseUid && (options.enabled ?? true),
+    queryFn: () => fetchCourseCandidateStudents(courseUid, params),
+  })
+
+  const imageReferences = useMemo(
+    () => collectManagedUsersListImageReferences(query.data?.users),
+    [query.data?.users],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return {
+      ...query.data,
+      users: query.data.users.map((user) => ({
+        ...user,
+        avatar_url: (user.avatar_url ? fileMap.getDisplayUrl(user.avatar_url) : undefined) || user.avatar_url,
+      })),
+    }
+  }, [fileMap.getDisplayUrl, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+export function useCourseMentors(courseUid: string, params?: IQueryParamsPayload) {
+  const query = useQuery({
+    queryKey: courseKeys.mentors(courseUid, params),
+    enabled: !!courseUid,
+    queryFn: () => fetchCourseMentors(courseUid, params),
+  })
+
+  const imageReferences = useMemo(
+    () => collectCourseMentorsImageReferences(query.data),
+    [query.data],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return applyResolvedImagesToCourseMentors(query.data, fileMap.getDisplayUrl)
   }, [fileMap.getDisplayUrl, query.data])
 
   return {
@@ -177,7 +295,10 @@ export function useCourseDetailWithCategories(uid: string) {
 export function useCourseDetailAdminAndMentor(uid: string) {
   const courseDetail = useCourseDetail(uid)
   const userCourse = useCourseStudents(uid)
-  const moduleCourse = useModulesByCourse(uid, { per_page: 100 })
+  // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum, Kehadiran,
+  // Tugas). Diambil lengkap supaya KPI dan daftar lesson tidak terpotong, lalu
+  // dipakai bersama lewat query key yang sama agar tidak ada request ganda.
+  const moduleCourse = useModulesByCourse(uid, { page: 1, per_page: 100 })
 
   const isLoading =
     courseDetail.isLoading || userCourse.isLoading || moduleCourse.isLoading
@@ -218,7 +339,7 @@ export function useCourseEditModules(courseUid: string) {
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
 
   const modules = useMemo(
-    () => stripLessonsFromModules(modulesQuery.data?.modules ?? []),
+    () => modulesQuery.data?.modules ?? [],
     [modulesQuery.data?.modules],
   )
 
@@ -233,9 +354,10 @@ export function useCourseEditModules(courseUid: string) {
   }
 }
 
-export function useCourseEditData(courseUid: string) {
+export function useCourseEditData(courseUid: string, options: { loadLessons?: boolean } = {}) {
   const courseDetail = useCourseDetail(courseUid)
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
+  const loadLessons = options.loadLessons ?? true
 
   const moduleList = useMemo(() => modulesQuery.data?.modules ?? [], [modulesQuery.data?.modules])
   const moduleUids = useMemo(
@@ -247,7 +369,7 @@ export function useCourseEditData(courseUid: string) {
     queries: moduleUids.map((moduleUid) => ({
       queryKey: lessonKeys.byModule(moduleUid, { per_page: 100 }),
       queryFn: () => fetchLessonsByModuleUid(moduleUid, { per_page: 100 }),
-      enabled: Boolean(courseUid) && modulesQuery.isSuccess && !!moduleUid,
+      enabled: loadLessons && Boolean(courseUid) && modulesQuery.isSuccess && !!moduleUid,
     })),
   })
 
@@ -263,7 +385,7 @@ export function useCourseEditData(courseUid: string) {
 
   const isLoadingLessons = lessonQueries.some((query) => query.isLoading)
   const isLoading =
-    courseDetail.isLoading || modulesQuery.isLoading || isLoadingLessons
+    courseDetail.isLoading || modulesQuery.isLoading || (loadLessons && isLoadingLessons)
   const error =
     courseDetail.error ||
     modulesQuery.error ||

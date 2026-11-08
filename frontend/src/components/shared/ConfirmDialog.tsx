@@ -9,14 +9,26 @@ export type ConfirmDialogProps = {
   confirmLabel?: string
   cancelLabel?: string
   variant?: 'default' | 'destructive'
+  className?: string
   onConfirm?: MouseEventHandler<HTMLButtonElement>
   onCancel?: MouseEventHandler<HTMLButtonElement>
 }
 
-export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel = 'Lanjutkan', cancelLabel = 'Batal', variant = 'default', onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel = 'Lanjutkan',
+  cancelLabel = 'Batal',
+  variant = 'default',
+  className,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className={className}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}

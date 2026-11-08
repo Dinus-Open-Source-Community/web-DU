@@ -16,7 +16,7 @@ export default function MentorCoursesPage() {
           onRetry={() => void refetch()}
         />
       ) : (
-        <ManageCourseSection role="mentor" data={isLoading ? [] : courses} />
+        <ManageCourseSection role="mentor" data={courses} isLoading={isLoading} />
       )}
     </MentorAppPageShell>
   )

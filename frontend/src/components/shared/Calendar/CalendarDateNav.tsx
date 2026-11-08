@@ -1,22 +1,14 @@
-import { useState } from 'react'
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
-import { id } from 'react-day-picker/locale'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import type { CalendarViewMode } from '@/components/shared/Calendar/View'
 import { buildRangeLabel, CALENDAR_VIEW_HINT } from '@/lib/func/calendar'
-import { appCardClassName } from '@/lib/design/app-shell-tokens'
-import { cn } from '@/lib/utils'
 
 type CalendarDateNavProps = {
   cursorDate: Date
   viewMode: CalendarViewMode
   onPrevious: () => void
   onNext: () => void
-  onToday: () => void
-  onPickDate: (date: Date) => void
 }
 
 export function CalendarDateNav({
@@ -24,10 +16,7 @@ export function CalendarDateNav({
   viewMode,
   onPrevious,
   onNext,
-  onToday,
-  onPickDate,
 }: CalendarDateNavProps) {
-  const [pickerOpen, setPickerOpen] = useState(false)
   const rangeLabel = buildRangeLabel(cursorDate, viewMode)
 
   return (
@@ -60,34 +49,6 @@ export function CalendarDateNav({
           </p>
           <p className="text-xs font-medium text-ink-500">{CALENDAR_VIEW_HINT[viewMode]}</p>
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <Button type="button" variant="outline" size="sm" onClick={onToday}>
-          Hari ini
-        </Button>
-
-        <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="gap-2">
-              <CalendarDays className="size-4 opacity-80" aria-hidden />
-              Pilih tanggal
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className={cn(appCardClassName, 'w-auto p-0 shadow-paper')} align="end">
-            <Calendar
-              mode="single"
-              locale={id}
-              selected={cursorDate}
-              onSelect={(date) => {
-                if (!date) return
-                onPickDate(date)
-                setPickerOpen(false)
-              }}
-              defaultMonth={cursorDate}
-            />
-          </PopoverContent>
-        </Popover>
       </div>
     </div>
   )

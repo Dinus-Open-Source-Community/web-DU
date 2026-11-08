@@ -22,10 +22,7 @@ function appendCourseFields(formData: FormData, payload: Partial<CourseFormField
   appendScalar(formData, 'category_uid', payload.category_uid)
   appendScalar(formData, 'course_type_uid', payload.course_type_uid)
   appendScalar(formData, 'level', payload.level)
-  appendScalar(formData, 'price', payload.price)
-  appendScalar(formData, 'price_strike', payload.price_strike)
   appendScalar(formData, 'slot', payload.slot)
-  appendScalar(formData, 'is_premium', payload.is_premium)
 
   if (payload.what_you_learn) {
     formData.append('what_you_learn', JSON.stringify(payload.what_you_learn))

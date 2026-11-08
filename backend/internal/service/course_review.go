@@ -73,16 +73,6 @@ func CreateCourseReviewFunc(c *gin.Context) {
 		return
 	}
 
-	if enrollment.Status == entity.EnrollmentPending {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Your enrollment is still pending. Reviews are available after activation",
-			"data":    nil,
-			"error":   "Enrollment pending",
-		})
-		return
-	}
-
 	if enrollment.Status != entity.EnrollmentActive && enrollment.Status != entity.EnrollmentCompleted {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,

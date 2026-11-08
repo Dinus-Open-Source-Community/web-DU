@@ -10,11 +10,8 @@ export interface ICourseFormFields {
   category_uid: string
   course_type_uid: string
   level: CourseApiLevel
-  price: number
-  price_strike?: number
   what_you_learn: string[]
   slot?: number
-  is_premium?: boolean
   cover?: File
 }
 
@@ -41,8 +38,6 @@ export interface ICourseFormValues {
   categoryUid: string
   courseTypeUid: string
   level: CourseApiLevel
-  price: number | ''
-  strikePrice: number | ''
   whatYouLearn: string[]
   slot: number | ''
   coverFile: File | null
@@ -56,8 +51,6 @@ export const EMPTY_COURSE_FORM_VALUES: ICourseFormValues = {
   categoryUid: '',
   courseTypeUid: '',
   level: 'PEMULA',
-  price: '',
-  strikePrice: '',
   whatYouLearn: [],
   slot: '',
   coverFile: null,

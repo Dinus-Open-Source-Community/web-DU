@@ -5,9 +5,15 @@ import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-o
 
 export type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 
-export function useCourseFormOptions(): CourseFormOptionsViewModel {
-  const { data: categoryResponse, isLoading: categoriesLoading } = useCourseCategories({ per_page: 100 })
-  const { data: courseTypeResponse, isLoading: typesLoading } = useCourseTypes({ per_page: 100 })
+export function useCourseFormOptions(enabled = true): CourseFormOptionsViewModel {
+  const { data: categoryResponse, isLoading: categoriesLoading } = useCourseCategories(
+    { per_page: 100 },
+    { enabled },
+  )
+  const { data: courseTypeResponse, isLoading: typesLoading } = useCourseTypes(
+    { per_page: 100 },
+    { enabled },
+  )
 
   const categories = useMemo(() => categoryResponse?.course_categories ?? [], [categoryResponse])
   const courseTypes = useMemo(() => courseTypeResponse?.course_types ?? [], [courseTypeResponse])

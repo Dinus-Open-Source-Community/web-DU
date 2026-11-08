@@ -41,7 +41,17 @@ export const updateUserRolePayloadSchema = z
   })
   .strict()
 
+export const batchUpdateUserRolePayloadSchema = z
+  .object({
+    user_uids: z
+      .array(beResolvableUidSchema)
+      .min(1, 'Pilih minimal 1 pengguna'),
+    role: assignableUserRoleSchema,
+  })
+  .strict()
+
 export const managedUserUidParamSchema = beResolvableUidSchema
 
 export type ManagedUserListParamsValidated = z.infer<typeof managedUserListParamsSchema>
 export type UpdateUserRolePayloadValidated = z.infer<typeof updateUserRolePayloadSchema>
+export type BatchUpdateUserRolePayloadValidated = z.infer<typeof batchUpdateUserRolePayloadSchema>

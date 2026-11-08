@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -233,6 +234,33 @@ func UpdateLessonAssignmentFunc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment updated successfully", "data": existing, "error": nil})
 }
 
+func deleteLessonAssignmentWithCascadeTx(tx *gorm.DB, lessonUID uuid.UUID) error {
+	var assignmentIDs []uuid.UUID
+	if err := tx.Model(&entity.LessonAssignment{}).Where("lesson_uid = ?", lessonUID).Pluck("uid", &assignmentIDs).Error; err != nil {
+		return err
+	}
+
+	if len(assignmentIDs) == 0 {
+		return nil
+	}
+
+	var submissionIDs []uuid.UUID
+	if err := tx.Model(&entity.LessonAssignmentSubmission{}).Where("lesson_assignment_uid IN ?", assignmentIDs).Pluck("uid", &submissionIDs).Error; err != nil {
+		return err
+	}
+
+	if len(submissionIDs) > 0 {
+		if err := tx.Where("lesson_assignment_submission_uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmissionAttempt{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("uid IN ?", submissionIDs).Delete(&entity.LessonAssignmentSubmission{}).Error; err != nil {
+			return err
+		}
+	}
+
+	return tx.Where("uid IN ?", assignmentIDs).Delete(&entity.LessonAssignment{}).Error
+}
+
 // @Summary      Delete lesson assignment (Admin/Mentor)
 // @Description  Delete assignment configuration for a lesson.
 // @Tags         Lesson Assignment
@@ -266,7 +294,9 @@ func DeleteLessonAssignmentFunc(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Where("lesson_uid = ?", lesson.Uid).Delete(&entity.LessonAssignment{}).Error; err != nil {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return deleteLessonAssignmentWithCascadeTx(tx, lesson.Uid)
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
@@ -311,12 +341,19 @@ func buildLessonAssignmentModel(lessonUID uuid.UUID, req dto.LessonAssignmentUps
 		return entity.LessonAssignment{}, errors.New("status must be one of: DRAFT, TERBIT (published), DITUTUP (closed)")
 	}
 
-	if !req.AllowFileSubmission && !req.AllowPlainTextSubmission && !req.AllowRichTextSubmission {
-		return entity.LessonAssignment{}, errors.New("at least one submit option must be enabled")
-	}
+	if taskType == entity.LessonAssignmentTaskTypeText {
+		if !req.AllowFileSubmission && !req.AllowPlainTextSubmission && !req.AllowRichTextSubmission {
+			return entity.LessonAssignment{}, errors.New("at least one submit option must be enabled")
+		}
 
-	if req.RequireFileDescription && !req.AllowFileSubmission {
-		return entity.LessonAssignment{}, errors.New("require_file_description can only be true when allow_file_submission is true")
+		if req.RequireFileDescription && !req.AllowFileSubmission {
+			return entity.LessonAssignment{}, errors.New("require_file_description can only be true when allow_file_submission is true")
+		}
+	} else {
+		req.AllowFileSubmission = false
+		req.AllowPlainTextSubmission = false
+		req.AllowRichTextSubmission = false
+		req.RequireFileDescription = false
 	}
 
 	if req.AllowResubmit {
@@ -391,3 +428,94 @@ func toRawMessage(v interface{}) (json.RawMessage, error) {
 	}
 	return json.RawMessage(b), nil
 }
+
+// @Summary      Upload image for lesson assignment/quiz (Admin/Mentor)
+// @Description  Upload an image file to S3/MinIO for embedding in quiz questions or assignment rich text. Supported formats: JPG, PNG, WebP, GIF. Max 5MB.
+// @Tags         Lesson Assignment
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        image  formData  file  true  "Image file (max 5MB)"
+// @Success      200  {object}  map[string]any  "Image uploaded successfully"
+// @Failure      400  {object}  map[string]any  "Invalid image file"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Access denied"
+// @Failure      500  {object}  map[string]any  "Failed to upload image"
+// @Router       /lessons/assignment/upload-image [post]
+func UploadLessonAssignmentImageFunc(c *gin.Context) {
+	user, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+
+	role := strings.ToLower(string(user.Role))
+	if role != "admin" && role != "super_admin" && role != "mentor" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Access denied: Admin or mentor only",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		file, err = c.FormFile("file")
+	}
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "File gambar wajib diunggah (field: image atau file)",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if file.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Ukuran berkas melebihi batas maksimal 5MB",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	switch ext {
+	case ".jpg", ".jpeg", ".png", ".webp", ".gif":
+		// format valid
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Format berkas tidak didukung (gunakan JPG, PNG, WebP, atau GIF)",
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
+	bucket := utils.GetBucketAssignments()
+	url, err := utils.UploadFile(file, bucket)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal mengunggah berkas ke penyimpanan",
+			"data":    nil,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Gambar berhasil diunggah",
+		"data": gin.H{
+			"url": url,
+		},
+		"error": nil,
+	})
+}
+

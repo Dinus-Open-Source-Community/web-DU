@@ -32,8 +32,8 @@ func ConnectDB() {
 	// Fungsi pembantu untuk membuka koneksi ke database dengan error handling otomatis
 	openOrFatal := func(dsn string) *gorm.DB {
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk Development
-			// Logger: logger.Default.LogMode(logger.Silent), // Gunakan untuk production agar log tidak bising
+			// Logger: logger.Default.LogMode(logger.Info), // Mode logging Info cocok untuk Development
+			Logger: logger.Default.LogMode(logger.Silent), // Gunakan untuk production agar log tidak bising
 		})
 		if err != nil {
 			log.Fatal("[Error] Gagal terhubung ke database:", err)
@@ -53,6 +53,7 @@ func ConnectDB() {
 	DB.AutoMigrate(
 		&entity.User{},
 		&entity.Event{},
+		&entity.Gallery{},
 		&entity.CourseCategory{},
 		&entity.ClassType{},
 		&entity.Course{},
@@ -63,8 +64,6 @@ func ConnectDB() {
 		&entity.LessonAssignmentSubmission{},
 		&entity.LessonAssignmentSubmissionAttempt{},
 		&entity.Enrollment{},
-		&entity.Payment{},
-		&entity.PaymentMethodConfig{},
 		&entity.CourseReview{},
 		&entity.CourseReviewReply{},
 		&entity.CourseAnnouncement{},
@@ -72,8 +71,11 @@ func ConnectDB() {
 		&entity.LessonReading{},
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},
+		&entity.OTP{},
+		&entity.EmailChangeRequest{},
+		&entity.RedeemCode{},
+		&entity.RedeemCodeUsage{},
 	)
-
 	log.Println("[Success] Berhasil terhubung ke database")
 }
 

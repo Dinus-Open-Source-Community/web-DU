@@ -30,7 +30,6 @@ export interface IManagedUserItem {
   is_verified: boolean
   enrollments?: IManagedEnrollmentItem[]
   created_at: string
-  updated_at: string
 }
 
 export interface IManagedUsersListResponse {
@@ -47,9 +46,21 @@ export interface IUpdateUserRolePayload {
   role: AssignableUserRole
 }
 
+export interface IBatchUpdateUserRolePayload {
+  user_uids: string[]
+  role: AssignableUserRole
+}
+
+export interface IBatchUpdateUserRoleResponse {
+  updated_count: number
+  users: IManagedUserItem[]
+}
+
 /** Alias backward-compat. */
 export type ManagedUserListParams = IManagedUserListParams
 export type ManagedEnrollmentItem = IManagedEnrollmentItem
 export type ManagedUserItem = IManagedUserItem
 export type ManagedUsersListResponse = IManagedUsersListResponse
 export type UpdateUserRolePayload = IUpdateUserRolePayload
+export type BatchUpdateUserRolePayload = IBatchUpdateUserRolePayload
+export type BatchUpdateUserRoleResponse = IBatchUpdateUserRoleResponse

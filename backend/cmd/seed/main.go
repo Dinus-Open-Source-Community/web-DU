@@ -17,7 +17,9 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("[Seed CLI] .env tidak ditemukan, memakai environment variable sistem")
+		if err := godotenv.Load("../.env"); err != nil {
+			log.Println("[Seed CLI] .env tidak ditemukan, memakai environment variable sistem")
+		}
 	}
 
 	database.ConnectDB()

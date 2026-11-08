@@ -15,17 +15,16 @@ import { cn } from '@/lib/utils'
 export const editLayout = {
   page: 'mx-auto flex w-full flex-col gap-6 pb-10 lg:pb-10',
   pageCompact: 'gap-4 pb-28 lg:gap-6 lg:pb-10',
-  shell:
-    'grid gap-6 lg:grid-cols-[minmax(17rem,21rem)_minmax(0,1fr)] lg:gap-0 lg:divide-x lg:divide-line-light',
+  shell: cn(
+    appCardClassName,
+    'grid gap-6 rounded-2xl p-5 shadow-paper sm:p-6 lg:grid-cols-[minmax(17rem,21rem)_minmax(0,1fr)] lg:gap-0 lg:divide-x lg:divide-line-light lg:p-6 xl:p-8',
+  ),
   shellCompactOutline: 'flex min-h-0 flex-1 flex-col',
   shellCompactEditor: 'flex min-h-0 flex-1 flex-col',
   outlinePanel:
-    'flex min-h-0 w-full min-w-0 flex-col lg:sticky lg:top-4 lg:max-h-[calc(100dvh-7rem)] lg:pr-4 xl:pr-6',
-  outlinePanelFull: cn(
-    appCardClassName,
-    'flex min-h-0 flex-1 flex-col p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none',
-  ),
-  editorPanel: 'min-w-0 lg:pl-8',
+    'flex min-h-0 w-full min-w-0 flex-col lg:sticky lg:top-4 lg:max-h-[calc(100dvh-10rem)] lg:pr-6 xl:pr-8',
+  outlinePanelFull: 'flex min-h-0 flex-1 flex-col',
+  editorPanel: 'min-w-0 lg:pl-6 xl:pl-8',
   editorPanelCompact: 'min-w-0 flex-1 px-0 sm:px-1',
   divider: 'border-b-2 border-ink-900/10',
   sectionDivider: 'border-t border-line-light',
@@ -38,9 +37,9 @@ export const editLayout = {
   meta: 'text-xs tabular-nums font-medium text-ink-400',
   control: cn(
     appToolbarPrimaryButtonClassName,
-    'h-9 min-h-9 rounded-sm px-4 text-sm shadow-none',
+    'h-9 min-h-9 rounded-full px-4 text-sm shadow-none',
   ),
-  iconButton: 'size-9 min-h-9 min-w-9 shrink-0 rounded-sm',
+  iconButton: 'size-9 min-h-9 min-w-9 shrink-0 rounded-full',
   surfaceMuted:
     'space-y-2 rounded-xl border-2 border-ink-900/10 bg-paper-paper p-3 sm:p-4',
   moduleRow: 'mb-1 flex items-center gap-0.5 rounded-md px-1 transition-colors',
@@ -54,9 +53,9 @@ export const editLayout = {
     'border-transparent text-ink-600 hover:bg-paper-paper hover:text-ink-900 active:bg-paper-paper/80',
   lessonRowActive: 'border-brand-blue bg-brand-blue/5 font-medium text-ink-900',
   fieldLabel: appKpiLabelClassName,
-  segmented: cn(appSegmentedControlClassName, 'w-full sm:w-auto'),
+  segmented: cn(appSegmentedControlClassName, 'w-full sm:w-auto rounded-full'),
   segmentedItem:
-    'inline-flex h-9 min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 sm:flex-none sm:h-8',
+    'inline-flex h-9 min-h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 sm:flex-none sm:h-8',
   segmentedItemActive: cn(appSegmentedItemActiveClassName, 'shadow-none'),
   segmentedItemIdle: appSegmentedItemIdleClassName,
   stickyBar: cn(

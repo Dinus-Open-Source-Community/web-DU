@@ -2,33 +2,31 @@ package service
 
 import (
 	"backend/internal/database"
-	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // @Summary      Register new user (Public)
-// @Description  Register a new user with name, email, and password. Returns JWT token on success.
+// @Description  Register a new user with name, email, and password. Requires OTP verification before login.
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        request  body  dto.RegisterRequest  true  "Register payload"
-// @Success      200  {object}  map[string]any  "User registered successfully"
+// @Success      200  {object}  map[string]any  "User registered successfully, OTP sent"
 // @Failure      400  {object}  map[string]any  "Invalid request data"
 // @Failure      409  {object}  map[string]any  "Email already registered"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /register [post]
 func PostRegisterFunc(c *gin.Context) {
-	var req dto.RegisterRequest // <-- KITA GUNAKAN MODEL YANG SUDAH DIPERBAIKI
+	var req dto.RegisterRequest
 
 	// 1. Ambil dan validasi data JSON (name, email, password)
-	// Gin akan otomatis memvalidasi JSON berdasarkan tag 'binding'
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -40,7 +38,6 @@ func PostRegisterFunc(c *gin.Context) {
 	}
 
 	// 2. Proses hashing password dan enkripsi data sensitif
-	// (Kita sekarang menggunakan data dari 'req' yang sudah divalidasi)
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -53,13 +50,48 @@ func PostRegisterFunc(c *gin.Context) {
 	emailEncrypted, _ := utils.Encrypt(req.Email)
 	emailHash := utils.GenerateBlindIndex(req.Email)
 
-	// 3. Buat instance user baru
+	// Cek apakah akun dengan email ini sudah ada di database
+	var existingUser entity.User
+	if err := database.DB.Where("email_hash = ?", emailHash).First(&existingUser).Error; err == nil {
+		if existingUser.IsVerified {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false, "message": "Email already registered", "data": nil, "error": nil,
+			})
+			return
+		}
+
+		// Jika akun sudah ada namun belum diverifikasi, perbarui password dan nama lalu kirim ulang OTP
+		existingUser.Name = nameEncrypted
+		existingUser.Password = hashedPassword
+		database.DB.Save(&existingUser)
+
+		userForMail := existingUser
+		userForMail.Email = req.Email
+		userForMail.Name = req.Name
+		if err := GenerateAndSendOTP(&userForMail, entity.PurposeVerifyAccount); err != nil {
+			log.Printf("[register] Gagal mengirim OTP: %v", err)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Akun kamu belum diverifikasi. Kode OTP verifikasi baru telah dikirim ke email kamu.",
+			"data": gin.H{
+				"email":                 req.Email,
+				"requires_verification": true,
+			},
+			"error": nil,
+		})
+		return
+	}
+
+	// 3. Buat instance user baru (is_verified = false)
 	newUser := entity.User{
-		Name:      nameEncrypted,
-		Email:     emailEncrypted,
-		EmailHash: emailHash,
-		Password:  hashedPassword,
-		Role:      entity.StudentRole,
+		Name:       nameEncrypted,
+		Email:      emailEncrypted,
+		EmailHash:  emailHash,
+		Password:   hashedPassword,
+		Role:       entity.StudentRole,
+		IsVerified: false,
 	}
 
 	// 4. Simpan user ke database
@@ -76,24 +108,22 @@ func PostRegisterFunc(c *gin.Context) {
 		})
 		return
 	}
-	// Generate token JWT untuk user yang berhasil login
-	// Token akan berlaku selama 24 jam sejak waktu register
-	expiration := time.Now().Add(24 * time.Hour)
-	token, err := middleware.GenerateJWT(newUser.EmailHash, expiration)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false, "message": "Failed to generate token", "data": nil, "error": err.Error(),
-		})
-		return
+
+	// 5. Kirim OTP verifikasi ke email user
+	userForMail := newUser
+	userForMail.Email = req.Email
+	userForMail.Name = req.Name
+	if err := GenerateAndSendOTP(&userForMail, entity.PurposeVerifyAccount); err != nil {
+		log.Printf("[register] Gagal mengirim OTP ke %s: %v", req.Email, err)
 	}
 
-	// 5. Jika berhasil, kirim response sukses
+	// 6. Kembalikan response sukses yang mengharuskan verifikasi OTP
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "User registered successfully!",
+		"message": "Pendaftaran berhasil! Kode verifikasi OTP telah dikirim ke email kamu.",
 		"data": gin.H{
-			"token":      token,
-			"expires_at": expiration.Format(time.RFC3339),
+			"email":                 req.Email,
+			"requires_verification": true,
 		},
 		"error": nil,
 	})

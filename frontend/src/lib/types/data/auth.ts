@@ -17,6 +17,22 @@ export interface IAuthTokenResponse {
   expires_at?: string
 }
 
+export interface IRegisterResponse {
+  email?: string
+  requires_verification?: boolean
+  token?: string
+  expires_at?: string
+}
+
+export interface IVerifyOtpPayload {
+  email: string
+  otp: string
+}
+
+export interface IResendOtpPayload {
+  email: string
+}
+
 export interface IAuthUser {
   uid: string
   name: string

@@ -1,6 +1,5 @@
-import { AdminUserStatusLabel } from '@/lib/admin/status-label'
-import type { AdminStatus } from '@/lib/types/user'
+import { AdminEmailVerificationLabel } from '@/lib/admin/status-label'
 
-export function UserStatusBadge({ status }: { status: AdminStatus }) {
-  return <AdminUserStatusLabel status={status} />
+export function UserStatusBadge({ isVerified }: { isVerified: boolean }) {
+  return <AdminEmailVerificationLabel isVerified={isVerified} />
 }

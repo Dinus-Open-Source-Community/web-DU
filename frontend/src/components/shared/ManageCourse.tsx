@@ -6,7 +6,8 @@ import { AdminUnderlineTabs } from '@/components/admin/AdminUnderlineTabs'
 import CardMentor from './CardMentor'
 import { Pagination } from './Pagination'
 import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
-import { CreateCourseDialog } from './CreateCourse'
+import { CourseFormDialog } from '@/components/shared/course-form/CourseFormDialog'
+import { CourseCardSkeletonGrid } from './CourseCardSkeleton'
 import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import type { CourseFormOptionsViewModel } from '@/lib/course-form/course-form-options-view-model'
 import type { CourseFormValues } from '@/lib/course-form/types'
@@ -20,7 +21,7 @@ import { cn } from '@/lib/utils'
 
 const filters = ['Semua', 'Aktif', 'Draf'] as const
 type CourseFilter = (typeof filters)[number]
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 8
 
 const EMPTY_FILTER_COPY: Record<
   CourseFilter,
@@ -51,20 +52,29 @@ type CreateCourseActions = {
 type CourseManagementSectionProps = {
   role: 'mentor' | 'admin'
   data: ICourseItem[] | null
+  /** Saat true, tampilkan skeleton kartu — jangan empty state. */
+  isLoading?: boolean
   formOptions?: CourseFormOptionsViewModel
   createCourse?: CreateCourseActions
+  createOpen?: boolean
+  onCreateOpenChange?: (open: boolean) => void
 }
 
 export default function ManageCourseSection({
   role = 'mentor',
   data,
+  isLoading = false,
   formOptions,
   createCourse,
+  createOpen: controlledCreateOpen,
+  onCreateOpenChange,
 }: CourseManagementSectionProps) {
   const isAdmin = role === 'admin'
   const [activeFilter, setActiveFilter] = useState<CourseFilter>('Semua')
   const [currentPage, setCurrentPage] = useState(1)
-  const [createOpen, setCreateOpen] = useState(false)
+  const [internalCreateOpen, setInternalCreateOpen] = useState(false)
+  const createOpen = controlledCreateOpen ?? internalCreateOpen
+  const setCreateOpen = onCreateOpenChange ?? setInternalCreateOpen
   const courses = useMemo(() => data ?? ([] as ICourseItem[]), [data])
 
   useEffect(() => {
@@ -98,8 +108,9 @@ export default function ManageCourseSection({
             className="mb-0 space-y-2"
           />
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <AdminUnderlineTabs<CourseFilter>
+              variant="pill"
               items={filters.map((f) => ({ value: f, label: f }))}
               value={activeFilter}
               onChange={setActiveFilter}
@@ -118,15 +129,16 @@ export default function ManageCourseSection({
           </div>
         </div>
 
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <CourseCardSkeletonGrid count={ITEMS_PER_PAGE} />
+        ) : filteredCourses.length > 0 ? (
           <div className="flex flex-col gap-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedCourses.map((c) => (
                 <CardMentor
                   key={c.uid}
                   data={c}
                   detailHref={ROUTES.dashboardMenu.courseDetail(c.uid)}
-                  adminStatusLabel
                 />
               ))}
             </div>
@@ -168,9 +180,10 @@ export default function ManageCourseSection({
       </div>
 
       {isAdmin && formOptions && createCourse ? (
-        <CreateCourseDialog
+        <CourseFormDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
+          mode="create"
           submitting={createCourse.submitting}
           onSubmitCreate={createCourse.onSubmit}
           categories={formOptions.categories}

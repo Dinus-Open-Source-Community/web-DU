@@ -2,9 +2,7 @@ import { memo } from 'react'
 import { ArrowRight, FileText, HelpCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { AssignmentSubmitterAvatarGroup } from '@/components/shared/course-detail-manage/AssignmentSubmitterAvatarGroup'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import type { CourseAssignmentOverviewItem } from '@/lib/course-detail/course-assignment-overview-presenter'
 import { AdminTaskTypeLabel } from '@/lib/admin/status-label'
 import { cn } from '@/lib/utils'
@@ -22,10 +20,10 @@ function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['t
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium',
         isQuiz
-          ? 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300'
-          : 'border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300',
+          ? 'border-sky-500/30 bg-sky-50 text-sky-800 dark:bg-sky-950/40 dark:border-sky-800/40 dark:text-sky-300'
+          : 'border-purple-500/30 bg-purple-50 text-purple-800 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300',
       )}
     >
       <Icon className="size-3" aria-hidden />
@@ -68,19 +66,7 @@ function CourseAssignmentOverviewRowBase({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-          {item.isParticipantsLoading ? (
-            <div className="space-y-2" aria-hidden>
-              <div className="flex -space-x-2">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <Skeleton key={index} className="size-8 rounded-full" />
-                ))}
-              </div>
-              <Skeleton className="h-3 w-28" />
-            </div>
-          ) : (
-            <AssignmentSubmitterAvatarGroup participants={item.participants} />
-          )}
+        <div className="flex items-center">
           <Button
             asChild
             type="button"

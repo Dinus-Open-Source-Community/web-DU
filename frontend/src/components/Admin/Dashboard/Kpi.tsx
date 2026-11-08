@@ -1,33 +1,62 @@
-import type { AdminKpi } from '@/lib/types/admin/dashboard'
-import { adminKpiAccentClassName } from '@/lib/admin/kpi-accent'
-import { localizeAdminKpis } from '@/lib/admin/localize-admin-kpi'
+import type { AdminKpi, AdminKpiIconName } from '@/lib/types/admin/dashboard'
 import { cn } from '@/lib/utils'
 
 import { StatCard } from '../../shared/StatCard'
+import { AdminKpiCardsSkeleton } from './DashboardSkeletons'
 
-function KpiSkeleton() {
-  return (
-    <div className="flex w-full animate-pulse flex-col items-start gap-3 rounded-xl border-2 border-l-4 border-ink-900/10 border-l-line-medium bg-paper-white p-4">
-      <div className="flex w-full flex-col gap-2">
-        <div className="h-3 w-20 rounded bg-line-light" />
-        <div className="h-7 w-28 rounded bg-line-light" />
-      </div>
-      <div className="h-3 w-40 max-w-full rounded bg-line-light" />
-    </div>
-  )
+/** Label KPI dari API (fallback jika backend belum terbarui). */
+const KPI_LABEL_BY_ID: Record<string, string> = {
+  'active-users': 'Pengguna aktif',
+  'support-tickets': 'Tiket support',
 }
 
-export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLoading?: boolean }) {
+const KPI_LABEL_BY_LEGACY_ENGLISH: Record<string, string> = {
+  'Active Users': 'Pengguna aktif',
+  'Support Tickets': 'Tiket support',
+}
+
+const TREND_LABEL_MAP: Record<string, string> = {
+  'all time': 'sepanjang waktu',
+  'vs periode sebelumnya': 'dibanding periode sebelumnya',
+}
+
+function localizeAdminKpis(kpis?: AdminKpi[]): AdminKpi[] | undefined {
+  return kpis?.map((kpi) => {
+    const label = KPI_LABEL_BY_ID[kpi.id] ?? KPI_LABEL_BY_LEGACY_ENGLISH[kpi.label] ?? kpi.label
+    const trendLabel = TREND_LABEL_MAP[kpi.trendLabel] ?? kpi.trendLabel
+    if (label === kpi.label && trendLabel === kpi.trendLabel) return kpi
+    return { ...kpi, label, trendLabel }
+  })
+}
+
+const adminKpiAccentClassName: Record<string, string> = {
+  users: 'border-l-note-mint',
+  courses: 'border-l-note-sky',
+  completion: 'border-l-note-lavender',
+}
+
+function getAdminKpiAccent(iconName?: AdminKpiIconName, id?: string): string {
+  if (id === 'active-users') return 'border-l-note-mint'
+  if (id === 'total-students') return 'border-l-note-sky'
+  if (id === 'active-courses') return 'border-l-note-yellow'
+  if (id === 'course-completion') return 'border-l-note-lavender'
+  if (iconName && adminKpiAccentClassName[iconName]) {
+    return adminKpiAccentClassName[iconName]
+  }
+  return 'border-l-note-mint'
+}
+
+export function KpiGrid({ 
+  adminKpis, 
+  isLoading,
+}: { 
+  adminKpis?: AdminKpi[]
+  isLoading?: boolean
+}) {
   const localizedKpis = localizeAdminKpis(adminKpis)
 
   if (isLoading) {
-    return (
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <KpiSkeleton key={i} />
-        ))}
-      </section>
-    )
+    return <AdminKpiCardsSkeleton />
   }
 
   return (
@@ -41,7 +70,7 @@ export function KpiGrid({ adminKpis, isLoading }: { adminKpis?: AdminKpi[]; isLo
           trendValue={k.trendValue}
           trendDirection={k.trendDirection}
           trendLabel={k.trendLabel}
-          accentClassName={adminKpiAccentClassName[k.iconName]}
+          accentClassName={getAdminKpiAccent(k.iconName, k.id)}
         />
       ))}
     </section>

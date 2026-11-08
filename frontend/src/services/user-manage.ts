@@ -4,6 +4,8 @@ import { API_ROUTES } from './api-path'
 import type { IResponse } from '@/lib/types/api'
 import type { ManagedUserDetailApiResponse } from '@/lib/user-manage/user-detail-api-types'
 import type {
+  BatchUpdateUserRolePayload,
+  BatchUpdateUserRoleResponse,
   ManagedUserItem,
   ManagedUserListParams,
   ManagedUsersListResponse,
@@ -12,6 +14,7 @@ import type {
 import type { UserRole } from '@/lib/types/user'
 import type { ResolvedSubmissionGraderProfile } from '@/lib/course-detail/staff-submission-grader-presenter'
 import {
+  parseBatchUpdateUserRolePayload,
   parseManagedUserListParams,
   parseManagedUserUidParam,
   parseUpdateUserRolePayload,
@@ -59,6 +62,15 @@ export async function updateManagedUserRole(uid: string, payload: UpdateUserRole
     validatedPayload,
   )
   return unwrapApiResponse(response.data, 'Gagal memperbarui role user')
+}
+
+export async function batchUpdateManagedUserRole(payload: BatchUpdateUserRolePayload) {
+  const validatedPayload = parseBatchUpdateUserRolePayload(payload)
+  const response = await api.patch<IResponse<BatchUpdateUserRoleResponse>>(
+    API_ROUTES.user.batchUpdateUserRole,
+    validatedPayload,
+  )
+  return unwrapApiResponse(response.data, 'Gagal memperbarui role user secara massal')
 }
 
 export async function deleteManagedUser(uid: string) {

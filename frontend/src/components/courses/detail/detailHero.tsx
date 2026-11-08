@@ -1,15 +1,23 @@
 import type { ReactNode } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { detailLayout } from '@/lib/course-detail/detail-layout'
+import { apiLevelToUi } from '@/lib/course-form/level'
 import { ROUTES } from '@/lib/routes'
-import { cn } from '@/lib/utils'
 
 interface CourseDetailHeroProps {
   title: string
   description?: string
   category: string
+  courseType?: string
+  level?: string
+  isEnrolled?: boolean
+  rating?: number
+  totalReviews?: number
+  slot?: number
+  mentorName?: string
+  mentorAvatar?: string
   backHref?: string
   backLabel?: string
   actions?: ReactNode
@@ -19,49 +27,65 @@ export function CourseDetailHero({
   title,
   description,
   category,
+  courseType,
+  level,
+  isEnrolled,
   backHref = ROUTES.courses,
-  backLabel = 'Kembali ke kursus',
+  backLabel = 'Kembali ke katalog',
   actions,
 }: CourseDetailHeroProps) {
+  const levelLabel = level ? apiLevelToUi(level) : null
+
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#0a84dc_0%,#075e9c_100%)] text-white">
-      <div
-        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-paper-white/10 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -bottom-16 -left-10 h-64 w-64 rounded-full bg-paper-white/5 blur-3xl"
-        aria-hidden
-      />
+    <div className="flex flex-col gap-5">
+      {/* Top Nav: Back button */}
+      <div>
+        <Link to={backHref} className={detailLayout.backLink}>
+          <ArrowLeft className="size-4 shrink-0 text-ink-900" aria-hidden />
+          <span>{backLabel}</span>
+        </Link>
+      </div>
 
-      <div
-        className={cn(
-          detailLayout.page,
-          detailLayout.pageGutter,
-          'relative flex flex-col gap-4 py-6 sm:gap-5 sm:py-8 lg:py-10',
-        )}
-      >
-        <nav aria-label="Navigasi kursus">
-          <Link to={backHref} className={detailLayout.backLink}>
-            <ChevronLeft className="h-5 w-5 shrink-0" aria-hidden />
-            <span>{backLabel}</span>
-          </Link>
-        </nav>
-
-        <div className="flex flex-col gap-2.5 sm:gap-3">
-          <span className="w-fit rounded-full bg-paper-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+      {/* Badges Row */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {category && (
+          <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-yellow px-3 py-1 font-mono text-xs font-black uppercase tracking-wider text-ink-900 shadow-2xs -rotate-1">
             {category}
           </span>
-          <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-[2.5rem]">
-            {title}
-          </h1>
-          {description ? (
-            <p className="max-w-3xl text-sm leading-relaxed text-white/85 sm:text-base">{description}</p>
-          ) : null}
-        </div>
+        )}
 
-        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+        {courseType && (
+          <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-sky px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-2xs">
+            {courseType}
+          </span>
+        )}
+
+        {levelLabel && (
+          <span className="inline-block rounded-sm border-2 border-ink-900 bg-paper-panel px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-800 shadow-2xs">
+            Level: {levelLabel}
+          </span>
+        )}
+
+        {isEnrolled && (
+          <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-mint px-3 py-1 font-mono text-xs font-black uppercase tracking-wider text-ink-900 shadow-2xs">
+            ✓ Sudah Terdaftar
+          </span>
+        )}
       </div>
-    </section>
+
+      {/* Main Title */}
+      <h1 className="font-display text-3xl font-black tracking-tight text-ink-900 sm:text-4xl lg:text-[2.85rem] leading-[1.12] [text-wrap:balance]">
+        {title}
+      </h1>
+
+      {/* Course Subtitle/Description */}
+      {description ? (
+        <p className="max-w-2xl text-base leading-relaxed text-ink-600 sm:text-lg">
+          {description}
+        </p>
+      ) : null}
+
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    </div>
   )
 }

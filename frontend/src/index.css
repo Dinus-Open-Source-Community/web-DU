@@ -548,12 +548,6 @@
     box-shadow: none;
   }
 
-  .lottie-animation-container {
-    width: var(--lottie-animation-container-width, 100%);
-    height: var(--lottie-animation-container-height, 280px);
-    background-color: var(--lottie-animation-container-background-color, transparent);
-    overflow: hidden;
-    margin: var(--lottie-animation-margin, 0);
-  }
+
 }
 

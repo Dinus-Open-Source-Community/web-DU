@@ -24,13 +24,13 @@ import (
 //   - UPDATE ringan pada beberapa seed lama (mis. user seed, patch course created_by_uid)
 //
 // Cara menjalankan ulang setelah mengubah seeder.go:
-//   1. CLI (disarankan):  cd backend && go run ./cmd/seed
-//   2. Saat startup app:  set SEED=true di .env lalu restart backend
+//  1. CLI (disarankan):  cd backend && go run ./cmd/seed
+//  2. Saat startup app:  set SEED=true di .env lalu restart backend
 //
 // Cara menambah data seed baru:
-//   1. Tambahkan entry di slice seed*() yang relevan
-//   2. Pastikan ada kunci idempoten (transaction_id unik, seed key Q&A, slug, order_index, …)
-//   3. Jalankan salah satu cara di atas — hanya data baru yang masuk
+//  1. Tambahkan entry di slice seed*() yang relevan
+//  2. Pastikan ada kunci idempoten (transaction_id unik, seed key Q&A, slug, order_index, …)
+//  3. Jalankan salah satu cara di atas — hanya data baru yang masuk
 //
 // Catatan terkait sistem enkripsi:
 //   - Field sensitif (User.Name/Email/Description, Course.Title/Subtitle/Description,
@@ -49,7 +49,6 @@ func RunSeeder(db *gorm.DB) {
 	seedClassTypes(db)
 	seedCourses(db)
 	seedEnrollments(db)
-	seedPayments(db)
 	seedCourseReviews(db)
 	seedCourseQaThreads(db)
 	seedModules(db)
@@ -117,87 +116,78 @@ func seedUsers(db *gorm.DB) {
 	log.Println("[Seeder] Seeding Users...")
 
 	type seedUser struct {
-		Name        string
-		Email       string
-		Password    string
-		Role        entity.UserRole
-		IsVerified  bool
-		AvatarURL   string
-		Description string
+		Name       string
+		Email      string
+		Password   string
+		Role       entity.UserRole
+		IsVerified bool
+		AvatarURL  string
 	}
 
 	users := []seedUser{
 		{
-			Name:        "Super Admin User",
-			Email:       "superadmin@doscom.id",
-			Password:    "superadmin123",
-			Role:        entity.SuperAdminRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=12",
-			Description: "Super administrator dari platform DU",
+			Name:       "Super Admin User",
+			Email:      "superadmin@doscom.id",
+			Password:   "superadmin123",
+			Role:       entity.SuperAdminRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=12",
 		},
 		{
-			Name:        "Admin User",
-			Email:       "admin@doscom.id",
-			Password:    "admin123",
-			Role:        entity.AdminRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=32",
-			Description: "Administrator dari platform DU",
+			Name:       "Admin User",
+			Email:      "admin@doscom.id",
+			Password:   "admin123",
+			Role:       entity.AdminRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=32",
 		},
 		{
-			Name:        "Budi Santoso",
-			Email:       "budi@doscom.id",
-			Password:    "student123",
-			Role:        entity.StudentRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=14",
-			Description: "Mahasiswa Dinus yang aktif belajar",
+			Name:       "Budi Santoro",
+			Email:      "budi@doscom.id",
+			Password:   "student123",
+			Role:       entity.StudentRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=14",
 		},
 		{
-			Name:        "Siti Nurhaliza",
-			Email:       "siti@doscom.id",
-			Password:    "student123",
-			Role:        entity.StudentRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=47",
-			Description: "Mahasiswa berprestasi di bidang teknologi",
+			Name:       "Siti Nurhaliza",
+			Email:      "siti@doscom.id",
+			Password:   "student123",
+			Role:       entity.StudentRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=47",
 		},
 		{
-			Name:        "Andi Pratama",
-			Email:       "andi.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=15",
-			Description: "Mentor backend dan arsitektur sistem",
+			Name:       "Andi Pratama",
+			Email:      "andi.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=15",
 		},
 		{
-			Name:        "Rina Kurnia",
-			Email:       "rina.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=44",
-			Description: "Mentor frontend dan UI engineering",
+			Name:       "Rina Kurnia",
+			Email:      "rina.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=44",
 		},
 		{
-			Name:        "Dimas Saputra",
-			Email:       "dimas.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=11",
-			Description: "Mentor DevOps dan cloud deployment",
+			Name:       "Dimas Saputra",
+			Email:      "dimas.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=11",
 		},
 		{
-			Name:        "Nadia Putri",
-			Email:       "nadia.mentor@doscom.id",
-			Password:    "mentor123",
-			Role:        entity.MentorRole,
-			IsVerified:  true,
-			AvatarURL:   "https://i.pravatar.cc/150?img=49",
-			Description: "Mentor database dan data engineering",
+			Name:       "Nadia Putri",
+			Email:      "nadia.mentor@doscom.id",
+			Password:   "mentor123",
+			Role:       entity.MentorRole,
+			IsVerified: true,
+			AvatarURL:  "https://i.pravatar.cc/150?img=49",
 		},
 	}
 
@@ -213,11 +203,6 @@ func seedUsers(db *gorm.DB) {
 		var existing entity.User
 		err = db.Where("email_hash = ?", emailHash).First(&existing).Error
 		if err == nil {
-			// User sudah ada — sinkronkan field penting menggunakan db.Save agar
-			// hook BeforeSave pada User mengenkripsi ulang Name/Email/Description
-			// secara konsisten. AfterFind sudah men-dekripsi field saat First()
-			// di atas sehingga existing.Name/Email/Description berbentuk plaintext;
-			// kita timpa langsung dengan plaintext baru lalu Save.
 			existing.Name = u.Name
 			existing.Email = u.Email
 			existing.EmailHash = emailHash
@@ -225,7 +210,6 @@ func seedUsers(db *gorm.DB) {
 			existing.Role = u.Role
 			existing.IsVerified = u.IsVerified
 			existing.AvatarURL = u.AvatarURL
-			existing.Description = u.Description
 
 			if err := db.Save(&existing).Error; err != nil {
 				log.Printf("[Warning] Gagal update user seed %s: %v", u.Name, err)
@@ -239,18 +223,14 @@ func seedUsers(db *gorm.DB) {
 			continue
 		}
 
-		// User belum ada — buat baru. Hook BeforeSave akan mengenkripsi
-		// Name/Email/Description sebelum data ditulis ke DB; kita cukup
-		// mengirim plaintext.
 		user := entity.User{
-			Name:        u.Name,
-			Email:       u.Email,
-			EmailHash:   emailHash,
-			Password:    hashedPassword,
-			Role:        u.Role,
-			IsVerified:  u.IsVerified,
-			AvatarURL:   u.AvatarURL,
-			Description: u.Description,
+			Name:       u.Name,
+			Email:      u.Email,
+			EmailHash:  emailHash,
+			Password:   hashedPassword,
+			Role:       u.Role,
+			IsVerified: u.IsVerified,
+			AvatarURL:  u.AvatarURL,
 		}
 
 		if err := db.Create(&user).Error; err != nil {
@@ -295,9 +275,9 @@ func seedCourses(db *gorm.DB) {
 
 	courses := []entity.Course{
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[0].Uid,
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[0].Uid,
 			ClassTypeUid: &classTypes[0].Uid,
 			Title:        "Golang Fundamentals",
 			Subtitle:     "Belajar Go dari dasar hingga siap produksi",
@@ -307,19 +287,16 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        299000,
-			PriceStrike:  399000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         30,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[0].Uid,
-			ClassTypeUid:  &classTypes[1].Uid,
-			Title:         "Web Development dengan Next.js",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[0].Uid,
+			ClassTypeUid: &classTypes[1].Uid,
+			Title:        "Web Development dengan Next.js",
 			Subtitle:     "Bangun aplikasi modern dengan Next.js",
 			Slug:         "web-development-nextjs",
 			Description:  "Buat aplikasi web modern menggunakan Next.js dan React",
@@ -327,19 +304,16 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        349000,
-			PriceStrike:  449000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         25,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[1].Uid,
-			ClassTypeUid:  &classTypes[1].Uid,
-			Title:         "Database Design dan SQL",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[1].Uid,
+			ClassTypeUid: &classTypes[1].Uid,
+			Title:        "Database Design dan SQL",
 			Subtitle:     "Rancang skema DB yang scalable",
 			Slug:         "database-design-sql",
 			Description:  "Desain database yang efisien dan kuasai SQL untuk berbagai kebutuhan",
@@ -347,19 +321,16 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        279000,
-			PriceStrike:  329000,
-			IsPremium:    false,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         40,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[1].Uid,
-			ClassTypeUid:  &classTypes[2].Uid,
-			Title:         "REST API Development",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[1].Uid,
+			ClassTypeUid: &classTypes[2].Uid,
+			Title:        "REST API Development",
 			Subtitle:     "Bangun API robust dan aman",
 			Slug:         "rest-api-development",
 			Description:  "Buat REST API yang robust dan scalable menggunakan best practices",
@@ -367,19 +338,16 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        299000,
-			PriceStrike:  379000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         35,
 		},
 		{
-			MentorUid:     &mentor.Uid,
-			CreatedByUid:  &createdByUID,
-			CategoryUid:   &categories[2].Uid,
-			ClassTypeUid:  &classTypes[0].Uid,
-			Title:         "DevOps Essentials",
+			MentorUid:    &mentor.Uid,
+			CreatedByUid: &createdByUID,
+			CategoryUid:  &categories[2].Uid,
+			ClassTypeUid: &classTypes[0].Uid,
+			Title:        "DevOps Essentials",
 			Subtitle:     "Deploy aplikasi dengan pipeline modern",
 			Slug:         "devops-essentials",
 			Description:  "Pelajari deployment, Docker, dan CI/CD pipeline untuk production",
@@ -387,9 +355,6 @@ func seedCourses(db *gorm.DB) {
 			WhatYouLearn: learningPoints,
 			CoverURL:     "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&h=300&q=80",
 			ThumbnailURL: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&h=300&q=80",
-			Price:        329000,
-			PriceStrike:  429000,
-			IsPremium:    true,
 			IsPublished:  true,
 			Status:       entity.CourseStatusActive,
 			Slot:         20,
@@ -440,17 +405,59 @@ func seedEnrollments(db *gorm.DB) {
 		Status       entity.EnrollmentStatus
 	}
 
-	// Budi di-enroll ke 3 course aktif, Siti ke 4 course aktif + 1 pending checkout.
+	// Pastikan student Budi (budi@doscom.id) tidak mengikuti kursus apapun.
+	// Bersihkan enrollment dan data terkait jika pernah dibuat sebelumnya.
+	if budi, err := findSeedUserByEmail(db, "budi@doscom.id"); err == nil {
+		var budiEnrollments []entity.Enrollment
+		if err := db.Where("user_uid = ?", budi.Uid).Find(&budiEnrollments).Error; err == nil && len(budiEnrollments) > 0 {
+			var budiEnrollmentUIDs []uuid.UUID
+			for _, e := range budiEnrollments {
+				budiEnrollmentUIDs = append(budiEnrollmentUIDs, e.Uid)
+			}
+			db.Exec("DELETE FROM payments WHERE enrollment_uid IN ?", budiEnrollmentUIDs)
+			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonAttendance{})
+			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonReading{})
+			db.Where("user_uid = ?", budi.Uid).Delete(&entity.Enrollment{})
+		}
+
+		var budiSubmissions []entity.LessonAssignmentSubmission
+		if db.Where("user_uid = ?", budi.Uid).Find(&budiSubmissions).Error == nil && len(budiSubmissions) > 0 {
+			var subUIDs []uuid.UUID
+			for _, s := range budiSubmissions {
+				subUIDs = append(subUIDs, s.Uid)
+			}
+			db.Where("lesson_assignment_submission_uid IN ?", subUIDs).Delete(&entity.LessonAssignmentSubmissionAttempt{})
+			db.Where("uid IN ?", subUIDs).Delete(&entity.LessonAssignmentSubmission{})
+		}
+
+		var budiReviews []entity.CourseReview
+		if db.Where("user_uid = ?", budi.Uid).Find(&budiReviews).Error == nil && len(budiReviews) > 0 {
+			var reviewUIDs []uuid.UUID
+			for _, r := range budiReviews {
+				reviewUIDs = append(reviewUIDs, r.Uid)
+			}
+			db.Where("course_review_uid IN ?", reviewUIDs).Delete(&entity.CourseReviewReply{})
+			db.Where("uid IN ?", reviewUIDs).Delete(&entity.CourseReview{})
+		}
+
+		var budiThreads []entity.CourseQaThread
+		if db.Where("author_uid = ?", budi.Uid).Find(&budiThreads).Error == nil && len(budiThreads) > 0 {
+			var threadUIDs []uuid.UUID
+			for _, t := range budiThreads {
+				threadUIDs = append(threadUIDs, t.Uid)
+			}
+			db.Where("thread_uid IN ?", threadUIDs).Delete(&entity.CourseQaReply{})
+			db.Where("uid IN ?", threadUIDs).Delete(&entity.CourseQaThread{})
+		}
+		log.Println("[Info] Siswa seed budi@doscom.id dipastikan tidak mengikuti kursus apapun (enrollment & aktivitas dibersihkan)")
+	}
+
 	enrollments := []seedEnrollment{
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", Progress: 75, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", Progress: 40, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", Progress: 55, Status: entity.EnrollmentActive},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", Progress: 0, Status: entity.EnrollmentPending},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", Progress: 90, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", Progress: 65, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", Progress: 30, Status: entity.EnrollmentActive},
 		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", Progress: 15, Status: entity.EnrollmentActive},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", Progress: 0, Status: entity.EnrollmentPending},
+		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", Progress: 0, Status: entity.EnrollmentActive},
 	}
 
 	for _, item := range enrollments {
@@ -502,93 +509,6 @@ func seedEnrollments(db *gorm.DB) {
 	}
 }
 
-// seedPayments membuat riwayat transaksi dummy untuk halaman admin (transactions,
-// financial, dashboard). Idempoten: lookup transaction_id.
-func seedPayments(db *gorm.DB) {
-	log.Println("[Seeder] Seeding Payments...")
-
-	now := time.Now()
-
-	type seedPayment struct {
-		StudentEmail  string
-		CourseSlug    string
-		TransactionID string
-		Method        entity.PaymentMethod
-		Status        entity.PaymentStatus
-		DaysAgo       int
-	}
-
-	payments := []seedPayment{
-		// Transaksi sukses tersebar 12 bulan terakhir untuk chart financial
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250108-001", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 330},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250215-002", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 290},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250320-003", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 250},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250405-004", Method: "BRIVA", Status: entity.PaymentSuccess, DaysAgo: 210},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250510-005", Method: "PERMATAVA", Status: entity.PaymentSuccess, DaysAgo: 170},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250601-006", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 120},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250718-007", Method: "QRIS2", Status: entity.PaymentSuccess, DaysAgo: 75},
-		// Transaksi terbaru untuk dashboard recent-transactions
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", TransactionID: "TRX-SEED-20250820-008", Method: "BNIVA", Status: entity.PaymentSuccess, DaysAgo: 14},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "web-development-nextjs", TransactionID: "TRX-SEED-20250902-009", Method: "DANA", Status: entity.PaymentSuccess, DaysAgo: 7},
-		{StudentEmail: "siti@doscom.id", CourseSlug: "devops-essentials", TransactionID: "TRX-SEED-20250910-010", Method: "OVO", Status: entity.PaymentSuccess, DaysAgo: 3},
-		// Pending & failed untuk ratio chart admin transactions
-		{StudentEmail: "siti@doscom.id", CourseSlug: "database-design-sql", TransactionID: "TRX-SEED-20250915-011", Method: "PERMATAVA", Status: entity.PaymentPending, DaysAgo: 2},
-		{StudentEmail: "budi@doscom.id", CourseSlug: "rest-api-development", TransactionID: "TRX-SEED-20250916-012", Method: "BCAVA", Status: entity.PaymentFailed, DaysAgo: 1},
-	}
-
-	for _, item := range payments {
-		var existing entity.Payment
-		if err := db.Where("transaction_id = ?", item.TransactionID).First(&existing).Error; err == nil {
-			continue
-		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("[Error] Gagal cek payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		enrollment, err := findSeedEnrollment(db, item.StudentEmail, item.CourseSlug)
-		if err != nil {
-			log.Printf("[Error] Enrollment tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		course, err := findSeedCourseBySlug(db, item.CourseSlug)
-		if err != nil {
-			log.Printf("[Error] Course tidak ditemukan untuk payment %s: %v", item.TransactionID, err)
-			continue
-		}
-
-		createdAt := now.AddDate(0, 0, -item.DaysAgo)
-		enrollmentUID := enrollment.Uid
-		payment := entity.Payment{
-			EnrollmentUid: &enrollmentUID,
-			Amount:        course.Price,
-			Method:        item.Method,
-			Status:        item.Status,
-			TransactionID: item.TransactionID,
-			CheckoutURL:   "https://tripay.co.id/checkout/seed-" + item.TransactionID,
-			CreatedAt:     createdAt,
-		}
-		if item.Status == entity.PaymentSuccess {
-			paidAt := createdAt.Add(2 * time.Hour)
-			payment.PaidAt = &paidAt
-		}
-
-		if err := db.Create(&payment).Error; err != nil {
-			log.Printf("[Error] Gagal membuat payment %s: %v", item.TransactionID, err)
-			continue
-		}
-		// Pastikan timestamp historis tidak ditimpa autoCreateTime.
-		updates := map[string]any{"created_at": createdAt}
-		if payment.PaidAt != nil {
-			updates["paid_at"] = *payment.PaidAt
-		}
-		if err := db.Model(&payment).Updates(updates).Error; err != nil {
-			log.Printf("[Warning] Gagal set timestamp payment %s: %v", item.TransactionID, err)
-		}
-		log.Printf("[Success] Payment %s (%s) berhasil dibuat", item.TransactionID, item.Status)
-	}
-}
-
 // terisi di API publik. Idempoten: lookup (user_uid, course_uid) — tidak menimpa
 // review yang sudah ada.
 func seedCourseReviews(db *gorm.DB) {
@@ -603,34 +523,16 @@ func seedCourseReviews(db *gorm.DB) {
 
 	reviews := []seedReview{
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "golang-fundamentals",
-			Rating:       5,
-			Comment:      "Materi Golang dijelaskan bertahap dan sangat mudah diikuti.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
 			Rating:       4,
 			Comment:      "Contoh kodenya membantu, tinggal ditambah latihan mandiri lagi.",
 		},
 		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "web-development-nextjs",
-			Rating:       5,
-			Comment:      "Struktur modul Next.js-nya rapi, cocok untuk yang sudah kenal React.",
-		},
-		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "web-development-nextjs",
 			Rating:       5,
 			Comment:      "Penjelasan SSR dan routing App Router sangat jelas.",
-		},
-		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "database-design-sql",
-			Rating:       4,
-			Comment:      "Konsep normalisasi dan query SQL-nya praktis untuk proyek nyata.",
 		},
 		{
 			StudentEmail: "siti@doscom.id",
@@ -645,7 +547,6 @@ func seedCourseReviews(db *gorm.DB) {
 			Comment:      "Pipeline CI/CD dan Docker dijelaskan dengan contoh yang bisa langsung dicoba.",
 		},
 	}
-
 
 	for _, item := range reviews {
 		student, err := findSeedUserByEmail(db, item.StudentEmail)
@@ -664,12 +565,10 @@ func seedCourseReviews(db *gorm.DB) {
 			continue
 		}
 
-		// Validasi: user harus memiliki enrollment yang bukan pending untuk course ini.
-		// Hanya user dengan enrollment active/completed/cancelled yang boleh memberikan review
-		// (status pending berarti pembayaran belum selesai diverifikasi).
+		// Validasi: user harus memiliki enrollment untuk course ini.
 		var activeEnrollment entity.Enrollment
-		enrollErr := db.Where("user_uid = ? AND course_uid = ? AND status != ?",
-			student.Uid, course.Uid, entity.EnrollmentPending).
+		enrollErr := db.Where("user_uid = ? AND course_uid = ?",
+			student.Uid, course.Uid).
 			First(&activeEnrollment).Error
 		if errors.Is(enrollErr, gorm.ErrRecordNotFound) {
 			log.Printf("[Seeder] User %s tidak memiliki enrollment aktif untuk course %s, review dilewati", item.StudentEmail, item.CourseSlug)
@@ -719,12 +618,6 @@ func seedCourseReviewReplies(db *gorm.DB) {
 	}
 
 	replies := []seedReply{
-		{
-			StudentEmail: "budi@doscom.id",
-			CourseSlug:   "golang-fundamentals",
-			MentorEmail:  "andi.mentor@doscom.id",
-			Comment:      "Terima kasih Budi! Senang materinya membantu perjalanan belajarmu.",
-		},
 		{
 			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
@@ -811,7 +704,7 @@ func seedCourseQaThreads(db *gorm.DB) {
 	threads := []seedThread{
 		{
 			SeedKey:      "qa-go-error-handling",
-			StudentEmail: "budi@doscom.id",
+			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "golang-fundamentals",
 			Title:        "Bagaimana cara menangani error di Go?",
 			Body:         "Saya bingung kapan pakai panic vs return error. Ada contoh praktisnya?",
@@ -837,7 +730,7 @@ func seedCourseQaThreads(db *gorm.DB) {
 		},
 		{
 			SeedKey:      "qa-sql-index",
-			StudentEmail: "budi@doscom.id",
+			StudentEmail: "siti@doscom.id",
 			CourseSlug:   "database-design-sql",
 			Title:        "Kapan perlu menambahkan index di tabel?",
 			Body:         "Apakah semua kolom foreign key wajib di-index?",
@@ -924,20 +817,6 @@ func seedQaThreadExists(db *gorm.DB, authorUID, courseUID uuid.UUID, seedKey str
 		}
 	}
 	return false
-}
-
-func findSeedEnrollment(db *gorm.DB, studentEmail, courseSlug string) (entity.Enrollment, error) {
-	student, err := findSeedUserByEmail(db, studentEmail)
-	if err != nil {
-		return entity.Enrollment{}, err
-	}
-	course, err := findSeedCourseBySlug(db, courseSlug)
-	if err != nil {
-		return entity.Enrollment{}, err
-	}
-	var enrollment entity.Enrollment
-	err = db.Where("user_uid = ? AND course_uid = ?", student.Uid, course.Uid).First(&enrollment).Error
-	return enrollment, err
 }
 
 func findSeedUserByEmail(db *gorm.DB, email string) (entity.User, error) {
@@ -1062,14 +941,15 @@ func seedLessons(db *gorm.DB) {
 				videoURL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 			}
 
+			dayOffset := (module.OrderIndex-1)*3 + i - 3
 			lesson := entity.Lesson{
 				ModuleUid:   module.Uid,
 				Title:       module.Title + " - Lesson " + lessonNo,
 				ContentType: contentType,
 				Content:     contentJSON,
 				VideoURL:    videoURL,
-				StartTime:   now.AddDate(0, 0, i),
-				EndTime:     now.AddDate(0, 0, i).Add(2 * time.Hour),
+				StartTime:   now.AddDate(0, 0, dayOffset),
+				EndTime:     now.AddDate(0, 0, dayOffset).Add(2 * time.Hour),
 				OrderIndex:  i,
 			}
 
@@ -1277,15 +1157,8 @@ func seedLessonReadings(db *gorm.DB) {
 		LessonOrderIndexes []int
 	}
 
-	// Budi sudah membaca lesson ber-order_index 1 dan 2 dari setiap course-nya.
 	// Siti baru membaca lesson pertama saja (sedang baru mulai).
 	readings := []seedReading{
-		// Budi — golang-fundamentals
-		{StudentEmail: "budi@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1, 2}},
-		// Budi — web-development-nextjs
-		{StudentEmail: "budi@doscom.id", CourseSlug: "web-development-nextjs", LessonOrderIndexes: []int{1}},
-		// Budi — database-design-sql
-		{StudentEmail: "budi@doscom.id", CourseSlug: "database-design-sql", LessonOrderIndexes: []int{1, 2}},
 		// Siti — golang-fundamentals
 		{StudentEmail: "siti@doscom.id", CourseSlug: "golang-fundamentals", LessonOrderIndexes: []int{1}},
 		// Siti — web-development-nextjs
@@ -1400,7 +1273,7 @@ func seedLessonAttendances(db *gorm.DB) {
 }
 
 // seedLessonAssignmentSubmissions membuat contoh submission assignment dari
-// student seed (Budi dan Siti) untuk beberapa assignment yang sudah ada di
+// student seed (Siti) untuk beberapa assignment yang sudah ada di
 // course yang mereka ikuti. Submission mencakup:
 //   - Text submission sudah dinilai mentor (scored + feedback)
 //   - Quiz submission auto-graded
@@ -1418,14 +1291,14 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 	}
 
 	type seedSubmission struct {
-		StudentEmail     string
-		CourseSlug       string
+		StudentEmail string
+		CourseSlug   string
 		// ModuleOrderIndex dan LessonOrderIndex dipakai untuk mencari lesson spesifik.
 		ModuleOrderIndex int
 		LessonOrderIndex int
 		// Jika IsQuiz true, submission dikirim sebagai quiz answers.
-		IsQuiz      bool
-		PlainText   string
+		IsQuiz    bool
+		PlainText string
 		// QuizAnswers: map[questionId]selectedOptionId
 		QuizAnswers  map[string]string
 		AttemptCount int
@@ -1439,94 +1312,17 @@ func seedLessonAssignmentSubmissions(db *gorm.DB) {
 		QuizTotal   *int
 	}
 
-	boolTrue  := true
+	boolTrue := true
 	boolFalse := false
 
-	score100 := 100.0
-	score85  := 85.0
-	score70  := 70.0
-	score66  := 66.67
-	score33  := 33.33
+	score85 := 85.0
+	score70 := 70.0
+	score33 := 33.33
 
-	correct3 := 3
-	correct2 := 2
 	correct1 := 1
-	total3   := 3
+	total3 := 3
 
 	submissions := []seedSubmission{
-		// ── BUDI ──────────────────────────────────────────────────────────────
-		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text assignment, dinilai sempurna
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya membuat program Hello World menggunakan Go. Program menampilkan teks ke console melalui fmt.Println tanpa dependensi eksternal karena memanfaatkan standard library bawaan Go.",
-			AttemptCount:     1,
-			ScorePercent:     &score100,
-			Passed:           &boolTrue,
-			IsAutoGraded:     false,
-			Feedback:         "Excellent! Implementasi sudah benar dan penjelasannya sangat jelas. Terus pertahankan!",
-		},
-		// golang-fundamentals, Module 2 (Syntax dan Tipe Data), Lesson 1 — quiz, auto-graded sempurna
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 2,
-			LessonOrderIndex: 1,
-			IsQuiz:           true,
-			QuizAnswers:      map[string]string{"q1": "a", "q2": "b", "q3": "b"},
-			AttemptCount:     1,
-			ScorePercent:     &score100,
-			Passed:           &boolTrue,
-			IsAutoGraded:     true,
-			QuizCorrect:      &correct3,
-			QuizTotal:        &total3,
-		},
-		// golang-fundamentals, Module 3 (Control Flow dan Functions), Lesson 1 — quiz, auto-graded tidak lulus
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "golang-fundamentals",
-			ModuleOrderIndex: 3,
-			LessonOrderIndex: 1,
-			IsQuiz:           true,
-			QuizAnswers:      map[string]string{"q1": "a", "q2": "a", "q3": "b"},
-			AttemptCount:     2,
-			ScorePercent:     &score66,
-			Passed:           &boolFalse,
-			IsAutoGraded:     true,
-			QuizCorrect:      &correct2,
-			QuizTotal:        &total3,
-		},
-		// web-development-nextjs, Module 1 (React Basics), Lesson 1 — text, dinilai baik
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "web-development-nextjs",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya membuat komponen React yang menampilkan daftar item menggunakan useState dan map. Setiap item memiliki key unik untuk performa optimal. Komponen menerima props berupa array dan merender elemen li untuk tiap item.",
-			AttemptCount:     1,
-			ScorePercent:     &score85,
-			Passed:           &boolTrue,
-			IsAutoGraded:     false,
-			Feedback:         "Bagus! Penggunaan key prop sudah benar. Coba tambahkan PropTypes untuk type checking yang lebih baik.",
-		},
-		// database-design-sql, Module 1 (SQL Basics), Lesson 1 — text, pending penilaian
-		{
-			StudentEmail:     "budi@doscom.id",
-			CourseSlug:       "database-design-sql",
-			ModuleOrderIndex: 1,
-			LessonOrderIndex: 1,
-			IsQuiz:           false,
-			PlainText:        "Saya merancang skema database toko online dengan tabel: users, products, orders, dan order_items. Relasi antar tabel menggunakan foreign key, dan primary key setiap tabel menggunakan UUID untuk menghindari sequential ID exposure.",
-			AttemptCount:     1,
-			ScorePercent:     nil,
-			Passed:           nil,
-			IsAutoGraded:     false,
-		},
-
 		// ── SITI ──────────────────────────────────────────────────────────────
 		// golang-fundamentals, Module 1 (Pengenalan Go), Lesson 1 — text, dinilai baik
 		{

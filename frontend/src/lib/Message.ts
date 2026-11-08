@@ -29,15 +29,10 @@ export const Message = {
     updateFailed: 'Profil gagal diperbarui. Silakan coba lagi.',
     passwordUpdated: 'Kata sandi berhasil diubah.',
     passwordUpdateFailed: 'Kata sandi gagal diubah. Silakan coba lagi.',
-  },
-  payment: {
-    created: 'Pembayaran berhasil dibuat.',
-    processFailed: 'Pembayaran gagal diproses. Silakan coba lagi.',
-  },
-  invoice: {
-    downloadSuccess: 'Tagihan berhasil diunduh.',
-    downloadFailed: 'Tagihan gagal diunduh. Silakan coba lagi.',
-    loginRequired: 'Anda perlu masuk untuk mengunduh tagihan.',
+    emailChangeRequested: 'Tautan konfirmasi telah dikirim ke inbox email lama Anda.',
+    emailChangeRequestFailed: 'Gagal mengajukan perubahan email. Silakan coba lagi.',
+    emailConfirmed: 'Alamat email berhasil diperbarui.',
+    emailConfirmFailed: 'Tautan konfirmasi email tidak valid atau sudah kedaluwarsa.',
   },
   course: {
     createdDraft: 'Kursus disimpan sebagai draf. Terbitkan lewat tombol Terbit.',

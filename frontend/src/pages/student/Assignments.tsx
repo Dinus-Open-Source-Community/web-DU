@@ -1,9 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 
 import { StudentAppPageShell } from '@/components/student/StudentAppPageShell'
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { StudentAssignmentsSection } from '@/components/student/AssignmentSection'
-import { useStudentAssignmentItems } from '@/hooks/student-assignments/use-student-assignment-items'
 import { useStudentAssignmentListView } from '@/hooks/student-assignments/use-student-assignment-list-view'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useAuth } from '@/providers/auth-provider'
@@ -13,19 +11,19 @@ const Assignments = () => {
   const courseUidFilter = searchParams.get('courseUid')
   const { profile, isLoading: isAuthLoading } = useAuth()
   const sidebarUser = useSidebarUser('student')
-  const { items: assignmentItems, isLoading: isAssignmentsLoading } =
-    useStudentAssignmentItems(profile)
   const assignmentListView = useStudentAssignmentListView({
-    items: assignmentItems,
+    profile,
     courseUidFilter,
   })
 
+  // Skeleton ada di dalam `StudentAssignmentsSection` (bentuknya sudah sama
+  // dengan daftar tugas asli), jadi tidak perlu `PageSkeleton` tambahan di sini
+  // yang membuat dua skeleton muncul berurutan saat refresh.
   return (
     <StudentAppPageShell user={sidebarUser}>
-      {isAuthLoading && !profile ? <PageSkeleton message="Memuat daftar tugas..." /> : null}
       <StudentAssignmentsSection
         view={assignmentListView}
-        isLoading={isAuthLoading || isAssignmentsLoading}
+        isLoading={isAuthLoading || Boolean(assignmentListView.isLoading)}
       />
     </StudentAppPageShell>
   )

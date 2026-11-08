@@ -14,12 +14,14 @@ export function UserDetailSectionFilter({
   onChange,
 }: UserDetailSectionFilterProps) {
   return (
-    <div
-      className={userDetailLayout.contentPanelToolbar}
-      role="group"
-      aria-label="Pilih bagian detail user"
-    >
-      <SegmentedFilter items={items} value={value} onChange={onChange} variant="scroll" />
+    <div className={userDetailLayout.contentPanelToolbar}>
+      <SegmentedFilter
+        items={items}
+        value={value}
+        onChange={onChange}
+        ariaLabel="Pilih bagian detail user"
+        variant="wrap"
+      />
     </div>
   )
 }

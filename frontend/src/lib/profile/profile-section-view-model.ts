@@ -12,13 +12,19 @@ export type ProfileSectionViewModel = {
   onNewPasswordChange: (value: string) => void
   confirmPassword: string
   onConfirmPasswordChange: (value: string) => void
-  lastUpdatedLabel: string
+  newEmail: string
+  onNewEmailChange: (value: string) => void
+  emailPassword: string
+  onEmailPasswordChange: (value: string) => void
+  pendingEmailConfirmationTo: string | null
   isPhotoPending: boolean
   isProfilePending: boolean
   isPasswordPending: boolean
+  isEmailPending: boolean
   onPhotoChange: (event: ChangeEvent<HTMLInputElement>) => void
   onSubmitProfile: (event: FormEvent<HTMLFormElement>) => void
   onSubmitPassword: (event: FormEvent<HTMLFormElement>) => void
+  onSubmitEmail: (event: FormEvent<HTMLFormElement>) => void
 }
 
 export type ProfileSectionShellProps = {

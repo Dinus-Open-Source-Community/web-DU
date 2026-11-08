@@ -20,7 +20,7 @@ import {
   toModuleShell,
   collectPersistedLessonKeys,
 } from "@/lib/course-edit/merge-module-lessons";
-import { persistLesson } from "@/lib/course-edit/persist-lesson";
+import { persistLesson, type PersistLessonResult } from "@/lib/course-edit/persist-lesson";
 import {
   createPersistedModule,
   deletePersistedModule,
@@ -38,6 +38,16 @@ import {
   toMentorCourse,
   toOutlineModules,
 } from "@/lib/course-edit/mappers";
+import {
+  createAssignmentBaseline,
+  createLessonContentBaseline,
+  isAssignmentChanged,
+  isAssignmentEqual,
+  isLessonContentChanged,
+  isLessonContentEqual,
+  type AssignmentBaseline,
+  type LessonContentBaseline,
+} from "@/lib/course-edit/lesson-content-equality";
 import {
   applyHomeworkFromAssignment,
   ensureHomeworkDefaults,
@@ -87,6 +97,10 @@ export function useCourseEditController({
 
   const [course, setCourse] = useState<Partial<ICourseDetailItem> | null>(null);
   const [modules, setModules] = useState<EditableModule[]>([]);
+  const modulesRef = useRef<EditableModule[]>(modules);
+  useEffect(() => {
+    modulesRef.current = modules;
+  }, [modules]);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loadedModuleIds, setLoadedModuleIds] = useState<Set<string>>(
@@ -117,6 +131,8 @@ export function useCourseEditController({
     () => new Set(),
   );
   const initialLessonModuleMapRef = useRef<Map<string, string>>(new Map());
+  const lessonBaselinesRef = useRef<Map<string, LessonContentBaseline>>(new Map());
+  const assignmentBaselinesRef = useRef<Map<string, AssignmentBaseline>>(new Map());
   const lastHydratedLessonRef = useRef<string | null>(null);
   const lastHydratedAssignmentRef = useRef<string | null>(null);
 
@@ -217,6 +233,22 @@ export function useCourseEditController({
       toModuleShell(module, index + 1),
     );
 
+    const initialLessonUids = new Set<string>();
+    const initialLessonMap = new Map<string, string>();
+    for (const mod of nextModules) {
+      if (!mod.uid) continue;
+      for (const lesson of mod.lessons) {
+        const key = getLessonKey(lesson);
+        if (key) {
+          initialLessonUids.add(key);
+          initialLessonMap.set(key, mod.uid);
+          if (!lessonBaselinesRef.current.has(key)) {
+            lessonBaselinesRef.current.set(key, createLessonContentBaseline(lesson));
+          }
+        }
+      }
+    }
+
     setModules(nextModules);
 
     const initialModule =
@@ -224,16 +256,23 @@ export function useCourseEditController({
         ? nextModules.find((module) => module.uid === initialModuleId)
         : undefined) ?? nextModules[0];
 
+    const firstLessonId = initialModule
+      ? getFirstEditableLessonId(initialModule)
+      : null;
+
     setActiveModuleId(initialModule?.uid ?? null);
-    setActiveLessonId(null);
+    setActiveLessonId(firstLessonId);
     setEditorReady(false);
     setIsInitialized(true);
 
     persistedModuleUidsRef.current = new Set(
       uniqueModules.map((module) => module.uid).filter(Boolean),
     );
-    setPersistedLessonUids(new Set());
-    initialLessonModuleMapRef.current = new Map();
+    setPersistedLessonUids(initialLessonUids);
+    initialLessonModuleMapRef.current = initialLessonMap;
+    setLoadedModuleIds(
+      new Set(uniqueModules.map((module) => module.uid).filter(Boolean)),
+    );
   }, [
     isInitialized,
     sourceModules,
@@ -255,11 +294,11 @@ export function useCourseEditController({
       );
 
       setActiveLessonId((current) => {
+        if (!current) return null;
         const targetModule = merged.find(
           (module) => module.uid === activeModuleId,
         );
         if (
-          current &&
           targetModule?.lessons.some(
             (lesson) => getLessonKey(lesson) === current,
           )
@@ -301,6 +340,10 @@ export function useCourseEditController({
     );
 
     lastHydratedLessonRef.current = activeLessonId;
+    lessonBaselinesRef.current.set(
+      activeLessonId,
+      createLessonContentBaseline(hydrated),
+    );
     setModules((previous) =>
       previous.map((courseModule) => ({
         ...courseModule,
@@ -342,7 +385,12 @@ export function useCourseEditController({
         lessons: courseModule.lessons.map((lesson) => {
           const lessonKey = getLessonKey(lesson);
           if (lessonKey !== activeLessonId) return lesson;
-          return applyHomeworkFromAssignment(lesson, assignment);
+          const nextLesson = applyHomeworkFromAssignment(lesson, assignment);
+          assignmentBaselinesRef.current.set(
+            activeLessonId,
+            createAssignmentBaseline(nextLesson),
+          );
+          return nextLesson;
         }),
       })),
     );
@@ -356,34 +404,98 @@ export function useCourseEditController({
 
   const patchLocalLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
-      setModules((previous) =>
-        previous.map((module) => ({
-          ...module,
-          lessons: module.lessons.map((lesson) => {
-            const lessonKey = getLessonKey(lesson);
-            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
-            setModifiedLessons((prev) => new Set([...prev, lessonKey]));
-            return updater(lesson);
-          }),
-        })),
-      );
+      let currentLesson: EditableLesson | null = null;
+      for (const moduleItem of modulesRef.current) {
+        for (const item of moduleItem.lessons) {
+          if (getLessonKey(item) === lessonId || item.id === lessonId) {
+            currentLesson = item;
+            break;
+          }
+        }
+        if (currentLesson) break;
+      }
+
+      if (!currentLesson) return;
+
+      const updated = updater(currentLesson);
+      if (isLessonContentEqual(currentLesson, updated)) return;
+
+      let baseline = lessonBaselinesRef.current.get(lessonId);
+      if (!baseline) {
+        baseline = createLessonContentBaseline(currentLesson);
+        lessonBaselinesRef.current.set(lessonId, baseline);
+      }
+      const isChanged = isLessonContentChanged(updated, baseline);
+
+      modulesRef.current = modulesRef.current.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+          return updated;
+        }),
+      }));
+
+      setModules(modulesRef.current);
+
+      setModifiedLessons((prev) => {
+        const nextSet = new Set(prev);
+        if (isChanged) {
+          nextSet.add(lessonId);
+        } else {
+          nextSet.delete(lessonId);
+        }
+        return nextSet;
+      });
     },
     [],
   );
 
   const patchAssignmentLesson = useCallback(
     (lessonId: string, updater: (lesson: EditableLesson) => EditableLesson) => {
-      setModules((previous) =>
-        previous.map((module) => ({
-          ...module,
-          lessons: module.lessons.map((lesson) => {
-            const lessonKey = getLessonKey(lesson);
-            if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
-            setModifiedAssignmentLessons((prev) => new Set([...prev, lessonKey]));
-            return updater(lesson);
-          }),
-        })),
-      );
+      let currentLesson: EditableLesson | null = null;
+      for (const moduleItem of modulesRef.current) {
+        for (const item of moduleItem.lessons) {
+          if (getLessonKey(item) === lessonId || item.id === lessonId) {
+            currentLesson = item;
+            break;
+          }
+        }
+        if (currentLesson) break;
+      }
+
+      if (!currentLesson) return;
+
+      const updated = updater(currentLesson);
+      if (isAssignmentEqual(currentLesson, updated)) return;
+
+      let baseline = assignmentBaselinesRef.current.get(lessonId);
+      if (!baseline) {
+        baseline = createAssignmentBaseline(currentLesson);
+        assignmentBaselinesRef.current.set(lessonId, baseline);
+      }
+      const isChanged = isAssignmentChanged(updated, baseline);
+
+      modulesRef.current = modulesRef.current.map((module) => ({
+        ...module,
+        lessons: module.lessons.map((lesson) => {
+          const lessonKey = getLessonKey(lesson);
+          if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
+          return updated;
+        }),
+      }));
+
+      setModules(modulesRef.current);
+
+      setModifiedAssignmentLessons((prev) => {
+        const nextSet = new Set(prev);
+        if (isChanged) {
+          nextSet.add(lessonId);
+        } else {
+          nextSet.delete(lessonId);
+        }
+        return nextSet;
+      });
     },
     [],
   );
@@ -439,8 +551,8 @@ export function useCourseEditController({
     async (
       lessonId: string,
       opts?: { silent?: boolean; lesson?: EditableLesson },
-    ) => {
-      if (isSaving) return false;
+    ): Promise<PersistLessonResult | null> => {
+      if (isSaving) return null;
 
       const lesson = opts?.lesson ?? findLesson(modules, lessonId);
       const moduleForLesson = findModuleForLesson(modules, lessonId);
@@ -499,6 +611,14 @@ export function useCourseEditController({
           result.module.uid ?? moduleForLesson.uid!,
         );
 
+        lessonBaselinesRef.current.set(
+          result.nextLessonId,
+          createLessonContentBaseline(result.lesson),
+        );
+        if (result.previousLessonId !== result.nextLessonId) {
+          lessonBaselinesRef.current.delete(result.previousLessonId);
+        }
+
         setModifiedLessons((previous) => {
           const next = new Set(previous);
           next.delete(result.previousLessonId);
@@ -544,7 +664,7 @@ export function useCourseEditController({
         ])
 
         if (!opts?.silent) toast.success(Message.lesson.saved);
-        return true;
+        return result;
       } catch (error) {
         toast.error(
           resolveActionError(error instanceof Error ? error : null, Message.lesson.saveFailed),
@@ -638,7 +758,10 @@ export function useCourseEditController({
 
   const handleSelectModule = useCallback(
     (moduleId: string) => {
-      if (moduleId === activeModuleId) return;
+      if (moduleId === activeModuleId) {
+        setActiveModuleId(null);
+        return;
+      }
       const targetModule = outlineModules.find(
         (module) => module.uid === moduleId,
       );
@@ -656,68 +779,86 @@ export function useCourseEditController({
     await saveLesson(activeLessonId);
   }, [activeLessonId, activeLessonModified, saveLesson]);
 
-  const handleSaveCurrentAssignment = useCallback(async () => {
-    if (!activeLessonId || !activeLesson) return;
+  const handleSaveCurrentAssignment = useCallback(
+    async (explicitLessonUid?: string, explicitLesson?: EditableLesson) => {
+      const lesson = explicitLesson ?? activeLesson;
+      const lessonId = explicitLesson
+        ? getLessonKey(explicitLesson)
+        : activeLessonId;
+      if (!lessonId || !lesson) return;
 
-    const persistedLessonUid = activeLesson.uid ?? null;
-    if (!persistedLessonUid) {
-      toast.error(Message.assignment.saveLessonFirst);
-      return;
-    }
+      const persistedLessonUid = explicitLessonUid ?? lesson.uid ?? null;
+      if (!persistedLessonUid) {
+        toast.error(Message.assignment.saveLessonFirst);
+        return;
+      }
 
-    const homeworkLesson = ensureHomeworkDefaults(activeLesson);
-    const validationError = validateHomeworkForSave(homeworkLesson);
-    if (validationError) {
-      toast.error(validationError);
-      return;
-    }
+      const homeworkLesson = ensureHomeworkDefaults(lesson);
+      const validationError = validateHomeworkForSave(homeworkLesson);
+      if (validationError) {
+        toast.error(validationError);
+        return;
+      }
 
-    try {
-      const result = await saveAssignmentMutation.mutateAsync({
-        lessonUid: persistedLessonUid,
-        lesson: homeworkLesson,
-      });
+      try {
+        const result = await saveAssignmentMutation.mutateAsync({
+          lessonUid: persistedLessonUid,
+          lesson: homeworkLesson,
+        });
 
-      setModules((previous) =>
-        previous.map((module) => ({
+        const nextHomeworkLesson: EditableLesson = {
+          ...homeworkLesson,
+          homeworkAssignmentUid: result.assignmentUid,
+          hasHomework: Boolean(
+            result.assignmentUid && isHomeworkConfigured(homeworkLesson),
+          ),
+        };
+
+        const nextModules = modulesRef.current.map((module) => ({
           ...module,
-          lessons: module.lessons.map((lesson) => {
-            const lessonKey = getLessonKey(lesson);
-            if (lessonKey !== activeLessonId && lesson.id !== activeLessonId) {
-              return lesson;
+          lessons: module.lessons.map((item) => {
+            const lessonKey = getLessonKey(item);
+            if (lessonKey !== lessonId && item.id !== lessonId) {
+              return item;
             }
 
             return {
-              ...lesson,
-              homeworkAssignmentUid: result.assignmentUid,
-              hasHomework: Boolean(
-                result.assignmentUid && isHomeworkConfigured(homeworkLesson),
-              ),
+              ...item,
+              ...nextHomeworkLesson,
             };
           }),
-        })),
-      );
+        }));
 
-      setModifiedAssignmentLessons((previous) => {
-        const next = new Set(previous);
-        next.delete(activeLessonId);
-        return next;
-      });
+        modulesRef.current = nextModules;
+        setModules(nextModules);
 
-      lastHydratedAssignmentRef.current = activeLessonId;
+        assignmentBaselinesRef.current.set(
+          lessonId,
+          createAssignmentBaseline(nextHomeworkLesson),
+        );
 
-      toast.success(
-        result.assignmentUid
-          ? Message.assignment.saved
-          : Message.assignment.removedFromServer,
-      );
-    } catch (error) {
-      toast.error(
-        resolveActionError(error instanceof Error ? error : null, Message.assignment.saveFailed),
-      );
-      throw error;
-    }
-  }, [activeLesson, activeLessonId, saveAssignmentMutation]);
+        setModifiedAssignmentLessons((previous) => {
+          const next = new Set(previous);
+          next.delete(lessonId);
+          return next;
+        });
+
+        lastHydratedAssignmentRef.current = lessonId;
+
+        toast.success(
+          result.assignmentUid
+            ? Message.assignment.saved
+            : Message.assignment.removedFromServer,
+        );
+      } catch (error) {
+        toast.error(
+          resolveActionError(error instanceof Error ? error : null, Message.assignment.saveFailed),
+        );
+        throw error;
+      }
+    },
+    [activeLesson, activeLessonId, saveAssignmentMutation],
+  );
 
   const handleDeleteCurrentAssignment = useCallback(async () => {
     if (!activeLessonId || !activeLesson) return;
@@ -783,6 +924,10 @@ export function useCourseEditController({
         })),
       );
       lastHydratedLessonRef.current = lessonId;
+      lessonBaselinesRef.current.set(
+        lessonId,
+        createLessonContentBaseline(hydrated),
+      );
     },
     [queryClient],
   );
@@ -804,7 +949,12 @@ export function useCourseEditController({
           lessons: courseModule.lessons.map((item) => {
             const lessonKey = getLessonKey(item);
             if (lessonKey !== lessonId) return item;
-            return applyHomeworkFromAssignment(item, assignment);
+            const nextLesson = applyHomeworkFromAssignment(item, assignment);
+            assignmentBaselinesRef.current.set(
+              lessonId,
+              createAssignmentBaseline(nextLesson),
+            );
+            return nextLesson;
           }),
         })),
       );
@@ -853,11 +1003,14 @@ export function useCourseEditController({
     if (!activeLessonId || !pendingNavigation) return;
 
     try {
+      let savedLessonResult: PersistLessonResult | null = null;
       if (modifiedLessons.has(activeLessonId)) {
-        await saveLesson(activeLessonId, { silent: true });
+        savedLessonResult = await saveLesson(activeLessonId, { silent: true });
       }
       if (modifiedAssignmentLessons.has(activeLessonId)) {
-        await handleSaveCurrentAssignment();
+        const targetLesson = savedLessonResult?.lesson ?? activeLesson ?? undefined;
+        const targetUid = savedLessonResult?.lesson.uid ?? activeLesson?.uid ?? undefined;
+        await handleSaveCurrentAssignment(targetUid, targetLesson);
       }
 
       setUnsavedDialogOpen(false);
@@ -867,6 +1020,7 @@ export function useCourseEditController({
       // Error toast already shown in save handlers.
     }
   }, [
+    activeLesson,
     activeLessonId,
     pendingNavigation,
     modifiedLessons,
@@ -1320,6 +1474,22 @@ export function useCourseEditController({
         return next;
       });
 
+      setModifiedAssignmentLessons((previous) => {
+        const next = new Set(previous);
+        next.delete(lessonId);
+        return next;
+      });
+
+      lessonBaselinesRef.current.delete(lessonId);
+      assignmentBaselinesRef.current.delete(lessonId);
+
+      if (lastHydratedLessonRef.current === lessonId) {
+        lastHydratedLessonRef.current = null;
+      }
+      if (lastHydratedAssignmentRef.current === lessonId) {
+        lastHydratedAssignmentRef.current = null;
+      }
+
       if (activeLessonId === lessonId) {
         const updatedModule = nextOutline.find(
           (module) => module.uid === moduleForLesson.uid,
@@ -1329,13 +1499,21 @@ export function useCourseEditController({
         );
       }
 
-      await queryClient.invalidateQueries({
-        queryKey: lessonKeys.byModule(moduleForLesson.uid),
-      });
+      const courseUid = courseData.uid;
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: lessonKeys.byModule(moduleForLesson.uid),
+        }),
+        ...(courseUid ? [invalidateModuleQueries(courseUid, moduleForLesson.uid)] : []),
+      ]);
+      queryClient.removeQueries({ queryKey: lessonKeys.detail(lessonId) });
+      queryClient.removeQueries({ queryKey: lessonAssignmentKeys.detail(lessonId) });
     },
     [
       activeLessonId,
+      courseData.uid,
       handleModulesChange,
+      invalidateModuleQueries,
       modifiedLessons,
       outlineModules,
       persistedLessonUids,
@@ -1345,17 +1523,49 @@ export function useCourseEditController({
 
   const handleChangeLessonType = useCallback(
     (lessonId: string, deliveryType: "text" | "video") => {
-      setModules((previous) =>
-        previous.map((module) => ({
+      let hadChange = false;
+      let isChanged = false;
+
+      setModules((previous) => {
+        const currentLesson = findLesson(previous, lessonId);
+        if (!currentLesson || currentLesson.contentType === deliveryType) {
+          return previous;
+        }
+
+        hadChange = true;
+        const next = previous.map((module) => ({
           ...module,
           lessons: module.lessons.map((lesson) => {
             const lessonKey = getLessonKey(lesson);
             if (lessonKey !== lessonId && lesson.id !== lessonId) return lesson;
             return switchLessonDeliveryType(lesson, deliveryType);
           }),
-        })),
-      );
-      setModifiedLessons((previous) => new Set([...previous, lessonId]));
+        }));
+
+        const updatedLesson = findLesson(next, lessonId);
+        if (updatedLesson) {
+          let baseline = lessonBaselinesRef.current.get(lessonId);
+          if (!baseline) {
+            baseline = createLessonContentBaseline(currentLesson);
+            lessonBaselinesRef.current.set(lessonId, baseline);
+          }
+          isChanged = isLessonContentChanged(updatedLesson, baseline);
+        }
+
+        return next;
+      });
+
+      if (hadChange) {
+        setModifiedLessons((previousSet) => {
+          const nextSet = new Set(previousSet);
+          if (isChanged) {
+            nextSet.add(lessonId);
+          } else {
+            nextSet.delete(lessonId);
+          }
+          return nextSet;
+        });
+      }
     },
     [],
   );

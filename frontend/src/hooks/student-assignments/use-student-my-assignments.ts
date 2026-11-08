@@ -9,20 +9,22 @@ import {
 
 type UseStudentMyAssignmentsOptions = {
   fetchAll?: boolean
+  enabled?: boolean
 }
 
 export function useStudentMyAssignments(
   params?: IQueryParamsPayload,
   options: UseStudentMyAssignmentsOptions = {},
 ) {
-  const { fetchAll = false } = options
+  const { fetchAll = false, enabled = true } = options
 
   return useQuery({
     queryKey: fetchAll
       ? [...studentAssignmentKeys.myList(params), 'all']
       : studentAssignmentKeys.myList(params),
     queryFn: () =>
-      fetchAll ? fetchAllStudentMyAssignments() : fetchStudentMyAssignments(params),
+      fetchAll ? fetchAllStudentMyAssignments(params) : fetchStudentMyAssignments(params),
+    enabled,
     staleTime: 30_000,
   })
 }

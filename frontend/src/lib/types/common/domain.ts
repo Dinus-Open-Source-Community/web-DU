@@ -16,20 +16,16 @@ export type CourseCatalogStatus = 'published' | 'draft' | 'pending' | 'rejected'
 /** Status publish kursus di konteks enrollment user. */
 export type CoursePublishStatus = 'DRAFT' | 'PUBLISHED'
 
-export type BadgeVariant = 'free' | 'premium' | 'event' | 'draft'
-export type CourseClassType = 'Free' | 'Premium' | 'Event'
 export type ClassType = 'online' | 'offline'
 
-export type AdminStatus = 'active' | 'inactive' | 'pending'
 export type UserRole = 'student' | 'mentor' | 'admin' | 'super_admin'
-export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'cancelled'
+export type EnrollmentStatus = 'active' | 'completed'
 
 export type LessonAssignmentStatus = 'DRAFT' | 'TERBIT' | 'DITUTUP'
 export type MentorAssignmentLifecycleStatus = 'draft' | 'published' | 'closed'
 export type MentorSubmissionReviewStatus = 'pending_review' | 'graded' | 'returned'
 export type MentorCourseStudentStatus = 'Aktif' | 'Selesai' | 'Terlambat' | 'Belum mulai'
 
-export type PaymentStatus = 'pending' | 'success' | 'failed'
 export type DeadlineUrgency = 'overdue' | 'due_soon' | 'ok' | 'closed'
 export type SortDirection = 'asc' | 'desc'
 

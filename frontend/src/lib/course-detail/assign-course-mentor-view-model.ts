@@ -1,9 +1,16 @@
-import type { PersonSelectionItem } from '@/lib/types/utils'
+import type { PromoteCandidate } from '@/lib/user-manage/view-models'
 
 export type AssignCourseMentorDialogViewModel = {
-  items: PersonSelectionItem[]
+  candidates: PromoteCandidate[]
   isLoading: boolean
   emptyTitle: string
   emptyDescription: string
-  onConfirm: (item: PersonSelectionItem) => Promise<void>
+  onConfirm: (uids: string[]) => Promise<void>
+  onOpenChange: (open: boolean) => void
+  onSearchChange: (value: string) => void
+  hasMore: boolean
+  isLoadingMore: boolean
+  onLoadMore: () => void
+  candidateCount?: number
+  candidatesLoading: boolean
 }

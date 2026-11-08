@@ -9,12 +9,20 @@ import {
 import type { CourseAssignmentOverviewSource } from '@/lib/course-detail/assignment-overview-types'
 import { fetchCourseAssignments } from '@/services/course-assignments'
 
-const BULK_ASSIGNMENTS_PARAMS = { per_page: 100 } as const
+type CourseAssignmentsOverviewParams = {
+  page: number
+  per_page: number
+  task_type?: string
+}
 
-export function useCourseAssignmentsOverview(courseUid: string, enabled = true) {
+export function useCourseAssignmentsOverview(
+  courseUid: string,
+  enabled = true,
+  params: CourseAssignmentsOverviewParams = { page: 1, per_page: 10 },
+) {
   const bulkQuery = useQuery({
-    queryKey: courseKeys.assignments(courseUid, BULK_ASSIGNMENTS_PARAMS),
-    queryFn: () => fetchCourseAssignments(courseUid, BULK_ASSIGNMENTS_PARAMS),
+    queryKey: courseKeys.assignments(courseUid, params),
+    queryFn: () => fetchCourseAssignments(courseUid, params),
     enabled: enabled && Boolean(courseUid),
     staleTime: 60_000,
     retry: false,
@@ -70,6 +78,7 @@ export function useCourseAssignmentsOverview(courseUid: string, enabled = true) 
 
   return {
     sources,
+    meta: bulkQuery.data?.meta,
     isLoading: bulkQuery.isLoading,
     isHydratingSubmissions,
     isError,

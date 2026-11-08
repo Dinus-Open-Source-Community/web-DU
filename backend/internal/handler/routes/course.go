@@ -33,18 +33,13 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                          // Super Admin / Admin
 		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)                  // Super Admin / Admin
 		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)              // Super Admin / Admin
+		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc)          // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)                    // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)                        // Alias
 		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                         // Admin / Mentor
 
 		authCourseGroup.POST("/", service.PostAdminCourseFunc)        // Super Admin / Admin
 		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc)    // Super Admin / Admin
 		authCourseGroup.DELETE("/:id", service.DeleteAdminCourseFunc) // Super Admin / Admin
-	}
-
-	// Invoice routes
-	invoiceGroup := r.Group("/invoices")
-	invoiceGroup.Use(middleware.AuthMiddleware())
-	{
-		invoiceGroup.GET("/url", service.GetInvoiceURLFunc)                   // Query params: enrollment_id, user_id, course_id
-		invoiceGroup.GET("/:enrollment_id", service.GetEnrollmentInvoiceFunc) // Path param: enrollment_id
 	}
 }

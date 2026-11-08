@@ -221,10 +221,10 @@ export function TipTapMediaDialog({
             <span />
           )}
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
-            <Button type="button" onClick={handleConfirm}>
+            <Button type="button" className="rounded-full" onClick={handleConfirm}>
               Sisipkan
             </Button>
           </div>

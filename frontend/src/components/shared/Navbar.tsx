@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, Settings, X } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { Button } from '../ui/button'
 import { navLinks } from '../../lib/navigation'
 import type { GuestNavbarAuthProps } from '@/lib/layout/navbar-auth-view-model'
 import {
@@ -14,6 +14,9 @@ import type { UserRole } from '../../lib/types/user'
 import { ROUTES } from '../../lib/routes'
 import { greetingForUser, navbarUserRoleLabel } from '@/lib/layout/navbar-user-display'
 import { cn } from '../../lib/utils'
+
+/** Menyimpan koordinat X glider terakhir agar transisi antar-halaman tetap meluncur tanpa terpengaruh scroll Y. */
+let prevGliderPos: { left: number; width: number } | null = null
 
 function userInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -44,53 +47,61 @@ function GuestAuthActions({
   layout: 'desktop' | 'mobile'
 }) {
   const isMobile = layout === 'mobile'
-  const buttonClass = isMobile
-    ? 'h-10 w-full rounded-sm border-2 text-sm font-extrabold active:translate-y-[3px]'
-    : 'h-10 rounded-sm border-2 px-5 text-sm font-extrabold active:translate-y-[3px]'
 
-  if (variant === 'home') {
+  if (isMobile) {
     return (
-      <div className={cn('flex gap-3', isMobile && 'flex-col')}>
-        <Link to={ROUTES.login} onClick={onNavigate}>
-          <Button
-            variant="neobrutalism"
-            className={cn(
-              buttonClass,
-              'bg-paper-white text-ink-900 hover:bg-paper-paper',
-            )}
+      <div className="flex flex-col gap-2.5 pt-1">
+        <Link to={ROUTES.login} onClick={onNavigate} className="w-full">
+          <button
+            type="button"
+            className="flex h-11 w-full items-center justify-center rounded-xl border-2 border-ink-900 bg-paper-white text-sm font-bold text-ink-900 shadow-[2px_2px_0px_#050914] outline-none transition-all hover:bg-paper-panel active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             Masuk
-          </Button>
+          </button>
         </Link>
-        <Link to={ROUTES.register} onClick={onNavigate}>
-          <Button variant="neobrutalism" className={buttonClass}>
-            Daftar
-          </Button>
+        <Link
+          to={variant === 'home' ? ROUTES.register : ROUTES.redeem}
+          onClick={onNavigate}
+          className="w-full"
+        >
+          <button
+            type="button"
+            className={cn(
+              'flex h-11 w-full items-center justify-center rounded-xl border-2 border-ink-900 text-sm font-bold shadow-[2px_2px_0px_#050914] outline-none transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue',
+              variant === 'home'
+                ? 'bg-brand-blue text-ink-900 hover:bg-brand-hover'
+                : 'bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
+            )}
+          >
+            {variant === 'home' ? 'Daftar' : 'Tukar Kode'}
+          </button>
         </Link>
       </div>
     )
   }
 
   return (
-    <div className={cn('flex gap-3', isMobile && 'flex-col')}>
+    <div className="flex items-center gap-2.5">
       <Link to={ROUTES.login} onClick={onNavigate}>
-        <Button
-          variant="neobrutalism"
-          className={cn(
-            buttonClass,
-            'bg-paper-white hover:bg-paper-paper',
-          )}
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center rounded-xl border-2 border-ink-900 bg-paper-white px-4 text-sm font-bold text-ink-900 shadow-[2px_2px_0px_#050914] outline-none transition-all hover:-translate-y-0.5 hover:bg-paper-panel hover:shadow-[2px_3px_0px_#050914] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           Masuk
-        </Button>
+        </button>
       </Link>
-      <Link to={ROUTES.redeem} onClick={onNavigate}>
-        <Button
-          variant="neobrutalism"
-          className={cn(buttonClass, 'text-primary-foreground')}
+      <Link to={variant === 'home' ? ROUTES.register : ROUTES.redeem} onClick={onNavigate}>
+        <button
+          type="button"
+          className={cn(
+            'inline-flex h-9 items-center justify-center rounded-xl border-2 border-ink-900 px-4.5 text-sm font-bold shadow-[2px_2px_0px_#050914] outline-none transition-all hover:-translate-y-0.5 hover:shadow-[2px_3px_0px_#050914] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue',
+            variant === 'home'
+              ? 'bg-brand-blue text-ink-900 hover:bg-brand-hover'
+              : 'bg-note-yellow text-ink-900 hover:bg-note-yellow/90',
+          )}
         >
-          Tukar Kode
-        </Button>
+          {variant === 'home' ? 'Daftar' : 'Tukar Kode'}
+        </button>
       </Link>
     </div>
   )
@@ -98,7 +109,10 @@ function GuestAuthActions({
 
 export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState<string>('')
+  const navContainerRef = useRef<HTMLDivElement | null>(null)
+  const [initialPos] = useState(() => prevGliderPos)
+  const [target, setTarget] = useState<{ left: number; width: number } | null>(null)
+  const reduceMotion = useReducedMotion()
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, userName, userRole, userAvatar, onSignOut } = auth
@@ -106,52 +120,38 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
   const accountNavLinks = getAccountMenuNavLinks(accountNavContext, dashboardPath[userRole])
   const showAccountSettings = shouldShowAccountSettingsLink(accountNavContext)
 
-  // Scrollspy: tandai section yang sedang dikunjungi. Saat user scroll melewati
-  // sebuah section (id anchor di halaman home), link navbar-nya jadi aktif —
-  // mencerminkan posisi baca, bukan sekadar hash URL.
-  useEffect(() => {
-    const ids = navLinks
-      .map((l) => l.href)
-      .filter((h) => h.includes('#'))
-      .map((h) => h.slice(h.indexOf('#') + 1))
-      .filter((id) => document.getElementById(id))
-
-    if (ids.length === 0) return
-
-    const visible = new Map<string, number>()
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio)
-          else visible.delete(entry.target.id)
-        }
-        // Section dengan rasio paling besar = paling "sedang dibaca".
-        let best: string | null = null
-        let bestRatio = 0
-        for (const [id, ratio] of visible) {
-          if (ratio > bestRatio) {
-            best = id
-            bestRatio = ratio
-          }
-        }
-        setActiveSection(best ?? '')
-      },
-      { rootMargin: '-20% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] },
-    )
-    for (const id of ids) {
-      const el = document.getElementById(id)
-      if (el) io.observe(el)
-    }
-    return () => io.disconnect()
-  }, [pathname])
-
   const isActive = (href: string): boolean => {
-    const hashIndex = href.indexOf('#')
-    if (hashIndex === -1) return pathname === href
-    const id = href.slice(hashIndex + 1)
-    // Section aktif hasil scrollspy menang atas hash URL saat sedang dibaca.
-    return pathname === (href.slice(0, hashIndex) || '/') && activeSection === id
+    const cleanHref = href.split('#')[0] || '/'
+    if (cleanHref === '/') return pathname === '/'
+    return pathname === cleanHref || pathname.startsWith(`${cleanHref}/`)
   }
+
+  useLayoutEffect(() => {
+    const container = navContainerRef.current
+    if (!container) return
+
+    const updateCoords = () => {
+      const activeEl = container.querySelector<HTMLElement>('[data-active="true"]')
+      if (activeEl) {
+        const containerRect = container.getBoundingClientRect()
+        const activeRect = activeEl.getBoundingClientRect()
+        const left = activeRect.left - containerRect.left
+        const width = activeRect.width
+        const next = { left, width }
+        setTarget(next)
+        prevGliderPos = next
+      } else {
+        setTarget(null)
+        prevGliderPos = null
+      }
+    }
+
+    updateCoords()
+
+    const ro = new ResizeObserver(updateCoords)
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [pathname])
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -164,12 +164,10 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
     }
   }, [isMenuOpen])
 
-  // Tutup menu mobile saat rute/hash berubah (setelah klik link navigasi).
   useEffect(() => {
     setIsMenuOpen(false)
   }, [pathname, hash])
 
-  // Kunci fokus di dalam menu saat terbuka (Esc untuk menutup).
   useEffect(() => {
     if (!isMenuOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -192,189 +190,273 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
   }
 
   return (
-    <nav className="text-ink-900 bg-paper-white/95 shadow-nav fixed top-0 left-0 z-50 flex h-16 w-full items-center border-b-2 border-ink-900 backdrop-blur">
-      <div className="container mx-auto flex h-full w-full items-center px-4 md:px-8 lg:px-16">
-        <div className="flex flex-1 justify-start">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b-2 border-ink-900 bg-paper-white/95 text-ink-900 shadow-[0_2px_0_rgba(5,9,20,0.06)] backdrop-blur-md">
+      <div className="container mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12">
+        {/* Brand Logo Tactile */}
+        <div className="flex shrink-0 items-center">
           <Link
             to="/"
-            className="text-ink-900 font-display text-xl font-bold tracking-tight sm:text-2xl"
+            className="group flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
-            Doscom University
+            <span className="flex size-8 items-center justify-center rounded-[6px] border-2 border-ink-900 bg-note-yellow font-mono text-xs font-black tracking-tight text-ink-900 shadow-[2px_2px_0px_#050914] transition-transform duration-200 group-hover:rotate-6 -rotate-2">
+              DU
+            </span>
+            <span className="font-display text-lg font-bold tracking-tight text-ink-900 sm:text-xl">
+              Doscom University
+            </span>
           </Link>
         </div>
 
-        <div className="hidden justify-center lg:flex">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {navLinks.map((navLink) => (
+        {/* Desktop & Tablet Links (>= md) with Smooth Glider on Route Change */}
+        <div
+          ref={navContainerRef}
+          className="relative hidden items-center gap-1.5 md:flex lg:gap-2"
+        >
+          {target && (
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-10"
+              initial={
+                initialPos
+                  ? { x: initialPos.left, width: initialPos.width }
+                  : false
+              }
+              animate={{ x: target.left, width: target.width }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 30,
+                    }
+              }
+            >
+              <div className="size-full rounded-xl border-2 border-ink-900 bg-note-yellow shadow-[2px_2px_0px_#050914] -rotate-1" />
+            </motion.div>
+          )}
+
+          {navLinks.map((navLink) => {
+            const active = isActive(navLink.href)
+            return (
               <Link
                 key={navLink.href}
                 to={navLink.href}
-                className={`inline-flex h-8 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-3 text-xs font-extrabold tracking-wider uppercase transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/30 sm:text-sm sm:px-3.5 ${
-                  isActive(navLink.href) ? 'bg-brand-blue px-4 text-ink-900 sm:px-5' : 'text-ink-900 hover:text-brand-ink'
-                }`}>
-                {navLink.label}
+                data-active={active}
+                className={cn(
+                  'relative inline-flex h-9 items-center justify-center rounded-xl px-3.5 text-xs font-extrabold uppercase tracking-wider select-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-blue lg:text-sm',
+                  active
+                    ? 'text-ink-900'
+                    : 'text-ink-800 hover:text-ink-900 hover:bg-paper-panel/60',
+                )}
+              >
+                <span className="relative z-10">{navLink.label}</span>
               </Link>
-            ))}
-          </div>
+            )
+          })}
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-3 lg:gap-4">
-          <div className="hidden items-center lg:flex">
-          {isAuthenticated ? (
-            <div className="group relative ml-4 cursor-pointer py-2 pl-4 lg:ml-6 lg:pl-6">
-              <div
-                tabIndex={0}
-                className="flex cursor-pointer items-center gap-3 rounded-sm py-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
-                aria-haspopup="menu"
-              >
-                <span className="max-w-[9rem] min-w-0 text-right sm:max-w-[10rem]">
-                  <span className="block truncate text-sm font-semibold leading-5 text-ink-900">
-                    {userName}
+        {/* Right Section: Desktop Auth Actions or Mobile Menu Trigger */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="hidden items-center md:flex">
+            {isAuthenticated ? (
+              <div className="group relative ml-2 cursor-pointer py-2 pl-2">
+                <div
+                  tabIndex={0}
+                  className="flex cursor-pointer items-center gap-2.5 py-1 outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  aria-haspopup="menu"
+                >
+                  <span className="max-w-[8.5rem] min-w-0 text-right sm:max-w-[10rem]">
+                    <span className="block truncate text-xs font-bold leading-tight text-ink-900 sm:text-sm">
+                      {userName}
+                    </span>
+                    <span className="block truncate text-xs font-medium text-ink-500">
+                      {navbarUserRoleLabel[userRole]}
+                    </span>
                   </span>
-                  <span className="block truncate text-xs font-medium leading-4 text-ink-500">
-                    {navbarUserRoleLabel[userRole]}
-                  </span>
-                </span>
-                <Avatar className="size-9 shrink-0 ring-2 ring-ink-900/15">
-                  {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
-                  <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">
-                    {userInitials(userName)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+                  <Avatar className="size-9 shrink-0 border-2 border-ink-900 shadow-xs">
+                    {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
+                    <AvatarFallback className="bg-note-yellow text-xs font-bold text-ink-900">
+                      {userInitials(userName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
 
-              <div
-                role="menu"
-                /* Tertutup: visibility-hidden → isi tidak focusable (bukan cuma opacity 0).
-                   pt-2 = bridge hover agar mouse bisa turun ke panel tanpa putus.
-                   Inner div yang fade/slide (translate + opacity). */
-                className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 pt-2 group-hover:visible group-hover:pointer-events-auto group-focus-within:visible group-focus-within:pointer-events-auto">
-                <div className="bg-paper-white text-ink-900 shadow-paper rounded-[10px] border-2 border-ink-900 p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                  <div className="px-3 py-3">
-                    <p className="text-sm font-semibold">{greetingForUser(userName)}</p>
-                    <p className="text-ink-500 mt-1 text-xs leading-relaxed">
-                      Senang bertemu lagi di Doscom University.
-                    </p>
-                  </div>
-                  <div className="bg-ink-900/10 my-1 h-px" />
-                  {accountNavLinks.map((item) => {
-                    const Icon = item.icon
-                    return (
+                <div
+                  role="menu"
+                  className="pointer-events-none invisible absolute right-0 top-full z-50 w-64 pt-2 transition-all group-hover:pointer-events-auto group-hover:visible group-focus-within:pointer-events-auto group-focus-within:visible"
+                >
+                  <div className="rounded-xl border-2 border-ink-900 bg-paper-white p-2 text-ink-900 shadow-[0_12px_30px_rgba(5,9,20,0.18)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                    <div className="px-3 py-2.5">
+                      <p className="text-sm font-extrabold text-ink-900">{greetingForUser(userName)}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-ink-500">
+                        Senang bertemu lagi di Doscom University.
+                      </p>
+                    </div>
+                    <div className="my-1 h-px bg-ink-900/10" />
+                    {accountNavLinks.map((item) => {
+                      const Icon = item.icon
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          role="menuitem"
+                          className="flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-bold text-ink-900 outline-none transition hover:bg-paper-panel hover:text-brand-ink focus-visible:ring-2 focus-visible:ring-brand-blue sm:text-sm"
+                        >
+                          <Icon className="size-4 opacity-70" aria-hidden />
+                          {item.label}
+                        </Link>
+                      )
+                    })}
+                    {showAccountSettings && (
                       <Link
-                        key={item.to}
-                        to={item.to}
+                        to={ROUTES.profile}
                         role="menuitem"
-                        className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none"
+                        className="flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-bold text-ink-900 outline-none transition hover:bg-paper-panel hover:text-brand-ink focus-visible:ring-2 focus-visible:ring-brand-blue sm:text-sm"
                       >
-                        <Icon className="size-4 opacity-70" aria-hidden />
-                        {item.label}
+                        <Settings className="size-4 opacity-70" aria-hidden />
+                        Pengaturan
                       </Link>
-                    )
-                  })}
-                  {showAccountSettings ? (
-                    <Link
-                      to={ROUTES.profile}
-                      role="menuitem"
-                      className="text-ink-900 hover:text-brand-ink hover:bg-paper-paper flex min-h-10 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-ring/30 outline-none"
+                    )}
+                    <button
+                      type="button"
+                      className="flex min-h-9 w-full items-center gap-2 rounded-lg px-3 text-left text-xs font-bold text-destructive outline-none transition hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive/30 sm:text-sm"
+                      onClick={handleLogout}
                     >
-                      <Settings className="size-4 opacity-70" aria-hidden />
-                      Pengaturan
-                    </Link>
-                  ) : null}
-                  <button type="button" className="text-destructive hover:bg-destructive/10 flex min-h-10 w-full items-center gap-2 rounded-[10px] px-3 text-left text-sm font-semibold transition focus-visible:ring-3 focus-visible:ring-destructive/20 outline-none" onClick={handleLogout}>
-                    <LogOut className="size-4" />
-                    Keluar
-                  </button>
+                      <LogOut className="size-4" />
+                      Keluar
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <GuestAuthActions variant={authActionsVariant} layout="desktop" />
-          )}
-        </div>
+            ) : (
+              <GuestAuthActions variant={authActionsVariant} layout="desktop" />
+            )}
+          </div>
 
-        <button
-          type="button"
-          className="bg-paper-white text-ink-900 shadow-button inline-flex size-10 items-center justify-center rounded-[10px] border-2 border-ink-900 outline-none transition hover:translate-y-0.5 hover:shadow-button-hover active:translate-y-[3px] active:shadow-none focus-visible:ring-3 focus-visible:ring-ring/30 lg:hidden"
-          aria-label={isMenuOpen ? 'Tutup menu' : 'Buka menu'}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          onClick={() => setIsMenuOpen((prev) => !prev)}>
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+          {/* Hamburger Button for Mobile & Small Screen (< md) */}
+          <button
+            type="button"
+            className="inline-flex size-10 items-center justify-center rounded-xl border-2 border-ink-900 bg-paper-white text-ink-900 shadow-[2px_2px_0px_#050914] outline-none transition-all hover:bg-note-yellow active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-brand-blue md:hidden"
+            aria-label={isMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+          >
+            {isMenuOpen ? <X className="size-5 stroke-[2.5]" /> : <Menu className="size-5 stroke-[2.5]" />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu — inert saat tertutup supaya link tidak focusable. */}
+      {/* Backdrop Overlay for Mobile / Drawer */}
+      {isMenuOpen && (
+        <div
+          aria-hidden="true"
+          onClick={closeMenu}
+          className="fixed inset-0 top-16 z-40 bg-ink-900/40 backdrop-blur-xs transition-opacity duration-200 md:hidden"
+        />
+      )}
+
+      {/* Mobile & Small Screen Menu Drawer */}
       <div
         id="mobile-menu"
         inert={!isMenuOpen}
         className={cn(
-          'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
-          isMenuOpen ? 'max-h-[calc(100dvh-4rem)] overflow-y-auto opacity-100' : 'max-h-0 opacity-0',
-        )}>
-        <div className="bg-paper-white flex flex-col gap-3 border-t-2 border-ink-900 px-6 pt-8 pb-8">
+          'fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b-3 border-ink-900 bg-paper-white p-5 shadow-[0_20px_40px_rgba(5,9,20,0.18)] transition-all duration-300 ease-out md:hidden',
+          isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 pointer-events-none opacity-0',
+        )}
+      >
+        <div className="flex flex-col gap-4">
           {isAuthenticated && (
-            <div className="bg-paper-paper flex items-center gap-3 rounded-2xl border border-ink-900/15 px-3 py-2.5">
-              <div className="min-w-0 flex-1 text-right">
-                <p className="truncate text-sm font-semibold text-ink-900">{userName}</p>
-                <p className="truncate text-xs font-medium text-ink-500">
-                  {navbarUserRoleLabel[userRole]}
-                </p>
-              </div>
-              <Avatar className="size-10 shrink-0 ring-2 ring-ink-900/15">
+            <div className="flex items-center gap-3 rounded-xl border-2 border-ink-900 bg-paper-panel p-3 shadow-[2px_2px_0px_#050914]">
+              <Avatar className="size-11 shrink-0 border-2 border-ink-900 ring-2 ring-ink-900/10">
                 {userAvatar ? <AvatarImage src={userAvatar} alt={userName} /> : null}
-                <AvatarFallback className="bg-note-yellow text-ink-900 text-xs font-bold">{userInitials(userName)}</AvatarFallback>
+                <AvatarFallback className="bg-note-yellow text-xs font-bold text-ink-900">
+                  {userInitials(userName)}
+                </AvatarFallback>
               </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-extrabold text-ink-900">{userName}</p>
+                <span className="mt-0.5 inline-block rounded-md border border-ink-900/20 bg-note-mint px-2 py-0.5 text-[11px] font-semibold text-ink-900">
+                  {navbarUserRoleLabel[userRole]}
+                </span>
+              </div>
             </div>
           )}
+
+          {/* Navigasi Links Card List */}
           <div className="flex flex-col gap-2">
-            {navLinks.map((navLink) => (
-              <Link
-                key={navLink.href}
-                to={navLink.href}
-                onClick={closeMenu}
-                className={`flex items-center rounded-2xl px-4 py-2.5 text-sm font-extrabold tracking-wider uppercase transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
-                  isActive(navLink.href) ? 'bg-brand-blue text-ink-900 font-extrabold' : 'text-ink-900 hover:text-brand-ink'
-                }`}>
-                {navLink.label}
-              </Link>
-            ))}
+            <span className="px-1 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-500">
+              Menu Navigasi
+            </span>
+            {navLinks.map((navLink) => {
+              const active = isActive(navLink.href)
+              return (
+                <Link
+                  key={navLink.href}
+                  to={navLink.href}
+                  onClick={closeMenu}
+                  className={cn(
+                    'relative flex items-center justify-between rounded-xl px-4 py-3 text-sm font-extrabold uppercase tracking-wider outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-blue',
+                    active
+                      ? 'text-ink-900'
+                      : 'border border-ink-900/15 bg-paper-panel/40 text-ink-800 hover:border-ink-900 hover:bg-paper-panel hover:text-ink-900',
+                  )}
+                >
+                  {active && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 -z-10 rounded-xl border-2 border-ink-900 bg-note-yellow shadow-[3px_3px_0px_#050914] -rotate-0.5"
+                    />
+                  )}
+                  <span className="relative z-10">{navLink.label}</span>
+                  {active && <span className="relative z-10 font-mono text-xs">●</span>}
+                </Link>
+              )
+            })}
           </div>
+
+          {/* Account Links or Guest Auth Buttons */}
           {isAuthenticated ? (
-            <div className="flex flex-col gap-1 border-t border-ink-900/15 pt-3">
-              <p className="text-ink-500 px-4 text-xs font-extrabold tracking-wider uppercase">Menu akun</p>
+            <div className="flex flex-col gap-1.5 border-t-2 border-dashed border-ink-900/20 pt-4">
+              <span className="px-1 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-500">
+                Menu Akun
+              </span>
               {accountNavLinks.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link
                     key={item.to}
                     to={item.to}
-                    className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
                     onClick={closeMenu}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-bold text-ink-800 outline-none transition hover:bg-paper-panel hover:text-brand-ink"
                   >
-                    <Icon className="size-4 shrink-0 opacity-80" aria-hidden />
+                    <Icon className="size-4 shrink-0 opacity-75" aria-hidden />
                     {item.label}
                   </Link>
                 )
               })}
-              {showAccountSettings ? (
+              {showAccountSettings && (
                 <button
                   type="button"
-                  className="text-ink-900 hover:text-brand-ink flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
                   onClick={handleSettings}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-bold text-ink-800 outline-none transition hover:bg-paper-panel hover:text-brand-ink"
                 >
-                  <Settings className="size-4 shrink-0 opacity-80" aria-hidden />
+                  <Settings className="size-4 shrink-0 opacity-75" aria-hidden />
                   Pengaturan
                 </button>
-              ) : null}
-              <button type="button" className="text-destructive hover:text-destructive/80 flex items-center gap-2 px-4 py-2 text-left text-base font-semibold transition outline-none focus-visible:ring-3 focus-visible:ring-destructive/20" onClick={handleLogout}>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-bold text-destructive outline-none transition hover:bg-destructive/10"
+              >
                 <LogOut className="size-4 shrink-0" />
                 Keluar
               </button>
             </div>
           ) : (
-            <div className="pt-2">
+            <div className="border-t-2 border-dashed border-ink-900/20 pt-3">
               <GuestAuthActions
                 variant={authActionsVariant}
                 layout="mobile"

@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react'
-import { Banknote, BadgeCheck, GraduationCap, Layers3, Layout, Star, Tag } from 'lucide-react'
+import { BadgeCheck, GraduationCap, Layers3, Layout, Star, Tag } from 'lucide-react'
 
 import { AdminPublishStatusLabel } from '@/lib/admin/status-label'
 import { apiLevelToUi } from '@/lib/course-form/level'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { formatCourseRatingLabel, hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
-import { FormatRupiah } from '@/lib/func/func'
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { cn } from '@/lib/utils'
 
@@ -70,23 +69,6 @@ export function CourseDetailInfoCard({
             icon={<GraduationCap className="size-3.5" />}
             label="Level"
             value={apiLevelToUi(course.level)}
-          />
-
-          <InfoRow
-            icon={<Banknote className="size-3.5" />}
-            label="Harga"
-            value={
-              <div className="flex flex-col items-end">
-                <span className="text-primary">
-                  {course.price === 0 ? 'Gratis' : FormatRupiah(course.price)}
-                </span>
-                {course.price_strike ? (
-                  <span className="text-[10px] font-medium text-ink-400 line-through">
-                    {FormatRupiah(course.price_strike)}
-                  </span>
-                ) : null}
-              </div>
-            }
           />
 
           <InfoRow

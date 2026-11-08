@@ -8,6 +8,7 @@ import { LessonFooter } from '../module-viewer/LessonFooter'
 import { LessonSearchDialog } from '../module-viewer/LessonSearchDialog'
 import { LessonSidebar } from '../module-viewer/LessonSidebar'
 import { LessonViewerHeader } from '../module-viewer/LessonViewerHeader'
+import { LessonAssignmentSkeleton } from '../module-viewer/LessonViewerSkeleton'
 import { lessonViewerSurfaceClassName } from '@/lib/course-module-viewer/lesson-viewer-surface'
 import { cn } from '@/lib/utils'
 import type { CourseModuleViewerShellProps } from '@/lib/course-module-viewer/course-module-viewer-view-model'
@@ -27,6 +28,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
     isLessonLoading,
     isAssignmentLoading,
     readLessonIds,
+    submittedAssignmentIds,
     progressPercent,
     effectiveExpandedModules,
     isRightSidebarOpen,
@@ -78,21 +80,24 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
 
       <div
         className={cn(
-          'transition-[margin-left] duration-200 ease-out',
+          'transition-[margin-left] duration-300 ease-in-out',
           isContentShifted && 'lg:ml-[348px]',
         )}>
         {showLessonContent ? (
-          <LessonContent lesson={displayedLesson} theme={theme} isLoading={isLessonLoading} />
+          <LessonContent
+            lesson={displayedLesson}
+            theme={theme}
+            isLoading={isLessonLoading}
+            loadingType={activeEntry?.lesson.content_type}
+          />
         ) : null}
 
         {isAssignmentLoading ? (
-          <main className="min-h-dvh px-4 pb-28 pt-20 sm:px-6 sm:pt-24 md:px-8 lg:px-10">
-            <div className="mx-auto w-full max-w-3xl">
-              <p className={cn('text-sm', theme === 'dark' ? 'text-zinc-400' : 'text-ink-500')}>
-                Memuat data tugas...
-              </p>
-            </div>
-          </main>
+          <LessonAssignmentSkeleton
+            theme={theme}
+            pane={viewerPane as 'assignment' | 'assignment-detail' | 'assignment-work'}
+            taskType={displayedLesson?.assignment?.task_type}
+          />
         ) : null}
 
         {showAssignmentOverview && assignmentState.assignment && displayedLesson ? (
@@ -157,6 +162,7 @@ export function CourseModulePreview({ view }: CourseModuleViewerShellProps) {
         activePane={viewerPane}
         assignmentByLessonUid={assignmentByLessonUid}
         readLessonIds={readLessonIds}
+        submittedAssignmentIds={submittedAssignmentIds}
         progressPercent={progressPercent}
         expandedModules={effectiveExpandedModules}
         isOpen={isRightSidebarOpen}

@@ -9,7 +9,6 @@ import { hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
 import {
   resolveCourseProfiles,
 } from '@/lib/course-detail/course-profile'
-import { FormatRupiah } from '@/lib/func/func'
 import { isLearningProgressComplete } from '@/lib/learning/progress'
 import { CourseLevelLabel } from './CourseLevel'
 
@@ -74,9 +73,8 @@ const CardCourse = ({
       {/* Content description */}
       <div className={`relative z-10 flex grow flex-col rounded-xl bg-white border border-slate-100/50 ${sizes.contentWrapper[size]}`}>
         {/* Top Info */}
-        {(data.is_premium || data.level) && (
-          <div className="mb-3 flex items-center justify-between">
-            {data.is_premium ? <Badge variant="premium" /> : <Badge variant="free" />}
+        {data.level && (
+          <div className="mb-3 flex items-center justify-end">
             <CourseLevelLabel level={data.level} />
           </div>
         )}
@@ -86,12 +84,9 @@ const CardCourse = ({
           {data.module && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{data.module}</p>}
           <div className="flex flex-col grow">
             {data.description && <p className={`line-clamp-2 text-sm font-normal leading-[1.6] text-slate-500 ${sizes.description[size]}`}>{data.description}</p>}
-            {(data.price !== undefined || showRating) && (
-              <div className="mt-5 flex items-center justify-between gap-3">
-                {data.price !== undefined ? <span className="text-base font-semibold text-primary">{FormatRupiah(data.price)}</span> : <span />}
-                {showRating && data.rating !== undefined && data.total_reviews !== undefined ? (
-                  <Rating rating={data.rating} totalReviews={data.total_reviews} />
-                ) : null}
+            {showRating && data.rating !== undefined && data.total_reviews !== undefined && (
+              <div className="mt-5 flex items-center justify-end gap-3">
+                <Rating rating={data.rating} totalReviews={data.total_reviews} />
               </div>
             )}
           </div>

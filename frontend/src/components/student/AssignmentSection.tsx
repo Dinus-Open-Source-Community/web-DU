@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom'
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 import { PageHeader } from '../shared/Header'
 import { SearchForm } from '../shared/SearchForm'
 import { UnderlineTabList } from '../shared/UnderlineTabList'
+import { StudentAssignmentListSkeleton } from '@/components/student/dashboard/StudentAssignmentSkeletons'
 import { appCardClassName } from '@/lib/design/app-shell-tokens'
 import { studentDashboardLayout } from '@/lib/layout/student-dashboard-layout'
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
 import { CalendarClock, ChevronRight, Lock } from 'lucide-react'
-import { Pagination } from '../shared/Pagination'
+import { TablePaginationFooter } from '../shared/TablePaginationFooter'
 import { format, isValid } from 'date-fns'
 import { id } from 'date-fns/locale'
 import type { StudentAssignmentFeedCategory, StudentAssignmentRowKind } from '@/lib/types/student-assignments'
@@ -21,7 +22,7 @@ import { formatAssignmentDeadlineRelative } from '@/lib/student-assignments/form
 import type { StudentAssignmentRow } from '@/lib/student-assignments/assignment-row-model'
 import { buildStudentAssignmentHref } from '@/lib/student-assignments/assignment-navigation'
 import type { StudentAssignmentListViewModel } from '@/lib/student-assignments/assignment-list-view-model'
-import { NothingLottieIllustration } from '@/components/playful/NothingLottieIllustration'
+import { PlayfulEmptyIllustration, type PlayfulEmptyVariant } from '@/components/playful/PublicLottieIllustration'
 
 type StudentAssignmentsSectionProps = {
   view: StudentAssignmentListViewModel
@@ -65,7 +66,7 @@ function TaskBadges({ row }: { row: StudentAssignmentRow }) {
     <div className="flex flex-wrap items-center gap-1.5">
       <span
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold',
+          'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium',
           meta.className,
         )}>
         {meta.label}
@@ -75,31 +76,49 @@ function TaskBadges({ row }: { row: StudentAssignmentRow }) {
   )
 }
 
-function AssignmentListSkeleton() {
-  return (
-    <div className="flex flex-col gap-4" aria-hidden>
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-[220px] animate-pulse rounded-xl border-2 border-ink-900/10 bg-paper-paper/70"
-        />
-      ))}
-    </div>
-  )
-}
-
 function categoryEmptyTitle(category: StudentAssignmentFeedCategory): string {
   switch (category) {
     case 'todo':
       return 'Belum ada tugas yang perlu dikumpulkan.'
     case 'pending_review':
-      return 'Belum ada tugas yang menunggu review.'
+      return 'Tidak ada tugas yang perlu ditunggu'
     case 'done':
-      return 'Belum ada tugas yang selesai dinilai.'
+      return 'Belum ada nilai tugas yang tersedia.'
     case 'late':
-      return 'Belum ada tugas terlambat.'
+      return 'Tidak ada tugas terlambat.'
     default:
       return 'Belum ada tugas yang bisa ditampilkan.'
+  }
+}
+
+function getAssignmentNotFoundText(category: StudentAssignmentFeedCategory): string {
+  switch (category) {
+    case 'todo':
+      return 'Belum ada tugas yang perlu dikumpulkan.'
+    case 'pending_review':
+      return 'Tidak ada tugas yang perlu ditunggu'
+    case 'done':
+      return 'Belum ada nilai tugas yang tersedia.'
+    case 'late':
+      return 'Tidak ada tugas terlambat.'
+    case 'all':
+    default:
+      return 'Tugas yang Anda cari tidak ditemukan.'
+  }
+}
+
+function getAssignmentCategoryVariant(category: StudentAssignmentFeedCategory): PlayfulEmptyVariant {
+  switch (category) {
+    case 'todo':
+      return 'todo'
+    case 'pending_review':
+      return 'pending_review'
+    case 'done':
+      return 'done'
+    case 'late':
+      return 'late'
+    default:
+      return 'nothing'
   }
 }
 
@@ -112,21 +131,32 @@ function AssignmentEmptyState({
   categoryMatchCount: number
   category: StudentAssignmentFeedCategory
 }) {
-  const title =
-    scopedCount === 0
+  const isSpecificTab = category !== 'all'
+  const notFoundText = getAssignmentNotFoundText(category)
+
+  const title = isSpecificTab
+    ? categoryMatchCount === 0
+      ? categoryEmptyTitle(category)
+      : notFoundText
+    : scopedCount === 0
       ? 'Belum ada tugas yang bisa ditampilkan.'
       : categoryMatchCount === 0
         ? categoryEmptyTitle(category)
-        : 'Tidak ada tugas yang cocok dengan pencarian.'
+        : notFoundText
 
   const description =
-    scopedCount === 0
+    !isSpecificTab && scopedCount === 0
       ? 'Tugas dari kursus yang Anda ikuti akan muncul di sini setelah diterbitkan.'
       : undefined
 
+  const variant = getAssignmentCategoryVariant(category)
+
   return (
     <div className={cn(appCardClassName, "flex flex-col items-center px-6 py-16 text-center")}>
-      <NothingLottieIllustration className="mb-1 max-w-[12rem]" />
+      <PlayfulEmptyIllustration
+        variant={variant}
+        className="mb-1 max-w-[12rem]"
+      />
       <h3 className="mb-2 text-xl font-bold text-ink-900">{title}</h3>
       {description ? (
         <p className="max-w-md text-sm font-medium leading-relaxed text-ink-500">{description}</p>
@@ -166,7 +196,7 @@ function AssignmentRowCard({ row, now }: { row: StudentAssignmentRow; now: Date 
   const deadlineLabel = formatAssignmentDeadlineLabel(row.assignment.deadlineAt)
 
   return (
-    <article className="group overflow-hidden rounded-xl border-2 border-ink-900/10 bg-paper-white shadow-paper transition-colors duration-200 hover:border-ink-900/20">
+    <article className="group overflow-hidden bg-paper-white transition-colors duration-200">
       <div className="grid min-h-[220px] gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col justify-between gap-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4">
@@ -265,7 +295,10 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
     hasVisibleRows,
     currentPage,
     totalPages,
+    total,
+    pageSize,
     onPageChange,
+    onPageSizeChange,
   } = view
 
   return (
@@ -299,19 +332,19 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
         />
 
         <UnderlineTabList
+          variant="pill"
           value={category}
           options={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
           onChange={onCategoryChange}
           ariaLabel="Kategori tugas"
-          className="w-max max-w-full"
         />
       </div>
 
       {isLoading ? (
-        <AssignmentListSkeleton />
+        <StudentAssignmentListSkeleton rows={pageSize} />
       ) : hasVisibleRows ? (
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
+        <section className={cn(appCardClassName, 'w-full overflow-hidden flex flex-col')}>
+          <div className="flex flex-col divide-y divide-line-light">
             {paginatedRows.map((row, index) => (
               <AssignmentRowCard
                 key={buildAssignmentRowKey(row, index)}
@@ -321,8 +354,17 @@ export function StudentAssignmentsSection({ view, isLoading = false, className }
             ))}
           </div>
 
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-        </div>
+          <TablePaginationFooter
+            page={currentPage}
+            totalPages={totalPages}
+            total={total}
+            totalLabel="tugas"
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </section>
       ) : (
         <AssignmentEmptyState
           scopedCount={scopedCount}

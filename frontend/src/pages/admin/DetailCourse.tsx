@@ -9,9 +9,6 @@ import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-c
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
 import { useAdminAppSidebar } from '@/hooks/use-sidebar-user'
 import type { IModulesData, IMentorCourseStudent } from '@/lib/types/course'
-import { appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
-import { appPageContentClassName } from '@/lib/layout/page-layout'
-import { cn } from '@/lib/utils'
 
 export default function AdminCourseDetailPage() {
   const { courseUid } = useParams()
@@ -38,7 +35,6 @@ export default function AdminCourseDetailPage() {
     <AppSidebarProvider
       role={shellRole}
       user={sidebarUser}
-      contentClassName={cn(appPageContentClassName, appShellPageBgClassName, 'relative')}
     >
       <AdminCourseDetailContent
         courseUid={courseUid}

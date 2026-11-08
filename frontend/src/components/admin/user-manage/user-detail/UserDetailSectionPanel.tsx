@@ -4,7 +4,6 @@ import {
   UserDetailJoinedCourseCard,
   UserDetailMentoredCourseCard,
   UserDetailReviewCard,
-  UserDetailTransactionCard,
 } from '@/components/admin/user-manage/user-detail/UserDetailListCards'
 import { UserStatusBadge } from '@/components/admin/user-manage/UserStatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -22,32 +21,30 @@ function UserDetailProfilePanel({ viewModel }: { viewModel: ManagedUserDetailVie
   const { profile } = viewModel
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <h2 className={userDetailLayout.sectionTitle}>Informasi profil</h2>
-      <dl className="grid gap-5 sm:grid-cols-2">
-        <div>
+      <dl className="grid gap-3.5 sm:grid-cols-2">
+        <div className={userDetailLayout.fieldCard}>
           <dt className={userDetailLayout.fieldLabel}>Nama</dt>
           <dd className={userDetailLayout.fieldValue}>{profile.name}</dd>
         </div>
-        <div>
+        <div className={userDetailLayout.fieldCard}>
           <dt className={userDetailLayout.fieldLabel}>Email</dt>
           <dd className={userDetailLayout.fieldValue}>{profile.email}</dd>
         </div>
-        <div>
+        <div className={userDetailLayout.fieldCard}>
           <dt className={userDetailLayout.fieldLabel}>Role</dt>
           <dd className={userDetailLayout.fieldValue}>{profile.roleLabel}</dd>
         </div>
-        <div>
-          <dt className={userDetailLayout.fieldLabel}>Status verifikasi</dt>
-          <dd className="mt-1">
-            <UserStatusBadge status={profile.status} />
+        <div className={userDetailLayout.fieldCard}>
+          <dt className={userDetailLayout.fieldLabel}>Verifikasi email</dt>
+          <dd className="mt-1.5">
+            <UserStatusBadge isVerified={profile.isVerified} />
           </dd>
         </div>
-        <div className="sm:col-span-2">
-          <dt className={userDetailLayout.fieldLabel}>Deskripsi</dt>
-          <dd className={userDetailLayout.fieldValueMuted}>
-            {profile.description ?? 'Belum ada deskripsi profil.'}
-          </dd>
+        <div className={`${userDetailLayout.fieldCard} sm:col-span-2`}>
+          <dt className={userDetailLayout.fieldLabel}>Bergabung</dt>
+          <dd className={userDetailLayout.fieldValue}>{profile.createdAtLabel}</dd>
         </div>
       </dl>
     </div>
@@ -94,12 +91,6 @@ export function UserDetailSectionPanel({ sectionContent, viewModel }: UserDetail
       {sectionContent.kind === 'reviews'
         ? sectionContent.items.map((review) => (
             <UserDetailReviewCard key={review.uid} review={review} />
-          ))
-        : null}
-
-      {sectionContent.kind === 'transactions'
-        ? sectionContent.items.map((transaction) => (
-            <UserDetailTransactionCard key={transaction.uid} transaction={transaction} />
           ))
         : null}
     </div>

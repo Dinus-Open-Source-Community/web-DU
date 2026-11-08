@@ -4,7 +4,6 @@ import type {
   ManagedUserDetailMentoredCourse,
   ManagedUserDetailReview,
   ManagedUserDetailTab,
-  ManagedUserDetailTransaction,
   ManagedUserDetailViewModel,
 } from './user-detail-types'
 
@@ -13,7 +12,6 @@ const TAB_LABELS: Record<ManagedUserDetailTab, string> = {
   courses: 'Kursus diikuti',
   mentored: 'Kursus diajar',
   reviews: 'Ulasan',
-  transactions: 'Transaksi',
 }
 
 const EMPTY_STATE_COPY: Record<
@@ -31,10 +29,6 @@ const EMPTY_STATE_COPY: Record<
   reviews: {
     title: 'Belum ada ulasan',
     description: 'User ini belum memberikan atau menerima ulasan kursus.',
-  },
-  transactions: {
-    title: 'Belum ada transaksi',
-    description: 'Riwayat pembayaran untuk user ini masih kosong.',
   },
 }
 
@@ -56,7 +50,6 @@ export type UserDetailSectionItems =
   | { kind: 'courses'; items: ManagedUserDetailJoinedCourse[] }
   | { kind: 'mentored'; items: ManagedUserDetailMentoredCourse[] }
   | { kind: 'reviews'; items: ManagedUserDetailReview[] }
-  | { kind: 'transactions'; items: ManagedUserDetailTransaction[] }
 
 export function resolveUserDetailSectionItems(
   viewModel: ManagedUserDetailViewModel,
@@ -71,8 +64,6 @@ export function resolveUserDetailSectionItems(
       return { kind: 'mentored', items: viewModel.mentoredCourses }
     case 'reviews':
       return { kind: 'reviews', items: viewModel.reviews }
-    case 'transactions':
-      return { kind: 'transactions', items: viewModel.transactions }
     default:
       return { kind: 'profile' }
   }

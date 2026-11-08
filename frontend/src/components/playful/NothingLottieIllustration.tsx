@@ -1,4 +1,4 @@
-import { PublicLottieIllustration } from './PublicLottieIllustration'
+import { PlayfulEmptyIllustration } from './PublicLottieIllustration'
 import { cn } from '@/lib/utils'
 
 type NothingLottieIllustrationProps = {
@@ -7,8 +7,8 @@ type NothingLottieIllustrationProps = {
 
 export function NothingLottieIllustration({ className }: NothingLottieIllustrationProps) {
   return (
-    <PublicLottieIllustration
-      src="/lotties/nothing.json"
+    <PlayfulEmptyIllustration
+      variant="nothing"
       className={cn('mb-4', className)}
     />
   )

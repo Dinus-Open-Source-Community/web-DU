@@ -10,7 +10,7 @@ const statCardShellVariants = cva('flex items-center justify-between', {
       default: cn(appCardClassName, 'mt-5 h-32 w-72 p-6'),
       compact: cn(appCardClassName, 'p-6 shadow-sm'),
       legacy: 'mt-5 h-32 w-72 rounded-2xl border border-gray-400 bg-white p-6',
-      kpi: 'w-full flex-col items-start gap-3 rounded-xl border-2 border-ink-900/10 bg-paper-white p-4 shadow-paper',
+      kpi: 'w-full flex-col items-start gap-2.5 rounded-xl border border-line-light bg-paper-white p-4.5',
     },
     size: {
       sm: 'p-4',

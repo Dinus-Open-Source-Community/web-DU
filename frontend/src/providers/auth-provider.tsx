@@ -1,8 +1,8 @@
 import Cookies from 'js-cookie'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth } from '../services/auth'
+import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth, verifyOtp } from '../services/auth'
 import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services/axios'
-import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload } from '../lib/types/auth'
+import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload, IRegisterResponse, IVerifyOtpPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
 import type { JwtPayload } from '@/lib/types/auth/jwt-payload'
 import { dashboardPathForUserRole } from '@/lib/dashboard-route'
@@ -14,6 +14,11 @@ export const AUTH_COOKIE_EXPIRES_AT = 'du_auth_expires_at'
 const DEFAULT_SESSION_DAYS = 1
 const AUTH_CHANGE_EVENT = 'du-auth-change'
 
+let inFlightProfileRequest: {
+  token: string
+  promise: Promise<IUserData>
+} | null = null
+
 interface AuthContextValue {
   user: IAuthSessionUser | null
   role: UserRole | null
@@ -23,7 +28,8 @@ interface AuthContextValue {
   isResolvingImages: boolean
   profile: IUserData | null
   signIn: (payload: ILoginPayload) => Promise<IAuthResult>
-  signUp: (payload: IRegisterPayload) => Promise<IAuthResult>
+  signUp: (payload: IRegisterPayload) => Promise<IRegisterResponse>
+  verifyOtp: (payload: IVerifyOtpPayload) => Promise<IAuthResult>
   signInWithToken: (token: string, expiresAt?: string) => Promise<IAuthResult>
   signOut: () => void
   refreshUser: () => Promise<IAuthSessionUser | null>
@@ -109,6 +115,16 @@ function getAuthToken() {
   return getApiAuthToken()
 }
 
+function getAuthenticatedUserOnce(token: string): Promise<IUserData> {
+  if (inFlightProfileRequest?.token === token) return inFlightProfileRequest.promise
+
+  const promise = getAuthenticatedUser().finally(() => {
+    if (inFlightProfileRequest?.promise === promise) inFlightProfileRequest = null
+  })
+  inFlightProfileRequest = { token, promise }
+  return promise
+}
+
 function setAuthUser(user: IAuthSessionUser) {
   Cookies.set(AUTH_COOKIE_USER, JSON.stringify(user), {
     expires: DEFAULT_SESSION_DAYS,
@@ -177,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const nextProfile = await getAuthenticatedUser()
+      const nextProfile = await getAuthenticatedUserOnce(currentToken)
       const sessionUser = toSessionUser(nextProfile)
       applySession(sessionUser, nextProfile)
       return nextProfile
@@ -214,7 +230,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(
     async ({ name, email, password }: IRegisterPayload) => {
       const payload = { name, email, password }
-      const auth = await registerWithEmail(payload)
+      return registerWithEmail(payload)
+    },
+    [],
+  )
+
+  const verifyOtpHandler = useCallback(
+    async (payload: IVerifyOtpPayload) => {
+      const auth = await verifyOtp(payload)
       return signInWithToken(auth.token, auth.expires_at)
     },
     [signInWithToken],
@@ -247,6 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isResolvingImages,
       signIn,
       signUp,
+      verifyOtp: verifyOtpHandler,
       signInWithToken,
       signOut,
       refreshUser,
@@ -265,6 +289,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       token,
       user,
+      verifyOtpHandler,
     ],
   )
 

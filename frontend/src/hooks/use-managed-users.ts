@@ -10,10 +10,11 @@ import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
 import { fetchManagedUsers } from '@/services/user-manage'
 import { userManageKeys } from './query-keys'
 
-export function useManagedUsers(params?: ManagedUserListParams) {
+export function useManagedUsers(params?: ManagedUserListParams, options?: { enabled?: boolean }) {
   const query = useQuery({
     queryKey: userManageKeys.list(params),
     queryFn: () => fetchManagedUsers(params),
+    enabled: options?.enabled ?? true,
   })
 
   const imageReferences = useMemo(

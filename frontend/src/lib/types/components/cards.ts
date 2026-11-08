@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import type { CourseCatalogStatus, ClassType, EnrollmentStatus } from '../common/domain'
 import type { ICourseItem } from '../data/course'
-import type { PaymentStatus } from '../common/domain'
 import type { IAuthorCourseItem, IMentor } from '../data/user'
 
 export interface ICardData {
@@ -13,10 +12,7 @@ export interface ICardData {
   course_type_uid: string
   cover_url: string
   thumbnail_url: string
-  price: number
-  price_strike?: number
   level: string
-  is_premium: boolean
   is_published: boolean
   status: CourseCatalogStatus
   mentor_uid: string
@@ -31,17 +27,13 @@ export interface ICardData {
 }
 
 export interface ICardProps extends ICourseItem {
-  variant?: 'course' | 'resume' | 'resumeAdmin' | 'transaction' | 'mentorCourse'
+  variant?: 'course' | 'resume' | 'resumeAdmin' | 'mentorCourse'
   size?: 'sm' | 'md' | 'lg'
   module?: string
   progress?: number
   isEnrolled?: boolean
   enrollment_status?: EnrollmentStatus
-  transactionId?: string
   classType?: string
-  paymentStatus?: PaymentStatus
-  paymentMethod?: string
-  purchasedAt?: string
   detailHref?: string
   resumeDetailHref?: string
   mentorHeader?: string

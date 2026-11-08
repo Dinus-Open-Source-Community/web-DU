@@ -1,21 +1,16 @@
 import type { ReactNode } from 'react'
-import { Award, Infinity as InfinityIcon } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import type { ICourseDetailItem, ICourseItem } from '@/lib/types/course'
-import { detailLayout } from '@/lib/course-detail/detail-layout'
 import { resolveCourseProfiles } from '@/lib/course-detail/course-profile'
-import { buildDiscountLabel } from '@/lib/course-detail/pricing'
-import { FormatRupiah } from '@/lib/func/func'
-import { cn } from '@/lib/utils'
-import { CourseDetailHero } from './detail/detailHero'
-import { CourseWhatYouLearn } from './detail/detailWhatYouLearn'
+import { detailLayout } from '@/lib/course-detail/detail-layout'
+import { ROUTES } from '@/lib/routes'
+import { CourseAboutAndLearn } from './detail/CourseAboutAndLearn'
 import { CourseInstructorCard } from './detail/CourseInstructorCard'
-import { StudentFeedbackPanel } from './detail/StudentPanel'
+import { CourseUnifiedReviewHub } from './detail/ReviewSection'
 import { CourseDetailSidebar } from './detail/CourseDetailSidebar'
-import { CourseDetailMobileCta } from './detail/CourseDetailMobileCta'
-import { CourseDetailMobileSummary } from './detail/CourseDetailMobileSummary'
 import { PopularCoursesStrip } from './detail/PopularCourse'
-import CourseUserReviews from './detail/ReviewSection'
 
 interface CourseDetailLayoutProps extends ICourseDetailItem {
   backHref?: string
@@ -25,107 +20,101 @@ interface CourseDetailLayoutProps extends ICourseDetailItem {
   popularBaseHref?: string
   descriptionContent?: ReactNode
   PopularCourse: ICourseItem[]
-}
-
-function buildCourseIncludes() {
-  return [
-    {
-      icon: <InfinityIcon className="h-4 w-4 text-ink-400" aria-hidden />,
-      label: 'Akses selamanya',
-    },
-    {
-      icon: <Award className="h-4 w-4 text-ink-400" aria-hidden />,
-      label: 'Sertifikat penyelesaian',
-    },
-  ]
+  isEnrolled?: boolean
 }
 
 export function CourseDetailLayout({ data }: { data: CourseDetailLayoutProps }) {
-  const formattedPrice = FormatRupiah(data.price) as string
-  const formattedStrikePrice = data.price_strike ? (FormatRupiah(data.price_strike) as string) : undefined
-  const discountLabel = buildDiscountLabel(data.price, data.price_strike)
-  const includes = buildCourseIncludes()
-  const totalReviews = data.totalReviews || data.reviews?.length || 0
   const instructors = resolveCourseProfiles(data)
+  const totalReviews = data.totalReviews || data.reviews?.length || 0
+
+  const categoryName =
+    typeof data.category === 'object' && data.category !== null
+      ? data.category.name
+      : String(data.category ?? '')
+
+  const courseTypeName =
+    typeof data.course_type === 'object' && data.course_type !== null
+      ? data.course_type.name
+      : typeof data.course_type === 'string'
+        ? data.course_type
+        : undefined
+
+  const popularCoursesList = (data.PopularCourse ?? []) as ICourseItem[]
+
+  const sidebarProps = {
+    title: data.title,
+    description: data.description,
+    category: categoryName,
+    courseType: courseTypeName,
+    level: data.level,
+    isEnrolled: data.isEnrolled,
+    previewImage: data.cover_url,
+    slot: data.slot,
+    enrolledCount: data.enrolled_count,
+  }
 
   return (
-    <div className="flex flex-col pt-16">
-      <CourseDetailHero
-        title={data.title}
-        description={data.description}
-        category={data.category.name}
-        backHref={data.backHref}
-        backLabel={data.backLabel}
-      />
+    <div className="relative z-1 mx-auto w-full max-w-7xl px-4 pt-20 pb-16 sm:px-6 md:pt-24 md:pb-24 lg:px-8">
+      {/* Top Nav: Back button */}
+      <div className="mb-6">
+        <Link to={data.backHref ?? ROUTES.courses} className={detailLayout.backLink}>
+          <ArrowLeft className="size-4 shrink-0 text-ink-900" aria-hidden />
+          <span>{data.backLabel ?? 'Kembali ke katalog'}</span>
+        </Link>
+      </div>
 
-      <div
-        className={cn(
-          detailLayout.page,
-          detailLayout.pageGutter,
-          detailLayout.pageSection,
-          detailLayout.pageBottomMobile,
-        )}
-      >
-        <CourseDetailMobileSummary
-          previewImage={data.cover_url}
-          price={formattedPrice}
-          strikePrice={formattedStrikePrice}
-          discountLabel={discountLabel}
-          rating={data.rating}
-          totalReviews={totalReviews}
-        />
-
-        <div className={cn(detailLayout.mainGrid, 'mt-4 sm:mt-6')}>
-          <div className={detailLayout.contentStack}>
-            <CourseWhatYouLearn items={data.what_you_learn} />
-
-            <section className={cn(detailLayout.sectionCard, detailLayout.sectionPadding)}>
-              <h2 className={cn(detailLayout.sectionTitle, 'mb-3')}>Tentang kursus ini</h2>
-              <div className={cn(detailLayout.body, 'space-y-3')}>
-                {data.descriptionContent ?? <p>{data.description}</p>}
-              </div>
-            </section>
-
-            {instructors.map((instructor) => (
-              <CourseInstructorCard
-                key={instructor.uid ?? instructor.name}
-                name={instructor.name}
-                role={instructor.role ?? 'Instruktur'}
-                avatar={instructor.avatar_url}
-                desc={instructor.description ?? ''}
-              />
-            ))}
-
-            <StudentFeedbackPanel course={data} />
-
-            <CourseUserReviews reviews={data.reviews ?? []} />
-          </div>
-
-          <div className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
-            <CourseDetailSidebar
-              previewImage={data.cover_url}
-              price={formattedPrice}
-              strikePrice={formattedStrikePrice}
-              discountLabel={discountLabel}
-              includes={includes}
-            >
+      {/* Main Split-Hero Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
+        {/* Left Column: Content Sections */}
+        <div className="flex flex-col gap-5 sm:gap-6">
+          {/* Mobile Preview & CTA Card (Shown on small screens) */}
+          <div className="lg:hidden">
+            <CourseDetailSidebar {...sidebarProps}>
               {data.sidebarCta}
             </CourseDetailSidebar>
           </div>
+
+          {/* Section 1: Tentang Kursus & Yang Akan Kamu Pelajari */}
+          <CourseAboutAndLearn
+            description={data.description}
+            descriptionContent={data.descriptionContent}
+            items={data.what_you_learn}
+          />
+
+          {/* Section 2: Mentor Kursus */}
+          {instructors.length > 0 && (
+            <CourseInstructorCard mentors={instructors} />
+          )}
+
+          {/* Section 3: Penilaian & Ulasan Terpadu */}
+          <CourseUnifiedReviewHub
+            rating={data.rating}
+            totalReviews={totalReviews}
+            reviews={data.reviews ?? []}
+          />
+
+          {/* Mobile Kursus Populer (Tampil di bagian bawah pada layar mobile) */}
+          <div className="lg:hidden">
+            <PopularCoursesStrip
+              items={popularCoursesList}
+              baseHref={data.popularBaseHref}
+            />
+          </div>
         </div>
 
-        <div className="mt-6 sm:mt-8">
-          <PopularCoursesStrip items={data.PopularCourse as ICourseItem[]} />
+        {/* Right Column: Action Card + Kursus Populer di Bawahnya pada Desktop */}
+        <div className="hidden lg:flex lg:flex-col lg:gap-5 lg:gap-y-6 lg:self-start">
+          <CourseDetailSidebar {...sidebarProps}>
+            {data.sidebarCta}
+          </CourseDetailSidebar>
+
+          <PopularCoursesStrip
+            items={popularCoursesList}
+            isSidebar
+            baseHref={data.popularBaseHref}
+          />
         </div>
       </div>
-
-      <CourseDetailMobileCta
-        price={formattedPrice}
-        strikePrice={formattedStrikePrice}
-        discountLabel={discountLabel}
-      >
-        {data.sidebarCta}
-      </CourseDetailMobileCta>
     </div>
   )
 }

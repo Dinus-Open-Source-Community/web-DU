@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { isAxiosError } from 'axios'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -12,10 +13,12 @@ import { GlobalInput } from '@/components/shared/Input'
 import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
-import { Message, resolveActionError } from '@/lib/Message'
+import { Message } from '@/lib/Message'
+import { ROUTES } from '@/lib/routes'
 import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
 import { parseLoginPayload } from '@/lib/validator/auth'
 import { useAuth } from '@/providers/auth-provider'
+import { getApiErrorMessage, resolveAppErrorSource } from '@/services/api-error'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -42,12 +45,27 @@ export default function LoginPage() {
       })
       toast.success(Message.auth.loginSuccess)
     } catch (err) {
-      toast.error(
-        resolveActionError(
-          err instanceof Error ? err : null,
-          Message.auth.loginFailed,
-        ),
-      )
+      const appErr = resolveAppErrorSource(err instanceof Error ? err : null)
+      const errorMsg = appErr
+        ? getApiErrorMessage(appErr, Message.auth.loginFailed)
+        : Message.auth.loginFailed
+
+      if (
+        errorMsg.toLowerCase().includes('verifikasi') ||
+        (isAxiosError(appErr) && appErr.response?.status === 403)
+      ) {
+        toast.error(errorMsg)
+        navigate(ROUTES.verifyOtp, {
+          state: {
+            email,
+            from: location.state?.from,
+            authChoice: location.state?.authChoice,
+          },
+        })
+        return
+      }
+
+      toast.error(errorMsg)
     } finally {
       setIsSubmitting(false)
     }
@@ -114,12 +132,13 @@ export default function LoginPage() {
 
           <p className="text-sm text-muted-foreground">
             Belum punya akun?{' '}
-            <Link
-              to="/auth/register"
-              className="font-semibold text-primary hover:underline"
-            >
-              Daftar sekarang
-            </Link>
+          <Link
+            to="/auth/register"
+            state={location.state}
+            className="font-semibold text-primary hover:underline"
+          >
+            Daftar sekarang
+          </Link>
           </p>
 
           <Button
@@ -143,7 +162,11 @@ export default function LoginPage() {
 
           <OauthButton
             isSubmitting={isSubmitting}
-            onGoogleSignIn={startGoogleOAuth}
+            onGoogleSignIn={() => {
+              const from = resolveSafeRedirectPath(location.state?.from, '')
+              if (from) sessionStorage.setItem('auth-redirect-path', from)
+              startGoogleOAuth()
+            }}
           />
         </form>
       </AuthFormPanel>

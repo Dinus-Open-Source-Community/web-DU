@@ -21,8 +21,6 @@ type CalendarControlsProps = {
   cursorDate: Date
   onPrevious: () => void
   onNext: () => void
-  onToday: () => void
-  onPickDate: (date: Date) => void
 }
 
 function ControlSectionLabel({ children }: { children: string }) {
@@ -39,8 +37,6 @@ export function CalendarControls({
   cursorDate,
   onPrevious,
   onNext,
-  onToday,
-  onPickDate,
 }: CalendarControlsProps) {
   return (
     <div className={cn(appCardClassName, 'overflow-hidden p-0 shadow-none')}>
@@ -71,8 +67,6 @@ export function CalendarControls({
           viewMode={viewMode}
           onPrevious={onPrevious}
           onNext={onNext}
-          onToday={onToday}
-          onPickDate={onPickDate}
         />
       </div>
     </div>

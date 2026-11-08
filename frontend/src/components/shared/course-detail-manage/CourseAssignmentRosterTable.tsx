@@ -43,10 +43,10 @@ function SubmissionStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium",
         isSubmitted
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-ink-900/10 bg-paper-paper text-ink-600",
+          ? "border-emerald-200/80 bg-emerald-50 text-emerald-800"
+          : "border-line-light bg-paper-paper text-ink-600",
       )}
     >
       {isSubmitted ? (
@@ -102,7 +102,7 @@ function GradingStatusBadge({
   }
 
   return (
-    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+    <span className="inline-flex items-center rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
       Menunggu penilaian
     </span>
   );

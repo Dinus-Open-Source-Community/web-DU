@@ -1,5 +1,5 @@
 import type { ICourseDetailItem, ICourseItem, IAdminQaThread, IAdminReview } from '@/lib/types/course'
-import type { ICourseStudentListResponse } from '@/lib/types/course'
+import type { ICourseMentorListResponse, ICourseStudentListResponse } from '@/lib/types/course'
 import type { IManagedUserItem } from '@/lib/types/features/user-manage'
 import type { IUserData } from '@/lib/types/user'
 import type { ManagedUserDetailApiResponse } from '@/lib/user-manage/user-detail-api-types'
@@ -59,6 +59,15 @@ export function collectCourseStudentsImageReferences(
   if (!students?.enrollments?.length) return []
   return students.enrollments
     .map((student) => student.student_avatar_url)
+    .filter((value): value is string => Boolean(value?.trim()))
+}
+
+export function collectCourseMentorsImageReferences(
+  mentorsResponse?: ICourseMentorListResponse | null,
+): string[] {
+  if (!mentorsResponse?.mentors?.length) return []
+  return mentorsResponse.mentors
+    .map((mentor) => mentor.avatar_url)
     .filter((value): value is string => Boolean(value?.trim()))
 }
 

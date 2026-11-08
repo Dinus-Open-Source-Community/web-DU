@@ -1,6 +1,6 @@
 import { Navigate, useParams } from 'react-router-dom'
 
-import { dashboardMenu } from '@/lib/routes'
+import { dashboardMenu, ROUTES } from '@/lib/routes'
 
 type ParamMap = Record<string, string | undefined>
 
@@ -15,6 +15,7 @@ export function LegacyRedirect({ template }: { template: string }) {
 
 /** Path lama → template path baru (parameter `:id` sama di kedua sisi). */
 export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string }> = [
+  { path: '/profile', template: ROUTES.profile },
   { path: '/admin/dashboard', template: '/dashboard' },
   { path: '/mentor/dashboard', template: '/dashboard' },
   { path: '/student/dashboard', template: '/dashboard' },
@@ -30,7 +31,6 @@ export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string 
   { path: '/admin/courses', template: dashboardMenu.courses },
   { path: '/admin/course-categories', template: dashboardMenu.courseCategories },
   { path: '/admin/course-types', template: dashboardMenu.courseTypes },
-  { path: '/admin/gallery', template: dashboardMenu.gallery },
   { path: '/admin/courses/:courseUid', template: dashboardMenu.courseDetail(':courseUid') },
   { path: '/admin/courses/:courseUid/edit', template: dashboardMenu.courseEdit(':courseUid') },
   {
@@ -41,8 +41,6 @@ export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string 
     path: '/admin/courses/:courseUid/assignments/:lessonUid/submissions/:submissionUid',
     template: dashboardMenu.assignmentSubmissionDetail(':courseUid', ':lessonUid', ':submissionUid'),
   },
-  { path: '/admin/transactions', template: dashboardMenu.transactions },
-  { path: '/admin/financial', template: dashboardMenu.financial },
   { path: '/admin/reviews-and-qa', template: dashboardMenu.reviewsAndQa },
   { path: '/mentor/courses', template: dashboardMenu.courses },
   { path: '/mentor/courses/:courseUid', template: dashboardMenu.courseDetail(':courseUid') },
@@ -63,7 +61,5 @@ export const LEGACY_DASHBOARD_REDIRECTS: Array<{ path: string; template: string 
   { path: '/student/learning/course/:courseUid', template: dashboardMenu.learningCourse(':courseUid') },
   { path: '/student/assignments', template: dashboardMenu.assignments },
   { path: '/student/browse', template: dashboardMenu.learning },
-  { path: '/student/transactions', template: dashboardMenu.transactions },
-  { path: '/student/transactions/payment', template: dashboardMenu.transactionPayment },
   { path: '/student/certificates', template: dashboardMenu.certificates },
 ]

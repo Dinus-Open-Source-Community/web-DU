@@ -20,8 +20,7 @@ export function StudentAppPageShell({
   const user = userProp ?? defaultUser
 
   return (
-    <AppSidebarProvider role="student" user={user} contentClassName={studentDashboardLayout.contentClassName}>
-      <div aria-hidden className={studentDashboardLayout.gridOverlay} />
+    <AppSidebarProvider role="student" user={user}>
       <div className={cn(layout === 'stack' ? studentDashboardLayout.pageStack : 'relative z-[1]')}>
         {children}
       </div>

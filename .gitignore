@@ -4,7 +4,10 @@
 # Golang
 /backend/vendor/
 /backend/*.exe
+/backend/bin/
 !/backend/public/uploads/avatars/*.txt
+# Logs
+/logs/
 # Environment variables
 .env
 # Playwright / MCP browser artifacts (any path, never push)
@@ -20,3 +23,8 @@ blob-report/
 /.impeccable/
 /.superpowers/
 /docs
+/tests/tokens.json
+/tests/assets.json
+/results/
+/.codex/config.toml
+/.claude/skills/karpathy-guidelines/

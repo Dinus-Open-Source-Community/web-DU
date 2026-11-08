@@ -16,6 +16,7 @@ func StartLessonAssignmentRoutes(r *gin.Engine) {
 	lessonAssignmentGroup := r.Group("/lessons")
 	lessonAssignmentGroup.Use(middleware.AuthMiddleware())
 	{
+		lessonAssignmentGroup.POST("/assignment/upload-image", service.UploadLessonAssignmentImageFunc)
 		lessonAssignmentGroup.POST("/:id/assignment", service.CreateLessonAssignmentFunc)
 		lessonAssignmentGroup.GET("/:id/assignment", service.GetLessonAssignmentFunc)
 		lessonAssignmentGroup.PUT("/:id/assignment", service.UpdateLessonAssignmentFunc)

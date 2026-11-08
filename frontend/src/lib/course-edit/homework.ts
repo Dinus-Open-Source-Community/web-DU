@@ -12,13 +12,17 @@ function stripHtml(html: string): string {
 }
 
 export function isHomeworkConfigured(lesson: EditableLesson): boolean {
+  if (lesson.homeworkAssignmentUid) return true
   const type = lesson.homeworkType ?? 'text'
 
   if (type === 'quiz') {
     return (lesson.homeworkQuiz?.questions.length ?? 0) > 0
   }
 
-  return stripHtml(lesson.homeworkDescriptionHtml ?? '').length > 0
+  return (
+    stripHtml(lesson.homeworkDescriptionHtml ?? '').length > 0 ||
+    (lesson.homeworkRules?.instructionAttachments?.length ?? 0) > 0
+  )
 }
 
 export function ensureHomeworkDefaults(lesson: EditableLesson): EditableLesson {
@@ -78,7 +82,9 @@ export function applyHomeworkPatch(
     ...lesson,
     ...patch,
     homeworkRules:
-      patch.homeworkType != null && patch.homeworkRules == null
+      patch.homeworkType != null &&
+      patch.homeworkType !== lesson.homeworkType &&
+      patch.homeworkRules == null
         ? createDefaultHomeworkRules(homeworkType)
         : patch.homeworkRules ?? lesson.homeworkRules,
   })

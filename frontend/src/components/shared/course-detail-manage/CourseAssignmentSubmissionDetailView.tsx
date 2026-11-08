@@ -43,7 +43,7 @@ function DetailGradingBadge({
     return adminLabels ? (
       <AdminStatusLabel tone="info">{label}</AdminStatusLabel>
     ) : (
-      <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
+      <span className="inline-flex items-center gap-1 rounded-md border border-sky-200/80 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800">
         {label}
       </span>
     )
@@ -53,7 +53,7 @@ function DetailGradingBadge({
     return adminLabels ? (
       <AdminStatusLabel tone="warning">Menunggu penilaian</AdminStatusLabel>
     ) : (
-      <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+      <span className="inline-flex items-center rounded-md border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
         Menunggu penilaian
       </span>
     )
@@ -74,10 +74,10 @@ function DetailGradingBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium',
         submission.passed
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          : 'border-rose-200 bg-rose-50 text-rose-700',
+          ? 'border-emerald-200/80 bg-emerald-50 text-emerald-800'
+          : 'border-rose-200/80 bg-rose-50 text-rose-800',
       )}
     >
       <CheckCircle2 className="size-3" aria-hidden />

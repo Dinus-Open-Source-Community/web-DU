@@ -6,6 +6,7 @@ import type {
   ICategoryItem,
   ICategoryListResponse,
   ICourseListResponse,
+  ICourseMentorListResponse,
   ICourseStudentListResponse,
   ICourseTypeListResponse,
   CourseReadingProgress,
@@ -25,6 +26,7 @@ import {
   parseAssignMentorsToCoursePayload,
 } from '@/lib/validator/course-mentor'
 import { normalizeCourseDetailItem } from '@/lib/course-review/mappers'
+import type { ManagedUserItem } from '@/lib/types/features/user-manage'
 import type {
   CreateCourseReviewReplyPayload,
   CreateCourseReviewReplyResponse,
@@ -142,7 +144,6 @@ export async function deleteCourse(uid: string) {
 
 export interface JoinCourseResponse {
   enrollment: { uid: string; user_uid: string; course_uid: string; status: string }
-  invoice_url: string
 }
 
 export async function joinCourse(courseUid: string) {
@@ -153,11 +154,18 @@ export async function joinCourse(courseUid: string) {
   return unwrapApiResponse(response.data, 'Gagal mendaftar kursus')
 }
 
-export async function fetchCourseStudents(courseUid: string) {
+export async function fetchCourseStudents(courseUid: string, params?: IQueryParamsPayload) {
   const response = await api.get<IResponse<ICourseStudentListResponse>>(
-    API_ROUTES.courses.getStudentsByUid(courseUid),
+    API_ROUTES.courses.getStudentsByUid(courseUid, params),
   )
   return unwrapApiResponse(response.data, 'Gagal mengambil peserta kursus')
+}
+
+export async function fetchCourseMentors(courseUid: string, params?: IQueryParamsPayload) {
+  const response = await api.get<IResponse<ICourseMentorListResponse>>(
+    API_ROUTES.courses.getMentorByUid(courseUid, params),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil mentor kursus')
 }
 
 export async function fetchCourseProgress(courseUid: string) {
@@ -239,3 +247,43 @@ export async function fetchCourseEditSnapshot(courseUid: string) {
 }
 
 export { fetchModulesByCourseUid }
+
+export interface CourseCandidateStudentsResponse {
+  users: ManagedUserItem[]
+  total: number
+  current_page?: number
+  per_page?: number
+  total_pages?: number
+}
+
+export interface AddCourseParticipantsPayload {
+  student_uids: string[]
+}
+
+export interface AddCourseParticipantsResponse {
+  course_uid: string
+  added_count: number
+  skipped_count: number
+  added_uids: string[]
+}
+
+export async function fetchCourseCandidateStudents(courseUid: string, params?: IQueryParamsPayload) {
+  const validatedUid = parseCourseUidParam(courseUid)
+  const response = await api.get<IResponse<CourseCandidateStudentsResponse>>(
+    API_ROUTES.courses.getCandidateStudentsByUid(validatedUid, params),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil kandidat peserta kursus')
+}
+
+export async function addCourseParticipants(
+  courseUid: string,
+  payload: AddCourseParticipantsPayload,
+) {
+  const validatedUid = parseCourseUidParam(courseUid)
+  const response = await api.post<IResponse<AddCourseParticipantsResponse>>(
+    API_ROUTES.courses.addParticipantsByUid(validatedUid),
+    payload,
+  )
+  return unwrapApiResponse(response.data, 'Gagal menambahkan peserta ke kursus')
+}
+

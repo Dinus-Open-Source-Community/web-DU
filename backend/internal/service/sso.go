@@ -282,7 +282,6 @@ func SSOCallbackHandler(c *gin.Context) {
 		user.Email = encEmail
 		user.AvatarURL = info.AvatarURL
 		user.IsVerified = info.EmailVerified
-		user.UpdatedAt = time.Now()
 		if err := database.DB.Save(&user).Error; err != nil {
 			ssoRedirectFrontend(c, target, url.Values{"error": {"failed_update_user"}}, nil)
 			return

@@ -1,12 +1,17 @@
-import type { AdminTransactionsParams } from '@/services/admin-transactions'
 import type { ManagedUserListParams } from '@/lib/user-manage/types'
 import type { IQueryParamsPayload } from '@/services/api-path'
 
 export const courseKeys = {
   all: ['courses'] as const,
   list: (params?: IQueryParamsPayload) => ['courses', params] as const,
+  infiniteList: (params?: IQueryParamsPayload) => ['courses', 'infinite', params] as const,
   detail: (uid: string) => ['courses', uid] as const,
-  students: (courseUid: string) => ['course-students', courseUid] as const,
+  students: (courseUid: string, params?: IQueryParamsPayload) =>
+    ['course-students', courseUid, params] as const,
+  candidateStudents: (courseUid: string, params?: IQueryParamsPayload) =>
+    ['course-candidate-students', courseUid, params] as const,
+  mentors: (courseUid: string, params?: IQueryParamsPayload) =>
+    ['course-mentors', courseUid, params] as const,
   categories: (params?: IQueryParamsPayload) => ['course-categories', params] as const,
   category: (id: string) => ['course-category', id] as const,
   types: (params?: IQueryParamsPayload) => ['course-types', params] as const,
@@ -50,27 +55,9 @@ export const attendanceKeys = {
   byLesson: (lessonUid: string) => ['lesson-attendances', 'lesson', lessonUid] as const,
 }
 
-export const paymentKeys = {
-  all: ['payment'] as const,
-  tripayDetail: (reference: string, merchantRef: string) =>
-    ['payment', 'tripay', 'detail', reference, merchantRef] as const,
-}
-
 export const adminDashboardKeys = {
   all: ['admin-dashboard'] as const,
   kpis: (period: string) => ['admin-dashboard', 'kpis', period] as const,
-  recentTransactions: (limit: number, period: string) =>
-    ['admin-dashboard', 'recent-transactions', limit, period] as const,
-  transactionSummary: (period: string) =>
-    ['admin-dashboard', 'transaction-summary', period] as const,
-  financialCharts: (period: string) =>
-    ['admin-dashboard', 'financial-charts', period] as const,
-}
-
-export const adminTransactionsKeys = {
-  all: ['admin-transactions'] as const,
-  list: (params?: AdminTransactionsParams) =>
-    ['admin-transactions', 'list', params] as const,
 }
 
 export const authKeys = {
@@ -100,4 +87,11 @@ export const mentorDashboardKeys = {
   kpis: ['mentor-dashboard', 'kpis'] as const,
   schedules: (params?: IQueryParamsPayload) =>
     ['mentor-dashboard', 'schedules', params] as const,
+}
+
+export const redeemCodeKeys = {
+  all: ['redeem-codes'] as const,
+  list: (params?: IQueryParamsPayload) => ['redeem-codes', params] as const,
+  candidateStudents: (courseUid?: string, params?: IQueryParamsPayload) =>
+    ['redeem-candidate-students', courseUid, params] as const,
 }

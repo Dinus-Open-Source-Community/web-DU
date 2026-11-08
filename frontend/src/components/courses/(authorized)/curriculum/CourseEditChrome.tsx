@@ -3,7 +3,6 @@ import { ChevronLeft } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { AdminPublishStatusLabel } from "@/lib/admin/status-label";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isCoursePublished } from "@/lib/course-detail/publish-state";
 import { resolveCourseProfiles } from "@/lib/course-detail/course-profile";
@@ -103,14 +102,8 @@ export function CourseEditToolbar({
             <ChevronLeft className="size-5" aria-hidden />
           </Button>
           <h1 className={editLayout.pageTitle}>{course.title}</h1>
-          {isAdmin ? (
-            <AdminPublishStatusLabel published={published} />
-          ) : (
-            <Badge
-              variant={published ? "coursePublished" : "courseDraft"}
-              className="shrink-0"
-            />
-          )}
+          <span className="text-ink-300 select-none text-xs" aria-hidden>·</span>
+          <AdminPublishStatusLabel published={published} />
         </div>
         {course.subtitle && (
           <p className={`line-clamp-2 sm:truncate ${editLayout.body}`}>

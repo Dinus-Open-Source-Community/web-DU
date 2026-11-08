@@ -13,8 +13,6 @@ export const courseListParamsSchema = z
     per_page: paginationPerPageSchema.optional(),
     mentor_id: beResolvableUidSchema.optional(),
     title: searchQuerySchema.optional(),
-    price: z.union([z.string().trim(), z.number()]).optional(),
-    is_premium: z.boolean().optional(),
     course_category_id: beResolvableUidSchema.optional(),
     course_type_id: beResolvableUidSchema.optional(),
     class_type_id: beResolvableUidSchema.optional(),

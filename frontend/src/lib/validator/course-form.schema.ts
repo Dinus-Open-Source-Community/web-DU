@@ -33,17 +33,6 @@ export const courseSlugSchema = z
   .max(255, 'Slug maksimal 255 karakter')
   .regex(/^[a-z0-9-]*$/, 'Slug hanya boleh huruf kecil, angka, dan tanda hubung')
 
-/** Selaras `decimal(10,2)` di BE. */
-export const coursePriceSchema = z
-  .number({ message: 'Harga wajib diisi' })
-  .min(0, 'Harga tidak boleh negatif')
-  .max(99_999_999.99, 'Harga terlalu besar')
-
-export const coursePriceStrikeSchema = z
-  .number({ message: 'Harga coret harus berupa angka' })
-  .min(0, 'Harga coret tidak boleh negatif')
-  .max(99_999_999.99, 'Harga coret terlalu besar')
-
 export const courseSlotSchema = z
   .number({ message: 'Slot harus berupa angka' })
   .int('Slot harus bilangan bulat')
@@ -69,11 +58,8 @@ const courseFormFieldsSchema = z.object({
   category_uid: beResolvableUidSchema,
   course_type_uid: beResolvableUidSchema,
   level: courseApiLevelSchema,
-  price: coursePriceSchema,
-  price_strike: coursePriceStrikeSchema.optional(),
   what_you_learn: whatYouLearnSchema,
   slot: courseSlotSchema.optional(),
-  is_premium: z.boolean().optional(),
   cover: imageUploadFileSchema.optional(),
 })
 
@@ -82,15 +68,6 @@ export const createCoursePayloadSchema = courseFormFieldsSchema
     is_published: z.literal(COURSE_CREATE_AS_DRAFT),
   })
   .strict()
-  .superRefine((data, ctx) => {
-    if (data.price_strike !== undefined && data.price_strike > 0 && data.price_strike < data.price) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Harga coret tidak boleh lebih kecil dari harga jual',
-        path: ['price_strike'],
-      })
-    }
-  })
 
 export const updateCoursePayloadSchema = courseFormFieldsSchema
   .partial()
@@ -99,19 +76,6 @@ export const updateCoursePayloadSchema = courseFormFieldsSchema
     message: 'Minimal satu field harus diisi untuk pembaruan kursus',
   })
   .superRefine((data, ctx) => {
-    if (
-      data.price !== undefined &&
-      data.price_strike !== undefined &&
-      data.price_strike > 0 &&
-      data.price_strike < data.price
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Harga coret tidak boleh lebih kecil dari harga jual',
-        path: ['price_strike'],
-      })
-    }
-
     if (data.title !== undefined && data.title.trim() === '') {
       ctx.addIssue({
         code: 'custom',
@@ -148,11 +112,6 @@ export const courseFormValuesSchema = z
     categoryUid: beResolvableUidSchema,
     courseTypeUid: beResolvableUidSchema,
     level: courseApiLevelSchema,
-    price: optionalNonNegativeNumber.refine(
-      (value) => value !== '',
-      'Harga wajib diisi',
-    ),
-    strikePrice: optionalNonNegativeNumber,
     whatYouLearn: whatYouLearnSchema,
     slot: optionalNonNegativeNumber,
     coverFile: imageUploadFileSchema.nullable(),
@@ -160,35 +119,6 @@ export const courseFormValuesSchema = z
   })
   .strict()
   .superRefine((data, ctx) => {
-    if (typeof data.price === 'number' && data.price > 99_999_999.99) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Harga terlalu besar',
-        path: ['price'],
-      })
-    }
-
-    if (typeof data.strikePrice === 'number') {
-      if (data.strikePrice > 99_999_999.99) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Harga coret terlalu besar',
-          path: ['strikePrice'],
-        })
-      }
-      if (
-        data.strikePrice > 0 &&
-        typeof data.price === 'number' &&
-        data.strikePrice < data.price
-      ) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Harga coret tidak boleh lebih kecil dari harga jual',
-          path: ['strikePrice'],
-        })
-      }
-    }
-
     if (typeof data.slot === 'number') {
       if (!Number.isInteger(data.slot)) {
         ctx.addIssue({

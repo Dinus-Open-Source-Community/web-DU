@@ -1,14 +1,13 @@
-/** Shared motion tokens for course edit UI (tw-animate-css). */
+/** Shared motion tokens for course edit UI. */
 export const editMotion = {
-  panel:
-    'animate-in fade-in duration-300 ease-out fill-mode-both',
-  panelFromRight: 'slide-in-from-right-3',
-  panelFromLeft: 'slide-in-from-left-3',
-  panelFromBottom: 'slide-in-from-bottom-2',
-  outlineItem: 'animate-in fade-in slide-in-from-left-2 duration-300 ease-out fill-mode-both',
+  panel: '',
+  panelFromRight: '',
+  panelFromLeft: '',
+  panelFromBottom: '',
+  outlineItem: '',
   rowSelect:
-    'transition-[background-color,border-color,color,transform] duration-200 ease-out',
-  tabTitle: 'animate-in fade-in slide-in-from-bottom-1 duration-200 ease-out fill-mode-both',
+    'transition-colors duration-150 ease-out',
+  tabTitle: '',
   reducedMotion: 'motion-reduce:animate-none motion-reduce:transition-none',
 } as const
 

@@ -1,0 +1,39 @@
+package routes
+
+import (
+	"backend/internal/handler/middleware"
+	"backend/internal/handler/routes/setup"
+	"backend/internal/service"
+
+	"github.com/gin-gonic/gin"
+)
+
+func init() {
+	setup.RegisterRoute(StartRedeemRoutes)
+}
+
+func StartRedeemRoutes(r *gin.Engine) {
+	// Endpoint penukaran kode redeem (Khusus role student)
+	redeemStudentGroup := r.Group("/redeem")
+	redeemStudentGroup.Use(middleware.AuthMiddleware(), middleware.StudentOnlyMiddleware())
+	{
+		redeemStudentGroup.POST("", service.RedeemCourseCodeFunc)
+	}
+
+	// Endpoint pembuatan dan pengelolaan kode redeem. Penghapusan khusus Admin.
+	adminRedeemGroup := r.Group("/admin/redeem-codes")
+	adminRedeemGroup.Use(middleware.AuthMiddleware())
+	{
+		adminRedeemGroup.POST("", service.GenerateRedeemCodeFunc)
+		adminRedeemGroup.GET("", service.ListRedeemCodesFunc)
+		adminRedeemGroup.GET("/candidate-students", service.GetRedeemCandidateStudentsFunc)
+		adminRedeemGroup.DELETE("/:id", service.DeleteRedeemCodeFunc)
+	}
+
+	externalRedeemGroup := r.Group("/external/redeem-codes")
+	externalRedeemGroup.Use(middleware.ExternalAPIKeyMiddleware())
+	{
+		externalRedeemGroup.POST("", service.GenerateExternalRedeemCodeFunc)
+	}
+
+}

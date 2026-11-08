@@ -10,7 +10,7 @@ export function CourseCardCoverFallback({ className }: CourseCardCoverFallbackPr
   return (
     <div
       className={cn(
-        'flex h-full w-full items-center justify-center rounded-[10px] bg-[#D2E1ED] text-[#00D8FF]',
+        'flex h-full w-full items-center justify-center rounded-t-xl rounded-b-none bg-[#D2E1ED] text-[#00D8FF]',
         className,
       )}
       aria-hidden

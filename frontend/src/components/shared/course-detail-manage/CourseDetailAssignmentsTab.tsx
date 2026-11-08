@@ -12,6 +12,7 @@ import type { CourseAssignmentTaskFilter } from "@/lib/types/features/course-det
 import { CourseDetailLottieEmpty } from "@/components/shared/course-detail-manage/CourseDetailLottieEmpty";
 import { CourseDetailTabSectionIntro } from "@/components/shared/course-detail-manage/CourseDetailTabSectionIntro";
 import { cn } from "@/lib/utils";
+import { TablePaginationFooter } from "@/components/shared/TablePaginationFooter";
 
 type CourseDetailAssignmentsTabProps = {
   view: CourseDetailAssignmentsViewModel;
@@ -42,6 +43,12 @@ export function CourseDetailAssignmentsTab({
     assignmentItems,
     itemsForTaskType,
     prefetchSubmissionRoster,
+    page,
+    pageSize,
+    total,
+    totalPages,
+    onPageChange,
+    onPageSizeChange,
   } = view;
 
   const taskTypeLabel = taskFilter === "quiz" ? "kuis" : "teks";
@@ -131,6 +138,16 @@ export function CourseDetailAssignmentsTab({
               />
             ))}
           </ul>
+          <TablePaginationFooter
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            totalLabel="tugas"
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
         </div>
       )}
     </div>

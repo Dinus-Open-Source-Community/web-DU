@@ -1,6 +1,8 @@
 package service
 
 import (
+	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -381,7 +383,7 @@ func GetCourseMentorsByCourseIDFunc(c *gin.Context) {
 	}
 
 	var course entity.Course
-	if err := database.DB.Select("uid", "title", "mentor_uid").First(&course, courseUID).Error; err != nil {
+	if err := database.DB.Select("uid", "title", "mentor_uid").Where("status = ?", entity.CourseStatusActive).First(&course, courseUID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Course not found",
@@ -566,17 +568,35 @@ func mentorListToGinH(mentors []entity.User) ([]gin.H, error) {
 	for _, mentor := range mentors {
 		name, _ := utils.Decrypt(mentor.Name)
 		email, _ := utils.Decrypt(mentor.Email)
-		description, _ := utils.Decrypt(mentor.Description)
 		summary := summaryMap[mentor.Uid]
+		var assignedCount, joinedCount int64
+		if err := database.DB.Table("courses AS c").
+			Joins("LEFT JOIN course_mentors AS cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", mentor.Uid).
+			Where("c.mentor_uid = ? OR cm.mentor_uid IS NOT NULL", mentor.Uid).
+			Distinct("c.uid").Count(&assignedCount).Error; err != nil {
+			return nil, err
+		}
+		if err := database.DB.Table("courses AS c").
+			Joins("LEFT JOIN course_mentors AS cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", mentor.Uid).
+			Where("c.mentor_uid = ? OR cm.status = ?", mentor.Uid, entity.CourseMentorJoined).
+			Distinct("c.uid").Count(&joinedCount).Error; err != nil {
+			return nil, err
+		}
+		if assignedCount > 0 {
+			summary.Assigned = int(assignedCount)
+		}
+		if joinedCount > 0 {
+			summary.Joined = int(joinedCount)
+		}
 		result = append(result, gin.H{
 			"uid":                  mentor.Uid,
 			"name":                 name,
 			"email":                email,
+			"role":                 mentor.Role,
 			"avatar_url":           mentor.AvatarURL,
-			"description":          description,
+			"social_links":         json.RawMessage(mentor.SocialLinks),
 			"is_verified":          mentor.IsVerified,
 			"created_at":           mentor.CreatedAt,
-			"updated_at":           mentor.UpdatedAt,
 			"assigned_courses":     summary.Assigned,
 			"joined_teach_courses": summary.Joined,
 		})
@@ -720,7 +740,7 @@ func GetMentorDetailFunc(c *gin.Context) {
 	}
 
 	var mentor entity.User
-	if err := database.DB.Where("uid = ? AND role = ?", mentorUID, entity.MentorRole).First(&mentor).Error; err != nil {
+	if err := database.DB.Where("uid = ? AND role IN ?", mentorUID, []entity.UserRole{entity.MentorRole, entity.AdminRole, entity.SuperAdminRole}).First(&mentor).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "Mentor not found",
@@ -731,20 +751,22 @@ func GetMentorDetailFunc(c *gin.Context) {
 	}
 
 	type assignmentRow struct {
-		Status       entity.CourseMentorStatus `gorm:"column:status"`
-		JoinedAt     *time.Time                `gorm:"column:joined_at"`
-		AssignedAt   time.Time                 `gorm:"column:assigned_at"`
-		CourseUID    uuid.UUID                 `gorm:"column:course_uid"`
-		CourseTitle  string                    `gorm:"column:course_title"`
-		CourseSlug   string                    `gorm:"column:course_slug"`
-		CourseStatus entity.CourseStatus       `gorm:"column:course_status"`
+		Status             entity.CourseMentorStatus `gorm:"column:status"`
+		JoinedAt           *time.Time                `gorm:"column:joined_at"`
+		AssignedAt         time.Time                 `gorm:"column:assigned_at"`
+		CourseUID          uuid.UUID                 `gorm:"column:course_uid"`
+		CourseTitle        string                    `gorm:"column:course_title"`
+		CourseSlug         string                    `gorm:"column:course_slug"`
+		CourseStatus       entity.CourseStatus       `gorm:"column:course_status"`
+		CourseCoverURL     string                    `gorm:"column:course_cover_url"`
+		CourseThumbnailURL string                    `gorm:"column:course_thumbnail_url"`
 	}
 
 	var assignmentRows []assignmentRow
-	if err := database.DB.Table("course_mentors AS cm").
-		Select("cm.status, cm.joined_at, cm.created_at as assigned_at, c.uid as course_uid, c.title as course_title, c.slug as course_slug, c.status as course_status").
-		Joins("INNER JOIN courses AS c ON c.uid = cm.course_uid").
-		Where("cm.mentor_uid = ?", mentorUID).
+	if err := database.DB.Table("courses AS c").
+		Select("COALESCE(cm.status, 'joined') as status, cm.joined_at, COALESCE(cm.created_at, c.created_at) as assigned_at, c.uid as course_uid, c.title as course_title, c.slug as course_slug, c.status as course_status, c.cover_url as course_cover_url, c.thumbnail_url as course_thumbnail_url").
+		Joins("LEFT JOIN course_mentors AS cm ON cm.course_uid = c.uid AND cm.mentor_uid = ?", mentorUID).
+		Where("c.mentor_uid = ? OR cm.mentor_uid IS NOT NULL OR c.created_by_uid = ?", mentorUID, mentorUID).
 		Order("cm.created_at DESC").
 		Scan(&assignmentRows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -767,6 +789,8 @@ func GetMentorDetailFunc(c *gin.Context) {
 			"course_title":  utils.DecryptOrSelf(row.CourseTitle),
 			"course_slug":   row.CourseSlug,
 			"course_status": row.CourseStatus,
+			"cover_url":     row.CourseCoverURL,
+			"thumbnail_url": row.CourseThumbnailURL,
 			"status":        row.Status,
 			"assigned_at":   row.AssignedAt,
 			"joined_at":     row.JoinedAt,
@@ -830,28 +854,26 @@ func GetMentorDetailFunc(c *gin.Context) {
 		}
 
 		if len(reviewRows) > 0 {
-			averageRating = float64(totalRating) / float64(len(reviewRows))
+			averageRating = math.Round((float64(totalRating)/float64(len(reviewRows)))*10) / 10
 		}
 	}
 
 	nameDecrypted, _ := utils.Decrypt(mentor.Name)
 	emailDecrypted, _ := utils.Decrypt(mentor.Email)
-	descriptionDecrypted, _ := utils.Decrypt(mentor.Description)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Mentor detail retrieved successfully",
 		"data": gin.H{
-			"uid":         mentor.Uid,
-			"name":        nameDecrypted,
-			"email":       emailDecrypted,
-			"avatar_url":  mentor.AvatarURL,
-			"role":        mentor.Role,
-			"is_verified": mentor.IsVerified,
-			"description": descriptionDecrypted,
-			"created_at":  mentor.CreatedAt,
-			"updated_at":  mentor.UpdatedAt,
-			"assignments": assignedCourses,
+			"uid":          mentor.Uid,
+			"name":         nameDecrypted,
+			"email":        emailDecrypted,
+			"avatar_url":   mentor.AvatarURL,
+			"social_links": json.RawMessage(mentor.SocialLinks),
+			"role":         mentor.Role,
+			"is_verified":  mentor.IsVerified,
+			"created_at":   mentor.CreatedAt,
+			"assignments":  assignedCourses,
 			"review_summary": gin.H{
 				"total_reviews":  len(reviewData),
 				"average_rating": averageRating,

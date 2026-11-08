@@ -8,7 +8,7 @@ import type { EditableLesson } from "@/lib/course-edit/types";
 import type { LessonDeliveryType } from "@/lib/types/lesson";
 
 import { editLayout } from '@/lib/course-edit/edit-layout'
-import { PanelTransition } from "./PanelTransition";
+import { normalizeRichText } from '@/lib/course-edit/lesson-content-equality'
 import { SegmentedControl } from "./SegmentedControl";
 
 const DELIVERY_OPTIONS = [
@@ -64,7 +64,11 @@ export function LessonContentPanel({
         <SegmentedControl
           value={lesson.contentType}
           options={DELIVERY_OPTIONS}
-          onChange={(type) => onChangeDeliveryType(type)}
+          onChange={(type) => {
+            if (type !== lesson.contentType) {
+              onChangeDeliveryType(type);
+            }
+          }}
           ariaLabel="Pilih tipe konten lesson"
         />
       </div>
@@ -79,10 +83,7 @@ export function LessonContentPanel({
       {isLoadingDetail && <LessonEditorSkeleton />}
 
       {(showEditor || !isLoadingDetail) && (
-        <PanelTransition
-          panelKey={`${lessonKey}-${lesson.contentType}`}
-          direction="bottom"
-        >
+        <div key={`${lessonKey}-${lesson.contentType}`} className="min-w-0">
           {showEditor && lesson.contentType === "text" && (
             <TiptapEditor
               key={`${lessonKey}-text`}
@@ -90,6 +91,9 @@ export function LessonContentPanel({
               onChange={(html: string) => {
                 onPatchLesson(lessonKey, (current) => {
                   if (current.contentType !== "text") return current;
+                  if (normalizeRichText(current.contentHtml) === normalizeRichText(html)) {
+                    return current;
+                  }
                   return {
                     ...current,
                     contentHtml: html,
@@ -108,12 +112,16 @@ export function LessonContentPanel({
               onVideoUrlChange={(url: string) => {
                 onPatchLesson(lessonKey, (current) => {
                   if (current.contentType !== "video") return current;
+                  if ((current.videoUrl ?? "").trim() === url.trim()) return current;
                   return { ...current, videoUrl: url };
                 });
               }}
               onDescriptionChange={(html: string) => {
                 onPatchLesson(lessonKey, (current) => {
                   if (current.contentType !== "video") return current;
+                  if (normalizeRichText(current.contentHtml) === normalizeRichText(html)) {
+                    return current;
+                  }
                   return {
                     ...current,
                     contentHtml: html,
@@ -123,7 +131,7 @@ export function LessonContentPanel({
               }}
             />
           )}
-        </PanelTransition>
+        </div>
       )}
     </section>
   );

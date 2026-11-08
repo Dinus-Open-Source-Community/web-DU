@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { resolveParticipantEnrollmentStatus } from '@/lib/course-detail/participant-enrollment-status'
-import type { AdminStatus } from '@/lib/types/user'
 import type { AttendanceStatusValue } from '@/lib/types/features/course-detail-assignments'
 import { cn } from '@/lib/utils'
 
@@ -42,26 +41,12 @@ export function AdminMetaLabel({
   return <span className={cn('text-xs font-medium text-ink-500', className)}>{children}</span>
 }
 
-const USER_STATUS: Record<AdminStatus, { tone: AdminStatusTone; label: string }> = {
-  active: { tone: 'success', label: 'Aktif' },
-  inactive: { tone: 'neutral', label: 'Nonaktif' },
-  pending: { tone: 'warning', label: 'Menunggu verifikasi' },
-}
-
-export function AdminUserStatusLabel({ status }: { status: AdminStatus }) {
-  const { tone, label } = USER_STATUS[status]
-  return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
-}
-
-const SEVERITY: Record<'high' | 'medium' | 'low', { tone: AdminStatusTone; label: string }> = {
-  high: { tone: 'danger', label: 'High' },
-  medium: { tone: 'warning', label: 'Medium' },
-  low: { tone: 'info', label: 'Low' },
-}
-
-export function AdminSeverityLabel({ severity }: { severity: 'high' | 'medium' | 'low' }) {
-  const { tone, label } = SEVERITY[severity]
-  return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
+export function AdminEmailVerificationLabel({ isVerified }: { isVerified: boolean }) {
+  return (
+    <AdminStatusLabel tone={isVerified ? 'success' : 'warning'}>
+      {isVerified ? 'Terverifikasi' : 'Belum terverifikasi'}
+    </AdminStatusLabel>
+  )
 }
 
 export function AdminQaStatusLabel({ answered }: { answered: boolean }) {
@@ -72,11 +57,40 @@ export function AdminQaStatusLabel({ answered }: { answered: boolean }) {
   )
 }
 
-export function AdminPublishStatusLabel({ published }: { published: boolean }) {
+export function AdminPublishStatusLabel({
+  published,
+  className,
+}: {
+  published: boolean
+  className?: string
+}) {
+  if (published) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-emerald-700',
+          className,
+        )}
+      >
+        <span className="relative flex size-2 shrink-0">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+        </span>
+        Terbit
+      </span>
+    )
+  }
+
   return (
-    <AdminStatusLabel tone={published ? 'success' : 'warning'}>
-      {published ? 'Terbit' : 'Draft'}
-    </AdminStatusLabel>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-ink-500',
+        className,
+      )}
+    >
+      <span className="size-2 shrink-0 rounded-full bg-ink-400" aria-hidden />
+      Draft
+    </span>
   )
 }
 

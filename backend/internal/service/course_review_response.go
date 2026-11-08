@@ -1,6 +1,8 @@
 package service
 
 import (
+	"math"
+
 	"backend/internal/database"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
@@ -52,7 +54,7 @@ func fetchCourseReviewSummaries(courseUIDs []uuid.UUID) map[uuid.UUID]courseRevi
 
 	for _, row := range rows {
 		result[row.CourseUID] = courseReviewSummary{
-			AverageRating: row.AverageRating,
+			AverageRating: math.Round(row.AverageRating*10) / 10,
 			TotalReviews:  int(row.TotalReviews),
 		}
 	}
@@ -132,7 +134,7 @@ func courseReviewsResponse(reviews []entity.CourseReview) []gin.H {
 }
 
 func applyReviewSummaryFields(item gin.H, summary courseReviewSummary) {
-	item["rating"] = summary.AverageRating
+	item["rating"] = math.Round(summary.AverageRating*10) / 10
 	item["total_reviews"] = summary.TotalReviews
 }
 

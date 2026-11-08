@@ -1,9 +1,7 @@
 import type { AdminAdministrator, AdminMentor } from '@/lib/types/api'
-import type { AdminStatus, AdminStudent } from '@/lib/types/user'
+import type { AdminStudent } from '@/lib/types/user'
 import type { ManagedUserItem } from './types'
 import { toLearningProgressPercent } from '@/lib/learning/progress'
-
-const DEFAULT_AVATAR = '/Logo.svg'
 
 const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',
@@ -15,10 +13,6 @@ function formatDate(value?: string) {
   if (!value) return '-'
   const parsed = new Date(value)
   return Number.isNaN(parsed.getTime()) ? value : dateFormatter.format(parsed)
-}
-
-function resolveStatus(isVerified: boolean): AdminStatus {
-  return isVerified ? 'active' : 'pending'
 }
 
 function averageProgress(enrollments?: ManagedUserItem['enrollments']) {
@@ -36,17 +30,16 @@ function mapAdministratorRole(role: string): AdminAdministrator['role'] {
 }
 
 export function toAdminStudent(user: ManagedUserItem): AdminStudent {
+  const count = user.enrollments?.length ?? 0
   return {
     uid: user.uid,
     name: user.name,
     email: user.email,
-    avatar: user.avatar_url || DEFAULT_AVATAR,
+    avatar: user.avatar_url || '',
     joinedAt: formatDate(user.created_at),
-    enrolledCourses: user.enrollments?.length ?? 0,
-    averageProgress: averageProgress(user.enrollments),
-    status: resolveStatus(user.is_verified),
-    totalSpent: 0,
-    lastActive: formatDate(user.updated_at),
+    enrolledCourses: count,
+    averageProgress: count > 0 ? averageProgress(user.enrollments) : undefined,
+    isVerified: user.is_verified,
   }
 }
 
@@ -55,12 +48,12 @@ export function toAdminMentor(user: ManagedUserItem): AdminMentor {
     uid: user.uid,
     name: user.name,
     email: user.email,
-    avatar: user.avatar_url || DEFAULT_AVATAR,
+    avatar: user.avatar_url || '',
     joinedAt: formatDate(user.created_at),
     totalCourses: 0,
     rating: 0,
     totalReviews: 0,
-    status: resolveStatus(user.is_verified),
+    isVerified: user.is_verified,
     studentsCount: 0,
   }
 }
@@ -70,10 +63,9 @@ export function toAdminAdministrator(user: ManagedUserItem): AdminAdministrator 
     uid: user.uid,
     name: user.name,
     email: user.email,
-    avatar: user.avatar_url || DEFAULT_AVATAR,
+    avatar: user.avatar_url || '',
     role: mapAdministratorRole(user.role),
-    lastActive: formatDate(user.updated_at),
-    status: resolveStatus(user.is_verified),
+    isVerified: user.is_verified,
     createdAt: formatDate(user.created_at),
   }
 }

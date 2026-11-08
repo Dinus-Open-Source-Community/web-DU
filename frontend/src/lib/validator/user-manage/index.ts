@@ -1,9 +1,15 @@
-import type { ManagedUserListParams, UpdateUserRolePayload } from '@/lib/user-manage/types'
+import type {
+  BatchUpdateUserRolePayload,
+  ManagedUserListParams,
+  UpdateUserRolePayload,
+} from '@/lib/user-manage/types'
 import { getValidationMessage, parseWithValidationMessage } from '../errors'
 import {
+  batchUpdateUserRolePayloadSchema,
   managedUserListParamsSchema,
   managedUserUidParamSchema,
   updateUserRolePayloadSchema,
+  type BatchUpdateUserRolePayloadValidated,
   type ManagedUserListParamsValidated,
   type UpdateUserRolePayloadValidated,
 } from '../user-manage.schema'
@@ -22,6 +28,13 @@ export function parseUpdateUserRolePayload(
   fallback = 'Payload perubahan role tidak valid',
 ): UpdateUserRolePayloadValidated {
   return parseWithValidationMessage(updateUserRolePayloadSchema, payload, fallback)
+}
+
+export function parseBatchUpdateUserRolePayload(
+  payload: BatchUpdateUserRolePayload,
+  fallback = 'Payload perubahan role massal tidak valid',
+): BatchUpdateUserRolePayloadValidated {
+  return parseWithValidationMessage(batchUpdateUserRolePayloadSchema, payload, fallback)
 }
 
 export function parseManagedUserUidParam(uid: string, fallback = 'UID user tidak valid'): string {

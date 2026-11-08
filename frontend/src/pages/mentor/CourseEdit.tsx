@@ -9,18 +9,21 @@ import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-c
 import type { ICourseDetailItem } from '@/lib/types/course'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { useCourseEditModules } from '@/hooks/use-course'
+import { useAuth } from '@/providers/auth-provider'
 
 export default function MentorCourseEditPage() {
   const { courseUid } = useParams()
   const [searchParams] = useSearchParams()
   const moduleId = searchParams.get('moduleId') ?? undefined
 
-  const sidebarUser = useSidebarUser('mentor')
+  const { role } = useAuth()
+  const shellRole = role === 'student' ? 'student' : 'mentor'
+  const sidebarUser = useSidebarUser(shellRole)
   const { courseDetail, modules, isLoading } = useCourseEditModules(courseUid ?? '')
 
   if (isLoading) {
     return (
-      <AppSidebarProvider role="mentor" user={sidebarUser}>
+      <AppSidebarProvider role={shellRole} user={sidebarUser}>
         <PageSkeleton message="Memuat course..." />
       </AppSidebarProvider>
     )
@@ -28,14 +31,14 @@ export default function MentorCourseEditPage() {
 
   if (!courseUid || !courseDetail.data) {
     return (
-      <AppSidebarProvider role="mentor" user={sidebarUser}>
+      <AppSidebarProvider role={shellRole} user={sidebarUser}>
         <NotFoundContent />
       </AppSidebarProvider>
     )
   }
 
   return (
-    <AppSidebarProvider role="mentor" user={sidebarUser}>
+    <AppSidebarProvider role={shellRole} user={sidebarUser}>
       <MentorCourseEditContent
         courseData={courseDetail.data as ICourseDetailItem}
         modules={modules}

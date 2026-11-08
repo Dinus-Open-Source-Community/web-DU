@@ -1,13 +1,20 @@
 basePath: /
 definitions:
-  dto.APIResponse:
+  dto.AddCourseParticipantsRequest:
     properties:
-      data:
-        $ref: '#/definitions/dto.CreatePaymentResponse'
-      message:
-        type: string
-      success:
-        type: boolean
+      student_uids:
+        example:
+        - '["f47ac10b"'
+        - '"550e8400-e29b-41d4-a716-446655440000"]'
+        items:
+          type: string
+        type: array
+      user_uids:
+        example:
+        - '["f47ac10b"]'
+        items:
+          type: string
+        type: array
     type: object
   dto.AssignMentorsToCourseRequest:
     properties:
@@ -18,6 +25,20 @@ definitions:
         type: array
     required:
     - mentor_uids
+    type: object
+  dto.BatchUpdateUserRoleRequest:
+    properties:
+      role:
+        example: mentor
+        type: string
+      user_uids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - role
+    - user_uids
     type: object
   dto.ChangePasswordRequest:
     properties:
@@ -109,91 +130,32 @@ definitions:
     - order_index
     - title
     type: object
-  dto.CreatePaymentRequest:
+  dto.GenerateRedeemCodeRequest:
     properties:
-      amount:
+      code:
+        example: CUSTOM-CODE-2026
+        type: string
+      course_uid:
+        example: e61b7f94-9128-4444-a4f6-7b830d12e431
+        type: string
+      expires_at:
+        type: string
+      is_active:
+        type: boolean
+      max_uses:
+        example: 1
         type: integer
-      enrollment_uid:
+      prefix:
+        example: REACT
         type: string
-      method:
-        enum:
-        - PERMATAVA
-        - BNIVA
-        - BRIVA
-        - MANDIRIVA
-        - BCAVA
-        - MUAMALATVA
-        - CIMBVA
-        - BSIVA
-        - OCBCVA
-        - DANAMONVA
-        - OVO
-        - DANA
-        - QRIS2
+      target_email:
+        example: buyer@external.com
         type: string
-      order_items:
-        items:
-          $ref: '#/definitions/dto.OrderItem'
-        minItems: 1
-        type: array
-      return_url:
+      target_user_uid:
+        example: 7e484e3e-436e-44f3-b789-fdf2d0e653da
         type: string
     required:
-    - amount
-    - method
-    - order_items
-    type: object
-  dto.CreatePaymentResponse:
-    properties:
-      amount:
-        type: integer
-      amount_received:
-        type: integer
-      callback_url:
-        type: string
-      checkout_url:
-        type: string
-      customer_email:
-        type: string
-      customer_name:
-        type: string
-      customer_phone:
-        type: string
-      expired_time:
-        type: integer
-      fee_customer:
-        type: integer
-      fee_merchant:
-        type: integer
-      instructions:
-        items:
-          $ref: '#/definitions/dto.PaymentInstruction'
-        type: array
-      merchant_ref:
-        type: string
-      order_items:
-        items:
-          $ref: '#/definitions/dto.OrderItemResponse'
-        type: array
-      pay_code:
-        type: string
-      pay_url: {}
-      payment_method:
-        type: string
-      payment_name:
-        type: string
-      payment_selection_type:
-        type: string
-      qr_string: {}
-      qr_url: {}
-      reference:
-        type: string
-      return_url:
-        type: string
-      status:
-        type: string
-      total_fee:
-        type: integer
+    - course_uid
     type: object
   dto.LessonAssignmentSubmissionGradeRequest:
     properties:
@@ -339,50 +301,15 @@ definitions:
     - email
     - password
     type: object
-  dto.OrderItem:
+  dto.RedeemCodeRequest:
     properties:
-      image_url:
-        type: string
-      name:
-        type: string
-      price:
-        type: integer
-      product_url:
-        type: string
-      quantity:
-        type: integer
-      sku:
+      code:
+        example: KURSUS-REACT-2026
+        maxLength: 64
+        minLength: 4
         type: string
     required:
-    - name
-    - price
-    - quantity
-    type: object
-  dto.OrderItemResponse:
-    properties:
-      image_url:
-        type: string
-      name:
-        type: string
-      price:
-        type: integer
-      product_url:
-        type: string
-      quantity:
-        type: integer
-      sku:
-        type: string
-      subtotal:
-        type: integer
-    type: object
-  dto.PaymentInstruction:
-    properties:
-      steps:
-        items:
-          type: string
-        type: array
-      title:
-        type: string
+    - code
     type: object
   dto.RegisterRequest:
     properties:
@@ -434,13 +361,6 @@ definitions:
         type: string
     type: object
   dto.UpdateUserProfileRequest:
-    properties:
-      description:
-        type: string
-      email:
-        type: string
-      name:
-        type: string
     type: object
   dto.UpdateUserRoleRequest:
     properties:
@@ -457,6 +377,40 @@ info:
   title: Web DU Backend
   version: "1.0"
 paths:
+  /admin/dashboard/analytics:
+    get:
+      consumes:
+      - application/json
+      description: Get rich analytics data for admin dashboard (charts, distributions,
+        trends).
+      parameters:
+      - description: 'Days for trend (default: 30)'
+        in: query
+        name: days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Analytics data retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get admin dashboard analytics
+      tags:
+      - Admin
   /admin/dashboard/kpis:
     get:
       consumes:
@@ -488,72 +442,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Get admin dashboard KPIs
-      tags:
-      - Admin
-  /admin/dashboard/recent-transactions:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve recent transactions for the admin dashboard.
-      parameters:
-      - description: 'Number of items (default: 5)'
-        in: query
-        name: limit
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Recent transactions retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get recent admin transactions
-      tags:
-      - Admin
-  /admin/financial/summary:
-    get:
-      consumes:
-      - application/json
-      description: Revenue analytics for the admin financial page.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Financial summary retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get admin financial summary
       tags:
       - Admin
   /admin/qna:
@@ -649,6 +537,193 @@ paths:
       security:
       - BearerAuth: []
       summary: Reply to a Q&A thread (Admin)
+      tags:
+      - Admin
+  /admin/redeem-codes:
+    get:
+      description: Retrieve a paginated list of generated redeem codes with optional
+        filters for course and active status.
+      parameters:
+      - description: Filter by course UID
+        in: query
+        name: course_uid
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of redeem codes retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Mentors/Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List redeem codes (Admin / Mentor)
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Create or auto-generate a new course redeem code with custom usage
+        limits, expiration date, and optional target user or email restrictions.
+      parameters:
+      - description: Generate redeem code request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GenerateRedeemCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Redeem code successfully created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input or parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Mentors/Admins only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course or target user not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Redeem code already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate redeem code (Admin / Mentor)
+      tags:
+      - Admin
+  /admin/redeem-codes/{id}:
+    delete:
+      description: Permanently delete a redeem code that has never been used.
+      parameters:
+      - description: Redeem code UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redeem code deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin or Admin only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Redeem code not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Redeem code has already been used
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete redeem code
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete unused redeem code (Super Admin / Admin)
+      tags:
+      - Admin
+  /admin/redeem-codes/candidate-students:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil daftar user role student yang belum terdaftar di kursus
+        yang dipilih untuk keperluan generate kode redeem.
+      parameters:
+      - description: Course UID or prefix
+        in: query
+        name: course_uid
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Search in student name or email
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get candidate students for redeem code (Admin / Mentor)
       tags:
       - Admin
   /admin/reviews:
@@ -749,166 +824,6 @@ paths:
       - BearerAuth: []
       summary: Reply to a review (Admin)
       tags:
-      - Admin
-  /admin/transactions:
-    get:
-      consumes:
-      - application/json
-      - application/json
-      description: |-
-        Retrieve paginated admin transaction list with summary counts.
-        Aggregate payment counts and gross revenue for admin dashboards.
-      parameters:
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 10, max: 100)'
-        in: query
-        name: per_page
-        type: integer
-      - description: Filter by payment status
-        in: query
-        name: status
-        type: string
-      - description: Search by reference, course, or student
-        in: query
-        name: search
-        type: string
-      - description: Filter from date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_from
-        type: string
-      - description: Filter to date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_to
-        type: string
-      - description: Filter by payment status
-        in: query
-        name: status
-        type: string
-      - description: Search by reference, course, or student
-        in: query
-        name: search
-        type: string
-      - description: Filter from date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_from
-        type: string
-      - description: Filter to date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_to
-        type: string
-      produces:
-      - application/json
-      - application/json
-      responses:
-        "200":
-          description: Transaction summary retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      - BearerAuth: []
-      summary: Get admin transactions summary
-      tags:
-      - Admin
-      - Admin
-  /admin/transactions/summary:
-    get:
-      consumes:
-      - application/json
-      - application/json
-      description: |-
-        Retrieve paginated admin transaction list with summary counts.
-        Aggregate payment counts and gross revenue for admin dashboards.
-      parameters:
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 10, max: 100)'
-        in: query
-        name: per_page
-        type: integer
-      - description: Filter by payment status
-        in: query
-        name: status
-        type: string
-      - description: Search by reference, course, or student
-        in: query
-        name: search
-        type: string
-      - description: Filter from date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_from
-        type: string
-      - description: Filter to date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_to
-        type: string
-      - description: Filter by payment status
-        in: query
-        name: status
-        type: string
-      - description: Search by reference, course, or student
-        in: query
-        name: search
-        type: string
-      - description: Filter from date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_from
-        type: string
-      - description: Filter to date (YYYY-MM-DD or RFC3339)
-        in: query
-        name: date_to
-        type: string
-      produces:
-      - application/json
-      - application/json
-      responses:
-        "200":
-          description: Transaction summary retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      - BearerAuth: []
-      summary: Get admin transactions summary
-      tags:
-      - Admin
       - Admin
   /auth/sso/callback:
     get:
@@ -1431,8 +1346,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve paginated list of courses with optional filters (mentor_id,
-        title, price, is_premium)
+      description: Retrieve paginated list of ACTIVE courses with optional filters
+        (mentor_id, title)
       parameters:
       - description: 'Page number (default: 1)'
         in: query
@@ -1450,14 +1365,6 @@ paths:
         in: query
         name: title
         type: string
-      - description: Filter by exact price
-        in: query
-        name: price
-        type: number
-      - description: Filter by premium status
-        in: query
-        name: is_premium
-        type: boolean
       produces:
       - application/json
       responses:
@@ -1478,8 +1385,8 @@ paths:
       consumes:
       - multipart/form-data
       description: Create a new course with cover, title, subtitle/header, dynamic
-        category, dynamic class type, level, pricing, and learning points. Requires
-        Super Admin or Admin.
+        category, dynamic class type, level, and learning points. Requires Super Admin
+        or Admin.
       parameters:
       - description: 'Course cover image (JPG, PNG recommended). Fallback key: thumbnail'
         in: formData
@@ -1517,15 +1424,6 @@ paths:
         name: level
         required: true
         type: string
-      - description: Course selling price
-        in: formData
-        name: price
-        required: true
-        type: number
-      - description: Displayed strike-through/original price
-        in: formData
-        name: price_strike
-        type: number
       - description: JSON array of strings, e.g. [\
         in: formData
         name: what_you_learn
@@ -1540,10 +1438,6 @@ paths:
         in: formData
         name: slot
         type: integer
-      - description: 'Whether course is premium (default: false)'
-        in: formData
-        name: is_premium
-        type: boolean
       - description: 'Whether course is published (default: false)'
         in: formData
         name: is_published
@@ -1665,8 +1559,8 @@ paths:
       consumes:
       - multipart/form-data
       description: Update an existing course metadata (cover, title, subtitle, category,
-        class type, level, pricing, learning points). Only sent fields are updated.
-        Requires Super Admin or Admin.
+        class type, level, learning points). Only sent fields are updated. Requires
+        Super Admin or Admin.
       parameters:
       - description: Course UID
         in: path
@@ -1705,14 +1599,6 @@ paths:
         in: formData
         name: level
         type: string
-      - description: Course selling price
-        in: formData
-        name: price
-        type: number
-      - description: Displayed strike-through/original price
-        in: formData
-        name: price_strike
-        type: number
       - description: JSON array of strings, e.g. [\
         in: formData
         name: what_you_learn
@@ -1725,10 +1611,6 @@ paths:
         in: formData
         name: slot
         type: integer
-      - description: Whether course is premium
-        in: formData
-        name: is_premium
-        type: boolean
       produces:
       - application/json
       responses:
@@ -1789,6 +1671,10 @@ paths:
         in: query
         name: status
         type: string
+      - description: Filter by task type (quiz, text)
+        in: query
+        name: task_type
+        type: string
       produces:
       - application/json
       responses:
@@ -1822,6 +1708,50 @@ paths:
       summary: List assignments in a course (Admin/Mentor)
       tags:
       - Course
+  /courses/{id}/candidate-students:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil daftar user dengan role student yang belum terdaftar
+        di kursus ini, lengkap dengan data progres dan kursus yang diikuti. (Super
+        Admin, Admin, dan Mentor penanggung jawab).
+      parameters:
+      - description: Course UID or prefix
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Candidate students retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin, Admin, or assigned mentor only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get candidate students for a course
+      tags:
+      - Courses
   /courses/{id}/join:
     post:
       consumes:
@@ -2032,6 +1962,60 @@ paths:
       summary: Unassign mentors from course (Super Admin / Admin)
       tags:
       - Course
+  /courses/{id}/participants:
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan satu atau beberapa siswa ke dalam kursus (Enrollment
+        active).
+      parameters:
+      - description: Course UID or prefix
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: List of student UIDs to enroll
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddCourseParticipantsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Participants added successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request or quota exceeded
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Super Admin, Admin, or assigned mentor only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add participants to a course
+      tags:
+      - Courses
   /courses/{id}/progress:
     get:
       consumes:
@@ -2379,78 +2363,29 @@ paths:
       summary: Get all enrolled students in a course (Public)
       tags:
       - Course
-  /invoices/{enrollment_id}:
-    get:
+  /external/redeem-codes:
+    post:
       consumes:
       - application/json
-      description: Retrieve or generate invoice for a specific enrollment
+      description: Create a course redeem code using the external API key configured
+        by REDEEM_CODE_API_KEY.
       parameters:
-      - description: Enrollment UID
-        in: path
-        name: enrollment_id
+      - description: Generate redeem code request payload
+        in: body
+        name: request
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/dto.GenerateRedeemCodeRequest'
       produces:
       - application/json
       responses:
-        "200":
-          description: Invoice retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Enrollment not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Failed to retrieve invoice
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get course enrollment invoice (All Roles)
-      tags:
-      - Course
-  /invoices/url:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve invoice URL by providing enrollment_id, user_id, and course_id
-        as query parameters. Accessible by super admin, admin, assigned/joined mentor
-        for the course, or the enrolled student (self).
-      parameters:
-      - description: Enrollment UID
-        in: query
-        name: enrollment_id
-        required: true
-        type: string
-      - description: User UID
-        in: query
-        name: user_id
-        required: true
-        type: string
-      - description: Course UID
-        in: query
-        name: course_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Invoice URL retrieved successfully
+        "201":
+          description: Redeem code successfully created
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Missing required parameters
+          description: Invalid input or parameters
           schema:
             additionalProperties: true
             type: object
@@ -2459,13 +2394,98 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "403":
-          description: Forbidden
+        "404":
+          description: Course or target user not found
           schema:
             additionalProperties: true
             type: object
-        "404":
-          description: Enrollment not found
+        "409":
+          description: Redeem code already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ExternalAPIKey: []
+      summary: Generate redeem code for external applications
+      tags:
+      - External
+  /galleries:
+    get:
+      description: Public endpoint to retrieve gallery documentation items with pagination,
+        search, and variant filtering.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 15, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: Search by caption
+        in: query
+        name: search
+        type: string
+      - description: Filter by variant (all, auto, 0..5)
+        in: query
+        name: variant
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Galleries retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve galleries
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all gallery items (Public)
+      tags:
+      - Gallery
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload photo to Garage S3 and create a new gallery documentation
+        item.
+      parameters:
+      - description: Gallery photo file (PNG, JPG, JPEG, WebP, max 5MB)
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Photo story caption (max 200 chars)
+        in: formData
+        name: caption
+        required: true
+        type: string
+      - description: Scrapbook card variant (auto or 0..5)
+        in: formData
+        name: variant
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Gallery item created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
           schema:
             additionalProperties: true
             type: object
@@ -2476,9 +2496,136 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get invoice URL by enrollment details (Super Admin/Admin/Mentor/Self)
+      summary: Create gallery item (Super Admin & Admin)
       tags:
-      - Invoice
+      - Gallery
+  /galleries/{id}:
+    delete:
+      description: Delete a gallery item by uid and remove its object from Garage
+        S3.
+      parameters:
+      - description: Gallery UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gallery item deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid gallery uid
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Gallery item not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete gallery item (Super Admin & Admin)
+      tags:
+      - Gallery
+    get:
+      description: Public endpoint to retrieve a single gallery item by uid.
+      parameters:
+      - description: Gallery UID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gallery item retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid gallery uid
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Gallery item not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get gallery item by ID (Public)
+      tags:
+      - Gallery
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update gallery photo, caption, or variant.
+      parameters:
+      - description: Gallery UID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New gallery photo file (optional)
+        in: formData
+        name: image
+        type: file
+      - description: Photo story caption
+        in: formData
+        name: caption
+        type: string
+      - description: Scrapbook card variant (auto or 0..5)
+        in: formData
+        name: variant
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gallery item updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Gallery item not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update gallery item (Super Admin & Admin)
+      tags:
+      - Gallery
   /lessons:
     get:
       consumes:
@@ -3345,6 +3492,51 @@ paths:
       summary: Mark lesson as read (Enrolled Student/Admin/Mentor)
       tags:
       - Lesson
+  /lessons/assignment/upload-image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'Upload an image file to S3/MinIO for embedding in quiz questions
+        or assignment rich text. Supported formats: JPG, PNG, WebP, GIF. Max 5MB.'
+      parameters:
+      - description: Image file (max 5MB)
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image uploaded successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid image file
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to upload image
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload image for lesson assignment/quiz (Admin/Mentor)
+      tags:
+      - Lesson Assignment
   /lessons/attendances:
     post:
       consumes:
@@ -4241,124 +4433,12 @@ paths:
       summary: Google OAuth callback (Public)
       tags:
       - Auth
-  /payment/create:
-    post:
-      consumes:
-      - application/json
-      description: Create a new payment request to Tripay for a course enrollment
-      parameters:
-      - description: Payment Request
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreatePaymentRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment created successfully
-          schema:
-            $ref: '#/definitions/dto.APIResponse'
-        "400":
-          description: Invalid request or validation failed
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - Invalid or missing JWT token
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create Payment (All Roles)
-      tags:
-      - Payment
-  /payment/method:
-    get:
-      description: Mengambil daftar channel pembayaran langsung dari Tripay API.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tripay payment channels
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "502":
-          description: Failed to fetch from Tripay
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get Payment Channels (Tripay)
-      tags:
-      - Payment
-  /payment/tripay:
-    get:
-      consumes:
-      - application/json
-      description: Get payment details directly from Tripay by reference or merchant_ref
-      parameters:
-      - description: Tripay Reference
-        in: query
-        name: reference
-        type: string
-      - description: Tripay Merchant Reference
-        in: query
-        name: merchant_ref
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tripay payment details
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Reference parameter is missing
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - Invalid or missing JWT token
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Payment not found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get Payment (Tripay)
-      tags:
-      - Payment
   /register:
     post:
       consumes:
       - application/json
-      description: Register a new user with name, email, and password. Returns JWT
-        token on success.
+      description: Register a new user with name, email, and password. Requires OTP
+        verification before login.
       parameters:
       - description: Register payload
         in: body
@@ -4370,7 +4450,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: User registered successfully
+          description: User registered successfully, OTP sent
           schema:
             additionalProperties: true
             type: object
@@ -4401,10 +4481,22 @@ paths:
         in: query
         name: page
         type: integer
-      - description: 'Items per page (default: 20, max: 100)'
+      - description: 'Items per page (default: 10, max: 100)'
         in: query
         name: per_page
         type: integer
+      - description: Filter by course UID
+        in: query
+        name: course_uid
+        type: string
+      - description: Search by assignment title or course title
+        in: query
+        name: search
+        type: string
+      - description: Filter by category (all, todo, pending_review, done, late)
+        in: query
+        name: category
+        type: string
       produces:
       - application/json
       responses:
@@ -4431,6 +4523,59 @@ paths:
       security:
       - BearerAuth: []
       summary: List my assignments (Student)
+      tags:
+      - Student
+  /students/redeem:
+    post:
+      consumes:
+      - application/json
+      description: Redeem a voucher/token code to enroll into a course. Enforces strict
+        validations (active status, expiration, max usage, target user restrictions,
+        and duplicate enrollment checks).
+      parameters:
+      - description: Redeem code request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RedeemCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course code successfully redeemed
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request, expired code, max usage exceeded, or already
+            enrolled
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 'Access denied: Not targeted for this user or students only'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Redeem code or course not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Redeem course code (Student)
       tags:
       - Student
   /user/{id}:
@@ -4488,9 +4633,7 @@ paths:
       consumes:
       - application/json
       description: Retrieve own detailed user data including profile, joined courses,
-        enrollment invoices (same structure as GET /invoices/{enrollment_id}, with
-        invoice_url and filename per enrollment), transaction history, course reviews,
-        enrollment summary, and mentored courses.
+        course reviews, enrollment summary, and mentored courses.
       produces:
       - application/json
       responses:
@@ -4674,8 +4817,8 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update authenticated user's profile information including name,
-        email, and description. All fields are optional and encrypted before storage.
+      description: Update authenticated user's profile information including name
+        and email. All fields are optional and encrypted before storage.
       parameters:
       - description: Profile update data (all fields optional)
         in: body
@@ -4775,10 +4918,67 @@ paths:
       summary: Update user role (Super Admin / Admin)
       tags:
       - User Management
+  /user/role/batch:
+    patch:
+      consumes:
+      - application/json
+      description: Assign target role (admin, mentor, or student) to one or more users
+        at once. Only super_admin may assign the admin role or modify existing admin/super_admin
+        users.
+      parameters:
+      - description: User UIDs and target role
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BatchUpdateUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User roles updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request or role value
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: One or more users not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Batch update user roles (Super Admin / Admin)
+      tags:
+      - User Management
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.
     in: header
     name: Authorization
+    type: apiKey
+  ExternalAPIKey:
+    description: API key configured with REDEEM_CODE_API_KEY.
+    in: header
+    name: X-API-Key
     type: apiKey
 swagger: "2.0"

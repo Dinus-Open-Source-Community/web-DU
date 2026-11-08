@@ -7,11 +7,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-// Konstanta context key untuk menyimpan uid pengguna (UUID) dari JWT.
+// Konstanta context key untuk menyimpan uid pengguna (UUID) dan role dari JWT.
 const (
-	UIDCK = "uid"
+	UIDCK  = "uid"
+	RoleCK = "role"
 )
 
 // AuthMiddleware adalah middleware yang digunakan untuk memverifikasi token JWT
@@ -68,13 +70,84 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		var userData entity.User
-		_ = database.DB.Model(&entity.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
+		err = database.DB.Model(&entity.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
+		if err != nil || userData.Uid == uuid.Nil || !userData.IsVerified {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "Akun belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu.",
+				"data":    nil,
+				"error":   "Account not verified",
+			})
+			c.Abort()
+			return
+		}
 
-		// Simpan data Name dan Email dari claims ke context.
-		// Data ini bisa diambil di handler menggunakan c.Get(NameCK) atau c.Get(EmailCK).
+		// Simpan data Uid dan Role ke context.
 		c.Set(UIDCK, userData.Uid)
+		c.Set(RoleCK, userData.Role)
 
 		// Lanjutkan ke handler berikutnya jika token valid.
 		c.Next()
 	}
+}
+
+// RequireRoleMiddleware memvalidasi bahwa pengguna yang telah diautentikasi memiliki salah satu role yang diizinkan.
+func RequireRoleMiddleware(allowedRoles ...entity.UserRole) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleVal, exists := c.Get(RoleCK)
+		if !exists {
+			uidVal, uidExists := c.Get(UIDCK)
+			if !uidExists {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"success": false,
+					"message": "Autentikasi diperlukan",
+					"data":    nil,
+					"error":   "Unauthorized",
+				})
+				c.Abort()
+				return
+			}
+
+			var user entity.User
+			if err := database.DB.Select("role").First(&user, uidVal).Error; err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"success": false,
+					"message": "Pengguna tidak ditemukan",
+					"data":    nil,
+					"error":   err.Error(),
+				})
+				c.Abort()
+				return
+			}
+			roleVal = user.Role
+			c.Set(RoleCK, user.Role)
+		}
+
+		userRole, ok := roleVal.(entity.UserRole)
+		if !ok {
+			if strRole, isStr := roleVal.(string); isStr {
+				userRole = entity.UserRole(strRole)
+			}
+		}
+
+		for _, allowed := range allowedRoles {
+			if userRole == allowed {
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Akses ditolak: fitur ini hanya dapat diakses oleh role yang ditentukan",
+			"data":    nil,
+			"error":   "Forbidden access",
+		})
+		c.Abort()
+	}
+}
+
+// StudentOnlyMiddleware memastikan request hanya dapat diproses oleh pengguna dengan role student.
+func StudentOnlyMiddleware() gin.HandlerFunc {
+	return RequireRoleMiddleware(entity.StudentRole)
 }

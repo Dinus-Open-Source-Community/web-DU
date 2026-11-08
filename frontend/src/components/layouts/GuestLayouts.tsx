@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 
 import { useNavbarAuth } from '@/hooks/layout/use-navbar-auth'
-import { landingSurfaceClassName } from '@/lib/landing/landing-surface'
 import { cn } from '@/lib/utils'
 import Footer from '../shared/Footer'
 import Navbar from '../shared/Navbar'
+
+const landingSurfaceClassName = 'landing-surface'
 
 type GuestLayoutProps = {
   children: ReactNode
@@ -16,7 +17,7 @@ type GuestLayoutProps = {
 
 const GuestLayout = ({
   children,
-  navbarAuthVariant = 'default',
+  navbarAuthVariant = 'home',
   marketingSurface = false,
 }: GuestLayoutProps) => {
   const auth = useNavbarAuth()
@@ -34,7 +35,10 @@ const GuestLayout = ({
       <Navbar auth={auth} authActionsVariant={navbarAuthVariant} />
       <div
         id="main-content"
-        className={cn('relative z-10', marketingSurface ? 'bg-transparent' : 'bg-background')}
+        className={cn(
+          'relative z-10 min-h-dvh',
+          marketingSurface ? 'bg-paper-offwhite' : 'bg-background',
+        )}
       >
         {children}
       </div>
