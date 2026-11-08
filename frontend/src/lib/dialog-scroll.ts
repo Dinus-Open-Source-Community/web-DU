@@ -160,7 +160,7 @@ export function lockPageScrollForDialog() {
       return
     }
 
-    let snapshot: ScrollLockSnapshot | null = null
+    let snapshot: ScrollLockSnapshot | null
     try {
       snapshot = JSON.parse(
         html.dataset.dialogScrollLockSnapshot ?? 'null',

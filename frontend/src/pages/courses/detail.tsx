@@ -54,7 +54,7 @@ export default function PublicCourseDetailPage() {
     }
 
     navigate(ROUTES.student.redeem)
-  }, [courseDetail.data, isAuthenticated, isCourseFull, isEnrolled, navigate, profile?.role])
+  }, [courseDetail.data, isAuthenticated, isEnrolled, navigate, profile])
 
   if (isLoading) {
     return (

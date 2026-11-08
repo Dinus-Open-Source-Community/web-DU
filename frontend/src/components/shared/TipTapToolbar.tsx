@@ -38,7 +38,7 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
 
   return (
     <>
-      <ToolbarShell theme={theme}>
+      <ToolbarShell>
         <ToolbarRow
           className={cn(
             'justify-between gap-3 border-b',
@@ -50,7 +50,7 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
             <TipTapBlockTypeSelect size={controlSize} theme={theme} />
           </div>
 
-          <ToolbarGroup surface theme={theme}>
+          <ToolbarGroup surface>
             <ToolbarIconButton
               label="Urungkan"
               disabled={!toolbar.canUndo}
@@ -78,7 +78,7 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
             compact ? 'py-1.5' : 'py-2',
           )}
         >
-          <ToolbarGroup surface theme={theme}>
+          <ToolbarGroup surface>
             <ToolbarIconButton
               label="Daftar bullet"
               size={controlSize}
@@ -108,9 +108,9 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
             </ToolbarIconButton>
           </ToolbarGroup>
 
-          <ToolbarDivider theme={theme} />
+          <ToolbarDivider />
 
-          <ToolbarGroup surface theme={theme}>
+          <ToolbarGroup surface>
             <ToolbarIconButton
               label="Kutipan"
               size={controlSize}
@@ -131,13 +131,12 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
             </ToolbarIconButton>
           </ToolbarGroup>
 
-          <ToolbarDivider theme={theme} />
+          <ToolbarDivider />
 
-          <ToolbarGroup surface theme={theme}>
+          <ToolbarGroup surface>
             <TipTapInsertMenu
               editor={editor}
               size={controlSize}
-              theme={theme}
               onCaptureSelection={media.captureSelectionForMediaDialog}
               onInsertLink={() => media.openMediaDialog('link')}
               onInsertImage={() => media.openMediaDialog('image')}
@@ -147,17 +146,17 @@ export function TipTapToolbar({ variant, theme = 'light' }: TipTapToolbarProps) 
 
           {toolbar.isTable ? (
             <>
-              <ToolbarDivider theme={theme} />
-              <ToolbarGroup surface theme={theme}>
+              <ToolbarDivider />
+              <ToolbarGroup surface>
                 <TipTapTableControls size={controlSize} theme={theme} />
               </ToolbarGroup>
             </>
           ) : null}
 
-          <ToolbarDivider theme={theme} />
+          <ToolbarDivider />
 
-          <ToolbarGroup surface theme={theme}>
-            <TipTapMoreMenu editor={editor} size={controlSize} theme={theme} />
+          <ToolbarGroup surface>
+            <TipTapMoreMenu editor={editor} size={controlSize} />
           </ToolbarGroup>
         </ToolbarRow>
       </ToolbarShell>

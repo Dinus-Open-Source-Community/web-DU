@@ -15,12 +15,10 @@ import { ROUTES } from '@/lib/routes'
 import type { JoinedCourse } from '@/lib/types/user'
 import { cn } from '@/lib/utils'
 
-export type JoinedCourseCardVariant = 'resume' | 'non-resume'
 export type JoinedCourseCardSize = 'sm' | 'md' | 'lg'
 
 interface JoinedCourseCardProps {
   data: JoinedCourse
-  variant?: JoinedCourseCardVariant
   size?: JoinedCourseCardSize
   className?: string
   showProgress?: boolean
@@ -51,7 +49,6 @@ const sizes = {
 
 const JoinedCourseCard = ({
   data,
-  variant: _variant = 'non-resume',
   size = 'md',
   className,
   showProgress = true,

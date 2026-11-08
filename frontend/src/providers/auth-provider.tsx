@@ -65,7 +65,7 @@ const toSessionUser = (user: IUserData): IAuthSessionUser => ({
 })
 
 const getDashboardPath = (role?: UserRole | null) =>
-  role ? dashboardPathForUserRole(role) : '/auth/login'
+  role ? dashboardPathForUserRole() : '/auth/login'
 
 function decodeJwtPayload(token: string): JwtPayload | null {
   try {

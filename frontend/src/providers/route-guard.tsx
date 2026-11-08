@@ -29,7 +29,7 @@ export function RouteGuard({ children, allowedRoles }: RouteGuardProps) {
 
   if (!role || !allowedRoles?.includes(role)) {
     return (
-      <Navigate to={role ? dashboardPathForUserRole(role) : '/auth/login'} replace />
+      <Navigate to={role ? dashboardPathForUserRole() : '/auth/login'} replace />
     )
   }
 

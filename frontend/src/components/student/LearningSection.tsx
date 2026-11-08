@@ -220,15 +220,10 @@ const LearningSection = ({ Data }: { Data: IUserData }) => {
         <div className="flex flex-col gap-8">
           <div className={gridCardsClassName}>
             {paginatedCourses.map((course) => {
-              const isInProgress = isLearningProgressInProgress(
-                course.progress,
-              );
-
               return (
                 <JoinedCourseCard
                   key={course.uid}
                   data={course}
-                  variant={isInProgress ? "resume" : "non-resume"}
                   size="sm"
                 />
               );

@@ -31,7 +31,6 @@ export function TipTapTableControls({ size = 'default', theme = 'light' }: TipTa
       <ToolbarIconButton
         label="Tambah baris"
         size={size}
-        theme={theme}
         onClick={() => editor.chain().focus().addRowAfter().run()}
       >
         <Rows2 className={iconClass} />
@@ -39,7 +38,6 @@ export function TipTapTableControls({ size = 'default', theme = 'light' }: TipTa
       <ToolbarIconButton
         label="Tambah kolom"
         size={size}
-        theme={theme}
         onClick={() => editor.chain().focus().addColumnAfter().run()}
       >
         <Columns2 className={iconClass} />
@@ -47,7 +45,6 @@ export function TipTapTableControls({ size = 'default', theme = 'light' }: TipTa
       <ToolbarIconButton
         label="Hapus tabel"
         size={size}
-        theme={theme}
         onClick={() => editor.chain().focus().deleteTable().run()}
       >
         <Trash2 className={iconClass} />
