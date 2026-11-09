@@ -65,13 +65,13 @@ export default defineConfig(({ mode }) => {
         output: {
           codeSplitting: {
             groups: [
-              { name: 'tiptap', test: /node_modules[\\/](?:@tiptap|prosemirror)[\\/]/, priority: 20, maxSize: 450_000 },
+              { name: 'tiptap', test: /node_modules[\\/](?:@tiptap|prosemirror)[\\/]/, priority: 20 },
               { name: 'recharts', test: /node_modules[\\/](?:recharts|d3-[^\\/]+)[\\/]/, priority: 20 },
               { name: 'query', test: /node_modules[\\/]@tanstack[\\/]react-query[\\/]/, priority: 20 },
               { name: 'router', test: /node_modules[\\/]react-router[^\\/]*[\\/]/, priority: 20 },
               { name: 'radix', test: /node_modules[\\/](?:radix-ui|@radix-ui)[\\/]/, priority: 20 },
               { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 20 },
-              { name: 'vendor', test: /node_modules[\\/]/, priority: 10, maxSize: 450_000 },
+              { name: 'vendor', test: /node_modules[\\/]/, priority: 10 },
             ],
           },
         },

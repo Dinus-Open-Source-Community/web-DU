@@ -59,9 +59,9 @@ export default function Footer() {
 
       <div
         aria-hidden
-        className="pointer-events-none relative mt-3 mb-1 flex items-end overflow-hidden select-none max-sm:justify-start max-sm:mb-0.5 md:justify-center lg:mb-2"
+        className="pointer-events-none relative mt-3 mb-1 flex items-end overflow-hidden select-none max-sm:justify-center max-sm:mb-0.5 md:justify-center lg:mb-2"
       >
-        <span className="font-display text-paper-white/20 text-[clamp(2.75rem,14vw,7rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap max-sm:text-[clamp(3.25rem,23vw,9rem)] md:text-[clamp(4rem,15vw,12rem)] lg:text-[clamp(4.5rem,16vw,14rem)]">
+        <span className="font-display text-paper-white/20 text-[clamp(2.75rem,14vw,7rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap max-sm:text-[clamp(3.25rem,24vw,9rem)] md:text-[clamp(4rem,15vw,12rem)] lg:text-[clamp(4.5rem,16vw,14rem)]">
           DOSCOM
         </span>
       </div>
