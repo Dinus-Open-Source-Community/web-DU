@@ -1,5 +1,6 @@
 services:
   frontend:
+    image: localhost/web-du-frontend:latest
     build:
       context: ./frontend
       target: runtime
@@ -11,6 +12,7 @@ services:
       - backend
 
   backend:
+    image: localhost/web-du-backend:latest
     build: ./backend
     ports:
       - "8080:8080"
@@ -63,7 +65,7 @@ services:
         condition: service_started
 
   db:
-    image: postgres:15
+    image: docker.io/library/postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -79,12 +81,12 @@ services:
       retries: 5
 
   adminer:
-    image: adminer
+    image: docker.io/library/adminer:latest
     ports:
       - "8013:8080"
 
   garage:
-    image: dxflrs/garage:v2.4.1
+    image: docker.io/dxflrs/garage:v2.4.1
     ports:
       - "3900:3900"
       - "3901:3901"

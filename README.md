@@ -147,10 +147,19 @@ HMAC_KEY=your_hmac_key
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-### 3. Run with Docker Compose
+### 3. Run with Docker Compose or Podman Compose
+
+Build and start with Docker Compose:
 
 ```bash
 docker-compose up --build
+```
+
+Build and start with Podman Compose:
+
+```bash
+podman-compose build
+podman-compose up -d
 ```
 
 This will start all services:
