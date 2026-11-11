@@ -20,7 +20,7 @@ import (
 //
 // Seeder ini TIDAK melakukan TRUNCATE/DELETE massal. Setiap seed*():
 //   - INSERT jika record belum ada (lookup via kunci stabil: slug, email_hash, transaction_id, dll.)
-//   - SKIP jika sudah ada (enrollment, payment, review, submission, attendance, …)
+//   - SKIP jika sudah ada (enrollment, payment, review, submission, …)
 //   - UPDATE ringan pada beberapa seed lama (mis. user seed, patch course created_by_uid)
 //
 // Cara menjalankan ulang setelah mengubah seeder.go:
@@ -55,7 +55,6 @@ func RunSeeder(db *gorm.DB) {
 	seedLessons(db)
 	seedLessonAssignments(db)
 	seedLessonReadings(db)
-	seedLessonAttendances(db)
 	seedLessonAssignmentSubmissions(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
@@ -415,7 +414,9 @@ func seedEnrollments(db *gorm.DB) {
 				budiEnrollmentUIDs = append(budiEnrollmentUIDs, e.Uid)
 			}
 			db.Exec("DELETE FROM payments WHERE enrollment_uid IN ?", budiEnrollmentUIDs)
-			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonAttendance{})
+			if db.Migrator().HasTable("lesson_attendances") {
+				db.Exec("DELETE FROM lesson_attendances WHERE enrollment_uid IN ?", budiEnrollmentUIDs)
+			}
 			db.Where("enrollment_uid IN ?", budiEnrollmentUIDs).Delete(&entity.LessonReading{})
 			db.Where("user_uid = ?", budi.Uid).Delete(&entity.Enrollment{})
 		}
@@ -1233,43 +1234,6 @@ func seedLessonReadings(db *gorm.DB) {
 			log.Printf("[Success] Lesson reading %s / lesson order_index=%d (course %s) berhasil dibuat", item.StudentEmail, lesson.OrderIndex, item.CourseSlug)
 		}
 	}
-}
-
-// seedLessonAttendances mensimulasikan kehadiran siswa pada lesson yang sudah
-// mereka baca. Dipakai oleh GET /courses/:id/students (attendance_present).
-// Idempoten: lookup (lesson_uid, enrollment_uid).
-func seedLessonAttendances(db *gorm.DB) {
-	log.Println("[Seeder] Seeding Lesson Attendances...")
-
-	var readings []entity.LessonReading
-	if err := db.Find(&readings).Error; err != nil {
-		log.Printf("[Error] Gagal mengambil lesson readings untuk attendance: %v", err)
-		return
-	}
-
-	for _, reading := range readings {
-		var existing entity.LessonAttendance
-		err := db.Where("lesson_uid = ? AND enrollment_uid = ?", reading.LessonUid, reading.EnrollmentUid).First(&existing).Error
-		if err == nil {
-			continue
-		}
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("[Error] Gagal cek lesson attendance: %v", err)
-			continue
-		}
-
-		attendance := entity.LessonAttendance{
-			LessonUid:     reading.LessonUid,
-			EnrollmentUid: reading.EnrollmentUid,
-			Status:        entity.AttendancePresent,
-			CheckedInAt:   reading.ReadAt,
-		}
-		if err := db.Create(&attendance).Error; err != nil {
-			log.Printf("[Error] Gagal membuat lesson attendance: %v", err)
-			continue
-		}
-	}
-	log.Printf("[Success] Lesson attendances disinkronkan dari %d lesson readings", len(readings))
 }
 
 // seedLessonAssignmentSubmissions membuat contoh submission assignment dari

@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import type { CourseDetailTabValue } from '@/components/shared/course-detail-manage/CourseDetailNavTabs'
 import {
@@ -18,7 +19,16 @@ export function useCourseDetailTab({
 }: UseCourseDetailTabOptions) {
   const tabValues = useMemo(() => getCourseDetailTabValues(isAdmin), [isAdmin])
   const [rawTab, setRawTab] = useQueryStateEnum('tab', tabValues, defaultTab)
+  const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = resolveCourseDetailTab(rawTab, isAdmin, defaultTab)
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'attendance') {
+      const nextSearchParams = new URLSearchParams(searchParams)
+      nextSearchParams.delete('tab')
+      setSearchParams(nextSearchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const setActiveTab = (nextTab: CourseDetailTabValue) => {
     setRawTab(nextTab)

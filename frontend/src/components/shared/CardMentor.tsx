@@ -67,25 +67,23 @@ const CardMentor = ({
 
         {/* 3. Stats and Actions */}
         <div className="mt-auto space-y-2.5 border-t border-line-light pt-2.5">
-          <div className="flex items-center gap-2.5 text-xs font-medium text-ink-500">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-ink-500">
             <div className="flex items-center gap-1 font-bold text-ink-900">
               <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden />
               <span className="tabular-nums">{formatCourseRatingLabel(data.rating)}</span>
             </div>
-            <span className="text-line-medium">·</span>
             <div className="flex items-center gap-1.5">
               <Users className="size-3.5 text-ink-400" aria-hidden />
               <span className="tabular-nums">{data.slot ?? 0} Slot</span>
             </div>
-            <span className="text-line-medium">·</span>
             <div className="flex items-center gap-1.5">
               <BookOpen className="size-3.5 text-ink-400" aria-hidden />
               <span className="tabular-nums">{data.total_reviews ?? 0} Review</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
+          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 w-full sm:flex-1">
               {profiles.length > 0 ? (
                 <CourseCardProfiles profiles={profiles} compact showCount={false} />
               ) : (
@@ -96,12 +94,12 @@ const CardMentor = ({
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex w-full items-center gap-1.5 sm:w-auto sm:shrink-0">
               {detailHref && (
                 <Button
                   asChild
                   size="sm"
-                  className="h-8 shrink-0 rounded-sm border-2 border-ink-900/10 bg-primary px-3.5 text-xs font-semibold !text-white shadow-none hover:bg-brand-hover active:scale-[0.98] transition-all"
+                  className="h-9 w-full shrink-0 rounded-sm border-2 border-ink-900/10 bg-primary px-3.5 text-xs font-semibold !text-white shadow-none transition-all hover:bg-brand-hover active:scale-[0.98] sm:w-auto"
                 >
                   <Link to={detailHref} className="!text-white font-semibold">
                     Kelola Kursus

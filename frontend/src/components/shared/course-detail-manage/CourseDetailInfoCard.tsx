@@ -22,14 +22,14 @@ type InfoRowProps = {
 
 function InfoRow({ icon, label, value }: InfoRowProps) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-b border-line-light py-2 last:border-0 last:pb-0">
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center gap-x-3 gap-y-0.5 border-b border-line-light py-2 last:border-0 last:pb-0">
       <div className="flex min-w-0 items-center gap-2">
         <span className="text-ink-400" aria-hidden>
           {icon}
         </span>
         <span className="text-xs font-medium text-ink-500">{label}</span>
       </div>
-      <div className="min-w-0 text-right text-xs font-semibold text-ink-900 [&_.inline-flex]:font-semibold [&_span]:text-xs">
+      <div className="min-w-0 break-words text-right text-xs font-semibold text-ink-900 [&_.inline-flex]:font-semibold [&_span]:text-xs">
         {value}
       </div>
     </div>

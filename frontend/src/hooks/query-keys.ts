@@ -50,11 +50,6 @@ export const lessonAssignmentKeys = {
     ['lesson-assignments', 'overview-submissions', lessonUid] as const,
 }
 
-export const attendanceKeys = {
-  all: ['lesson-attendances'] as const,
-  byLesson: (lessonUid: string) => ['lesson-attendances', 'lesson', lessonUid] as const,
-}
-
 export const adminDashboardKeys = {
   all: ['admin-dashboard'] as const,
   kpis: (period: string) => ['admin-dashboard', 'kpis', period] as const,

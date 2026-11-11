@@ -128,8 +128,6 @@ export interface IMentorCourseStudent {
   enrolled_at: string
   progress: number
   status: MentorCourseStudentStatus
-  student_attendance_present?: number
-  student_attendance_total?: number
 }
 
 export interface ICourseStudentListResponse {

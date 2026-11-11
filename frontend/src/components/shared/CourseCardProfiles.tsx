@@ -49,7 +49,7 @@ export function CourseCardProfiles({ profiles, compact = false, showCount = true
           type="button"
           className={cn(
             'flex min-w-0 items-center cursor-pointer transition-opacity hover:opacity-80',
-            compact ? 'max-w-[140px] gap-1.5 sm:max-w-[160px]' : 'w-full gap-2',
+            compact ? 'w-full max-w-full gap-1.5' : 'w-full gap-2',
             className,
           )}
         >

@@ -596,8 +596,10 @@ func deleteLessonsWithCascadeTx(tx *gorm.DB, lessonIDs []uuid.UUID) error {
 		return nil
 	}
 
-	if err := tx.Where("lesson_uid IN ?", lessonIDs).Delete(&entity.LessonAttendance{}).Error; err != nil {
-		return err
+	if tx.Migrator().HasTable("lesson_attendances") {
+		if err := tx.Exec("DELETE FROM lesson_attendances WHERE lesson_uid IN ?", lessonIDs).Error; err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Where("lesson_uid IN ?", lessonIDs).Delete(&entity.LessonReading{}).Error; err != nil {

@@ -294,7 +294,7 @@ export function useCourseDetailWithCategories(uid: string) {
 export function useCourseDetailAdminAndMentor(uid: string) {
   const courseDetail = useCourseDetail(uid)
   const userCourse = useCourseStudents(uid)
-  // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum, Kehadiran,
+  // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum,
   // Tugas). Diambil lengkap supaya KPI dan daftar lesson tidak terpotong, lalu
   // dipakai bersama lewat query key yang sama agar tidak ada request ganda.
   const moduleCourse = useModulesByCourse(uid, { page: 1, per_page: 100 })

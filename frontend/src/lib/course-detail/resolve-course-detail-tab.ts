@@ -5,7 +5,6 @@ const COURSE_DETAIL_TAB_VALUES = [
   'kurikulum',
   'peserta',
   'assignments',
-  'attendance',
   'review',
   'mentor',
 ] as const satisfies readonly CourseDetailTabValue[]
@@ -15,7 +14,7 @@ export function getCourseDetailTabValues(isAdmin: boolean): CourseDetailTabValue
     return [...COURSE_DETAIL_TAB_VALUES]
   }
 
-  return COURSE_DETAIL_TAB_VALUES.filter((tab) => tab !== 'attendance' && tab !== 'mentor')
+  return COURSE_DETAIL_TAB_VALUES.filter((tab) => tab !== 'mentor')
 }
 
 export function resolveCourseDetailTab(

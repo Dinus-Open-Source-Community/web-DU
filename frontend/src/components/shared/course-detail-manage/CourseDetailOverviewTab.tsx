@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import {
-  ClipboardCheck,
   ClipboardList,
   FileText,
   GraduationCap,
@@ -19,7 +18,6 @@ import {
   summarizeAssignments,
   summarizeCourseReviews,
 } from '@/lib/course-detail/course-detail-overview-stats'
-import { deriveLessonsFromModules } from '@/lib/course-detail/derive-lessons-from-modules'
 import { formatCourseRatingLabel, hasPublishedCourseReviews } from '@/lib/course-detail/course-rating'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { Initials } from '@/lib/func/func'
@@ -86,7 +84,6 @@ export function CourseDetailOverviewTab({
 }: CourseDetailOverviewTabProps) {
   const moduleCount = modules.length
   const lessonCount = countCurriculumLessons(modules)
-  const attendanceLessonCount = deriveLessonsFromModules(modules).length
   const mentors = course.mentors ?? []
   const reviews = course.reviews ?? []
 
@@ -134,9 +131,6 @@ export function CourseDetailOverviewTab({
           {isAdmin ? (
             <StatItem label="Mentor" value={mentors.length} accentClassName={nextAccent()} />
           ) : null}
-          {isAdmin ? (
-            <StatItem label="Lesson absen" value={attendanceLessonCount} accentClassName={nextAccent()} />
-          ) : null}
           <StatItem label="Rating publik" value={ratingLabel} accentClassName={nextAccent()} />
         </div>
 
@@ -151,7 +145,7 @@ export function CourseDetailOverviewTab({
           />
         </article>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
           <CourseDetailOverviewSection
             title="Kurikulum"
             description="Ringkasan modul dan lesson dari tab Kurikulum."
@@ -261,7 +255,7 @@ export function CourseDetailOverviewTab({
           ) : null}
         </CourseDetailOverviewSection>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
           <CourseDetailOverviewSection
             title={COURSE_DETAIL_OVERVIEW_REVIEW_KPI_LABEL}
             description="Umpan balik siswa dari tab Ulasan."
@@ -325,27 +319,6 @@ export function CourseDetailOverviewTab({
             </CourseDetailOverviewSection>
           ) : null}
 
-          {isAdmin ? (
-            <CourseDetailOverviewSection
-              title="Kehadiran"
-              description="Pencatatan absensi per lesson dari tab Kehadiran."
-              icon={ClipboardCheck}
-              tab="attendance"
-              tabLabel="Buka kehadiran"
-              onNavigateToTab={onNavigateToTab}
-              className={isAdmin ? undefined : 'hidden'}
-            >
-              {attendanceLessonCount === 0 ? (
-                <OverviewEmpty>Tambahkan lesson di kurikulum untuk mulai mencatat kehadiran.</OverviewEmpty>
-              ) : (
-                <p className="text-sm text-ink-600">
-                  <span className="font-semibold text-ink-900 tabular-nums">{attendanceLessonCount}</span>{' '}
-                  lesson siap dicatat kehadirannya untuk{' '}
-                  <span className="font-semibold text-ink-900 tabular-nums">{students.length}</span> peserta.
-                </p>
-              )}
-            </CourseDetailOverviewSection>
-          ) : null}
         </div>
       </div>
     </div>

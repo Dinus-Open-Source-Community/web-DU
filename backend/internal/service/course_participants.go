@@ -1,17 +1,20 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"backend/internal/database"
+	"backend/internal/model/dto"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func isMentorAssignedToCourse(mentorUID, courseUID uuid.UUID) (bool, error) {
@@ -232,10 +235,127 @@ func GetCourseCandidateStudentsFunc(c *gin.Context) {
 // @Failure      500   {object}  map[string]any                "Internal server error"
 // @Router       /courses/{id}/participants [post]
 func AddCourseParticipantsFunc(c *gin.Context) {
-	c.JSON(http.StatusForbidden, gin.H{
-		"success": false,
-		"message": "Gunakan kode redeem untuk masuk ke kursus.",
-		"data":    nil,
-		"error":   "Redeem code required",
+	courseUID, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+	if _, ok := authorizeCourseParticipantManager(c, courseUID); !ok {
+		return
+	}
+
+	var req dto.AddCourseParticipantsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request body", "data": nil, "error": err.Error()})
+		return
+	}
+
+	rawUIDs := make([]string, 0, len(req.StudentUids)+len(req.UserUids))
+	for _, uid := range append(req.StudentUids, req.UserUids...) {
+		if uid = strings.TrimSpace(uid); uid != "" {
+			rawUIDs = append(rawUIDs, uid)
+		}
+	}
+	if len(rawUIDs) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Pilih minimal satu siswa untuk diundang.", "data": nil, "error": "student_uids or user_uids cannot be empty"})
+		return
+	}
+
+	resolvedUIDs, err := database.ResolveUIDs("users", rawUIDs)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Gagal menemukan data siswa.", "data": nil, "error": err.Error()})
+		return
+	}
+	uniqueUIDs := make([]uuid.UUID, 0, len(resolvedUIDs))
+	seenUIDs := make(map[uuid.UUID]struct{}, len(resolvedUIDs))
+	for _, uid := range resolvedUIDs {
+		if _, exists := seenUIDs[uid]; !exists {
+			seenUIDs[uid] = struct{}{}
+			uniqueUIDs = append(uniqueUIDs, uid)
+		}
+	}
+
+	var students []entity.User
+	if err := database.DB.Where("uid IN ? AND role = ?", uniqueUIDs, entity.StudentRole).Find(&students).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal mengambil data siswa.", "data": nil, "error": err.Error()})
+		return
+	}
+	if len(students) != len(uniqueUIDs) {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Semua pengguna yang dipilih harus memiliki role student.", "data": nil, "error": "Invalid student selection"})
+		return
+	}
+
+	tx := database.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal memulai transaksi.", "data": nil, "error": tx.Error.Error()})
+		return
+	}
+	var course entity.Course
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&course, courseUID).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Course not found", "data": nil, "error": err.Error()})
+		return
+	}
+
+	var existing []entity.Enrollment
+	if err := tx.Where("course_uid = ? AND user_uid IN ?", courseUID, uniqueUIDs).Find(&existing).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal memeriksa pendaftaran siswa.", "data": nil, "error": err.Error()})
+		return
+	}
+	existingUIDs := make(map[uuid.UUID]struct{}, len(existing))
+	for _, enrollment := range existing {
+		existingUIDs[enrollment.UserUid] = struct{}{}
+	}
+
+	newEnrollments := make([]entity.Enrollment, 0, len(students))
+	addedUIDs := make([]string, 0, len(students))
+	for _, student := range students {
+		if _, alreadyEnrolled := existingUIDs[student.Uid]; alreadyEnrolled {
+			continue
+		}
+		newEnrollments = append(newEnrollments, entity.Enrollment{
+			UserUid: student.Uid, CourseUid: course.Uid, Status: entity.EnrollmentActive,
+		})
+		addedUIDs = append(addedUIDs, student.Uid.String())
+	}
+
+	if course.Slot > 0 && len(newEnrollments) > 0 {
+		var enrolledCount int64
+		if err := tx.Table("enrollments e").Joins("JOIN users u ON u.uid = e.user_uid").
+			Where("e.course_uid = ? AND u.role = ?", course.Uid, entity.StudentRole).Count(&enrolledCount).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal memeriksa kuota kursus.", "data": nil, "error": err.Error()})
+			return
+		}
+		if enrolledCount+int64(len(newEnrollments)) > int64(course.Slot) {
+			tx.Rollback()
+			c.JSON(http.StatusConflict, gin.H{"success": false, "message": fmt.Sprintf("Kuota kursus hanya tersisa %d tempat.", int64(course.Slot)-enrolledCount), "data": nil, "error": "Course capacity exceeded"})
+			return
+		}
+	}
+
+	if len(newEnrollments) == 0 {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Semua siswa yang dipilih sudah terdaftar di kursus ini.", "data": nil, "error": "Students already enrolled"})
+		return
+	}
+	if err := tx.Create(&newEnrollments).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal mengundang siswa ke kursus.", "data": nil, "error": err.Error()})
+		return
+	}
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal menyimpan undangan siswa.", "data": nil, "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": fmt.Sprintf("Berhasil mengundang %d siswa ke kursus.", len(addedUIDs)),
+		"data": dto.AddCourseParticipantsResponse{
+			CourseUid: course.Uid.String(), AddedCount: len(addedUIDs),
+			SkippedCount: len(uniqueUIDs) - len(addedUIDs), AddedUids: addedUIDs,
+		},
+		"error": nil,
 	})
 }

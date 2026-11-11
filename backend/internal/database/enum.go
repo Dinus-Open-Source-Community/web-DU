@@ -20,10 +20,8 @@ func CreateAllEnums(db *gorm.DB) {
 	// menghapus dependency kolom/tabel dan menyebabkan data tidak konsisten.
 	createUserRoleEnum(db)
 	createEnrollmentStatusEnum(db)
-	createAttendanceStatusEnum(db)
 	createCourseLevelEnum(db)
 	createCourseStatusEnum(db)
-	migrateLessonAttendanceStatusEnum(db)
 
 	// Log bahwa seluruh ENUM berhasil diinisialisasi
 	log.Println("[Success] All ENUMs have been created")
@@ -92,57 +90,6 @@ func createEnrollmentStatusEnum(db *gorm.DB) {
 	_ = db.Exec("UPDATE enrollments SET status = 'active' WHERE status::text IN ('pending', 'cancelled')").Error
 
 	log.Println("[Success] ENUM enrollment_status is ready for use")
-}
-
-// createAttendanceStatusEnum digunakan untuk membuat ENUM bernama `attendance_status`
-// di database PostgreSQL.
-//
-// ENUM ini berisi empat nilai tetap:
-// - 'present' → untuk status kehadiran tepat waktu
-// - 'late'    → untuk status kehadiran terlambat
-// - 'absent'  → untuk status tidak hadir
-// - 'excused' → untuk status izin
-//
-// Parameter:
-//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
-func createAttendanceStatusEnum(db *gorm.DB) {
-	ensureEnumType(db, "attendance_status", []string{"present", "late", "absent", "excused"})
-
-	log.Println("[Success] ENUM attendance_status is ready for use")
-}
-
-// migrateLessonAttendanceStatusEnum memastikan kolom status pada lesson_attendances
-// menggunakan tipe attendance_status dan default 'present' tanpa error casting.
-//
-// Parameter:
-//   - db: instance koneksi *gorm.DB yang digunakan untuk menjalankan query.
-func migrateLessonAttendanceStatusEnum(db *gorm.DB) {
-	query := `DO $$
-DECLARE
-	current_type text;
-BEGIN
-	SELECT udt_name INTO current_type
-	FROM information_schema.columns
-	WHERE table_name = 'lesson_attendances' AND column_name = 'status';
-
-	IF current_type IS NULL THEN
-		RETURN;
-	END IF;
-
-	IF current_type <> 'attendance_status' THEN
-		EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status DROP DEFAULT';
-		EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status TYPE attendance_status USING status::attendance_status';
-	END IF;
-
-	EXECUTE 'ALTER TABLE lesson_attendances ALTER COLUMN status SET DEFAULT ''present''';
-END $$;`
-
-	if err := db.Exec(query).Error; err != nil {
-		log.Printf("[Warning] Failed to migrate lesson_attendances.status: %v\n", err)
-		return
-	}
-
-	log.Println("[Success] lesson_attendances.status migrated to attendance_status")
 }
 
 func createCourseLevelEnum(db *gorm.DB) {

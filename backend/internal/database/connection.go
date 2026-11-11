@@ -67,7 +67,6 @@ func ConnectDB() {
 		&entity.CourseReview{},
 		&entity.CourseReviewReply{},
 		&entity.CourseAnnouncement{},
-		&entity.LessonAttendance{},
 		&entity.LessonReading{},
 		&entity.CourseQaThread{},
 		&entity.CourseQaReply{},

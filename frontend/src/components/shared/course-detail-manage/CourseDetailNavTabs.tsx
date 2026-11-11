@@ -1,6 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
 import {
-  ClipboardCheck,
   ClipboardList,
   GraduationCap,
   Layers3,
@@ -17,7 +16,6 @@ export type CourseDetailTabValue =
   | 'kurikulum'
   | 'peserta'
   | 'assignments'
-  | 'attendance'
   | 'review'
   | 'mentor'
 
@@ -34,13 +32,6 @@ const DETAIL_TAB_CONFIG: CourseDetailTabConfig[] = [
   { value: 'kurikulum', label: 'Kurikulum', shortLabel: 'Kurikulum', icon: Layers3 },
   { value: 'peserta', label: 'Peserta', shortLabel: 'Peserta', icon: UsersRound },
   { value: 'assignments', label: 'Tugas', shortLabel: 'Tugas', icon: ClipboardList },
-  {
-    value: 'attendance',
-    label: 'Kehadiran',
-    shortLabel: 'Absen',
-    icon: ClipboardCheck,
-    adminOnly: true,
-  },
   { value: 'review', label: 'Ulasan', shortLabel: 'Ulasan', icon: Star },
   {
     value: 'mentor',
