@@ -55,7 +55,7 @@ func GetMailer() *Mailer {
 			from = user
 		}
 		if fromName == "" {
-			fromName = "DOSCOM University"
+			fromName = "DKelas"
 		}
 
 		implicitTLS := port == "465" || strings.EqualFold(encryption, "ssl")
@@ -93,7 +93,7 @@ func (m *Mailer) SendOTP(to, name, code string, expiresMinutes int) error {
 	body = strings.ReplaceAll(body, "{{.Code}}", code)
 	body = strings.ReplaceAll(body, "{{.ExpiresMinutes}}", fmt.Sprintf("%d", expiresMinutes))
 
-	if err := m.sendHTML(to, "Kode Verifikasi Akun DOSCOM University", body); err != nil {
+	if err := m.sendHTML(to, "Kode Verifikasi Akun DKelas", body); err != nil {
 		return err
 	}
 	log.Printf("[mailer] Successfully sent OTP email to %s", to)
@@ -114,7 +114,7 @@ func (m *Mailer) SendEmailChangeConfirmation(toOldEmail, name, newEmail, confirm
 	body = strings.ReplaceAll(body, "{{.ConfirmURL}}", confirmURL)
 	body = strings.ReplaceAll(body, "{{.ExpiresMinutes}}", fmt.Sprintf("%d", expiresMinutes))
 
-	if err := m.sendHTML(toOldEmail, "Konfirmasi Perubahan Alamat Email — DOSCOM University", body); err != nil {
+	if err := m.sendHTML(toOldEmail, "Konfirmasi Perubahan Alamat Email — DKelas", body); err != nil {
 		return err
 	}
 	log.Printf("[mailer] Successfully sent email-change confirmation to %s (new: %s)", toOldEmail, newEmail)

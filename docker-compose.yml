@@ -26,6 +26,15 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_SSLMODE=${DB_SSLMODE}
+      - REDIS_ENABLED=${REDIS_ENABLED:-true}
+      - REDIS_ADDR=${REDIS_ADDR:-redis:6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_DB=${REDIS_DB:-0}
+      - REDIS_POOL_SIZE=${REDIS_POOL_SIZE:-20}
+      - REDIS_DIAL_TIMEOUT=${REDIS_DIAL_TIMEOUT:-5s}
+      - REDIS_READ_TIMEOUT=${REDIS_READ_TIMEOUT:-3s}
+      - REDIS_WRITE_TIMEOUT=${REDIS_WRITE_TIMEOUT:-3s}
+      - REDIS_AUTH_CACHE_TTL=${REDIS_AUTH_CACHE_TTL:-45s}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - REDEEM_CODE_API_KEY=${REDEEM_CODE_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -57,7 +66,6 @@ services:
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
       - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME}
-      - SEED=${SEED} # HAPUS SAJA PADA SAAT PRODUCTION
     depends_on:
       db:
         condition: service_healthy
@@ -78,6 +86,19 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
+      retries: 5
+
+  redis:
+    image: docker.io/library/redis:7-alpine
+    command: ["sh", "-c", "if [ -n \"$$REDIS_PASSWORD\" ]; then exec redis-server --requirepass \"$$REDIS_PASSWORD\"; else exec redis-server; fi"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -n \"$$REDIS_PASSWORD\" ]; then redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG; else redis-cli ping | grep -q PONG; fi"]
+      interval: 5s
+      timeout: 3s
       retries: 5
 
   adminer:
@@ -108,3 +129,4 @@ volumes:
   db_data:
   garage_meta:
   garage_data:
+  redis_data:

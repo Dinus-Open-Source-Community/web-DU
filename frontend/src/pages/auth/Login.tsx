@@ -74,7 +74,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       heading="Selamat datang kembali"
-      subheading="Masuk ke akunmu dan lanjutkan perjalanan belajar bersama Doscom University."
+      subheading="Masuk ke akunmu dan lanjutkan perjalanan belajar bersama DKelas."
     >
       <AuthFormPanel>
         <AuthPageHeader title="Masuk" displayTitle />

@@ -286,7 +286,7 @@ definitions:
         example: user@example.com
         type: string
       name:
-        example: User DU
+        example: User DK
         type: string
       password:
         example: StrongPassword123
@@ -342,8 +342,8 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Documentation for Web DU Backend API.
-  title: Web DU Backend
+  description: Documentation for DKelas Backend API.
+  title: DKelas Backend
   version: "1.0"
 paths:
   /admin/dashboard/analytics:

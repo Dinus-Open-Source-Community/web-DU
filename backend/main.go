@@ -1,6 +1,6 @@
-// @title Web DU Backend
+// @title DKelas Backend
 // @version 1.0
-// @description Documentation for Web DU Backend API.
+// @description Documentation for DKelas Backend API.
 
 // @host localhost:8080
 // @BasePath /
@@ -16,13 +16,13 @@
 package main
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/utils"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -76,11 +76,15 @@ func main() {
 
 	// Connect to the database
 	database.ConnectDB()
-
-	// Run seeder jika SEED=true di environment variable
-	if os.Getenv("SEED") == "true" {
-		database.RunSeeder(database.DB)
+	if err := cache.InitializeFromEnv(); err != nil {
+		log.Fatalf("Redis configuration failed: %v", err)
 	}
+	if cache.Default != nil {
+		defer cache.Default.Close()
+	}
+
+	// Seeder tidak dijalankan saat startup. Gunakan binary khusus:
+	// go build -o bin/seed ./cmd/seed && ./bin/seed
 
 	// Setup all routes
 	setup.SetupAllRoutes(r)

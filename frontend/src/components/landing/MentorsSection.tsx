@@ -55,7 +55,7 @@ export default function MentorsSection() {
             ))}
           </div>
         ) : isError || preview.length === 0 ? (
-          <Reveal once={false} y={24} className="mt-10 sm:mt-12">
+          <Reveal y={24} className="mt-10 sm:mt-12">
             <div className="mx-auto max-w-md py-10 text-center">
               <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-mint text-ink-900">
                 <Users className="size-6 text-ink-900" />

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/internal/cache"
 	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/service"
@@ -15,28 +16,28 @@ func init() {
 func StartCourseRoutes(r *gin.Engine) {
 	publicCourseGroup := r.Group("/courses")
 	{
-		publicCourseGroup.GET("/", service.GetAllCoursesFunc)                        // Public
-		publicCourseGroup.GET("/:id", service.GetCourseByIDFunc)                     // Public
-		publicCourseGroup.GET("/:id/mentor", service.GetCourseMentorsByCourseIDFunc) // Public
-		publicCourseGroup.GET("/:id/students", service.GetCourseStudentsFunc)        // Public
+		publicCourseGroup.GET("/", cache.ResponseCache(cache.NamespaceCourseList, cache.PublicCoursesTTL), service.GetAllCoursesFunc)                                   // Public
+		publicCourseGroup.GET("/:id", cache.ResponseCacheUID(cache.NamespaceCourseDetail, cache.CourseDetailTTL, "courses", "id"), service.GetCourseByIDFunc)           // Public
+		publicCourseGroup.GET("/:id/mentor", cache.ResponseCacheUID("course:mentors", cache.CourseMentorsTTL, "courses", "id"), service.GetCourseMentorsByCourseIDFunc) // Public
+		publicCourseGroup.GET("/:id/students", service.GetCourseStudentsFunc)                                                                                           // Public
 	}
 
 	authCourseGroup := r.Group("/courses")
 	authCourseGroup.Use(middleware.AuthMiddleware())
 	{
-		authCourseGroup.GET("/:id/progress", service.GetCourseProgressFunc)                            // Enrolled students / Admin / Mentor
-		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                       // Students only
-		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                             // Enrolled students only
-		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc)       // Mentor+ only
-		authCourseGroup.POST("/:id/qna", service.CreateCourseQaThreadFunc)                              // Enrolled students only
-		authCourseGroup.POST("/:id/qna/:thread_id/replies", service.CreateCourseQaReplyFunc)            // Student / Mentor / Admin
-		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                          // Super Admin / Admin
-		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)                  // Super Admin / Admin
-		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)              // Super Admin / Admin
-		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc)          // Super Admin / Admin / Mentor
-		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)                    // Super Admin / Admin / Mentor
-		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)                        // Alias
-		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                         // Admin / Mentor
+		authCourseGroup.GET("/:id/progress", service.GetCourseProgressFunc)                       // Enrolled students / Admin / Mentor
+		authCourseGroup.POST("/:id/join", service.JoinCourseFunc)                                 // Students only
+		authCourseGroup.POST("/:id/review", service.CreateCourseReviewFunc)                       // Enrolled students only
+		authCourseGroup.POST("/:id/review/:review_id/reply", service.CreateCourseReviewReplyFunc) // Mentor+ only
+		authCourseGroup.POST("/:id/qna", service.CreateCourseQaThreadFunc)                        // Enrolled students only
+		authCourseGroup.POST("/:id/qna/:thread_id/replies", service.CreateCourseQaReplyFunc)      // Student / Mentor / Admin
+		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)      // Super Admin / Admin
+		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc)    // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)              // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)                  // Alias
+		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                 // Admin / Mentor
 
 		authCourseGroup.POST("/", service.PostAdminCourseFunc)        // Super Admin / Admin
 		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc)    // Super Admin / Admin

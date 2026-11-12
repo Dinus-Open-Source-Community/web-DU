@@ -188,7 +188,7 @@ export function PopularCoursesStrip({
                   </div>
                 ) : (
                   <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-ink-500">
-                    Komunitas Doscom
+                    Komunitas DKelas
                   </span>
                 )}
 

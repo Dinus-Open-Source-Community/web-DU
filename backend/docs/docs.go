@@ -6699,7 +6699,7 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
-                    "example": "User DU"
+                    "example": "User DK"
                 },
                 "password": {
                     "type": "string",
@@ -6792,8 +6792,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Web DU Backend",
-	Description:      "Documentation for Web DU Backend API.",
+	Title:            "DKelas Backend",
+	Description:      "Documentation for DKelas Backend API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -160,7 +160,7 @@ export default function CoursePage() {
 
               <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ink-600 sm:text-base md:text-lg">
                 Pelajari teknologi modern dan pemrograman langsung dari kurikulum berbasis proyek nyata.
-                Dipandu oleh mentor praktisi komunitas Doscom.
+                Dipandu oleh mentor praktisi komunitas DKelas.
               </p>
 
               {/* Unified Tactile Search Bar + Level Filter */}
@@ -495,7 +495,7 @@ export default function CoursePage() {
                             </div>
                           ) : (
                             <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-ink-500">
-                              Doscom
+                              DKelas
                             </span>
                           )}
 

@@ -803,7 +803,7 @@ export function GenerateRedeemCodeDialog({
                     className="rounded-xl border-ink-900/15 uppercase font-mono tracking-wider"
                   />
                   <p className="text-[11px] text-ink-400">
-                    Kode dibuat otomatis. Format: <span className="font-mono text-ink-700">{prefix.trim() || 'DU'}-XXXX-XXXX</span>.
+                    Kode dibuat otomatis. Format: <span className="font-mono text-ink-700">{prefix.trim() || 'DK'}-XXXX-XXXX</span>.
                   </p>
                 </div>
               </div>

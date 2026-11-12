@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
@@ -341,6 +342,7 @@ func PostAdminModuleFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceModuleList, cache.NamespaceCourseDetail)
 
 	module.Title = utils.DecryptOrSelf(module.Title)
 
@@ -441,6 +443,7 @@ func UpdateAdminModuleFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceModuleList, cache.NamespaceCourseDetail)
 
 	module.Title = utils.DecryptOrSelf(module.Title)
 
@@ -534,6 +537,7 @@ func DeleteAdminModuleFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceModuleList, cache.NamespaceCourseDetail, cache.NamespaceLessonDetail, cache.NamespaceAssignmentConfig)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

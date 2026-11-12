@@ -24,8 +24,10 @@ import (
 //   - UPDATE ringan pada beberapa seed lama (mis. user seed, patch course created_by_uid)
 //
 // Cara menjalankan ulang setelah mengubah seeder.go:
-//  1. CLI (disarankan):  cd backend && go run ./cmd/seed
-//  2. Saat startup app:  set SEED=true di .env lalu restart backend
+//
+//	cd backend && go build -o bin/seed ./cmd/seed && ./bin/seed
+//
+// Seeder tidak lagi dijalankan otomatis saat startup app.
 //
 // Cara menambah data seed baru:
 //  1. Tambahkan entry di slice seed*() yang relevan

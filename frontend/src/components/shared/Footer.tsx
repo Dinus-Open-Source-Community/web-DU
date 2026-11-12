@@ -23,10 +23,10 @@ export default function Footer() {
               to="/"
               className="font-display text-brand-blue focus-visible:ring-brand-blue/60 inline-block rounded-lg text-2xl font-bold tracking-tight outline-none focus-visible:ring-3 lg:text-3xl"
             >
-              DOSCOM University
+              DKelas
             </Link>
             <p className="text-paper-white/60 mt-3 max-w-md text-sm leading-relaxed max-sm:mt-2">
-              Program intensif open source DOSCOM — belajar ngoding bareng
+              Program intensif open source DKELAS — belajar ngoding bareng
               komunitas, dari nol sampai bisa ikut kontribusi.
             </p>
           </div>
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <p className="text-paper-white/60 mt-3 text-center text-xs max-sm:mt-2 sm:mt-8 lg:mt-10">
-          &copy; {new Date().getFullYear()} Doscom University
+          &copy; {new Date().getFullYear()} DKelas
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export default function Footer() {
         className="pointer-events-none relative mt-3 mb-1 flex items-end overflow-hidden select-none max-sm:justify-center max-sm:mb-0.5 md:justify-center lg:mb-2"
       >
         <span className="font-display text-paper-white/20 text-[clamp(2.75rem,14vw,7rem)] leading-[0.8] font-bold tracking-tight whitespace-nowrap max-sm:text-[clamp(3.25rem,24vw,9rem)] md:text-[clamp(4rem,15vw,12rem)] lg:text-[clamp(4.5rem,16vw,14rem)]">
-          DOSCOM
+          DKELAS
         </span>
       </div>
     </footer>

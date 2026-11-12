@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
@@ -286,6 +287,10 @@ func SSOCallbackHandler(c *gin.Context) {
 			ssoRedirectFrontend(c, target, url.Values{"error": {"failed_update_user"}}, nil)
 			return
 		}
+		cache.InvalidateAuthSession(user.EmailHash)
+		cache.InvalidateMentorDirectory()
+		cache.InvalidateCourseList()
+		cache.InvalidateCourseContent(user.Uid.String())
 	}
 
 	// Terbitkan JWT lokal 24 jam — konsisten dengan POST /login yang lama.

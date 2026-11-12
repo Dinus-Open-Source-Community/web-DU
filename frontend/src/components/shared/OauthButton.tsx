@@ -27,7 +27,7 @@ const OauthButton = ({ isSubmitting, onGoogleSignIn }: OauthButtonProps) => {
         disabled={isSubmitting}
       >
         <img src="/Logo.svg" alt="" className="size-5 object-contain" />
-        Doscom
+        DKelas
       </Button>
     </div>
   )

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
@@ -233,6 +234,7 @@ func GradeLessonAssignmentSubmissionForStaffFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to sync submission attempt grade", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceCourseDetail)
 
 	if err := preloadSubmissionRelations(database.DB).First(&row, row.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to reload submission", "data": nil, "error": err.Error()})

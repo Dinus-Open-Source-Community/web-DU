@@ -207,7 +207,7 @@ function SidebarBrand() {
         to={ROUTES.home}
         className={cn('flex flex-shrink-0 items-center', isMobile && 'mx-auto justify-center')}
       >
-        <span className={cn(brandWordmarkClassName, 'whitespace-nowrap')}>Doscom University</span>
+        <span className={cn(brandWordmarkClassName, 'whitespace-nowrap')}>DKelas</span>
       </Link>
 
       {isMobile && (

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/internal/cache"
 	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/service"
@@ -15,7 +16,7 @@ func init() {
 func StartMentorRoutes(r *gin.Engine) {
 	mentorGroup := r.Group("/mentor")
 	{
-		mentorGroup.GET("/all", service.GetAllMentorsFunc) // Public
+		mentorGroup.GET("/all", cache.ResponseCache(cache.NamespaceMentorDirectory, cache.PublicMentorsTTL), service.GetAllMentorsFunc) // Public
 
 		dashboardGroup := mentorGroup.Group("/dashboard")
 		dashboardGroup.Use(middleware.AuthMiddleware())

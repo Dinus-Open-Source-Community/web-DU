@@ -64,7 +64,7 @@ export default function RegisterPage() {
   return (
     <AuthLayout
       heading="Buat akun baru"
-      subheading="Daftar sekarang dan mulai perjalanan belajar Anda dengan Doscom University."
+      subheading="Daftar sekarang dan mulai perjalanan belajar Anda dengan DKelas."
     >
       <AuthFormPanel>
         <AuthPageHeader title="Daftar" displayTitle />

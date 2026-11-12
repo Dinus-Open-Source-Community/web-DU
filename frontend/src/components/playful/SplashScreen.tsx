@@ -86,7 +86,7 @@ function SplashOverlay({ onSkip }: { onSkip: () => void }) {
   return (
     <motion.div
       role="status"
-      aria-label="Memuat DOSCOM"
+      aria-label="Memuat DKELAS"
       onClick={onSkip}
       initial={false}
       animate={{ opacity: 1 }}
@@ -95,7 +95,7 @@ function SplashOverlay({ onSkip }: { onSkip: () => void }) {
       className="fixed inset-0 z-[200] flex cursor-pointer flex-col items-center justify-center bg-paper-white"
     >
       <p className="font-display text-5xl font-bold tracking-tight text-ink-900 md:text-6xl">
-        DOSCOM
+        DKELAS
       </p>
 
       <div className="mt-6 h-2 w-44 overflow-hidden rounded-full border-2 border-ink-900 bg-paper-panel">

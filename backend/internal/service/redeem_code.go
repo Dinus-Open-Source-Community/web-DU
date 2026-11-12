@@ -32,7 +32,7 @@ func redeemCodeCanDelete(usedCount int, usageCount int64) bool {
 func generateRandomRedeemCode(prefix string) (string, error) {
 	cleanPrefix := strings.ToUpper(strings.TrimSpace(prefix))
 	if cleanPrefix == "" {
-		cleanPrefix = "DU"
+		cleanPrefix = "DK"
 	}
 	cleanPrefix = strings.Trim(cleanPrefix, "-_")
 

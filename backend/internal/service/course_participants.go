@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -348,6 +349,7 @@ func AddCourseParticipantsFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal menyimpan undangan siswa.", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateCourse(courseUID.String())
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
@@ -226,6 +227,8 @@ func PostAdminCourseCategoryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseCategories()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -311,6 +314,8 @@ func UpdateAdminCourseCategoryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseCategories()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -363,6 +368,8 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseCategories()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -559,6 +566,8 @@ func PostAdminClassTypeFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseTypes()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -644,6 +653,8 @@ func UpdateAdminClassTypeFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseTypes()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -696,6 +707,8 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseTypes()
+	cache.InvalidateCourseList()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

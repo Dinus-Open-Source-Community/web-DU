@@ -4,6 +4,7 @@ import { ArrowRight, Camera, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
+import { useLandingMotion } from '@/components/playful/LandingMotion'
 import {
   StickerStar,
   StickerSquiggle,
@@ -265,7 +266,7 @@ function PostcardCard({ img, aspect, mobileAspect }: PhotoProps) {
       </div>
       {/* Stempel miring pojok kiri-bawah */}
       <div aria-hidden className="absolute bottom-8 left-2 z-10 -rotate-12 opacity-60">
-        <p className="font-marker text-brand-ink/70 text-[10px] leading-none">DOSCOM</p>
+        <p className="font-marker text-brand-ink/70 text-[10px] leading-none">DKELAS</p>
       </div>
       <div className="mt-4 overflow-hidden border border-ink-900/25 bg-paper-panel">
         <Photo img={img} aspect={aspect} mobileAspect={mobileAspect} />
@@ -345,7 +346,7 @@ export function GalleryBentoGrid({
       return <div className="mt-10 min-h-[55vh] sm:mt-16" aria-hidden />
     }
     return (
-      <Reveal once={false} y={24} className="mt-10 sm:mt-12">
+      <Reveal y={24} className="mt-10 sm:mt-12">
         <div className="mx-auto max-w-md py-10 text-center">
           <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-peach text-ink-900">
             <Camera className="size-6 text-ink-900" />
@@ -386,7 +387,7 @@ export function GalleryBentoGrid({
                 return (
                   <Reveal
                     key={`${img.src}-${rowIdx}-${i}`}
-                    once={false}
+
                     y={44}
                     delay={(i % 3) * 0.08}
                     className={cn(
@@ -432,7 +433,7 @@ export function GalleryBentoGrid({
                   <Camera className="size-4" aria-hidden />
                 </span>
                 <DialogTitle className="line-clamp-1 text-sm font-extrabold uppercase tracking-wide text-ink-900 sm:text-base">
-                  Dokumentasi DOSCOM
+                  Dokumentasi DKELAS
                 </DialogTitle>
               </div>
 
@@ -542,6 +543,7 @@ export default function GallerySection() {
   const { gallery } = LANDING_COPY
   const sectionRef = useRef<HTMLElement | null>(null)
   const reduceMotion = useReducedMotion()
+  const landingMotion = useLandingMotion()
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'start 0.25'],
@@ -589,12 +591,12 @@ export default function GallerySection() {
       </div>
 
       <motion.div
-        style={reduceMotion ? undefined : { y }}
+        style={reduceMotion || !landingMotion ? undefined : { y }}
         className="relative z-[1] mx-auto max-w-6xl px-6 py-16 will-change-transform md:px-10 md:py-24 lg:py-28"
       >
         {/* Header Asimetris: Eyebrow ticket, Title display besar, Subtitle, Squiggle, CTA kanan */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <Reveal once={false} y={32} className="max-w-2xl">
+          <Reveal y={32} className="max-w-2xl">
             <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-peach px-3.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button rotate-1">
               {gallery.eyebrow}
             </span>
@@ -607,7 +609,7 @@ export default function GallerySection() {
             <StickerSquiggle className="mt-3 h-4 w-44" />
           </Reveal>
 
-          <Reveal once={false} y={32} delay={0.1} className="shrink-0">
+          <Reveal y={32} delay={0.1} className="shrink-0">
             <Link
               to={gallery.allHref}
               className="group/btn inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-ink-900 bg-paper-white px-6 text-sm font-extrabold tracking-wider uppercase text-ink-900 shadow-button outline-none transition-all hover:bg-note-yellow focus-visible:ring-4 focus-visible:ring-brand-blue/50"

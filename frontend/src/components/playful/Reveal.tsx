@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 import type { ReactNode } from 'react'
+import { useLandingMotion } from '@/components/playful/LandingMotion'
 
 type RevealProps = {
   children: ReactNode
@@ -21,7 +22,8 @@ export default function Reveal({
   once = true,
 }: RevealProps) {
   const reduceMotion = useReducedMotion()
-  if (reduceMotion) return <div className={className}>{children}</div>
+  const landingMotion = useLandingMotion()
+  if (reduceMotion || !landingMotion) return <div className={className}>{children}</div>
   return (
     <motion.div
       className={className}

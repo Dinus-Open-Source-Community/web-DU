@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
@@ -145,6 +146,7 @@ func CreateLessonFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceLessonDetail, cache.NamespaceModuleList, cache.NamespaceCourseDetail, cache.NamespaceAssignmentConfig)
 
 	lesson.Title = utils.DecryptOrSelf(lesson.Title)
 
@@ -580,6 +582,7 @@ func UpdateLessonFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceLessonDetail, cache.NamespaceModuleList, cache.NamespaceCourseDetail, cache.NamespaceAssignmentConfig)
 
 	lesson.Title = utils.DecryptOrSelf(lesson.Title)
 
@@ -699,6 +702,7 @@ func DeleteLessonFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceLessonDetail, cache.NamespaceModuleList, cache.NamespaceCourseDetail, cache.NamespaceAssignmentConfig)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

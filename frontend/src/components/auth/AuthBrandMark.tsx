@@ -10,7 +10,7 @@ export function AuthBrandMark() {
     >
       <LogoDu className="size-8 text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none" />
       <span className="text-base font-semibold tracking-tight text-foreground">
-        Doscom University
+        DKelas
       </span>
     </Link>
   )

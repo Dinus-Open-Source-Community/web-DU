@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Documentation for Web DU Backend API.",
-        "title": "Web DU Backend",
+        "description": "Documentation for DKelas Backend API.",
+        "title": "DKelas Backend",
         "contact": {},
         "version": "1.0"
     },
@@ -6693,7 +6693,7 @@
                 },
                 "name": {
                     "type": "string",
-                    "example": "User DU"
+                    "example": "User DK"
                 },
                 "password": {
                     "type": "string",

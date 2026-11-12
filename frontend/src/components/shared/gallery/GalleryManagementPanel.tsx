@@ -95,7 +95,7 @@ export function GalleryManagementPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Manajemen Galeri"
-          subtitle="Kelola foto dokumentasi kegiatan DOSCOM untuk ditampilkan pada halaman beranda dan galeri publik."
+          subtitle="Kelola foto dokumentasi kegiatan DKELAS untuk ditampilkan pada halaman beranda dan galeri publik."
           className="mb-0 min-w-0 flex-1 space-y-1.5"
         />
         <div className="flex shrink-0 items-center gap-2 self-start">

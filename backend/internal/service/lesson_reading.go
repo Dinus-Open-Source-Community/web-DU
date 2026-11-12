@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
@@ -197,6 +198,7 @@ func MarkLessonAsReadFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceCourseDetail)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,

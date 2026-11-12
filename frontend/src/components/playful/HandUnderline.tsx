@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { cn } from '@/lib/utils'
+import { useLandingMotion } from '@/components/playful/LandingMotion'
 
 const PATH = 'M4 10 C 60 4, 150 4, 216 8'
 
@@ -7,7 +8,8 @@ type HandUnderlineProps = { className?: string; draw?: boolean }
 
 export default function HandUnderline({ className, draw = false }: HandUnderlineProps) {
   const reduceMotion = useReducedMotion()
-  if (!draw || reduceMotion) {
+  const landingMotion = useLandingMotion()
+  if (!draw || reduceMotion || !landingMotion) {
     return (
       <svg
         aria-hidden

@@ -161,7 +161,7 @@ export default function VerifyOtpPage() {
   return (
     <AuthLayout
       heading="Verifikasi Akun Kamu"
-      subheading="Masukkan kode OTP 6 digit yang dikirimkan ke email untuk mengaktifkan akun DOSCOM University."
+      subheading="Masukkan kode OTP 6 digit yang dikirimkan ke email untuk mengaktifkan akun DKelas."
     >
       <AuthFormPanel>
         <AuthPageHeader

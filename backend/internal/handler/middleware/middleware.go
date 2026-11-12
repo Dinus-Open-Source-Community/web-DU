@@ -1,10 +1,14 @@
 package middleware
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/entity"
+	"context"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -69,9 +73,46 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		var userData entity.User
-		err = database.DB.Model(&entity.User{}).Where("email_hash = ?", claims.Key).First(&userData).Error
-		if err != nil || userData.Uid == uuid.Nil || !userData.IsVerified {
+		var userUID uuid.UUID
+		var role entity.UserRole
+		var isVerified bool
+		var session cache.AuthSession
+		var authVersion string
+		cacheHit := false
+		if cache.Default != nil && cache.Default.Available() {
+			cacheCtx, cancel := context.WithTimeout(c.Request.Context(), 250*time.Millisecond)
+			session, authVersion, cacheHit, err = cache.Default.GetAuthSession(cacheCtx, claims.Key)
+			cancel()
+			if err != nil {
+				log.Printf("redis auth cache lookup failed: %v", err)
+				cacheHit = false
+			}
+		}
+		if cacheHit {
+			userUID, err = uuid.Parse(session.UserUID)
+			if err != nil {
+				cacheHit = false
+			}
+			role = entity.UserRole(session.Role)
+			isVerified = session.IsVerified
+		}
+		if !cacheHit {
+			var userData entity.User
+			err = database.DB.Model(&entity.User{}).Select("uid", "role", "is_verified").Where("email_hash = ?", claims.Key).First(&userData).Error
+			if err == nil {
+				userUID, role, isVerified = userData.Uid, userData.Role, userData.IsVerified
+				if cache.Default != nil && cache.Default.Available() {
+					cacheCtx, cancel := context.WithTimeout(c.Request.Context(), 250*time.Millisecond)
+					if cacheErr := cache.Default.SetAuthSession(cacheCtx, claims.Key, authVersion, cache.AuthSession{
+						UserUID: userUID.String(), Role: string(role), IsVerified: isVerified,
+					}); cacheErr != nil {
+						log.Printf("redis auth cache write failed: %v", cacheErr)
+					}
+					cancel()
+				}
+			}
+		}
+		if err != nil || userUID == uuid.Nil || !isVerified {
 			c.JSON(http.StatusForbidden, gin.H{
 				"success": false,
 				"message": "Akun belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu.",
@@ -83,8 +124,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Simpan data Uid dan Role ke context.
-		c.Set(UIDCK, userData.Uid)
-		c.Set(RoleCK, userData.Role)
+		c.Set(UIDCK, userUID)
+		c.Set(RoleCK, role)
 
 		// Lanjutkan ke handler berikutnya jika token valid.
 		c.Next()

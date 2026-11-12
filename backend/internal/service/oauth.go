@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/entity"
 	"backend/internal/utils"
@@ -210,6 +211,10 @@ func CallbackHandler(c *gin.Context) {
 			})
 			return
 		}
+		cache.InvalidateAuthSession(user.EmailHash)
+		cache.InvalidateMentorDirectory()
+		cache.InvalidateCourseList()
+		cache.InvalidateCourseContent(user.Uid.String())
 	}
 
 	nameDecrypted, _ := utils.Decrypt(user.Name)

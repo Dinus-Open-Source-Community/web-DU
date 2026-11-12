@@ -60,7 +60,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
               ✦
             </span>
             <span className="font-mono text-xs font-extrabold uppercase tracking-widest text-ink-900">
-              BERKAS RESMI MENTOR • DOSCOM FACULTY
+              BERKAS RESMI MENTOR • DKELAS FACULTY
             </span>
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function MentorDetailModal({ mentor, index = 0, children }: Mento
             {/* Nama Mentor */}
             <div className="relative">
               <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-mint px-3 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ink-900 shadow-2xs -rotate-1">
-                MENTOR DOSCOM UNIVERSITY
+                MENTOR DKELAS
               </span>
               <DialogTitle className="mt-2.5 font-display text-3xl font-bold leading-tight text-ink-900 sm:text-4xl lg:text-5xl">
                 {resolvedName}

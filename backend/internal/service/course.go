@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
@@ -293,6 +294,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -569,6 +571,7 @@ func UpdateAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -652,6 +655,7 @@ func DeleteAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -989,6 +993,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
@@ -345,6 +346,7 @@ func PostAdminGalleryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateGalleryList()
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
@@ -533,6 +535,7 @@ func UpdateAdminGalleryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateGalleryList()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -585,6 +588,7 @@ func DeleteAdminGalleryFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateGalleryList()
 
 	deleteOldGalleryObjectIfManaged(oldURL)
 

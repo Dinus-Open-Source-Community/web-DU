@@ -275,49 +275,36 @@ The seeder creates:
 
 ### Running the Seeder
 
-#### Using Docker Compose
-
-1. **Set environment variable in `.env`**:
-
-   ```env
-   SEED=true
-   ```
-2. **Start the application**:
-
-   ```bash
-   docker-compose up
-   ```
-
-   The seeder will automatically run when the backend starts.
+Seeder runs only through the dedicated `seed` binary. Backend startup never seeds.
 
 #### Local Development
 
-1. **Update `.env` file in the `backend/` directory**:
+```bash
+cd backend
+go build -o bin/seed ./cmd/seed
+./bin/seed
+```
 
-   ```env
-   SEED=true
-   ```
-2. **Run the backend**:
+#### Using Docker Compose
 
-   ```bash
-   cd backend
-   go mod tidy
-   go run main.go
-   ```
-3. **Verify in logs**:
+```bash
+docker compose exec backend ./seed
+```
 
-   ```
-   [Seeder] Memulai proses seeding database...
-   [Success] User Admin User berhasil dibuat
-   ...
-   [Seeder] Seeding database selesai!
-   ```
+Expected logs:
+
+```
+[Seed CLI] Mode incremental — data yang sudah ada TIDAK dihapus
+[Seeder] Memulai proses seeding database...
+[Success] User Admin User berhasil dibuat
+...
+[Seeder] Seeding database selesai!
+```
 
 ### Seeder Configuration
 
-- **Default**: `SEED=false` (disabled)
-- **Enable**: Set `SEED=true` in `.env` to run seeder on application startup
 - **Safety**: The seeder uses idempotent operations, so it can be run multiple times without creating duplicate data
+- **No env toggle**: `SEED` is no longer read; run the `seed` binary when you need seeding
 
 ### Seeder Details
 
