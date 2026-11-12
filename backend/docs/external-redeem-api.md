@@ -100,6 +100,8 @@ If the environment variable is empty, the endpoint rejects requests.
 
 The course must exist; it does not need to be active or published. When a target email already belongs to a user, that user must not already be enrolled in the course. A target user must have the `student` role and must not already be enrolled.
 
+> **Note:** This endpoint only generates and stores the redeem code and returns the JSON response. **It does not send any email** (even if `target_email` is provided). The `target_email` field acts strictly as an account restriction when the code is redeemed later. Delivering the code to the recipient is entirely the responsibility of the calling external application.
+
 Example request body:
 
 ```json
@@ -127,7 +129,7 @@ curl --request POST 'http://localhost:8080/external/redeem-codes' \
 
 ### Successful response
 
-The endpoint returns HTTP `201 Created`. Keep the returned `code` and deliver it to the intended customer.
+The endpoint returns HTTP `201 Created`. No email is dispatched by the server. Keep the returned `code` from the response payload and deliver it to the intended customer.
 
 ```json
 {

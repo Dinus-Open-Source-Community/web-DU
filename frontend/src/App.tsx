@@ -232,7 +232,7 @@ const routeConfig: RouteConfig[] = [
     element: <ViewModuleAndLessons />,
     public: false,
     lazy: true,
-    roles: ["student", "mentor", "admin", "super_admin"],
+    roles: ["mentor", "admin", "super_admin"],
     fallback: LESSON_VIEWER_FALLBACK,
   },
   {
@@ -240,7 +240,7 @@ const routeConfig: RouteConfig[] = [
     element: <ViewModuleAndLessons />,
     public: false,
     lazy: true,
-    roles: ["student", "mentor", "admin", "super_admin"],
+    roles: ["mentor", "admin", "super_admin"],
     fallback: LESSON_VIEWER_FALLBACK,
   },
   {

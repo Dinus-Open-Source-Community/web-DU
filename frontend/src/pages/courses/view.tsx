@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Message } from '@/lib/Message'
@@ -23,6 +23,7 @@ import { useAppTheme } from '@/providers/theme-provider'
 export default function CourseViewPage() {
   const { courseUid, lessonUid } = useParams()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const { user } = useAuth()
   const { theme } = useAppTheme()
   const [loadedCourseUid, setLoadedCourseUid] = useState<string | null>(null)
@@ -100,6 +101,7 @@ export default function CourseViewPage() {
         backHref={getCourseModuleViewerBackHref(
           (user?.role ?? 'student') as CourseModulePreviewVariant,
           courseUid ?? '',
+          location.pathname,
         )}
         theme={theme}
         lessonType={initialLessonDetail?.content_type ?? effectiveInitialLesson?.content_type}

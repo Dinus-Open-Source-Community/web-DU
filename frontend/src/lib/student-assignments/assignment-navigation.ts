@@ -11,7 +11,7 @@ export function buildStudentAssignmentHref({
   lessonUid,
   openAssignmentPane = true,
 }: BuildAssignmentHrefInput): string {
-  const basePath = ROUTES.viewModuleAndLessons(courseUid, lessonUid)
+  const basePath = ROUTES.student.learningCourse(courseUid, lessonUid)
   if (!lessonUid) return basePath
 
   if (openAssignmentPane) {
