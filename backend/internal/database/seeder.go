@@ -47,17 +47,17 @@ func RunSeeder(db *gorm.DB) {
 	log.Println("[Seeder] Memulai proses seeding database...")
 
 	seedUsers(db)
-	seedCourseCategories(db)
-	seedClassTypes(db)
-	seedCourses(db)
-	seedEnrollments(db)
-	seedCourseReviews(db)
-	seedCourseQaThreads(db)
-	seedModules(db)
-	seedLessons(db)
-	seedLessonAssignments(db)
-	seedLessonReadings(db)
-	seedLessonAssignmentSubmissions(db)
+	// seedCourseCategories(db)
+	// seedClassTypes(db)
+	// seedCourses(db)
+	// seedEnrollments(db)
+	// seedCourseReviews(db)
+	// seedCourseQaThreads(db)
+	// seedModules(db)
+	// seedLessons(db)
+	// seedLessonAssignments(db)
+	// seedLessonReadings(db)
+	// seedLessonAssignmentSubmissions(db)
 
 	log.Println("[Seeder] Seeding database selesai!")
 }
@@ -134,62 +134,62 @@ func seedUsers(db *gorm.DB) {
 			IsVerified: true,
 			AvatarURL:  "https://i.pravatar.cc/150?img=12",
 		},
-		{
-			Name:       "Admin User",
-			Email:      "admin@doscom.id",
-			Password:   "admin123",
-			Role:       entity.AdminRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=32",
-		},
-		{
-			Name:       "Budi Santoro",
-			Email:      "budi@doscom.id",
-			Password:   "student123",
-			Role:       entity.StudentRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=14",
-		},
-		{
-			Name:       "Siti Nurhaliza",
-			Email:      "siti@doscom.id",
-			Password:   "student123",
-			Role:       entity.StudentRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=47",
-		},
-		{
-			Name:       "Andi Pratama",
-			Email:      "andi.mentor@doscom.id",
-			Password:   "mentor123",
-			Role:       entity.MentorRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=15",
-		},
-		{
-			Name:       "Rina Kurnia",
-			Email:      "rina.mentor@doscom.id",
-			Password:   "mentor123",
-			Role:       entity.MentorRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=44",
-		},
-		{
-			Name:       "Dimas Saputra",
-			Email:      "dimas.mentor@doscom.id",
-			Password:   "mentor123",
-			Role:       entity.MentorRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=11",
-		},
-		{
-			Name:       "Nadia Putri",
-			Email:      "nadia.mentor@doscom.id",
-			Password:   "mentor123",
-			Role:       entity.MentorRole,
-			IsVerified: true,
-			AvatarURL:  "https://i.pravatar.cc/150?img=49",
-		},
+		// {
+		// 	Name:       "Admin User",
+		// 	Email:      "admin@doscom.id",
+		// 	Password:   "admin123",
+		// 	Role:       entity.AdminRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=32",
+		// },
+		// {
+		// 	Name:       "Budi Santoro",
+		// 	Email:      "budi@doscom.id",
+		// 	Password:   "student123",
+		// 	Role:       entity.StudentRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=14",
+		// },
+		// {
+		// 	Name:       "Siti Nurhaliza",
+		// 	Email:      "siti@doscom.id",
+		// 	Password:   "student123",
+		// 	Role:       entity.StudentRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=47",
+		// },
+		// {
+		// 	Name:       "Andi Pratama",
+		// 	Email:      "andi.mentor@doscom.id",
+		// 	Password:   "mentor123",
+		// 	Role:       entity.MentorRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=15",
+		// },
+		// {
+		// 	Name:       "Rina Kurnia",
+		// 	Email:      "rina.mentor@doscom.id",
+		// 	Password:   "mentor123",
+		// 	Role:       entity.MentorRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=44",
+		// },
+		// {
+		// 	Name:       "Dimas Saputra",
+		// 	Email:      "dimas.mentor@doscom.id",
+		// 	Password:   "mentor123",
+		// 	Role:       entity.MentorRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=11",
+		// },
+		// {
+		// 	Name:       "Nadia Putri",
+		// 	Email:      "nadia.mentor@doscom.id",
+		// 	Password:   "mentor123",
+		// 	Role:       entity.MentorRole,
+		// 	IsVerified: true,
+		// 	AvatarURL:  "https://i.pravatar.cc/150?img=49",
+		// },
 	}
 
 	for _, u := range users {
