@@ -346,6 +346,73 @@ info:
   title: DKelas Backend
   version: "1.0"
 paths:
+  /admin/courses:
+    get:
+      consumes:
+      - application/json
+      description: Paginated course list with optional status/title/category/type/level
+        filters. Admin sees all courses; mentor sees only assigned courses.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: per_page
+        type: integer
+      - description: 'Filter by status: DRAFT, ACTIVE, TIDAK ACTIVE (empty = all)'
+        in: query
+        name: status
+        type: string
+      - description: Search by title (case-insensitive)
+        in: query
+        name: title
+        type: string
+      - description: Filter by category UID
+        in: query
+        name: course_category_id
+        type: string
+      - description: Filter by course type UID
+        in: query
+        name: course_type_id
+        type: string
+      - description: Filter by level (PEMULA/MENENGAH/LANJUTAN)
+        in: query
+        name: level
+        type: string
+      - description: Filter by mentor UID
+        in: query
+        name: mentor_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Courses retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve courses
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get courses for admin/mentor (staff)
+      tags:
+      - Admin
   /admin/dashboard/analytics:
     get:
       consumes:

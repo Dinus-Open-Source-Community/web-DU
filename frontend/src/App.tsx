@@ -4,6 +4,7 @@ import { ROUTES } from "./lib/routes.ts";
 import {
   DashboardAssignmentSubmissionDetailGateway,
   DashboardAssignmentSubmissionsGateway,
+  DashboardCourseAssignmentsGateway,
   DashboardCourseDetailGateway,
   DashboardCourseEditGateway,
   DashboardCoursesGateway,
@@ -77,9 +78,6 @@ const AdminRedeemCodesPage = React.lazy(
 );
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
-const MentorAssignments = React.lazy(
-  () => import("./pages/mentor/CourseAssignments.tsx"),
-);
 const StudentLearning = React.lazy(
   () => import("./pages/student/Learning.tsx"),
 );
@@ -400,9 +398,9 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.dashboardMenu.courseAssignmentHub(":courseUid"),
-    element: <MentorAssignments />,
+    element: <DashboardCourseAssignmentsGateway />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["mentor", "admin", "super_admin"],
   },
   {

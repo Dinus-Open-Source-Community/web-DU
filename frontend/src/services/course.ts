@@ -60,6 +60,15 @@ export async function fetchCourses(params?: IQueryParamsPayload) {
   return unwrapApiResponse(response.data, 'Gagal mengambil daftar kursus')
 }
 
+/** Staff list — includes DRAFT/TIDAK ACTIVE for admin; mentor scoped server-side. */
+export async function fetchAdminCourses(params?: IQueryParamsPayload) {
+  const validatedParams = parseCourseListParams(params)
+  const response = await api.get<IResponse<ICourseListResponse>>(
+    API_ROUTES.admin.courses.getAll(validatedParams),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengambil daftar kursus')
+}
+
 export async function fetchCourseByUid(uid: string) {
   const validatedUid = parseCourseUidParam(uid)
   const response = await api.get<IResponse<IDetailCourseResponse>>(
