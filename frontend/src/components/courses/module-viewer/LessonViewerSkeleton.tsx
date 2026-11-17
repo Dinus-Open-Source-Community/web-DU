@@ -45,6 +45,7 @@ export function LessonViewerRouteFallback() {
   const backHref = getCourseModuleViewerBackHref(
     (role ?? 'student') as CourseModulePreviewVariant,
     courseUid,
+    location.pathname,
   )
 
   return <LessonViewerSkeleton backHref={backHref} theme={theme} pane={pane} />

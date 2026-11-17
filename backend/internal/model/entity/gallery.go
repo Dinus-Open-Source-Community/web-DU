@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Gallery menyimpan foto dokumentasi kegiatan DOSCOM untuk beranda dan halaman galeri publik.
+// Gallery menyimpan foto dokumentasi kegiatan DKelas untuk beranda dan halaman galeri publik.
 type Gallery struct {
 	Uid          uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"uid"`
 	ImageURL     string     `gorm:"type:text;not null" json:"image_url"`

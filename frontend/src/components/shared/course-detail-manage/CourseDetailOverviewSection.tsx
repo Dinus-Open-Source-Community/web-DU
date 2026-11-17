@@ -29,8 +29,8 @@ export function CourseDetailOverviewSection({
   children,
 }: CourseDetailOverviewSectionProps) {
   return (
-    <section className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding, className)}>
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <section className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding, 'min-w-0', className)}>
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <h3 className={cn(manageDetailLayout.sectionTitle, 'flex items-center gap-2')}>
             <Icon className="size-4 text-ink-400" aria-hidden />
@@ -42,6 +42,7 @@ export function CourseDetailOverviewSection({
           type="button"
           className={cn(
             'h-11 shrink-0 gap-2 rounded-sm border-2 border-ink-900/10 bg-primary px-5 font-semibold text-white shadow-none hover:bg-brand-hover',
+            'w-full whitespace-normal md:w-auto',
             manageDetailLayout.actionButton,
           )}
           onClick={() => onNavigateToTab(tab)}

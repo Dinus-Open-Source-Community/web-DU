@@ -133,7 +133,7 @@ export function GalleryFormDialog({ open, onOpenChange, mode, item, onSubmit }: 
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs leading-relaxed text-ink-500">
-              Unggah foto dokumentasi kegiatan komunitas DOSCOM untuk ditampilkan di galeri website.
+              Unggah foto dokumentasi kegiatan komunitas DKELAS untuk ditampilkan di galeri website.
             </DialogDescription>
           </DialogHeader>
 

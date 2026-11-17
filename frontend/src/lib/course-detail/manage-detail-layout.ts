@@ -50,18 +50,18 @@ export const manageDetailLayout = {
   ),
   stickyBarInner: 'mx-auto flex w-full max-w-3xl flex-col gap-3',
   overviewGrid:
-    'grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] lg:items-start lg:gap-8',
-  overviewInfoSticky: 'lg:sticky lg:top-[calc(4rem+1rem)] lg:z-[1] lg:self-start',
+    'grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] xl:items-start xl:gap-8',
+  overviewInfoSticky: 'xl:sticky xl:top-[calc(4rem+1rem)] xl:z-[1] xl:self-start',
   overviewInfoCardShell: 'rounded-xl shadow-paper',
   overviewInfoCardInner: cn(
     appCardClassName,
     'overflow-hidden rounded-xl shadow-none',
   ),
   overviewInfoCardScroll:
-    'max-h-[calc(100dvh-4rem-2.5rem)] overflow-y-auto overscroll-contain',
+    'xl:max-h-[calc(100dvh-4rem-2.5rem)] xl:overflow-y-auto xl:overscroll-contain',
   overviewInfoCardPadding: 'p-3 sm:p-4',
   statGrid:
-    'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4',
+    'grid min-w-0 grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 2xl:grid-cols-3',
   flatPage: 'flex w-full flex-col gap-6 sm:gap-8',
   flatStats:
     'grid grid-cols-2 gap-x-6 gap-y-4 border-b border-line-light pb-5 sm:grid-cols-4',

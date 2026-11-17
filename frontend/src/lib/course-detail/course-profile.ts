@@ -34,7 +34,7 @@ function isUsableProfile<T extends ProfileCandidate>(
   return Boolean(person?.name?.trim())
 }
 
-/** Kumpulkan semua profil mentor/pembuat kursus (gabungkan mentors dan created_by tanpa duplikasi). */
+/** Kumpulkan semua profil mentor kursus tanpa menyertakan created_by. */
 export function resolveCourseProfiles(source: CourseProfileSource): CourseProfile[] {
   const result: CourseProfile[] = []
   const seenUids = new Set<string>()
@@ -82,14 +82,10 @@ export function resolveCourseProfiles(source: CourseProfileSource): CourseProfil
     addProfile(source.mentor)
   }
 
-  if (source.created_by) {
-    addProfile(source.created_by)
-  }
-
   return result
 }
 
-/** Profil utama (mentor pertama atau created_by). */
+/** Profil utama (mentor pertama). */
 export function resolveCourseProfile(source: CourseProfileSource): CourseProfile | null {
   return resolveCourseProfiles(source)[0] ?? null
 }

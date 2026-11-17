@@ -32,7 +32,7 @@ export default function AuthLayout({
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-10 pb-12 text-center xl:px-14">
           <Link
             to="/"
-            aria-label="Ke beranda Doscom University"
+            aria-label="Ke beranda DKelas"
             className="inline-flex rounded-2xl outline-none transition-transform hover:scale-105 focus-visible:ring-3 focus-visible:ring-ring/40 motion-reduce:transition-none motion-reduce:hover:scale-100"
           >
             <LogoDu className="size-20 text-primary sm:size-24 xl:size-28" />

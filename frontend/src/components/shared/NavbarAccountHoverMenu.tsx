@@ -130,7 +130,7 @@ export function NavbarAccountHoverMenu({
           <div className="px-3 py-3">
             <p className="text-sm font-semibold">{greetingForUser(userName)}</p>
             <p className={cn('mt-1 text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-ink-500')}>
-              Senang bertemu lagi di Doscom University.
+              Senang bertemu lagi di DKelas.
             </p>
           </div>
           <div className={cn('my-1 h-px', isDark ? 'bg-zinc-700' : 'bg-ink-900/10')} />

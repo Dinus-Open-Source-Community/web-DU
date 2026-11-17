@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/dto"
@@ -123,6 +124,8 @@ func CreateCourseReviewFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourseList()
+	cache.InvalidateCourseContent(courseUid.String())
 
 	// Decrypt comment for response
 	review.Comment, _ = utils.Decrypt(review.Comment)
@@ -228,6 +231,7 @@ func CreateCourseReviewReplyFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to create review reply", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateCourseContent(courseUID.String())
 
 	decryptedComment, _ := utils.Decrypt(reply.Comment)
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 import { useCourseDetailAssignmentsView } from '@/hooks/course-detail/use-course-detail-assignments-view'
 import { CourseDetailAssignmentsTab } from '@/components/shared/course-detail-manage/CourseDetailAssignmentsTab'
@@ -10,6 +10,8 @@ type CourseDetailAssignmentsTabPanelProps = {
   courseUid: string
   role: StaffAssignmentRole
   students: IMentorCourseStudent[]
+  /** Aksi tingkat halaman (mis. tautan Halaman tugas) di samping judul. */
+  actions?: ReactNode
 }
 
 export function CourseDetailAssignmentsTabPanel({
@@ -17,6 +19,7 @@ export function CourseDetailAssignmentsTabPanel({
   courseUid,
   role,
   students,
+  actions,
 }: CourseDetailAssignmentsTabPanelProps) {
   const [hasVisited, setHasVisited] = useState(active)
 
@@ -32,6 +35,7 @@ export function CourseDetailAssignmentsTabPanel({
       role={role}
       students={students}
       enabled={active}
+      actions={actions}
     />
   )
 }
@@ -41,6 +45,7 @@ type CourseDetailAssignmentsTabContentProps = {
   role: StaffAssignmentRole
   students: IMentorCourseStudent[]
   enabled: boolean
+  actions?: ReactNode
 }
 
 function CourseDetailAssignmentsTabContent({
@@ -48,6 +53,7 @@ function CourseDetailAssignmentsTabContent({
   role,
   students,
   enabled,
+  actions,
 }: CourseDetailAssignmentsTabContentProps) {
   const view = useCourseDetailAssignmentsView({
     courseUid,
@@ -56,5 +62,5 @@ function CourseDetailAssignmentsTabContent({
     enabled,
   })
 
-  return <CourseDetailAssignmentsTab view={view} />
+  return <CourseDetailAssignmentsTab view={view} actions={actions} />
 }

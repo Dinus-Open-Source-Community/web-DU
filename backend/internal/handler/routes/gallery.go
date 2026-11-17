@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/internal/cache"
 	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/service"
@@ -15,8 +16,8 @@ func init() {
 func StartGalleryRoutes(r *gin.Engine) {
 	publicGalleryGroup := r.Group("/galleries")
 	{
-		publicGalleryGroup.GET("/", service.GetAllGalleriesFunc)
-		publicGalleryGroup.GET("/:id", service.GetGalleryByIDFunc)
+		publicGalleryGroup.GET("/", cache.ResponseCache(cache.NamespaceGalleryList, cache.PublicGalleriesTTL), service.GetAllGalleriesFunc)
+		publicGalleryGroup.GET("/:id", cache.ResponseCacheUID(cache.NamespaceGalleryList, cache.PublicGalleriesTTL, "galleries", "id"), service.GetGalleryByIDFunc)
 	}
 
 	authGalleryGroup := r.Group("/galleries")

@@ -1,9 +1,12 @@
+import { Link } from 'react-router-dom'
+
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
+import { Button } from '@/components/ui/button'
 import { useCourseDetailTab } from '@/hooks/course-detail/use-course-detail-tab'
-import { useCourseDetailAttendanceView } from '@/hooks/course-detail/use-course-detail-attendance-view'
 import { useCourseMentorManagement } from '@/hooks/course-detail/use-course-mentor-management'
 import { CourseDetailAssignmentsTabPanel } from '@/components/shared/course-detail-manage/CourseDetailAssignmentsTabPanel'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { ROUTES } from '@/lib/routes'
 import type { CourseDetailShellProps } from '@/lib/course-detail/course-detail-manage-view-model'
 import { cn } from '@/lib/utils'
 import { Tabs, TabsContent } from '../ui/tabs'
@@ -18,7 +21,6 @@ import { CourseDetailMobileActions } from './course-detail-manage/CourseDetailMo
 import {
   CourseDetailNavTabs,
 } from './course-detail-manage/CourseDetailNavTabs'
-import { CourseDetailAttendanceTab } from './course-detail-manage/CourseDetailAttendanceTab'
 import { CourseDetailOverviewTab } from './course-detail-manage/CourseDetailOverviewTab'
 import { AdminPageShell } from '@/components/admin/AdminPageShell'
 
@@ -58,11 +60,6 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
 
   const { activeTab, setActiveTab } = useCourseDetailTab({ isAdmin })
 
-  const attendanceView = useCourseDetailAttendanceView({
-    modules,
-    students: dataStudents,
-    enabled: isAdmin && activeTab === 'attendance',
-  })
   const mentorManagement = useCourseMentorManagement({
     courseUid,
     enabled: isAdmin,
@@ -129,14 +126,20 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
               courseUid={courseUid}
               role={isAdmin ? 'admin' : 'mentor'}
               students={dataStudents}
+              actions={
+                <Button
+                  asChild
+                  type="button"
+                  variant="outline"
+                  className="shrink-0 rounded-sm"
+                >
+                  <Link to={ROUTES.dashboardMenu.courseAssignmentHub(courseUid)}>
+                    Halaman tugas
+                  </Link>
+                </Button>
+              }
             />
           </TabsContent>
-
-          {isAdmin ? (
-            <TabsContent value="attendance" className="mt-0 animate-in fade-in duration-300">
-              <CourseDetailAttendanceTab view={attendanceView} />
-            </TabsContent>
-          ) : null}
 
           <TabsContent value="review" className="mt-0 animate-in fade-in duration-300">
             <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>

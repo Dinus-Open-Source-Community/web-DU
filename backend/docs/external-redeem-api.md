@@ -93,12 +93,14 @@ If the environment variable is empty, the endpoint rejects requests.
 | `target_email` | No | — | Restrict code to this email address. The account does not need to exist yet. |
 | `target_user_uid` | No | — | Restrict code to an existing student account. If both target fields are set, this user takes precedence. |
 | `code` | No | Generated | Custom code, 4–64 characters; letters, numbers, `-`, and `_` only. |
-| `prefix` | No | `DU` | Prefix for the generated code. It is uppercased; ignored when `code` is provided. |
+| `prefix` | No | `DK` | Prefix for the generated code. It is uppercased; ignored when `code` is provided. |
 | `max_uses` | No | `1` | Maximum successful redemptions. Values less than 1 use the default `1`. |
 | `expires_at` | No | No expiration | Expiration timestamp in RFC 3339 format. Must be in the future. |
 | `is_active` | No | `true` | Whether the code is active immediately after creation. |
 
 The course must exist; it does not need to be active or published. When a target email already belongs to a user, that user must not already be enrolled in the course. A target user must have the `student` role and must not already be enrolled.
+
+> **Note:** This endpoint only generates and stores the redeem code and returns the JSON response. **It does not send any email** (even if `target_email` is provided). The `target_email` field acts strictly as an account restriction when the code is redeemed later. Delivering the code to the recipient is entirely the responsibility of the calling external application.
 
 Example request body:
 
@@ -127,7 +129,7 @@ curl --request POST 'http://localhost:8080/external/redeem-codes' \
 
 ### Successful response
 
-The endpoint returns HTTP `201 Created`. Keep the returned `code` and deliver it to the intended customer.
+The endpoint returns HTTP `201 Created`. No email is dispatched by the server. Keep the returned `code` from the response payload and deliver it to the intended customer.
 
 ```json
 {
@@ -135,7 +137,7 @@ The endpoint returns HTTP `201 Created`. Keep the returned `code` and deliver it
   "message": "Kode redeem berhasil dibuat.",
   "data": {
     "uid": "7e484e3e-436e-44f3-b789-fdf2d0e653da",
-    "code": "DU-X7K2-9B4Z",
+    "code": "DK-X7K2-9B4Z",
     "course_uid": "e61b7f94-9128-4444-a4f6-7b830d12e431",
     "course_title": "Dasar Pemrograman Golang",
     "target_email": "buyer@example.com",

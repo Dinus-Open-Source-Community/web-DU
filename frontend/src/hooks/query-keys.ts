@@ -4,6 +4,7 @@ import type { IQueryParamsPayload } from '@/services/api-path'
 export const courseKeys = {
   all: ['courses'] as const,
   list: (params?: IQueryParamsPayload) => ['courses', params] as const,
+  adminList: (params?: IQueryParamsPayload) => ['courses', 'admin', params] as const,
   infiniteList: (params?: IQueryParamsPayload) => ['courses', 'infinite', params] as const,
   detail: (uid: string) => ['courses', uid] as const,
   students: (courseUid: string, params?: IQueryParamsPayload) =>
@@ -48,11 +49,6 @@ export const lessonAssignmentKeys = {
     ['lesson-assignments', 'staff-submissions', lessonUid] as const,
   overviewSubmissions: (lessonUid: string) =>
     ['lesson-assignments', 'overview-submissions', lessonUid] as const,
-}
-
-export const attendanceKeys = {
-  all: ['lesson-attendances'] as const,
-  byLesson: (lessonUid: string) => ['lesson-attendances', 'lesson', lessonUid] as const,
 }
 
 export const adminDashboardKeys = {

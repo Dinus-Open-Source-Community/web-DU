@@ -23,8 +23,6 @@ export interface ICourseAssignmentRosterRow {
 
 export type CourseStaffGradingStatus = 'pending' | 'graded'
 
-export type AttendanceStatusValue = 'present' | 'late' | 'absent' | 'excused'
-
 export interface ICourseStaffSubmissionStudent {
   uid: string
   name: string
@@ -68,22 +66,6 @@ export interface IGradeStaffSubmissionPayload {
   score_percent: number
   feedback?: string
   passed?: boolean
-}
-
-export interface ILessonAttendanceRecord {
-  uid: string
-  lesson_uid: string
-  enrollment_uid: string
-  checked_in_at: string
-  status: AttendanceStatusValue
-  note: string
-  created_at: string
-  updated_at: string
-}
-
-export interface IUpdateAttendancePayload {
-  status: AttendanceStatusValue
-  note?: string
 }
 
 export interface ICourseDetailLessonRef {

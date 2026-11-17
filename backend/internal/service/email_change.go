@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -374,6 +375,7 @@ func ConfirmEmailChangeService(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateAuthSession(changeReq.OldEmailHash)
 
 	nameDecrypted, _ := utils.Decrypt(user.Name)
 

@@ -225,7 +225,7 @@ export function useCourseModuleViewer({
   const previousEntry = activeIndex > 0 ? lessonEntries[activeIndex - 1] : null
   const nextEntry =
     activeIndex >= 0 && activeIndex < lessonEntries.length - 1 ? lessonEntries[activeIndex + 1] : null
-  const backHref = getCourseModuleViewerBackHref(variant, courseUid)
+  const backHref = getCourseModuleViewerBackHref(variant, courseUid, location.pathname)
 
   const effectiveExpandedModules = useMemo(() => {
     if (expandedModules.size > 0) return expandedModules

@@ -117,12 +117,6 @@ export const Message = {
     saved: 'Penilaian berhasil disimpan.',
     saveFailed: 'Penilaian gagal disimpan. Silakan coba lagi.',
   },
-  attendance: {
-    updated: 'Kehadiran berhasil diperbarui.',
-    updateFailed: 'Kehadiran gagal diperbarui. Silakan coba lagi.',
-    noteDeleted: 'Catatan kehadiran berhasil dihapus.',
-    noteDeleteFailed: 'Catatan kehadiran gagal dihapus. Silakan coba lagi.',
-  },
   review: {
     replySent: 'Balasan ulasan berhasil dikirim.',
     replyFailed: 'Balasan ulasan gagal dikirim. Silakan coba lagi.',

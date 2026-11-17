@@ -69,8 +69,13 @@ export default function CourseLessonsPage() {
     return <NotFoundContent />
   }
 
-  const viewerHref = ROUTES.viewModuleAndLessons(courseUid)
-  const lessonHref = (lessonUid: string) => `${viewerHref}?lesson=${encodeURIComponent(lessonUid)}`
+  const viewerHref = isStudent
+    ? ROUTES.student.learningCourse(courseUid)
+    : ROUTES.viewModuleAndLessons(courseUid)
+  const lessonHref = (lessonUid: string) =>
+    isStudent
+      ? ROUTES.student.learningCourse(courseUid, lessonUid)
+      : `${viewerHref}?lesson=${encodeURIComponent(lessonUid)}`
   const allDone = lessonEntries.length > 0 && resumeLessonUid === null
 
   return (

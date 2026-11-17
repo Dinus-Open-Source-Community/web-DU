@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"encoding/json"
 	"errors"
 	"math"
@@ -694,6 +695,13 @@ func UpdateUserProfileService(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateAuthSession(user.EmailHash)
+	cache.InvalidateMentorDirectory()
+	cache.InvalidateCourseList()
+	cache.InvalidateCourseContent(user.Uid.String())
+	if req.Email != nil {
+		cache.InvalidateAuthSession(utils.GenerateBlindIndex(strings.ToLower(strings.TrimSpace(*req.Email))))
+	}
 
 	if err := database.DB.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -938,6 +946,10 @@ func UpdateUserRoleService(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateAuthSession(targetUser.EmailHash)
+	cache.InvalidateMentorDirectory()
+	cache.InvalidateCourseList()
+	cache.InvalidateCourseContent(targetUser.Uid.String())
 
 	// Decrypt user data for response
 	nameDecrypted, _ := utils.Decrypt(targetUser.Name)
@@ -1128,6 +1140,12 @@ func BatchUpdateUserRoleService(c *gin.Context) {
 		})
 		return
 	}
+	for _, targetUser := range targetUsers {
+		cache.InvalidateAuthSession(targetUser.EmailHash)
+	}
+	cache.InvalidateMentorDirectory()
+	cache.InvalidateCourseList()
+	cache.InvalidateCourseContent("")
 
 	updatedItems := make([]gin.H, 0, len(targetUsers))
 	for _, u := range targetUsers {
@@ -1230,6 +1248,10 @@ func DeleteUserService(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateAuthSession(targetUser.EmailHash)
+	cache.InvalidateMentorDirectory()
+	cache.InvalidateCourseList()
+	cache.InvalidateCourseContent(targetUser.Uid.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

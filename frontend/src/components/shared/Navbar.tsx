@@ -199,10 +199,10 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
             className="group flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             <span className="flex size-8 items-center justify-center rounded-[6px] border-2 border-ink-900 bg-note-yellow font-mono text-xs font-black tracking-tight text-ink-900 shadow-[2px_2px_0px_#050914] transition-transform duration-200 group-hover:rotate-6 -rotate-2">
-              DU
+              DK
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-ink-900 sm:text-xl">
-              Doscom University
+              DKelas
             </span>
           </Link>
         </div>
@@ -290,7 +290,7 @@ export default function Navbar({ auth, authActionsVariant = 'default' }: NavbarP
                     <div className="px-3 py-2.5">
                       <p className="text-sm font-extrabold text-ink-900">{greetingForUser(userName)}</p>
                       <p className="mt-0.5 text-xs leading-relaxed text-ink-500">
-                        Senang bertemu lagi di Doscom University.
+                        Senang bertemu lagi di DKelas.
                       </p>
                     </div>
                     <div className="my-1 h-px bg-ink-900/10" />

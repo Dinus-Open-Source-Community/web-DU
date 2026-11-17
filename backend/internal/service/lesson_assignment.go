@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
@@ -101,6 +102,7 @@ func CreateLessonAssignmentFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to create lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceAssignmentConfig, cache.NamespaceCourseDetail)
 
 	assignment.Title = utils.DecryptOrSelf(assignment.Title)
 	c.JSON(http.StatusCreated, gin.H{"success": true, "message": "Lesson assignment created successfully", "data": assignment, "error": nil})
@@ -229,6 +231,7 @@ func UpdateLessonAssignmentFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to update lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceAssignmentConfig, cache.NamespaceCourseDetail)
 
 	existing.Title = utils.DecryptOrSelf(existing.Title)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment updated successfully", "data": existing, "error": nil})
@@ -300,6 +303,7 @@ func DeleteLessonAssignmentFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to delete lesson assignment", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceAssignmentConfig, cache.NamespaceCourseDetail)
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lesson assignment deleted successfully", "data": nil, "error": nil})
 }
@@ -518,4 +522,3 @@ func UploadLessonAssignmentImageFunc(c *gin.Context) {
 		"error": nil,
 	})
 }
-

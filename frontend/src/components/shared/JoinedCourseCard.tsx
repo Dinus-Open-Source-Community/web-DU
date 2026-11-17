@@ -139,7 +139,7 @@ const JoinedCourseCard = ({
               {profiles.length > 0 ? (
                 <CourseCardProfiles profiles={profiles} compact />
               ) : (
-                <div className="text-xs font-medium text-ink-400">Doscom University</div>
+                <div className="text-xs font-medium text-ink-400">DKelas</div>
               )}
             </div>
 

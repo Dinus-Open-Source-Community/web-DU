@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -205,6 +206,8 @@ func VerifyOTPFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateAuthSession(user.EmailHash)
+	cache.InvalidateMentorDirectory()
 
 	// Generate JWT session token
 	expiration := time.Now().Add(24 * time.Hour)
@@ -221,7 +224,7 @@ func VerifyOTPFunc(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Email berhasil diverifikasi! Selamat datang di DOSCOM University.",
+		"message": "Email berhasil diverifikasi! Selamat datang di DKelas.",
 		"data": gin.H{
 			"token":      token,
 			"expires_at": expiration.Format(time.RFC3339),

@@ -12,6 +12,7 @@ import {
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { cn } from '@/lib/utils'
 import Reveal from '@/components/playful/Reveal'
+import { useLandingMotion } from '@/components/playful/LandingMotion'
 import { StickerTape, StickerStar, StickerSquiggle, StickerSparkle } from '@/components/playful/Stickers'
 import { LANDING_COPY } from '@/lib/landing/copy'
 import { useCourses } from '@/hooks/use-course'
@@ -40,6 +41,7 @@ export default function CourseSection() {
   const { course } = LANDING_COPY
   const sectionRef = useRef<HTMLElement | null>(null)
   const reduceMotion = useReducedMotion()
+  const landingMotion = useLandingMotion()
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'start 0.25'],
@@ -69,12 +71,12 @@ export default function CourseSection() {
       />
 
       <motion.div
-        style={reduceMotion ? undefined : { y }}
+        style={reduceMotion || !landingMotion ? undefined : { y }}
         className="relative mx-auto max-w-7xl px-6 py-16 will-change-transform md:px-10 md:py-24 lg:py-28"
       >
         {/* Header asimetris: judul besar */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <Reveal once={false} y={32} className="max-w-2xl">
+          <Reveal y={32} className="max-w-2xl">
             <span className="inline-block rounded-sm border-2 border-ink-900 bg-note-yellow px-3.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink-900 shadow-button -rotate-2">
               {course.eyebrow}
             </span>
@@ -114,7 +116,7 @@ export default function CourseSection() {
             })}
           </div>
         ) : isError || courses.length === 0 ? (
-          <Reveal once={false} y={24} className="mt-10 sm:mt-12">
+          <Reveal y={24} className="mt-10 sm:mt-12">
             <div className="mx-auto max-w-md py-10 text-center">
               <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-note-yellow text-ink-900">
                 <BookOpen className="size-6 text-ink-900" />
@@ -142,7 +144,7 @@ export default function CourseSection() {
               const primaryMentor = item.mentors && item.mentors.length > 0 ? item.mentors[0] : null
 
               return (
-                <Reveal key={item.uid} once={false} y={32} delay={i * 0.06} className="h-full">
+                <Reveal key={item.uid} y={32} delay={i * 0.06} className="h-full">
                   <Link
                     to={detailHref}
                     className="group relative flex h-full flex-col justify-between rounded-[20px] border-2 border-ink-900 bg-paper-white p-4 shadow-paper transition-[translate] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 motion-reduce:transition-none outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/50 focus-visible:ring-inset"

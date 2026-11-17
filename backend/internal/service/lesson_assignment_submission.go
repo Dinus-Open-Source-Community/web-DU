@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/model/dto"
 	"backend/internal/model/entity"
@@ -175,6 +176,7 @@ func CreateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save submission attempt history", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceCourseDetail)
 
 	utils.DecryptFields(&row.PlainText, &row.FileOriginalFilename, &row.FileDescription, &row.Feedback)
 	c.JSON(http.StatusCreated, gin.H{"success": true, "message": "Submission recorded successfully", "data": row, "error": nil})
@@ -343,6 +345,7 @@ func UpdateLessonAssignmentSubmissionFunc(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save submission attempt history", "data": nil, "error": err.Error()})
 		return
 	}
+	cache.InvalidateNamespaces(cache.NamespaceCourseDetail)
 
 	utils.DecryptFields(&row.PlainText, &row.FileOriginalFilename, &row.FileDescription, &row.Feedback)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Submission updated successfully", "data": row, "error": nil})
@@ -434,9 +437,9 @@ func GetMyLessonAssignmentSubmissionFunc(c *gin.Context) {
 		"data": gin.H{
 			"lesson_uid":            lesson.Uid,
 			"assignment_uid":        assignment.Uid,
-			"submission_uid":          row.Uid,
-			"total_attempts":          len(submissions),
-			"latest_attempt_number":   row.AttemptCount,
+			"submission_uid":        row.Uid,
+			"total_attempts":        len(submissions),
+			"latest_attempt_number": row.AttemptCount,
 			"max_attempts":          maxSubmissionAttempts(&assignment),
 			"submissions":           submissions,
 		},

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"backend/internal/database"
 	"backend/internal/handler/middleware"
 	"backend/internal/model/entity"
@@ -293,6 +294,7 @@ func PostAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -569,6 +571,7 @@ func UpdateAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	if err := database.DB.Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").First(&course, course.Uid).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -652,6 +655,7 @@ func DeleteAdminCourseFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -989,6 +993,7 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 		})
 		return
 	}
+	cache.InvalidateCourse(course.Uid.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -1022,52 +1027,14 @@ func JoinCourseFunc(c *gin.Context) {
 }
 
 type CourseStudentSafeItem struct {
-	EnrollmentUid     uuid.UUID               `json:"enrollment_uid"`
-	StudentUid        uuid.UUID               `json:"student_uid"`
-	StudentName       string                  `json:"student_name"`
-	StudentAvatarURL  string                  `json:"student_avatar_url,omitempty"`
-	EnrolledAt        time.Time               `json:"enrolled_at"`
-	Progress          float64                 `json:"progress"`
-	Status            entity.EnrollmentStatus `json:"status"`
-	AttendancePresent int                     `json:"attendance_present"`
-	AttendanceTotal   int                     `json:"attendance_total"`
-	LastActiveAt      *time.Time              `json:"last_active_at,omitempty"`
-}
-
-func countCourseLessons(courseUID uuid.UUID) int {
-	var count int64
-	database.DB.Table("lessons l").
-		Joins("JOIN modules m ON m.uid = l.module_uid").
-		Where("m.course_uid = ?", courseUID).
-		Count(&count)
-	return int(count)
-}
-
-func fetchEnrollmentAttendancePresent(courseUID uuid.UUID, enrollmentUIDs []uuid.UUID) map[uuid.UUID]int {
-	result := make(map[uuid.UUID]int, len(enrollmentUIDs))
-	if len(enrollmentUIDs) == 0 {
-		return result
-	}
-
-	type row struct {
-		EnrollmentUID uuid.UUID `gorm:"column:enrollment_uid"`
-		Count         int       `gorm:"column:cnt"`
-	}
-	var rows []row
-	database.DB.Table("lesson_attendances la").
-		Select("la.enrollment_uid, COUNT(*) AS cnt").
-		Joins("JOIN lessons l ON l.uid = la.lesson_uid").
-		Joins("JOIN modules m ON m.uid = l.module_uid").
-		Where("m.course_uid = ?", courseUID).
-		Where("la.enrollment_uid IN ?", enrollmentUIDs).
-		Where("la.status IN ?", []entity.AttendanceStatus{entity.AttendancePresent, entity.AttendanceLate}).
-		Group("la.enrollment_uid").
-		Scan(&rows)
-
-	for _, r := range rows {
-		result[r.EnrollmentUID] = r.Count
-	}
-	return result
+	EnrollmentUid    uuid.UUID               `json:"enrollment_uid"`
+	StudentUid       uuid.UUID               `json:"student_uid"`
+	StudentName      string                  `json:"student_name"`
+	StudentAvatarURL string                  `json:"student_avatar_url,omitempty"`
+	EnrolledAt       time.Time               `json:"enrolled_at"`
+	Progress         float64                 `json:"progress"`
+	Status           entity.EnrollmentStatus `json:"status"`
+	LastActiveAt     *time.Time              `json:"last_active_at,omitempty"`
 }
 
 // buildEnrollmentProgressMap menghitung progress (0.0–1.0) per enrollment dari lesson_readings dan lesson_assignment_submissions.
@@ -1214,23 +1181,6 @@ func applyCalculatedEnrollmentProgress(enrollments []entity.Enrollment) {
 	progressMap := buildEnrollmentProgressMap(enrollments)
 	for i := range enrollments {
 		enrollments[i].Progress = progressMap[enrollments[i].Uid]
-	}
-}
-
-func applyCalculatedEnrollmentProgressPtr(enrollment *entity.Enrollment) {
-	if enrollment == nil {
-		return
-	}
-	progressMap := buildEnrollmentProgressMap([]entity.Enrollment{*enrollment})
-	enrollment.Progress = progressMap[enrollment.Uid]
-}
-
-func applyCalculatedEnrollmentProgressToAttendances(attendances []entity.LessonAttendance, enrollments []entity.Enrollment) {
-	progressMap := buildEnrollmentProgressMap(enrollments)
-	for i := range attendances {
-		if attendances[i].Enrollment != nil {
-			attendances[i].Enrollment.Progress = progressMap[attendances[i].EnrollmentUid]
-		}
 	}
 }
 
@@ -1399,17 +1349,14 @@ func GetCourseStudentsFunc(c *gin.Context) {
 		return
 	}
 
-	lessonTotal := countCourseLessons(course.Uid)
 	enrollmentUIDs := make([]uuid.UUID, 0, len(students))
 	for i := range students {
 		if decryptedName, decErr := utils.Decrypt(students[i].StudentName); decErr == nil {
 			students[i].StudentName = decryptedName
 		}
-		students[i].AttendanceTotal = lessonTotal
 		enrollmentUIDs = append(enrollmentUIDs, students[i].EnrollmentUid)
 	}
 
-	attendanceMap := fetchEnrollmentAttendancePresent(course.Uid, enrollmentUIDs)
 	lastActiveMap := fetchEnrollmentLastActive(course.Uid, enrollmentUIDs)
 	enrollmentsForProgress := make([]entity.Enrollment, 0, len(students))
 	for _, s := range students {
@@ -1421,7 +1368,6 @@ func GetCourseStudentsFunc(c *gin.Context) {
 	}
 	progressMap := buildEnrollmentProgressMap(enrollmentsForProgress)
 	for i := range students {
-		students[i].AttendancePresent = attendanceMap[students[i].EnrollmentUid]
 		students[i].LastActiveAt = lastActiveMap[students[i].EnrollmentUid]
 		students[i].Progress = progressMap[students[i].EnrollmentUid]
 	}

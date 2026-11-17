@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { BarChart3, CheckCircle, ClipboardList, Loader2, Users } from 'lucide-react'
+import { BarChart3, CheckCircle, Loader2, Users } from 'lucide-react'
 import type { IMentorCourseStudent } from '../../lib/types/course'
 import { Initials } from '../../lib/func/func'
 import { TablePaginationFooter } from './TablePaginationFooter'
-import { AttendanceBar, ProgressBar } from '../ui/bar'
+import { ProgressBar } from '../ui/bar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { AdminParticipantStatusLabel } from '@/lib/admin/status-label'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import { CourseParticipantStatusBadge } from '../ui/badge'
 import { CourseDetailTabSectionIntro } from './course-detail-manage/CourseDetailTabSectionIntro'
 import { useCourseStudents } from '@/hooks/use-course'
-import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
+import { AddCourseParticipantDialog } from './AddCourseParticipantDialog'
 import { useAuth } from '@/providers/auth-provider'
 
 type CourseParticipantsSectionProps = {
@@ -65,11 +65,11 @@ export function CourseParticipantsSection({
         className="mb-4"
         icon={Users}
         title="Peserta Kursus"
-        description="Lihat siswa yang terdaftar beserta status, kemajuan belajar, dan kehadiran."
+        description="Lihat siswa yang terdaftar beserta status dan kemajuan belajar."
         aside={
           isManageAllowed ? (
             <div className="flex flex-wrap items-center gap-2">
-              <GenerateRedeemCodeDialog initialCourseUid={courseUid} triggerLabel="Generate Kode Redeem" />
+              <AddCourseParticipantDialog courseUid={courseUid} />
             </div>
           ) : null
         }
@@ -103,12 +103,6 @@ export function CourseParticipantsSection({
                       Kemajuan belajar
                     </span>
                   </TableHead>
-                  <TableHead className={cn('w-[22%] px-5 py-3', manageDetailLayout.tableHead)}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <ClipboardList className="size-3.5" aria-hidden />
-                      Kehadiran
-                    </span>
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -135,9 +129,6 @@ export function CourseParticipantsSection({
                     </TableCell>
                     <TableCell className="min-w-44 px-5 py-4">
                       <ProgressBar value={student.progress} />
-                    </TableCell>
-                    <TableCell className="min-w-44 px-5 py-4">
-                      <AttendanceBar student={student} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -181,10 +172,6 @@ export function CourseParticipantsSection({
                       <div className="mt-3 flex flex-col gap-1">
                         <p className={manageDetailLayout.tableHead}>Kemajuan belajar</p>
                         <ProgressBar value={student.progress} />
-                      </div>
-                      <div className="mt-3 flex flex-col gap-1">
-                        <p className={manageDetailLayout.tableHead}>Kehadiran</p>
-                        <AttendanceBar student={student} />
                       </div>
                     </div>
                   </div>

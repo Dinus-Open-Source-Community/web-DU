@@ -157,7 +157,7 @@ export default function Hero() {
                   <span className="size-3 rounded-full border-2 border-ink-900 bg-note-yellow" />
                   <span className="size-3 rounded-full border-2 border-ink-900 bg-note-mint" />
                   <span className="ml-2 hidden font-mono text-xs font-bold text-ink-700 sm:inline">
-                    doscom-learning / student-workspace
+                    dkelas-learning / student-workspace
                   </span>
                 </div>
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/cache"
 	"encoding/json"
 	"math"
 	"net/http"
@@ -189,6 +190,8 @@ func AssignMentorsToCourseFunc(c *gin.Context) {
 	if course.MentorUid == nil && len(uniqueMentorUIDs) > 0 {
 		database.DB.Model(&course).Update("mentor_uid", uniqueMentorUIDs[0])
 	}
+	cache.InvalidateCourse(courseUID.String())
+	cache.InvalidateNamespaces("course:mentors", cache.NamespaceMentorDirectory, cache.NamespaceCourseList, cache.NamespaceCourseDetail)
 
 	assignedMentors := make([]gin.H, 0, len(mentors))
 	for _, mentor := range mentors {
@@ -350,6 +353,8 @@ func UnassignMentorsFromCourseFunc(c *gin.Context) {
 			database.DB.Model(&course).Update("mentor_uid", nil)
 		}
 	}
+	cache.InvalidateCourse(courseUID.String())
+	cache.InvalidateNamespaces("course:mentors", cache.NamespaceMentorDirectory, cache.NamespaceCourseList, cache.NamespaceCourseDetail)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

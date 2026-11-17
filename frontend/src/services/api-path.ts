@@ -195,20 +195,12 @@ export const API_ROUTES = {
           `/lessons/${lessonUid}/assignment/submissions/${submissionUid}/grade`,
       },
     },
-    attendances: {
-      create: `/lessons/attendances`,
-      checkStatus: (params?: IQueryParamsPayload) =>
-        withQuery(`/lessons/attendances/check-status`, params),
-      getMyHistory: (params?: IQueryParamsPayload) =>
-        withQuery(`/lessons/attendances/my-history`, params),
-      getByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
-      updateByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
-      deleteByUid: (uid: Uid) => `/lessons/attendances/${uid}`,
-      getByLessonUid: (lessonUid: Uid, params?: IQueryParamsPayload) =>
-        withQuery(`/lessons/attendances/lesson/${lessonUid}`, params),
-    },
   },
   admin: {
+    courses: {
+      getAll: (params?: IQueryParamsPayload) =>
+        withQuery(`/admin/courses`, params),
+    },
     dashboard: {
       kpis: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/kpis`, params),

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { resolveParticipantEnrollmentStatus } from '@/lib/course-detail/participant-enrollment-status'
-import type { AttendanceStatusValue } from '@/lib/types/features/course-detail-assignments'
 import { cn } from '@/lib/utils'
 
 export type AdminStatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral'
@@ -108,18 +107,6 @@ export function resolveParticipantStatus(status?: string): { tone: AdminStatusTo
 
 export function AdminParticipantStatusLabel({ status }: { status?: string }) {
   const { tone, label } = resolveParticipantStatus(status)
-  return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
-}
-
-const ATTENDANCE_STATUS: Record<AttendanceStatusValue, { tone: AdminStatusTone; label: string }> = {
-  present: { tone: 'success', label: 'Hadir' },
-  late: { tone: 'warning', label: 'Terlambat' },
-  absent: { tone: 'danger', label: 'Tidak hadir' },
-  excused: { tone: 'info', label: 'Izin' },
-}
-
-export function AdminAttendanceStatusLabel({ status }: { status: AttendanceStatusValue }) {
-  const { tone, label } = ATTENDANCE_STATUS[status]
   return <AdminStatusLabel tone={tone}>{label}</AdminStatusLabel>
 }
 

@@ -14,6 +14,8 @@ import AdminAssignmentSubmissions from '@/pages/admin/AssignmentSubmissions'
 import MentorAssignmentSubmissions from '@/pages/mentor/AssignmentSubmissions'
 import AdminAssignmentSubmissionDetail from '@/pages/admin/AssignmentSubmissionDetail'
 import MentorAssignmentSubmissionDetail from '@/pages/mentor/AssignmentSubmissionDetail'
+import AdminCourseAssignments from '@/pages/admin/CourseAssignments'
+import MentorCourseAssignments from '@/pages/mentor/CourseAssignments'
 
 function staffCourseRole(role: string | null | undefined): 'admin' | 'mentor' | null {
   if (role === 'admin' || role === 'super_admin') return 'admin'
@@ -59,5 +61,14 @@ export function DashboardAssignmentSubmissionDetailGateway() {
   const staff = staffCourseRole(role)
   if (staff === 'admin') return <AdminAssignmentSubmissionDetail />
   if (staff === 'mentor') return <MentorAssignmentSubmissionDetail />
+  return <Navigate to={DASHBOARD_PATH} replace />
+}
+
+export function DashboardCourseAssignmentsGateway() {
+  const { role } = useAuth()
+  const staff = staffCourseRole(role)
+  if (staff === 'admin') return <AdminCourseAssignments />
+  if (staff === 'mentor') return <MentorCourseAssignments />
+  if (role === 'student') return <Navigate to={ROUTES.student.learning} replace />
   return <Navigate to={DASHBOARD_PATH} replace />
 }

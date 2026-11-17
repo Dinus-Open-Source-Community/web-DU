@@ -15,6 +15,7 @@ import {
 } from '@/lib/files'
 import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
 import {
+  fetchAdminCourses,
   fetchCourseByUid,
   fetchCourseCandidateStudents,
   fetchCourseCategories,
@@ -41,6 +42,42 @@ export function useCourses(
   const query = useQuery({
     queryKey: courseKeys.list(params),
     queryFn: () => fetchCourses(params),
+    enabled: options.enabled,
+  })
+
+  const imageReferences = useMemo(
+    () => collectCourseListImageReferences(query.data?.courses),
+    [query.data?.courses],
+  )
+
+  const fileMap = useProtectedFileMap(imageReferences, {
+    enabled: query.isSuccess && imageReferences.length > 0,
+  })
+  const data = useMemo(() => {
+    if (!query.data) return undefined
+    return {
+      ...query.data,
+      courses: query.data.courses.map((course) =>
+        applyResolvedImagesToCourseItem(course, fileMap.getDisplayUrl),
+      ),
+    }
+  }, [fileMap, query.data])
+
+  return {
+    ...query,
+    data,
+    isResolvingImages: fileMap.isLoading || fileMap.isFetching,
+  }
+}
+
+/** Staff course list (admin: all statuses incl. DRAFT; mentor: assigned only). */
+export function useAdminCourses(
+  params?: IQueryParamsPayload,
+  options: UseCoursesOptions = {},
+) {
+  const query = useQuery({
+    queryKey: courseKeys.adminList(params),
+    queryFn: () => fetchAdminCourses(params),
     enabled: options.enabled,
   })
 
@@ -294,7 +331,7 @@ export function useCourseDetailWithCategories(uid: string) {
 export function useCourseDetailAdminAndMentor(uid: string) {
   const courseDetail = useCourseDetail(uid)
   const userCourse = useCourseStudents(uid)
-  // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum, Kehadiran,
+  // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum,
   // Tugas). Diambil lengkap supaya KPI dan daftar lesson tidak terpotong, lalu
   // dipakai bersama lewat query key yang sama agar tidak ada request ganda.
   const moduleCourse = useModulesByCourse(uid, { page: 1, per_page: 100 })

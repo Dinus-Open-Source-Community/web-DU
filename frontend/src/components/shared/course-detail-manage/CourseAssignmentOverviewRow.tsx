@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, type ReactNode } from 'react'
 import { ArrowRight, FileText, HelpCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -11,6 +11,8 @@ type CourseAssignmentOverviewRowProps = {
   item: CourseAssignmentOverviewItem
   adminStatusLabels?: boolean
   onPrefetchRoster?: () => void
+  /** Aksi tambahan (mis. Edit/Hapus) di samping tombol pengumpulan. */
+  actions?: ReactNode
 }
 
 function TaskTypeBadge({ taskType }: { taskType: CourseAssignmentOverviewItem['taskType'] }) {
@@ -36,6 +38,7 @@ function CourseAssignmentOverviewRowBase({
   item,
   adminStatusLabels = false,
   onPrefetchRoster,
+  actions,
 }: CourseAssignmentOverviewRowProps) {
   return (
     <li className="px-5 py-4">
@@ -66,7 +69,7 @@ function CourseAssignmentOverviewRowBase({
           </p>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             asChild
             type="button"
@@ -81,6 +84,7 @@ function CourseAssignmentOverviewRowBase({
               <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
+          {actions}
         </div>
       </div>
     </li>
