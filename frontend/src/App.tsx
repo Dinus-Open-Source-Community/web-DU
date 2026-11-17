@@ -8,6 +8,7 @@ import {
   DashboardCourseDetailGateway,
   DashboardCourseEditGateway,
   DashboardCoursesGateway,
+  DashboardRedeemCodesGateway,
 } from "./pages/dashboard/Gateways.tsx";
 import {
   LEGACY_DASHBOARD_REDIRECTS,
@@ -72,9 +73,6 @@ const AdminCourseTypes = React.lazy(
 );
 const AdminGalleryPage = React.lazy(
   () => import("./pages/admin/Gallery.tsx"),
-);
-const AdminRedeemCodesPage = React.lazy(
-  () => import("./pages/admin/RedeemCodes.tsx"),
 );
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
@@ -391,9 +389,9 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.admin.redeemCodes,
-    element: <AdminRedeemCodesPage />,
+    element: <DashboardRedeemCodesGateway />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["admin", "super_admin", "mentor"],
   },
   {
