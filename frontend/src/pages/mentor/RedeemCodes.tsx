@@ -1,16 +1,17 @@
 import { useState } from 'react'
-import { Copy, Plus, RefreshCw } from 'lucide-react'
+import { Copy, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { AdminPageShell } from '@/components/admin/AdminPageShell'
 import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
 import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useMentorCourses } from '@/hooks/mentor-courses/use-mentor-courses'
-import { useRedeemCodes } from '@/hooks/use-redeem-codes'
+import { useDeleteRedeemCode, useRedeemCodes } from '@/hooks/use-redeem-codes'
 import { appCardClassName, appPageSubtitleClassName, appPageTitleClassName } from '@/lib/design/app-shell-tokens'
 import type { IAdminDataTableColumn } from '@/lib/types/components/admin-table'
 import type { IRedeemCodeItem } from '@/services/redeem'
@@ -27,7 +28,9 @@ export default function MentorRedeemCodesPage() {
   const [status, setStatus] = useState('')
   const [search, setSearch] = useState('')
   const [generateOpen, setGenerateOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<IRedeemCodeItem | null>(null)
   const coursesQuery = useMentorCourses()
+  const deleteMutation = useDeleteRedeemCode()
   const codesQuery = useRedeemCodes({
     page,
     per_page: pageSize,
@@ -47,6 +50,18 @@ export default function MentorRedeemCodesPage() {
       toast.success('Kode redeem disalin.')
     } catch {
       toast.error('Gagal menyalin kode. Silakan salin kode secara manual.')
+    }
+  }
+
+  async function deleteCode() {
+    if (!deleteTarget || deleteMutation.isPending) return
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.uid)
+      toast.success('Kode redeem berhasil dihapus.')
+      if (items.length === 1 && page > 1) setPage((current) => current - 1)
+      setDeleteTarget(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menghapus kode redeem.')
     }
   }
 
@@ -98,6 +113,20 @@ export default function MentorRedeemCodesPage() {
     {
       id: 'expires', header: 'Masa Berlaku',
       cell: (item) => <span className="whitespace-nowrap">{item.expires_at ? dateFormatter.format(new Date(item.expires_at)) : 'Tanpa batas waktu'}</span>,
+    },
+    {
+      id: 'actions', header: 'Aksi', align: 'right',
+      cell: (item) => (
+        <Button
+          type="button" variant="ghost" size="icon-sm" className="size-11 rounded-lg text-ink-500 shadow-none hover:bg-rose-50 hover:text-rose-700"
+          disabled={item.used_count > 0}
+          title={item.used_count > 0 ? 'Kode yang pernah digunakan tidak dapat dihapus' : undefined}
+          aria-label={`Hapus kode redeem ${item.code}`}
+          onClick={() => setDeleteTarget(item)}
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+        </Button>
+      ),
     },
   ]
 
@@ -187,6 +216,18 @@ export default function MentorRedeemCodesPage() {
             )}
           />
         )}
+        <ConfirmDialog
+          open={Boolean(deleteTarget)}
+          onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDeleteTarget(null) }}
+          title="Hapus kode redeem?"
+          description={deleteTarget
+            ? `Kode "${deleteTarget.code}" akan dihapus permanen. Kode yang pernah digunakan tidak dapat dihapus.`
+            : undefined}
+          confirmLabel={deleteMutation.isPending ? 'Menghapus...' : 'Hapus kode'}
+          cancelLabel="Batal"
+          variant="destructive"
+          onConfirm={(event) => { event.preventDefault(); void deleteCode() }}
+        />
       </AdminPageShell>
     </MentorAppPageShell>
   )

@@ -1,6 +1,6 @@
 import { ChartCard } from '@/components/shared/ChartCard'
 import { PageHeader } from '@/components/shared/Header'
-import { AppSidebarProvider } from '@/components/shared/Sidebar'
+import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
 import { mentorDashboardLayout } from '@/lib/layout/mentor-dashboard-layout'
@@ -227,8 +227,15 @@ export function MentorDashboardRouteFallback() {
   const sidebarUser = useSidebarUser('mentor')
 
   return (
-    <AppSidebarProvider role="mentor" user={sidebarUser}>
-      <MentorDashboardSkeleton userName={sidebarUser.name} />
-    </AppSidebarProvider>
+    <MentorAppPageShell user={sidebarUser}>
+      <PageHeader
+        className={mentorDashboardLayout.pageHeader}
+        title="Dasbor"
+        subtitle={`Halo, ${sidebarUser.name}! Ringkasan aktivitas mentoring, jadwal, dan tugas yang perlu ditindaklanjuti.`}
+      />
+      <MentorKpiCardsSkeleton />
+      <ScheduleChartCardSkeleton />
+      <TeachingCalendarCardSkeleton />
+    </MentorAppPageShell>
   )
 }

@@ -73,7 +73,8 @@ test('mentor redeem route renders mentor navigation and creation without admin d
   assert.match(html, /Buat Kode Redeem/)
   assert.match(html, /MENTOR-CODE/)
   assert.match(html, /Assigned course/)
-  assert.doesNotMatch(html, /Administrator|Hapus kode redeem|Manajemen Pengguna/)
+  assert.doesNotMatch(html, /Administrator|Manajemen Pengguna/)
+  assert.match(html, /Hapus kode/)
 })
 
 test('mentor sees actionable empty state', () => {
