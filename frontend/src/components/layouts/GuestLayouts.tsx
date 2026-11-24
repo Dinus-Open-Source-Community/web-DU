@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils'
 import Footer from '../shared/Footer'
 import Navbar from '../shared/Navbar'
 
-const landingSurfaceClassName = 'landing-surface'
-
 type GuestLayoutProps = {
   children: ReactNode
   /** Kontrol CTA auth di navbar guest (landing pakai Daftar + Masuk). */
@@ -18,11 +16,11 @@ type GuestLayoutProps = {
 const GuestLayout = ({
   children,
   navbarAuthVariant = 'home',
-  marketingSurface = false,
+  marketingSurface: _marketingSurface = false,
 }: GuestLayoutProps) => {
   const auth = useNavbarAuth()
 
-  const shellClass = cn(marketingSurface && `${landingSurfaceClassName} min-h-dvh`)
+  const shellClass = cn(`min-h-dvh`)
 
   return (
     <div className={shellClass}>
@@ -33,13 +31,7 @@ const GuestLayout = ({
         Langsung ke konten
       </a>
       <Navbar auth={auth} authActionsVariant={navbarAuthVariant} />
-      <div
-        id="main-content"
-        className={cn(
-          'relative z-10 min-h-dvh',
-          marketingSurface ? 'bg-paper-offwhite' : 'bg-background',
-        )}
-      >
+      <div id="main-content" className="relative z-10 min-h-dvh bg-background">
         {children}
       </div>
       <Footer />

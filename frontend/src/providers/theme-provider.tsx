@@ -3,12 +3,10 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react'
 
 import {
-  getStoredTheme,
   persistTheme,
   type AppTheme,
 } from '@/lib/theme/app-theme'
@@ -21,11 +19,10 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<AppTheme>(() => getStoredTheme())
+  const theme: AppTheme = 'light';
 
-  const setTheme = useCallback((next: AppTheme) => {
-    setThemeState(next)
-    persistTheme(next)
+  const setTheme = useCallback((_next: AppTheme) => {
+    persistTheme('light')
   }, [])
 
   const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme])

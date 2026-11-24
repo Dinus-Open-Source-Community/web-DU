@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { ImageIcon, Loader2 } from 'lucide-react'
 
 import { SettingsSocialSection } from '@/components/profile/SettingsSocialSection'
-import { SettingsThemeSection } from '@/components/profile/SettingsThemeSection'
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength'
 import { UserAvatarImage } from '@/components/shared/UserAvatarImage'
 import { Button } from '@/components/ui/button'
@@ -187,8 +186,6 @@ export default function ProfileSection({ view }: ProfileSectionShellProps) {
       </div>
 
       <SettingsSocialSection userUid={user.uid} />
-
-      <SettingsThemeSection />
 
       <div className={settingsLayout.securityGrid}>
         <div className={settingsLayout.cardLg}>
