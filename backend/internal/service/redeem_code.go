@@ -800,7 +800,17 @@ func ListRedeemCodesFunc(c *gin.Context) {
 
 	// Jika mentor, batasi hanya kursus yang diajar jika bukan admin
 	if user.Role == entity.MentorRole {
-		query = query.Where("course_uid IN (SELECT course_uid FROM course_mentors WHERE mentor_uid = ?)", user.Uid)
+		courseUIDs, err := mentorAssignedCourseUIDs(user.Uid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal memverifikasi akses mentor kursus.",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		query = query.Where("course_uid IN ?", courseUIDs)
 	}
 
 	var total int64

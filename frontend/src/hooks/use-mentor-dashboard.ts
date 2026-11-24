@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
 import { mentorDashboardKeys } from './query-keys'
@@ -87,6 +87,7 @@ export function useMentorDashboard(
   const schedules = useQuery({
     queryKey: mentorDashboardKeys.schedules(calendarRange as IQueryParamsPayload),
     queryFn: () => fetchMentorDashboardSchedules(calendarRange),
+    placeholderData: keepPreviousData,
     staleTime: 60_000,
   })
 

@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom'
+
 import { EditCourseDialog } from '@/components/shared/course-form/EditCourseDialog'
+import { Button } from '@/components/ui/button'
 import { useCourseDetailTab } from '@/hooks/course-detail/use-course-detail-tab'
 import { useCourseMentorManagement } from '@/hooks/course-detail/use-course-mentor-management'
 import { CourseDetailAssignmentsTabPanel } from '@/components/shared/course-detail-manage/CourseDetailAssignmentsTabPanel'
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
+import { ROUTES } from '@/lib/routes'
 import type { CourseDetailShellProps } from '@/lib/course-detail/course-detail-manage-view-model'
 import { cn } from '@/lib/utils'
 import { Tabs, TabsContent } from '../ui/tabs'
@@ -122,6 +126,18 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
               courseUid={courseUid}
               role={isAdmin ? 'admin' : 'mentor'}
               students={dataStudents}
+              actions={
+                <Button
+                  asChild
+                  type="button"
+                  variant="outline"
+                  className="shrink-0 rounded-sm"
+                >
+                  <Link to={ROUTES.dashboardMenu.courseAssignmentHub(courseUid)}>
+                    Halaman tugas
+                  </Link>
+                </Button>
+              }
             />
           </TabsContent>
 

@@ -43,4 +43,12 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc)    // Super Admin / Admin
 		authCourseGroup.DELETE("/:id", service.DeleteAdminCourseFunc) // Super Admin / Admin
 	}
+
+	// Staff course list — admin sees all statuses (incl. DRAFT); mentor scoped to own courses.
+	// Additive: public GET /courses (ACTIVE only) is intentionally left unchanged.
+	adminCourseGroup := r.Group("/admin/courses")
+	adminCourseGroup.Use(middleware.AuthMiddleware())
+	{
+		adminCourseGroup.GET("/", service.GetAdminCoursesFunc) // Super Admin / Admin / Mentor
+	}
 }

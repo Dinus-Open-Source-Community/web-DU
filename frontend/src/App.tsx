@@ -4,9 +4,11 @@ import { ROUTES } from "./lib/routes.ts";
 import {
   DashboardAssignmentSubmissionDetailGateway,
   DashboardAssignmentSubmissionsGateway,
+  DashboardCourseAssignmentsGateway,
   DashboardCourseDetailGateway,
   DashboardCourseEditGateway,
   DashboardCoursesGateway,
+  DashboardRedeemCodesGateway,
 } from "./pages/dashboard/Gateways.tsx";
 import {
   LEGACY_DASHBOARD_REDIRECTS,
@@ -81,14 +83,8 @@ const AdminCourseTypes = React.lazy(
 const AdminGalleryPage = React.lazy(
   () => import("./pages/admin/Gallery.tsx"),
 );
-const AdminRedeemCodesPage = React.lazy(
-  () => import("./pages/admin/RedeemCodes.tsx"),
-);
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
-const MentorAssignments = React.lazy(
-  () => import("./pages/mentor/CourseAssignments.tsx"),
-);
 const StudentLearning = React.lazy(
   () => import("./pages/student/Learning.tsx"),
 );
@@ -408,16 +404,16 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.admin.redeemCodes,
-    element: <AdminRedeemCodesPage />,
+    element: <DashboardRedeemCodesGateway />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["admin", "super_admin", "mentor"],
   },
   {
     path: ROUTES.dashboardMenu.courseAssignmentHub(":courseUid"),
-    element: <MentorAssignments />,
+    element: <DashboardCourseAssignmentsGateway />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["mentor", "admin", "super_admin"],
   },
   {

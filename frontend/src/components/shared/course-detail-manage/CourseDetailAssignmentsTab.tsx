@@ -1,4 +1,5 @@
 import { ClipboardList, FileText, HelpCircle, Search } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { AdminUnderlineTabs } from "@/components/admin/AdminUnderlineTabs";
 import { isAdminStaffRole } from "@/lib/admin/staff-shell";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { manageDetailLayout } from "@/lib/course-detail/manage-detail-layout";
 import type { CourseDetailAssignmentsViewModel } from "@/lib/course-detail/course-detail-assignments-view-model";
+import type { CourseAssignmentOverviewItem } from "@/lib/course-detail/course-assignment-overview-presenter";
 import type { CourseAssignmentTaskFilter } from "@/lib/types/features/course-detail-assignments";
 import { CourseDetailLottieEmpty } from "@/components/shared/course-detail-manage/CourseDetailLottieEmpty";
 import { CourseDetailTabSectionIntro } from "@/components/shared/course-detail-manage/CourseDetailTabSectionIntro";
@@ -16,6 +18,10 @@ import { TablePaginationFooter } from "@/components/shared/TablePaginationFooter
 
 type CourseDetailAssignmentsTabProps = {
   view: CourseDetailAssignmentsViewModel;
+  /** Aksi tingkat halaman (mis. tombol Buat Tugas) di samping judul. */
+  actions?: ReactNode;
+  /** Aksi per baris tugas (mis. Edit/Hapus). */
+  renderRowActions?: (item: CourseAssignmentOverviewItem) => ReactNode;
 };
 
 const TASK_FILTER_OPTIONS: Array<{
@@ -29,6 +35,8 @@ const TASK_FILTER_OPTIONS: Array<{
 
 export function CourseDetailAssignmentsTab({
   view,
+  actions,
+  renderRowActions,
 }: CourseDetailAssignmentsTabProps) {
   const {
     role,
@@ -73,11 +81,14 @@ export function CourseDetailAssignmentsTab({
   return (
     <div className={cn(manageDetailLayout.sectionCard, manageDetailLayout.sectionPadding)}>
       <div className="mb-5 space-y-4">
-        <CourseDetailTabSectionIntro
-          icon={ClipboardList}
-          title="Tugas kursus"
-          description="Lihat lesson yang memiliki tugas, filter jenis, dan kelola pengumpulan siswa."
-        />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <CourseDetailTabSectionIntro
+            icon={ClipboardList}
+            title="Tugas kursus"
+            description="Lihat lesson yang memiliki tugas, filter jenis, dan kelola pengumpulan siswa."
+          />
+          {actions}
+        </div>
 
         <div className="w-full space-y-1.5">
           <Label htmlFor="assignment-overview-search" className="sr-only">
@@ -135,6 +146,7 @@ export function CourseDetailAssignmentsTab({
                 item={item}
                 adminStatusLabels={useAdminChrome}
                 onPrefetchRoster={() => prefetchSubmissionRoster(item.lessonUid)}
+                actions={renderRowActions?.(item)}
               />
             ))}
           </ul>

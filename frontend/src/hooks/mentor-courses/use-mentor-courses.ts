@@ -1,10 +1,11 @@
 import { useAuth } from '@/providers/auth-provider'
-import { useCourses } from '@/hooks/use-course'
+import { useAdminCourses } from '@/hooks/use-course'
 
 export function useMentorCourses() {
   const { profile, isLoading: isProfileLoading } = useAuth()
   const mentorUid = profile?.uid ?? ''
-  const coursesQuery = useCourses(
+  // Staff endpoint: mentor automatically scoped to assigned courses (incl. DRAFT).
+  const coursesQuery = useAdminCourses(
     { mentor_id: mentorUid },
     { enabled: Boolean(mentorUid) },
   )

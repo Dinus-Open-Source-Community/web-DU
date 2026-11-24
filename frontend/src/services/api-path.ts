@@ -197,6 +197,10 @@ export const API_ROUTES = {
     },
   },
   admin: {
+    courses: {
+      getAll: (params?: IQueryParamsPayload) =>
+        withQuery(`/admin/courses`, params),
+    },
     dashboard: {
       kpis: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/dashboard/kpis`, params),
