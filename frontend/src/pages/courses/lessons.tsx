@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle2, ChevronRight, Circle, Play } from 'lucide-reac
 
 import { EmptyState } from '@/components/shared/EmptyState'
 import { NotFoundContent } from '@/components/shared/Error'
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
+import { CourseLessonsSkeleton } from '@/components/courses/CourseLessonsSkeleton'
 import { Progress } from '@/components/ui/progress'
 import { useCourseEditData } from '@/hooks/use-course'
 import { useCourseLessonReading } from '@/hooks/use-course-lesson-reading'
@@ -57,7 +57,7 @@ export default function CourseLessonsPage() {
   )
 
   if (isLoading) {
-    return <PageSkeleton message="Memuat daftar materi..." />
+    return <CourseLessonsSkeleton />
   }
 
   if (!courseUid || !courseDetail.data) {

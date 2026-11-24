@@ -10,6 +10,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useInfinitePublicMentors } from '@/hooks/use-public-mentors'
 import { toLandingMentor, type LandingMentor } from '@/lib/landing/mentors'
+import { MentorCardSkeleton } from '@/components/landing/LandingRouteSkeletons'
 
 const TILTS = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as const
 const MENTORS_PER_PAGE = 8
@@ -101,14 +102,11 @@ export default function MentorsPage() {
 
             {/* Konten Grid Kartu Mentor Polaroid */}
             {isLoading && mentorItems.length === 0 ? (
-              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5 sm:mt-14">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-80 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3.5 shadow-paper animate-pulse"
-                  />
+              <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+               {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <MentorCardSkeleton key={i} index={i} />
                 ))}
-              </div>
+               </div>
             ) : isError && mentorItems.length === 0 ? (
               <p className="text-ink-600 mt-10 min-h-[40vh] text-center">
                 Data mentor belum dapat dimuat.

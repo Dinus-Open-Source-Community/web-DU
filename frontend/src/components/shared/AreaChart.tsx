@@ -41,7 +41,26 @@ export function TimelineAreaChart({ data, series, height = 280 }: TimelineAreaCh
             cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '3 3' }}
             contentStyle={chartTooltipContentStyle}
           />
-          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }} />
+          <Legend
+            verticalAlign="bottom"
+            content={({ payload }) => {
+              if (!payload?.length) return null
+              return (
+                <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 pt-3 text-xs font-medium text-muted-foreground">
+                  {payload.map((entry) => (
+                    <li key={String(entry.dataKey ?? entry.value)} className="inline-flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="size-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: entry.color }}
+                      />
+                      <span>{entry.value}</span>
+                    </li>
+                  ))}
+                </ul>
+              )
+            }}
+          />
           {series.map((s) => (
             <Area
               key={s.dataKey}

@@ -19,6 +19,7 @@ import {
 import { type GalleryImage } from '@/lib/landing/gallery'
 import { useDummyGallery } from '@/lib/gallery/dummy-gallery'
 import { LANDING_COPY } from '@/lib/landing/copy'
+import { GalleryBentoSkeleton } from './LandingRouteSkeletons'
 
 /**
  * GallerySection — papan tempel bento ala scrapbook sungguhan. Enam "kulit"
@@ -343,7 +344,9 @@ export function GalleryBentoGrid({
 
   if (rows.length === 0) {
     if (isLoading) {
-      return <div className="mt-10 min-h-[55vh] sm:mt-16" aria-hidden />
+      return <div className="mt-10 sm:mt-12">
+        <GalleryBentoSkeleton />
+      </div>
     }
     return (
       <Reveal y={24} className="mt-10 sm:mt-12">

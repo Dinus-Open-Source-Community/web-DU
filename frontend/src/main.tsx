@@ -8,6 +8,7 @@ import { QueryProvider } from './providers/query-providers.tsx'
 import { AuthProvider } from './providers/auth-provider.tsx'
 import { ThemeProvider } from './providers/theme-provider.tsx'
 import { Toaster } from './components/ui/sonner.tsx'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 bootstrapTheme()
 
