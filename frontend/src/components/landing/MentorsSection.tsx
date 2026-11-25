@@ -50,7 +50,7 @@ export default function MentorsSection() {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-72 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3.5 shadow-paper animate-pulse"
+                className="h-72 rounded-[20px] border-2 border-ink-900/20 bg-muted p-3.5 shadow-paper animate-pulse"
               />
             ))}
           </div>

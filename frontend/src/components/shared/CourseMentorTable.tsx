@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { GraduationCap, Loader2, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
+import { GraduationCap, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
 import type { ICourseMentorItem } from '@/lib/types/user'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { AdminMetaLabel } from '@/lib/admin/status-label'
@@ -11,6 +11,7 @@ import { CourseDetailTabSectionIntro } from '@/components/shared/course-detail-m
 import { manageDetailLayout } from '@/lib/course-detail/manage-detail-layout'
 import { cn } from '@/lib/utils'
 import { useCourseMentors } from '@/hooks/use-course'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface CourseMentorTableProps {
   courseUid?: string
@@ -124,9 +125,14 @@ export function CourseMentorTable({
 
       <section className={manageDetailLayout.tableSurface}>
       {isLoading && !mentorsResponse && courseUid ? (
-        <div className="flex h-48 items-center justify-center text-sm text-ink-500">
-          <Loader2 className="mr-2 size-5 animate-spin text-brand-blue" />
-          Memuat data mentor...
+        <div className="space-y-3 p-4" role="status" aria-label="Memuat data mentor">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-center gap-3 border-b border-line-light pb-4 last:border-0">
+              <Skeleton className="size-11 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-3 w-1/2" /></div>
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
         </div>
       ) : displayedMentors.length === 0 ? (
         <div className="px-4 py-10 text-center sm:px-5">

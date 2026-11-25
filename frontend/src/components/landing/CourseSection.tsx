@@ -100,15 +100,15 @@ export default function CourseSection() {
                   <StickerTape className={tapeClass} />
                   <div>
                     <div className="aspect-[16/10] w-full rounded-xl border border-ink-900/15 bg-paper-panel" />
-                    <div className="mt-3 h-3.5 w-1/3 rounded bg-ink-900/10" />
-                    <div className="mt-2.5 h-5 w-3/4 rounded bg-ink-900/10" />
+                    <div className="mt-3 h-3.5 w-1/3 rounded bg-muted" />
+                    <div className="mt-2.5 h-5 w-3/4 rounded bg-muted" />
                     <div className="mt-2 space-y-1.5">
-                      <div className="h-3.5 w-full rounded bg-ink-900/10" />
-                      <div className="h-3.5 w-2/3 rounded bg-ink-900/10" />
+                      <div className="h-3.5 w-full rounded bg-muted" />
+                      <div className="h-3.5 w-2/3 rounded bg-muted" />
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-dashed border-ink-900/10 pt-3">
-                    <div className="h-4 w-20 rounded bg-ink-900/10" />
+                    <div className="h-4 w-20 rounded bg-muted" />
                     <div className="size-7 rounded-lg border border-ink-900/10 bg-paper-panel" />
                   </div>
                 </div>

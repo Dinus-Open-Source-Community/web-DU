@@ -8,7 +8,7 @@ const KemiringanKartu = ['-rotate-1', 'rotate-1', 'rotate-1', '-rotate-1'] as co
 
 function LandingSkeletonTheme({ children }: { children: ReactNode }) {
   return (
-    <SkeletonTheme baseColor="#ebe6dc" highlightColor="#faf8f5">
+    <SkeletonTheme baseColor="#F1F3F5" highlightColor="#FBFCFD">
       {children}
     </SkeletonTheme>
   )
