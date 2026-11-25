@@ -14,6 +14,7 @@ import OauthButton from '@/components/shared/OauthButton'
 import { Button } from '@/components/ui/button'
 import AuthLayout from '@/components/layouts/AuthLayouts'
 import { Message, resolveActionError } from '@/lib/Message'
+import { EvaluatePassword } from '@/lib/func/func'
 import { ROUTES } from '@/lib/routes'
 import { resolveSafeRedirectPath } from '@/lib/security/safe-redirect'
 import { parseRegisterFormValues } from '@/lib/validator/auth'
@@ -33,10 +34,11 @@ export default function RegisterPage() {
 
   const passwordMismatch =
     confirmPassword.length > 0 && password !== confirmPassword
+  const passwordStrongEnough = EvaluatePassword(password).metCount >= 5
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (passwordMismatch || isSubmitting) return
+    if (passwordMismatch || !passwordStrongEnough || isSubmitting) return
 
     setIsSubmitting(true)
     try {
@@ -160,7 +162,7 @@ export default function RegisterPage() {
             type="submit"
             variant="neobrutalism"
             className={authSubmitButtonClassName}
-            disabled={passwordMismatch || isSubmitting}
+            disabled={passwordMismatch || !passwordStrongEnough || isSubmitting}
             aria-busy={isSubmitting}
           >
             {isSubmitting ? (

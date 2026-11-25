@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { ExternalLink, ImageIcon, Link2, Video } from 'lucide-react'
 
 import { SafeEmbedFrame } from '@/components/shared/SafeEmbedFrame'
@@ -14,6 +14,8 @@ import {
 } from '@/lib/tiptap-media'
 import { resolveSafeEmbedUrl, resolveSafeImageSrc } from '@/lib/security/safe-external-url'
 import { cn } from '@/lib/utils'
+import { getValidationMessage, imageUploadFileSchema } from '@/lib/validator'
+import { uploadLessonAssignmentImage } from '@/services/lesson-assignment'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -37,7 +39,7 @@ const DIALOG_META: Record<
   },
   image: {
     title: 'Sisipkan gambar',
-    description: 'URL https atau path /files/{bucket}/{object} dari storage.',
+    description: 'Pilih file dari perangkat (maks 5 MB) atau tempel URL/path /files/{bucket}/{object}.',
     placeholder: 'https://example.com/gambar.jpg atau /files/bucket/object',
     icon: ImageIcon,
   },
@@ -71,6 +73,8 @@ export function TipTapMediaDialog({
   const [url, setUrl] = useState(initialUrl)
   const [error, setError] = useState<string | null>(null)
   const [imageStatus, setImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle')
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const meta = DIALOG_META[kind]
   const Icon = meta.icon
@@ -101,6 +105,29 @@ export function TipTapMediaDialog({
     }
     setImageStatus('loading')
   }, [canPreviewImage, trimmedUrl])
+
+  async function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    const validation = imageUploadFileSchema.safeParse(file)
+    if (!validation.success) {
+      setError(getValidationMessage(validation.error, 'File gambar tidak valid'))
+      return
+    }
+
+    setIsUploading(true)
+    setError(null)
+    try {
+      const uploadedUrl = await uploadLessonAssignmentImage(validation.data)
+      setUrl(uploadedUrl)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal mengunggah gambar')
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   function handleConfirm() {
     const validationError = validateMediaUrl(kind, url)
@@ -147,6 +174,31 @@ export function TipTapMediaDialog({
           />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
+
+          {kind === 'image' ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? 'Mengunggah...' : 'Pilih dari perangkat'}
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                JPG, PNG, WebP, atau GIF — maksimal 5 MB
+              </span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                aria-label="Pilih gambar dari perangkat"
+                onChange={handleFileSelect}
+              />
+            </div>
+          ) : null}
 
           <div className="rounded-xl border border-input bg-muted p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pratinjau</p>

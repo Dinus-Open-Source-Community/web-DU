@@ -17,7 +17,7 @@ export default function AuthLayout({
   return (
     <main className="grid min-h-dvh bg-muted lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,560px)] xl:grid-cols-[minmax(0,1.15fr)_minmax(480px,620px)] 2xl:grid-cols-[minmax(0,1.2fr)_minmax(520px,680px)]">
       {/* Panel kiri — permukaan kertas (menggantikan gradient biru). */}
-      <section className="relative hidden overflow-hidden bg-muted lg:flex lg:flex-col lg:justify-between">
+      <section className="relative hidden overflow-hidden bg-muted lg:sticky lg:top-0 lg:h-dvh lg:flex lg:flex-col lg:justify-between">
         {/* Grid kertas halus sebagai tekstur. */}
         <div
           aria-hidden

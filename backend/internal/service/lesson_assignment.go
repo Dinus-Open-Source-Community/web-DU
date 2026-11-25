@@ -453,10 +453,10 @@ func UploadLessonAssignmentImageFunc(c *gin.Context) {
 	}
 
 	role := strings.ToLower(string(user.Role))
-	if role != "admin" && role != "super_admin" && role != "mentor" {
+	if role != "admin" && role != "super_admin" && role != "mentor" && role != "student" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Access denied: Admin or mentor only",
+			"message": "Access denied",
 			"data":    nil,
 			"error":   nil,
 		})

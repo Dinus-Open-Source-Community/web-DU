@@ -69,18 +69,27 @@ export default function MentorDashboardPage() {
         className="overflow-visible"
         contentClassName="px-5 py-4"
       >
-        {schedules.isError ? (
+        {schedules.isError && !schedules.data ? (
           <DashboardError
             message={schedules.error?.message ?? 'Terjadi kesalahan saat memuat jadwal'}
             onRetry={() => schedules.refetch()}
           />
-        ) : schedules.isLoading ? (
-          <CalendarContentSkeleton />
         ) : (
-          <CalendarView
-            schedules={schedules.data ?? []}
-            onVisibleRangeChange={handleCalendarRangeChange}
-          />
+          <>
+            {schedules.isError ? (
+              <p className="mb-3 text-xs font-medium text-amber-700">
+                Gagal memperbarui jadwal terbaru; menampilkan data terakhir.
+              </p>
+            ) : null}
+            {schedules.isLoading ? (
+              <CalendarContentSkeleton />
+            ) : (
+              <CalendarView
+                schedules={schedules.data ?? []}
+                onVisibleRangeChange={handleCalendarRangeChange}
+              />
+            )}
+          </>
         )}
       </ChartCard>
     </MentorAppPageShell>
