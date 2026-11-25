@@ -26,6 +26,12 @@ export const passwordSchema = z
   .max(128, 'Password maksimal 128 karakter')
   .refine((value) => /[A-Za-z]/.test(value), 'Password harus mengandung huruf')
   .refine((value) => /\d/.test(value), 'Password harus mengandung angka')
+  .refine((value) => /[A-Z]/.test(value), 'Password harus mengandung huruf besar (A-Z)')
+  .refine((value) => /[a-z]/.test(value), 'Password harus mengandung huruf kecil (a-z)')
+  .refine(
+    (value) => /[^A-Za-z0-9]/.test(value),
+    'Password harus mengandung karakter spesial (!@#$%...)',
+  )
 
 export const currentPasswordSchema = z.string().min(1, 'Password saat ini wajib diisi')
 

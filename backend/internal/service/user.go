@@ -769,6 +769,16 @@ func ChangePasswordService(c *gin.Context) {
 		return
 	}
 
+	if err := utils.ValidatePasswordStrength(req.NewPassword); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
 	var user entity.User
 	if err := database.DB.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{

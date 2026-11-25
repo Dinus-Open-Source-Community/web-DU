@@ -37,6 +37,17 @@ func PostRegisterFunc(c *gin.Context) {
 		return
 	}
 
+	// Validasi kekuatan password — selaras indikator frontend (EvaluatePassword).
+	if err := utils.ValidatePasswordStrength(req.Password); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+			"error":   nil,
+		})
+		return
+	}
+
 	// 2. Proses hashing password dan enkripsi data sensitif
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
