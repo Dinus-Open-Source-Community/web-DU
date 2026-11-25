@@ -12,6 +12,7 @@ import { isCoursePublished } from '@/lib/course-detail/publish-state'
 import { Message } from '@/lib/Message'
 import { ROUTES } from '@/lib/routes'
 import { useAuth } from '@/providers/auth-provider'
+import { CourseDetailRouteFallback } from '@/components/landing/LandingRouteSkeletons'
 
 export default function PublicCourseDetailPage() {
   const { courseUid } = useParams()
@@ -57,23 +58,7 @@ export default function PublicCourseDetailPage() {
   }, [courseDetail.data, isAuthenticated, isEnrolled, navigate, profile])
 
   if (isLoading) {
-    return (
-      <GuestLayout navbarAuthVariant="home" marketingSurface>
-        <main className="w-full">
-          <section className="relative min-h-dvh overflow-hidden bg-paper-offwhite">
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-ink-900/80" />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-[0.14]"
-              style={{
-                backgroundImage: 'radial-gradient(#050914 1.2px, transparent 1.2px)',
-                backgroundSize: '22px 22px',
-              }}
-            />
-          </section>
-        </main>
-      </GuestLayout>
-    )
+    return <CourseDetailRouteFallback />
   }
 
   if (!courseDetail.data || !isCoursePublished(courseDetail.data)) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Check,
   Copy,
@@ -110,6 +110,7 @@ export function GenerateRedeemCodeDialog({
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
+  const isOpen = open ?? false
   const setOpen = useCallback(
     (nextOpen: boolean) => {
       if (isControlled) {
@@ -137,7 +138,6 @@ export function GenerateRedeemCodeDialog({
   const [prefix, setPrefix] = useState('')
   const [maxUses, setMaxUses] = useState(1)
   const [expiresAt, setExpiresAt] = useState('')
-  const expiresAtInputRef = useRef<HTMLInputElement>(null)
   const [isActive, setIsActive] = useState(true)
 
   const [copied, setCopied] = useState(false)
@@ -306,7 +306,7 @@ export function GenerateRedeemCodeDialog({
     (initialCourseQuery.data?.uid === courseUid ? initialCourseQuery.data : undefined)
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setOpen}>
       {trigger ? (
         <DialogTrigger asChild>{trigger}</DialogTrigger>
       ) : (
@@ -828,44 +828,22 @@ export function GenerateRedeemCodeDialog({
                   </p>
                 </div>
 
-                <div className="space-y-1.5 select-none">
+                <div className="space-y-1.5">
                   <Label htmlFor="expires-at" className="text-xs font-semibold text-ink-700 flex items-center gap-1">
                     <Calendar className="size-3 text-ink-400" />
                     Masa Berlaku (Opsional)
                   </Label>
                   <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const input = expiresAtInputRef.current
-                        if (!input) return
-                        try {
-                          input.showPicker()
-                        } catch {
-                          input.click()
-                        }
-                      }}
-                      className="flex h-9 w-full select-none items-center justify-between rounded-xl border border-ink-900/15 bg-card px-3 text-left text-xs text-ink-900 transition hover:border-line-medium focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
-                    >
-                      <span className={expiresAt ? '' : 'text-ink-400'}>
-                        {expiresAt
-                          ? new Intl.DateTimeFormat('id-ID', {
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            }).format(new Date(expiresAt))
-                          : 'Pilih tanggal dan waktu'}
-                      </span>
-                      <Calendar className="size-4 shrink-0 text-ink-400" />
-                    </button>
-                    <input
-                      ref={expiresAtInputRef}
+                    <Input
                       id="expires-at"
                       type="datetime-local"
                       value={expiresAt}
                       onChange={(e) => setExpiresAt(e.target.value)}
-                      tabIndex={-1}
+                      className="h-10 w-full rounded-xl border-ink-900/15 bg-card pr-10 text-xs text-ink-900 focus-visible:ring-3 focus-visible:ring-ring/30"
+                    />
+                    <Calendar
                       aria-hidden="true"
-                      className="pointer-events-none absolute left-1/2 top-1/2 size-px -translate-x-1/2 -translate-y-1/2 opacity-0"
+                      className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-400"
                     />
                   </div>
                   <p className="text-[11px] text-ink-400">

@@ -8,6 +8,7 @@ import {
   DashboardCourseDetailGateway,
   DashboardCourseEditGateway,
   DashboardCoursesGateway,
+  DashboardRedeemCodesGateway,
 } from "./pages/dashboard/Gateways.tsx";
 import {
   LEGACY_DASHBOARD_REDIRECTS,
@@ -33,6 +34,15 @@ import { RouteGuard } from "./providers/route-guard.tsx";
 import { RouterErrorBoundary } from "./components/shared/Error.tsx";
 import ScrollManager from "./components/shared/ScrollManager.tsx";
 import type { UserRole } from "./lib/types/user.ts";
+import "react-loading-skeleton/dist/skeleton.css";
+import { CourseLessonsSkeleton } from "./components/courses/CourseLessonsSkeleton.tsx";
+import {
+  HomeRouteFallback,
+  MentorsRouteFallback,
+  CoursesRouteFallback,
+  GalleryRouteFallback,
+  CourseDetailRouteFallback,
+} from "./components/landing/LandingRouteSkeletons.tsx";
 
 const Home = React.lazy(() => import("./pages/landing/Home.tsx"));
 const GalleryPage = React.lazy(() => import("./pages/landing/Gallery.tsx"));
@@ -72,9 +82,6 @@ const AdminCourseTypes = React.lazy(
 );
 const AdminGalleryPage = React.lazy(
   () => import("./pages/admin/Gallery.tsx"),
-);
-const AdminRedeemCodesPage = React.lazy(
-  () => import("./pages/admin/RedeemCodes.tsx"),
 );
 const ReviewsQa = React.lazy(() => import('./pages/admin/ReviewsQA.tsx'))
 // const CourseEditMentor = React.lazy(() => import('./components/pages/mentor/CourseEdit.tsx'))
@@ -200,30 +207,35 @@ const routeConfig: RouteConfig[] = [
     element: <Home />,
     public: true,
     lazy: true,
+    fallback: <HomeRouteFallback />
   },
   {
     path: ROUTES.gallery,
     element: <GalleryPage />,
     public: true,
     lazy: true,
+    fallback: <GalleryRouteFallback />
   },
   {
     path: ROUTES.mentors,
     element: <MentorsPage />,
     public: true,
     lazy: true,
+    fallback: <MentorsRouteFallback />
   },
   {
     path: ROUTES.courses,
     element: <CoursePage />,
     public: true,
     lazy: true,
+    fallback: <CoursesRouteFallback />
   },
   {
     path: ROUTES.courseDetail(":courseUid"),
     element: <CourseDetail />,
     public: true,
     lazy: true,
+    fallback: <CourseDetailRouteFallback />
   },
   {
     path: ROUTES.viewModuleAndLessons(":courseUid"),
@@ -247,6 +259,7 @@ const routeConfig: RouteConfig[] = [
     public: false,
     lazy: true,
     roles: ["student", "mentor", "admin", "super_admin"],
+    fallback: <CourseLessonsSkeleton />
   },
   {
     path: ROUTES.login,
@@ -391,9 +404,9 @@ const routeConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.admin.redeemCodes,
-    element: <AdminRedeemCodesPage />,
+    element: <DashboardRedeemCodesGateway />,
     public: false,
-    lazy: true,
+    lazy: false,
     roles: ["admin", "super_admin", "mentor"],
   },
   {

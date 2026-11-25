@@ -16,6 +16,15 @@ import AdminAssignmentSubmissionDetail from '@/pages/admin/AssignmentSubmissionD
 import MentorAssignmentSubmissionDetail from '@/pages/mentor/AssignmentSubmissionDetail'
 import AdminCourseAssignments from '@/pages/admin/CourseAssignments'
 import MentorCourseAssignments from '@/pages/mentor/CourseAssignments'
+import AdminRedeemCodes from '@/pages/admin/RedeemCodes'
+import MentorRedeemCodes from '@/pages/mentor/RedeemCodes'
+
+export function DashboardRedeemCodesGateway() {
+  const { role } = useAuth()
+  if (role === 'admin' || role === 'super_admin') return <AdminRedeemCodes />
+  if (role === 'mentor') return <MentorRedeemCodes />
+  return <Navigate to={DASHBOARD_PATH} replace />
+}
 
 function staffCourseRole(role: string | null | undefined): 'admin' | 'mentor' | null {
   if (role === 'admin' || role === 'super_admin') return 'admin'

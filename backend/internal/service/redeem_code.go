@@ -29,6 +29,15 @@ func redeemCodeCanDelete(usedCount int, usageCount int64) bool {
 	return usedCount == 0 && usageCount == 0
 }
 
+func mentorCanManageRedeemCourse(courseUID uuid.UUID, assignedCourseUIDs []uuid.UUID) bool {
+	for _, assignedUID := range assignedCourseUIDs {
+		if assignedUID == courseUID {
+			return true
+		}
+	}
+	return false
+}
+
 func generateRandomRedeemCode(prefix string) (string, error) {
 	cleanPrefix := strings.ToUpper(strings.TrimSpace(prefix))
 	if cleanPrefix == "" {
@@ -800,7 +809,17 @@ func ListRedeemCodesFunc(c *gin.Context) {
 
 	// Jika mentor, batasi hanya kursus yang diajar jika bukan admin
 	if user.Role == entity.MentorRole {
-		query = query.Where("course_uid IN (SELECT course_uid FROM course_mentors WHERE mentor_uid = ?)", user.Uid)
+		courseUIDs, err := mentorAssignedCourseUIDs(user.Uid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Gagal memverifikasi akses mentor kursus.",
+				"data":    nil,
+				"error":   err.Error(),
+			})
+			return
+		}
+		query = query.Where("course_uid IN ?", courseUIDs)
 	}
 
 	var total int64
@@ -896,7 +915,12 @@ func ListRedeemCodesFunc(c *gin.Context) {
 // @Failure      500  {object}  map[string]any  "Failed to delete redeem code"
 // @Router       /admin/redeem-codes/{id} [delete]
 func DeleteRedeemCodeFunc(c *gin.Context) {
-	if _, ok := requireAdminAccess(c); !ok {
+	user, ok := getAuthenticatedUser(c)
+	if !ok {
+		return
+	}
+	if !hasAdminAccess(user.Role) && user.Role != entity.MentorRole {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Akses ditolak: Admin atau mentor kursus yang ditugaskan saja.", "data": nil, "error": "Forbidden access"})
 		return
 	}
 
@@ -926,6 +950,19 @@ func DeleteRedeemCodeFunc(c *gin.Context) {
 			"error":   "Redeem code not found",
 		})
 		return
+	}
+	if user.Role == entity.MentorRole {
+		courseUIDs, err := mentorAssignedCourseUIDs(user.Uid)
+		if err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Gagal memverifikasi akses mentor kursus.", "data": nil, "error": err.Error()})
+			return
+		}
+		if !mentorCanManageRedeemCourse(redeemCode.CourseUid, courseUIDs) {
+			tx.Rollback()
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Anda tidak memiliki hak akses untuk menghapus kode redeem kursus ini.", "data": nil, "error": "Mentor cannot manage this course"})
+			return
+		}
 	}
 
 	var usageCount int64

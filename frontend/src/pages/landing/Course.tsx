@@ -33,6 +33,7 @@ import type { CourseUiLevel } from '@/lib/types'
 import { useCourses } from '@/hooks/use-course'
 import { filterPublishedCourses } from '@/lib/course-catalog/available-courses'
 import { useAuth } from '@/providers/auth-provider'
+import { CourseCardSkeleton } from '@/components/landing/LandingRouteSkeletons'
 
 const CARD_ACCENTS = [
   { bg: 'bg-note-mint' },
@@ -355,24 +356,9 @@ export default function CoursePage() {
               {/* Loading Skeletons */}
               {isLoading && paginatedCourses.length === 0 ? (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {[0, 1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="relative flex h-full flex-col justify-between rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-4 shadow-paper animate-pulse"
-                    >
-                      <div className="aspect-[16/10] w-full rounded-xl border border-ink-900/15 bg-paper-panel" />
-                      <div className="mt-3.5 h-3.5 w-1/3 rounded bg-ink-900/10" />
-                      <div className="mt-2.5 h-5 w-4/5 rounded bg-ink-900/10" />
-                      <div className="mt-2 space-y-1.5">
-                        <div className="h-3.5 w-full rounded bg-ink-900/10" />
-                        <div className="h-3.5 w-2/3 rounded bg-ink-900/10" />
-                      </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-dashed border-ink-900/10 pt-3">
-                        <div className="h-4 w-24 rounded bg-ink-900/10" />
-                        <div className="size-8 rounded-lg border border-ink-900/10 bg-paper-panel" />
-                      </div>
-                    </div>
-                  ))}
+                   {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <CourseCardSkeleton key={i} />
+                    ))}
                 </div>
               ) : totalCourses === 0 ? (
                 /* Empty State */
