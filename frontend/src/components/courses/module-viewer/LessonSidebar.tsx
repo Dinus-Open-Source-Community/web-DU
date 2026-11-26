@@ -87,7 +87,7 @@ export function LessonSidebar({
   return (
     <>
       <div
-        className="fixed top-16 left-0 z-30 hidden h-[calc(100dvh-4rem)] transition-transform duration-300 ease-in-out will-change-transform lg:block"
+        className="fixed top-16 bottom-[calc(4.25rem_+_1px_+_env(safe-area-inset-bottom))] left-0 z-30 hidden transition-transform duration-300 ease-in-out will-change-transform sm:bottom-[calc(4.75rem_+_1px_+_env(safe-area-inset-bottom))] lg:block"
         style={{
           width: LESSON_SIDEBAR_WIDTH_PX + LESSON_SIDEBAR_TOGGLE_PX,
           transform: isOpen ? 'translateX(0)' : `translateX(-${LESSON_SIDEBAR_WIDTH_PX}px)`,

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { DetailCourse } from '../../components/shared/DetailCourseComponents'
 import { AppSidebarProvider } from '../../components/shared/Sidebar'
 import { NotFoundContent } from '@/components/shared/Error'
-import { PageSkeleton } from '@/components/shared/PageSkeleton'
+import { CourseDetailSkeleton } from '@/components/shared/course-detail-manage/CourseDetailSkeleton'
 import { useCourseDetailManageView } from '@/hooks/course-detail/use-course-detail-manage-view'
 import { useRegisterCourseNavbarBreadcrumb } from '@/hooks/layout/use-register-course-navbar-breadcrumb'
 import { useCourseDetailAdminAndMentor } from '@/hooks/use-course'
@@ -17,31 +17,27 @@ export default function AdminCourseDetailPage() {
     courseUid as string,
   )
 
-  if (isLoading) {
-    return <PageSkeleton message="Memuat course" />
-  }
-
-  if (!courseDetail?.data || !courseUid) {
-    return (
-      <NotFoundContent
-        description="Detail kursus tidak ditemukan"
-        showBackButton={false}
-        title="Kursus tidak ditemukan"
-      />
-    )
-  }
-
   return (
     <AppSidebarProvider
       role={shellRole}
       user={sidebarUser}
     >
-      <AdminCourseDetailContent
-        courseUid={courseUid}
-        dataCourse={courseDetail.data}
-        dataStudents={userCourse.data?.enrollments ?? []}
-        dataModules={moduleCourse.data?.modules as IModulesData[]}
-      />
+      {isLoading ? (
+        <CourseDetailSkeleton isAdmin />
+      ) : !courseDetail?.data || !courseUid ? (
+        <NotFoundContent
+          description="Detail kursus tidak ditemukan"
+          showBackButton={false}
+          title="Kursus tidak ditemukan"
+        />
+      ) : (
+        <AdminCourseDetailContent
+          courseUid={courseUid}
+          dataCourse={courseDetail.data}
+          dataStudents={userCourse.data?.enrollments ?? []}
+          dataModules={moduleCourse.data?.modules as IModulesData[]}
+        />
+      )}
     </AppSidebarProvider>
   )
 }

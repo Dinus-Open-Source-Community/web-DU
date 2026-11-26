@@ -154,7 +154,7 @@ export function LessonViewerSkeleton({
       ) : null}
 
       <div
-        className="fixed top-16 left-0 z-30 hidden h-[calc(100dvh-4rem)] lg:block"
+        className="fixed top-16 bottom-[calc(4.25rem_+_1px_+_env(safe-area-inset-bottom))] left-0 z-30 hidden sm:bottom-[calc(4.75rem_+_1px_+_env(safe-area-inset-bottom))] lg:block"
         style={{ width: LESSON_SIDEBAR_WIDTH_PX + LESSON_SIDEBAR_TOGGLE_PX }}
       >
         <aside

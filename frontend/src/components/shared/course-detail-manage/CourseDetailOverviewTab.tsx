@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils'
 import type { CourseDetailTabValue } from './CourseDetailNavTabs'
 import { CourseDetailInfoCard } from './CourseDetailInfoCard'
 import { StatCard } from '@/components/shared/StatCard'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const OVERVIEW_KPI_ACCENTS = [
   'border-l-brand-blue',
@@ -186,7 +187,9 @@ export function CourseDetailOverviewTab({
             onNavigateToTab={onNavigateToTab}
           >
             {assignmentsLoading ? (
-              <OverviewEmpty>Memuat data tugas…</OverviewEmpty>
+              <div className="space-y-3" role="status" aria-label="Memuat data tugas">
+                {Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-12 w-full" />)}
+              </div>
             ) : assignmentSummary.assignmentCount === 0 ? (
               <OverviewEmpty>Belum ada tugas terdaftar untuk kursus ini.</OverviewEmpty>
             ) : (
