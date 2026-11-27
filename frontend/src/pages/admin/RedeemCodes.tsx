@@ -16,6 +16,7 @@ import { AdminPageShell } from '@/components/admin/AdminPageShell'
 import { AdminDataTable } from '@/components/shared/AdminDataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
+import { RedeemCodesPageSkeleton } from '@/components/admin/redeem/RedeemCodesSkeleton'
 import { UserIdentityCell } from '@/components/admin/user-manage/UserIdentityCell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -328,6 +329,10 @@ export default function AdminRedeemCodesPage() {
   return (
     <AppSidebarProvider role={shellRole} user={sidebarUser}>
       <AdminPageShell>
+        {isLoading ? (
+          <RedeemCodesPageSkeleton variant="admin" />
+        ) : (
+          <>
         {/* Header Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -469,6 +474,8 @@ export default function AdminRedeemCodesPage() {
             )
           }
         />
+          </>
+        )}
         <ConfirmDialog
           open={Boolean(deleteTarget)}
           onOpenChange={(open) => {
