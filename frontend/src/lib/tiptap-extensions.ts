@@ -92,6 +92,8 @@ export function createTiptapExtensions(placeholder = DEFAULT_PLACEHOLDER): Exten
     }).configure({
       lowlight,
       defaultLanguage: null,
+      enableTabIndentation: true,
+      tabSize: 2,
       HTMLAttributes: { class: 'tiptap-code-block' },
     }),
     TiptapImage.configure({
