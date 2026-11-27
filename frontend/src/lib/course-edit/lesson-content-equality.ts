@@ -15,6 +15,18 @@ export type AssignmentBaseline = {
   homeworkRulesJson: string
 }
 
+function normalizeWhitespaceOutsidePre(html: string): string {
+  return html
+    .split(/(<pre\b[\s\S]*?<\/pre>)/gi)
+    .map((part) =>
+      /^<pre\b/i.test(part)
+        ? part
+        : part.replace(/\s+/g, ' ').replace(/>\s+</g, '><'),
+    )
+    .join('')
+    .trim()
+}
+
 export function normalizeRichText(html?: string | null): string {
   if (!html) return ''
   const trimmed = html.trim()
@@ -59,22 +71,18 @@ export function normalizeRichText(html?: string | null): string {
       }
     })
 
-    return div.innerHTML
-      .replace(/\s+/g, ' ')
-      .replace(/>\s+</g, '><')
-      .trim()
+    return normalizeWhitespaceOutsidePre(div.innerHTML)
   }
 
   // Fallback regex normalization if document is not available
-  return trimmed
-    .replace(/<li><p>(.*?)<\/p><\/li>/gi, '<li>$1</li>')
-    .replace(/<b>(.*?)<\/b>/gi, '<strong>$1</strong>')
-    .replace(/<i>(.*?)<\/i>/gi, '<em>$1</em>')
-    .replace(/\s+/g, ' ')
-    .replace(/>\s+</g, '><')
-    .replace(/<p>\s*<\/p>/g, '')
-    .replace(/<p><br\s*\/?>\s*<\/p>/g, '')
-    .trim()
+  return normalizeWhitespaceOutsidePre(
+    trimmed
+      .replace(/<li><p>(.*?)<\/p><\/li>/gi, '<li>$1</li>')
+      .replace(/<b>(.*?)<\/b>/gi, '<strong>$1</strong>')
+      .replace(/<i>(.*?)<\/i>/gi, '<em>$1</em>')
+      .replace(/<p>\s*<\/p>/g, '')
+      .replace(/<p><br\s*\/?>\s*<\/p>/g, ''),
+  )
 }
 
 export function getLessonVideoUrl(lesson: EditableLesson): string {
