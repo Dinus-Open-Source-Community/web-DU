@@ -34,6 +34,8 @@ export interface ICourseItem {
   what_you_learn?: string[]
 }
 
+export type CourseMasterUsageConflict = { courses: ICourseItem[] }
+
 export interface ICategoryItem {
   uid: string
   name: string

@@ -20,6 +20,8 @@ export type CourseDetailManageViewModel = {
   onConfirmOpenChange: (open: boolean) => void
   onEditClick: () => void
   onPublishClick: () => void
+  onArchiveClick: () => void
+  isArchived: boolean
   confirmTitle: string
   confirmDescription: string
   confirmLabel: string

@@ -1003,6 +1003,29 @@ func ActivateCourseStatusFunc(c *gin.Context) {
 	})
 }
 
+func ArchiveAdminCourseFunc(c *gin.Context) {
+	if _, ok := requireAdmin(c); !ok {
+		return
+	}
+	id, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+	var course entity.Course
+	if err := database.DB.First(&course, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Course not found", "data": nil, "error": err.Error()})
+		return
+	}
+	course.Status = entity.CourseStatusTidakActive
+	course.IsPublished = false
+	if err := database.DB.Save(&course).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to archive course", "data": nil, "error": err.Error()})
+		return
+	}
+	cache.InvalidateCourse(course.Uid.String())
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Course archived successfully", "data": course, "error": nil})
+}
+
 // @Summary      Join a course (Student Only)
 // @Description  Allow authenticated students to enroll in a course. Creates an enrollment record. Course must be in ACTIVE status.
 // @Tags         Course

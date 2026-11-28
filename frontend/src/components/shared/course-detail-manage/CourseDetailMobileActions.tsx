@@ -1,4 +1,4 @@
-import { Eye, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { Archive, Eye, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -14,18 +14,18 @@ import { cn } from '@/lib/utils'
 type CourseDetailMobileActionsProps = {
   previewHref: string
   isAdmin: boolean
-  isPublished: boolean
+  isArchived: boolean
+  onArchiveClick: () => void
   onEditClick: () => void
-  onPublishClick: () => void
   onDeleteClick?: () => void
 }
 
 export function CourseDetailMobileActions({
   previewHref,
   isAdmin,
-  isPublished,
+  isArchived,
+  onArchiveClick,
   onEditClick,
-  onPublishClick,
   onDeleteClick,
 }: CourseDetailMobileActionsProps) {
   return (
@@ -56,7 +56,7 @@ export function CourseDetailMobileActions({
             </Link>
           </Button>
 
-          {isAdmin && (!isPublished || onDeleteClick) ? (
+          {isAdmin ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -69,12 +69,10 @@ export function CourseDetailMobileActions({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                {!isPublished ? (
-                  <DropdownMenuItem onClick={onPublishClick}>
-                    <Sparkles className="size-4" aria-hidden />
-                    Terbit
-                  </DropdownMenuItem>
-                ) : null}
+                <DropdownMenuItem onClick={onArchiveClick}>
+                  {isArchived ? <Sparkles className="size-4" aria-hidden /> : <Archive className="size-4" aria-hidden />}
+                  {isArchived ? 'Aktifkan Kursus' : 'Arsipkan Kursus'}
+                </DropdownMenuItem>
                 {onDeleteClick ? (
                   <DropdownMenuItem
                     onClick={onDeleteClick}

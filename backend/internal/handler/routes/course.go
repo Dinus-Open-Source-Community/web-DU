@@ -32,12 +32,13 @@ func StartCourseRoutes(r *gin.Engine) {
 		authCourseGroup.POST("/:id/qna", service.CreateCourseQaThreadFunc)                        // Enrolled students only
 		authCourseGroup.POST("/:id/qna/:thread_id/replies", service.CreateCourseQaReplyFunc)      // Student / Mentor / Admin
 		authCourseGroup.PATCH("/:id/status", service.ActivateCourseStatusFunc)                    // Super Admin / Admin
-		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)            // Super Admin / Admin
-		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)      // Super Admin / Admin
-		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc)    // Super Admin / Admin / Mentor
-		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)              // Super Admin / Admin / Mentor
-		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)                  // Alias
-		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)                 // Admin / Mentor
+		authCourseGroup.PATCH("/:id/archive", service.ArchiveAdminCourseFunc)
+		authCourseGroup.POST("/:id/mentors/assign", service.AssignMentorsToCourseFunc)         // Super Admin / Admin
+		authCourseGroup.POST("/:id/mentors/unassign", service.UnassignMentorsFromCourseFunc)   // Super Admin / Admin
+		authCourseGroup.GET("/:id/candidate-students", service.GetCourseCandidateStudentsFunc) // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/participants", service.AddCourseParticipantsFunc)           // Super Admin / Admin / Mentor
+		authCourseGroup.POST("/:id/students", service.AddCourseParticipantsFunc)               // Alias
+		authCourseGroup.GET("/:id/assignments", service.GetCourseAssignmentsFunc)              // Admin / Mentor
 
 		authCourseGroup.POST("/", service.PostAdminCourseFunc)        // Super Admin / Admin
 		authCourseGroup.PUT("/:id", service.UpdateAdminCourseFunc)    // Super Admin / Admin
@@ -50,5 +51,6 @@ func StartCourseRoutes(r *gin.Engine) {
 	adminCourseGroup.Use(middleware.AuthMiddleware())
 	{
 		adminCourseGroup.GET("/", service.GetAdminCoursesFunc) // Super Admin / Admin / Mentor
+		adminCourseGroup.GET("/:id", service.GetAdminCourseByIDFunc)
 	}
 }

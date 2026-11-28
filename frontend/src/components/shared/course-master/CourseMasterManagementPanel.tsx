@@ -25,12 +25,14 @@ import type {
   CourseMasterItem,
   CourseMasterKind,
 } from '@/lib/course-master/types'
+import type { ICourseItem } from '@/lib/types/course'
 import { COURSE_MASTER_LABELS } from '@/lib/course-master/types'
 import {
   COURSE_MASTER_COLUMN_SPECS,
   type CourseMasterColumnId,
 } from '@/lib/course-master/table-columns'
 import { CourseMasterFormDialog } from './CourseMasterFormDialog'
+import { CourseMasterUsageDialog } from './CourseMasterUsageDialog'
 import {
   appKpiLabelClassName,
   appToolbarPrimaryButtonClassName,
@@ -49,6 +51,7 @@ type DialogState =
   | { mode: 'edit'; item: CourseMasterItem }
 
 type DeleteState = { uid: string; name: string } | null
+type UsageDialogState = { name: string; courses: ICourseItem[] } | null
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50]
 
@@ -60,6 +63,7 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
   const [committedSearch, setCommittedSearch] = useState('')
   const [dialogState, setDialogState] = useState<DialogState>({ mode: 'closed' })
   const [deleteTarget, setDeleteTarget] = useState<DeleteState>(null)
+  const [usageDialog, setUsageDialog] = useState<UsageDialogState>(null)
 
   const { items, meta, isLoading } = useCourseMasterList(kind, {
     page,
@@ -85,9 +89,26 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         </div>
       ),
       status: (row) => <AdminActiveStatusLabel active={row.is_active} />,
-      courses: (row) => (
-        <span className="tabular-nums font-medium text-ink-700">{row.courses?.length ?? 0}</span>
-      ),
+      courses: (row) => {
+        const courses = row.courses ?? []
+
+        // Kursus yang memakai kategori/tipe ini bisa dilihat langsung dari
+        // jumlahnya, tanpa perlu menekan Hapus lalu ditolak backend.
+        if (courses.length === 0) {
+          return <span className="text-xs font-medium text-ink-400">—</span>
+        }
+
+        return (
+          <button
+            type="button"
+            onClick={() => setUsageDialog({ name: row.name, courses })}
+            title={`Lihat ${courses.length} kursus yang memakai ${row.name}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/10 bg-paper-paper px-2.5 py-1 text-xs font-semibold tabular-nums text-ink-700 outline-none transition-colors hover:border-ink-900/25 hover:bg-paper-white hover:text-ink-900 focus-visible:ring-2 focus-visible:ring-brand-blue/40"
+          >
+            {courses.length} kursus
+          </button>
+        )
+      },
       updated: (row) => (
         <span className="text-sm font-medium text-ink-600">
           {row.updated_at ? dateFormatter.format(new Date(row.updated_at)) : '-'}
@@ -148,13 +169,19 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
   const handleDelete = async () => {
     if (!deleteTarget) return
 
-    await deleteMutation.mutateAsync(deleteTarget.uid)
-    setDeleteTarget(null)
-
-    if (items.length === 1 && page > 1) {
-      setPage((current) => current - 1)
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.uid)
+      setDeleteTarget(null)
+      if (items.length === 1 && page > 1) setPage((current) => current - 1)
+    } catch (error) {
+      const details = (error as Error & { details?: { courses?: ICourseItem[] } }).details
+      if (details?.courses?.length) {
+        setUsageDialog({ name: deleteTarget.name, courses: details.courses })
+        setDeleteTarget(null)
+      }
     }
   }
+
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize)
@@ -263,6 +290,16 @@ export function CourseMasterManagementPanel({ kind }: { kind: CourseMasterKind }
         onConfirm={() => {
           void handleDelete()
         }}
+      />
+
+      <CourseMasterUsageDialog
+        open={Boolean(usageDialog)}
+        onOpenChange={(open) => {
+          if (!open) setUsageDialog(null)
+        }}
+        kind={kind}
+        name={usageDialog?.name ?? ''}
+        courses={usageDialog?.courses ?? []}
       />
     </div>
   )

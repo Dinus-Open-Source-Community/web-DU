@@ -87,6 +87,7 @@ export function useDeleteCourseMaster(kind: CourseMasterKind) {
       toast.success(messageCourseMasterDeleted(label))
     },
     onError: (error: Error) => {
+      if ((error as Error & { details?: unknown }).details) return
       toast.error(resolveActionError(error, messageCourseMasterDeleteFailed(label)))
     },
   })

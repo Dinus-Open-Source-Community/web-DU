@@ -7,6 +7,7 @@ import { useAssignCourseMentorDialog } from '@/hooks/course-detail/use-assign-co
 import { courseKeys } from '@/hooks/query-keys'
 import {
   useDeleteCourse,
+  useArchiveCourse,
   useReplyCourseReview,
   useUpdateCourseStatus,
   useUpdateCourse,
@@ -35,6 +36,7 @@ export function useCourseDetailManageView({
   const queryClient = useQueryClient()
   const updateCourseStatus = useUpdateCourseStatus()
   const deleteCourseMutation = useDeleteCourse()
+  const archiveCourseMutation = useArchiveCourse()
   const replyCourseReview = useReplyCourseReview()
   const updateCourse = useUpdateCourse()
 
@@ -54,6 +56,7 @@ export function useCourseDetailManageView({
   })
 
   const isPublished = course ? isCoursePublished(course) : false
+  const isArchived = course?.status?.trim().toUpperCase() !== 'ACTIVE'
   const editHref = ROUTES.dashboardMenu.courseEdit(courseUid)
   const previewHref = ROUTES.viewModuleAndLessons(courseUid)
   const curriculumEditNavigationState = useMemo(
@@ -95,6 +98,16 @@ export function useCourseDetailManageView({
     }
   }, [courseUid, deleteCourseMutation, navigate])
 
+  const onArchiveClick = useCallback(async () => {
+    try {
+      if (isArchived) await updateCourseStatus.mutateAsync({ courseUid })
+      else await archiveCourseMutation.mutateAsync(courseUid)
+      await queryClient.invalidateQueries({ queryKey: courseKeys.detail(courseUid) })
+    } catch {
+      // Error toast ditangani oleh mutation hook.
+    }
+  }, [archiveCourseMutation, courseUid, isArchived, queryClient, updateCourseStatus])
+
   const onEditCourseSubmit = useCallback(
     async (values: CourseFormValues) => {
       if (!course) return
@@ -117,6 +130,8 @@ export function useCourseDetailManageView({
     courseUid,
     isAdmin,
     isPublished,
+    isArchived,
+    onArchiveClick: () => void onArchiveClick(),
     editHref,
     previewHref,
     curriculumEditNavigationState,

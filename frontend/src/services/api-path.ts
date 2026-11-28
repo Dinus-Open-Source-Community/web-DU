@@ -98,6 +98,7 @@ export const API_ROUTES = {
     replyReviewByUid: (courseUid: Uid, reviewUid: Uid) =>
       `/courses/${courseUid}/review/${reviewUid}/reply`,
     updateStatusByUid: (uid: Uid) => `/courses/${uid}/status`,
+    archiveByUid: (uid: Uid) => `/courses/${uid}/archive`,
     assignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/assign`,
     unassignMentorsByUid: (uid: Uid) => `/courses/${uid}/mentors/unassign`,
     getProgressByUid: (uid: Uid) => `/courses/${uid}/progress`,
@@ -200,6 +201,7 @@ export const API_ROUTES = {
     courses: {
       getAll: (params?: IQueryParamsPayload) =>
         withQuery(`/admin/courses`, params),
+      getByUid: (uid: Uid) => `/admin/courses/${uid}`,
     },
     dashboard: {
       kpis: (params?: IQueryParamsPayload) =>

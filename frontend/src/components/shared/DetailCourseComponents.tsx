@@ -30,6 +30,8 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     courseUid,
     isAdmin,
     isPublished,
+    isArchived,
+    onArchiveClick,
     editHref,
     previewHref,
     curriculumEditNavigationState,
@@ -40,7 +42,6 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
     isConfirmOpen,
     onConfirmOpenChange,
     onEditClick,
-    onPublishClick,
     confirmTitle,
     confirmDescription,
     confirmLabel,
@@ -77,9 +78,9 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
         course={course}
         previewHref={previewHref}
         isAdmin={isAdmin}
-        isPublished={isPublished}
+        isArchived={isArchived}
+        onArchiveClick={onArchiveClick}
         onEditClick={onEditClick}
-        onPublishClick={onPublishClick}
         onDeleteClick={isAdmin ? onDeleteClick : undefined}
       />
 
@@ -176,9 +177,9 @@ export function DetailCourse({ view }: CourseDetailShellProps) {
       <CourseDetailMobileActions
         previewHref={previewHref}
         isAdmin={isAdmin}
-        isPublished={isPublished}
+        isArchived={isArchived}
+        onArchiveClick={onArchiveClick}
         onEditClick={onEditClick}
-        onPublishClick={onPublishClick}
         onDeleteClick={isAdmin ? onDeleteClick : undefined}
       />
 

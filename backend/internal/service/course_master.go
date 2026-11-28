@@ -358,6 +358,15 @@ func DeleteAdminCourseCategoryFunc(c *gin.Context) {
 		})
 		return
 	}
+	var courses []entity.Course
+	if err := database.DB.Where("category_uid = ?", category.Uid).Order("title").Find(&courses).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to check category usage", "data": nil, "error": err.Error()})
+		return
+	}
+	if len(courses) > 0 {
+		c.JSON(http.StatusConflict, gin.H{"success": false, "message": "Category is used by courses; archive them before deleting", "data": gin.H{"courses": courseListResponse(courses, nil)}, "error": nil})
+		return
+	}
 
 	if err := database.DB.Delete(&category).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -695,6 +704,15 @@ func DeleteAdminClassTypeFunc(c *gin.Context) {
 			"data":    nil,
 			"error":   err.Error(),
 		})
+		return
+	}
+	var courses []entity.Course
+	if err := database.DB.Where("class_type_uid = ?", classType.Uid).Order("title").Find(&courses).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to check course type usage", "data": nil, "error": err.Error()})
+		return
+	}
+	if len(courses) > 0 {
+		c.JSON(http.StatusConflict, gin.H{"success": false, "message": "Course type is used by courses; archive them before deleting", "data": gin.H{"courses": courseListResponse(courses, nil)}, "error": nil})
 		return
 	}
 

@@ -78,6 +78,12 @@ export async function fetchCourseByUid(uid: string) {
   return normalizeCourseDetailItem(course)
 }
 
+export async function fetchAdminCourseByUid(uid: string) {
+  const validatedUid = parseCourseUidParam(uid)
+  const response = await api.get<IResponse<IDetailCourseResponse>>(API_ROUTES.admin.courses.getByUid(validatedUid))
+  return normalizeCourseDetailItem(unwrapApiResponse(response.data, 'Gagal mengambil detail kursus'))
+}
+
 export async function fetchCourseCategories(params?: IQueryParamsPayload) {
   const response = await api.get<IResponse<ICategoryListResponse>>(
     API_ROUTES.courseCategories.getAll(params),
@@ -133,6 +139,14 @@ export async function updateCourseStatus(request: UpdateCourseStatusRequest) {
     API_ROUTES.courses.updateStatusByUid(validatedRequest.courseUid),
   )
   return unwrapApiResponse(response.data, 'Gagal memperbarui status kursus')
+}
+
+export async function archiveCourse(uid: string) {
+  const validatedUid = parseCourseUidParam(uid)
+  const response = await api.patch<IResponse<DeleteCourseResponse>>(
+    API_ROUTES.courses.archiveByUid(validatedUid),
+  )
+  return unwrapApiResponse(response.data, 'Gagal mengarsipkan kursus')
 }
 
 export type DeleteCourseResponse = {
@@ -295,4 +309,3 @@ export async function addCourseParticipants(
   )
   return unwrapApiResponse(response.data, 'Gagal menambahkan peserta ke kursus')
 }
-
