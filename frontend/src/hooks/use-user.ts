@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type {
   IConfirmEmailChangePayload,
@@ -7,6 +7,7 @@ import type {
   IUpdateProfilePayload,
 } from '@/lib/types/user'
 import { Message, resolveApiActionError } from '@/lib/Message'
+import { getDoscomBindStatus } from '@/services/auth'
 import {
   confirmUserEmailChange,
   requestUserEmailChange,
@@ -15,6 +16,15 @@ import {
   uploadProfilePhoto,
 } from '@/services/user'
 import { authKeys } from './query-keys'
+
+export function useDoscomBindStatus() {
+  return useQuery({
+    queryKey: authKeys.doscomBindStatus,
+    queryFn: getDoscomBindStatus,
+    staleTime: 60_000,
+    retry: false,
+  })
+}
 
 export function useUpdateProfilePhoto() {
   const queryClient = useQueryClient()

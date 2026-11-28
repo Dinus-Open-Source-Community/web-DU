@@ -40,6 +40,12 @@ export const Message = {
     emailChangeRequestFailed: 'Gagal mengajukan perubahan email. Silakan coba lagi.',
     emailConfirmed: 'Alamat email berhasil diperbarui.',
     emailConfirmFailed: 'Tautan konfirmasi email tidak valid atau sudah kedaluwarsa.',
+    doscomBindSuccess: 'Akun DOSCOM berhasil dihubungkan.',
+    doscomBindFailed: 'Gagal menghubungkan akun DOSCOM. Silakan coba lagi.',
+    doscomBindCallbackFailed:
+      'Gagal menghubungkan akun DOSCOM. Tautan verifikasi tidak valid atau sudah kedaluwarsa.',
+    doscomAlreadyBound: 'Akun sudah terhubung ke DOSCOM.',
+    doscomBindStatusUnknown: 'Status koneksi DOSCOM tidak dapat diperiksa.',
   },
   course: {
     createdDraft: 'Kursus disimpan sebagai draf. Terbitkan lewat tombol Terbit.',

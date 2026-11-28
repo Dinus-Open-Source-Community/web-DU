@@ -58,6 +58,7 @@ export const adminDashboardKeys = {
 
 export const authKeys = {
   session: ['auth', 'session'] as const,
+  doscomBindStatus: ['auth', 'doscom-bind-status'] as const,
 }
 
 export const userManageKeys = {

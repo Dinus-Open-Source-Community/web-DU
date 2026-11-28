@@ -65,3 +65,29 @@ export function startGoogleOAuth() {
 export function startDoscomSSO() {
   window.location.assign(buildApiUrl(API_ROUTES.auth.oauth.ssoLogin))
 }
+
+export interface IDoscomBindStatus {
+  bound: boolean
+}
+
+export interface IDoscomBindStart extends IDoscomBindStatus {
+  url?: string
+}
+
+export async function getDoscomBindStatus(): Promise<IDoscomBindStatus> {
+  return withApiErrorHandling(async () => {
+    const response = await api.get<IResponse<IDoscomBindStatus>>(
+      API_ROUTES.auth.oauth.ssoBindStatus,
+    )
+    return unwrapApiResponse(response.data, 'Gagal memeriksa status akun DOSCOM')
+  }, 'Gagal memeriksa status akun DOSCOM')
+}
+
+export async function startDoscomAccountBind(): Promise<IDoscomBindStart> {
+  return withApiErrorHandling(async () => {
+    const response = await api.post<IResponse<IDoscomBindStart>>(
+      API_ROUTES.auth.oauth.ssoBind,
+    )
+    return unwrapApiResponse(response.data, 'Gagal menghubungkan akun DOSCOM')
+  }, 'Gagal menghubungkan akun DOSCOM')
+}

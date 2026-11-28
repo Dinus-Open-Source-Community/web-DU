@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/internal/handler/middleware"
 	"backend/internal/handler/routes/setup"
 	"backend/internal/service"
 
@@ -18,5 +19,10 @@ func StartSSORoutes(r *gin.Engine) {
 	{
 		ssoGroup.GET("/login", service.SSOLoginHandler)       // titik awal: redirect browser ke /authorize milik SSO
 		ssoGroup.GET("/callback", service.SSOCallbackHandler) // callback SSO: tukar code → token → JWT lokal → redirect ke frontend
+
+		// Bind akun lokal ke akun DOSCOM (Settings).
+		ssoGroup.POST("/bind", middleware.AuthMiddleware(), service.SSOBindStartHandler) // minta URL form bind
+		ssoGroup.GET("/bind/status", middleware.AuthMiddleware(), service.SSOBindStatusHandler)
+		ssoGroup.GET("/bind/callback", service.SSOBindCallbackHandler) // redirect balik dari sso-auth + bind_token
 	}
 }

@@ -8,6 +8,7 @@ import ProfileSection from '@/components/profile/Section'
 import { AppNavbarProvider } from '@/components/shared/Sidebar'
 import { appShellPageBgClassName } from '@/lib/design/app-shell-tokens'
 import { appPageContentClassName } from '@/lib/layout/page-layout'
+import { Message } from '@/lib/Message'
 import { cn } from '@/lib/utils'
 import { useProfileSectionView } from '@/hooks/profile/use-profile-section-view'
 import { useSidebarUser } from '@/hooks/use-sidebar-user'
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { mutateAsync: confirmEmailChange } = useConfirmEmailChange()
   const processedTokenRef = useRef<string | null>(null)
+  const processedBindRef = useRef<string | null>(null)
 
   const profileUser = user ?? fallbackUser
   const sidebarUser = useSidebarUser(profileUser.role)
@@ -51,6 +53,23 @@ export default function ProfilePage() {
         // Error toast already handled by useConfirmEmailChange
       })
   }, [confirmEmailChange, refreshProfile, searchParams, setSearchParams, signInWithToken])
+
+  useEffect(() => {
+    const bind = searchParams.get('bind')?.trim()
+    if (!bind || processedBindRef.current === bind) return
+    processedBindRef.current = bind
+
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('bind')
+    nextParams.delete('reason')
+    setSearchParams(nextParams, { replace: true })
+
+    if (bind === 'success') {
+      toast.success(Message.profile.doscomBindSuccess)
+      return
+    }
+    toast.error(Message.profile.doscomBindCallbackFailed)
+  }, [searchParams, setSearchParams])
 
   const handleValidationError = useCallback((message: string) => {
     toast.error(message)
