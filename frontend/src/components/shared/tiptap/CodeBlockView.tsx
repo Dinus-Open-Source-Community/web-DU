@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { NodeViewContent, NodeViewWrapper, type NodeViewProps } from '@tiptap/react'
-import { Trash2 } from 'lucide-react'
+import { FileCode2, Trash2 } from 'lucide-react'
 
 import { CODE_LANGUAGES, normalizeCodeLanguage } from '@/lib/tiptap-code-languages'
 import { cn } from '@/lib/utils'
@@ -26,43 +26,48 @@ export function CodeBlockView({ node, updateAttributes, deleteNode }: NodeViewPr
   return (
     <NodeViewWrapper className="code-block code-block--editable" data-language={language}>
       <div className="code-block__header" contentEditable={false}>
-        <input
-          type="text"
-          className="code-block__title"
-          value={title}
-          placeholder="Judul blok kode (opsional)"
-          aria-label="Judul blok kode"
-          maxLength={120}
-          onChange={(event) => setTitle(event.target.value)}
-          onBlur={commitTitle}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              commitTitle()
-              event.currentTarget.blur()
-            }
-          }}
-        />
-        <select
-          className="code-block__language-select"
-          value={language}
-          aria-label="Bahasa blok kode"
-          onChange={(event) => updateAttributes({ language: event.target.value })}
-        >
-          {CODE_LANGUAGES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="code-block__delete"
-          aria-label="Hapus blok kode"
-          onClick={() => deleteNode()}
-        >
-          <Trash2 className="size-4" aria-hidden />
-        </button>
+        <div className="code-block__filename">
+          <FileCode2 className="code-block__filename-icon size-4" aria-hidden />
+          <input
+            type="text"
+            className="code-block__title"
+            value={title}
+            placeholder="Judul blok kode (opsional)"
+            aria-label="Judul blok kode"
+            maxLength={120}
+            onChange={(event) => setTitle(event.target.value)}
+            onBlur={commitTitle}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                commitTitle()
+                event.currentTarget.blur()
+              }
+            }}
+          />
+        </div>
+        <div className="code-block__actions">
+          <select
+            className="code-block__language-select"
+            value={language}
+            aria-label="Bahasa blok kode"
+            onChange={(event) => updateAttributes({ language: event.target.value })}
+          >
+            {CODE_LANGUAGES.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="code-block__delete"
+            aria-label="Hapus blok kode"
+            onClick={() => deleteNode()}
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </button>
+        </div>
       </div>
       <div className="code-block__body">
         <div className="code-block__gutter" contentEditable={false} aria-hidden="true">

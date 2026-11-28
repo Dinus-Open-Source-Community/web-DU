@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import hljs from 'highlight.js/lib/common'
-import { Check, Copy, TriangleAlert } from 'lucide-react'
+import { Check, Copy, FileCode2, TriangleAlert } from 'lucide-react'
 
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import {
@@ -51,6 +51,7 @@ export function ReadOnlyCodeBlock({
     <div className={cn('code-block code-block--readonly', className)}>
       <div className="code-block__header">
         <div className="code-block__heading">
+          <FileCode2 className="code-block__filename-icon size-4" aria-hidden />
           {trimmedTitle ? <p className="code-block__title">{trimmedTitle}</p> : null}
           <span className="code-block__language">{languageLabel}</span>
         </div>
