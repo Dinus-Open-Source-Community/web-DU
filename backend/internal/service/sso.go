@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -77,6 +78,23 @@ func ssoRedirectURL() string {
 		return v
 	}
 	return "http://localhost:8080/auth/sso/callback"
+}
+
+// ssoMissingConfig mengembalikan nama variabel lingkungan SSO yang belum diisi.
+// Client ini bertipe confidential sehingga SSO menolak tukar token bila
+// SSO_CLIENT_SECRET kosong (HTTP 401 invalid_client).
+func ssoMissingConfig() []string {
+	var missing []string
+	if ssoBaseURL() == "" {
+		missing = append(missing, "SSO_BASE_URL")
+	}
+	if ssoClientID() == "" {
+		missing = append(missing, "SSO_CLIENT_ID")
+	}
+	if ssoClientSecret() == "" {
+		missing = append(missing, "SSO_CLIENT_SECRET")
+	}
+	return missing
 }
 
 // ssoDefaultFrontendTarget adalah tujuan default bila frontend tidak
@@ -157,6 +175,16 @@ func ssoPKCEChallenge(verifier string) string {
 // @Failure      500  {object}  map[string]any  "Gagal membuat state/PKCE"
 // @Router       /auth/sso/login [get]
 func SSOLoginHandler(c *gin.Context) {
+	// Gagal cepat dengan pesan yang jelas bila env server belum lengkap,
+	// daripada mengirim browser ke URL /authorize yang pasti ditolak SSO.
+	if missing := ssoMissingConfig(); len(missing) > 0 {
+		log.Printf("[SSO] konfigurasi belum lengkap, variabel kosong: %s", strings.Join(missing, ", "))
+		ssoRedirectFrontend(c, ssoResolveFrontendTarget(c.Query("next")), url.Values{
+			"error": {"sso_not_configured"},
+		}, nil)
+		return
+	}
+
 	state, err := ssoRandomToken(32)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -247,12 +275,14 @@ func SSOCallbackHandler(c *gin.Context) {
 
 	tokens, err := ssoExchange(c.Request.Context(), c.Query("code"), verifier)
 	if err != nil {
+		log.Printf("[SSO] tukar authorization code gagal: %v", err)
 		ssoRedirectFrontend(c, target, url.Values{"error": {"token_exchange_failed"}}, nil)
 		return
 	}
 
 	info, err := ssoFetchUserinfo(c.Request.Context(), tokens.AccessToken)
 	if err != nil {
+		log.Printf("[SSO] ambil /userinfo gagal: %v", err)
 		ssoRedirectFrontend(c, target, url.Values{"error": {"userinfo_failed"}}, nil)
 		return
 	}
@@ -275,6 +305,7 @@ func SSOCallbackHandler(c *gin.Context) {
 			Role:       entity.StudentRole, // default role
 		}
 		if err := database.DB.Create(&user).Error; err != nil {
+			log.Printf("[SSO] buat user lokal gagal: %v", err)
 			ssoRedirectFrontend(c, target, url.Values{"error": {"failed_create_user"}}, nil)
 			return
 		}
@@ -284,6 +315,7 @@ func SSOCallbackHandler(c *gin.Context) {
 		user.AvatarURL = info.AvatarURL
 		user.IsVerified = info.EmailVerified
 		if err := database.DB.Save(&user).Error; err != nil {
+			log.Printf("[SSO] perbarui user lokal gagal: %v", err)
 			ssoRedirectFrontend(c, target, url.Values{"error": {"failed_update_user"}}, nil)
 			return
 		}
@@ -299,6 +331,7 @@ func SSOCallbackHandler(c *gin.Context) {
 	expiration := time.Now().Add(24 * time.Hour)
 	token, err := middleware.GenerateJWT(user.EmailHash, expiration)
 	if err != nil {
+		log.Printf("[SSO] terbitkan JWT lokal gagal: %v", err)
 		ssoRedirectFrontend(c, target, url.Values{"error": {"failed_generate_token"}}, nil)
 		return
 	}
@@ -354,12 +387,19 @@ func ssoExchange(ctx context.Context, code, verifier string) (*ssoTokens, error)
 	}
 	defer resp.Body.Close()
 
-	var tokens ssoTokens
-	if err := json.NewDecoder(resp.Body).Decode(&tokens); err != nil {
+	// Body ikut dibaca agar penyebab penolakan SSO (mis. invalid_client karena
+	// secret salah/kosong) tercatat di log, bukan sekadar kode status.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	if err != nil {
 		return nil, err
 	}
+
+	var tokens ssoTokens
+	if err := json.Unmarshal(body, &tokens); err != nil {
+		return nil, fmt.Errorf("sso: respons /token bukan JSON (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
 	if resp.StatusCode != http.StatusOK || tokens.AccessToken == "" {
-		return nil, fmt.Errorf("sso: token exchange gagal (HTTP %d)", resp.StatusCode)
+		return nil, fmt.Errorf("sso: token exchange gagal (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 	return &tokens, nil
 }
@@ -383,7 +423,7 @@ func ssoFetchUserinfo(ctx context.Context, accessToken string) (*ssoUserInfo, er
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("sso: /userinfo gagal (HTTP %d)", resp.StatusCode)
+		return nil, fmt.Errorf("sso: /userinfo gagal (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 
 	var info ssoUserInfo

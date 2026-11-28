@@ -26,6 +26,8 @@ export const Message = {
     ssoLoginInvalidSession: 'Sesi login DOSCOM tidak valid. Silakan coba lagi.',
     ssoLoginServiceUnavailable:
       'Layanan login DOSCOM sedang bermasalah. Coba lagi nanti.',
+    ssoLoginNotConfigured:
+      'Login DOSCOM belum dikonfigurasi di server. Hubungi admin.',
   },
   profile: {
     photoUpdated: 'Foto profil berhasil diubah.',
@@ -156,6 +158,7 @@ export function getGoogleOAuthErrorMessage(rawError: string): string {
 const SSO_OAUTH_ERROR_MAP: Record<string, string> = {
   access_denied: Message.auth.ssoLoginCancelled,
   invalid_state: Message.auth.ssoLoginInvalidSession,
+  sso_not_configured: Message.auth.ssoLoginNotConfigured,
   token_exchange_failed: Message.auth.ssoLoginFailed,
   userinfo_failed: Message.auth.ssoLoginFailed,
   failed_create_user: Message.auth.ssoLoginFailed,
