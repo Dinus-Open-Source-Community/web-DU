@@ -67,31 +67,39 @@ export function CourseCardSkeleton() {
   )
 }
 
-/** Bento Grid Galeri */
+/**
+ * Bento Grid Galeri — meniru baris awal aktual `GalleryBentoGrid`
+ * (GALLERY_PREVIEW_COUNT = 5 foto → baris 7+5 lalu 4+4+4), termasuk
+ * grid 2 kolom mobile, gap, dan item ganjil terakhir yang melebar.
+ */
 export function GalleryBentoSkeleton() {
+  const row2Tilt = ['rotate-1', '-rotate-1', 'rotate-2'] as const
+
   return (
     <LandingSkeletonTheme>
-      <div className="space-y-4 sm:space-y-5">
+      <div className="flex flex-col gap-6 md:gap-8">
         {/* Baris 1: 7 + 5 */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-12">
-          <div className="md:col-span-7 -rotate-1 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3 shadow-paper">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7">
+          <div className="h-full -rotate-1 rounded-xl border border-ink-900/20 bg-paper-white p-3 shadow-paper md:col-span-7">
             <Skeleton className="aspect-[16/10] w-full" borderRadius={12} />
             <Skeleton height={16} width="65%" className="mt-2.5" />
           </div>
-          <div className="md:col-span-5 rotate-1 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3 shadow-paper">
+          <div className="h-full rotate-1 rounded-xl border border-ink-900/20 bg-paper-white p-3 shadow-paper md:col-span-5">
             <Skeleton className="aspect-[16/10] md:aspect-[16/11] w-full" borderRadius={12} />
             <Skeleton height={16} width="50%" className="mt-2.5" />
           </div>
         </div>
 
-        {/* Baris 2: 4 + 4 + 4 */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-12">
+        {/* Baris 2: 4 + 4 + 4 — item terakhir melebar 2 kolom di mobile */}
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-12 md:gap-7">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
               className={cn(
-                'md:col-span-4 rounded-[20px] border-2 border-ink-900/20 bg-paper-white p-3 shadow-paper',
-                i === 1 ? '-rotate-1' : 'rotate-1',
+                'h-full rounded-xl border border-ink-900/20 bg-paper-white p-3 shadow-paper',
+                'md:col-span-4',
+                i === 2 && 'col-span-2',
+                row2Tilt[i],
               )}
             >
               <Skeleton className="aspect-[4/3] w-full" borderRadius={12} />
@@ -111,6 +119,25 @@ function PublicHeaderSkeleton() {
       <Skeleton height={44} width={420} borderRadius={12} className="mt-4 max-w-full" />
       <Skeleton height={16} width={500} className="mt-4 max-w-full" />
       <Skeleton height={16} width={340} className="mt-2 max-w-full" />
+    </div>
+  )
+}
+
+/**
+ * Header hero halaman Galeri — meniru badge "Dokumentasi Kegiatan",
+ * H1 dua baris dengan garis aksen, dan paragraf pendek.
+ */
+function GalleryHeaderSkeleton() {
+  return (
+    <div className="mx-auto max-w-4xl text-center">
+      <Skeleton height={28} width={160} borderRadius={6} className="inline-block -rotate-1" />
+      <Skeleton height={44} width={440} borderRadius={12} className="mt-4 max-w-full" />
+      <div className="mt-3 flex flex-col items-center gap-2.5">
+        <Skeleton height={44} width={340} borderRadius={12} className="max-w-full" />
+        <Skeleton height={8} width={220} borderRadius={999} className="max-w-full" />
+      </div>
+      <Skeleton height={16} width={520} className="mt-4 max-w-full" />
+      <Skeleton height={16} width={360} className="mt-2.5 max-w-full" />
     </div>
   )
 }
@@ -217,8 +244,17 @@ export function GalleryRouteFallback() {
       <LandingSkeletonTheme>
         <main className="w-full">
           <section className="relative min-h-dvh overflow-hidden bg-paper-offwhite">
-            <div className="container mx-auto px-4 pt-20 pb-16 sm:px-6 md:pt-24 md:pb-24 lg:px-10">
-              <PublicHeaderSkeleton />
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-ink-900/80" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-0 opacity-[0.14]"
+              style={{
+                backgroundImage: 'radial-gradient(#050914 1.2px, transparent 1.2px)',
+                backgroundSize: '22px 22px',
+              }}
+            />
+            <div className="relative z-[1] container mx-auto px-4 pt-20 pb-16 sm:px-6 md:pt-24 md:pb-24 lg:px-10">
+              <GalleryHeaderSkeleton />
               <div className="mt-10 lg:mt-14">
                 <GalleryBentoSkeleton />
               </div>

@@ -4,6 +4,8 @@
  * Lihat `LessonDeliveryType` (`content_type`) vs `RichTextContentFormat` di types.
  */
 import StarterKit from '@tiptap/starter-kit'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { common, createLowlight } from 'lowlight'
 import YoutubeExtension from '@tiptap/extension-youtube'
 import TiptapImage from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
@@ -22,11 +24,15 @@ import { TaskItem } from '@tiptap/extension-task-item'
 import Typography from '@tiptap/extension-typography'
 import CharacterCount from '@tiptap/extension-character-count'
 import type { Extensions } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
 
+import { CodeBlockView } from '@/components/shared/tiptap/CodeBlockView'
 import { resolveSafeExternalHref } from '@/lib/security/safe-external-url'
 
 const DEFAULT_PLACEHOLDER =
   'Tulis modul dan konten kursus di sini. Gunakan toolbar untuk format dan sisipkan video YouTube.'
+
+const lowlight = createLowlight(common)
 
 export const TIPTAP_FONT_FAMILIES = [
   { label: 'Default', value: '' },
@@ -50,7 +56,7 @@ export function createTiptapExtensions(placeholder = DEFAULT_PLACEHOLDER): Exten
       heading: { levels: [1, 2, 3, 4, 5, 6] },
       bulletList: { keepMarks: true, keepAttributes: true },
       orderedList: { keepMarks: true, keepAttributes: true },
-      codeBlock: { HTMLAttributes: { class: 'tiptap-code-block' } },
+      codeBlock: false,
       link: {
         openOnClick: false,
         autolink: true,
@@ -65,6 +71,30 @@ export function createTiptapExtensions(placeholder = DEFAULT_PLACEHOLDER): Exten
         },
       },
       underline: {},
+    }),
+    CodeBlockLowlight.extend({
+      addAttributes() {
+      return {
+          ...this.parent?.(),
+          codeTitle: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('data-code-title'),
+            renderHTML: (attributes) => {
+              if (!attributes.codeTitle) return {}
+              return { 'data-code-title': attributes.codeTitle }
+            },
+          },
+      }
+      },
+      addNodeView() {
+        return ReactNodeViewRenderer(CodeBlockView)
+      },
+    }).configure({
+      lowlight,
+      defaultLanguage: null,
+      enableTabIndentation: true,
+      tabSize: 2,
+      HTMLAttributes: { class: 'tiptap-code-block' },
     }),
     TiptapImage.configure({
       inline: false,

@@ -42,6 +42,7 @@ const RICH_TEXT_ALLOWED_ATTR = [
   'alt',
   'class',
   'colspan',
+  'data-code-title',
   'href',
   'rel',
   'rowspan',

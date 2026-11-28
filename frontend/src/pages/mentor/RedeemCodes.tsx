@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { AdminPageShell } from '@/components/admin/AdminPageShell'
 import { GenerateRedeemCodeDialog } from '@/components/admin/redeem/GenerateRedeemCodeDialog'
+import { RedeemCodesPageSkeleton } from '@/components/admin/redeem/RedeemCodesSkeleton'
 import { DashboardError } from '@/components/Admin/Dashboard/DashboardError'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { MentorAppPageShell } from '@/components/mentor/MentorAppPageShell'
@@ -133,6 +134,10 @@ export default function MentorRedeemCodesPage() {
   return (
     <MentorAppPageShell layout="content">
       <AdminPageShell>
+        {codesQuery.isLoading ? (
+          <RedeemCodesPageSkeleton variant="mentor" />
+        ) : (
+          <>
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className={appPageTitleClassName}>Kode Redeem</h1>
@@ -215,6 +220,8 @@ export default function MentorRedeemCodesPage() {
               </div>
             )}
           />
+        )}
+          </>
         )}
         <ConfirmDialog
           open={Boolean(deleteTarget)}
