@@ -23,11 +23,17 @@ import { getApiErrorMessage, resolveAppErrorSource } from '@/services/api-error'
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signIn, startGoogleOAuth } = useAuth()
+  const { signIn, startGoogleOAuth, startDoscomSSO } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const startOAuth = (start: () => void) => {
+    const from = resolveSafeRedirectPath(location.state?.from, '')
+    if (from) sessionStorage.setItem('auth-redirect-path', from)
+    start()
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -162,11 +168,8 @@ export default function LoginPage() {
 
           <OauthButton
             isSubmitting={isSubmitting}
-            onGoogleSignIn={() => {
-              const from = resolveSafeRedirectPath(location.state?.from, '')
-              if (from) sessionStorage.setItem('auth-redirect-path', from)
-              startGoogleOAuth()
-            }}
+            onGoogleSignIn={() => startOAuth(startGoogleOAuth)}
+            onDoscomSignIn={() => startOAuth(startDoscomSSO)}
           />
         </form>
       </AuthFormPanel>

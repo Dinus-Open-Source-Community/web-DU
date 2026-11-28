@@ -53,6 +53,7 @@ export const API_ROUTES = {
     oauth: {
       googleLogin: `/oauth/google`,
       googleCallback: `/oauth/google/callback`,
+      ssoLogin: `/auth/sso/login`,
     },
   },
   avatar: {

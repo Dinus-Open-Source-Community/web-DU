@@ -53,6 +53,7 @@ const LoginPage = React.lazy(() => import("./pages/auth/Login.tsx"));
 const RegisterPage = React.lazy(() => import("./pages/auth/Register.tsx"));
 const VerifyOtpPage = React.lazy(() => import("./pages/auth/VerifyOtp.tsx"));
 const OAuthCallbackPage = React.lazy(() => import("./pages/auth/Oauth.tsx"));
+const SSOCallbackPage = React.lazy(() => import("./pages/auth/SSOCallback.tsx"));
 const ViewModuleAndLessons = React.lazy(
   () => import("./pages/courses/view.tsx"),
 );
@@ -196,6 +197,7 @@ const LOCKDOWN_ALLOWLIST: ReadonlySet<string> = new Set<string>([
   ROUTES.verifyOtp,
   ROUTES.redeem,
   ROUTES.oauthCallback,
+  ROUTES.ssoCallback,
   ROUTES.forgotPassword,
   ROUTES.resetPassword,
   '*',
@@ -285,6 +287,13 @@ const routeConfig: RouteConfig[] = [
   {
     path: ROUTES.oauthCallback,
     element: <OAuthCallbackPage />,
+    public: true,
+    lazy: true,
+    fallback: AUTH_PAGE_FALLBACK,
+  },
+  {
+    path: ROUTES.ssoCallback,
+    element: <SSOCallbackPage />,
     public: true,
     lazy: true,
     fallback: AUTH_PAGE_FALLBACK,

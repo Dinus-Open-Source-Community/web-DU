@@ -23,7 +23,7 @@ import { useAuth } from '@/providers/auth-provider'
 export default function RegisterPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signUp, startGoogleOAuth } = useAuth()
+  const { signUp, startGoogleOAuth, startDoscomSSO } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [name, setName] = useState('')
@@ -183,6 +183,11 @@ export default function RegisterPage() {
               const from = resolveSafeRedirectPath(location.state?.from, '')
               if (from) sessionStorage.setItem('auth-redirect-path', from)
               startGoogleOAuth()
+            }}
+            onDoscomSignIn={() => {
+              const from = resolveSafeRedirectPath(location.state?.from, '')
+              if (from) sessionStorage.setItem('auth-redirect-path', from)
+              startDoscomSSO()
             }}
           />
         </form>

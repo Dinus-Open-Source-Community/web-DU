@@ -61,3 +61,7 @@ export function getGoogleOAuthUrl() {
 export function startGoogleOAuth() {
   window.location.assign(getGoogleOAuthUrl())
 }
+
+export function startDoscomSSO() {
+  window.location.assign(buildApiUrl(API_ROUTES.auth.oauth.ssoLogin))
+}

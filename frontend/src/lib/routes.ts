@@ -81,6 +81,7 @@ export const ROUTES = {
   verifyOtp: '/auth/verify-otp',
   redeem: '/redeem',
   oauthCallback: '/auth/oauth/callback',
+  ssoCallback: '/auth/sso/callback',
   forgotPassword: '/auth/forgot-password',
   resetPassword: '/auth/reset-password',
   dashboardMenu,

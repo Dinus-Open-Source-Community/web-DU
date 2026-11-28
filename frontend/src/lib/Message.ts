@@ -21,6 +21,11 @@ export const Message = {
     googleLoginInvalidSession: 'Sesi login tidak valid. Silakan coba lagi.',
     googleLoginSessionExpired: 'Sesi login sudah berakhir. Silakan masuk lagi.',
     googleLoginServiceUnavailable: 'Layanan login sedang bermasalah. Coba lagi nanti.',
+    ssoLoginFailed: 'Gagal masuk dengan DOSCOM. Silakan coba lagi.',
+    ssoLoginCancelled: 'Login DOSCOM dibatalkan.',
+    ssoLoginInvalidSession: 'Sesi login DOSCOM tidak valid. Silakan coba lagi.',
+    ssoLoginServiceUnavailable:
+      'Layanan login DOSCOM sedang bermasalah. Coba lagi nanti.',
   },
   profile: {
     photoUpdated: 'Foto profil berhasil diubah.',
@@ -146,6 +151,23 @@ const GOOGLE_OAUTH_ERROR_MAP: Record<string, string> = {
 export function getGoogleOAuthErrorMessage(rawError: string): string {
   const normalized = rawError.trim().toLowerCase()
   return GOOGLE_OAUTH_ERROR_MAP[normalized] ?? Message.auth.googleLoginFailed
+}
+
+const SSO_OAUTH_ERROR_MAP: Record<string, string> = {
+  access_denied: Message.auth.ssoLoginCancelled,
+  invalid_state: Message.auth.ssoLoginInvalidSession,
+  token_exchange_failed: Message.auth.ssoLoginFailed,
+  userinfo_failed: Message.auth.ssoLoginFailed,
+  failed_create_user: Message.auth.ssoLoginFailed,
+  failed_update_user: Message.auth.ssoLoginFailed,
+  failed_generate_token: Message.auth.ssoLoginFailed,
+  server_error: Message.auth.ssoLoginServiceUnavailable,
+  temporarily_unavailable: Message.auth.ssoLoginServiceUnavailable,
+}
+
+export function getSsoOAuthErrorMessage(rawError: string): string {
+  const normalized = rawError.trim().toLowerCase()
+  return SSO_OAUTH_ERROR_MAP[normalized] ?? Message.auth.ssoLoginFailed
 }
 
 export function messageUserRoleChanged(roleLabel: string): string {

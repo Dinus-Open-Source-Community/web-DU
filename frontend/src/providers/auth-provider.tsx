@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startGoogleOAuth, verifyOtp } from '../services/auth'
+import { getAuthenticatedUser, loginWithEmail, registerWithEmail, startDoscomSSO, startGoogleOAuth, verifyOtp } from '../services/auth'
 import { AUTH_COOKIE_TOKEN, getApiAuthToken, setApiAuthToken } from '../services/axios'
 import type { IAuthResult, IAuthSessionUser, ILoginPayload, IRegisterPayload, IRegisterResponse, IVerifyOtpPayload } from '../lib/types/auth'
 import type { IUserData, UserRole } from '../lib/types/user'
@@ -35,6 +35,7 @@ interface AuthContextValue {
   refreshUser: () => Promise<IAuthSessionUser | null>
   refreshProfile: () => Promise<IUserData | null>
   startGoogleOAuth: () => void
+  startDoscomSSO: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -276,6 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUser,
       refreshProfile,
       startGoogleOAuth,
+      startDoscomSSO,
     }),
     [
       isLoading,
