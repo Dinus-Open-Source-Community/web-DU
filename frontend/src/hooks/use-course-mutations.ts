@@ -14,6 +14,7 @@ import {
   replyToCourseReview,
   updateCourse,
   updateCourseStatus,
+  archiveCourse,
   type AddCourseParticipantsPayload,
   type CreateCoursePayload,
   type UpdateCoursePayload,
@@ -65,6 +66,18 @@ export function useUpdateCourseStatus() {
     onError: (error: Error) => {
       toast.error(resolveActionError(error, Message.course.publishFailed))
     },
+  })
+}
+
+export function useArchiveCourse() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (uid: string) => archiveCourse(uid),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: courseKeys.all })
+      toast.success('Kursus berhasil diarsipkan.')
+    },
+    onError: (error: Error) => toast.error(resolveActionError(error, 'Kursus gagal diarsipkan.')),
   })
 }
 
@@ -176,4 +189,3 @@ export function useAddCourseParticipants() {
     },
   })
 }
-

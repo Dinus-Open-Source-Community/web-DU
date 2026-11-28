@@ -42,6 +42,7 @@ docs/
 | [progress/files-to-revise.md](./progress/files-to-revise.md) | Peta file yang perlu diubah per task |
 | [progress/qa-checklist.md](./progress/qa-checklist.md) | Skenario uji manual regression |
 | [progress/architecture.md](./progress/architecture.md) | Struktur folder & pola arsitektur |
+| [design/dark-mode-palette.md](./design/dark-mode-palette.md) | **Spesifikasi & Palet Dark Mode** — panduan token, kontras, aturan dev |
 
 ---
 

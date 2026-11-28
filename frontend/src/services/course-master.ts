@@ -1,8 +1,9 @@
+import { isAxiosError } from 'axios'
 import { api } from './axios'
 import { unwrapApiResponse } from './api-error'
 import { API_ROUTES } from './api-path'
 import type { IResponse } from '@/lib/types/api'
-import type { ICategoryItem, ICourseTypeItem } from '@/lib/types/course'
+import type { ICategoryItem, ICourseItem, ICourseTypeItem } from '@/lib/types/course'
 import type {
   CreateCourseMasterPayload,
   UpdateCourseMasterPayload,
@@ -34,10 +35,17 @@ export async function updateCourseCategory(uid: string, payload: UpdateCourseMas
 
 export async function deleteCourseCategory(uid: string) {
   const validatedUid = parseCourseMasterUidParam(uid)
-  const response = await api.delete<IResponse<null>>(
-    API_ROUTES.courseCategories.deleteByUid(validatedUid),
-  )
-  return unwrapApiResponse(response.data, 'Gagal menghapus kategori kursus')
+  try {
+    const response = await api.delete<IResponse<null>>(API_ROUTES.courseCategories.deleteByUid(validatedUid))
+    return unwrapApiResponse(response.data, 'Gagal menghapus kategori kursus')
+  } catch (error) {
+    if (isAxiosError<IResponse<{ courses?: ICourseItem[] }>>(error) && error.response?.status === 409) {
+      const wrapped = new Error(error.response?.data?.message || error.message, { cause: error })
+      Object.assign(wrapped, { details: error.response?.data?.data })
+      throw wrapped
+    }
+    throw error
+  }
 }
 
 export async function fetchCourseTypeByUid(uid: string) {
@@ -69,8 +77,15 @@ export async function updateCourseType(uid: string, payload: UpdateCourseMasterP
 
 export async function deleteCourseType(uid: string) {
   const validatedUid = parseCourseMasterUidParam(uid)
-  const response = await api.delete<IResponse<null>>(
-    API_ROUTES.courseTypes.deleteByUid(validatedUid),
-  )
-  return unwrapApiResponse(response.data, 'Gagal menghapus tipe kursus')
+  try {
+    const response = await api.delete<IResponse<null>>(API_ROUTES.courseTypes.deleteByUid(validatedUid))
+    return unwrapApiResponse(response.data, 'Gagal menghapus tipe kursus')
+  } catch (error) {
+    if (isAxiosError<IResponse<{ courses?: ICourseItem[] }>>(error) && error.response?.status === 409) {
+      const wrapped = new Error(error.response?.data?.message || error.message, { cause: error })
+      Object.assign(wrapped, { details: error.response?.data?.data })
+      throw wrapped
+    }
+    throw error
+  }
 }

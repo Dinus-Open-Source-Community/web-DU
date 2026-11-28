@@ -1,4 +1,4 @@
-import { Eye, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { Archive, Eye, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -10,9 +10,9 @@ type CourseDetailManageHeaderProps = {
   course: ICourseDetailItem
   previewHref: string
   isAdmin: boolean
-  isPublished: boolean
+  isArchived: boolean
+  onArchiveClick: () => void
   onEditClick: () => void
-  onPublishClick: () => void
   onDeleteClick?: () => void
 }
 
@@ -20,9 +20,9 @@ export function CourseDetailManageHeader({
   course,
   previewHref,
   isAdmin,
-  isPublished,
+  isArchived,
+  onArchiveClick,
   onEditClick,
-  onPublishClick,
   onDeleteClick,
 }: CourseDetailManageHeaderProps) {
   return (
@@ -38,9 +38,9 @@ export function CourseDetailManageHeader({
         <HeaderActionButtons
           previewHref={previewHref}
           isAdmin={isAdmin}
-          isPublished={isPublished}
+          isArchived={isArchived}
+          onArchiveClick={onArchiveClick}
           onEditClick={onEditClick}
-          onPublishClick={onPublishClick}
           onDeleteClick={onDeleteClick}
         />
       </div>
@@ -51,9 +51,9 @@ export function CourseDetailManageHeader({
 type HeaderActionButtonsProps = {
   previewHref: string
   isAdmin: boolean
-  isPublished: boolean
+  isArchived: boolean
+  onArchiveClick: () => void
   onEditClick: () => void
-  onPublishClick: () => void
   onDeleteClick?: () => void
   compact?: boolean
 }
@@ -61,9 +61,9 @@ type HeaderActionButtonsProps = {
 export function HeaderActionButtons({
   previewHref,
   isAdmin,
-  isPublished,
+  isArchived,
+  onArchiveClick,
   onEditClick,
-  onPublishClick,
   onDeleteClick,
   compact = false,
 }: HeaderActionButtonsProps) {
@@ -94,21 +94,19 @@ export function HeaderActionButtons({
 
       {isAdmin ? (
         <>
-          {!isPublished ? (
-            <Button
-              type="button"
-              onClick={onPublishClick}
-              className={cn(
-                manageDetailLayout.actionButton,
-                compact ? 'w-full' : 'px-6',
-                'bg-ink-900 text-paper-white hover:bg-ink-800',
-              )}
-            >
-              <Sparkles className="mr-2 size-4" aria-hidden />
-              Terbit
-            </Button>
-          ) : null}
-
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onArchiveClick}
+            className={cn(
+              manageDetailLayout.actionButton,
+              compact ? 'w-full' : 'px-6',
+              'border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800',
+            )}
+          >
+            {isArchived ? <Sparkles className="mr-2 size-4" aria-hidden /> : <Archive className="mr-2 size-4" aria-hidden />}
+            {isArchived ? 'Aktifkan Kursus' : 'Arsipkan Kursus'}
+          </Button>
           {onDeleteClick ? (
             <Button
               type="button"

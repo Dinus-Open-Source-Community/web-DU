@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,7 @@ import type {
 import { COURSE_MASTER_LABELS, EMPTY_COURSE_MASTER_FORM } from '@/lib/course-master/types'
 import { getCourseMasterFormValidationMessage } from '@/lib/validator/course-master'
 import { courseMasterLayout } from '@/lib/course-master/layout'
+import { cn } from '@/lib/utils'
 
 type CourseMasterFormDialogProps = {
   open: boolean
@@ -122,20 +123,53 @@ export function CourseMasterFormDialog({
               <p className={courseMasterLayout.fieldHint}>Tidak ditampilkan ke peserta, hanya untuk referensi admin.</p>
             </div>
 
-            <div className={courseMasterLayout.activeRow}>
-              <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-ink-900">Status aktif</p>
-                <p className="text-xs leading-5 text-ink-500">
-                  Nonaktifkan agar tidak muncul di form pembuatan kursus.
-                </p>
+            <div
+              className={cn(
+                courseMasterLayout.activeRow,
+                'gap-4 transition-colors',
+                values.isActive
+                  ? 'border-emerald-200 bg-emerald-50/60'
+                  : 'border-ink-900/10 bg-paper-paper'
+              )}
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <span
+                  aria-hidden
+                  className={cn(
+                    'grid size-8 shrink-0 place-items-center rounded-lg transition-colors',
+                    values.isActive
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-ink-900/5 text-ink-400'
+                  )}
+                >
+                  {values.isActive ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                </span>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-ink-900">Status aktif</p>
+                  <p className="text-xs leading-5 text-ink-500">
+                    {values.isActive
+                      ? `Jika aktif, ${labels.singular.toLowerCase()} akan tampil di form pembuatan kursus.`
+                      : `Jika tidak aktif, ${labels.singular.toLowerCase()} tidak akan tampil di form pembuatan kursus.`}
+                  </p>
+                </div>
               </div>
-              <Checkbox
-                checked={values.isActive}
-                onCheckedChange={(checked) =>
-                  setValues((current) => ({ ...current, isActive: checked === true }))
-                }
-                aria-label={`${labels.singular} aktif`}
-              />
+              <div className="flex shrink-0 items-center gap-2">
+                <span
+                  className={cn(
+                    'text-xs font-semibold transition-colors',
+                    values.isActive ? 'text-emerald-700' : 'text-ink-400'
+                  )}
+                >
+                  {values.isActive ? 'Aktif' : 'Nonaktif'}
+                </span>
+                <Switch
+                  checked={values.isActive}
+                  onCheckedChange={(checked) =>
+                    setValues((current) => ({ ...current, isActive: checked }))
+                  }
+                  aria-label={`${labels.singular} aktif`}
+                />
+              </div>
             </div>
           </div>
 

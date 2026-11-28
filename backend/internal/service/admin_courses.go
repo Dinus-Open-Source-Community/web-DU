@@ -8,7 +8,44 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
+
+func GetAdminCourseByIDFunc(c *gin.Context) {
+	user, ok := requireAdminOrMentorModerationAccess(c)
+	if !ok {
+		return
+	}
+	id, ok := resolveUIDParam(c, "courses", "id", "course")
+	if !ok {
+		return
+	}
+	var course entity.Course
+	db := database.DB
+	if !hasAdminAccess(user.Role) {
+		courseUIDs, err := mentorAssignedCourseUIDs(user.Uid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to resolve mentor courses", "data": nil, "error": err.Error()})
+			return
+		}
+		db = db.Where("uid IN ?", courseUIDs)
+	}
+	if err := db.Preload("Modules", func(db *gorm.DB) *gorm.DB { return db.Order("order_index ASC") }).Preload("Category").Preload("ClassType").Preload("Mentor").Preload("Mentors").Preload("CreatedBy").Preload("CourseMentors").First(&course, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Course not found", "data": nil, "error": err.Error()})
+		return
+	}
+	reviews, err := fetchCourseReviewsByCourseUID(course.Uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to retrieve course reviews", "data": nil, "error": err.Error()})
+		return
+	}
+	var enrolled int64
+	if err := database.DB.Model(&entity.Enrollment{}).Where("course_uid = ?", course.Uid).Count(&enrolled).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to count course enrollments", "data": nil, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Course retrieved successfully", "data": courseDetailResponse(course, reviews, int(enrolled)), "error": nil})
+}
 
 // GetAdminCoursesFunc returns a paginated course list for staff (admin/super_admin
 // see all courses including DRAFT; mentor sees only assigned courses).

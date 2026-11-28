@@ -16,6 +16,7 @@ import {
 import { useProtectedFileMap } from '@/hooks/files/use-protected-file-map'
 import {
   fetchAdminCourses,
+  fetchAdminCourseByUid,
   fetchCourseByUid,
   fetchCourseCandidateStudents,
   fetchCourseCategories,
@@ -329,7 +330,11 @@ export function useCourseDetailWithCategories(uid: string) {
 }
 
 export function useCourseDetailAdminAndMentor(uid: string) {
-  const courseDetail = useCourseDetail(uid)
+  const courseDetail = useQuery({
+    queryKey: courseKeys.detail(uid),
+    enabled: !!uid,
+    queryFn: () => fetchAdminCourseByUid(uid),
+  })
   const userCourse = useCourseStudents(uid)
   // Satu sumber modul untuk seluruh halaman detail (Ringkasan, Kurikulum,
   // Tugas). Diambil lengkap supaya KPI dan daftar lesson tidak terpotong, lalu
@@ -371,7 +376,11 @@ export function useCombinedCourseCategoriesAndTypes(params?: IQueryParamsPayload
 }
 
 export function useCourseEditModules(courseUid: string) {
-  const courseDetail = useCourseDetail(courseUid)
+  const courseDetail = useQuery({
+    queryKey: courseKeys.detail(courseUid),
+    enabled: !!courseUid,
+    queryFn: () => fetchAdminCourseByUid(courseUid),
+  })
   const modulesQuery = useModulesByCourse(courseUid, { per_page: 100 })
 
   const modules = useMemo(
