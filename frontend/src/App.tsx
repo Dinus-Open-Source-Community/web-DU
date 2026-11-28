@@ -539,8 +539,8 @@ function renderRouteElement(route: RouteConfig) {
 function App() {
   return (
     <BrowserRouter>
-      <ScrollManager />
       <RouterErrorBoundary>
+        <ScrollManager />
         <Routes>
           {LEGACY_DASHBOARD_REDIRECTS.map((legacy) => (
             <Route
